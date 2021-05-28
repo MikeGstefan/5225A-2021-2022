@@ -1,5 +1,9 @@
 #include "main.h"
+#include "logging.hpp"
+// using namespace std;
+// using namespace pros;
 
+Data test(Levels::both, "/usd/test.txt");
 
 /**
  * Runs initialization code. This occurs as soon as the program is started.
@@ -8,10 +12,8 @@
  * to keep execution time for this mode under a few seconds.
  */
 void initialize() {
-	pros::lcd::initialize();
-	pros::lcd::set_text(1, "Hello PROS User!");
+	print_task();
 
-	pros::lcd::register_btn1_cb(on_center_button);
 }
 
 /**
@@ -59,9 +61,19 @@ void autonomous() {}
  * task, not resume it from where it left off.
  */
 void opcontrol() {
+		delay(300);
+		test.print("%d, diofjwdoi",millis());
+		test.print("%d,  dfjksfndk",millis());
+		test.print("%d, diofjwdoi",millis());
+		test.print("%d, diofjwdsdakdnslasoi",millis());
+		test.print("%d, diofjwdoi",millis());
+		test.print("%d, diofadlsajnjwdoi",millis());
+		test.print("%d, diofjwdoi",millis());
+		test.print("%d, diofjadslknsadwdoi",millis());
+		test.print("%d, diofjwdwkldnwdoi",millis());
+		test.print("%d, does this mem",millis());
+		test.print("%d, how bout now",millis());
 
 
-	while (true) {
-
-	}
+	// test.logging("fdsjsfdu");
 }

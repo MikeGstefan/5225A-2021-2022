@@ -1,6 +1,7 @@
 #include "data.hpp"
 
 Data tracking(Levels::wire);
+Data pos(Levels::both);
 
 void Data::print(const char* format, ...){
     char output[256];
@@ -27,4 +28,5 @@ int main()
 {   
     int pain = 36;
     tracking.print("testing %d",pain);
+    // pos.print();
 }
