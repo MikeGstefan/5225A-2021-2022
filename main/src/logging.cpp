@@ -50,7 +50,7 @@ void Data::logging(std::string output){
     }
   }
   else{
-    printf("DATA SKIPPED\b");
+    printf("DATA SKIPPED\n");
     data_lost++;
   }
 }
