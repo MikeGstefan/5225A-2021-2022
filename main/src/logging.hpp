@@ -38,6 +38,7 @@ void print_task();
 void L_print();
 void printStopTask();
 
+extern int data_lost;
 const int queue_size = 10;
 
 

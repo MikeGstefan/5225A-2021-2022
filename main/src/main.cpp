@@ -62,6 +62,10 @@ void autonomous() {}
  */
 void opcontrol() {
 		delay(300);
+		while(true){
+			test.print("%d, does this mem",millis());
+			delay(5);
+		}
 		test.print("%d, diofjwdoi",millis());
 		test.print("%d,  dfjksfndk",millis());
 		test.print("%d, diofjwdoi",millis());

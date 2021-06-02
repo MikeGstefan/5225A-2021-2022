@@ -2,6 +2,7 @@
 Task *printing = nullptr;
 
 int open_slot = 0, last_point = 0;
+int data_lost = 0;
 string id_array [queue_size];
 string type = "NULL";
 
@@ -40,11 +41,17 @@ void Data::print(const char* format, ...){
 
 
 void Data::logging(std::string output){
-  id_array[open_slot] = this->file;
-  Queue[open_slot] = output;
-  open_slot++;
-  if(open_slot > queue_size-1){
-    open_slot = 0;
+  if(Queue[open_slot].empty()){
+    id_array[open_slot] = this->file;
+    Queue[open_slot] = output;
+    open_slot++;
+    if(open_slot > queue_size-1){
+      open_slot = 0;
+    }
+  }
+  else{
+    printf("DATA SKIPPED\b");
+    data_lost++;
   }
 }
 
@@ -58,7 +65,7 @@ void L_print(){
     if(last_point != open_slot || !Queue[last_point].empty()){
       file.open(id_array[last_point], ios::app);
       file<<Queue[last_point];
-      cout<<millis()<< " "<<id_array[last_point]<<" "<<Queue[last_point]<<endl;
+      // cout<<millis()<< " "<<id_array[last_point]<<" "<<Queue[last_point]<<endl;
       //this clears the string in the array rather than erase the index of the vector
       Queue[last_point].clear();
       id_array[last_point].clear();
