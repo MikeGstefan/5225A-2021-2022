@@ -1,9 +1,10 @@
 #include "main.h"
 #include "logging.hpp"
+#include "config.hpp"
+#include "util.hpp"
 // using namespace std;
 // using namespace pros;
 
-Data test(Levels::both, "/usd/test.txt");
 
 /**
  * Runs initialization code. This occurs as soon as the program is started.
@@ -12,7 +13,7 @@ Data test(Levels::both, "/usd/test.txt");
  * to keep execution time for this mode under a few seconds.
  */
 void initialize() {
-	print_task();
+
 
 }
 
@@ -61,23 +62,16 @@ void autonomous() {}
  * task, not resume it from where it left off.
  */
 void opcontrol() {
-		delay(300);
-		while(true){
-			test.print("%d, does this mem",millis());
-			delay(5);
-		}
-		test.print("%d, diofjwdoi",millis());
-		test.print("%d,  dfjksfndk",millis());
-		test.print("%d, diofjwdoi",millis());
-		test.print("%d, diofjwdsdakdnslasoi",millis());
-		test.print("%d, diofjwdoi",millis());
-		test.print("%d, diofadlsajnjwdoi",millis());
-		test.print("%d, diofjwdoi",millis());
-		test.print("%d, diofjadslknsadwdoi",millis());
-		test.print("%d, diofjwdwkldnwdoi",millis());
-		test.print("%d, does this mem",millis());
-		test.print("%d, how bout now",millis());
+	int power_x, power_y, power_a;
+	while(true){
+		power_x = master.get_analog(E_CONTROLLER_ANALOG_LEFT_X);
+		power_y = master.get_analog(E_CONTROLLER_ANALOG_RIGHT_Y);
+		power_a = master.get_analog(E_CONTROLLER_ANALOG_RIGHT_X);
+		if(fabs(power_x) < 15)power_x = 0;
+		if(fabs(power_y) < 15)power_y = 0;
+		if(fabs(power_a) < 15)power_a = 0;
+		move(power_x, power_y, power_a);
+		delay(10);
+	}
 
-
-	// test.logging("fdsjsfdu");
 }
