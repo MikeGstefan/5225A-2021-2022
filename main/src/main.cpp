@@ -79,7 +79,7 @@ void opcontrol() {
 			file.open("/usd/text.txt", ios::app);
 			open_time += micros()-time;
 			time = micros();
-			file.write(str_test, 10240);
+			file.write(str_test, 10);
 
 			print_time += micros()-time;
 			time = micros();
