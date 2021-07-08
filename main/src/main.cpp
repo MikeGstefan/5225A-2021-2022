@@ -1,5 +1,6 @@
 #include "main.h"
 #include "logging.hpp"
+#include "config.hpp"
 // using namespace std;
 // using namespace pros;
 
@@ -70,23 +71,29 @@ void opcontrol() {
 	uint64_t open_time = 0;
 	uint64_t print_time =0;
 	uint64_t close_time =0;
-	for( int j = 0; j < 20; j++){
-		open_time = 0;
-		print_time =0;
-		close_time =0;
-		for(int i = 0; i <100; i++){
-			time = micros();
-			file.open("/usd/text.txt", ios::app);
-			open_time += micros()-time;
-			time = micros();
-			file.write(str_test, 10);
-
-			print_time += micros()-time;
-			time = micros();
-			file.close();
-			close_time += micros()-time;
+	int count = 0;
+	pros::Task([](){
+		while(true){
+			printf("%llu\n",pros::micros());
+			delay(1);
 		}
-		printf("%llu, %llu, %llu\n", open_time/100,print_time/100,close_time/100);
+	});
+	while(true){
+
+		time = micros();
+		file.open("/usd/text.txt", ios::app);
+		open_time = micros()-time;
+		time = micros();
+		file.write(str_test, 100);
+
+		print_time = micros()-time;
+		time = micros();
+		file.close();
+		close_time = micros()-time;
+
+		printf("%d, %llu, %llu, %llu\n",count, open_time,print_time,close_time);
+		delay(1);
+
 	}
 
 
