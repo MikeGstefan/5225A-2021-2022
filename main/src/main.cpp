@@ -72,26 +72,21 @@ void opcontrol() {
 	uint64_t print_time =0;
 	uint64_t close_time =0;
 	int count = 0;
-	pros::Task([](){
-		while(true){
-			printf("%llu\n",pros::micros());
-			delay(1);
+	uint64_t loop_time = 0;
+	pros::Task([&](){
+		time = micros();
+		for(int i = 0; i <100; i++){
+			delay(0);
+			loop_time += micros() - time;
+			time = micros();
 		}
+		printf("%lld\n",loop_time/100);
 	});
 	while(true){
-
-		time = micros();
 		file.open("/usd/text.txt", ios::app);
-		open_time = micros()-time;
-		time = micros();
 		file.write(str_test, 100);
-
-		print_time = micros()-time;
-		time = micros();
 		file.close();
-		close_time = micros()-time;
 
-		printf("%d, %llu, %llu, %llu\n",count, open_time,print_time,close_time);
 		delay(1);
 
 	}
