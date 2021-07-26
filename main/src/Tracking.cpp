@@ -148,7 +148,7 @@ void Tracking::wait_for_error(double distance){
 void move_to_target(void* params){
   double error_x = 0.0, error_y = 0.0, error_a = 0.0, local_error_x = 0.0, local_error_y = 0.0;
   double error_d = 0.0, difference_a = 0.0;
-  double kp = 15.0, kp_a = 140, kI_d = 0.00;
+  double kp = 8.3, kp_a = 140, kI_d = 0.00;
   double target_x = move_params.target_x, target_y = move_params.target_y, target_a = move_params.target_a;
   double end_error = move_params.end_error, end_error_a = move_params.end_error_a;
   bool Brake = move_params.Brake, debug = move_params.debug;

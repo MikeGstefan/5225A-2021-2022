@@ -64,7 +64,7 @@ void autonomous() {}
  */
 void opcontrol() {
 	int power_x, power_y, power_a;
-	move_to_target_sync(0.0,20.0,0,true, true);
+	move_to_target_sync(0.0,0.0,90.0,true, true);
 	while(true){
 		// power_x = master.get_analog(E_CONTROLLER_ANALOG_LEFT_X);
 		// power_y = master.get_analog(E_CONTROLLER_ANALOG_RIGHT_Y);
