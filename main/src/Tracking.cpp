@@ -30,7 +30,7 @@ void Tracking::move_start_task(){
 
 void update(void* params){
   // LeftEncoder.reset(); RightEncoder.reset(); BackEncoder.reset();
-  double DistanceLR = 14.965, DistanceB = 6.5;
+  double DistanceLR = 14.79, DistanceB = 6.1;
   double Left, Right, Back, NewLeft, NewRight, NewBack, LastLeft = LeftEncoder.get_value()/360.0 *(2.75*M_PI), LastRight =  RightEncoder.get_value()/360.0 *(2.75*M_PI), LastBack = BackEncoder.get_value()/360.0 *(2.77*M_PI);
   double Theta = 0.0, Beta = 0.0, Alpha = 0.0;
   double RadiusR, RadiusB, h, h2;
@@ -101,7 +101,7 @@ void update(void* params){
   if(millis() - 50 > lasttime){
       // printf("%f,%f\n", tracking.x_coord, tracking.y_coord);
 
-    // printf("time: %d, TRACKING: %f, %f, %f \n", millis(), tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle));
+    printf("time: %d, TRACKING: %f, %f, %f \n", millis(), tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle));
     // printf("%d pow_a: %.1f, pow_x: %.1f, pow_y: %.1f, total_pow: %.1f\n",millis(),  tracking.power_a, tracking.power_x, tracking.power_y, fabs(tracking.power_a) + fabs(tracking.power_x) + fabs(tracking.power_y));
 
     printf("ENCODER L: %d, R: %d, B:%d \n", LeftEncoder.get_value(), RightEncoder.get_value(), BackEncoder.get_value());
