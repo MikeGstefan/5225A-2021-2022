@@ -107,8 +107,8 @@ void update(void* params){
   if(millis() - 50 > lasttime){
       // printf("%f,%f\n", tracking.x_coord, tracking.y_coord);
 
-    printf("time: %d, TRACKING: %f, %f, %f \n", millis(), tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle));
-    printf("time: %d, TOTAL: %f, %f, %f \n", millis(), total_x, total_y, rad_to_deg(total_a));
+    // printf("time: %d, TRACKING: %f, %f, %f \n", millis(), tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle));
+    // printf("time: %d, TOTAL: %f, %f, %f \n", millis(), total_x, total_y, rad_to_deg(total_a));
     // printf("%d pow_a: %.1f, pow_x: %.1f, pow_y: %.1f, total_pow: %.1f\n",millis(),  tracking.power_a, tracking.power_x, tracking.power_y, fabs(tracking.power_a) + fabs(tracking.power_x) + fabs(tracking.power_y));
 
     // printf("ENCODER L: %d, R: %d, B:%d \n", LeftEncoder.get_value(), RightEncoder.get_value(), BackEncoder.get_value());
@@ -155,7 +155,7 @@ void Tracking::wait_for_error(double distance){
 void move_to_target(void* params){
   double error_x = 0.0, error_y = 0.0, error_a = 0.0, local_error_x = 0.0, local_error_y = 0.0;
   double error_d = 0.0, difference_a = 0.0;
-  double kp = 8.3, kp_a = 140, kI_d = 0.00;
+  double kp = 7.6, kp_a = 140, kI_d = 0.00;
   double target_x = move_params.target_x, target_y = move_params.target_y, target_a = move_params.target_a;
   double end_error = move_params.end_error, end_error_a = move_params.end_error_a;
   bool Brake = move_params.Brake, debug = move_params.debug;
