@@ -10,7 +10,7 @@ vector<std::string> Queue(queue_size);
 
 
 
-Data tracking(Levels::wire, "usd/test.txt");
+
 // Data pos(Levels::both);
 
 void Data::print(const char* format, ...){
