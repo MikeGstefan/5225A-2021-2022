@@ -65,18 +65,15 @@ void autonomous() {}
  */
 void opcontrol() {
 	int power_x, power_y, power_a;
-	uint64_t start = micros();
-	move_to_target_sync(0.0,49.0,0.0,true, false);
-	printf("%llu\n", micros() - start);
-	// while(true){
-	// 	power_x = master.get_analog(E_CONTROLLER_ANALOG_LEFT_X);
-	// 	power_y = master.get_analog(E_CONTROLLER_ANALOG_RIGHT_Y);
-	// 	power_a = master.get_analog(E_CONTROLLER_ANALOG_RIGHT_X);
-	// 	if(fabs(power_x) < 15)power_x = 0;
-	// 	if(fabs(power_y) < 15)power_y = 0;
-	// 	if(fabs(power_a) < 15)power_a = 0;
-	// 	move(power_x, power_y, power_a);
-	// 	delay(10);
-	// }
+	while(true){
+		power_x = master.get_analog(E_CONTROLLER_ANALOG_RIGHT_X);
+		power_y = master.get_analog(E_CONTROLLER_ANALOG_LEFT_Y);
+		power_a = master.get_analog(E_CONTROLLER_ANALOG_LEFT_X);
+		if(fabs(power_x) < 15)power_x = 0;
+		if(fabs(power_y) < 15)power_y = 0;
+		if(fabs(power_a) < 15)power_a = 0;
+		move(power_x, power_y, power_a);
+		delay(10);
+	}
 
 }
