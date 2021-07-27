@@ -107,7 +107,7 @@ void update(void* params){
   if(millis() - 50 > lasttime){
       // printf("%f,%f\n", tracking.x_coord, tracking.y_coord);
 
-    // printf("time: %d, TRACKING: %f, %f, %f \n", millis(), tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle));
+    printf("time: %d, TRACKING: %f, %f, %f \n", millis(), tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle));
     // printf("time: %d, TOTAL: %f, %f, %f \n", millis(), total_x, total_y, rad_to_deg(total_a));
     // printf("%d pow_a: %.1f, pow_x: %.1f, pow_y: %.1f, total_pow: %.1f\n",millis(),  tracking.power_a, tracking.power_x, tracking.power_y, fabs(tracking.power_a) + fabs(tracking.power_x) + fabs(tracking.power_y));
 
@@ -153,26 +153,24 @@ void Tracking::wait_for_error(double distance){
 }
 
 void move_to_target(void* params){
-  double error_x = 0.0, error_y = 0.0, error_a = 0.0, local_error_x = 0.0, local_error_y = 0.0;
-  double error_d = 0.0, difference_a = 0.0;
-  double kp = 7.6, kp_a = 140, kI_d = 0.00;
-  double target_x = move_params.target_x, target_y = move_params.target_y, target_a = move_params.target_a;
-  double end_error = move_params.end_error, end_error_a = move_params.end_error_a;
+  double target_x = move_params.target_x, target_y = move_params.target_y, target_a = deg_to_rad(move_params.target_a);
+  double end_error = move_params.end_error, end_error_a = deg_to_rad(move_params.end_error_a);
   bool Brake = move_params.Brake, debug = move_params.debug;
   int max_power = move_params.max_power;
-  int lasttime = 0, starttime = millis(), integral_last_time = millis();
-  double overflow, overflow_x, overflow_y, overflow_a;
-  double total_power;
-  double integral_x, integral_y;
   bool Overshoot = move_params.Overshoot; //
+  double kp_l =9.0, kp_d = 5.0, kp_a = 100.0, ki_l = 0.0, ki_d = 0.0, ki_a = 0.0, kd_l = 0.0, kd_d = 0.0, kd_a = 0.0;
+  double error_angle, error_line, error_d, error_x, error_y, error_a , error_tot;
+  double power_line, power_d, total_power;
+  double dif_a, lx, ly, dx, dy;
+  int last_time = 0;
   //log_time("starting time: %d X: %f Y: %f A: %f from X: %f Y: %f A: %f \n", millis(), target_x, target_y, target_a, tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle));
-  printf("Starting move to target X: %f Y: %f A: %f from X: %f Y: %f A: %f  Time %d\n", target_x, target_y, target_a, tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle), starttime);
-  target_a = deg_to_rad(target_a);
+  printf("Starting move to target X: %f Y: %f A: %f from X: %f Y: %f A: %f\n", target_x, target_y, target_a, tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle));
 
   tracking.move_complete = false;
   tracking.movetime = millis();
-  error_x = target_x - tracking.x_coord;  // I added this, senior devs check it doesn't mess with stuff
-  error_y = target_y - tracking.y_coord;
+  double start_error_x = target_x - tracking.x_coord, start_error_y = target_y - tracking.y_coord;
+  double d_angle = atan2(start_error_x, start_error_y);
+
 
   double orig_point_angle = atan2(error_x, error_y); //
   double cur_point_angle;
@@ -182,47 +180,28 @@ void move_to_target(void* params){
     error_x = target_x - tracking.x_coord;
     error_y = target_y - tracking.y_coord;
     error_a = target_a - tracking.global_angle;
-    error_d = sqrt(pow(error_x, 2.0) + pow(error_y, 2.0));
-    tracking.drive_error = error_d;
-    difference_a = tracking.global_angle + atan2(error_y, error_x);
-    local_error_x = cos(difference_a)*error_d;
-    local_error_y = sin(difference_a)*error_d;
+    error_tot = sqrt(pow(error_x,2)+ pow(error_y,2));
 
-    if(fabs(local_error_x) > 0.3){
-      tracking.power_x = cos(difference_a)*error_d * kp;
-      if (fabs(tracking.power_x) < min_power&& max_power > min_power) tracking.power_x = min_power* sgn(local_error_x);
-    }
-    else tracking.power_x = 0.0;
+    error_angle = atan2(error_x,error_y)-d_angle;
+    error_line = sin(error_angle)*error_tot;
+    error_d = cos(error_angle)*error_tot;
+    dif_a = d_angle - tracking.global_angle;
 
-    if(fabs(local_error_y) > 0.3){
-      tracking.power_y = sin(difference_a)*error_d *kp;
-      if (fabs(tracking.power_y) < min_power && max_power > min_power) tracking.power_y = min_power* sgn(local_error_y);
-    }
-    else tracking.power_y = 0.0;
+    power_line = error_line *kp_l;
+    power_d = error_d * kp_d;
 
-    if(fabs(error_a) > deg_to_rad(end_error_a)){
-      tracking.power_a = error_a * kp_a;
-      if (fabs(tracking.power_a) < min_power_a) tracking.power_a = min_power_a * sgn(error_a);
-    }
-    else tracking.power_a = 0;
-    if(millis()-integral_last_time >50){
-      if (fabs(local_error_x) < 5.0){
-        integral_x += fabs(local_error_x) * (millis() - integral_last_time);
-      }
-      if (fabs(local_error_y) < 5.0){
-        integral_y += fabs(local_error_y) * (millis() - integral_last_time);
-      }
+    lx = cos(dif_a) * power_line;
+    ly = -sin(dif_a)* power_line;
+    dx = sin(dif_a) * power_d;
+    dy = cos(dif_a) * power_d;
 
-      if(fabs(local_error_x)<=0.9) {
-        integral_x = 0;
-      }
-      if(fabs(local_error_y)<=0.9) {
-        integral_y = 0;
-      }
-    }
+    tracking.power_x = lx + dx;
+    if(fabs(tracking.power_x) < min_power)tracking.power_x = sgn(tracking.power_x)*min_power;
+    tracking.power_y = ly + dy;
+    if(fabs(tracking.power_y) < min_power)tracking.power_y = sgn(tracking.power_y)*min_power;
 
-    tracking.power_x+= sgn(tracking.power_x) * integral_x * kI_d;
-    //tracking.power_y+= sgn(tracking.power_y) * integral_y* kI_d;
+    tracking.power_a = error_a *kp_a;
+    if(fabs(tracking.power_a) < min_power_a)tracking.power_a = sgn(tracking.power_a)*min_power_a;
 
     total_power = fabs(tracking.power_x)+fabs(tracking.power_y)+fabs(tracking.power_a);
     if(total_power>max_power){
@@ -231,44 +210,23 @@ void move_to_target(void* params){
       tracking.power_a = tracking.power_a/total_power * max_power;
     }
 
-    move(tracking.power_x, tracking.power_y, tracking.power_a);
+    move(tracking.power_x,tracking.power_y,tracking.power_a);
 
-    if(debug && millis() - lasttime > 50){
-      printf("Error x: %f, Error y: %f, Error a: %f \n", error_x,error_y, rad_to_deg(error_a));
-      printf("power x: %f, power y: %f, power a: %f \n", tracking.power_x, tracking.power_y, tracking.power_a);
-      printf("GlobalX: %f, GlobalY: %f, GlobalA: %f \n",tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle));
-      printf("integ X: %f, integ Y: %f \n",integral_x, integral_y);
-      lasttime = millis();
+    if(millis() - last_time > 50){
+
+      printf("error line: %f, d: %f, x: %f, y: %f\n",error_line, error_d,error_x, error_y);
+      printf("power line: %f, d: %f, x: %f, y: %f\n",power_line, power_d,tracking.power_x,tracking.power_y);
+      last_time = millis();
     }
 
-    cur_point_angle = atan2(error_x, error_y);
-    if(Overshoot){
-      if(fabs(orig_point_angle - cur_point_angle) > perpendicular && fabs(error_a) < deg_to_rad(end_error_a)){
-        if (Brake){
-          brake();  printf("\n\n ***************BRAKE");brake();
-        }
-        tracking.move_complete = true;
-        printf("Ending move to target X: %f Y: %f A: %f at X: %f Y: %f A: %f   Time elapsed: %d\n", target_x, target_y, target_a, tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle), millis()-starttime);
-        //log_time("ending starting time: %d, delta time: %d X: %f Y: %f A: %f from X: %f Y: %f A: %f \n", millis(),millis() -starttime, target_x, target_y, target_a, tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle));
-        tracking.move_stop_task();
-        tracking.movetime = 0;
-        return;
-      }
+    if(fabs(error_x) < end_error && fabs(error_y) < end_error && fabs(error_a) < end_error_a){
+      brake();
+      return;
     }
 
-    else if(!Overshoot){
-      if(fabs(error_x) < end_error && fabs(error_y) < end_error && fabs(error_a) < deg_to_rad(end_error_a)){
-        if (Brake){
-          brake();  printf("\n\n ***************BRAKE");brake();
-        }
-        tracking.move_complete = true;
-        printf("Ending move to target X: %f Y: %f A: %f at X: %f Y: %f A: %f   Time elapsed: %d\n", target_x, target_y, target_a, tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle), millis()-starttime);
-        //log_time("ending starting time: %d, delta time: %d X: %f Y: %f A: %f from X: %f Y: %f A: %f \n", millis(),millis() -starttime, target_x, target_y, target_a, tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle));
-        tracking.move_stop_task();
-        tracking.movetime = 0;
-        return;
-      }
-    }
+
+
+
 
 
     delay(10);
