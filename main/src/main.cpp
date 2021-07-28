@@ -64,16 +64,16 @@ void autonomous() {}
  * task, not resume it from where it left off.
  */
 void opcontrol() {
-	int power_x, power_y, power_a;
+	int speed = 30;
 	while(true){
-		power_x = master.get_analog(E_CONTROLLER_ANALOG_RIGHT_X);
-		power_y = master.get_analog(E_CONTROLLER_ANALOG_LEFT_Y);
-		power_a = master.get_analog(E_CONTROLLER_ANALOG_LEFT_X);
-		if(fabs(power_x) < 15)power_x = 0;
-		if(fabs(power_y) < 15)power_y = 0;
-		if(fabs(power_a) < 15)power_a = 0;
-		move(power_x, power_y, power_a);
-		delay(10);
+		fbar.move(speed*-1);
+		while(!btm.get_value())delay(10);
+		fbar.move_relative(0,200);
+		while(!master.get_digital_new_press(E_CONTROLLER_DIGITAL_A))delay(10);
+		fbar.move(speed);
+		while(!top.get_value())delay(10);
+		fbar.move_relative(0,200);
+		while(!master.get_digital_new_press(E_CONTROLLER_DIGITAL_A))delay(10);
 	}
 
 }
