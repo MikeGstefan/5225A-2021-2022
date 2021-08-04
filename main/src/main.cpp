@@ -63,10 +63,29 @@ void autonomous() {}
  */
 void opcontrol() {
 	int power_x, power_y, power_a;
+	int claw_state = 0;
+	master.print(0,0,"UP:toggle, R:vent");
 	while(true){
 		power_x = master.get_analog(E_CONTROLLER_ANALOG_RIGHT_X);
 		power_y = master.get_analog(E_CONTROLLER_ANALOG_LEFT_Y);
 		power_a = master.get_analog(E_CONTROLLER_ANALOG_LEFT_X);
+		if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_UP)){
+			if(claw_state !=1){
+				claw_out.set_value(1);
+				claw_in.set_value(0);
+				claw_state = 1;
+			}
+			else{
+				claw_out.set_value(0);
+				claw_in.set_value(1);
+				claw_state = 0;
+			}
+		}
+		if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_RIGHT)){
+			claw_out.set_value(0);
+			claw_in.set_value(0);
+			claw_state = 0;
+		}
 		if(fabs(power_x) < 15)power_x = 0;
 		if(fabs(power_y) < 15)power_y = 0;
 		if(fabs(power_a) < 15)power_a = 0;
