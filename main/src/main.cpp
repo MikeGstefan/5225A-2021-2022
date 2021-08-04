@@ -16,7 +16,7 @@
 void initialize() {
 	delay(150);
 	updateStartTask();
-
+	pros::lcd::initialize();
 }
 
 /**
@@ -65,15 +65,28 @@ void autonomous() {}
  */
 void opcontrol() {
 	int speed = 30;
+	int time = 0;
+	fbar.move(10);
 	while(true){
-		fbar.move(speed*-1);
+		printf("%d temp: %f\n",millis(),fbar.get_temperature());
+		delay(100);
+	}
+
+	while(true){
+		fbar.move(-60);
+		time = millis();
 		while(!btm.get_value())delay(10);
+
+		master.print(0,0,"Time: %d",millis()-time);
 		fbar.move_relative(0,200);
 		while(!master.get_digital_new_press(E_CONTROLLER_DIGITAL_A))delay(10);
-		fbar.move(speed);
+		fbar.move(127);
+		time = millis();
 		while(!top.get_value())delay(10);
+		master.print(0,0,"Time: %d",millis()-time);
 		fbar.move_relative(0,200);
 		while(!master.get_digital_new_press(E_CONTROLLER_DIGITAL_A))delay(10);
+		lcd::print(0,"temp: %f", fbar.get_temperature());
 	}
 
 }
