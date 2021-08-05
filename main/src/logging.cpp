@@ -1,93 +1,32 @@
 #include "logging.hpp"
 Task *printing = nullptr;
 
-int open_slot = 0, last_point = 0;
-int data_lost = 0;
-string id_array [queue_size];
-string type = "NULL";
+char queue[queue_size];
+char* front = queue;
+char* back = queue;
+char buffer[256];
 
-vector<std::string> Queue(queue_size);
+void print(const char* format,...){
+  std::va_list args;
+  va_start(args, format);
+  vsprintf(buffer,format,args);
+  //copying the string uses memcpy instead of strcpy or strncpy to avoid copying the terminating character
 
-
-
-Data tracking(Levels::wire, "usd/test.txt");
-// Data pos(Levels::both);
-
-void Data::print(const char* format, ...){
-    char output_char[256];
-    va_list args;
-    va_start(args, format);
-    vsprintf(output_char, format, args);
-    va_end(args);
-    std::string output =output_char;
-    // printf("got here %s\n", output_char);
-    // std::cout << output <<endl;
-    switch(this->level){
-        case Levels::both:
-            printf("%s\n",output.c_str());
-            this->logging(output);
-        break;
-        case Levels::wire:
-            printf("%s\n",output.c_str());
-        break;
-        case Levels::card:
-          this->logging(output);
-        break;
-        case Levels::none:
-
-        break;
-    }
-}
-
-
-void Data::logging(std::string output){
-  if(Queue[open_slot].empty()){
-    id_array[open_slot] = this->file;
-    Queue[open_slot] = output;
-    open_slot++;
-    if(open_slot > queue_size-1){
-      open_slot = 0;
-    }
+  //if the end of the buffer would be past the max of the queue array
+  if(reinterpret_cast<uintptr_t>(back)+strlen(buffer) > reinterpret_cast<uintptr_t>(&queue)+queue_size-1){
+    //copy the data that fills the queue
+    memcpy(back, buffer, queue_size-1 - (reinterpret_cast<uintptr_t>(back) - reinterpret_cast<uintptr_t>(&queue)));
+    //creates a ptr to the last character used to fill the back of the queue
+    char* overflow_ptr = buffer+(queue_size-1 - (reinterpret_cast<uintptr_t>(back) - reinterpret_cast<uintptr_t>(&queue)));
+    //fills the front of the queue with the remaining data from the buffer, marked by the overflow_ptr
+    memcpy(queue,overflow_ptr,strlen(buffer)- (queue_size-1 - (reinterpret_cast<uintptr_t>(back) - reinterpret_cast<uintptr_t>(&queue))));
+    //moves back to the back of the data
+    back =  strlen(buffer)-queue_size+1 + back;
   }
   else{
-    printf("DATA SKIPPED\n");
-    data_lost++;
+    //copies data to the queue and moves the pointer down
+    memcpy(back,buffer,strlen(buffer));
+    back +=strlen(buffer);
   }
-}
-
-void L_print(){
-  //data can be printed every 4-6 ms
-  //avoid printing more often then that
-  printf("task started\n");
-  std::ofstream file;
-  while(true){
-    // printf("open: %d, last: %d\n",open_slot,last_point);
-    if(last_point != open_slot || !Queue[last_point].empty()){
-      file.open(id_array[last_point], ios::app);
-      file<<Queue[last_point];
-      // cout<<millis()<< " "<<id_array[last_point]<<" "<<Queue[last_point]<<endl;
-      //this clears the string in the array rather than erase the index of the vector
-      Queue[last_point].clear();
-      id_array[last_point].clear();
-      file << endl;
-      file.close();
-      last_point +=1;
-      if(last_point > queue_size-1){
-        last_point = 0;
-      }
-    }
-    delay(1);
-  }
-}
-
-void print_task(){
-  printing = new Task(L_print);
-}
-
-void printStopTask(){
-  if(printing != nullptr){
-    printing->remove();
-    delete printing;
-    printing = nullptr;
-  }
+  va_end(args);
 }

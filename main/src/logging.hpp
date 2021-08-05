@@ -23,24 +23,11 @@ enum class Levels{
 class Data{
     public:
         Levels level;
-        string file;
         void print(const char* format, ...);
-        Data(Levels data_level, string file_path){
+        Data(Levels data_level){
             level = data_level;
-            file = file_path;
         }
         void logging(string output);
 };
-
-void print_task();
-
-
-void L_print();
-void printStopTask();
-
-extern int data_lost;
-const int queue_size = 10;
-
-
-
-extern Data test;
+void print(const char* format, ...);
+const int queue_size = 10240;
