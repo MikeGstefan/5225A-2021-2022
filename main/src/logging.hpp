@@ -30,4 +30,5 @@ class Data{
         void logging(string output);
 };
 void print(const char* format, ...);
-const int queue_size = 10240;
+void queue_handle();
+const int queue_size = 10;

@@ -1,10 +1,11 @@
 #include "logging.hpp"
 Task *printing = nullptr;
-
-char queue[queue_size];
-char* front = queue;
-char* back = queue;
+const char* file_name= "/usd/test.txt";
+char queue[queue_size] ={"123456789"};
+char* front = queue+7;
+char* back = queue+2;
 char buffer[256];
+ofstream file;
 
 void print(const char* format,...){
   std::va_list args;
@@ -29,4 +30,19 @@ void print(const char* format,...){
     back +=strlen(buffer);
   }
   va_end(args);
+}
+
+void queue_handle(){
+  if(reinterpret_cast<uintptr_t>(back) < reinterpret_cast<uintptr_t>(front)){
+    file.open(file_name,ofstream::app);
+    file.write(front, queue_size-1-( reinterpret_cast<uintptr_t>(front)-reinterpret_cast<uintptr_t>(&queue)));
+    file.write(queue,reinterpret_cast<uintptr_t>(back)-reinterpret_cast<uintptr_t>(&queue));
+    file.close();
+  }
+  else{
+    file.open(file_name,ofstream::app);
+    file.write(front, reinterpret_cast<uintptr_t>(back)- reinterpret_cast<uintptr_t>(front));
+    file.close();
+  }
+
 }
