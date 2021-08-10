@@ -47,18 +47,21 @@ struct move_target_params{
   double end_error;
   double end_error_a;
   double p;
+  double lpercent;
+  double apercent;
 };
 extern Tracking tracking;
 extern move_target_params move_params;
 
 void move_to_target(void* params);
-void move_to_target_async(double target_x, double target_y, double target_a, bool Brake = true, bool debug = false, int max_power = 127, bool Overshoot = false, double end_error = 0.5, double end_error_a = 5.0, double p = 15.0);
-void move_to_target_sync(double target_x, double target_y, double target_a, bool Brake = true, bool debug = false, int max_power = 127, bool Overshoot = false, double end_error = 0.5, double end_error_a = 5.0, double p = 15.0);
+void move_to_target_async(double target_x, double target_y, double target_a, bool Brake = true, bool debug = false, int max_power = 127, bool Overshoot = false, double end_error = 0.5, double end_error_a = 5.0, double p = 15.0, double lpercent = 0.3, double apercent = 0.1);
+void move_to_target_sync(double target_x, double target_y, double target_a, bool Brake = true, bool debug = false, int max_power = 127, bool Overshoot = false, double end_error = 0.5, double end_error_a = 5.0, double p = 15.0, double lpercent = 0.3, double apercent = 0.1);
 
 
 
 const int min_power_a = 20;
-const int min_power = 30;
+const int min_power_x = 28;
+const int min_power_y = 12;
 
 
 // extern bool lineup_first_default;

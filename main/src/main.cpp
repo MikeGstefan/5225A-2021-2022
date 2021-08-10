@@ -64,8 +64,21 @@ void autonomous() {}
  * task, not resume it from where it left off.
  */
 void opcontrol() {
+  // int speed = 0;
+  // while(true){
+  //   if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_A)){
+  //     speed++;
+  //     master.print(0,0,"speed: %d", speed);
+  //   }
+  //   //y = 12
+  //   // x = 28
+  //   //a = 20
+  //   move(0,0,speed);
+  // }
 	while(!master.get_digital(E_CONTROLLER_DIGITAL_A))delay(10);
-	move_to_target_sync(0.0,0.0,180.0);
+	// move_to_target_sync(0.0,0.0,180.0);
+  move_to_target_sync(20,-20,-90.0);
+  // move_to_target_sync(0,40,0);
 	// int power_x, power_y, power_a;
 	// while(true){
 	// 	power_x = master.get_analog(E_CONTROLLER_ANALOG_RIGHT_X);

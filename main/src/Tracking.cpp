@@ -126,18 +126,18 @@ void update(void* params){
   }
 }
 
-void move_to_target_sync(double target_x, double target_y, double target_a, bool Brake, bool debug, int max_power, bool Overshoot, double end_error, double end_error_a, double p){
+void move_to_target_sync(double target_x, double target_y, double target_a, bool Brake, bool debug, int max_power, bool Overshoot, double end_error, double end_error_a, double p,double lpercent, double apercent){
   if(!tracking.move_complete) tracking.move_stop_task();
   if(moveTask != nullptr) moveTask = nullptr;
   // printf("here2");
-  move_params = {target_x, target_y, target_a, Brake, debug, max_power, Overshoot, end_error, end_error_a, p};
+  move_params = {target_x, target_y, target_a, Brake, debug, max_power, Overshoot, end_error, end_error_a, p, lpercent, apercent};
   tracking.move_complete = false;
   move_to_target(nullptr);
 
 }
-void move_to_target_async(double target_x, double target_y, double target_a, bool Brake, bool debug, int max_power, bool Overshoot, double end_error, double end_error_a, double p){
+void move_to_target_async(double target_x, double target_y, double target_a, bool Brake, bool debug, int max_power, bool Overshoot, double end_error, double end_error_a, double p, double lpercent, double apercent){
   if(!tracking.move_complete) tracking.move_stop_task();
-  move_params = {target_x, target_y, target_a, Brake, debug, max_power, Overshoot, end_error, end_error_a, p};
+  move_params = {target_x, target_y, target_a, Brake, debug, max_power, Overshoot, end_error, end_error_a, p, lpercent, apercent};
   tracking.move_complete = false;
   printf("async task started %d \n", millis());
   tracking.move_start_task();
@@ -158,10 +158,12 @@ void move_to_target(void* params){
   bool Brake = move_params.Brake, debug = move_params.debug;
   int max_power = move_params.max_power;
   bool Overshoot = move_params.Overshoot; //
-  double kp_l =9.0, kp_d = 5.0, kp_a = 100.0, ki_l = 0.0, ki_d = 0.0, ki_a = 0.0, kd_l = 0.0, kd_d = 0.0, kd_a = 0.0;
+  double lpercent= move_params.lpercent, apercent=move_params.apercent;
+  double kp_l =7.0, kp_d = 5.0, kp_a = 100.0, ki_l = 0.0, ki_d = 0.0, ki_a = 0.0, kd_l = 0.0, kd_d = 0.0, kd_a = 0.0;
   double error_angle, error_line, error_d, error_x, error_y, error_a , error_tot;
-  double power_line, power_d, total_power;
+  double power_line, power_d, total_power, line_total;
   double dif_a, lx, ly, dx, dy;
+  double min_lx, min_ly, min_a, min_total;
   int last_time = 0;
   //log_time("starting time: %d X: %f Y: %f A: %f from X: %f Y: %f A: %f \n", millis(), target_x, target_y, target_a, tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle));
   printf("Starting move to target X: %f Y: %f A: %f from X: %f Y: %f A: %f\n", target_x, target_y, target_a, tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle));
@@ -195,25 +197,51 @@ void move_to_target(void* params){
     dx = sin(dif_a) * power_d;
     dy = cos(dif_a) * power_d;
 
-    tracking.power_x = lx + dx;
-    if(fabs(tracking.power_x) < min_power)tracking.power_x = sgn(tracking.power_x)*min_power;
-    tracking.power_y = ly + dy;
-    if(fabs(tracking.power_y) < min_power)tracking.power_y = sgn(tracking.power_y)*min_power;
-
     tracking.power_a = error_a *kp_a;
     if(fabs(tracking.power_a) < min_power_a)tracking.power_a = sgn(tracking.power_a)*min_power_a;
 
-    total_power = fabs(tracking.power_x)+fabs(tracking.power_y)+fabs(tracking.power_a);
-    if(total_power>max_power){
-      tracking.power_x = tracking.power_x/total_power * max_power;
-      tracking.power_y = tracking.power_y/total_power * max_power;
-      tracking.power_a = tracking.power_a/total_power * max_power;
+    // if(millis() - last_time > 50){
+    //   printf("pre scal lx: %f, ly: %f, dx: %f, dy: %f, a: %f\n",lx,ly,dx,dy,tracking.power_a);
+    // }
+
+    total_power = fabs(lx+dx+ly+dy+tracking.power_a);
+    if(total_power > max_power){
+      line_total = fabs(lx)+fabs(dx);
+      if(line_total > lpercent*max_power){
+        min_lx = (fabs(lx)/line_total) *lpercent*max_power;
+        min_ly = (fabs(ly)/line_total) *lpercent*max_power;
+      }
+      else{
+        min_lx = fabs(lx);
+        min_ly = fabs(ly);
+      }
+      if(fabs(tracking.power_a) > apercent*max_power) min_a = apercent*max_power;
+      else min_a = fabs(tracking.power_a);
+      min_total = min_lx + min_ly + min_a;
+      lx =((fabs(lx)/(total_power-min_total))*(max_power-min_total)+min_lx)*sgn(lx);
+      ly =((fabs(ly)/(total_power-min_total))*(max_power-min_total)+min_ly)*sgn(ly);
+      dx =(dx/(total_power-min_total))*(max_power-min_total);
+      dy =(dy/(total_power-min_total))*(max_power-min_total);
+      tracking.power_a =((fabs(tracking.power_a)/(total_power-min_total))*(max_power-min_total)+min_a)*sgn(tracking.power_a);
     }
+
+
+    tracking.power_x = lx + dx;
+    if(fabs(tracking.power_x) < end_error - 0.25) tracking.power_x = 0.0;
+    else if(fabs(tracking.power_x) < min_power_x)tracking.power_x = sgn(tracking.power_x)*min_power_x;
+    tracking.power_y = ly + dy;
+    if(fabs(tracking.power_y) < end_error - 0.25) tracking.power_y = 0.0;
+    if(fabs(tracking.power_y) < min_power_y)tracking.power_y = sgn(tracking.power_y)*min_power_y;
+
+
+
+
 
     move(tracking.power_x,tracking.power_y,tracking.power_a);
 
     if(millis() - last_time > 50){
-
+      // printf("post scal lx: %f, ly: %f, dx: %f, dy: %f, a: %f\n",lx,ly,dx,dy,tracking.power_a);
+      // printf("mins lx: %f, ly: %f, a: %f\n",min_lx,min_ly,min_a);
       printf("error line: %f, d: %f, x: %f, y: %f\n",error_line, error_d,error_x, error_y);
       printf("power line: %f, d: %f, x: %f, y: %f\n",power_line, power_d,tracking.power_x,tracking.power_y);
       last_time = millis();
@@ -221,6 +249,10 @@ void move_to_target(void* params){
 
     if(fabs(error_x) < end_error && fabs(error_y) < end_error && fabs(error_a) < end_error_a){
       brake();
+      tracking.move_complete = true;
+      printf("Ending move to target X: %f Y: %f A: %f at X: %f Y: %f A: %f \n", target_x, target_y, target_a, tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle));
+      //log_time("ending starting time: %d, delta time: %d X: %f Y: %f A: %f from X: %f Y: %f A: %f \n", millis(),millis() -starttime, target_x, target_y, target_a, tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle));
+      tracking.move_stop_task();
       return;
     }
 
