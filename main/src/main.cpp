@@ -73,11 +73,11 @@ void opcontrol() {
   //   //y = 12
   //   // x = 28
   //   //a = 20
-  //   move(0,0,speed);
+  //   move(speed,0,0);
   // }
 	while(!master.get_digital(E_CONTROLLER_DIGITAL_A))delay(10);
 	// move_to_target_sync(0.0,0.0,180.0);
-  move_to_target_sync(20,-20,-90.0);
+  move_to_target_sync(0,40,0.0,true,true);
   // move_to_target_sync(0,40,0);
 	// int power_x, power_y, power_a;
 	// while(true){
