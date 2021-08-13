@@ -159,7 +159,7 @@ void move_to_target(void* params){
   int max_power = move_params.max_power;
   bool Overshoot = move_params.Overshoot; //
   double lpercent= move_params.lpercent, apercent=move_params.apercent;
-  double kp_l =5.0, kp_d = 5.0, kp_a = 50.0, ki_l = 0.05, ki_d = 0.05, ki_a = 0.0, kd_l = 0.0, kd_d = 0.0, kd_a = 0.0;
+  double kp_l =5.0, kp_d = 7.0, kp_a = 50.0, ki_l = 0.05, ki_d = 0.05, ki_a = 0.0, kd_l = 0.0, kd_d = 0.0, kd_a = 0.0;
   double error_angle, error_line, error_d, error_x, error_y, error_a , error_tot;
   double power_line, power_d, total_power, line_total;
   double dif_a, lx, ly, dx, dy;
@@ -276,13 +276,13 @@ void move_to_target(void* params){
     move(tracking.power_x,tracking.power_y,tracking.power_a);
 
     if(millis() - last_time > 50 && debug){
-      printf("%f, %f\n",tracking.power_y, tracking.y_coord);
+      printf("%f, %f\n", tracking.y_coord,tracking.power_y);
       // printf("post scal lx: %f, ly: %f, dx: %f, dy: %f, a: %f\n",lx,ly,dx,dy,tracking.power_a);
       // printf("mins lx: %f, ly: %f, a: %f\n",min_lx,min_ly,min_a);
       // printf("error line: %f, d: %f, x: %f, y: %f, a: %f\n",error_line, error_d,error_x, error_y, rad_to_deg(error_a));
       // printf("power line: %f, d: %f, x: %f, y: %f, a: %f\n",power_line, power_d,tracking.power_x,tracking.power_y,tracking.power_a);
       // printf("integral l: %f, d: %f\n",integ_l,integ_d);
-      // printf("derivative l: %f, d: %f a: %f\n",deriv_l, deriv_d, deriv_a);
+      printf("derivative l: %f, d: %f a: %f\n",deriv_l, deriv_d, deriv_a);
       last_time = millis();
     }
 
