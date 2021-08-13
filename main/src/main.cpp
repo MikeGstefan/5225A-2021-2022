@@ -16,7 +16,7 @@
 void initialize() {
 	delay(150);
 	updateStartTask();
-
+	pros::lcd::initialize();
 }
 
 /**
