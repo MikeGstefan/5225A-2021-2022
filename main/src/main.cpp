@@ -2,6 +2,7 @@
 #include "logging.hpp"
 #include "config.hpp"
 #include "util.hpp"
+#include "tracking.hpp"
 // using namespace std;
 // using namespace pros;
 
@@ -13,7 +14,8 @@
  * to keep execution time for this mode under a few seconds.
  */
 void initialize() {
-
+	delay(150);
+	updateStartTask();
 
 }
 
