@@ -3,9 +3,12 @@
 #include "config.hpp"
 #include <cmath>
 
+// enum class claw_state{in,out,neut};
+
 void move(int x, int y, int a);
 void move(double x, double y, double a);
 void brake();
+// void set_claw_state(claw_state state);
 
 int sgn(int n);
 int sgn(double n);

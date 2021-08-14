@@ -19,6 +19,23 @@ void brake(){
   back_r.move_relative(0, 200);
 }
 
+// void set_claw_state(claw_state state){
+//   switch(state){
+//     case claw_state::in:
+//       claw_out.set_value(0);
+//       claw_in.set_value(1);
+//     break;
+//     case claw_state::out:
+//       claw_out.set_value(1);
+//       claw_in.set_value(0);
+//     break;
+//     case claw_state::neut:
+//       claw_out.set_value(0);
+//       claw_in.set_value(0);
+//     break;
+//   }
+// }
+
 int sgn(int n){
   if (n > 0)return 1;
   else if(n < 0) return -1;
