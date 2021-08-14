@@ -66,6 +66,18 @@ void autonomous() {}
 void opcontrol() {
 	int power_x, power_y, power_a, power_l;
 	int claw_state = 0, uptk_state = 0, last_state = 0;
+	fbar.move_relative(0,200);
+	move_to_target_sync(0.0,-45.0,0.0);
+	move(0,-50,0);
+	while(!claw_touch.get_value())delay(10);
+	claw_out.set_value(0);
+	claw_in.set_value(1);
+	claw_state = 0;
+	last_state = 0;
+	// fbar.move(50);
+	move_to_target_sync(0.0,-10.0,0.0);
+	// fbar.move(0);
+
 	master.print(0,0,"UP:toggle, R:vent");
 	while(true){
 		power_x = master.get_analog(E_CONTROLLER_ANALOG_RIGHT_X);
