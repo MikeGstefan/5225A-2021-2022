@@ -1,6 +1,7 @@
 #include "main.h"
 #include "logging.hpp"
 #include "config.hpp"
+#include "util.hpp"
 // using namespace std;
 // using namespace pros;
 
@@ -13,7 +14,7 @@
  * to keep execution time for this mode under a few seconds.
  */
 void initialize() {
-
+	logging_task_start();
 
 }
 
@@ -62,7 +63,15 @@ void autonomous() {}
  * task, not resume it from where it left off.
  */
 void opcontrol() {
-  queue_handle();
+	uint64_t timer, total_time = 0;
+	for(int x = 0; x<100;x++){
+		timer = micros();
+		log_print("t:%d ",x);
+		total_time += micros() - timer;
+		delay(10);
+	}
+	printf("%llu\n",total_time);
+  // queue_handle();
   // print("helk");
 	// print("helk");
 	// print("helk");

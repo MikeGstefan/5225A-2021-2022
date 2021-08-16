@@ -1,4 +1,5 @@
 #pragma once
+#include "util.hpp"
 #include <iostream>
 #include <vector>
 #include <string>
@@ -13,22 +14,14 @@ using namespace pros;
 extern Task *printing;
 
 
-enum class Levels{
-    both,
-    card,
-    wire,
-    none
-};
 
-class Data{
-    public:
-        Levels level;
-        void print(const char* format, ...);
-        Data(Levels data_level){
-            level = data_level;
-        }
-        void logging(string output);
-};
-void print(const char* format, ...);
-void queue_handle();
-const int queue_size = 10;
+void logging_task_start();
+void logging_task_stop();
+
+
+void log_print(const char* format, ...);
+void queue_handle(void* params);
+uintptr_t data_size();
+const int queue_size = 100;
+const int print_point = 80;
+const int print_max_time = 2000;
