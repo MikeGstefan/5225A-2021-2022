@@ -54,15 +54,19 @@ void queue_handle(void* params){
   while(true){
     if(data_size() > print_point || logging_tmr.get_time() > print_max_time){
       temp_back = back;
+      //does the queue rollover?
       if(reinterpret_cast<uintptr_t>(back) < reinterpret_cast<uintptr_t>(front)){
         file.open(file_name,ofstream::app);
+        //print from the front to the end of the queue
         file.write(front, queue_size-1-( reinterpret_cast<uintptr_t>(front)-queue_start));
+        //print from the start to the end of the data
         file.write(queue,reinterpret_cast<uintptr_t>(temp_back)-queue_start);
         file.close();
         front = queue +(reinterpret_cast<uintptr_t>(temp_back)-queue_start);
       }
       else{
         file.open(file_name,ofstream::app);
+        //print the data marked to be printed
         file.write(front, reinterpret_cast<uintptr_t>(temp_back)- reinterpret_cast<uintptr_t>(front));
         file.close();
         front += reinterpret_cast<uintptr_t>(temp_back)- reinterpret_cast<uintptr_t>(front);
@@ -75,7 +79,7 @@ void queue_handle(void* params){
 
 }
 
-uintptr_t data_size(){
+uintptr_t data_size(){//returns the number of characters needed to be printed from the queue
   if(reinterpret_cast<uintptr_t>(back) < reinterpret_cast<uintptr_t>(front))return(queue_size-1-( reinterpret_cast<uintptr_t>(front)-queue_start))+(reinterpret_cast<uintptr_t>(back)-queue_start);
   else return reinterpret_cast<uintptr_t>(back)- reinterpret_cast<uintptr_t>(front);
 }
