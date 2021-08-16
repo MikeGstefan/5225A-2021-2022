@@ -66,7 +66,7 @@ void opcontrol() {
 	uint64_t timer, total_time = 0;
 	for(int x = 0; x<100;x++){
 		timer = micros();
-		log_print("t:%d ",x);
+		test_log.log_print("t:%d ",x);
 		total_time += micros() - timer;
 		delay(10);
 	}

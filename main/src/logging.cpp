@@ -6,8 +6,11 @@ char* front = queue;
 char* back = queue;
 char buffer[256];
 ofstream file;
-
 uintptr_t queue_start = reinterpret_cast<uintptr_t>(&queue);
+
+
+Data test_log("$01");
+
 
 void logging_task_start(){
   file.open(file_name,ofstream::app);
@@ -23,10 +26,11 @@ void logging_task_stop(){
   }
 }
 
-void log_print(const char* format,...){
+void Data::log_print(const char* format,...){
   std::va_list args;
   va_start(args, format);
   vsprintf(buffer,format,args);
+  memcpy(buffer+strlen(buffer), this->id,3);
   //copying the string uses memcpy instead of strcpy or strncpy to avoid copying the terminating character
 
   //if the end of the buffer would be past the max of the queue array
