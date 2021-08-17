@@ -1,22 +1,34 @@
 #include "logging.hpp"
 Task *logging_task = nullptr;
 const char* file_name= "/usd/test.txt";
+const char* file_meta= "/usd/meta_data.txt";
 char queue[queue_size];
 char* front = queue;
 char* back = queue;
 char buffer[256];
 ofstream file;
 uintptr_t queue_start = reinterpret_cast<uintptr_t>(&queue);
+vector<Data*> Data::obj_list;
+
+Data::Data(const char* obj_name, const char* id_code){
+  this->id = id_code;
+  this->name = obj_name;
+  obj_list.push_back(this);
+}
 
 
-Data test_log("$01");
 
+
+Data test_log("track","$01");
+Data test2_log("pp","$02");
+Data test3_log("data","$01");
+
+vector<Data*> Data::get_objs(){
+  return obj_list;
+}
 
 void logging_task_start(){
-  file.open(file_name,ofstream::app);
-  file.close();
   logging_task = new Task(queue_handle);
-
 }
 void logging_task_stop(){
   if(logging_task != nullptr){
@@ -24,6 +36,22 @@ void logging_task_stop(){
     delete logging_task;
     logging_task = nullptr;
   }
+}
+
+void Data::log_init(){
+  file.open(file_meta,ofstream::trunc | ofstream::out);
+  char meta_data[256];
+  for(int i = 0; i< Data::obj_list.size(); i++){
+    strcat(meta_data,Data::obj_list[i]->name);
+    strcat(meta_data,",");
+    strcat(meta_data,Data::obj_list[i]->id);
+    strcat(meta_data,",");
+  }
+  file.write(meta_data,strlen(meta_data));
+  file.close();
+  file.open(file_name,ofstream::app);
+  file.close();
+  logging_task_start();
 }
 
 void Data::log_print(const char* format,...){

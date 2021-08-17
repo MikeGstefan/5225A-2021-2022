@@ -14,7 +14,8 @@
  * to keep execution time for this mode under a few seconds.
  */
 void initialize() {
-	logging_task_start();
+	// logging_task_start();
+	Data::log_init();
 
 }
 

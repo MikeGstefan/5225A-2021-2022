@@ -17,20 +17,17 @@ extern Task *printing;
 
 void logging_task_start();
 void logging_task_stop();
-enum class levels{
-  both,
-  card,
-  wire,
-  none
-};
 
 class Data{
-  public:
-    const char* id;
-    void log_print(const char* format, ...);
-    Data(const char* id_code){
-      id = id_code;
-    }
+private:
+  static vector<Data*> obj_list;
+public:
+  const char* id;
+  const char* name;
+  static vector<Data*> get_objs();
+  void log_print(const char* format, ...);
+  Data(const char* obj_name, const char* id_code);
+  static void log_init();
 };
 
 
