@@ -303,7 +303,7 @@ void move_on_line(void* params){
   int max_power = move_params.max_power;
   bool Overshoot = move_params.Overshoot; //
   double lpercent= move_params.lpercent, apercent=move_params.apercent;
-  double kp_lx =21.0, kp_ly =7.0, kp_dx = 21.0, kp_dy = 7.0, kp_a = 50.0, ki_lx = 0.0, ki_ly = 0.01, ki_dx = 0.0, ki_dy = 0.01, ki_a = 0.0, kd_lx = 0.0, kd_ly = 0.0, kd_dx = 0.0, kd_dy = 0.0, kd_a = 0.0;
+  double kp_lx =21.0, kp_ly =7.0, kp_dx = 21.0, kp_dy = 7.5, kp_a = 50.0, ki_lx = 0.0, ki_ly = 0.01, ki_dx = 0.0, ki_dy = 0.01, ki_a = 0.0, kd_lx = 0.0, kd_ly = 0.0, kd_dx = 0.0, kd_dy = 0.0, kd_a = 0.0;
   double error_angle, error_line, error_d, error_x, error_y, error_a , error_tot;
   double power_line_x, power_line_y, power_d_x, power_d_y, total_power, line_total;
   double dif_a;
