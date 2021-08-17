@@ -303,7 +303,7 @@ void move_on_line(void* params){
   int max_power = move_params.max_power;
   bool Overshoot = move_params.Overshoot; //
   double lpercent= move_params.lpercent, apercent=move_params.apercent;
-  double kp_lx =17.0, kp_ly =7.0, kp_dx = 17.0, kp_dy = 7.0, kp_a = 50.0, ki_lx = 0.0, ki_ly = 0.0, ki_dx = 0.0, ki_dy = 0.0, ki_a = 0.0, kd_lx = 0.0, kd_ly = 0.0, kd_dx = 0.0, kd_dy = 0.0, kd_a = 0.0;
+  double kp_lx =21.0, kp_ly =7.0, kp_dx = 21.0, kp_dy = 7.0, kp_a = 50.0, ki_lx = 0.0, ki_ly = 0.01, ki_dx = 0.0, ki_dy = 0.01, ki_a = 0.0, kd_lx = 0.0, kd_ly = 0.0, kd_dx = 0.0, kd_dy = 0.0, kd_a = 0.0;
   double error_angle, error_line, error_d, error_x, error_y, error_a , error_tot;
   double power_line_x, power_line_y, power_d_x, power_d_y, total_power, line_total;
   double dif_a;
@@ -342,8 +342,8 @@ void move_on_line(void* params){
       if(fabs(error_d)<integ_start) integ_d += fabs(error_d)*(millis()-integ_last_time);
 
 
-      if(fabs(error_line) <=0.8)integ_l = 0.0;
-      if(fabs(error_d) <= 0.8)integ_d = 0.0;
+      if(fabs(error_line) <=0.5)integ_l = 0.0;
+      if(fabs(error_d) <= 0.5)integ_d = 0.0;
 
       integ_last_time = millis();
     }
@@ -383,7 +383,7 @@ void move_on_line(void* params){
       printf("pre sc lx: %f, ly: %f, dx: %f, dy: %f, a: %f\n",power_line_x,power_line_y,power_d_x,power_d_y,tracking.power_a);
     }
 
-    total_power = fabs(power_line_x+power_d_x+power_line_y+power_d_y+tracking.power_a);
+    total_power = fabs(power_line_x+power_d_x)+fabs(power_line_y+power_d_y)+fabs(tracking.power_a);
     if(total_power > max_power){
       line_total = fabs(power_line_x)+fabs(power_d_x);
       if(line_total > lpercent*max_power){
@@ -424,7 +424,7 @@ void move_on_line(void* params){
       printf("errors l: %.2f, d: %.2f\n",error_line, error_d);
       printf("powers x: %.2f, y: %.2f, a: %.2f\n",tracking.power_x, tracking.power_y, tracking.power_a);
       printf("post s lx: %f, ly: %f, dx: %f, dy: %f, a: %f\n",power_line_x,power_line_y,power_d_x,power_d_y,tracking.power_a);
-      if(lpercent != 0.0 || apercent != 0.0)printf("mins  lx: %.2f, ly: %.2f, a: %.2f",min_lx,min_ly,min_a);
+      if(lpercent != 0.0 || apercent != 0.0)printf("mins  lx: %.2f, ly: %.2f, a: %.2f\n",min_lx,min_ly,min_a);
       if(ki_lx != 0.0 || ki_ly != 0.0 || ki_dx != 0.0 || ki_dy != 0.0 || ki_a != 0.0)printf("integ  l: %.2f, d: %.2f\n",integ_l,integ_d);
       if(kd_lx != 0.0 || kd_ly != 0.0 || kd_dx != 0.0 || kd_dy != 0.0 || kd_a != 0.0)printf("deriv  l: %.2f, d: %.2f a: %.2f\n",deriv_l, deriv_d, deriv_a);
       // printf("%f, %f\n", tracking.y_coord,tracking.power_y);
