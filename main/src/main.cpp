@@ -66,7 +66,13 @@ void autonomous() {}
 void opcontrol() {
 	int power_x, power_y, power_a, power_l;
 	int claw_state = 0, uptk_state = 0, last_state = 0;
+	master.clear();
+	delay(50);
 	master.print(0,0,"UP:toggle, R:vent");
+	delay(50);
+	master.print(1,0,"right stick: lift");
+	delay(50);
+	master.print(2,0,"A: lift lock");
 	while(true){
 		power_x = master.get_analog(E_CONTROLLER_ANALOG_RIGHT_X);
 		power_y = master.get_analog(E_CONTROLLER_ANALOG_LEFT_Y);
