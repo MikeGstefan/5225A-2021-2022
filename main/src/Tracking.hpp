@@ -30,7 +30,7 @@ public:
     bool move_complete = true, move_started = false;
     int movetime = 0;
 
-    void move_start_task();
+    void move_start_task(pros::task_fn_t function);
     void move_stop_task();
     void wait_for_complete();
     void wait_for_error(double distance);
@@ -56,6 +56,10 @@ extern move_target_params move_params;
 void move_to_target(void* params);
 void move_to_target_async(double target_x, double target_y, double target_a, bool Brake = true, bool debug = false, int max_power = 127, bool Overshoot = false, double end_error = 0.5, double end_error_a = 5.0, double p = 15.0, double lpercent = 0.0, double apercent = 0.0);
 void move_to_target_sync(double target_x, double target_y, double target_a, bool Brake = true, bool debug = false, int max_power = 127, bool Overshoot = false, double end_error = 0.5, double end_error_a = 5.0, double p = 15.0, double lpercent = 0.0, double apercent = 0.0);
+
+void move_on_line(void* params);
+void move_on_line_async(double target_x, double target_y, double target_a, bool Brake = true, bool debug = false, int max_power = 127, bool Overshoot = false, double end_error = 0.5, double end_error_a = 5.0, double p = 15.0, double lpercent = 0.0, double apercent = 0.0);
+void move_on_line_sync(double target_x, double target_y, double target_a, bool Brake = true, bool debug = false, int max_power = 127, bool Overshoot = false, double end_error = 0.5, double end_error_a = 5.0, double p = 15.0, double lpercent = 0.0, double apercent = 0.0);
 
 
 
