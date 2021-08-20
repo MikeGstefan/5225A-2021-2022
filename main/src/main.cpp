@@ -3,6 +3,7 @@
 #include "config.hpp"
 #include "util.hpp"
 #include "tracking.hpp"
+#include "lift.hpp"
 // using namespace std;
 // using namespace pros;
 
@@ -64,62 +65,5 @@ void autonomous() {}
  * task, not resume it from where it left off.
  */
 void opcontrol() {
-	int power_x, power_y, power_a, power_l;
-	int claw_state = 0, uptk_state = 0, last_state = 0;
-	master.clear();
-	delay(50);
-	master.print(0,0,"UP:toggle, R:vent");
-	delay(50);
-	master.print(1,0,"right stick: lift");
-	delay(50);
-	master.print(2,0,"A: lift lock");
-	while(true){
-		power_x = master.get_analog(E_CONTROLLER_ANALOG_RIGHT_X);
-		power_y = master.get_analog(E_CONTROLLER_ANALOG_LEFT_Y);
-		power_a = master.get_analog(E_CONTROLLER_ANALOG_LEFT_X);
-		power_l = master.get_analog(E_CONTROLLER_ANALOG_RIGHT_Y);
-		if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_UP)){
-			if(claw_state !=1){
-				claw_out.set_value(1);
-				claw_in.set_value(0);
-				claw_state = 1;
-			}
-			else{
-				claw_out.set_value(0);
-				claw_in.set_value(1);
-				claw_state = 0;
-			}
-		}
-		if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_RIGHT)){
-			claw_out.set_value(0);
-			claw_in.set_value(0);
-			claw_state = 0;
-		}
-		if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_A)){
-			if(!uptk_state){
-				fbar.move_relative(0,200);
-				uptk_state = !uptk_state;
-			}
-			else {
-				fbar.move(0);
-				uptk_state = !uptk_state;
-			}
-		}
-		if(claw_touch.get_value() && last_state == 1){
-			claw_out.set_value(0);
-			claw_in.set_value(1);
-			claw_state = 0;
-			last_state = 0;
-		}
-		if(!claw_touch.get_value()&& last_state ==0)last_state = 1;
-		if(fabs(power_x) < 15)power_x = 0;
-		if(fabs(power_y) < 15)power_y = 0;
-		if(fabs(power_a) < 15)power_a = 0;
-		if(fabs(power_l) < 15)power_l = 0;
-		if(uptk_state)fbar.move(power_l);
-		move(power_x, power_y, power_a);
-		delay(10);
-		printf("%d %d %d\n",millis(),claw_touch.get_value(),claw_state);
-	}
-
+	
 }
