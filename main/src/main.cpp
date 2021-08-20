@@ -3,6 +3,7 @@
 #include "config.hpp"
 #include "util.hpp"
 #include "tracking.hpp"
+#include "lift.hpp"
 // using namespace std;
 // using namespace pros;
 
