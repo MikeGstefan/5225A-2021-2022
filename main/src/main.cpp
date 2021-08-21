@@ -104,10 +104,11 @@ void opcontrol() {
 	fbar.move_absolute(1000,200);
 	tracking.wait_for_complete();
 	backup_time = millis() -backup_time;
-
+	master.print(1,0,"grab: %d", grab_time);
+	master.print(2,0,"back: %d", backup_time);
 	// fbar.move(0);
 
-	master.print(0,0,"UP:toggle, R:vent");
+	// master.print(0,0,"UP:toggle, R:vent");
 	while(true){
 		power_x = master.get_analog(E_CONTROLLER_ANALOG_RIGHT_X);
 		power_y = master.get_analog(E_CONTROLLER_ANALOG_LEFT_Y);
