@@ -1,7 +1,7 @@
 {
     "py/object": "pros.conductor.project.Project",
     "py/state": {
-        "project_name": "5225A-2021-2022",
+        "project_name": "drive code",
         "target": "v5",
         "templates": {
             "kernel": {
