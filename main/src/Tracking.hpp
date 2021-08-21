@@ -34,6 +34,7 @@ public:
     void move_stop_task();
     void wait_for_complete();
     void wait_for_error(double distance);
+    void wait_for_dist(double distance);
 
 };
 struct move_target_params{

@@ -149,7 +149,14 @@ void Tracking::wait_for_complete(){
 }
 void Tracking::wait_for_error(double distance){
 
-  while(fabs(tracking.drive_error)- distance > 1)delay(10);
+  while(fabs(tracking.drive_error)- distance > 1 &&!tracking.move_complete)delay(10);
+  printf("%d done wait for error %f",millis(), tracking.drive_error);
+}
+
+void Tracking::wait_for_dist(double distance){
+
+  while(fabs(tracking.drive_error) > distance &&!tracking.move_complete)delay(10);
+  printf("%d done wait for dist %f",millis(), tracking.drive_error);
 }
 
 void move_to_target(void* params){
@@ -186,7 +193,7 @@ void move_to_target(void* params){
     error_y = target_y - tracking.y_coord;
     error_a = target_a - tracking.global_angle;
     error_tot = sqrt(pow(error_x,2)+ pow(error_y,2));
-
+    tracking.drive_error = error_tot;
     error_angle = atan2(error_x,error_y)-d_angle;
     error_line = sin(error_angle)*error_tot;
     error_d = cos(error_angle)*error_tot;

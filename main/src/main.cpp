@@ -68,14 +68,26 @@ void opcontrol() {
 	int power_x, power_y, power_a, power_l;
 	int claw_state = 0, uptk_state = 0, last_state = 0;
 	// fbar.move_relative(0,200);
-	Task lift([&](){
-		lift_reset();
-		fbar.move_relative(30,200);
-		while(true){
-			printf("%d\n",claw_touch.get_value());
-			delay(10);
+	master.clear();
+	delay(50);
+	int backup_point = 0;
+	while(!master.get_digital_new_press(E_CONTROLLER_DIGITAL_RIGHT)){
+		if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_UP)){
+			if(backup_point == 25)backup_point = 0;
+			else backup_point++;
 		}
-	});
+		if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_DOWN)){
+			if(backup_point == 0)backup_point = 25;
+			else backup_point--;
+		}
+		delay(10);
+		master.print(0,0,"backup: %2d",backup_point);
+	}
+
+	lift_reset();
+	while(!master.get_digital_new_press(E_CONTROLLER_DIGITAL_A))delay(10);
+	fbar.move_relative(0,200);
+	int grab_time = millis(), backup_time = millis(), lift_done = millis();
 
 	move_to_target_sync(0.0,-45.0,0.0);
 	move(0,-50,0);
@@ -83,12 +95,16 @@ void opcontrol() {
 	while(!claw_touch.get_value())delay(10);
 	claw_out.set_value(0);
 	claw_in.set_value(1);
-	printf("%d grab time \n\n\n\n",millis());
+	grab_time = millis()-grab_time;
 	claw_state = 0;
 	last_state = 0;
 	// fbar.move(50);
-	move_to_target_sync(0.0,-20.0,0.0);
+	move_to_target_async(0.0,-20.0,0.0);
+	tracking.wait_for_dist(backup_point);
 	fbar.move_absolute(1000,200);
+	tracking.wait_for_complete();
+	backup_time = millis() -backup_time;
+
 	// fbar.move(0);
 
 	master.print(0,0,"UP:toggle, R:vent");
