@@ -107,7 +107,7 @@ void update(void* params){
   if(millis() - 50 > lasttime){
       // printf("%f,%f\n", tracking.x_coord, tracking.y_coord);
 
-    printf("time: %d, TRACKING: %f %f, %f \n", millis(), tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle));
+    // printf("time: %d, TRACKING: %f %f, %f \n", millis(), tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle));
     // printf("time: %d, TOTAL: %f, %f, %f \n", millis(), total_x, total_y, rad_to_deg(total_a));
     // printf("%d pow_a: %.1f, pow_x: %.1f, pow_y: %.1f, total_pow: %.1f\n",millis(),  tracking.power_a, tracking.power_x, tracking.power_y, fabs(tracking.power_a) + fabs(tracking.power_x) + fabs(tracking.power_y));
 
