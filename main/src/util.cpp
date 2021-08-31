@@ -85,3 +85,7 @@ void Timer::reset(){
     last_reset_time = millis();
     printf("%s's initialize time is: %d\n", name, pros::millis());
 }
+
+// Coord constructor definition
+Coord::Coord(double x, double y, double angle): x(x), y(y), angle(angle){}
+Coord::Coord(): x(0.0), y(0.0), angle(0.0){}

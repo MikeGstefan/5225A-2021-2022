@@ -48,3 +48,10 @@ public:
     uint32_t get_time();    // gets the time since last reset of timer
     void print();   // prints the current time of the timer
 };
+
+struct Coord{   // stores members variables for a coordinate: x, y and angle    MUST BE DEINFED HERE, OTHERWISE CIRCULAR HEADER FILE DEPENDENCY OCCURS
+    double x, y, angle;
+    Coord(double x, double y, double angle);
+    Coord();
+    // default constructor
+};

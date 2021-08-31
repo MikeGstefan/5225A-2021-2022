@@ -2,14 +2,9 @@
 #include "logging.hpp"
 #include "config.hpp"
 #include "util.hpp"
-#include "tracking.hpp"
+#include "Tracking.hpp"
 #include "lift.hpp"
-
-#define JOY_FORWARD E_CONTROLLER_ANALOG_LEFT_Y
-#define JOY_STRAFE E_CONTROLLER_ANALOG_RIGHT_X
-#define JOY_TURN E_CONTROLLER_ANALOG_LEFT_X
-#define JOY_LIFT E_CONTROLLER_ANALOG_RIGHT_Y
-
+#include "drive.hpp"
 
 // using namespace std;
 // using namespace pros;
@@ -22,6 +17,9 @@
  * to keep execution time for this mode under a few seconds.
  */
 void initialize() {
+
+	// custom_drive::custom_curve_init();
+
 	delay(150);
 	updateStartTask();
 	pros::lcd::initialize();
@@ -58,12 +56,12 @@ void competition_initialize() {}
  */
 void autonomous() {
 	lift.cal();
-	double height = 35;
-	printf("DEG: %lf\n", lift.height_to_deg(height));
+	double height = 17.5;
+	printf("POS: %lf\n", lift.height_to_pos(height));
 	// delay(10000);
-	// lift.move_absolute(lift.height_to_deg(height), 200);
+	lift.move_absolute(lift.height_to_pos(height), 150);
 	while (true){
-		printf("%lf\n", lift.get_position());
+		printf("pos:%lf, height:%lf\n", lift.get_position(), lift.pos_to_height(lift.get_position()));
 		delay(10);
 	}
 
@@ -86,6 +84,7 @@ void autonomous() {
 void opcontrol() {
 	int power_x, power_y, power_a, power_l;
 	int claw_state = 0, uptk_state = 0, last_state = 0;
+	lift.lift_height_util();
 	// lift.move_relative(0,200);
 /*	master.clear();
 	delay(50);
@@ -128,10 +127,8 @@ void opcontrol() {
 	// lift.move(0);
 */
 	// master.print(0,0,"UP:toggle, R:vent");
+/*
 	while(true){
-		power_x = master.get_analog(JOY_STRAFE);
-		power_y = master.get_analog(JOY_FORWARD);
-		power_a = master.get_analog(JOY_TURN);
 		power_l = master.get_analog(JOY_LIFT);
 		if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_UP)){	// unlocks claw
 			if(claw_state != 1){
@@ -162,13 +159,11 @@ void opcontrol() {
 			last_state = 0;
 		}
 		if(!claw_touch.get_value() && last_state == 0)	last_state = 1;
-		if(fabs(power_x) < 7)	power_x = 0;
-		if(fabs(power_y) < 7)	power_y = 0;
-		if(fabs(power_a) < 7)	power_a = 0;
+
+		drive_input();
 		if(fabs(power_l) < 7)	power_l = 0;
 		if(uptk_state)	lift.move(power_l);
-		move(power_x, power_y, power_a);
 		delay(10);
 	}
-
+*/
 }

@@ -39,6 +39,7 @@ void update(void* params){
   double last_x = 0, last_y = 0, last_a = 0;
   double last_vel_l = 0, last_vel_r = 0, last_vel_b = 0;
 
+  Coord last_coord;  // last position of robot
   int last_velocity_time = 0;    // time of last velocity update
   int velocity_update_time = 0; // time SINCE last velocity update
 
@@ -66,6 +67,12 @@ void update(void* params){
         last_vel_r = NewRight;
         last_vel_b = NewBack;
 
+        // gives us linear velocity in inches per second, and angular velocity in radians per second
+        tracking.g_velocity.x = (tracking.x_coord - last_coord.x) / velocity_update_time * 1000;
+        tracking.g_velocity.y = (tracking.y_coord - last_coord.y) / velocity_update_time * 1000;
+        tracking.g_velocity.angle = (tracking.global_angle - last_coord.angle) / velocity_update_time * 1000;
+
+        last_coord = {tracking.x_coord, tracking.y_coord, tracking.global_angle};
 
         last_velocity_time = millis();
     }
