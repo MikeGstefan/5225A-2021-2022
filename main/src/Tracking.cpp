@@ -323,8 +323,8 @@ void move_to_target(void* params){
 
 // #define exit_condition tracking.x_coord < target_x - 5.0 || tracking.y_coord > target_y + 5.0
 
-void rush_goal(double target_x, double target_y, double target_a, bool forwards){
-    double end_error = 0.5, end_error_a = 5.0, kp_x = 7.0, kp_a = 160.0, local_error_x, local_error_y, difference_a, error_a, error_d, max_power = 127, total_power, scale;
+void rush_goal(double target_x, double target_y, double target_a){
+    double end_error = 0.5, end_error_a = 5.0, kp_x = 10.0, kp_a = 120.0, local_error_x, local_error_y, difference_a, error_a, error_d, max_power = 127, total_power, scale;
     uint32_t last_time = millis();
     target_a = deg_to_rad(target_a);
     short orig_y_sgn = sgn(target_y - tracking.y_coord);
@@ -346,11 +346,8 @@ void rush_goal(double target_x, double target_y, double target_a, bool forwards)
             tracking.power_y = 0;
             printf("WARNING: A ROBOT IS PUSHING US OR SOMETHING ELSE IS VERY WRONG.\n");
         }
-        else{
-          if (forwards) tracking.power_y = max_power - fabs(tracking.power_x) - fabs(tracking.power_a);
-          else  tracking.power_y = -max_power + fabs(tracking.power_x) + fabs(tracking.power_a);
+        else  tracking.power_y = sgn(local_error_y) * (max_power - fabs(tracking.power_x) - fabs(tracking.power_a));
 
-        }
         printf("cur_y_sgn: %lf, cur_y: %lf\n", target_y - tracking.y_coord, tracking.y_coord);
         // exit condition
         if ((error_d < end_error && fabs(local_error_y) < end_error && fabs(error_a) < deg_to_rad(end_error_a)) || sgn(target_y - tracking.y_coord) != orig_y_sgn){

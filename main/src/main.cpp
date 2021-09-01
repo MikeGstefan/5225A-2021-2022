@@ -69,7 +69,7 @@ void autonomous() {
 	// move_to_target_async(0.0, -45.0, 0.0);	// got to goal
 	// while(tracking.y_coord > -45.0)	delay(10);
 	master.print(0, 0, "time: %d", move_timer.get_time());
-	rush_goal(0.0, -20.0, 0.0, true);
+	rush_goal(0.0, -20.0, 0.0);
 
 }
 
