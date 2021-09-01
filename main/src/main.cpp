@@ -55,16 +55,21 @@ void competition_initialize() {}
  * from where it left off.
  */
 void autonomous() {
-	lift.cal();
-	double height = 17.5;
-	printf("POS: %lf\n", lift.height_to_pos(height));
-	// delay(10000);
-	lift.move_absolute(lift.height_to_pos(height), 150);
-	while (true){
-		printf("pos:%lf, height:%lf\n", lift.get_position(), lift.pos_to_height(lift.get_position()));
-		delay(10);
-	}
-
+	// lift.cal();
+	// double height = 17.5;
+	// printf("POS: %lf\n", lift.height_to_pos(height));
+	// // delay(10000);
+	// lift.move_absolute(lift.height_to_pos(height), 150);
+	// while (true){
+	// 	printf("pos:%lf, height:%lf\n", lift.get_position(), lift.pos_to_height(lift.get_position()));
+	// 	delay(10);
+	// }
+	Timer move_timer{"move_timer"};
+	rush_goal(0.0, -45.0, 0.0);
+	// move_to_target_async(0.0, -45.0, 0.0);	// got to goal
+	// while(tracking.y_coord > -45.0)	delay(10);
+	master.print(0, 0, "time: %d", move_timer.get_time());
+	rush_goal(0.0, -20.0, 0.0, true);
 
 }
 
@@ -84,7 +89,7 @@ void autonomous() {
 void opcontrol() {
 	int power_x, power_y, power_a, power_l;
 	int claw_state = 0, uptk_state = 0, last_state = 0;
-	lift.lift_height_util();
+	lift.cal();
 	// lift.move_relative(0,200);
 /*	master.clear();
 	delay(50);
@@ -127,7 +132,7 @@ void opcontrol() {
 	// lift.move(0);
 */
 	// master.print(0,0,"UP:toggle, R:vent");
-/*
+
 	while(true){
 		power_l = master.get_analog(JOY_LIFT);
 		if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_UP)){	// unlocks claw
@@ -162,8 +167,12 @@ void opcontrol() {
 
 		drive_input();
 		if(fabs(power_l) < 7)	power_l = 0;
+		// prevents lift from going out of bounds
+		if(lift.pos_to_height(lift.get_position()) > 40.0 && power_l > 0) power_l = 0;
+		if(lift.pos_to_height(lift.get_position()) < 10.0 && power_l < 0) power_l = 0;
+		printf("height: %lf\n", lift.pos_to_height(lift.get_position()));
 		if(uptk_state)	lift.move(power_l);
 		delay(10);
 	}
-*/
+
 }

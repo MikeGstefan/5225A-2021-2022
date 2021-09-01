@@ -58,8 +58,7 @@ extern move_target_params move_params;
 void move_to_target(void* params);
 void move_to_target_async(double target_x, double target_y, double target_a, bool Brake = true, bool debug = false, int max_power = 127, bool Overshoot = false, double end_error = 0.5, double end_error_a = 5.0, double p = 15.0, double lpercent = 0.0, double apercent = 0.0);
 void move_to_target_sync(double target_x, double target_y, double target_a, bool Brake = true, bool debug = false, int max_power = 127, bool Overshoot = false, double end_error = 0.5, double end_error_a = 5.0, double p = 15.0, double lpercent = 0.0, double apercent = 0.0);
-
-
+void rush_goal(double target_x, double target_y, double target_a, bool forwards = false);
 
 const int min_power_a = 18;
 const int min_power_x = 35;
