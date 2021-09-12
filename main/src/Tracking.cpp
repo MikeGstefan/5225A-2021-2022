@@ -369,3 +369,52 @@ void rush_goal(double target_x, double target_y, double target_a){
     }
 
 }
+
+void rush_goal2(double target_x, double target_y, double target_a){
+    double end_error = 0.5, end_error_a = 5.0, kp_x = 10.0, kp_a = 120.0, local_error_x, local_error_y, difference_a, error_a, error_d, max_power = 127, total_power, scale;
+    uint32_t last_time = millis();
+    target_a = deg_to_rad(target_a);
+    short orig_y_sgn = sgn(target_y - tracking.y_coord);
+    printf("orig_y_sgn: %lf\n", target_y - tracking.y_coord);
+    while(true){
+        error_d = sqrt(pow(target_x - tracking.x_coord, 2) + pow(target_y - tracking.y_coord, 2));
+        difference_a = atan2(target_y - tracking.y_coord, target_x - tracking.x_coord) + tracking.global_angle;
+        local_error_x = error_d * cos(difference_a);
+        // local_error_y = error_d * sin(local_a);
+        error_a = target_a - tracking.global_angle;
+
+        tracking.power_x = local_error_x * kp_x;
+        tracking.power_a = error_a * kp_a;
+        total_power = fabs(tracking.power_x) + fabs(tracking.power_a);
+        if (total_power > max_power) {
+            scale = max_power / total_power;
+            tracking.power_x *= scale;
+            tracking.power_a *= scale;
+            tracking.power_y = 0;
+            printf("WARNING: A ROBOT IS PUSHING US OR SOMETHING ELSE IS VERY WRONG.\n");
+        }
+        else  tracking.power_y = sgn(orig_y_sgn) * (max_power - fabs(tracking.power_x) - fabs(tracking.power_a));
+        printf("pow_x %f, pow_y: %f, power_a: %f",tracking.power_x, tracking.power_y, tracking.power_a);
+        printf("cur_y_sgn: %lf, cur_y: %lf\n", target_y - tracking.y_coord, tracking.y_coord);
+        // exit condition
+        if (claw_touch.get_value()){
+            // got_goal = goal_lim_switch_state;
+            claw_out.set_value(1);
+          	claw_in.set_value(0);
+            brake();
+            printf("x: %lf, y: %lf, a: %lf\n", tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle));
+            printf("GOT TO GOAL: %d\n", millis());
+            return;
+        }
+        // if(millis() - last_time > 50){
+          // printf("powers| x: %lf, y: %lf, a: %lf\n", tracking.power_x, tracking.power_y, tracking.power_a);
+          // printf("x: %lf, y: %lf, a: %lf\n", tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle));
+
+        // }
+
+
+        move(tracking.power_x, tracking.power_y, tracking.power_a);
+        delay(10);
+    }
+
+}

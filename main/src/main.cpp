@@ -90,6 +90,18 @@ void opcontrol() {
 	int power_x, power_y, power_a, power_l;
 	int claw_state = 0, uptk_state = 0, last_state = 0;
 	lift.cal();
+	lift.move_absolute(120, 100);
+	int timer = millis();
+	claw_out.set_value(0);
+	claw_in.set_value(0);
+	rush_goal2(0,-40,0);
+	brake();
+	printf("timer: %d\n\n",millis()-timer);
+	move_to_target_async(0.0,-20.0,0.0);
+	lift.move_absolute(400,200);
+	tracking.wait_for_complete();
+	printf("timer: %d\n\n",millis()-timer);
+	return;
 	// lift.move_relative(0,200);
 /*	master.clear();
 	delay(50);
