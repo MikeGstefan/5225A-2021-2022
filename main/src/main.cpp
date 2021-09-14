@@ -18,7 +18,7 @@
  */
 void initialize() {
 
-	// custom_drive::custom_curve_init();
+	custom_drive::custom_curve_init();
 
 	delay(150);
 	updateStartTask();
@@ -55,22 +55,15 @@ void competition_initialize() {}
  * from where it left off.
  */
 void autonomous() {
-	// lift.cal();
-	// double height = 17.5;
-	// printf("POS: %lf\n", lift.height_to_pos(height));
-	// // delay(10000);
-	// lift.move_absolute(lift.height_to_pos(height), 150);
-	// while (true){
-	// 	printf("pos:%lf, height:%lf\n", lift.get_position(), lift.pos_to_height(lift.get_position()));
-	// 	delay(10);
-	// }
+	update_lookup_table_util();
+/*
 	Timer move_timer{"move_timer"};
 	rush_goal(0.0, -45.0, 0.0);
 	// move_to_target_async(0.0, -45.0, 0.0);	// got to goal
 	// while(tracking.y_coord > -45.0)	delay(10);
 	master.print(0, 0, "time: %d", move_timer.get_time());
 	rush_goal(0.0, -20.0, 0.0);
-
+*/
 }
 
 /**
@@ -87,6 +80,13 @@ void autonomous() {
  * task, not resume it from where it left off.
  */
 void opcontrol() {
+	while(true){
+		drive_input();
+		delay(10);
+	}
+
+	// update_lookup_table_util();
+	/*
 	int power_x, power_y, power_a, power_l;
 	int claw_state = 0, uptk_state = 0, last_state = 0;
 	lift.cal();
@@ -103,7 +103,7 @@ void opcontrol() {
 	printf("timer: %d\n\n",millis()-timer);
 	return;
 	// lift.move_relative(0,200);
-/*	master.clear();
+//	master.clear();
 	delay(50);
 	int backup_point = 0;
 	while(!master.get_digital_new_press(E_CONTROLLER_DIGITAL_RIGHT)){
@@ -142,7 +142,7 @@ void opcontrol() {
 	master.print(1, 0, "grab: %d", grab_time);
 	master.print(2, 0, "back: %d", backup_time);
 	// lift.move(0);
-*/
+
 	// master.print(0,0,"UP:toggle, R:vent");
 
 	while(true){
@@ -186,5 +186,5 @@ void opcontrol() {
 		if(uptk_state)	lift.move(power_l);
 		delay(10);
 	}
-
+*/
 }

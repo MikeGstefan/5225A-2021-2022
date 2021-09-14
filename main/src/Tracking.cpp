@@ -113,7 +113,7 @@ void update(void* params){
 
   if(millis() - 50 > lasttime){
     // printf("powers| x: %lf, y: %lf, a: %lf\n", tracking.power_x, tracking.power_y, tracking.power_a);
-    printf("x: %lf, y: %lf, a: %lf\n", tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle));
+    // printf("x: %lf, y: %lf, a: %lf\n", tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle));
 
       // printf("%f,%f\n", tracking.x_coord, tracking.y_coord);
 
@@ -338,7 +338,7 @@ void rush_goal(double target_x, double target_y, double target_a){
 
         tracking.power_x = local_error_x * kp_x;
         tracking.power_a = error_a * kp_a;
-        total_power = fabs(tracking.power_x) + fabs(tracking.power_x);
+        total_power = fabs(tracking.power_x) + fabs(tracking.power_a);
         if (total_power > max_power) {
             scale = max_power / total_power;
             tracking.power_x *= scale;

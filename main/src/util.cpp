@@ -83,7 +83,7 @@ void Timer::print(){
 
 void Timer::reset(){
     last_reset_time = millis();
-    printf("%s's initialize time is: %d\n", name, pros::millis());
+    printf("%s's reset time is: %d\n", name, pros::millis());
 }
 
 // Coord constructor definition

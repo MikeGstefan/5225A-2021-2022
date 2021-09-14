@@ -8,18 +8,31 @@
 #include <memory>
 #include <vector>
 
+// Emily  & Sarah: forward and strafing on left, and right is turning
+
+// #define JOY_FORWARD E_CONTROLLER_ANALOG_LEFT_Y
+// #define JOY_STRAFE E_CONTROLLER_ANALOG_LEFT_X
+// #define JOY_TURN E_CONTROLLER_ANALOG_RIGHT_X
+// #define JOY_LIFT E_CONTROLLER_ANALOG_RIGHT_Y
 #define JOY_FORWARD E_CONTROLLER_ANALOG_LEFT_Y
 #define JOY_STRAFE E_CONTROLLER_ANALOG_RIGHT_X
 #define JOY_TURN E_CONTROLLER_ANALOG_LEFT_X
 #define JOY_LIFT E_CONTROLLER_ANALOG_RIGHT_Y
 #define DEADZONE 7
 
+struct driver{
+  // controller_digital_e_t  strafe_stick = ;
+  controller_analog_e_t  JOY_STRAFE, JOY_FORWARD, JOY_TURN;
+
+};
+
+
 void drive_input();
 void update_lookup_table_util();
 
 enum class curve_types {polynomial, exponential};
 class custom_drive{
-  curve_types curve_type;
+  curve_types curve_type = curve_types::polynomial; // deafults to polynomial if not specified
   double curvature;
   int lookup_table[255];
 
@@ -34,4 +47,4 @@ public:
   int lookup(int x);
 };
 
-extern custom_drive local_x, local_y, local_a;
+extern custom_drive custom_drives[3];
