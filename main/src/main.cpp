@@ -80,8 +80,16 @@ void autonomous() {
  * task, not resume it from where it left off.
  */
 void opcontrol() {
+	master.clear();
+	int timer = millis();
 	while(true){
 		drive_input();
+		// if(front_l.get_temperature() > 45)
+		printf("fl%.0f r%.0f bl%.0f r%.0f\n", front_l.get_temperature(),front_r.get_temperature(), back_l.get_temperature(), back_r.get_temperature());
+		if(millis()- timer > 50){
+			master.print(0,0,"fl%.0f r%.0f bl%.0f r%.0f\n", front_l.get_temperature(),front_r.get_temperature(), back_l.get_temperature(), back_r.get_temperature());
+		}
+
 		delay(10);
 	}
 

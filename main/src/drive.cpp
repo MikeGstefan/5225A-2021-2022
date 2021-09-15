@@ -8,10 +8,13 @@
 // #define JOY_STRAFE E_CONTROLLER_ANALOG_LEFT_X
 // #define JOY_TURN E_CONTROLLER_ANALOG_RIGHT_X
 // #define JOY_LIFT E_CONTROLLER_ANALOG_RIGHT_Y
-#define JOY_FORWARD E_CONTROLLER_ANALOG_LEFT_Y
-#define JOY_STRAFE E_CONTROLLER_ANALOG_RIGHT_X
-#define JOY_TURN E_CONTROLLER_ANALOG_LEFT_X
-#define JOY_LIFT E_CONTROLLER_ANALOG_RIGHT_Y
+
+//Nikhil's controls
+
+#define JOY_FORWARD E_CONTROLLER_ANALOG_RIGHT_Y
+#define JOY_STRAFE E_CONTROLLER_ANALOG_LEFT_X
+#define JOY_TURN E_CONTROLLER_ANALOG_RIGHT_X
+#define JOY_LIFT E_CONTROLLER_ANALOG_LEFT_Y
 #define DEADZONE 7
 
 
@@ -79,7 +82,7 @@ void drive_input(){
     tracking.power_a = 0.0;
   }
   move(tracking.power_x, tracking.power_y, tracking.power_a);
-  printf("input: %d, output:%f, \n",master.get_analog(JOY_TURN), tracking.power_a);
+  // printf("input: %d, output:%f, \n",master.get_analog(JOY_TURN), tracking.power_a);
 }
 
 // curve file template
