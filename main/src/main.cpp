@@ -77,7 +77,7 @@ void opcontrol() {
   // }
 	while(!master.get_digital(E_CONTROLLER_DIGITAL_A))delay(10);
 	// move_to_target_sync(0.0,0.0,180.0);
-  move_on_line_sync(0,40,0.0,true,true,127,false,0.5,5.0,15.0,0);
+  move_on_line_sync(-30,-30,0.0,true,true,127,false,0.5,5.0,15.0,0);
   // move_to_target_sync(0,40,0);
 	// int power_x, power_y, power_a;
 	// while(true){
