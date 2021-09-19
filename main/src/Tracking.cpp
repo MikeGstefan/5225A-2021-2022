@@ -386,7 +386,7 @@ void move_on_line(void* params){
 
     total_power = fabs(power_line_x+power_d_x)+fabs(power_line_y+power_d_y)+fabs(tracking.power_a);
     if(total_power > max_power){
-      line_total = fabs(power_line_x)+fabs(power_d_x);
+      line_total = fabs(power_line_x)+fabs(power_line_y);
       if(line_total > lpercent*max_power){
         min_lx = (fabs(power_line_x)/line_total) *lpercent*max_power;
         min_ly = (fabs(power_line_y)/line_total) *lpercent*max_power;
@@ -398,11 +398,11 @@ void move_on_line(void* params){
       if(fabs(tracking.power_a) > apercent*max_power) min_a = apercent*max_power;
       else min_a = fabs(tracking.power_a);
       min_total = min_lx + min_ly + min_a;
-      power_line_x =((fabs(power_line_x)/(total_power-min_total))*(max_power-min_total)+min_lx)*sgn(power_line_x);
-      power_line_y =((fabs(power_line_y)/(total_power-min_total))*(max_power-min_total)+min_ly)*sgn(power_line_y);
+      power_line_x =(((fabs(power_line_x)-min_lx)/(total_power-min_total))*(max_power-min_total)+min_lx)*sgn(power_line_x);
+      power_line_y =(((fabs(power_line_y)-min_ly)/(total_power-min_total))*(max_power-min_total)+min_ly)*sgn(power_line_y);
       power_d_x =(power_d_x/(total_power-min_total))*(max_power-min_total);
       power_d_y =(power_d_y/(total_power-min_total))*(max_power-min_total);
-      tracking.power_a =((fabs(tracking.power_a)/(total_power-min_total))*(max_power-min_total)+min_a)*sgn(tracking.power_a);
+      tracking.power_a =(((fabs(tracking.power_a)- min_a)/(total_power-min_total))*(max_power-min_total)+min_a)*sgn(tracking.power_a);
     }
 
 
