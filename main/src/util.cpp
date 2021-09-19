@@ -17,31 +17,31 @@
 //   }
 // }
 
-// int sgn(int n){
-//   if (n > 0)return 1;
-//   else if(n < 0) return -1;
-//   else return 0;
-// }
-// int sgn(double n){
-//   if (n > 0)return 1;
-//   else if(n < 0) return -1;
-//   else return 0;
-// }
-//
-// double operator "" _deg(long double degree){
-//   return degree/180 *M_PI;
-// }
-// double operator "" _rad(long double radians){
-//   return radians/M_PI *180;
-// }
-//
-// double deg_to_rad(double deg){
-//   return deg / 180 * M_PI;
-// }
-//
-// double rad_to_deg(double rad){
-//   return rad / M_PI * 180;
-// }
+int sgn(int n){
+  if (n > 0)return 1;
+  else if(n < 0) return -1;
+  else return 0;
+}
+int sgn(double n){
+  if (n > 0)return 1;
+  else if(n < 0) return -1;
+  else return 0;
+}
+
+double operator "" _deg(long double degree){
+  return degree/180 *M_PI;
+}
+double operator "" _rad(long double radians){
+  return radians/M_PI *180;
+}
+
+double deg_to_rad(double deg){
+  return deg / 180 * M_PI;
+}
+
+double rad_to_deg(double rad){
+  return rad / M_PI * 180;
+}
 
 // timing class functions
 
@@ -62,9 +62,9 @@ void Timer::print(){
     printf("%s's current time is: %d\n", name, pros::millis() - last_reset_time);
 }
 
-void Timer::reset(){
+void Timer::reset(bool print_time){
     last_reset_time = millis();
-    printf("%s's reset time is: %d\n", name, pros::millis());
+    if (print_time) printf("%s's reset time is: %d\n", name, pros::millis());
 }
 
 // Coord constructor definition

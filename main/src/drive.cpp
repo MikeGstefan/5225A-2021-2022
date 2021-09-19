@@ -3,11 +3,20 @@
 
 // singleton dribase instance
 Drivebase drivebase = {{
-  driver("Nikhil", {E_CONTROLLER_ANALOG_LEFT_X, E_CONTROLLER_ANALOG_RIGHT_Y, E_CONTROLLER_ANALOG_RIGHT_X}, {0.5, 1.0, 4.0}),
-  {"Emily", {E_CONTROLLER_ANALOG_LEFT_X, E_CONTROLLER_ANALOG_LEFT_Y, E_CONTROLLER_ANALOG_LEFT_X}, {0.5, 1.0, 4.0}},
-  {"Sarah", {E_CONTROLLER_ANALOG_LEFT_X, E_CONTROLLER_ANALOG_LEFT_Y, E_CONTROLLER_ANALOG_LEFT_X}, {0.5, 1.0, 4.0}},
+  driver("Nikhil", {E_CONTROLLER_ANALOG_LEFT_X, E_CONTROLLER_ANALOG_RIGHT_Y, E_CONTROLLER_ANALOG_RIGHT_X}, {5.315, 1.0, 4.0}),
+  {"Emily", {E_CONTROLLER_ANALOG_LEFT_X, E_CONTROLLER_ANALOG_LEFT_Y, E_CONTROLLER_ANALOG_LEFT_X}, {0.5, 1.42, 4.0}},
+  {"Sarah", {E_CONTROLLER_ANALOG_LEFT_X, E_CONTROLLER_ANALOG_LEFT_Y, E_CONTROLLER_ANALOG_LEFT_X}, {0.5, 1.0, 2.2}},
 }};
-
+// test values
+// curvature:0.21
+// curvature:1.42234
+// curvature:4.794
+// curvature:0.534
+// curvature:1.9824
+// curvature:4.76
+// curvature:7.42
+// curvature:6.32
+// curvature:2.03
 
 
 // Emily  & Sarah: forward and strafing on left, and right is turning
@@ -45,7 +54,9 @@ custom_drive::custom_drive(double curvature): curvature(curvature){}
 void custom_drive::fill_lookup_table(){
   for (short x = -127; x < 128; x++){ // fills lookup table with values from appropriate function
     lookup_table[(unsigned char)x] = exponential(x);
-    printf("%d, %d\n", x, lookup_table[(unsigned char)x]);
+    // UNCOMMENT THESE FOR DEBUGGING, comment for performance
+    // printf("%d, %d\n", x, lookup_table[(unsigned char)x]);
+    // delay(1);
   }
 }
 
@@ -75,10 +86,9 @@ void Drivebase::brake(){
   back_r.move_relative(0, 200);
 }
 
-
 void Drivebase::update_screen(){
   WAIT_FOR_SCREEN_REFRESH();
-  master.print(0, 0, "Driver: %s", drivers[cur_driver].name); // updates driver
+  master.print(0, 0, "Driver: %s          ", drivers[cur_driver].name); // updates driver
   delay(50);
   master.print(1, 0, screen_text[cur_screen]);  // updates text
   delay(50);
@@ -96,33 +106,34 @@ void Drivebase::download_curve_data(){
   }
 
   for (short driver = 0; driver < num_of_drivers; driver++){  // reads curve curvature from curve file
+    printf("num of drivers:%d\n", num_of_drivers);
     printf("DRIVER: %s\n", drivers[driver].name);
     for (short curvature = 0; curvature < 3; curvature++){
       if (curve_file_exists)  fscanf(curve_file, "curvature:%lf\n", &drivers[driver].custom_drives[curvature].curvature);
       printf("curvature:%lf\n", drivers[driver].custom_drives[curvature].curvature);
       drivers[driver].custom_drives[curvature].fill_lookup_table();
+      delay(1);
     }
   }
 
 }
 // LOOK AT THIS LATER
 void Drivebase::update_lookup_table_util(){
-    double curvatures[3];
-
     download_curve_data();
 
     master.clear();
+    screen_timer.reset(false);
     update_screen();
 
     while (!master.get_digital_new_press(E_CONTROLLER_DIGITAL_B)){  // user presses b to save and exit utility
-      if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_Y)){  // moves to next driver
-        printf("pressed y\n");
+      if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_X)){  // moves to next driver
+        printf("pressed x\n");
         cur_driver++;
         cur_driver %= num_of_drivers;
         update_screen();
       }
-      else if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_X)){  // moves to previous driver
-        printf("pressed x\n");
+      else if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_Y)){  // moves to previous driver
+        printf("pressed y\n");
         if (cur_driver == 0)  cur_driver = num_of_drivers - 1;
         else cur_driver--;
         update_screen();
@@ -144,13 +155,13 @@ void Drivebase::update_lookup_table_util(){
 
       if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_UP)){  // increase curvature
         printf("pressed up\n");
-        if (curvatures[cur_screen] < 10.0)  drivers[cur_driver].custom_drives[cur_screen].curvature += 0.1;
+        if (drivers[cur_driver].custom_drives[cur_screen].curvature < 9.9)  drivers[cur_driver].custom_drives[cur_screen].curvature += 0.1;
         WAIT_FOR_SCREEN_REFRESH();
         master.print(2, 0, "Curvature: %lf", drivers[cur_driver].custom_drives[cur_screen].curvature);  // updates curvature
       }
       else if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_DOWN)){  // decrease curvature
         printf("pressed down\n");
-        if (curvatures[cur_screen] > 0.0)  drivers[cur_driver].custom_drives[cur_screen].curvature -= 0.1;
+        if (drivers[cur_driver].custom_drives[cur_screen].curvature > 0.1)  drivers[cur_driver].custom_drives[cur_screen].curvature -= 0.1;
         WAIT_FOR_SCREEN_REFRESH();
         master.print(2, 0, "Curvature: %lf", drivers[cur_driver].custom_drives[cur_screen].curvature);  // updates curvature
       }
@@ -158,6 +169,7 @@ void Drivebase::update_lookup_table_util(){
       delay(10);
     }
     master.clear();
+    screen_timer.reset();
     curve_file = fopen("/usd/curve_file.txt", "w");
 
     for (short driver = 0; driver < num_of_drivers; driver++){  // uploads curve data to curve file
@@ -170,6 +182,7 @@ void Drivebase::update_lookup_table_util(){
     fclose(curve_file);
     WAIT_FOR_SCREEN_REFRESH();
     master.print(0, 0, "Saved.");
+    delay(200);
 }
 
 void Drivebase::handle_input(){
@@ -190,29 +203,43 @@ void Drivebase::driver_practice(){
   master.print(2, 0, "Driver: %s", drivers[cur_driver].name);
   screen_timer.reset();
   while(true){
-    if (master.get_digital(E_CONTROLLER_DIGITAL_UP)){
-      cur_driver++;
-      cur_driver %= num_of_drivers; // rollover
-      WAIT_FOR_SCREEN_REFRESH();
-      master.print(2, 0, "Driver: %s", drivers[cur_driver].name);
+    while(!master.get_digital_new_press(E_CONTROLLER_DIGITAL_B)){
+      if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_UP)){
+        cur_driver++;
+        cur_driver %= num_of_drivers; // rollover
+        WAIT_FOR_SCREEN_REFRESH();
+        // spaces in the controller print are to overwrite names
+        master.print(2, 0, "Driver: %s          ", drivers[cur_driver].name);
+      }
+      else if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_DOWN)){
+        if (cur_driver == 0)  cur_driver = num_of_drivers - 1;
+        else cur_driver--;
+        WAIT_FOR_SCREEN_REFRESH();
+        master.print(2, 0, "Driver: %s          ", drivers[cur_driver].name);
+      }
+      drivebase.handle_input();
+      // prints motor temps
+      if(screen_timer.get_time() > 50){
+        printf("fl%.0f r%.0f bl%.0f r%.0f\n", front_l.get_temperature(), front_r.get_temperature(), back_l.get_temperature(), back_r.get_temperature());
+        master.print(0, 0, "fl%.0f r%.0f bl%.0f r%.0f\n", front_l.get_temperature(), front_r.get_temperature(), back_l.get_temperature(), back_r.get_temperature());
+        screen_timer.reset(false);
+      }
+      delay(10);
     }
-    else if (master.get_digital(E_CONTROLLER_DIGITAL_DOWN)){
-      if (cur_driver == 0)  cur_driver = num_of_drivers - 1;
-      else cur_driver--;
-      WAIT_FOR_SCREEN_REFRESH();
-      master.print(2, 0, "Driver: %s", drivers[cur_driver].name);
-    }
-    drivebase.handle_input();
-    // prints motor temps
-    if(screen_timer.get_time() > 50){
-      printf("fl%.0f r%.0f bl%.0f r%.0f\n", front_l.get_temperature(), front_r.get_temperature(), back_l.get_temperature(), back_r.get_temperature());
-      master.print(0, 0, "fl%.0f r%.0f bl%.0f r%.0f\n", front_l.get_temperature(), front_r.get_temperature(), back_l.get_temperature(), back_r.get_temperature());
-      screen_timer.reset();
-    }
-
-    delay(10);
+    update_lookup_table_util();
+    delay(50);
+    master.clear();
+    delay(50);
+    master.print(2, 0, "Driver: %s", drivers[cur_driver].name);
+    screen_timer.reset(false);
   }
 }
+
+// TEST
+// Nikhil: local x | input: 35 output:
+// Emily: local x | input: 35, output:
+// Sarah: local x | input: 35, output:
+
   // Drive::Drive(driver drivers[3]): drivers{drivers[0], drivers[1], drivers[2]}{}
 
 // curve file template

@@ -80,7 +80,7 @@ void autonomous() {
  */
 void opcontrol() {
 	drivebase.driver_practice();	// this method has self-contained while loop
-
+	// drivebase.update_lookup_table_util();
 	// update_lookup_table_util();
 	/*
 	int power_x, power_y, power_a, power_l;
