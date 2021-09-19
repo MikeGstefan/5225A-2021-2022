@@ -7,33 +7,20 @@
 #include <cmath>
 #include <memory>
 #include <vector>
+#include <array>
 
-// Emily  & Sarah: forward and strafing on left, and right is turning
+using namespace pros;
 
-// #define JOY_FORWARD E_CONTROLLER_ANALOG_LEFT_Y
-// #define JOY_STRAFE E_CONTROLLER_ANALOG_LEFT_X
-// #define JOY_TURN E_CONTROLLER_ANALOG_RIGHT_X
-// #define JOY_LIFT E_CONTROLLER_ANALOG_RIGHT_Y
-// #define JOY_FORWARD E_CONTROLLER_ANALOG_LEFT_Y
-// #define JOY_STRAFE E_CONTROLLER_ANALOG_RIGHT_X
-// #define JOY_TURN E_CONTROLLER_ANALOG_LEFT_X
-// #define JOY_LIFT E_CONTROLLER_ANALOG_RIGHT_Y
-// #define DEADZONE 7
+// aliases to make code more readable, used to encode vales of drive.cur_driver
+// enum class drivers{Nikhil = 0, Emily = 1, Sarah = 2};
 
-struct driver{
-  // controller_digital_e_t  strafe_stick = ;
-  controller_analog_e_t  JOY_STRAFE, JOY_FORWARD, JOY_TURN;
+#define WAIT_FOR_SCREEN_REFRESH() {\
+  delay(screen_timer.get_time() < 50 ? 50 - screen_timer.get_time() : 0);\
+  screen_timer.reset();\
+}
 
-};
-
-
-void drive_input();
-void update_lookup_table_util();
-
-enum class curve_types {polynomial, exponential};
 class custom_drive{
-  curve_types curve_type = curve_types::polynomial; // deafults to polynomial if not specified
-  double curvature;
+  // curve_types curve_type = curve_types::polynomial; // defaults to polynomial if not specified
   int lookup_table[255];
 
   // curve functions
@@ -41,10 +28,42 @@ class custom_drive{
   int exponential(int x);
 
 public:
-  static void custom_curve_init();
-  void update_curve_values(curve_types curve_type, double curvature);
+  double curvature;
+  custom_drive(double curvature); // constructor
   void fill_lookup_table();
   int lookup(int x);
 };
 
-extern custom_drive custom_drives[3];
+struct driver{
+  const char* name;
+  // 0 is strafe, 1 is forward, 2 is turn
+  std::array<controller_analog_e_t, 3> joy_sticks;
+  std::array<custom_drive, 3> custom_drives;
+  driver(const char* name, std::array<controller_analog_e_t, 3> joy_sticks, std::array<custom_drive, 3> custom_drives);
+};
+
+
+// Nikhil is 0, Emily is 1, Sarah is 2
+
+class Drivebase{
+  Timer screen_timer = {"screen_timer"};
+  int cur_screen;
+  int deadzone = 4;
+  const char* screen_text[3] = {"LOCAL_X CURVE:", "LOCAL_Y CURVE:", "LOCAL_A CURVE:"};
+  void update_screen();
+
+public:
+  int cur_driver = 0;  // driver to defaults to Emily
+  int num_of_drivers = 3;
+  FILE* curve_file;
+  std::array<driver, 3> drivers;  // driver profiles
+  Drivebase(std::array<driver, 3> drivers); // constructor
+  void move(double x, double y, double a);
+  void brake();
+  void download_curve_data();
+  void update_lookup_table_util();
+  void handle_input();
+  void driver_practice();
+};
+
+extern Drivebase drivebase;

@@ -17,8 +17,7 @@
  * to keep execution time for this mode under a few seconds.
  */
 void initialize() {
-
-	custom_drive::custom_curve_init();
+	drivebase.download_curve_data();
 
 	delay(150);
 	updateStartTask();
@@ -55,7 +54,7 @@ void competition_initialize() {}
  * from where it left off.
  */
 void autonomous() {
-	update_lookup_table_util();
+	drivebase.update_lookup_table_util();
 /*
 	Timer move_timer{"move_timer"};
 	rush_goal(0.0, -45.0, 0.0);
@@ -80,18 +79,7 @@ void autonomous() {
  * task, not resume it from where it left off.
  */
 void opcontrol() {
-	master.clear();
-	int timer = millis();
-	while(true){
-		drive_input();
-		// if(front_l.get_temperature() > 45)
-		printf("fl%.0f r%.0f bl%.0f r%.0f\n", front_l.get_temperature(),front_r.get_temperature(), back_l.get_temperature(), back_r.get_temperature());
-		if(millis()- timer > 50){
-			master.print(0,0,"fl%.0f r%.0f bl%.0f r%.0f\n", front_l.get_temperature(),front_r.get_temperature(), back_l.get_temperature(), back_r.get_temperature());
-		}
-
-		delay(10);
-	}
+	drivebase.driver_practice();	// this method has self-contained while loop
 
 	// update_lookup_table_util();
 	/*

@@ -290,7 +290,7 @@ void move_to_target(void* params){
 
 
 
-    move(tracking.power_x,tracking.power_y,tracking.power_a);
+    drivebase.move(tracking.power_x,tracking.power_y,tracking.power_a);
 
     if(millis() - last_time > 50 && debug){
       printf("%f, %f\n", tracking.y_coord,tracking.power_y);
@@ -304,7 +304,7 @@ void move_to_target(void* params){
     }
 
     if(fabs(error_x) < end_error && fabs(error_y) < end_error && fabs(rad_to_deg(error_a)) < end_error_a){
-      brake();
+      drivebase.brake();
       tracking.move_complete = true;
       printf("Ending move to target X: %f Y: %f A: %f at X: %f Y: %f A: %f \n", target_x, target_y, target_a, tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle));
       //log_time("ending starting time: %d, delta time: %d X: %f Y: %f A: %f from X: %f Y: %f A: %f \n", millis(),millis() -starttime, target_x, target_y, target_a, tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle));
@@ -352,7 +352,7 @@ void rush_goal(double target_x, double target_y, double target_a){
         // exit condition
         if ((error_d < end_error && fabs(local_error_y) < end_error && fabs(error_a) < deg_to_rad(end_error_a)) || sgn(target_y - tracking.y_coord) != orig_y_sgn){
             // got_goal = goal_lim_switch_state;
-            move(0, -10 * sgn(orig_y_sgn), 0);
+            drivebase.move(0, -10 * sgn(orig_y_sgn), 0);
             printf("x: %lf, y: %lf, a: %lf\n", tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle));
             printf("GOT TO GOAL: %d\n", millis());
             return;
@@ -364,7 +364,7 @@ void rush_goal(double target_x, double target_y, double target_a){
         // }
 
 
-        move(tracking.power_x, tracking.power_y, tracking.power_a);
+        drivebase.move(tracking.power_x, tracking.power_y, tracking.power_a);
         delay(10);
     }
 
@@ -401,7 +401,7 @@ void rush_goal2(double target_x, double target_y, double target_a){
             // got_goal = goal_lim_switch_state;
             claw_out.set_value(1);
           	claw_in.set_value(0);
-            brake();
+            drivebase.brake();
             printf("x: %lf, y: %lf, a: %lf\n", tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle));
             printf("GOT TO GOAL: %d\n", millis());
             return;
@@ -413,7 +413,7 @@ void rush_goal2(double target_x, double target_y, double target_a){
         // }
 
 
-        move(tracking.power_x, tracking.power_y, tracking.power_a);
+        drivebase.move(tracking.power_x, tracking.power_y, tracking.power_a);
         delay(10);
     }
 
