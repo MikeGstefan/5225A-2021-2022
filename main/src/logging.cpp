@@ -10,18 +10,20 @@ ofstream file;
 uintptr_t queue_start = reinterpret_cast<uintptr_t>(&queue);
 vector<Data*> Data::obj_list;
 
-Data::Data(const char* obj_name, const char* id_code){
+Data::Data(const char* obj_name, const char* id_code, log_types log_type_param, log_locations log_location_param){
   this->id = id_code;
   this->name = obj_name;
+  this->log_type = log_type_param;
+  this->log_location = log_location_param;
   obj_list.push_back(this);
 }
 
 
 
+Data test_log("tracking.txt","$01", error, log_locations::both);
+Data test_log2("pos.txt","$02", warning, log_locations::both);
+Data test_log3("tracking.txt","$03", warning, log_locations::both);
 
-Data test_log("track","$01");
-Data test2_log("pp","$02");
-Data test3_log("data","$01");
 
 vector<Data*> Data::get_objs(){
   return obj_list;
@@ -40,12 +42,21 @@ void logging_task_stop(){
 
 void Data::log_init(){
   file.open(file_meta,ofstream::trunc | ofstream::out);
+  if(!file.is_open()){
+    printf("Log File not found\n");
+    for(int i = 0; i< Data::obj_list.size(); i++){
+      if(Data::obj_list[i]->log_location == log_locations::sd && int(Data::obj_list[i]->log_type))Data::obj_list[i]->log_location = log_locations::t;
+    }
+    return;
+  }
   char meta_data[256];
   for(int i = 0; i< Data::obj_list.size(); i++){
-    strcat(meta_data,Data::obj_list[i]->name);
-    strcat(meta_data,",");
-    strcat(meta_data,Data::obj_list[i]->id);
-    strcat(meta_data,",");
+    if((Data::obj_list[i]->log_location == log_locations::sd || Data::obj_list[i]->log_location == log_locations::both) && int(Data::obj_list[i]->log_type)){
+      strcat(meta_data,Data::obj_list[i]->name);
+      strcat(meta_data,",");
+      strcat(meta_data,Data::obj_list[i]->id);
+      strcat(meta_data,",");
+    }
   }
   file.write(meta_data,strlen(meta_data));
   file.close();
@@ -54,16 +65,35 @@ void Data::log_init(){
   logging_task_start();
 }
 
-void Data::log_print(const char* format,...){
+
+void Data::print(const char* format,...){
   char buffer[256];
-  std::va_list args, args_2;
+  std::va_list args;
   va_start(args, format);
-  va_copy(args_2,args);
-  vprintf(format, args_2);
   int buffer_len = vsnprintf(buffer,256,format,args) + 3;
-  printf("\n%d, %s, %s\n", buffer_len, buffer, this->id);
+  va_end(args);
+  // printf("%s, %d\n",this->name,this->log_type);
+  if(int(this->log_type)){
+    switch(log_location){
+      case log_locations::t:
+        printf("%s",buffer);
+      break;
+      case log_locations::sd:
+        this->log_print(buffer, buffer_len);
+      break;
+      case log_locations::none:
+      break;
+      case log_locations::both:
+        printf("%s",buffer);
+        this->log_print(buffer, buffer_len);
+      break;
+    }
+  }
+
+}
+
+void Data::log_print(char* buffer, int buffer_len){
   memcpy(buffer+buffer_len -3, this->id,3);
-  printf("%d\n",buffer_len);
   //copying the string uses memcpy instead of strcpy or strncpy to avoid copying the terminating character
 
   //if the end of the buffer would be past the max of the queue array
@@ -82,7 +112,6 @@ void Data::log_print(const char* format,...){
     memcpy(back,buffer,buffer_len);
     back +=buffer_len;
   }
-  va_end(args);
 
 }
 

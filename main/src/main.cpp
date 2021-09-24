@@ -65,9 +65,17 @@ void autonomous() {}
  */
 void opcontrol() {
 	uint64_t timer, total_time = 0;
-	for(int x = 0; x<100;x++){
+	Task([&](){
+		for(int x = 0; x<100000;x++){
+			timer = micros();
+			test_log2.print("t:%d \n",x);
+			total_time += micros() - timer;
+			delay(10);
+		}
+	});
+	for(int x = 0; x<100000;x++){
 		timer = micros();
-		test_log.log_print("t:%d ",x);
+		test_log.print("t:%d \n",x);
 		total_time += micros() - timer;
 		delay(10);
 	}
