@@ -71,6 +71,12 @@ void opcontrol() {
 		total_time += micros() - timer;
 		delay(10);
 	}
+	// for(int x = 0; x<100;x++){
+	// 	timer = micros();
+	// 	test_log.log_print("t:%d ",x);
+	// 	total_time += micros() - timer;
+	// 	delay(10);
+	// }
 	printf("%llu\n",total_time);
   // queue_handle();
   // print("helk");

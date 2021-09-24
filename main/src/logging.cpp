@@ -5,7 +5,7 @@ const char* file_meta= "/usd/meta_data.txt";
 char queue[queue_size];
 char* front = queue;
 char* back = queue;
-char buffer[256];
+// char buffer[256];
 ofstream file;
 uintptr_t queue_start = reinterpret_cast<uintptr_t>(&queue);
 vector<Data*> Data::obj_list;
@@ -55,29 +55,35 @@ void Data::log_init(){
 }
 
 void Data::log_print(const char* format,...){
-  std::va_list args;
+  char buffer[256];
+  std::va_list args, args_2;
   va_start(args, format);
-  vsprintf(buffer,format,args);
-  memcpy(buffer+strlen(buffer), this->id,3);
+  va_copy(args_2,args);
+  vprintf(format, args_2);
+  int buffer_len = vsnprintf(buffer,256,format,args) + 3;
+  printf("\n%d, %s, %s\n", buffer_len, buffer, this->id);
+  memcpy(buffer+buffer_len -3, this->id,3);
+  printf("%d\n",buffer_len);
   //copying the string uses memcpy instead of strcpy or strncpy to avoid copying the terminating character
 
   //if the end of the buffer would be past the max of the queue array
-  if(reinterpret_cast<uintptr_t>(back)+strlen(buffer) > queue_start+queue_size-1){
+  if(reinterpret_cast<uintptr_t>(back)+buffer_len > queue_start+queue_size-1){
     //copy the data that fills the queue
     memcpy(back, buffer, queue_size-1 - (reinterpret_cast<uintptr_t>(back) - queue_start));
     //creates a ptr to the last character used to fill the back of the queue
     char* overflow_ptr = buffer+(queue_size-1 - (reinterpret_cast<uintptr_t>(back) - queue_start));
     //fills the front of the queue with the remaining data from the buffer, marked by the overflow_ptr
-    memcpy(queue,overflow_ptr,strlen(buffer)- (queue_size-1 - (reinterpret_cast<uintptr_t>(back) - queue_start)));
+    memcpy(queue,overflow_ptr,buffer_len- (queue_size-1 - (reinterpret_cast<uintptr_t>(back) - queue_start)));
     //moves back to the back of the data
-    back =  strlen(buffer)-queue_size+1 + back;
+    back =  buffer_len-queue_size+1 + back;
   }
   else{
     //copies data to the queue and moves the pointer down
-    memcpy(back,buffer,strlen(buffer));
-    back +=strlen(buffer);
+    memcpy(back,buffer,buffer_len);
+    back +=buffer_len;
   }
   va_end(args);
+
 }
 
 void queue_handle(void* params){
