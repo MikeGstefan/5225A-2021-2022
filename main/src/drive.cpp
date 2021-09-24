@@ -1,40 +1,23 @@
 #include "drive.hpp"
 // custom drive class methods
 
-// singleton dribase instance
+// singleton drivebase instance
 Drivebase drivebase = {{
   driver("Nikhil", {E_CONTROLLER_ANALOG_LEFT_X, E_CONTROLLER_ANALOG_RIGHT_Y, E_CONTROLLER_ANALOG_RIGHT_X}, {5.315, 1.0, 4.0}),
-  {"Emily", {E_CONTROLLER_ANALOG_LEFT_X, E_CONTROLLER_ANALOG_LEFT_Y, E_CONTROLLER_ANALOG_LEFT_X}, {0.5, 1.42, 4.0}},
-  {"Sarah", {E_CONTROLLER_ANALOG_LEFT_X, E_CONTROLLER_ANALOG_LEFT_Y, E_CONTROLLER_ANALOG_LEFT_X}, {0.5, 1.0, 2.2}},
+  driver("Emily", {E_CONTROLLER_ANALOG_LEFT_X, E_CONTROLLER_ANALOG_RIGHT_Y, E_CONTROLLER_ANALOG_RIGHT_X}, {0.5, 1.42, 4.0}),
+  driver("Sarah", {E_CONTROLLER_ANALOG_LEFT_X, E_CONTROLLER_ANALOG_RIGHT_Y, E_CONTROLLER_ANALOG_RIGHT_X}, {0.5, 1.0, 2.2}),
 }};
-// test values
-// curvature:0.21
-// curvature:1.42234
-// curvature:4.794
-// curvature:0.534
-// curvature:1.9824
-// curvature:4.76
-// curvature:7.42
-// curvature:6.32
-// curvature:2.03
 
-
-// Emily  & Sarah: forward and strafing on left, and right is turning
-
-// #define JOY_FORWARD E_CONTROLLER_ANALOG_LEFT_Y
-// #define JOY_STRAFE E_CONTROLLER_ANALOG_LEFT_X
-// #define JOY_TURN E_CONTROLLER_ANALOG_RIGHT_X
-// #define JOY_LIFT E_CONTROLLER_ANALOG_RIGHT_Y
-
-//Nikhil's controls
-
-// #define JOY_FORWARD E_CONTROLLER_ANALOG_RIGHT_Y
-// #define JOY_STRAFE E_CONTROLLER_ANALOG_LEFT_X
-// #define JOY_TURN E_CONTROLLER_ANALOG_RIGHT_X
-// #define JOY_LIFT E_CONTROLLER_ANALOG_LEFT_Y
-// #define DEADZONE 4
-
-// Nikhil is 0, Emily is 1, Sarah is 2
+// curve file_template
+// curvature:0.5
+// curvature:1.5
+// curvature:3.0
+// curvature:0.5
+// curvature:1.5
+// curvature:3.0
+// curvature:0.5
+// curvature:1.5
+// curvature:3.0
 
 // custom drive methods
 

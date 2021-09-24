@@ -333,7 +333,7 @@ void rush_goal(double target_x, double target_y, double target_a){
         error_d = sqrt(pow(target_x - tracking.x_coord, 2) + pow(target_y - tracking.y_coord, 2));
         difference_a = atan2(target_y - tracking.y_coord, target_x - tracking.x_coord) + tracking.global_angle;
         local_error_x = error_d * cos(difference_a);
-        // local_error_y = error_d * sin(local_a);
+        local_error_y = error_d * sin(difference_a);
         error_a = target_a - tracking.global_angle;
 
         tracking.power_x = local_error_x * kp_x;
@@ -347,8 +347,9 @@ void rush_goal(double target_x, double target_y, double target_a){
             printf("WARNING: A ROBOT IS PUSHING US OR SOMETHING ELSE IS VERY WRONG.\n");
         }
         else  tracking.power_y = sgn(local_error_y) * (max_power - fabs(tracking.power_x) - fabs(tracking.power_a));
-
-        printf("cur_y_sgn: %lf, cur_y: %lf\n", target_y - tracking.y_coord, tracking.y_coord);
+        // printf("")
+        printf("powers: %lf, %lf, %lf\n", tracking.power_x, tracking.power_y, tracking.power_a);
+        // printf("cur_y_sgn: %lf, cur_y: %lf\n", target_y - tracking.y_coord, tracking.y_coord);
         // exit condition
         if ((error_d < end_error && fabs(local_error_y) < end_error && fabs(error_a) < deg_to_rad(end_error_a)) || sgn(target_y - tracking.y_coord) != orig_y_sgn){
             // got_goal = goal_lim_switch_state;
@@ -397,14 +398,21 @@ void rush_goal2(double target_x, double target_y, double target_a){
         printf("pow_x %f, pow_y: %f, power_a: %f",tracking.power_x, tracking.power_y, tracking.power_a);
         printf("cur_y_sgn: %lf, cur_y: %lf\n", target_y - tracking.y_coord, tracking.y_coord);
         // exit condition
-        if (claw_touch.get_value()){
-            // got_goal = goal_lim_switch_state;
-            claw_out.set_value(1);
-          	claw_in.set_value(0);
-            drivebase.brake();
-            printf("x: %lf, y: %lf, a: %lf\n", tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle));
-            printf("GOT TO GOAL: %d\n", millis());
-            return;
+        // if (claw_touch.get_value()){
+        //   // got_goal = goal_lim_switch_state;
+        //   claw_out.set_value(1);
+        // 	claw_in.set_value(0);
+        //   drivebase.brake();
+        //   printf("x: %lf, y: %lf, a: %lf\n", tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle));
+        //   printf("GOT TO GOAL: %d\n", millis());
+        //   return;
+        // }
+        if (fabs(tracking.y_coord) > fabs(target_y) + 10.0){
+          printf("target_y: %lf\n", target_y);
+          printf("x: %lf, y: %lf, a: %lf\n", tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle));
+          printf("FAILED GETTING TO GOAL: %d\n", millis());
+          drivebase.brake();
+          return;
         }
         // if(millis() - last_time > 50){
           // printf("powers| x: %lf, y: %lf, a: %lf\n", tracking.power_x, tracking.power_y, tracking.power_a);

@@ -20,7 +20,9 @@ void initialize() {
 	drivebase.download_curve_data();
 
 	delay(150);
+	tracking.x_coord = 0.0, tracking.y_coord = 0.0, tracking.global_angle = 0.0;
 	updateStartTask();
+
 	pros::lcd::initialize();
 }
 
@@ -54,10 +56,14 @@ void competition_initialize() {}
  * from where it left off.
  */
 void autonomous() {
-	drivebase.update_lookup_table_util();
+	// drivebase.update_lookup_table_util();
+	// printf("here\n");
+	rush_goal2(0.0, -45.0, 0.0);
+	// drivebase.move(0,-127, 0);
+	// while(!claw_touch.get_value()) delay(10);
+	// master.print(0, 0, "inches: %lf", tracking.y_coord);
 /*
 	Timer move_timer{"move_timer"};
-	rush_goal(0.0, -45.0, 0.0);
 	// move_to_target_async(0.0, -45.0, 0.0);	// got to goal
 	// while(tracking.y_coord > -45.0)	delay(10);
 	master.print(0, 0, "time: %d", move_timer.get_time());
@@ -79,7 +85,23 @@ void autonomous() {
  * task, not resume it from where it left off.
  */
 void opcontrol() {
-	drivebase.driver_practice();	// this method has self-contained while loop
+	Timer op_control_timer{"op_control_timer", false, timing_units::millis};
+	while(true){
+		if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_A)){
+			op_control_timer.play();
+		}
+		if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_B)){
+			op_control_timer.pause();
+		}
+		if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_UP)){
+			// master.print(0,0, "time: %lld", op_control_timer.get_time());
+			op_control_timer.reset(false);
+		}
+		// printf("op_control_timer: %lld\n", op_control_timer.get_time());
+		op_control_timer.print("Mike is so so cool");
+		delay(10);
+	}
+	// drivebase.driver_practice();	// this method has self-contained while loop
 	// drivebase.update_lookup_table_util();
 	// update_lookup_table_util();
 	/*

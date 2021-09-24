@@ -32,18 +32,42 @@ double rad_to_deg(double rad);
 double deg_to_rad(double deg);
 
 // timing class allows us to automate the creation of timers and have commonly used utlities
-class Timer{
+// class Timer{
+//
+//     uint32_t last_reset_time, time;
+//     const char* name;   // what to call the timer
+//
+// public:
+//
+//     Timer(const char* name);    // constructor takes in time
+//     uint32_t get_last_reset_time(); // get time of last reset
+//     void reset(bool print_time = true);   // resets the timer time
+//     uint32_t get_time();    // gets the time since last reset of timer
+//     void print();   // prints the current time of the timer
+// };
+//
+enum class timing_units{
+    millis,
+    micros
+};
 
-    uint32_t last_reset_time, time;
-    const char* name;   // what to call the timer
+class Timer{
+    // 'time' is the time counted by the timer until the last call of pause()
+    uint64_t last_reset_time, time, last_play_time;
+    const char* name;
+    bool paused;    // state of timer
+    timing_units timing_unit;
+    uint64_t get_time_in_timing_unit(); // returns time in either millis micros
 
 public:
 
-    Timer(const char* name);    // constructor takes in time
-    uint32_t get_last_reset_time(); // get time of last reset
-    void reset(bool print_time = true);   // resets the timer time
-    uint32_t get_time();    // gets the time since last reset of timer
-    void print();   // prints the current time of the timer
+    Timer(const char* name, const bool& play = true, timing_units timing_unit = timing_units::millis);
+    uint64_t get_last_reset_time();
+    void reset(const bool& play = true);
+    uint64_t get_time();
+    void play();
+    void pause();
+    void print(const char* str = "");
 };
 
 struct Coord{   // stores members variables for a coordinate: x, y and angle    MUST BE DEINFED HERE, OTHERWISE CIRCULAR HEADER FILE DEPENDENCY OCCURS

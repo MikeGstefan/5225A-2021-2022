@@ -48,7 +48,7 @@ struct driver{
 class Drivebase{
   Timer screen_timer = {"screen_timer"};
   int cur_screen;
-  int deadzone = 4;
+  int deadzone = 5;
   const char* screen_text[3] = {"LOCAL_X CURVE:", "LOCAL_Y CURVE:", "LOCAL_A CURVE:"};
   void update_screen();
 
