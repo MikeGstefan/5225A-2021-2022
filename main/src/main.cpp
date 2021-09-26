@@ -17,7 +17,7 @@
  * to keep execution time for this mode under a few seconds.
  */
 void initialize() {
-	drivebase.download_curve_data();
+	// drivebase.download_curve_data();
 
 	delay(150);
 	tracking.x_coord = 0.0, tracking.y_coord = 0.0, tracking.global_angle = 0.0;
@@ -56,9 +56,11 @@ void competition_initialize() {}
  * from where it left off.
  */
 void autonomous() {
+	f_bar.move(50);
+	c_bar.move(60);
 	// drivebase.update_lookup_table_util();
 	// printf("here\n");
-	rush_goal2(0.0, -45.0, 0.0);
+	// rush_goal2(0.0, -45.0, 0.0);
 	// drivebase.move(0,-127, 0);
 	// while(!claw_touch.get_value()) delay(10);
 	// master.print(0, 0, "inches: %lf", tracking.y_coord);
@@ -85,6 +87,23 @@ void autonomous() {
  * task, not resume it from where it left off.
  */
 void opcontrol() {
+
+	c_bar_cal();
+	f_bar_cal();
+	// f_bar.move_absolute(54 * 7.0, 100);
+	// waitUntil(f_bar.get_position() / 7 > 50);
+	// while(f_bar.get_position() / 7 < 54) delay(10);
+	// printf("DONE %lf\n", f_bar.get_position() / 7);
+	// c_bar.move_absolute(54 * 5.0 / 3.0, 100);
+	find_arm_angles(Vector2D(4.0, 24 + 18.0));
+
+	while(true){
+		// f_bar.move_absolute(45 *7.0, 50);
+		// c_bar.move_absolute(45 * 5.0 / 3.0, 50)
+		printf("c_bar: %lf | f_bar: %lf\n", c_bar.get_position() * 3.0 / 5.0, f_bar.get_position() / 7.0);
+		delay(10);
+	}
+
 
 	// drivebase.driver_practice();	// this method has self-contained while loop
 	// drivebase.update_lookup_table_util();
