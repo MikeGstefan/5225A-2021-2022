@@ -13,7 +13,7 @@ Lift::Lift(pros::Motor& lift_motor, double mecanum_wheel_radius, double parallel
 
 void Lift::cal(void * params){
   lift.move(-60);
-  Timer vel_rise_timeout {"lift_vel_rise"};
+  Timer vel_rise_timeout("lift_vel_rise");
   // waits for lift velocity to rise or timeout to trigger
   while(fabs(lift.get_actual_velocity()) < 45.0){
     printf("vel (rising loop): %lf\n", lift.get_actual_velocity());
@@ -45,7 +45,7 @@ void Lift::lift_height_util(){
 	double target_height = 5.0; // default target height is 5 inches (bottom height)
   master.clear();
   delay(150);
-  Timer text_set_timer{"text_set"};
+  Timer text_set_timer("text_set");
   int text_set_line = 0;  // which line is next to be set
 	while (true){
 		printf("pos:%lf, height:%lf, target_height: %lf\n", lift.get_position(), lift.pos_to_height(lift.get_position()), target_height);
