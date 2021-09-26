@@ -3,6 +3,7 @@
 #include "config.hpp"
 #include "util.hpp"
 #include "tracking.hpp"
+#include "gui.hpp"
 // using namespace std;
 // using namespace pros;
 
@@ -64,16 +65,30 @@ void autonomous() {}
  * task, not resume it from where it left off.
  */
 void opcontrol() {
-	int power_x, power_y, power_a;
-	while(true){
-		power_x = master.get_analog(E_CONTROLLER_ANALOG_RIGHT_X);
-		power_y = master.get_analog(E_CONTROLLER_ANALOG_LEFT_Y);
-		power_a = master.get_analog(E_CONTROLLER_ANALOG_LEFT_X);
-		if(fabs(power_x) < 15)power_x = 0;
-		if(fabs(power_y) < 15)power_y = 0;
-		if(fabs(power_a) < 15)power_a = 0;
-		move(power_x, power_y, power_a);
-		delay(10);
+	screen::set_eraser(COLOR_RED);
+	screen::erase();
+
+	Button Button1 (25, 25, 170, 75, Button::CORNER, "BUTTON1");
+	Button Button2 (150, 50, 250, 150, Button::CORNER, "BUTTON2", COLOR_YELLOW);
+
+	while(1){
+		Button::update_press_status();
+		(*Button::get_press()).del();
 	}
+
+// 	screen_touch_status_s_t status;
+//
+// 	while(1){
+// 	 status = c::screen_touch_status();
+//
+// 	 // Will print various information about the last touch
+// 	 screen::print(TEXT_MEDIUM, 1, "Touch Status (Type): %d", status.touch_status);
+// 	 screen::print(TEXT_MEDIUM, 2, "Last X: %d", status.x);
+// 	 screen::print(TEXT_MEDIUM, 3, "Last Y: %d", status.y);
+// 	 screen::print(TEXT_MEDIUM, 4, "Press Count: %d", status.press_count);
+// 	 screen::print(TEXT_MEDIUM, 5, "Release Count: %d", status.release_count);
+// 	 printf("%d %d\n", status.x, status.y);
+// 	 delay(20);
+// }
 
 }
