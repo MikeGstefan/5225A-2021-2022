@@ -64,31 +64,33 @@ void autonomous() {}
  * operator control task will be stopped. Re-enabling the robot will restart the
  * task, not resume it from where it left off.
  */
-void opcontrol() {
-	screen::set_eraser(COLOR_RED);
-	screen::erase();
 
-	Button Button1 (25, 25, 170, 75, Button::CORNER, "BUTTON1");
-	Button Button2 (150, 50, 250, 150, Button::CORNER, "BUTTON2", COLOR_YELLOW);
+void hello(){
+	 printf("HELLO");
+ }
+
+void opcontrol() {
+	//Constructing a page does not go to it
+	//Constructing a button will draw it if it is on the right page
+
+	Page page1 (1, COLOR_RED);
+	Page tester (2);
+
+	Page::goTo(&page1);
+
+	Button button1 (25, 25, 170, 75, Button::CORNER, &page1, "BUTTON1");
+	Button button2 (150, 50, 250, 150, Button::CORNER, &page1, "BUTTON2", COLOR_YELLOW);
+	Button test1 (175, 50, 300, 150, Button::CORNER, &tester, "BUTTON1", COLOR_GREEN);
+	Button test2 (100, 25, 300, 80, Button::CORNER, &tester, "TEST", COLOR_PINK, COLOR_BLUE);
+
+	button1.setTask(&hello);
 
 	while(1){
+		//These should probably be called in the background
 		Button::update_press_status();
-		(*Button::get_press()).del();
+		printf("%x", Button::get_press());
 	}
 
-// 	screen_touch_status_s_t status;
-//
-// 	while(1){
-// 	 status = c::screen_touch_status();
-//
-// 	 // Will print various information about the last touch
-// 	 screen::print(TEXT_MEDIUM, 1, "Touch Status (Type): %d", status.touch_status);
-// 	 screen::print(TEXT_MEDIUM, 2, "Last X: %d", status.x);
-// 	 screen::print(TEXT_MEDIUM, 3, "Last Y: %d", status.y);
-// 	 screen::print(TEXT_MEDIUM, 4, "Press Count: %d", status.press_count);
-// 	 screen::print(TEXT_MEDIUM, 5, "Release Count: %d", status.release_count);
-// 	 printf("%d %d\n", status.x, status.y);
-// 	 delay(20);
-// }
+	// screen::fill_rect(100, 25, 300, 80); //for presses
 
 }
