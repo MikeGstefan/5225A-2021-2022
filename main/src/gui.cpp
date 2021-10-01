@@ -1,6 +1,6 @@
 #include "gui.hpp"
 
-//Static Declarations
+//Static Variable Declarations
 Page* Page::currentPage = 0;
 last_touch_e_t Button::touch_status = E_TOUCH_RELEASED;
 int16_t Button::x = 0, Button::y = 0;

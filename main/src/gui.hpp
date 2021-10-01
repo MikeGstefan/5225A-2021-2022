@@ -1,21 +1,10 @@
 #pragma once
-#include <iostream>
 #include <vector>
 #include <string>
-#include <cstdarg>
-#include <array>
-#include <fstream>
-#include <cmath>
-#include <memory>
-#include <vector>
-#include <map>
 #include "main.h"
-#include "config.hpp"
-#include "util.hpp"
-#include "logging.hpp"
-#include "config.hpp"
+using namespace pros;
 
-class Page;
+class Page; //So they can access each other
 class Button;
 
 class Page{
@@ -25,7 +14,7 @@ class Page{
     std::uint32_t page_bcolor;
 
   public:
-    enum disp{
+    enum disp{ //Display Constants
       left = 0,
       up = 0,
       right = 479,
