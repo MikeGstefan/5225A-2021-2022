@@ -17,7 +17,6 @@
  * to keep execution time for this mode under a few seconds.
  */
 void initialize() {
-<<<<<<< Updated upstream
 	drivebase.download_curve_data();
 
 	delay(150);
@@ -25,13 +24,11 @@ void initialize() {
 	updateStartTask();
 
 	pros::lcd::initialize();
-=======
 	// drivebase.download_curve_data();
 	//
 	// delay(150);
-	updateStartTask();
+	// updateStartTask();
 	//pros::lcd::initialize();
->>>>>>> Stashed changes
 }
 
 /**
@@ -64,16 +61,12 @@ void competition_initialize() {}
  * from where it left off.
  */
 void autonomous() {
-<<<<<<< Updated upstream
 	// drivebase.update_lookup_table_util();
 	// printf("here\n");
 	rush_goal2(0.0, -45.0, 0.0);
 	// drivebase.move(0,-127, 0);
 	// while(!claw_touch.get_value()) delay(10);
 	// master.print(0, 0, "inches: %lf", tracking.y_coord);
-=======
-	//drivebase.update_lookup_table_util();
->>>>>>> Stashed changes
 /*
 	Timer move_timer{"move_timer"};
 	// move_to_target_async(0.0, -45.0, 0.0);	// got to goal
@@ -97,14 +90,16 @@ void autonomous() {
  * task, not resume it from where it left off.
  */
 void opcontrol() {
-<<<<<<< Updated upstream
+	// while(true){
+	// 	delay(10);
+	// }
 
-	// drivebase.driver_practice();	// this method has self-contained while loop
-	// drivebase.update_lookup_table_util();
-=======
-	//drivebase.driver_practice();	// this method has self-contained while loop
-	rush_goal(0,25, 0);
->>>>>>> Stashed changes
+
+	int start_time = millis();
+  rush_goal2(0.0, -51.0, 0.0);
+	printf("Grab time %d \n", millis() - start_time);
+	// drivebase.brake();
+	move_to_target_sync(0,-20,0);
 	// update_lookup_table_util();
 	/*
 	int power_x, power_y, power_a, power_l;

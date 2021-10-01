@@ -105,9 +105,9 @@ void update(void* params){
   tracking.y_coord += Yy + Xy;
   tracking.global_angle += Theta;
 
-  total_x += fabs(Xx+Yx);
-  total_y += fabs(Yy + Xy);
-  total_a += fabs(Theta);
+  // total_x += fabs(Xx+Yx);
+  // total_y += fabs(Yy + Xy);
+  // total_a += fabs(Theta);
   //printf("time: %d, TRACKING: %f, %f, %f \n", millis(), tracking.x_coord, tracking.y_coord, tracking.global_angle/M_PI *180);
   //printf("ENCODER L: %d, R: %d, B:%d \n", LeftEncoder.get_value(), RightEncoder.get_value(), BackEncoder.get_value());
 
@@ -118,10 +118,11 @@ void update(void* params){
       // printf("%f,%f\n", tracking.x_coord, tracking.y_coord);
 
     printf("time: %d, TRACKING: %f %f, %f \n", millis(), tracking.x_coord, tracking.y_coord, fmod(rad_to_deg(tracking.global_angle), 360));
-    // printf("time: %d, TOTAL: %f, %f, %f \n", millis(), total_x, total_y, rad_to_deg(total_a));
-     printf("%d pow_a: %.1f, pow_x: %.1f, pow_y: %.1f, total_pow: %.1f\n",millis(),  tracking.power_a, tracking.power_x, tracking.power_y, fabs(tracking.power_a) + fabs(tracking.power_x) + fabs(tracking.power_y));
-
+    // // printf("time: %d, TOTAL: %f, %f, %f \n", millis(), total_x, total_y, rad_to_deg(total_a));
+    //  printf("%d pow_a: %.1f, pow_x: %.1f, pow_y: %.1f, total_pow: %.1f\n",millis(),  tracking.power_a, tracking.power_x, tracking.power_y, fabs(tracking.power_a) + fabs(tracking.power_x) + fabs(tracking.power_y));
+    //
     printf("ENCODER L: %d, R: %d, B:%d \n", LeftEncoder.get_value(), RightEncoder.get_value(), BackEncoder.get_value());
+    printf("ENCODER L: %f, R: %f, B:%f \n", LeftEncoder.get_value()/360.0 *(2.75*M_PI), RightEncoder.get_value()/360.0 *(2.75*M_PI), BackEncoder.get_value()/360.0 *(2.75*M_PI));
     // printf("%d VELOCIT L: %f, R: %f\n", millis(), tracking.l_velo, tracking.r_velo);
 
     // printf("GLOBAL VELOCITY| x: %.2f, y: %.2f a: %.2f\n", tracking.g_velocity.x, tracking.g_velocity.y, rad_to_deg(tracking.g_velocity.angle));
@@ -407,7 +408,7 @@ void rush_goal2(double target_x, double target_y, double target_a){
         //   printf("GOT TO GOAL: %d\n", millis());
         //   return;
         // }
-        if (fabs(tracking.y_coord) > fabs(target_y) + 10.0){
+        if (fabs(tracking.y_coord) > fabs(target_y)){
           printf("target_y: %lf\n", target_y);
           printf("x: %lf, y: %lf, a: %lf\n", tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle));
           printf("FAILED GETTING TO GOAL: %d\n", millis());

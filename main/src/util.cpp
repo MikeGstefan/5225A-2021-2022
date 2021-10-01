@@ -21,8 +21,6 @@ int sgn(int n){
   if (n > 0)return 1;
   else if(n < 0) return -1;
   else return 0;
-<<<<<<< Updated upstream
-=======
 }
 int sgn(double n){
   if (n > 0)return 1;
@@ -47,31 +45,30 @@ double rad_to_deg(double rad){
 
 // timing class functions
 
-Timer::Timer(const char* name): name(name){ // constructor
-    printf("%s's initialize time is: %d\n", name, pros::millis());
-    reset();
->>>>>>> Stashed changes
-}
-int sgn(double n){
-  if (n > 0)return 1;
-  else if(n < 0) return -1;
-  else return 0;
-}
-
-double operator "" _deg(long double degree){
-  return degree/180 *M_PI;
-}
-double operator "" _rad(long double radians){
-  return radians/M_PI *180;
-}
-
-double deg_to_rad(double deg){
-  return deg / 180 * M_PI;
-}
-
-double rad_to_deg(double rad){
-  return rad / M_PI * 180;
-}
+// Timer::Timer(const char* name): name(name){ // constructor
+//     printf("%s's initialize time is: %d\n", name, pros::millis());
+//     reset();
+// }
+// int sgn(double n){
+//   if (n > 0)return 1;
+//   else if(n < 0) return -1;
+//   else return 0;
+// }
+//
+// double operator "" _deg(long double degree){
+//   return degree/180 *M_PI;
+// }
+// double operator "" _rad(long double radians){
+//   return radians/M_PI *180;
+// }
+//
+// double deg_to_rad(double deg){
+//   return deg / 180 * M_PI;
+// }
+//
+// double rad_to_deg(double rad){
+//   return rad / M_PI * 180;
+// }
 
 // Coord constructor definition
 Coord::Coord(double x, double y, double angle): x(x), y(y), angle(angle){}
