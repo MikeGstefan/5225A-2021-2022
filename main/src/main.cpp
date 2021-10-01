@@ -17,13 +17,14 @@
  * to keep execution time for this mode under a few seconds.
  */
 void initialize() {
-	drivebase.download_curve_data();
+	// drivebase.download_curve_data();
+	//
+		printf("start");
 
-	delay(150);
-	tracking.x_coord = 0.0, tracking.y_coord = 0.0, tracking.global_angle = 0.0;
-	updateStartTask();
-
-	pros::lcd::initialize();
+	// tracking.x_coord = 0.0, tracking.y_coord = 0.0, tracking.global_angle = 0.0;
+	// updateStartTask();
+	//
+	// pros::lcd::initialize();
 	// drivebase.download_curve_data();
 	//
 	// delay(150);
@@ -62,8 +63,8 @@ void competition_initialize() {}
  */
 void autonomous() {
 	// drivebase.update_lookup_table_util();
-	// printf("here\n");
-	rush_goal2(0.0, -45.0, 0.0);
+	printf("here\n");
+	//rush_goal2(0.0, -45.0, 0.0);
 	// drivebase.move(0,-127, 0);
 	// while(!claw_touch.get_value()) delay(10);
 	// master.print(0, 0, "inches: %lf", tracking.y_coord);
@@ -90,16 +91,25 @@ void autonomous() {
  * task, not resume it from where it left off.
  */
 void opcontrol() {
-	// while(true){
-	// 	delay(10);
-	// }
 
+	printf("running\n");
+	bool toggle = 0;
+	while(true){
 
-	int start_time = millis();
-  rush_goal2(0.0, -51.0, 0.0);
-	printf("Grab time %d \n", millis() - start_time);
-	// drivebase.brake();
-	move_to_target_sync(0,-20,0);
+		// master.print(E_CONTROLLER_MASTER, 0, 0, "Running	");
+		if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_A)){
+			if(!toggle){
+				printf("On");
+				intake.move(127);
+				toggle = 1;
+			}else{
+				printf("Off");
+				intake.move(0);
+				toggle = 0;
+			}
+		}
+		delay(10);
+	}
 	// update_lookup_table_util();
 	/*
 	int power_x, power_y, power_a, power_l;
