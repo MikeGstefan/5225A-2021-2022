@@ -85,6 +85,7 @@ void autonomous() {
  * task, not resume it from where it left off.
  */
 void opcontrol() {
+	/*
 	Timer op_control_timer{"op_control_timer", false, timing_units::millis};
 	while(true){
 		if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_A)){
@@ -101,7 +102,8 @@ void opcontrol() {
 		op_control_timer.print("Mike is so so cool");
 		delay(10);
 	}
-	// drivebase.driver_practice();	// this method has self-contained while loop
+	*/
+	drivebase.driver_practice();	// this method has self-contained while loop
 	// drivebase.update_lookup_table_util();
 	// update_lookup_table_util();
 	/*
