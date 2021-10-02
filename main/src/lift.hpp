@@ -4,14 +4,16 @@
 using namespace pros;
 using namespace std;
 
-struct Vector2D{
-    Vector2D(double x, double y) : x(x), y(y) {}
-    double x, y;
+enum class lift_position_types{
+  positive,
+  negative,
+  fastest
 };
 
 void f_bar_cal();
 void c_bar_cal();
-void find_arm_angles(Vector2D target);
+void f_bar_elastic_util();
+void find_arm_angles(double target_x, double target_y, lift_position_types lift_position_type = lift_position_types::fastest);
 
 // class Lift: public pros::Motor {  // subclasses pros::Motor
 //   double mecanum_wheel_radius, parallel_arm_len, gear_diameter, lift_base_height, arm_len, gear_ratio, offset_a, offset_h; // offset_a should be in motor encoder degrees

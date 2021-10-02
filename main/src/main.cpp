@@ -87,22 +87,51 @@ void autonomous() {
  * task, not resume it from where it left off.
  */
 void opcontrol() {
-
 	c_bar_cal();
 	f_bar_cal();
+
+
 	// f_bar.move_absolute(54 * 7.0, 100);
 	// waitUntil(f_bar.get_position() / 7 > 50);
 	// while(f_bar.get_position() / 7 < 54) delay(10);
 	// printf("DONE %lf\n", f_bar.get_position() / 7);
 	// c_bar.move_absolute(54 * 5.0 / 3.0, 100);
-	find_arm_angles(Vector2D(4.0, 24 + 18.0));
-
+	// find_arm_angles(Vector2D(4.0, 17.0 + 24.0));
+	double target_x = 4.0, target_y = 41.0;
+	master.clear();
+	delay(50);
+	master.print(0, 0, "y: %lf", target_y);
 	while(true){
-		// f_bar.move_absolute(45 *7.0, 50);
-		// c_bar.move_absolute(45 * 5.0 / 3.0, 50)
-		printf("c_bar: %lf | f_bar: %lf\n", c_bar.get_position() * 3.0 / 5.0, f_bar.get_position() / 7.0);
+		if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_RIGHT)){  // increase height
+			target_x++;
+			delay(50);
+			master.print(1, 0, "y: %lf", target_x);
+		}
+		else if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_LEFT)){  // decrease height
+			target_x--;
+			delay(50);
+			master.print(1, 0, "%lf", target_x);
+		}
+		if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_UP)){  // increase height
+			target_y++;
+			delay(50);
+			master.print(0, 0, "y: %lf", target_y);
+		}
+		else if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_DOWN)){  // decrease height
+			target_y--;
+			delay(50);
+			master.print(0, 0, "%lf", target_y);
+		}
+		find_arm_angles(target_x, target_y);
 		delay(10);
 	}
+	//
+	// while(true){
+	// // 	// f_bar.move_absolute(45 *7.0, 50);
+	// // 	// c_bar.move_absolute(45 * 5.0 / 3.0, 50)
+	// 	printf("c_bar: %lf | f_bar: %lf\n", c_bar.get_position() * 3.0 / 5.0, f_bar.get_position() / 7.0);
+	// 	delay(10);
+	// }
 
 
 	// drivebase.driver_practice();	// this method has self-contained while loop
