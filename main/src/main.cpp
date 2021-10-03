@@ -66,7 +66,8 @@ void autonomous() {}
  */
 
 void hello(){
-	 printf("HELLO");
+	 printf("HELLO\n");
+	 delay(10);
  }
 
 void opcontrol() {
@@ -88,9 +89,8 @@ void opcontrol() {
 	while(1){
 		//These should probably be called in the background
 		Button::update_press_status();
-		printf("%x", Button::get_press());
+		Button::get_press();
+		delay(10);
 	}
-
-	// screen::fill_rect(100, 25, 300, 80); //for presses
 
 }

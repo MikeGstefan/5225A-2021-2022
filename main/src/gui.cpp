@@ -67,6 +67,19 @@ void Button::draw(){
   }
 }
 
+void Button::draw_pressed(){
+  if(Page::currentPage == this->page){
+    screen::set_eraser((this->page)->page_bcolor);
+    screen::erase_rect(x1, y1, x2, y2);
+    screen::set_pen(bcolor);
+    screen::set_eraser(bcolor);
+    screen::fill_rect(x1+5, y1+5, x2-5, y2-5);
+    screen::set_pen(lcolor);
+    screen::print(TEXT_SMALL, (x1+x2-(label.length()*Page::char_width))/2, (y1+y2-Page::char_height)/2, label.c_str()); //Centers label on button
+    screen::set_eraser(COLOR_BLACK);
+  }
+}
+
 void Button::del(){
   //Looks for the button in the list of buttons for its page
   std::vector <Button*>::iterator it = find(((this->page)->buttons).begin(), ((this->page)->buttons).end(), this);
@@ -83,7 +96,7 @@ void Button::setTask(void (*pointer_to_function)()){
 }
 
 void Button::runTask(){ //to be called continously
-  if (funcPtr != 0 && this->pressed()) (*funcPtr); //runs function assigned to the button
+  if (funcPtr != 0) (*funcPtr)(); //runs function assigned to the button
 }
 
 void Button::update_press_status() { //to be called continously
@@ -112,13 +125,22 @@ bool Button::new_press(){
 }
 
 Button* Button::get_press(){
-  if (touch_status == TOUCH_PRESSED || touch_status == TOUCH_HELD){
-    //Loops through the list of buttons on the current page to check for presses
-    for (std::vector <Button*>::iterator it = (Page::currentPage->buttons).begin(); it != (Page::currentPage->buttons).end(); it++){
-      if((*it)->pressed()){
-        //If pressed it will run the buttons task and then return the button
+  //Loops through the list of buttons on the current page to check for presses
+  for (std::vector <Button*>::iterator it = (Page::currentPage->buttons).begin(); it != (Page::currentPage->buttons).end(); it++){
+    if((*it)->pressed()){
+      //If pressed it will run the buttons task and then return the button
+      if ((*it)->lastPressed == 0){
+        (*it)->lastPressed = 1;
+        (*it)->draw_pressed();
         (*it)->runTask();
-        return *it;
+      }
+      return *it;
+    }
+
+    else{
+      if ((*it)->lastPressed = 1){
+        (*it)->lastPressed = 0;
+        (*it)->draw();
       }
     }
   }

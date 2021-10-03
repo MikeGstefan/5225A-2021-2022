@@ -11,6 +11,7 @@ class Page{
   //create permanent buttons that let you scroll between pages.
 
   private:
+    friend class Button;
     std::uint32_t page_bcolor;
 
   public:
@@ -39,7 +40,7 @@ class Page{
 class Button{
 
   private:
-    friend class Page; //Only so Page class can access Button::draw()
+    friend class Page;
 
     static last_touch_e_t touch_status;
     static int16_t x, y;
@@ -47,9 +48,11 @@ class Button{
     int16_t x1=0, y1=0, x2=0, y2=0;
     std::uint32_t bcolor=0, lcolor;
     std::string label;
+    bool lastPressed;
+    void (*funcPtr)()=0; //This is a var because it is a pointer to a void function, not a void function in itself
 
     void draw();
-    void (*funcPtr)()=0;
+    void draw_pressed();
     void runTask();
 
   public:
