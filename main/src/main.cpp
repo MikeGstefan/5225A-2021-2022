@@ -94,21 +94,38 @@ void autonomous() {
 
 void hello(){
 	 printf("HELLO\n");
+	 if(intake.get_current_draw() == 0){
+		 intake.move(127);
+	 }else{
+		 intake.move(0);
+	 }
 	 delay(10);
  }
 
 void opcontrol() {
-	int power_x, power_y, power_a;
-	while(true){
-		power_x = master.get_analog(E_CONTROLLER_ANALOG_RIGHT_X);
-		power_y = master.get_analog(E_CONTROLLER_ANALOG_LEFT_Y);
-		power_a = master.get_analog(E_CONTROLLER_ANALOG_LEFT_X);
-		if(fabs(power_x) < 15)power_x = 0;
-		if(fabs(power_y) < 15)power_y = 0;
-		if(fabs(power_a) < 15)power_a = 0;
-		move(power_x, power_y, power_a);
+	bool toggle = 0;
+	Page page1 (1,COLOR_GREY);
+	Page::goTo(&page1);
+	Button Text(0,10,0,100, Button::CORNER,&page1, "Intake in Port 6", COLOR_GREY, COLOR_WHITE);
+	Button Intake_Button(150,50,300,150, Button::CORNER,&page1, "Intake Switch", COLOR_WHITE);
+	Intake_Button.setTask(&hello);
+	while (1) {
+		Button::update_press_status();
+		Button::get_press();
 		delay(10);
+		/* code */
 	}
+	// int power_x, power_y, power_a;
+	// while(true){
+	// 	power_x = master.get_analog(E_CONTROLLER_ANALOG_RIGHT_X);
+	// 	power_y = master.get_analog(E_CONTROLLER_ANALOG_LEFT_Y);
+	// 	power_a = master.get_analog(E_CONTROLLER_ANALOG_LEFT_X);
+	// 	if(fabs(power_x) < 15)power_x = 0;
+	// 	if(fabs(power_y) < 15)power_y = 0;
+	// 	if(fabs(power_a) < 15)power_a = 0;
+	// 	move(power_x, power_y, power_a);
+	// 	delay(10);
+	// }
 	// update_lookup_table_util();
 	/*
 	int power_x, power_y, power_a, power_l;
