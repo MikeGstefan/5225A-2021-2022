@@ -6,6 +6,7 @@
 #include "lift.hpp"
 #include "drive.hpp"
 
+#include "gui.hpp"
 // using namespace std;
 // using namespace pros;
 
@@ -90,24 +91,22 @@ void autonomous() {
  * operator control task will be stopped. Re-enabling the robot will restart the
  * task, not resume it from where it left off.
  */
+
+void hello(){
+	 printf("HELLO\n");
+	 delay(10);
+ }
+
 void opcontrol() {
-
-	printf("running\n");
-	bool toggle = 0;
+	int power_x, power_y, power_a;
 	while(true){
-
-		// master.print(E_CONTROLLER_MASTER, 0, 0, "Running	");
-		if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_A)){
-			if(!toggle){
-				printf("On");
-				intake.move(127);
-				toggle = 1;
-			}else{
-				printf("Off");
-				intake.move(0);
-				toggle = 0;
-			}
-		}
+		power_x = master.get_analog(E_CONTROLLER_ANALOG_RIGHT_X);
+		power_y = master.get_analog(E_CONTROLLER_ANALOG_LEFT_Y);
+		power_a = master.get_analog(E_CONTROLLER_ANALOG_LEFT_X);
+		if(fabs(power_x) < 15)power_x = 0;
+		if(fabs(power_y) < 15)power_y = 0;
+		if(fabs(power_a) < 15)power_a = 0;
+		move(power_x, power_y, power_a);
 		delay(10);
 	}
 	// update_lookup_table_util();
