@@ -90,6 +90,9 @@ void opcontrol() {
 	c_bar_cal();
 	f_bar_cal();
 
+	// f_bar.move_absolute(136.776786, 150);
+	// c_bar.move_absolute(24.558264, 80);
+	move_xy_util();
 
 	// f_bar.move_absolute(54 * 7.0, 100);
 	// waitUntil(f_bar.get_position() / 7 > 50);
@@ -97,34 +100,36 @@ void opcontrol() {
 	// printf("DONE %lf\n", f_bar.get_position() / 7);
 	// c_bar.move_absolute(54 * 5.0 / 3.0, 100);
 	// find_arm_angles(Vector2D(4.0, 17.0 + 24.0));
-	double target_x = 4.0, target_y = 41.0;
-	master.clear();
-	delay(50);
-	master.print(0, 0, "y: %lf", target_y);
-	while(true){
-		if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_RIGHT)){  // increase height
-			target_x++;
-			delay(50);
-			master.print(1, 0, "y: %lf", target_x);
-		}
-		else if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_LEFT)){  // decrease height
-			target_x--;
-			delay(50);
-			master.print(1, 0, "%lf", target_x);
-		}
-		if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_UP)){  // increase height
-			target_y++;
-			delay(50);
-			master.print(0, 0, "y: %lf", target_y);
-		}
-		else if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_DOWN)){  // decrease height
-			target_y--;
-			delay(50);
-			master.print(0, 0, "%lf", target_y);
-		}
-		find_arm_angles(target_x, target_y);
+
+// VELOCITY TESTING
+
+	/*
+
+	double low = 1000, high = -1000, mid;
+	c_bar.move_absolute(500, 100);
+  while(c_bar.get_position() < 450){
+		printf("f_bar_vel: %lf, pos:%lf\n", c_bar.get_actual_velocity(), f_bar.get_position());
+		if(c_bar.get_actual_velocity() > high) high = c_bar.get_actual_velocity();
+		if(c_bar.get_actual_velocity() < low) low = c_bar.get_actual_velocity();
 		delay(10);
 	}
+	c_bar.move(0);
+	mid = (high + low) / 2;
+	printf("high: %lf, low: %lf, mid: %lf\n", high, low, mid);
+	*/
+
+	// find_arm_angles(target_x, target_y);
+	// f_bar.move_absolute(7.0 * 42.0, 150);
+	// c_bar.move_absolute(65.0 * 5.0 / 3.0, 80);
+	// waitUntil(f_bar.get_position() > 7.0 * 40.0 - 20);
+	// f_bar.move(0);
+	// c_bar.move(0);
+	// while(true){
+	// 	printf("f_bar_pos: %lf, c_bar_pos:%lf\n", f_bar.get_position(), c_bar.get_position());
+	// 	delay(10);
+	// }
+
+
 	//
 	// while(true){
 	// // 	// f_bar.move_absolute(45 *7.0, 50);
