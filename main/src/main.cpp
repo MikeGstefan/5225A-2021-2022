@@ -87,7 +87,12 @@ void autonomous() {
  * task, not resume it from where it left off.
  */
 void opcontrol() {
-	drivebase.handle_input();
+	drivebase.cur_driver = 0;
+	while(true){
+		drivebase.handle_input();
+		delay(10);
+	}
+
 	// drivebase.driver_practice();
 	// lift.c_bar_cal();
 	// lift.f_bar_cal();

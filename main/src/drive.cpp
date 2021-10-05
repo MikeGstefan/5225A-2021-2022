@@ -179,7 +179,7 @@ void Drivebase::handle_input(){
   if(fabs(tracking.power_x) < deadzone) tracking.power_x = 0.0;
   if(fabs(tracking.power_y) < deadzone) tracking.power_y = 0.0;
   if(fabs(tracking.power_a) < deadzone) tracking.power_a = 0.0;
-
+  printf("x: %lf, y: %lf, a: %lf \n", tracking.power_x, tracking.power_y, tracking.power_a);
   move(tracking.power_x, tracking.power_y, tracking.power_a);
 }
 
