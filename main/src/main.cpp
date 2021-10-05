@@ -87,12 +87,12 @@ void autonomous() {
  * task, not resume it from where it left off.
  */
 void opcontrol() {
-	c_bar_cal();
-	f_bar_cal();
+	lift.c_bar_cal();
+	lift.f_bar_cal();
 
 	// f_bar.move_absolute(136.776786, 150);
 	// c_bar.move_absolute(24.558264, 80);
-	move_xy_util();
+	lift.move_to_target_util();
 
 	// f_bar.move_absolute(54 * 7.0, 100);
 	// waitUntil(f_bar.get_position() / 7 > 50);

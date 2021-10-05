@@ -83,8 +83,9 @@ void Lift::lift_height_util(){
 
 }
 */
+Lift lift;
 
-void f_bar_cal(){
+void Lift::f_bar_cal(){
   f_bar.move(-60);
   Timer vel_rise_timeout("f_bar_vel_rise");
   // waits for f_bar velocity to rise or timeout to trigger
@@ -104,7 +105,7 @@ void f_bar_cal(){
   f_bar.move(0);
 }
 
-void c_bar_cal(){
+void Lift::c_bar_cal(){
   c_bar.move(-60);
   Timer vel_rise_timeout("c_bar_vel_rise");
   // waits for c_bar velocity to rise or timeout to trigger
@@ -124,7 +125,7 @@ void c_bar_cal(){
   c_bar.move(0);
 }
 
-void f_bar_elastic_util(){
+void Lift::f_bar_elastic_util(){
 
   // up time should be around 750 and down time should be around 820
   c_bar_cal();
@@ -143,7 +144,7 @@ void f_bar_elastic_util(){
 }
 
 
-void find_arm_angles(double target_x, double target_y, lift_position_types lift_position_type){
+void Lift::find_arm_angles(double target_y, double target_z, lift_position_types lift_position_type){
   // variables to determine postion type for lift
   double top_arm_speed = 100, bottom_arm_speed = 200; // in pros velocity units
   double bottom_arm_lower_limit = 0, bottom_arm_upper_limit = 700, top_arm_lower_limit = 0, top_arm_upper_limit = 500;
@@ -151,18 +152,15 @@ void find_arm_angles(double target_x, double target_y, lift_position_types lift_
   double bottom_arm_pos_angle, top_arm_pos_angle, bottom_arm_neg_angle, top_arm_neg_angle;
   bool pos_position_valid, neg_position_valid, move_valid = true; // flags to determine if move is possible
 
-  double top_arm_gear_ratio = 5.0/3.0, bottom_arm_gear_ratio = 7.0;
   double bottom_arm_angle, top_arm_angle;
-  double bottom_arm_len = 14.5, top_arm_len = 11.5;
-  double dist_between_axles = 10.5;
-  double bottom_arm_offset_a = 42.5; // this will be in encoder degrees but needs to be converted to arm degrees
-  double top_arm_offset_a = 65.0; // this will be in encoder degrees but needs to be converted to arm degrees
-  double offset_h = 17.0 + dist_between_axles; // height of arm + wheel_radius + dist_between_axles
-  target_y -= offset_h;
-  double point_dist = sqrt(pow(target_x, 2.0) + pow(target_y, 2.0));
+
+  target_z -= offset_h;
+  target_y *= -1 ;  // reverses y axis
+
+  double point_dist = sqrt(pow(target_y, 2.0) + pow(target_z, 2.0));
   printf("point_dist: %lf\n", point_dist);
   // this is the angle formed between the line of the target and the horizontal
-  double target_angle = atan2(target_y, target_x);
+  double target_angle = atan2(target_z, target_y);
   printf("target_angle: %lf\n", rad_to_deg(target_angle));
   // use law of cosines to find arm angles
   // angle 'C' is the angle formed between the bottom and top arm
@@ -253,45 +251,48 @@ void find_arm_angles(double target_x, double target_y, lift_position_types lift_
 
   if (move_valid){
     f_bar.move_absolute(bottom_arm_angle, 150);
-    if(bottom_arm_angle / bottom_arm_gear_ratio > 40.0) waitUntil(f_bar.get_position() / bottom_arm_gear_ratio > 40.0);
+    if(bottom_arm_angle / bottom_arm_gear_ratio > bottom_arm_offset_a) waitUntil(f_bar.get_position() / bottom_arm_gear_ratio > bottom_arm_offset_a);
     c_bar.move_absolute(top_arm_angle, 80);
   }
   else printf("POSITION IS INVALID | POS: TOP: %lf, BOTTOM: %lf | NEG: TOP: %lf, BOTTOM: %lf\n", top_arm_pos_angle, bottom_arm_pos_angle, top_arm_neg_angle, bottom_arm_neg_angle);
 }
 
 
-void move_xy_util(){
-  double target_x = 6.0, target_y = 13.0;
+void Lift::move_to_target_util(){
+  double target_y = -6.0, target_z = 13.0;
 
   master.clear();
   delay(50);
-  master.print(0, 0, "y: %lf", target_y);
+  master.print(0, 0, "z: %lf", target_z);
   delay(50);
-  master.print(1, 0, "x: %lf", target_x);
-  find_arm_angles(target_x, target_y);
+  master.print(1, 0, "y: %lf", target_y);
+  find_arm_angles(target_y, target_z);
 
 	while(true){
 		if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_RIGHT)){
-			target_x++;
-			delay(50);
-			master.print(1, 0, "x: %lf", target_x);
-		}
-		else if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_LEFT)){  // decrease height
-			target_x--;
-			delay(50);
-			master.print(1, 0, "x: %lf", target_x);
-		}
-		if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_UP)){  // increase height
 			target_y++;
 			delay(50);
-			master.print(0, 0, "y: %lf", target_y);
+			master.print(1, 0, "y: %lf", target_y);
+      find_arm_angles(target_y, target_z);
 		}
-		else if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_DOWN)){  // decrease height
+		else if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_LEFT)){  // decrease height
 			target_y--;
 			delay(50);
-			master.print(0, 0, "y: %lf", target_y);
+			master.print(1, 0, "y: %lf", target_y);
+      find_arm_angles(target_y, target_z);
 		}
-		find_arm_angles(target_x, target_y);
+		if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_UP)){  // increase height
+			target_z++;
+			delay(50);
+			master.print(0, 0, "z: %lf", target_z);
+      find_arm_angles(target_y, target_z);
+		}
+		else if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_DOWN)){  // decrease height
+			target_z--;
+			delay(50);
+			master.print(0, 0, "z: %lf", target_z);
+      find_arm_angles(target_y, target_z);
+		}
 		delay(10);
 	}
 }
