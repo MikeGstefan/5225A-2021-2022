@@ -88,8 +88,17 @@ void autonomous() {
  */
 void opcontrol() {
 	drivebase.cur_driver = 0;
+  Timer screen_timer = {"screen_timer"};
+	screen_timer.reset();
+
 	while(true){
 		drivebase.handle_input();
+		// prints motor temps
+		if(screen_timer.get_time() > 50){
+			printf("fl%.0f r%.0f bl%.0f r%.0f\n", front_l.get_temperature(), front_r.get_temperature(), back_l.get_temperature(), back_r.get_temperature());
+			master.print(0, 0, "fl%.0f r%.0f bl%.0f r%.0f\n", front_l.get_temperature(), front_r.get_temperature(), back_l.get_temperature(), back_r.get_temperature());
+			screen_timer.reset(false);
+		}
 		delay(10);
 	}
 
