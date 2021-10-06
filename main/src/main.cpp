@@ -17,6 +17,7 @@
 void initialize() {
 	delay(150);
 	updateStartTask();
+	guiSetup();
 
 }
 
@@ -67,29 +68,22 @@ void autonomous() {}
 
 void hello(){
 	 printf("HELLO\n");
-	 delay(10);
  }
 
 void opcontrol() {
-	//Constructing a page does not go to it
-	//Constructing a button will draw it if it is on the right page
+	Page liftElastic (1, "Lift - Elastic Test"); //Testing the elastics on the lift
+	Page liftMove (2, "Lift - Moving"); //Moving the lift to an xyz position
+	Page tracking (3, "Tracking"); //Display tracking vals and reset btns
+	Page autoSel (4, "Auton"); //Select auton routes
+	Page driverCurve (5, "Drivers"); //Select a driver and their exp curve
+	Page intkTest (6, "Intake"); //Test for intake with rings
+	Page temps (7, "Temperature"); //Motor temps?
 
-	Page page1 (1, COLOR_RED);
-	Page tester (2);
-
-	Page::goTo(&page1);
-
-	Button button1 (25, 25, 170, 75, Button::CORNER, &page1, "BUTTON1");
-	Button button2 (150, 50, 250, 150, Button::CORNER, &page1, "BUTTON2", COLOR_YELLOW);
-	Button test1 (175, 50, 300, 150, Button::CORNER, &tester, "BUTTON1", COLOR_GREEN);
-	Button test2 (100, 25, 300, 80, Button::CORNER, &tester, "TEST", COLOR_PINK, COLOR_BLUE);
-
-	button1.setTask(&hello);
 
 	while(1){
 		//These should probably be called in the background
-		Button::update_press_status();
-		Button::get_press();
+		Page::updatePressStatus();
+		Button::getPress();
 		delay(10);
 	}
 
