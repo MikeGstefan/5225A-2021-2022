@@ -1,4 +1,5 @@
 #pragma once
+#include <tuple>
 #include "main.h"
 #include "util.hpp"
 using namespace pros;
@@ -24,8 +25,8 @@ public:
   void f_bar_cal();
   void c_bar_cal();
   void f_bar_elastic_util();
-  void find_arm_angles(double target_y, double target_z, const lift_position_types lift_position_type = lift_position_types::fastest);  // returns arm_angles
-  void move_to_target(double target_y, double target_z, const lift_position_types lift_position_type = lift_position_types::fastest);  // actual method to
+  tuple<double, double, double, double, double, double, bool> find_arm_angles(double target_y, double target_z, const lift_position_types lift_position_type = lift_position_types::fastest);  // returns arm_angles
+  void move_to_target(double target_y, double target_z, const lift_position_types lift_position_type = lift_position_types::fastest, const double bottom_arm_speed = 100, const double top_arm_speed = 200);  // actual method to move the lift to a target
   void move_to_target_util(); // utility to move arm with controller
 };
 extern Lift lift;

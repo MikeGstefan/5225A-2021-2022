@@ -92,6 +92,7 @@ void opcontrol() {
 
 	// f_bar.move_absolute(136.776786, 150);
 	// c_bar.move_absolute(24.558264, 80);
+	// lift.move_to_target(-6.0, 13.0);
 	lift.move_to_target_util();
 
 	// f_bar.move_absolute(54 * 7.0, 100);

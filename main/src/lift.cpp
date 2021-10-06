@@ -144,7 +144,7 @@ void Lift::f_bar_elastic_util(){
 }
 
 
-void Lift::find_arm_angles(double target_y, double target_z, lift_position_types lift_position_type){
+tuple<double, double, double, double, double, double, bool> Lift::find_arm_angles(double target_y, double target_z, lift_position_types lift_position_type){
   // variables to determine postion type for lift
   double top_arm_speed = 100, bottom_arm_speed = 200; // in pros velocity units
   double bottom_arm_lower_limit = 0, bottom_arm_upper_limit = 700, top_arm_lower_limit = 0, top_arm_upper_limit = 500;
@@ -248,15 +248,18 @@ void Lift::find_arm_angles(double target_y, double target_z, lift_position_types
 
   printf("Final bottom_arm_angle: %lf\n", bottom_arm_angle);
   printf("Final top_arm_angle: %lf\n", top_arm_angle);
+  return {top_arm_angle, bottom_arm_angle, top_arm_pos_angle, bottom_arm_pos_angle, top_arm_neg_angle, bottom_arm_neg_angle, move_valid};
+}
 
+void Lift::move_to_target(const double target_y, const double target_z, const lift_position_types lift_position_type, const double bottom_arm_speed, const double top_arm_speed){
+  auto[top_arm_angle, bottom_arm_angle, top_arm_pos_angle, bottom_arm_pos_angle, top_arm_neg_angle, bottom_arm_neg_angle, move_valid] = find_arm_angles(target_y, target_z, lift_position_type);
   if (move_valid){
-    f_bar.move_absolute(bottom_arm_angle, 150);
+    f_bar.move_absolute(bottom_arm_angle, top_arm_speed);
     if(bottom_arm_angle / bottom_arm_gear_ratio > bottom_arm_offset_a) waitUntil(f_bar.get_position() / bottom_arm_gear_ratio > bottom_arm_offset_a);
-    c_bar.move_absolute(top_arm_angle, 80);
+    c_bar.move_absolute(top_arm_angle, bottom_arm_speed);
   }
   else printf("POSITION IS INVALID | POS: TOP: %lf, BOTTOM: %lf | NEG: TOP: %lf, BOTTOM: %lf\n", top_arm_pos_angle, bottom_arm_pos_angle, top_arm_neg_angle, bottom_arm_neg_angle);
 }
-
 
 void Lift::move_to_target_util(){
   double target_y = -6.0, target_z = 13.0;
@@ -266,32 +269,32 @@ void Lift::move_to_target_util(){
   master.print(0, 0, "z: %lf", target_z);
   delay(50);
   master.print(1, 0, "y: %lf", target_y);
-  find_arm_angles(target_y, target_z);
+  move_to_target(target_y, target_z);
 
 	while(true){
 		if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_RIGHT)){
 			target_y++;
 			delay(50);
 			master.print(1, 0, "y: %lf", target_y);
-      find_arm_angles(target_y, target_z);
+      move_to_target(target_y, target_z);
 		}
 		else if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_LEFT)){  // decrease height
 			target_y--;
 			delay(50);
 			master.print(1, 0, "y: %lf", target_y);
-      find_arm_angles(target_y, target_z);
+      move_to_target(target_y, target_z);
 		}
 		if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_UP)){  // increase height
 			target_z++;
 			delay(50);
 			master.print(0, 0, "z: %lf", target_z);
-      find_arm_angles(target_y, target_z);
+      move_to_target(target_y, target_z);
 		}
 		else if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_DOWN)){  // decrease height
 			target_z--;
 			delay(50);
 			master.print(0, 0, "z: %lf", target_z);
-      find_arm_angles(target_y, target_z);
+      move_to_target(target_y, target_z);
 		}
 		delay(10);
 	}
