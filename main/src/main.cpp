@@ -93,7 +93,17 @@ void opcontrol() {
 	// f_bar.move_absolute(136.776786, 150);
 	// c_bar.move_absolute(24.558264, 80);
 	// lift.move_to_target(-6.0, 13.0);
-	lift.move_to_target_util();
+	// lift.move_to_target_util();
+
+	auto[top_arm_angle, bottom_arm_angle, top_arm_pos_angle, bottom_arm_pos_angle, top_arm_neg_angle, bottom_arm_neg_angle, move_valid] = lift.find_arm_angles(-6.0, 13.0);
+	double target_y = -6.0;
+	while(true){
+		// z_speed = master.get_analog(E_CONTROLLER_ANALOG_LEFT_Y);
+		f_bar.move(master.get_analog(E_CONTROLLER_ANALOG_LEFT_Y));
+		lift.touch_line(target_y, f_bar.get_position());
+		// printf("GOING TO:%lf", ((rad_to_deg(top_arm_offset_a - acos((cos(deg_to_rad(bottom_arm_angle / bottom_arm_gear_ratio) - bottom_arm_offset_a) * bottom_arm_len - target_y) / top_arm_len))) * top_arm_gear_ratio);
+		delay(10);
+	}
 
 	// f_bar.move_absolute(54 * 7.0, 100);
 	// waitUntil(f_bar.get_position() / 7 > 50);

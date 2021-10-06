@@ -147,7 +147,6 @@ void Lift::f_bar_elastic_util(){
 tuple<double, double, double, double, double, double, bool> Lift::find_arm_angles(double target_y, double target_z, lift_position_types lift_position_type){
   // variables to determine postion type for lift
   double top_arm_speed = 100, bottom_arm_speed = 200; // in pros velocity units
-  double bottom_arm_lower_limit = 0, bottom_arm_upper_limit = 700, top_arm_lower_limit = 0, top_arm_upper_limit = 500;
   double pos_time, neg_time;
   double bottom_arm_pos_angle, top_arm_pos_angle, bottom_arm_neg_angle, top_arm_neg_angle;
   bool pos_position_valid, neg_position_valid, move_valid = true; // flags to determine if move is possible
@@ -298,4 +297,12 @@ void Lift::move_to_target_util(){
 		}
 		delay(10);
 	}
+}
+
+void Lift::touch_line(double target_y, double bottom_arm_angle, double speed){ // should be in motor degrees
+  double top_arm_angle = rad_to_deg(deg_to_rad(top_arm_offset_a) - acos((cos(deg_to_rad(bottom_arm_angle / bottom_arm_gear_ratio) - deg_to_rad(bottom_arm_offset_a)) * bottom_arm_len + target_y) / top_arm_len)) * top_arm_gear_ratio;
+  if (top_arm_angle > top_arm_upper_limit || top_arm_angle < top_arm_lower_limit)// move is invalid
+    printf("MOVE INVALID: top arm position attempt: %lf\n", top_arm_angle);
+  else
+    c_bar.move_absolute(top_arm_angle, speed);
 }
