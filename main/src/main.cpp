@@ -18,7 +18,6 @@ void initialize() {
 	delay(150);
 	updateStartTask();
 	guiSetup();
-
 }
 
 /**
@@ -67,7 +66,8 @@ void autonomous() {}
  */
 
 void opcontrol() {
-	Page liftElastic (1, "Lift - Elastic Test"); //Testing the elastics on the lift
+
+	Page liftElastic (1, "Lift - Elastic Test", COLOR_RED); //Testing the elastics on the lift
 	Page liftMove (2, "Lift - Moving"); //Moving the lift to an xyz position
 	Page tracking (3, "Tracking"); //Display tracking vals and reset btns
 	Page autoSel (4, "Auton"); //Select auton routes
@@ -76,8 +76,12 @@ void opcontrol() {
 	Page temps (7, "Temperature"); //Motor temps
 
 
+	Page::goTo(&autoSel);
+
 	Button tester (50, 75, 100, 50, Button::SIZE, true, &liftMove, "TESTING", COLOR_RED, COLOR_CYAN);
-	Text (225, 30, &autoSel, "HELLO", COLOR_BLUE);
+	Button tester2 (50, 170, 100, 50, Button::SIZE, false, &liftMove, "TESTING", COLOR_VIOLET, COLOR_CYAN);
+	Text blah(225, 100, TEXT_LARGE, &autoSel, "HELLO", COLOR_BLUE);
+
 
 	while(1){
 		//These should probably be called in the background

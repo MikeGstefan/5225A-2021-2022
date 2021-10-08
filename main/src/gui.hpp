@@ -91,11 +91,12 @@ class Button{
 
 struct Text{
   int16_t x, y;
+  text_format_e_t txt_fmt;
   std::string label;
   std::uint32_t lcol;
   Page* page;
 
-  Text (int16_t point1, int16_t point2, Page* page_ptr, std::string text = "", std::uint32_t label_color = COLOR_BLACK);
+  Text (int16_t point1, int16_t point2, text_format_e_t size, Page* page_ptr, std::string text = "", std::uint32_t label_color = COLOR_BLACK);
 
   void draw();
 };

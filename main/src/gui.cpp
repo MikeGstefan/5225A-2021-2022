@@ -8,29 +8,38 @@ int16_t Page::x = 0, Page::y = 0;
 
 //Permanent Buttons
 void Page::toPrev(){
-  if (currentPage == pages.front()) Page::goTo(pages.back());
+  if (currentPage == pages[1]) Page::goTo(pages[7]);
   else goTo(pages[currentPage->pageNum-1]);
 }
 void Page::toNext(){
-  if (currentPage == pages.back()) Page::goTo(pages.front());
-  else goTo(pages[currentPage->pageNum+1]);
+  if (currentPage == pages[7]) Page::goTo(pages[1]);
+  else goTo(pages[(currentPage->pageNum)+1]);
 }
 
 Page perm (0, "PERM BTNS", COLOR_PINK);
 //Page perm only exists because its a problem if permanent buttons think they belong to every page.
 //So they think they belong to page perm, but every page knows they own these buttons.
-Button prevPage(0, 0, 20, 10, Button::SIZE, 0, &perm, "<-");
-Button nextPage(460, 0, 20, 10, Button::SIZE, 0, &perm, "->");
+Button prevPage(0, 0, 40, 20, Button::SIZE, 0, &perm, "<-");
+Button nextPage(480, 0, -40, 20, Button::SIZE, 0, &perm, "->");
+
+void guiSetup(){
+
+  prevPage.setTask(&(Page::toPrev));
+  nextPage.setTask(&(Page::toNext));
+}
 
 //Constructors
-Text::Text (int16_t point1, int16_t point2, Page* page_ptr, std::string text, std::uint32_t label_color){
+Text::Text (int16_t point1, int16_t point2, text_format_e_t size, Page* page_ptr, std::string text, std::uint32_t label_color){
   x = point1;
   y = point2;
+  txt_fmt = size;
   page = page_ptr;
   label = text;
   lcol = label_color;
 
   (page->texts).push_back(this);
+
+  if(Page::currentPage == this->page || &perm == this->page) draw();
 }
 
 Button::Button(int16_t pt1, int16_t pt2, int16_t pt3, int16_t pt4, style type, bool toggle, Page* page_ptr, std::string text, std::uint32_t background_color, std::uint32_t label_color){
@@ -77,7 +86,7 @@ Button::Button(int16_t pt1, int16_t pt2, int16_t pt3, int16_t pt4, style type, b
   text_y = (y1+y2-Page::char_height)/2;
 
 
-  draw();
+  if(Page::currentPage == this->page || &perm == this->page) draw();
 }
 
 Page::Page(int page_number, std::string name, std::uint32_t background_color){
@@ -93,16 +102,12 @@ Page::Page(int page_number, std::string name, std::uint32_t background_color){
 
 }
 
-void guiSetup(){
-
-  prevPage.setTask(&(Page::toPrev));
-  nextPage.setTask(&(Page::toNext));
-}
-
 void Page::goTo(Page* page){
   clearScreen(page->bcol);
   currentPage = page; //Saves new page then draws all the buttons on the page
-  screen::print(TEXT_SMALL, mid_x, 10, "%d", page->title);
+  screen::set_pen(COLOR_WHITE);
+  screen::set_eraser(page->bcol);
+  screen::print(TEXT_SMALL, mid_x-(page->title.length()*Page::char_width)/2, 10, "%s", page->title);
   for (std::vector <Button*>::iterator it = (page->buttons).begin(); it != (page->buttons).end(); it++) (*it)->draw();
   for (std::vector<Text*>::iterator it = (page->texts).begin(); it != (page->texts).end(); it++) (*it)->draw();
 }
@@ -115,17 +120,15 @@ void Page::clearScreen(std::uint32_t color){
 void Text::draw(){
   screen::set_eraser((this->page)->bcol);
   screen::set_pen(lcol);
-  screen::print(TEXT_SMALL, x, x, label.c_str());
+  screen::print(txt_fmt, x, y, label.c_str());
 }
 
 void Button::draw(){
-  if(Page::currentPage == this->page || &perm == this->page){
-    screen::set_pen(bcol);
-    screen::set_eraser(bcol);
-    screen::fill_rect(x1, y1, x2, y2);
-    screen::set_pen(lcol);
-    screen::print(TEXT_SMALL, text_x, text_y, label.c_str()); //Centers label on button
-  }
+  screen::set_pen(bcol);
+  screen::set_eraser(bcol);
+  screen::fill_rect(x1, y1, x2, y2);
+  screen::set_pen(lcol);
+  screen::print(TEXT_SMALL, text_x, text_y, label.c_str()); //Centers label on button
 }
 
 void Button::drawPressed(){
@@ -189,10 +192,17 @@ Button* Button::getPress(){ //to be called continously
 
     if (btn_id->latch){ //If latch-type button
       if (btn_id->pressed() && !(btn_id->lastPressed)){ //If new press
+        btn_id->lastPressed = 1;
         btn_id->latched = !(btn_id->latched); //Toggles the latch
 
         if(btn_id->latched) btn_id->drawPressed(); //Draws button's new state
         else btn_id->draw();
+
+        return btn_id;
+      }
+
+      else if (!(btn_id->pressed()) && btn_id->lastPressed){//If new release
+        btn_id->lastPressed = 0;
       }
 
       if (btn_id->latched){ //If in pressed state
@@ -206,6 +216,7 @@ Button* Button::getPress(){ //to be called continously
         btn_id->lastPressed = 1;
         btn_id->drawPressed();
         btn_id->runTask();
+        return btn_id;
       }
 
       else if (!(btn_id->pressed()) && btn_id->lastPressed){//If new release
