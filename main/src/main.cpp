@@ -18,6 +18,7 @@
  * to keep execution time for this mode under a few seconds.
  */
 void initialize() {
+<<<<<<< HEAD
 	// drivebase.download_curve_data();
 	//
 		printf("start");
@@ -31,6 +32,11 @@ void initialize() {
 	// delay(150);
 	// updateStartTask();
 	//pros::lcd::initialize();
+=======
+	delay(150);
+	updateStartTask();
+	guiSetup();
+>>>>>>> GUI
 }
 
 /**
@@ -92,6 +98,7 @@ void autonomous() {
  * task, not resume it from where it left off.
  */
 
+<<<<<<< HEAD
 void hello(){
 	 printf("HELLO\n");
 	 if(intake.get_current_draw() == 0){
@@ -225,6 +232,30 @@ void opcontrol() {
 		if(lift.pos_to_height(lift.get_position()) < 10.0 && power_l < 0) power_l = 0;
 		printf("height: %lf\n", lift.pos_to_height(lift.get_position()));
 		if(uptk_state)	lift.move(power_l);
+=======
+void opcontrol() {
+
+	Page liftElastic (1, "Lift - Elastic Test", COLOR_RED); //Testing the elastics on the lift
+	Page liftMove (2, "Lift - Moving"); //Moving the lift to an xyz position
+	Page tracking (3, "Tracking"); //Display tracking vals and reset btns
+	Page autoSel (4, "Auton"); //Select auton routes
+	Page driverCurve (5, "Drivers"); //Select a driver and their exp curve
+	Page intkTest (6, "Intake"); //Test for intake with rings
+	Page temps (7, "Temperature"); //Motor temps
+
+
+	Page::goTo(&autoSel);
+
+	Button tester (50, 75, 100, 50, Button::SIZE, true, &liftMove, "TESTING", COLOR_RED, COLOR_CYAN);
+	Button tester2 (50, 170, 100, 50, Button::SIZE, false, &liftMove, "TESTING", COLOR_VIOLET, COLOR_CYAN);
+	Text blah(225, 100, TEXT_LARGE, &autoSel, "HELLO", COLOR_BLUE);
+
+
+	while(1){
+		//These should probably be called in the background
+		Page::updateScreenStatus();
+		Button::getPress();
+>>>>>>> GUI
 		delay(10);
 	}
 */
