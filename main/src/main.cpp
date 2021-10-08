@@ -66,10 +66,6 @@ void autonomous() {}
  * task, not resume it from where it left off.
  */
 
-void hello(){
-	 printf("HELLO\n");
- }
-
 void opcontrol() {
 	Page liftElastic (1, "Lift - Elastic Test"); //Testing the elastics on the lift
 	Page liftMove (2, "Lift - Moving"); //Moving the lift to an xyz position
@@ -77,12 +73,15 @@ void opcontrol() {
 	Page autoSel (4, "Auton"); //Select auton routes
 	Page driverCurve (5, "Drivers"); //Select a driver and their exp curve
 	Page intkTest (6, "Intake"); //Test for intake with rings
-	Page temps (7, "Temperature"); //Motor temps?
+	Page temps (7, "Temperature"); //Motor temps
 
+
+	Button tester (50, 75, 100, 50, Button::SIZE, true, &liftMove, "TESTING", COLOR_RED, COLOR_CYAN);
+	Text (225, 30, &autoSel, "HELLO", COLOR_BLUE);
 
 	while(1){
 		//These should probably be called in the background
-		Page::updatePressStatus();
+		Page::updateScreenStatus();
 		Button::getPress();
 		delay(10);
 	}
