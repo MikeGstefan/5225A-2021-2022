@@ -65,7 +65,14 @@ void autonomous() {}
  * task, not resume it from where it left off.
  */
 
+// void pri(std::string msg, double* val){
+// 	// printf(msg.c_str(), val);
+// 	printf("%f\n",*val);
+// }
+
+double flTemp, blTemp, frTemp, brTemp;
 void opcontrol() {
+	//All constructor args are in the format points, format, page, text, color
 
 	Page liftElastic (1, "Lift - Elastic Test", COLOR_RED); //Testing the elastics on the lift
 	Page liftMove (2, "Lift - Moving"); //Moving the lift to an xyz position
@@ -76,18 +83,13 @@ void opcontrol() {
 	Page temps (7, "Temperature"); //Motor temps
 
 
-	Page::goTo(&autoSel);
+	Page::goTo(&liftMove);
+	Slider slidtest(50, Page::mid_y, 250, 30, Style::SIZE, 20, 40, &liftMove, "Vertical", COLOR_CYAN, COLOR_YELLOW);
+	Text temp1(25, 100, TEXT_SMALL, &temps, "Front Left: %d", &flTemp);
+	Text temp2(25, 200, TEXT_SMALL, &temps, "Back Left: %d", &blTemp);
+	Text temp3(250, 100, TEXT_SMALL, &temps, "Front Right: %d", &frTemp);
+	Text temp4(250, 200, TEXT_SMALL, &temps, "Back Right: %d", &brTemp);
 
-	Button tester (50, 75, 100, 50, Button::SIZE, true, &liftMove, "TESTING", COLOR_RED, COLOR_CYAN);
-	Button tester2 (50, 170, 100, 50, Button::SIZE, false, &liftMove, "TESTING", COLOR_VIOLET, COLOR_CYAN);
-	Text blah(225, 100, TEXT_LARGE, &autoSel, "HELLO", COLOR_BLUE);
-
-
-	while(1){
-		//These should probably be called in the background
-		Page::updateScreenStatus();
-		Button::getPress();
-		delay(10);
-	}
+	while(1) backgroundStuff();
 
 }

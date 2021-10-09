@@ -2,17 +2,30 @@
 #include <vector>
 #include <string>
 #include "main.h"
+#include "config.hpp"
 using namespace pros;
 
+namespace Style{
+  enum style{ //how the rect coords get evaluated
+    CENTRE,
+    CORNER,
+    SIZE
+  };
+};
+
+extern double flTemp, blTemp, frTemp, brTemp;
 void guiSetup();
+void backgroundStuff();
 
 class Page; //So they can access each other
 class Button;
+class Slider;
 struct Text;
 
 class Page{
   friend struct Text;
   friend class Button;
+  friend class Slider;
   private:
 
     //Vars
@@ -39,6 +52,7 @@ class Page{
     static Page* currentPage;
     static std::array<Page*, 11> pages;
     std::vector<Button*> buttons;
+    std::vector<Slider*> sliders;
     std::vector<Text*> texts;
     int pageNum;
 
@@ -53,6 +67,11 @@ class Page{
 
 class Button{
   friend class Page;
+  public: enum press_type{
+      SINGLE,
+      LATCH,
+      HOLD
+    };
 
   private:
     //Vars
@@ -61,7 +80,8 @@ class Button{
     int16_t x1, y1, x2, y2, text_x, text_y;
     void (*funcPtr)(); //This is a var because it is a pointer to a void function, not a void function in itself
     bool lastPressed=0;
-    bool latch, latched=0;
+    bool latched=0;
+    press_type form;
 
     //Functions
     void runTask();
@@ -69,17 +89,11 @@ class Button{
     void drawPressed();
 
   public:
-    //Vars
-    enum style{ //how the rect coords get evaluated
-      CENTRE,
-      CORNER,
-      SIZE
-    };
-
-    Page* page;
-
     //Constructor
-    Button (int16_t pt1, int16_t pt2, int16_t pt3, int16_t pt4, style type, bool toggle, Page* page_number, std::string text = "", std::uint32_t background_color = COLOR_WHITE, std::uint32_t label_color = COLOR_BLACK);
+    Button (int16_t pt1, int16_t pt2, int16_t pt3, int16_t pt4, Style::style type, press_type prType, Page* page_number, std::string text = "", std::uint32_t background_color = COLOR_BLACK, std::uint32_t label_color = COLOR_WHITE);
+
+    //Vars
+    Page* page;
 
     //Functions
     static Button* getPress();
@@ -89,14 +103,40 @@ class Button{
     bool newPress();
 };
 
+class Slider{
+  friend class Page;
+  friend class Button;
+  private:
+    //Vars
+    std::uint32_t lcol, bcol;
+    std::string label;
+    int16_t x1, y1, x2, y2, text_x, text_y;
+    int min, max;
+
+    //Functions
+    void draw();
+
+  public:
+    Slider (int16_t pt1, int16_t pt2, int16_t pt3, int16_t pt4, Style::style type, int minimum, int maximum, Page* page_number, std::string text = "", std::uint32_t background_color = COLOR_BLACK, std::uint32_t label_color = COLOR_WHITE);
+
+    //Vars
+    Page* page;
+    int val=0, prevVal;
+
+    //Functions
+    void updateVal();
+};
+
 struct Text{
   int16_t x, y;
   text_format_e_t txt_fmt;
   std::string label;
   std::uint32_t lcol;
   Page* page;
+  double* val_ptr;
 
-  Text (int16_t point1, int16_t point2, text_format_e_t size, Page* page_ptr, std::string text = "", std::uint32_t label_color = COLOR_BLACK);
+  Text (int16_t point1, int16_t point2, text_format_e_t size, Page* page_ptr, std::string text, std::uint32_t label_color = COLOR_WHITE);
+  Text (int16_t point1, int16_t point2, text_format_e_t size, Page* page_ptr, std::string text, double* val_ref, std::uint32_t label_color = COLOR_WHITE);
 
   void draw();
 };
