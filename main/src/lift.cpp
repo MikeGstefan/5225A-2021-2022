@@ -250,12 +250,15 @@ tuple<double, double, double, double, double, double, bool> Lift::find_arm_angle
   return {top_arm_angle, bottom_arm_angle, top_arm_pos_angle, bottom_arm_pos_angle, top_arm_neg_angle, bottom_arm_neg_angle, move_valid};
 }
 
-void Lift::move_to_target(const double target_y, const double target_z, const lift_position_types lift_position_type, const double bottom_arm_speed, const double top_arm_speed){
+void Lift::move_to_target(const double target_y, const double target_z, const lift_position_types lift_position_type, const bool wait_for_complete, const double bottom_arm_speed, const double top_arm_speed){
   auto[top_arm_angle, bottom_arm_angle, top_arm_pos_angle, bottom_arm_pos_angle, top_arm_neg_angle, bottom_arm_neg_angle, move_valid] = find_arm_angles(target_y, target_z, lift_position_type);
   if (move_valid){
-    f_bar.move_absolute(bottom_arm_angle, top_arm_speed);
+    f_bar.move_absolute(bottom_arm_angle, bottom_arm_speed);
     if(bottom_arm_angle / bottom_arm_gear_ratio > bottom_arm_offset_a) waitUntil(f_bar.get_position() / bottom_arm_gear_ratio > bottom_arm_offset_a);
-    c_bar.move_absolute(top_arm_angle, bottom_arm_speed);
+    c_bar.move_absolute(top_arm_angle, top_arm_speed);
+    if (wait_for_complete){
+      waitUntil(fabs(f_bar.get_position() - bottom_arm_angle) < 15 && fabs(c_bar.get_position() - top_arm_angle) < 15);
+    }
   }
   else printf("POSITION IS INVALID | POS: TOP: %lf, BOTTOM: %lf | NEG: TOP: %lf, BOTTOM: %lf\n", top_arm_pos_angle, bottom_arm_pos_angle, top_arm_neg_angle, bottom_arm_neg_angle);
 }
@@ -301,8 +304,30 @@ void Lift::move_to_target_util(){
 
 void Lift::touch_line(double target_y, double bottom_arm_angle, double speed){ // should be in motor degrees
   double top_arm_angle = rad_to_deg(deg_to_rad(top_arm_offset_a) - acos((cos(deg_to_rad(bottom_arm_angle / bottom_arm_gear_ratio) - deg_to_rad(bottom_arm_offset_a)) * bottom_arm_len + target_y) / top_arm_len)) * top_arm_gear_ratio;
-  if (top_arm_angle > top_arm_upper_limit || top_arm_angle < top_arm_lower_limit)// move is invalid
+  if (top_arm_angle > top_arm_upper_limit || top_arm_angle < top_arm_lower_limit) // move is invalid
     printf("MOVE INVALID: top arm position attempt: %lf\n", top_arm_angle);
   else
     c_bar.move_absolute(top_arm_angle, speed);
+}
+
+void Lift::move_on_line(double target_y, double target_z_start, double target_z_end){
+  move_to_target(target_y, target_z_start); // goes to position above the rings
+  // grabs position for f_bar to reach when at bottom of ring stack
+  auto[top_arm_angle, bottom_arm_angle, top_arm_pos_angle, bottom_arm_pos_angle, top_arm_neg_angle, bottom_arm_neg_angle, move_valid] = lift.find_arm_angles(target_y, target_z_end);
+  f_bar.move(bottom_arm_angle); // moves f_bar to bottom of ring stack
+  while(fabs(f_bar.get_position() - bottom_arm_angle) > 15){  // moves the chain bar to maintain the horizontal distance
+      touch_line(target_y, f_bar.get_position());
+  }
+
+}
+
+void Lift::pickup_rings(){
+  move_on_line(-6.0, 25.0, 13.0);
+  move_to_target(-6.0, 25.0); // goes to position above the rings
+  // grabs position for f_bar to reach when at bottom of ring stack
+  auto[top_arm_angle, bottom_arm_angle, top_arm_pos_angle, bottom_arm_pos_angle, top_arm_neg_angle, bottom_arm_neg_angle, move_valid] = lift.find_arm_angles(-6.0, 13.0);
+  f_bar.move(bottom_arm_angle); // moves f_bar to bottom of ring stack
+  while(fabs(f_bar.get_position() - bottom_arm_angle) > 15){  // moves the chain bar to maintain the horizontal distance
+    touch_line(-6.0, f_bar.get_position());
+  }
 }

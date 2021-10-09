@@ -28,9 +28,11 @@ public:
   void c_bar_cal();
   void f_bar_elastic_util();
   tuple<double, double, double, double, double, double, bool> find_arm_angles(double target_y, double target_z, const lift_position_types lift_position_type = lift_position_types::fastest);  // returns arm_angles
-  void move_to_target(double target_y, double target_z, const lift_position_types lift_position_type = lift_position_types::fastest, const double bottom_arm_speed = 200, const double top_arm_speed = 100);  // actual method to move the lift to a target
+  void move_to_target(double target_y, double target_z, const lift_position_types lift_position_type = lift_position_types::fastest, const bool wait_for_complete = true, const double bottom_arm_speed = 200, const double top_arm_speed = 100);  // actual method to move the lift to a target
   void move_to_target_util(); // utility to move arm with controller
   void touch_line(double target_y, double bottom_arm_angle, double speed = 100); // moves the top arm to contact the line specified by target_y
+  void move_on_line(double target_y, double target_z_start, double target_z_end); // moves the end effector in a vertical line
+  void pickup_rings();
 };
 extern Lift lift;
 

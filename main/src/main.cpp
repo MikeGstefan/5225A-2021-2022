@@ -90,11 +90,33 @@ void opcontrol() {
 	lift.c_bar_cal();
 	lift.f_bar_cal();
 
+	lift.move_to_target(-6.0, 25.0); // goes to position above the rings
+  // grabs position for f_bar to reach when at bottom of ring stack
+  auto[top_arm_angle, bottom_arm_angle, top_arm_pos_angle, bottom_arm_pos_angle, top_arm_neg_angle, bottom_arm_neg_angle, move_valid] = lift.find_arm_angles(-6.0, 13.0);
+  f_bar.move(bottom_arm_angle); // moves f_bar to bottom of ring stack
+  while(fabs(f_bar.get_position() - bottom_arm_angle) > 15){  // moves the chain bar to maintain the horizontal distance
+      lift.touch_line(-6.0, f_bar.get_position());
+  }
+
 	// f_bar.move_absolute(136.776786, 150);
 	// c_bar.move_absolute(24.558264, 80);
 	// lift.move_to_target(-6.0, 13.0);
 	// lift.move_to_target_util();
+	// lift.move_on_line(-6.0, 25.0, 12.0);
 
+	// lift.move_to_target(-6.0, 25);
+	// delay(2000);
+	// lift.move_to_target(-6.0, 13);
+
+		// f_bar.move_velocity(-30);
+		// c_bar.move_velocity(-30);
+		// waitUntil(master.get_digital_new_press(E_CONTROLLER_DIGITAL_B));
+		//
+		// f_bar.move(0);
+		// c_bar.move(0);
+
+
+/*
 	auto[top_arm_angle, bottom_arm_angle, top_arm_pos_angle, bottom_arm_pos_angle, top_arm_neg_angle, bottom_arm_neg_angle, move_valid] = lift.find_arm_angles(-6.0, 13.0);
 	double target_y = -6.0;
 	while(true){
@@ -104,6 +126,7 @@ void opcontrol() {
 		// printf("GOING TO:%lf", ((rad_to_deg(top_arm_offset_a - acos((cos(deg_to_rad(bottom_arm_angle / bottom_arm_gear_ratio) - bottom_arm_offset_a) * bottom_arm_len - target_y) / top_arm_len))) * top_arm_gear_ratio);
 		delay(10);
 	}
+*/
 
 	// f_bar.move_absolute(54 * 7.0, 100);
 	// waitUntil(f_bar.get_position() / 7 > 50);
