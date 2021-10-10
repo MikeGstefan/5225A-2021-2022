@@ -257,7 +257,7 @@ void Lift::move_to_target(const double target_y, const double target_z, const li
     if(bottom_arm_angle / bottom_arm_gear_ratio > bottom_arm_offset_a) waitUntil(f_bar.get_position() / bottom_arm_gear_ratio > bottom_arm_offset_a);
     c_bar.move_absolute(top_arm_angle, top_arm_speed);
     if (wait_for_complete){
-      waitUntil(fabs(f_bar.get_position() - bottom_arm_angle) < 15 && fabs(c_bar.get_position() - top_arm_angle) < 15);
+      waitUntil(fabs(f_bar.get_position() - bottom_arm_angle) < bottom_arm_end_error && fabs(c_bar.get_position() - top_arm_angle) < top_arm_end_error);
     }
   }
   else printf("POSITION IS INVALID | POS: TOP: %lf, BOTTOM: %lf | NEG: TOP: %lf, BOTTOM: %lf\n", top_arm_pos_angle, bottom_arm_pos_angle, top_arm_neg_angle, bottom_arm_neg_angle);
@@ -302,32 +302,47 @@ void Lift::move_to_target_util(){
 	}
 }
 
-void Lift::touch_line(double target_y, double bottom_arm_angle, double speed){ // should be in motor degrees
-  double top_arm_angle = rad_to_deg(deg_to_rad(top_arm_offset_a) - acos((cos(deg_to_rad(bottom_arm_angle / bottom_arm_gear_ratio) - deg_to_rad(bottom_arm_offset_a)) * bottom_arm_len + target_y) / top_arm_len)) * top_arm_gear_ratio;
+double Lift::find_top_arm_angle(const double target_y){
+  return rad_to_deg(deg_to_rad(top_arm_offset_a) - acos((cos(deg_to_rad(f_bar.get_position() / bottom_arm_gear_ratio) - deg_to_rad(bottom_arm_offset_a)) * bottom_arm_len + target_y) / top_arm_len)) * top_arm_gear_ratio;
+}
+
+void Lift::touch_line(const double target_y, double speed){ // should be in motor degrees
+  double top_arm_angle = find_top_arm_angle(target_y);
   if (top_arm_angle > top_arm_upper_limit || top_arm_angle < top_arm_lower_limit) // move is invalid
     printf("MOVE INVALID: top arm position attempt: %lf\n", top_arm_angle);
   else
     c_bar.move_absolute(top_arm_angle, speed);
 }
 
-void Lift::move_on_line(double target_y, double target_z_start, double target_z_end){
+double Lift::get_arm_velocity_ratio(const double target_y){
+  double bottom_arm_angle = deg_to_rad(f_bar.get_position());
+  // is returning derivative of find_top_arm_angle function
+  return (bottom_arm_len * top_arm_gear_ratio * sin(bottom_arm_offset_a - bottom_arm_angle / bottom_arm_gear_ratio)) / (top_arm_len * bottom_arm_gear_ratio * sqrt(1 - pow(bottom_arm_len * cos(bottom_arm_offset_a - bottom_arm_angle / bottom_arm_gear_ratio) + target_y, 2) / pow(top_arm_len, 2)));
+
+}
+
+// void Lift::move_on_line(double target_y, double target_z_start, double target_z_end){
+//   move_to_target(target_y, target_z_start); // goes to position above the rings
+//   // grabs position for f_bar to reach when at bottom of ring stack
+//   auto[top_arm_angle, bottom_arm_angle, top_arm_pos_angle, bottom_arm_pos_angle, top_arm_neg_angle, bottom_arm_neg_angle, move_valid] = lift.find_arm_angles(target_y, target_z_end);
+//   f_bar.move(bottom_arm_angle); // moves f_bar to bottom of ring stack
+//   while(fabs(f_bar.get_position() - bottom_arm_angle) > bottom_arm_end_error){  // moves the chain bar to maintain the horizontal distance
+//       touch_line(target_y, f_bar.get_position());
+//       delay(10);
+//   }
+// }
+
+void Lift::new_move_on_line(double target_y, double target_z_start, double target_z_end){
   move_to_target(target_y, target_z_start); // goes to position above the rings
   // grabs position for f_bar to reach when at bottom of ring stack
   auto[top_arm_angle, bottom_arm_angle, top_arm_pos_angle, bottom_arm_pos_angle, top_arm_neg_angle, bottom_arm_neg_angle, move_valid] = lift.find_arm_angles(target_y, target_z_end);
   f_bar.move(bottom_arm_angle); // moves f_bar to bottom of ring stack
-  while(fabs(f_bar.get_position() - bottom_arm_angle) > 15){  // moves the chain bar to maintain the horizontal distance
+  while(fabs(f_bar.get_position() - bottom_arm_angle) > bottom_arm_end_error){  // moves the chain bar to maintain the horizontal distance
       touch_line(target_y, f_bar.get_position());
+      delay(10);
   }
-
 }
 
 void Lift::pickup_rings(){
   move_on_line(-6.0, 25.0, 13.0);
-  move_to_target(-6.0, 25.0); // goes to position above the rings
-  // grabs position for f_bar to reach when at bottom of ring stack
-  auto[top_arm_angle, bottom_arm_angle, top_arm_pos_angle, bottom_arm_pos_angle, top_arm_neg_angle, bottom_arm_neg_angle, move_valid] = lift.find_arm_angles(-6.0, 13.0);
-  f_bar.move(bottom_arm_angle); // moves f_bar to bottom of ring stack
-  while(fabs(f_bar.get_position() - bottom_arm_angle) > 15){  // moves the chain bar to maintain the horizontal distance
-    touch_line(-6.0, f_bar.get_position());
-  }
 }

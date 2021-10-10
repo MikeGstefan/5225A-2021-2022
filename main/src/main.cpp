@@ -90,14 +90,17 @@ void opcontrol() {
 	lift.c_bar_cal();
 	lift.f_bar_cal();
 
+	lift.pickup_rings();
+/*
 	lift.move_to_target(-6.0, 25.0); // goes to position above the rings
   // grabs position for f_bar to reach when at bottom of ring stack
   auto[top_arm_angle, bottom_arm_angle, top_arm_pos_angle, bottom_arm_pos_angle, top_arm_neg_angle, bottom_arm_neg_angle, move_valid] = lift.find_arm_angles(-6.0, 13.0);
   f_bar.move(bottom_arm_angle); // moves f_bar to bottom of ring stack
   while(fabs(f_bar.get_position() - bottom_arm_angle) > 15){  // moves the chain bar to maintain the horizontal distance
       lift.touch_line(-6.0, f_bar.get_position());
+			delay(10);
   }
-
+*/
 	// f_bar.move_absolute(136.776786, 150);
 	// c_bar.move_absolute(24.558264, 80);
 	// lift.move_to_target(-6.0, 13.0);

@@ -14,6 +14,7 @@ enum class lift_position_types{
 // NOTE: all y positions passed in should be negative on the inside of the lift
 class Lift {
 private:
+  double bottom_arm_end_error = 15.0, top_arm_end_error = 15.0; // the acceptable range of error for the arms
   double top_arm_gear_ratio = 5.0/3.0, bottom_arm_gear_ratio = 7.0;
   double bottom_arm_len = 14.5, top_arm_len = 11.5;
   double dist_between_axles = 10.5;
@@ -30,8 +31,11 @@ public:
   tuple<double, double, double, double, double, double, bool> find_arm_angles(double target_y, double target_z, const lift_position_types lift_position_type = lift_position_types::fastest);  // returns arm_angles
   void move_to_target(double target_y, double target_z, const lift_position_types lift_position_type = lift_position_types::fastest, const bool wait_for_complete = true, const double bottom_arm_speed = 200, const double top_arm_speed = 100);  // actual method to move the lift to a target
   void move_to_target_util(); // utility to move arm with controller
-  void touch_line(double target_y, double bottom_arm_angle, double speed = 100); // moves the top arm to contact the line specified by target_y
+  double find_top_arm_angle(const double target_y); // finds top arm angle that will contact it with a line specified by target_y
+  void touch_line(const double target_y, double speed = 100); // moves the top arm to contact the line specified by target_y
+  double get_arm_velocity_ratio(const double target_y);  // gets ratio of top arm to bottom arm velocity to contact the line specified by target_y
   void move_on_line(double target_y, double target_z_start, double target_z_end); // moves the end effector in a vertical line
+  void new_move_on_line(double target_y, double target_z_start, double target_z_end); // moves the end effector in a vertical line
   void pickup_rings();
 };
 extern Lift lift;

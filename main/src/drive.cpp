@@ -3,21 +3,21 @@
 
 // singleton drivebase instance
 Drivebase drivebase = {{
-  driver("Nikhil", {E_CONTROLLER_ANALOG_LEFT_X, E_CONTROLLER_ANALOG_RIGHT_Y, E_CONTROLLER_ANALOG_RIGHT_X}, {5.315, 1.0, 4.0}),
-  driver("Emily", {E_CONTROLLER_ANALOG_LEFT_X, E_CONTROLLER_ANALOG_RIGHT_Y, E_CONTROLLER_ANALOG_RIGHT_X}, {0.5, 1.42, 4.0}),
-  driver("Sarah", {E_CONTROLLER_ANALOG_LEFT_X, E_CONTROLLER_ANALOG_RIGHT_Y, E_CONTROLLER_ANALOG_RIGHT_X}, {0.5, 1.0, 2.2}),
+  driver("Nikhil", {E_CONTROLLER_ANALOG_LEFT_X, E_CONTROLLER_ANALOG_RIGHT_Y, E_CONTROLLER_ANALOG_RIGHT_X}, {0.0, 1.0, 2.5}),
+  driver("Emily", {E_CONTROLLER_ANALOG_LEFT_X, E_CONTROLLER_ANALOG_RIGHT_Y, E_CONTROLLER_ANALOG_RIGHT_X}, {0.0, 1.0, 2.5}),
+  driver("Sarah", {E_CONTROLLER_ANALOG_LEFT_X, E_CONTROLLER_ANALOG_RIGHT_Y, E_CONTROLLER_ANALOG_RIGHT_X}, {0.0, 1.0, 2.5}),
 }};
 
 // curve file_template
-// curvature:0.5
-// curvature:1.5
-// curvature:3.0
-// curvature:0.5
-// curvature:1.5
-// curvature:3.0
-// curvature:0.5
-// curvature:1.5
-// curvature:3.0
+// curvature:0.0
+// curvature:1.0
+// curvature:2.5
+// curvature:0.0
+// curvature:1.0
+// curvature:2.5
+// curvature:0.0
+// curvature:1.0
+// curvature:2.5
 
 // custom drive methods
 
