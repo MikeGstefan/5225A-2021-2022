@@ -217,29 +217,3 @@ void Drivebase::driver_practice(){
     screen_timer.reset(false);
   }
 }
-
-// TEST
-// Nikhil: local x | input: 35 output:
-// Emily: local x | input: 35, output:
-// Sarah: local x | input: 35, output:
-
-  // Drive::Drive(driver drivers[3]): drivers{drivers[0], drivers[1], drivers[2]}{}
-
-// curve file template
-/*
-curve_type:E curvature:1.5
-curve_type:E curvature:2.0
-curve_type:E curvature:4.0
-*/
-// new curve_file template
-/*
-curvature:0.5 // driver 0
-curvature:1.5
-curvature:4.0
-curvature:0.5 // driver 0
-curvature:1.5
-curvature:4.0
-curvature:0.5 // driver 0
-curvature:1.5
-curvature:4.0
-*/

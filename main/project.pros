@@ -1,7 +1,7 @@
 {
     "py/object": "pros.conductor.project.Project",
     "py/state": {
-        "project_name": "center-grab",
+        "project_name": "lift-testing",
         "target": "v5",
         "templates": {
             "kernel": {

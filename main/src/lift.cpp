@@ -337,8 +337,14 @@ void Lift::new_move_on_line(double target_y, double target_z_start, double targe
   // grabs position for f_bar to reach when at bottom of ring stack
   auto[top_arm_angle, bottom_arm_angle, top_arm_pos_angle, bottom_arm_pos_angle, top_arm_neg_angle, bottom_arm_neg_angle, move_valid] = lift.find_arm_angles(target_y, target_z_end);
   f_bar.move(bottom_arm_angle); // moves f_bar to bottom of ring stack
+  double top_arm_kp = 10.0, top_arm_target, open_loop_velocity, closed_loop_velocity;
+
   while(fabs(f_bar.get_position() - bottom_arm_angle) > bottom_arm_end_error){  // moves the chain bar to maintain the horizontal distance
-      touch_line(target_y, f_bar.get_position());
+      // touch_line(target_y, f_bar.get_position());
+      top_arm_target = find_top_arm_angle(target_y);
+      open_loop_velocity = get_arm_velocity_ratio() * f_bar.get_actual_velocity();
+      closed_loop_velocity = top_arm_kp * (find_top_arm_angle(target_y) - c_bar.get_position());
+      c_bar.move_velocity(open_loop_velocity + closed_loop_velocity);
       delay(10);
   }
 }
