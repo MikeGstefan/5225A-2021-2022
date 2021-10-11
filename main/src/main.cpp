@@ -90,7 +90,16 @@ void opcontrol() {
 	lift.c_bar_cal();
 	lift.f_bar_cal();
 
+	// lift.move_to_target(-6.0, 25.0); // goes to position above the rings
+
 	lift.pickup_rings();
+	// lift.new_move_on_line();
+
+	// while(true){
+	// 	printf("y: %lf\n", lift.find_y_pos());
+	// 	delay(10);
+	// }
+
 /*
 	lift.move_to_target(-6.0, 25.0); // goes to position above the rings
   // grabs position for f_bar to reach when at bottom of ring stack
