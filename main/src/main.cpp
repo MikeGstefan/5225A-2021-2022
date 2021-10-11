@@ -105,6 +105,8 @@ void opcontrol() {
 */
 
 	lift.pickup_rings();
+	lift.new_move_on_line(-4.25, 9.5, 20.0);
+
 	// lift.new_move_on_line();
 
 	// while(true){
