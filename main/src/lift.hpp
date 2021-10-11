@@ -2,6 +2,7 @@
 #include <tuple>
 #include "main.h"
 #include "util.hpp"
+#include "pid.hpp"
 using namespace pros;
 using namespace std;
 
