@@ -6,3 +6,5 @@ extern pros::Motor front_l, front_r, back_l, back_r, lift_m, intake;
 extern pros::ADIEncoder LeftEncoder, RightEncoder, BackEncoder;
 extern pros::ADIDigitalOut claw_in, claw_out;
 extern pros::ADIDigitalIn claw_touch;
+extern pros::ADIDigitalIn intake_zero;
+extern bool running;

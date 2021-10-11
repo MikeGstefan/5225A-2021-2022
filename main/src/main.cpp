@@ -5,7 +5,7 @@
 #include "Tracking.hpp"
 #include "lift.hpp"
 #include "drive.hpp"
-
+#include "intake.hpp"
 #include "gui.hpp"
 // using namespace std;
 // using namespace pros;
@@ -18,25 +18,9 @@
  * to keep execution time for this mode under a few seconds.
  */
 void initialize() {
-<<<<<<< HEAD
-	// drivebase.download_curve_data();
-	//
-		printf("start");
-
-	// tracking.x_coord = 0.0, tracking.y_coord = 0.0, tracking.global_angle = 0.0;
-	// updateStartTask();
-	//
-	// pros::lcd::initialize();
-	// drivebase.download_curve_data();
-	//
-	// delay(150);
-	// updateStartTask();
-	//pros::lcd::initialize();
-=======
 	delay(150);
-	updateStartTask();
+	//updateStartTask();
 	guiSetup();
->>>>>>> GUI
 }
 
 /**
@@ -98,30 +82,26 @@ void autonomous() {
  * task, not resume it from where it left off.
  */
 
-<<<<<<< HEAD
-void hello(){
-	 printf("HELLO\n");
-	 if(intake.get_current_draw() == 0){
-		 intake.move(127);
-	 }else{
-		 intake.move(0);
-	 }
-	 delay(10);
- }
+
+
+
+
 
 void opcontrol() {
-	bool toggle = 0;
-	Page page1 (1,COLOR_GREY);
+
+	Page page1 (1,"",COLOR_GREY);
 	Page::goTo(&page1);
-	Button Text(0,10,0,100, Button::CORNER,&page1, "Intake in Port 6", COLOR_GREY, COLOR_WHITE);
-	Button Intake_Button(150,50,300,150, Button::CORNER,&page1, "Intake Switch", COLOR_WHITE);
-	Intake_Button.setTask(&hello);
+	Button Text(0,10,0,100, Button::CORNER,0,&page1, "Intake in Port 6", COLOR_GREY, COLOR_WHITE);
+	Button Intake_Button(150,50,300,150, Button::CORNER,1,&page1, "Intake Switch", COLOR_WHITE);
+	Intake_Button.setTask(&Start_Task);
 	while (1) {
-		Button::update_press_status();
-		Button::get_press();
-		delay(10);
+		Page::updateScreenStatus();
+		Button::getPress();
+		//if(running)
+		delay(100);
 		/* code */
 	}
+
 	// int power_x, power_y, power_a;
 	// while(true){
 	// 	power_x = master.get_analog(E_CONTROLLER_ANALOG_RIGHT_X);
@@ -232,30 +212,6 @@ void opcontrol() {
 		if(lift.pos_to_height(lift.get_position()) < 10.0 && power_l < 0) power_l = 0;
 		printf("height: %lf\n", lift.pos_to_height(lift.get_position()));
 		if(uptk_state)	lift.move(power_l);
-=======
-void opcontrol() {
-
-	Page liftElastic (1, "Lift - Elastic Test", COLOR_RED); //Testing the elastics on the lift
-	Page liftMove (2, "Lift - Moving"); //Moving the lift to an xyz position
-	Page tracking (3, "Tracking"); //Display tracking vals and reset btns
-	Page autoSel (4, "Auton"); //Select auton routes
-	Page driverCurve (5, "Drivers"); //Select a driver and their exp curve
-	Page intkTest (6, "Intake"); //Test for intake with rings
-	Page temps (7, "Temperature"); //Motor temps
-
-
-	Page::goTo(&autoSel);
-
-	Button tester (50, 75, 100, 50, Button::SIZE, true, &liftMove, "TESTING", COLOR_RED, COLOR_CYAN);
-	Button tester2 (50, 170, 100, 50, Button::SIZE, false, &liftMove, "TESTING", COLOR_VIOLET, COLOR_CYAN);
-	Text blah(225, 100, TEXT_LARGE, &autoSel, "HELLO", COLOR_BLUE);
-
-
-	while(1){
-		//These should probably be called in the background
-		Page::updateScreenStatus();
-		Button::getPress();
->>>>>>> GUI
 		delay(10);
 	}
 */
