@@ -5,6 +5,7 @@
 #include "Tracking.hpp"
 #include "lift.hpp"
 #include "drive.hpp"
+#include "pid.hpp"
 
 // using namespace std;
 // using namespace pros;
@@ -92,7 +93,16 @@ void opcontrol() {
 
 	// lift.move_to_target(-6.0, 25.0); // goes to position above the rings
 
-	lift.pickup_rings();
+	PID bottom_arm(0.6, 0.002, 0.0, 0.0, true, 0.0, 5.0);
+	while(true){
+		// if
+		bottom_arm.compute(f_bar.get_position(), 400);
+		f_bar.move(bottom_arm.get_output());
+		// printf("%lf, %lf\n", f_bar.get_position(), bottom_arm.get_output());
+		delay(10);
+	}
+
+	// lift.pickup_rings();
 	// lift.new_move_on_line();
 
 	// while(true){
