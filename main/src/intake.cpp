@@ -6,7 +6,7 @@ Task *StartTask = nullptr;
 void Intake_loop(){
 	printf("Motor Pos: %f \n", intake.get_position());
 	double intake_pos = 0;
-	double last_zero = 0;
+	double last_zero = intake.get_position();
 	if(intake.get_current_draw() == 0){
 		intake.move(127);
 		while(true){
