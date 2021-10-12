@@ -66,7 +66,8 @@ void autonomous() {}
  */
 
 void opcontrol() {
+//Change pages array to vector
 //Check for variadic text args in constructor for screen printing
-	while(1) backgroundStuff();
+	while(1) {backgroundStuff(); delay(20);}
 
 }

@@ -426,5 +426,4 @@ void backgroundStuff(){
   frTemp = front_r.get_temperature();
   brTemp = back_r.get_temperature();
   angle = rad_to_deg(tracking.global_angle);
-  delay(20);
 }
