@@ -65,31 +65,8 @@ void autonomous() {}
  * task, not resume it from where it left off.
  */
 
-// void pri(std::string msg, double* val){
-// 	// printf(msg.c_str(), val);
-// 	printf("%f\n",*val);
-// }
-
-double flTemp, blTemp, frTemp, brTemp;
 void opcontrol() {
-	//All constructor args are in the format points, format, page, text, color
-
-	Page liftElastic (1, "Lift - Elastic Test", COLOR_RED); //Testing the elastics on the lift
-	Page liftMove (2, "Lift - Moving"); //Moving the lift to an xyz position
-	Page tracking (3, "Tracking"); //Display tracking vals and reset btns
-	Page autoSel (4, "Auton"); //Select auton routes
-	Page driverCurve (5, "Drivers"); //Select a driver and their exp curve
-	Page intkTest (6, "Intake"); //Test for intake with rings
-	Page temps (7, "Temperature"); //Motor temps
-
-
-	Page::goTo(&liftMove);
-	Slider slidtest(50, Page::mid_y, 250, 30, Style::SIZE, 20, 40, &liftMove, "Vertical", COLOR_CYAN, COLOR_YELLOW);
-	Text temp1(25, 100, TEXT_SMALL, &temps, "Front Left: %d", &flTemp);
-	Text temp2(25, 200, TEXT_SMALL, &temps, "Back Left: %d", &blTemp);
-	Text temp3(250, 100, TEXT_SMALL, &temps, "Front Right: %d", &frTemp);
-	Text temp4(250, 200, TEXT_SMALL, &temps, "Back Right: %d", &brTemp);
-
+//Check for variadic text args in constructor for screen printing
 	while(1) backgroundStuff();
 
 }

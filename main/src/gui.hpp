@@ -2,8 +2,15 @@
 #include <vector>
 #include <string>
 #include "main.h"
+#include "tracking.hpp"
 #include "config.hpp"
 using namespace pros;
+
+//Forward-Declaration
+class Page;
+class Button;
+class Slider;
+class Text;
 
 namespace Style{
   enum style{ //how the rect coords get evaluated
@@ -13,17 +20,20 @@ namespace Style{
   };
 };
 
-extern double flTemp, blTemp, frTemp, brTemp;
+extern double flTemp, blTemp, frTemp, brTemp, angle;
+extern Page liftElastic, liftMove, track, autoSel, driverCurve, intkTest, temps, mContr;
+extern Text trackX, trackY, trackA, tempfl, tempbl, tempfr, tempbr;
+extern Button resX, resY, resA, goToXYA;
+extern Slider xVal, yVal, aVal;
+
 void guiSetup();
 void backgroundStuff();
+void flash();
 
-class Page; //So they can access each other
-class Button;
-class Slider;
-struct Text;
+//All constructor args are in the format points, format, page, text, color
 
 class Page{
-  friend struct Text;
+  friend class Text;
   friend class Button;
   friend class Slider;
   private:
@@ -35,22 +45,27 @@ class Page{
     std::string title;
 
   public:
-    enum disp{ //Display Constants
+    enum { //Display Constants
       left = 0,
+      user_left = 0,
       up = 0,
-      right = 479,
-      down = 239, //480 and 240 are the max but offscreen
+      user_up = 25,
+      right = 480,
+      user_right = 479,
+      down = 240,
+      user_down = 239,
       mid_x = 240,
       mid_y = 120,
       char_height = 12,
       char_width = 7
     };
-
-    Page(int page_number, std::string name, std::uint32_t background_color = COLOR_BLACK);
+    //Page num, Title, Bcolor
+    Page(int, std::string, std::uint32_t = COLOR_BLACK);
 
     //Vars
     static Page* currentPage;
     static std::array<Page*, 11> pages;
+    std::function <void()> func;
     std::vector<Button*> buttons;
     std::vector<Slider*> sliders;
     std::vector<Text*> texts;
@@ -58,10 +73,12 @@ class Page{
 
     //Functions
     static void updateScreenStatus ();
-    static void goTo(Page* page);
+    static void goTo(Page*);
+    static void goTo(int);
     static void clearScreen(std::uint32_t color);
     static void toPrev();
     static void toNext();
+    static void update();
 
 };
 
@@ -78,69 +95,84 @@ class Button{
     std::uint32_t lcol, bcol, dark_bcol;
     std::string label;
     int16_t x1, y1, x2, y2, text_x, text_y;
-    void (*funcPtr)(); //This is a var because it is a pointer to a void function, not a void function in itself
+    // void (*funcPtr)(); //This is a var because it is a pointer to a void function, not a void function in itself
     bool lastPressed=0;
-    bool latched=0;
     press_type form;
+
+    //For latch buttons
+    bool latched=0;
+    std::vector<Button*> options;
 
     //Functions
     void runTask();
     void draw();
     void drawPressed();
+    bool newPress();
+    bool newRelease();
 
   public:
     //Constructor
-    Button (int16_t pt1, int16_t pt2, int16_t pt3, int16_t pt4, Style::style type, press_type prType, Page* page_number, std::string text = "", std::uint32_t background_color = COLOR_BLACK, std::uint32_t label_color = COLOR_WHITE);
+    //Points, Format, Page, Label, Bcolor, Lcolor
+    Button (int16_t, int16_t, int16_t, int16_t, Style::style, press_type, Page*, std::string = "", std::uint32_t = COLOR_WHITE, std::uint32_t = COLOR_BLACK);
+    Button (){};
+    void construct (int16_t, int16_t, int16_t, int16_t, Style::style, press_type, Page*, std::string, std::uint32_t, std::uint32_t);
 
     //Vars
     Page* page;
+    std::function <void()> func;
 
     //Functions
-    static Button* getPress();
-    void setTask(void (*pointer_to_function)());
-    void del();
+    static Button* update();
+    static void createOptions(std::vector<Button*>);
     bool pressed();
-    bool newPress();
+    // void setTask(void (*)()); //Unused
+    // void del();
 };
 
 class Slider{
   friend class Page;
-  friend class Button;
   private:
     //Vars
     std::uint32_t lcol, bcol;
     std::string label;
     int16_t x1, y1, x2, y2, text_x, text_y;
     int min, max;
+    Button slideLeft, slideRight;
 
     //Functions
     void draw();
 
   public:
-    Slider (int16_t pt1, int16_t pt2, int16_t pt3, int16_t pt4, Style::style type, int minimum, int maximum, Page* page_number, std::string text = "", std::uint32_t background_color = COLOR_BLACK, std::uint32_t label_color = COLOR_WHITE);
+    //Points, Format, Min, Max, Page, Label, Bcolor, Lcolor
+    Slider (int16_t, int16_t, int16_t, int16_t, Style::style, int, int, Page*, std::string = "", std::uint32_t = COLOR_WHITE, std::uint32_t = COLOR_YELLOW);
 
     //Vars
     Page* page;
-    int val=0, prevVal;
+    double val=0.0, prevVal;
 
     //Functions
+    static Slider* update();
     void updateVal();
 };
 
-struct Text{
-  int16_t x, y;
-  text_format_e_t txt_fmt;
-  std::string label;
-  std::uint32_t lcol;
-  Page* page;
-  double* val_ptr;
+class Text{
+  friend class Page;
+  private:
+    int16_t x, y;
+    text_format_e_t txt_fmt;
+    std::string label;
+    std::uint32_t lcol;
+    Page* page;
+    double* val_ptr;
+    double prevVal;
 
-  Text (int16_t point1, int16_t point2, text_format_e_t size, Page* page_ptr, std::string text, std::uint32_t label_color = COLOR_WHITE);
-  Text (int16_t point1, int16_t point2, text_format_e_t size, Page* page_ptr, std::string text, double* val_ref, std::uint32_t label_color = COLOR_WHITE);
+    void construct (int16_t, int16_t, text_format_e_t, Page*, std::string, std::uint32_t label_color);
+    void draw();
 
-  void draw();
+  public:
+    //Points, Format, Page, Label, [var], Lcolor
+    Text (int16_t, int16_t, text_format_e_t, Page*, std::string, std::uint32_t label_color = COLOR_WHITE);
+    Text (int16_t, int16_t, text_format_e_t, Page*, std::string, double*, std::uint32_t label_color = COLOR_WHITE);
+
+    static void update();
 };
-
-//test if creating btn and text objects cause issues
-//Maybe allow page functions so they can display [moving] things on the screen (like robot cur pos on the field)
-//Check for variadic text in constructor for screen printing
