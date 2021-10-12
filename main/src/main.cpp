@@ -17,7 +17,7 @@
  * to keep execution time for this mode under a few seconds.
  */
 void initialize() {
-	// drivebase.download_curve_data();
+	drivebase.download_curve_data();
 
 	delay(150);
 	tracking.x_coord = 0.0, tracking.y_coord = 0.0, tracking.global_angle = 0.0;
@@ -87,10 +87,11 @@ void autonomous() {
  * task, not resume it from where it left off.
  */
 void opcontrol() {
-	lift.c_bar_cal();
-	lift.f_bar_cal();
+	drivebase.driver_practice();
+	// lift.c_bar_cal();
+	// lift.f_bar_cal();
 
-	lift.pickup_rings();
+	// lift.pickup_rings();
 /*
 	lift.move_to_target(-6.0, 25.0); // goes to position above the rings
   // grabs position for f_bar to reach when at bottom of ring stack

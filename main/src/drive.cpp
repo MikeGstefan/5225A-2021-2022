@@ -89,18 +89,18 @@ void Drivebase::download_curve_data(){
   }
 
   for (short driver = 0; driver < num_of_drivers; driver++){  // reads curve curvature from curve file
-    printf("num of drivers:%d\n", num_of_drivers);
+    printf("num of drivers: %d\n", num_of_drivers);
     printf("DRIVER: %s\n", drivers[driver].name);
     for (short curvature = 0; curvature < 3; curvature++){
-      if (curve_file_exists)  fscanf(curve_file, "curvature:%lf\n", &drivers[driver].custom_drives[curvature].curvature);
-      printf("curvature:%lf\n", drivers[driver].custom_drives[curvature].curvature);
+      if (curve_file_exists)  fscanf(curve_file, "curvature: %lf\n", &drivers[driver].custom_drives[curvature].curvature);
+      printf("curvature: %lf\n", drivers[driver].custom_drives[curvature].curvature);
       drivers[driver].custom_drives[curvature].fill_lookup_table();
       delay(1);
     }
   }
 
 }
-// LOOK AT THIS LATER
+
 void Drivebase::update_lookup_table_util(){
     download_curve_data();
 
@@ -157,8 +157,8 @@ void Drivebase::update_lookup_table_util(){
 
     for (short driver = 0; driver < num_of_drivers; driver++){  // uploads curve data to curve file
       for (short curvature = 0; curvature < 3; curvature++){
-        fprintf(curve_file, "curvature:%lf\n", drivers[driver].custom_drives[curvature].curvature);
-        printf("curvature:%lf\n", drivers[driver].custom_drives[curvature].curvature);
+        fprintf(curve_file, "curvature: %lf\n", drivers[driver].custom_drives[curvature].curvature);
+        printf("curvature: %lf\n", drivers[driver].custom_drives[curvature].curvature);
       }
     }
 
@@ -185,6 +185,7 @@ void Drivebase::driver_practice(){
   delay(50);
   master.print(2, 0, "Driver: %s", drivers[cur_driver].name);
   screen_timer.reset();
+  cur_driver = 1;
   while(true){
     while(!master.get_digital_new_press(E_CONTROLLER_DIGITAL_B)){
       if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_UP)){
