@@ -1,1 +1,0 @@
-tracking.txt,$01,pos.txt,$02,tracking.txt,$03,

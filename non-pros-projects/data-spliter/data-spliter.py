@@ -21,12 +21,14 @@ def find_in_meta(data, target):
 
 
 #pull meta data
-path = os.path.join(dir,meta_file_name)
 
+path = os.path.join(dir,meta_file_name)
 pos = 0
 last_pos = pos
 file = open(path,"r")
+print("meta data found")
 conts = file.read()
+file.close()
 meta_data= []
 counter = 0
 while(True):
@@ -42,6 +44,7 @@ while(True):
 
 
 #create the path
+print("Creating path")
 path = os.path.join(dir,output_folder)
 while(True):
     if(os.path.isdir(path)):
@@ -52,9 +55,10 @@ while(True):
         os.mkdir(path)
         break
 output_folder = path
-
+print("Path created")
 
 #create files in output path
+print("Creating output files")
 for i in meta_data:
     path = os.path.join(output_folder, i[0])
     try:
@@ -63,12 +67,12 @@ for i in meta_data:
         print("File exisits")
     finally:
         file.close()
-
+print("output files created")
 
 
 buffer = ''
 
-print(conts)
+print("Outputting data")
 done = False
 length = 4000
 path = os.path.join(dir,file_name)
@@ -86,12 +90,12 @@ while(not done):
         try:
             pos = conts.index(SEP,last_pos)
             location = conts[pos:pos+3]
-            print(location)
             if(not find_in_meta(meta_data,location) == 'none'):
                 # print(find_in_meta(meta_data,location)[0])
                 path = os.path.join(output_folder, find_in_meta(meta_data,location)[0])
                 file = open(path,"a")
                 file.write(conts[last_pos:pos])
+                print(conts[last_pos:pos])
                 file.close()
                 last_pos = pos+3
             else:
@@ -102,5 +106,6 @@ while(not done):
             buffer = conts[last_pos:len(conts)]
             break
 data_file.close()
+print("done")
 
 
