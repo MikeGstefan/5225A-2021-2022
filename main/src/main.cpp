@@ -16,6 +16,8 @@
 void initialize() {
 	delay(150);
 	updateStartTask();
+	// logging_task_start();
+	Data::log_init();
 
 }
 
