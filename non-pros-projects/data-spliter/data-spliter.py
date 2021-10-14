@@ -107,5 +107,8 @@ while(not done):
             break
 data_file.close()
 print("done")
+data_file = open(os.path.join(dir,file_name), "w")
+data_file.write('')
+data_file.close()
 
 
