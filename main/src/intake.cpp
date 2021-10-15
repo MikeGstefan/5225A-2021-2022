@@ -1,43 +1,40 @@
 #include "intake.hpp"
 
 Task *InTask = nullptr;
-Task *StartTask = nullptr;
+
 
 void Intake_loop(){
-	printf("Motor Pos: %f \n", intake.get_position());
 	double intake_pos = 0;
 	double last_zero = intake.get_position();
-	if(intake.get_current_draw() == 0){
-		intake.move(127);
-		while(true){
-			intake_pos = intake.get_position() - last_zero;
-				if(intake_zero.get_new_press()){
-					intake.set_zero_position(intake.get_position());
-					intake_pos = 0;
-					last_zero = intake.get_position();
-				}
-				if(intake_pos >= 770 && intake_pos < 950){
-					intake.move(50);
-				}else if(intake_pos >= 690 && intake_pos < 770){
-					intake.move(80);
-				}else{
-					intake.move(127);
-				}
-				delay(10);
+	double last_pos = 0;
+	uint32_t time_started = millis();
+	printf("Started Program: %u\n", time_started);
+	intake.move(127);
+	while(true){
+		//printf("Motor Pos: %f, Raw Motor Pos: %f, Last Pos: %f \n", intake_pos, intake.get_position(), last_pos);
+		printf("Raw Time: %d, Time: %u, Diff: %f \n", millis(), millis() - time_started, intake.get_position() -intake_pos);
+		if((intake.get_position() - intake_pos) <= 5 && (millis() - time_started) > 1000){
+			printf("Jam Detected\n");
+			intake.move(0);
+			InTask = nullptr;
+			break;
 		}
-	}else{
-		intake.move(0);
+		intake_pos = intake.get_position();
+		delay(10);
 	}
 }
 
 void Start_Task(){
+	printf("here\n");
   if(InTask != nullptr){
     InTask->remove();
     delete InTask;
     InTask = nullptr;
     delay(50);
     intake.move(0);
+		printf("killed Task\n");
   }else{
+		printf("Started Task\n");
     InTask = new Task(&Intake_loop);
   }
 }

@@ -21,6 +21,8 @@ void initialize() {
 	delay(150);
 	//updateStartTask();
 	guiSetup();
+
+
 }
 
 /**
@@ -88,11 +90,10 @@ void autonomous() {
 
 
 void opcontrol() {
-
 	Page page1 (1,"",COLOR_GREY);
 	Page::goTo(&page1);
 	Button Text(0,10,0,100, Button::CORNER,0,&page1, "Intake in Port 6", COLOR_GREY, COLOR_WHITE);
-	Button Intake_Button(150,50,300,150, Button::CORNER,1,&page1, "Intake Switch", COLOR_WHITE);
+	Button Intake_Button(150,50,300,150, Button::CORNER,0,&page1, "Intake Switch", COLOR_WHITE);
 	Intake_Button.setTask(&Start_Task);
 	while (1) {
 		Page::updateScreenStatus();
