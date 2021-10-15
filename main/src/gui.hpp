@@ -26,6 +26,8 @@ extern Text trackX, trackY, trackA, tempfl, tempbl, tempfr, tempbr;
 extern Button resX, resY, resA, goToXYA;
 extern Slider xVal, yVal, aVal;
 
+extern int cur_driver;
+
 void guiSetup();
 void backgroundStuff();
 void flash();
@@ -64,7 +66,7 @@ class Page{
 
     //Vars
     static Page* currentPage;
-    static std::array<Page*, 11> pages;
+    static std::vector<Page*> pages;
     std::function <void()> func;
     std::vector<Button*> buttons;
     std::vector<Slider*> sliders;
@@ -79,6 +81,7 @@ class Page{
     static void toPrev();
     static void toNext();
     static void update();
+    bool pressed();
 
 };
 
@@ -125,12 +128,16 @@ class Button{
     static Button* update();
     static void createOptions(std::vector<Button*>);
     bool pressed();
-    // void setTask(void (*)()); //Unused
-    // void del();
+    void del(); //Unused
 };
 
 class Slider{
   friend class Page;
+  public: enum direction{
+      VERTICAL,
+      HORIZONTAL
+  };
+
   private:
     //Vars
     std::uint32_t lcol, bcol;
@@ -138,13 +145,14 @@ class Slider{
     int16_t x1, y1, x2, y2, text_x, text_y;
     int min, max;
     Button slideLeft, slideRight;
+    direction dir;
 
     //Functions
     void draw();
 
   public:
     //Points, Format, Min, Max, Page, Label, Bcolor, Lcolor
-    Slider (int16_t, int16_t, int16_t, int16_t, Style::style, int, int, Page*, std::string = "", std::uint32_t = COLOR_WHITE, std::uint32_t = COLOR_YELLOW);
+    Slider (int16_t, int16_t, int16_t, int16_t, Style::style, direction, int, int, Page*, std::string = "", std::uint32_t = COLOR_WHITE, std::uint32_t = COLOR_YELLOW);
 
     //Vars
     Page* page;
@@ -157,6 +165,7 @@ class Slider{
 
 class Text{
   friend class Page;
+
   private:
     int16_t x, y;
     text_format_e_t txt_fmt;

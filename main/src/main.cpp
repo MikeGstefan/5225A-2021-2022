@@ -65,9 +65,13 @@ void autonomous() {}
  * task, not resume it from where it left off.
  */
 
+int cur_driver = 1; //Get rid of this once drivers is implemented
 void opcontrol() {
-//Change pages array to vector
+//center text
+//write motor controls
+//test flash
+//Check that vertical sliders work
+//make options throw error for not latch
 //Check for variadic text args in constructor for screen printing
 	while(1) {backgroundStuff(); delay(20);}
-
 }
