@@ -7,4 +7,5 @@ extern pros::ADIEncoder LeftEncoder, RightEncoder, BackEncoder;
 extern pros::ADIDigitalOut claw_in, claw_out;
 extern pros::ADIDigitalIn claw_touch;
 extern pros::ADIDigitalIn intake_zero;
+extern pros::Distance distance_intake;
 extern bool running;

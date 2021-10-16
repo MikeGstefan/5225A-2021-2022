@@ -21,8 +21,7 @@ void initialize() {
 	delay(150);
 	//updateStartTask();
 	guiSetup();
-
-
+	intake.set_brake_mode(E_MOTOR_BRAKE_HOLD);
 }
 
 /**
@@ -94,12 +93,16 @@ void opcontrol() {
 	Page::goTo(&page1);
 	Button Text(0,10,0,100, Button::CORNER,0,&page1, "Intake in Port 6", COLOR_GREY, COLOR_WHITE);
 	Button Intake_Button(150,50,300,150, Button::CORNER,0,&page1, "Intake Switch", COLOR_WHITE);
-	Intake_Button.setTask(&Start_Task);
+	Button Reset_Button(250,200,300,150, Button::CORNER,0,&page1, "Reset Button", COLOR_WHITE);
+	Intake_Button.setTask(&On_Off_Task);
+	Reset_Button.setTask(&Reset);
+	Intake_Setup();
 	while (1) {
 		Page::updateScreenStatus();
 		Button::getPress();
-		//if(running)
-		delay(100);
+		Intake_loop();
+		Intake_debug();
+		delay(10);
 		/* code */
 	}
 
