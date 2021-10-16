@@ -54,10 +54,11 @@ class Drivebase {
 
 public:
   int cur_driver = 0;  // driver to defaults to Nikhil
-  int num_of_drivers;
+  static constexpr int num_of_drivers = 5;
   FILE* curve_file;
-  std::vector<driver> drivers;  // driver profiles
-  Drivebase(std::vector<driver> drivers); // constructor
+  bool curve_file_exists;
+  std::array<driver, num_of_drivers> drivers;  // driver profiles
+  Drivebase(std::array<driver, num_of_drivers> drivers); // constructor
   void move(double x, double y, double a);
   void brake();
   void download_curve_data();
