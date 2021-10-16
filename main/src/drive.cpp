@@ -183,9 +183,9 @@ void Drivebase::handle_input(){
 void Drivebase::driver_practice(){
   master.clear();
   delay(50);
+  cur_driver = 1;
   master.print(2, 0, "Driver: %s", drivers[cur_driver].name);
   screen_timer.reset();
-  cur_driver = 1;
   while(true){
     while(!master.get_digital_new_press(E_CONTROLLER_DIGITAL_B)){
       if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_UP)){
