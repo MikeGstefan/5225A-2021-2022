@@ -106,7 +106,7 @@ void Drivebase::download_curve_data(){
       delay(1);
     }
   }
-
+  fclose(curve_file);
 }
 
 void Drivebase::update_lookup_table_util(){
@@ -173,9 +173,9 @@ void Drivebase::update_lookup_table_util(){
           printf("curvature:%lf\n", drivers[driver].custom_drives[curvature].curvature);
         }
       }
+      fclose(curve_file);
     }
 
-    fclose(curve_file);
     WAIT_FOR_SCREEN_REFRESH();
     master.print(0, 0, "Saved.");
     delay(200);

@@ -20,9 +20,7 @@ using namespace pros;
 }
 
 class custom_drive{
-  // curve_types curve_type = curve_types::polynomial; // defaults to polynomial if not specified
   int lookup_table[255];
-
   // curve functions
   int polynomial(int x);
   int exponential(int x);
@@ -61,10 +59,10 @@ public:
   Drivebase(std::array<driver, num_of_drivers> drivers); // constructor
   void move(double x, double y, double a);
   void brake();
-  void download_curve_data();
-  void update_lookup_table_util();
-  void handle_input();
-  void driver_practice();
+  void download_curve_data(); // grabs data from SD card and copies to driver arrays
+  void update_lookup_table_util();  // utility to alter expo curves for any driver
+  void handle_input();  // move the drivebase according to lookup tables from a joystick input
+  void driver_practice(); // method to let drivers drive and change driver profiles
 };
 
 extern Drivebase drivebase;
