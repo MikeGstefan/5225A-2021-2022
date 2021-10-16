@@ -92,7 +92,7 @@ void Drivebase::download_curve_data(){
     printf("num of drivers: %d\n", num_of_drivers);
     printf("DRIVER: %s\n", drivers[driver].name);
     for (short curvature = 0; curvature < 3; curvature++){
-      if (curve_file_exists)  fscanf(curve_file, "curvature: %lf\n", &drivers[driver].custom_drives[curvature].curvature);
+      if (curve_file_exists)  fscanf(curve_file, "curvature:%lf\n", &drivers[driver].custom_drives[curvature].curvature);
       printf("curvature: %lf\n", drivers[driver].custom_drives[curvature].curvature);
       drivers[driver].custom_drives[curvature].fill_lookup_table();
       delay(1);
@@ -157,8 +157,8 @@ void Drivebase::update_lookup_table_util(){
 
     for (short driver = 0; driver < num_of_drivers; driver++){  // uploads curve data to curve file
       for (short curvature = 0; curvature < 3; curvature++){
-        fprintf(curve_file, "curvature: %lf\n", drivers[driver].custom_drives[curvature].curvature);
-        printf("curvature: %lf\n", drivers[driver].custom_drives[curvature].curvature);
+        fprintf(curve_file, "curvature:%lf\n", drivers[driver].custom_drives[curvature].curvature);
+        printf("curvature:%lf\n", drivers[driver].custom_drives[curvature].curvature);
       }
     }
 
