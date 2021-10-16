@@ -45,7 +45,7 @@ struct driver{
 
 // Nikhil is 0, Emily is 1, Sarah is 2
 
-class Drivebase{
+class Drivebase {
   Timer screen_timer = {"screen_timer"};
   int cur_screen;
   int deadzone = 5;
@@ -54,10 +54,10 @@ class Drivebase{
 
 public:
   int cur_driver = 0;  // driver to defaults to Nikhil
-  int num_of_drivers = 3;
+  int num_of_drivers;
   FILE* curve_file;
-  std::array<driver, 3> drivers;  // driver profiles
-  Drivebase(std::array<driver, 3> drivers); // constructor
+  std::vector<driver> drivers;  // driver profiles
+  Drivebase(std::vector<driver> drivers); // constructor
   void move(double x, double y, double a);
   void brake();
   void download_curve_data();

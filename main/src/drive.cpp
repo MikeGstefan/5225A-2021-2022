@@ -6,6 +6,7 @@ Drivebase drivebase = {{
   driver("Nikhil", {E_CONTROLLER_ANALOG_LEFT_X, E_CONTROLLER_ANALOG_RIGHT_Y, E_CONTROLLER_ANALOG_RIGHT_X}, {0.0, 1.0, 2.5}),
   driver("Emily", {E_CONTROLLER_ANALOG_LEFT_X, E_CONTROLLER_ANALOG_RIGHT_Y, E_CONTROLLER_ANALOG_RIGHT_X}, {0.0, 1.0, 2.5}),
   driver("Sarah", {E_CONTROLLER_ANALOG_LEFT_X, E_CONTROLLER_ANALOG_RIGHT_Y, E_CONTROLLER_ANALOG_RIGHT_X}, {0.0, 1.0, 2.5}),
+  driver("Andrew", {E_CONTROLLER_ANALOG_LEFT_X, E_CONTROLLER_ANALOG_LEFT_Y, E_CONTROLLER_ANALOG_RIGHT_X}, {0.0, 1.0, 2.5}),
 }};
 
 // curve file_template
@@ -53,7 +54,9 @@ name(name), joy_sticks{joy_sticks[0], joy_sticks[1], joy_sticks[2]}, custom_driv
 {}
 
 // Drivebase class constructor
-Drivebase::Drivebase(std::array<driver, 3> drivers): drivers(drivers){}
+Drivebase::Drivebase(std::vector<driver> drivers) : drivers(drivers) {
+  num_of_drivers = drivers.size();
+}
 
 void Drivebase::move(double x, double y, double a){
   front_l.move(x + y + a);
