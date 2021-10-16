@@ -37,9 +37,7 @@ public:
   double find_top_arm_angle(const double target_y); // finds top arm angle that will contact it with a line specified by target_y
   void touch_line(const double target_y, double speed = 100); // moves the top arm to contact the line specified by target_y
   double get_arm_velocity_ratio(const double target_y);  // gets ratio of top arm to bottom arm velocity to contact the line specified by target_y
-  void old_move_on_line(double target_y, double target_z_start, double target_z_end); // moves the end effector in a vertical line
   void move_on_line(double target_y, double target_z_start, double target_z_end); // moves the end effector in a vertical line
-  void new_move_on_line(double target_y, double target_z_start, double target_z_end); // moves the end effector in a vertical line
   void pickup_rings();
 };
 extern Lift lift;

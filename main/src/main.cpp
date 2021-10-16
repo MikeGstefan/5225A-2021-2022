@@ -103,7 +103,9 @@ void opcontrol() {
 		delay(10);
 	}
 */
-	// delay(1000);
+	lift.move_to_target(-6.0, 18.0);
+	delay(500);
+
 	lift.pickup_rings();
 
 	// lift.new_move_on_line();
