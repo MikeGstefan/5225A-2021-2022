@@ -264,9 +264,9 @@ void Lift::move_on_line(double target_y, double target_z_start, double target_z_
   while(fabs(target_z_end - find_z_pos()) > 0.5 || fabs(target_y - find_y_pos()) > 0.5){  // moves the chain bar to maintain the horizontal distance
       top_arm_target = find_top_arm_angle(target_y);
       // printf("target: %lf, actual: %lf, diff: %lf, vel: %lf\n", top_arm_target, c_bar.get_position(), find_top_arm_angle(target_y) - c_bar.get_position(), (find_top_arm_angle(target_y) - c_bar.get_position()) * top_arm_kp);
-      ratio = get_arm_velocity_ratio(target_y);
+      ratio = get_arm_velocity_ratio(target_y + system_delay * f_bar.get_actual_velocity());
       // printf("ratio: %lf, f_bar_pos: %lf, f_bar_pos_rad: %lf, f_bar_vel: %lf, acc_vel: %lf\n", ratio, f_bar.get_position(), deg_to_rad(f_bar.get_position()), f_bar.get_actual_velocity(), ratio * f_bar.get_actual_velocity());
-      open_loop_velocity = (ratio + system_delay) * f_bar.get_actual_velocity();
+      open_loop_velocity = ratio * f_bar.get_actual_velocity();
       top_arm.compute(c_bar.get_position(), find_top_arm_angle(target_y));
       closed_loop_velocity = top_arm.get_output();
 
