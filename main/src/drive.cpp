@@ -95,11 +95,11 @@ void Drivebase::download_curve_data(){
   if(!curve_file_exists) {
     printf("WARNING: curve_file not found, using default data\n");
   }
-
+  // reads data for each driver from file
   for (short driver = 0; driver < num_of_drivers; driver++){  // reads curve curvature from curve file
     printf("num of drivers: %d\n", num_of_drivers);
     printf("DRIVER: %s\n", drivers[driver].name);
-    for (short curvature = 0; curvature < 3; curvature++){
+    for (short curvature = 0; curvature < 3; curvature++){  // reads data for each axis of motion
       if (curve_file_exists)  fscanf(curve_file, "curvature:%lf\n", &drivers[driver].custom_drives[curvature].curvature);
       printf("curvature: %lf\n", drivers[driver].custom_drives[curvature].curvature);
       drivers[driver].custom_drives[curvature].fill_lookup_table();
@@ -201,21 +201,21 @@ void Drivebase::driver_practice(){
   screen_timer.reset();
   while(true){
     while(!master.get_digital_new_press(E_CONTROLLER_DIGITAL_B)){
-      if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_UP)){
+      if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_UP)){ // goes to next driver
         cur_driver++;
         cur_driver %= num_of_drivers; // rollover
         WAIT_FOR_SCREEN_REFRESH();
         // spaces in the controller print are to overwrite names
         master.print(2, 0, "Driver: %s          ", drivers[cur_driver].name);
       }
-      else if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_DOWN)){
+      else if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_DOWN)){  // goes to previous driver
         if (cur_driver == 0)  cur_driver = num_of_drivers - 1;
         else cur_driver--;
         WAIT_FOR_SCREEN_REFRESH();
         master.print(2, 0, "Driver: %s          ", drivers[cur_driver].name);
       }
       drivebase.handle_input();
-      // prints motor temps
+      // prints motor temps every 50 ms
       if(screen_timer.get_time() > 50){
         printf("fl%.0f r%.0f bl%.0f r%.0f\n", front_l.get_temperature(), front_r.get_temperature(), back_l.get_temperature(), back_r.get_temperature());
         master.print(0, 0, "fl%.0f r%.0f bl%.0f r%.0f\n", front_l.get_temperature(), front_r.get_temperature(), back_l.get_temperature(), back_r.get_temperature());

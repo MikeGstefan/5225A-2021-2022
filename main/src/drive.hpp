@@ -14,6 +14,7 @@ using namespace pros;
 // aliases to make code more readable, used to encode vales of drive.cur_driver
 // enum class drivers{Nikhil = 0, Emily = 1, Sarah = 2};
 
+// wait until at least 50 ms since the last reset
 #define WAIT_FOR_SCREEN_REFRESH() {\
   delay(screen_timer.get_time() < 50 ? 50 - screen_timer.get_time() : 0);\
   screen_timer.reset();\
@@ -22,14 +23,14 @@ using namespace pros;
 class custom_drive{
   int lookup_table[255];
   // curve functions
-  int polynomial(int x);
-  int exponential(int x);
+  int polynomial(int x);  // transforms a linear input to a polynomially tranformed output
+  int exponential(int x);  // transforms a linear input to a exponentially tranformed output
 
 public:
   double curvature;
   custom_drive(double curvature); // constructor
-  void fill_lookup_table();
-  int lookup(int x);
+  void fill_lookup_table(); // transforms linear mapping to exponential mapping for a singular axis
+  int lookup(int x);  // returns transformed value from lookup table, taking in an x input
 };
 
 struct driver{
@@ -37,7 +38,7 @@ struct driver{
   // 0 is strafe, 1 is forward, 2 is turn
   std::array<controller_analog_e_t, 3> joy_sticks;
   std::array<custom_drive, 3> custom_drives;
-  driver(const char* name, std::array<controller_analog_e_t, 3> joy_sticks, std::array<custom_drive, 3> custom_drives);
+  driver(const char* name, std::array<controller_analog_e_t, 3> joy_sticks, std::array<custom_drive, 3> custom_drives); // constructor
 };
 
 
@@ -57,7 +58,7 @@ public:
   bool curve_file_exists;
   std::array<driver, num_of_drivers> drivers;  // driver profiles
   Drivebase(std::array<driver, num_of_drivers> drivers); // constructor
-  void move(double x, double y, double a);
+  void move(double x, double y, double a);  // sets the power for each drive motor based on x, y and angular power
   void brake();
   void download_curve_data(); // grabs data from SD card and copies to driver arrays
   void update_lookup_table_util();  // utility to alter expo curves for any driver
