@@ -83,6 +83,7 @@ void autonomous() {
  * task, not resume it from where it left off.
  */
 
+<<<<<<< HEAD
 
 
 
@@ -219,4 +220,17 @@ void opcontrol() {
 		delay(10);
 	}
 */
+=======
+int cur_driver = 1; //Get rid of this once drivers is implemented
+void opcontrol() {
+  Page::goTo(&moving);
+
+	Slider aVal(100, 100, 130, 200, Style::CORNER, Slider::VERTICAL, 0, 144, &autoSel, "A", COLOR_WHITE, COLOR_YELLOW);
+	Text test(200, 100, Style::CORNER, TEXT_LARGE, &autoSel, "TEST TEXT");
+	alignedCoords(3, 2, 90, 80);
+
+  //Check that vertical sliders work
+  //Check for variadic text args in constructor for screen printing
+	while(1) {backgroundStuff(); delay(20);}
+>>>>>>> GUI
 }
