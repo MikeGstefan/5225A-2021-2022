@@ -21,7 +21,7 @@ namespace Style{
 };
 
 extern double flTemp, blTemp, frTemp, brTemp, angle;
-extern Page liftElastic, liftMove, track, autoSel, driverCurve, intkTest, temps, mContr;
+extern Page liftElastic, liftMove, track, moving, autoSel, driverCurve, intkTest, temps, mContr;
 extern Text trackX, trackY, trackA, tempfl, tempbl, tempfr, tempbr;
 extern Button resX, resY, resA, goToXYA;
 extern Slider xVal, yVal, aVal;
@@ -30,7 +30,7 @@ extern int cur_driver;
 
 void guiSetup();
 void backgroundStuff();
-void flash();
+void flash(std::uint32_t color, std::uint32_t time);
 
 //All constructor args are in the format points, format, page, text, color
 
@@ -66,7 +66,7 @@ class Page{
 
     //Vars
     static Page* currentPage;
-    static std::vector<Page*> pages;
+    static std::array<Page*, 9> pages;
     std::function <void()> func;
     std::vector<Button*> buttons;
     std::vector<Slider*> sliders;
@@ -110,8 +110,6 @@ class Button{
     void runTask();
     void draw();
     void drawPressed();
-    bool newPress();
-    bool newRelease();
 
   public:
     //Constructor
@@ -128,6 +126,8 @@ class Button{
     static Button* update();
     static void createOptions(std::vector<Button*>);
     bool pressed();
+    bool newPress();
+    bool newRelease();
     void del(); //Unused
 };
 
@@ -175,13 +175,13 @@ class Text{
     double* val_ptr;
     double prevVal;
 
-    void construct (int16_t, int16_t, text_format_e_t, Page*, std::string, std::uint32_t label_color);
+    void construct (int16_t, int16_t, Style::style, text_format_e_t, Page*, std::string, std::uint32_t label_color);
     void draw();
 
   public:
     //Points, Format, Page, Label, [var], Lcolor
-    Text (int16_t, int16_t, text_format_e_t, Page*, std::string, std::uint32_t label_color = COLOR_WHITE);
-    Text (int16_t, int16_t, text_format_e_t, Page*, std::string, double*, std::uint32_t label_color = COLOR_WHITE);
+    Text (int16_t, int16_t, Style::style, text_format_e_t, Page*, std::string, std::uint32_t label_color = COLOR_WHITE);
+    Text (int16_t, int16_t, Style::style, text_format_e_t, Page*, std::string, double*, std::uint32_t label_color = COLOR_WHITE);
 
     static void update();
 };

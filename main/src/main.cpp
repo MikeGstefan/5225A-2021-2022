@@ -67,11 +67,14 @@ void autonomous() {}
 
 int cur_driver = 1; //Get rid of this once drivers is implemented
 void opcontrol() {
-//center text
-//write motor controls
-//test flash
-//Check that vertical sliders work
-//make options throw error for not latch
-//Check for variadic text args in constructor for screen printing
+  Page::goTo(1);
+
+	// Slider aVal(100, 40, 130, 200, Style::CORNER, Slider::VERTICAL, 0, 144, &autoSel, "A", COLOR_WHITE, COLOR_YELLOW);
+
+
+  //write motor controls
+  //Check that vertical sliders work
+  //make options throw error for not latch
+  //Check for variadic text args in constructor for screen printing
 	while(1) {backgroundStuff(); delay(20);}
 }
