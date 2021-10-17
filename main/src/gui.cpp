@@ -42,7 +42,7 @@ Page driverCurve (6, "Drivers"); //Select a driver and their exp curve
 Button Nik(30, Page::mid_y-30, 120, 60, Style::SIZE, Button::LATCH, &driverCurve, "Nikhil", COLOR_RED, COLOR_WHITE);
 Button Em(180, Page::mid_y-30, 120, 60, Style::SIZE, Button::LATCH, &driverCurve, "Emily", COLOR_RED, COLOR_WHITE);
 Button Sar(330, Page::mid_y-30, 120, 60, Style::SIZE, Button::LATCH, &driverCurve, "Sarah", COLOR_RED, COLOR_WHITE);
-// Text drivr(Page::mid_x, 45, Style::CORNER, TEXT_LARGE, &driverCurve, "chng to drivr name");
+Text drivr(Page::mid_x, 45, Style::CORNER, TEXT_LARGE, &driverCurve, "chng to drivr name");
 
 Page intkTest (7, "Intake"); //Test for intake with rings
 
@@ -112,8 +112,8 @@ void alignedCoords (int x_objects, int y_objects, int x_btn, int y_btn){
     printf("ALTERNATIVES:\n");
     int x_btn_new = x_btn;
     int y_btn_new = y_btn;
-    int x_space_new = x_space;
-    int y_space_new = y_space;
+    double x_space_new = x_space;
+    double y_space_new = y_space;
 
     while (fmod(x_space, 1) != 0){
       x_btn_new++;
@@ -332,9 +332,9 @@ void Text::draw(){
     int length = sprintf(buffer, label.c_str(), *val_ptr);
     screen::print(txt_fmt, x, y, "%*c   ", length);
     screen::print(txt_fmt, x, y, "%s", buffer);
+    prevVal = *val_ptr;
   }
   else screen::print(txt_fmt, x, y, label.c_str()); //Plain text (no var)
-  prevVal = *val_ptr;
 }
 
 void Slider::draw(){
@@ -444,11 +444,11 @@ void Page::update(){
 }
 
 void Text::update(){
-  // for (std::vector<Text*>::iterator it = (Page::currentPage->texts).begin(); it != (Page::currentPage->texts).end(); it++){
-  //   if ((*it)->val_ptr != nullptr){
-  //     if((*it)->prevVal != *((*it)->val_ptr)) (*it)->draw();
-  //   }
-  // }
+  for (std::vector<Text*>::iterator it = (Page::currentPage->texts).begin(); it != (Page::currentPage->texts).end(); it++){
+    if ((*it)->val_ptr != nullptr){
+      if((*it)->prevVal != *((*it)->val_ptr)) (*it)->draw();
+    }
+  }
 }
 
 Slider* Slider::update(){
