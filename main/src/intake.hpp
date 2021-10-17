@@ -22,5 +22,7 @@ void Intake_debug();
 void Intake_brake(int time);
 void Intake_Setup();
 void Reset();
+bool range(double bot_range, double top_range);
+void StartInTask();
 
 extern Intake_States Intake_State;

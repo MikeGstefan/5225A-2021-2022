@@ -97,12 +97,12 @@ void opcontrol() {
 	Intake_Button.setTask(&On_Off_Task);
 	Reset_Button.setTask(&Reset);
 	Intake_Setup();
+	StartInTask();
 	while (1) {
 		Page::updateScreenStatus();
 		Button::getPress();
-		Intake_loop();
-		Intake_debug();
-		delay(10);
+		//Intake_debug();
+		delay(50);
 		/* code */
 	}
 
