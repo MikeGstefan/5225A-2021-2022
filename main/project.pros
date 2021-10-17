@@ -1,7 +1,7 @@
 {
     "py/object": "pros.conductor.project.Project",
     "py/state": {
-        "project_name": "lift-testing",
+        "project_name": "gyro-testing",
         "target": "v5",
         "templates": {
             "kernel": {

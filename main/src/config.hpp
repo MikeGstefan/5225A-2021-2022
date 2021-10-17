@@ -6,3 +6,4 @@ extern pros::Motor front_l, front_r, back_l, back_r, lift_m, f_bar, c_bar;
 extern pros::ADIEncoder LeftEncoder, RightEncoder, BackEncoder;
 extern pros::ADIDigitalOut claw_in, claw_out;
 extern pros::ADIDigitalIn claw_touch;
+extern pros::Imu gyro;
