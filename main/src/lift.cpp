@@ -240,31 +240,32 @@ void Lift::touch_line(const double target_y, double speed){ // should be in moto
 }
 
 double Lift::get_arm_velocity_ratio(const double target_y){
-  double bottom_arm_angle = deg_to_rad(f_bar.get_position());
+
+  // system delay is 61.111111 ms
+  // or 0.00101851851667 minutes
+  double system_delay = 0.00102;
+
+  double bottom_arm_angle = deg_to_rad(f_bar.get_position() + system_delay * f_bar.get_actual_velocity());
   // printf("acc f_bar_position_rad: %lf\t", deg_to_rad(f_bar.get_position()));
   // is returning derivative of find_top_arm_angle function
   return (bottom_arm_len * top_arm_gear_ratio * sin(deg_to_rad(bottom_arm_offset_a) - bottom_arm_angle / bottom_arm_gear_ratio)) / (top_arm_len * bottom_arm_gear_ratio * sqrt(1 - pow(bottom_arm_len * cos(deg_to_rad(bottom_arm_offset_a) - bottom_arm_angle / bottom_arm_gear_ratio) + target_y, 2) / pow(top_arm_len, 2)));
 
 }
 
-void Lift::move_on_line(double target_y, double target_z_start, double target_z_end){
+void Lift::move_on_line(double target_y, double target_z_start, double target_z_end, const double speed){
   move_to_target(target_y, target_z_start, lift_position_types::fastest, true, 80, 80); // goes to position above the rings
   // delay(300);
   // grabs position for f_bar to reach when at bottom of ring stack
   auto[top_arm_angle, bottom_arm_angle, top_arm_pos_angle, bottom_arm_pos_angle, top_arm_neg_angle, bottom_arm_neg_angle, move_valid] = lift.find_arm_angles(target_y, target_z_end);
-  f_bar.move_absolute(bottom_arm_angle, 60); // moves f_bar to bottom of ring stack
+  f_bar.move_absolute(bottom_arm_angle, speed); // moves f_bar to bottom of ring stack
   double top_arm_target, open_loop_velocity, closed_loop_velocity;
   double ratio;
   PID top_arm(0.5, 0.0, 0.3, 0.0, true, 0.0, 100.0);
-  // system delay is 61.111111 ms
-  // or 0.00101851851667 minutes
-  double system_delay = 0.00102;
-
 
   while(fabs(target_z_end - find_z_pos()) > 0.5 || fabs(target_y - find_y_pos()) > 0.5){  // moves the chain bar to maintain the horizontal distance
       top_arm_target = find_top_arm_angle(target_y);
       // printf("target: %lf, actual: %lf, diff: %lf, vel: %lf\n", top_arm_target, c_bar.get_position(), find_top_arm_angle(target_y) - c_bar.get_position(), (find_top_arm_angle(target_y) - c_bar.get_position()) * top_arm_kp);
-      ratio = get_arm_velocity_ratio(target_y + system_delay * f_bar.get_actual_velocity());
+      ratio = get_arm_velocity_ratio(target_y);
       // printf("ratio: %lf, f_bar_pos: %lf, f_bar_pos_rad: %lf, f_bar_vel: %lf, acc_vel: %lf\n", ratio, f_bar.get_position(), deg_to_rad(f_bar.get_position()), f_bar.get_actual_velocity(), ratio * f_bar.get_actual_velocity());
       open_loop_velocity = ratio * f_bar.get_actual_velocity();
       top_arm.compute(c_bar.get_position(), find_top_arm_angle(target_y));
@@ -278,8 +279,8 @@ void Lift::move_on_line(double target_y, double target_z_start, double target_z_
   c_bar.move_relative(0, 100); // stops motor
 }
 
-void Lift::pickup_rings(){
-  move_on_line(-3.0, 20.0, 9.5);
+void Lift::pickup_rings(const double speed){
+  move_on_line(-3.25, 20.0, 9.5, speed);
   // delay(300);
-  move_on_line(-3.0, 9.5, 20.0);
+  move_on_line(-2.75, 9.5, 20.0, speed);
 }

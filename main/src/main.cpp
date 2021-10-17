@@ -90,10 +90,35 @@ void autonomous() {
 void opcontrol() {
 	lift.c_bar_cal();
 	lift.f_bar_cal();
+	// while(true){
+	// 	printf("%lf\n", f_bar.get_position() / 7.0);
+	// 	delay(10);
+	// }
+	while(true){
+		lift.move_to_target(-6.0, 20.0);
+		master.clear();
+		delay(50);
 
-	lift.move_to_target(-6.0, 18.0);
-	delay(500);
+		double speed = 70;
+		master.print(0, 0, "speed: %lf", speed);
+		delay(50);
+		while(!master.get_digital_new_press(E_CONTROLLER_DIGITAL_A)){
 
-	lift.pickup_rings();
+			if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_UP)){
+					speed++;
+					delay(50);
+					master.print(0, 0, "speed: %lf", speed);
+			}
+			else if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_DOWN)){
+				speed--;
+				delay(50);
+				master.print(0, 0, "speed: %lf", speed);
+			}
 
+			delay(10);
+		}
+
+		lift.pickup_rings(speed);
+		waitUntil(master.get_digital_new_press(E_CONTROLLER_DIGITAL_A));
+	}
 }
