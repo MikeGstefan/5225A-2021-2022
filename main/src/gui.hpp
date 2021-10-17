@@ -30,6 +30,7 @@ extern int cur_driver;
 
 void guiSetup();
 void backgroundStuff();
+void alignedCoords (int x_objects, int y_objects, int x_btn_size, int y_btn_size);
 void flash(std::uint32_t color, std::uint32_t time);
 
 //All constructor args are in the format points, format, page, text, color
@@ -144,7 +145,7 @@ class Slider{
     std::string label;
     int16_t x1, y1, x2, y2, text_x, text_y;
     int min, max;
-    Button slideLeft, slideRight;
+    Button dec, inc;
     direction dir;
 
     //Functions
@@ -172,7 +173,7 @@ class Text{
     std::string label;
     std::uint32_t lcol;
     Page* page;
-    double* val_ptr;
+    double* val_ptr=nullptr;
     double prevVal;
 
     void construct (int16_t, int16_t, Style::style, text_format_e_t, Page*, std::string, std::uint32_t label_color);

@@ -5,7 +5,7 @@ double flTemp, blTemp, frTemp, brTemp, angle;
 
 //Static Variable Declarations
 Page* Page::currentPage = 0;
-std::array<Page*, 9> Page::pages = {};
+std::array<Page*, 9> Page::pages = {}; //If size is changed, please change in class Page (.hpp), goTo(), toNext(), and toPrev()
 last_touch_e_t Page::touch_status = E_TOUCH_RELEASED;
 int16_t Page::x = 0, Page::y = 0;
 
@@ -30,11 +30,13 @@ Page moving (4, "Moving", COLOR_BLUE);
 Slider xVal(35, 45, 250, 40, Style::SIZE, Slider::HORIZONTAL, 0, 144, &moving, "X", COLOR_WHITE, COLOR_GREEN);
 Slider yVal(35, 110, 250, 40, Style::SIZE, Slider::HORIZONTAL, 0, 144, &moving, "Y", COLOR_WHITE, COLOR_YELLOW);
 Slider aVal(35, 175, 250, 40, Style::SIZE, Slider::HORIZONTAL, 0, 144, &moving, "A", COLOR_WHITE, COLOR_YELLOW);
-Button goToXYA(320, 45, 150, 40, Style::SIZE, Button::SINGLE, &moving, "Target",COLOR_RED, COLOR_BLACK);
-Button goHome(320, 110, 150, 40, Style::SIZE, Button::SINGLE, &moving, "Home",COLOR_RED, COLOR_BLACK);
-Button goCentre(320, 175, 150, 40, Style::SIZE, Button::SINGLE, &moving, "Centre",COLOR_RED, COLOR_BLACK);
+Button goToXYA(320, 45, 150, 40, Style::SIZE, Button::SINGLE, &moving, "Target", COLOR_RED, COLOR_BLACK);
+Button goHome(320, 110, 150, 40, Style::SIZE, Button::SINGLE, &moving, "Home", COLOR_RED, COLOR_BLACK);
+Button goCentre(320, 175, 150, 40, Style::SIZE, Button::SINGLE, &moving, "Centre", COLOR_RED, COLOR_BLACK);
 
 Page autoSel (5, "Auton"); //Select auton routes
+// Button route1(120);
+
 
 Page driverCurve (6, "Drivers"); //Select a driver and their exp curve
 Button Nik(30, Page::mid_y-30, 120, 60, Style::SIZE, Button::LATCH, &driverCurve, "Nikhil", COLOR_RED, COLOR_WHITE);
@@ -50,11 +52,7 @@ Text tempbl(25, 200, Style::CORNER, TEXT_SMALL, &temps, "Back Left: %.1f", &blTe
 Text tempfr(250, 100, Style::CORNER, TEXT_SMALL, &temps, "Front Right: %.1f", &frTemp);
 Text tempbr(250, 200, Style::CORNER, TEXT_SMALL, &temps, "Back Right: %.1f", &brTemp);
 
-Page mContr (9, "Motor Control");
-// latch btn on/off for each motor
-// slider for each motor
-// 4 drive motors, fbar, cbar, uptake, intake
-
+//Functions
 void draw_field(){
   std::uint32_t curTime = millis();
   screen::set_pen(COLOR_BLACK);
@@ -64,14 +62,12 @@ void draw_field(){
   screen::set_pen(COLOR_RED);
   screen::draw_pixel(270+tracking.x_coord, 230-tracking.y_coord);
 }
-
-//Functions
 void Page::toPrev(){
-  if (currentPage == pages[1]) Page::goTo(9);
+  if (currentPage == pages[1]) Page::goTo(8);
   else goTo((currentPage->pageNum)-1);
 }
 void Page::toNext(){
-  if (currentPage == pages[9]) Page::goTo(1);
+  if (currentPage == pages[8]) Page::goTo(1);
   else goTo((currentPage->pageNum)+1);
 }
 
@@ -93,6 +89,73 @@ void guiSetup(){ //Call once at start [in initialize()?]
   Nik.func = [&driver=cur_driver](){driver=0;};
   Em.func = [&driver=cur_driver](){driver=1;};
   Sar.func = [&driver=cur_driver](){driver=2;};
+
+  Page::goTo(1);
+}
+
+//Utility to get coordinates for aligned objects, (buttons, sliders...) of same size
+void alignedCoords (int x_objects, int y_objects, int x_btn, int y_btn){
+  std::string strX = "(", subStrX, strY = "(", subStrY;
+
+  double x_space = (480.0-x_objects*x_btn)/(x_objects+1.0);
+  double y_space = (220.0-y_objects*y_btn)/(y_objects+1.0);
+
+  for (int y = 0; y < y_objects; y++){
+    for (int x = 0; x < x_objects; x++){
+      printf("(%.1f, %.1f, %d, %d, Button::SIZE)\n", x_space*(x+1) + x_btn*x, y_space*(y+1) + y_btn*y, x_btn, y_btn);
+    }
+    printf("\n");
+  }
+  printf("\n");
+
+  if ((fmod(x_space, 1) != 0) || (fmod(y_space, 1) != 0)){
+    printf("ALTERNATIVES:\n");
+    int x_btn_new = x_btn;
+    int y_btn_new = y_btn;
+    int x_space_new = x_space;
+    int y_space_new = y_space;
+
+    while (fmod(x_space, 1) != 0){
+      x_btn_new++;
+      x_space_new = (480-x_objects*x_btn_new)/(x_objects+1);
+    }
+
+    while (fmod(y_space, 1) != 0){
+      y_btn_new++;
+      y_space_new = (480-x_objects*y_btn_new)/(y_objects+1);
+    }
+
+    for (int y = 0; y < y_objects; y++){
+      for (int x = 0; x < x_objects; x++){
+        printf("(%.1f, %.1f, %d, %d, Button::SIZE)\n", x_space_new*(x+1) + x_btn_new*x, y_space_new*(y+1) + y_btn_new*y, x_btn_new, y_btn_new);
+      }
+      printf("\n");
+    }
+    printf("\n");
+
+    x_btn_new = x_btn;
+    y_btn_new = y_btn;
+    x_space_new = x_space;
+    y_space_new = y_space;
+
+    while (fmod(x_space, 1) != 0){
+      x_btn_new--;
+      x_space_new = (480-x_objects*x_btn_new)/(x_objects+1);
+    }
+
+    while (fmod(y_space, 1) != 0){
+      y_btn_new--;
+      y_space_new = (480-x_objects*y_btn_new)/(y_objects+1);
+    }
+
+    for (int y = 0; y < y_objects; y++){
+      for (int x = 0; x < x_objects; x++){
+        printf("(%.1f, %.1f, %d, %d, Button::SIZE)\n", x_space_new*(x+1) + x_btn_new*x, y_space_new*(y+1) + y_btn_new*y, x_btn_new, y_btn_new);
+      }
+      printf("\n");
+    }
+  }
+
 }
 
 //Flashing
@@ -111,6 +174,7 @@ void end_flash (){
   }
 }
 
+//Class Functions
 std::tuple<int, int, int, int> fixPoints (int p1, int p2,int p3, int p4, Style::style type){
   int x1=p1, y1=p2, x2=p3, y2=p4, temp;
 
@@ -209,18 +273,20 @@ Slider::Slider (int16_t pt1, int16_t pt2, int16_t pt3, int16_t pt4, Style::style
 
   if (dir == HORIZONTAL){
     text_x = (x1+x2-(label.length()*Page::char_width))/2;
-    text_y = y1-15;
+    text_y = y1-Page::char_height-2;
+    inc.construct(x2+5, y1, x2+25, y2, Style::CORNER, Button::SINGLE, page, ">", lcol, bcol);
+    dec.construct(x1-25, y1, x1-5, y2, Style::CORNER, Button::SINGLE, page, "<", lcol, bcol);
   }
   else{
-    text_x = (x1+x2)/2-(2*label.length()*Page::char_width);
-    text_y = (y1+y2-Page::char_height)/2;
+    text_x = (x1+x2-(label.length()*Page::char_width))/2;
+    text_y = (y1+y2)/2;
+    inc.construct(x1, y1-25, x2, y1-5, Style::CORNER, Button::SINGLE, page, "▲", lcol, bcol);
+    dec.construct(x1, y2+5, x2, y2+25, Style::CORNER, Button::SINGLE, page, "▼", lcol, bcol);
   }
 
   //Buttons
-  slideLeft.construct(x1-25, y1, x1-5, y2, Style::CORNER, Button::SINGLE, page, "<", lcol, bcol);
-  slideRight.construct(x2+5, y1, x2+25, y2, Style::CORNER, Button::SINGLE, page, ">", lcol, bcol);
-  slideLeft.func = [&value=val, &minimum=this->min](){if(value != minimum) value--;};
-  slideRight.func = [&value=val, &maximum=this->max](){if (value != maximum) value++;};
+  dec.func = [&value=val, &minimum=this->min](){if(value != minimum) value--;};
+  inc.func = [&value=val, &maximum=this->max](){if (value != maximum) value++;};
 }
 
 Page::Page(int page_number, std::string name, std::uint32_t background_color){
@@ -235,7 +301,10 @@ Page::Page(int page_number, std::string name, std::uint32_t background_color){
   buttons.push_back(&nextPage);
 }
 
+//Methods
 void Page::goTo(Page* page){
+  std::array <Page*, 9>::iterator it = std::find(pages.begin(), pages.end(), page);
+  if (it == pages.end()) return;
   clearScreen(page->bcol);
   currentPage = page; //Saves new page then draws all the buttons on the page
   screen::set_pen(COLOR_WHITE);
@@ -259,12 +328,12 @@ void Text::draw(){
   screen::set_eraser(page->bcol);
   screen::set_pen(lcol);
   char buffer [70];
-  if (val_ptr) {
+  if (val_ptr != nullptr) { //If there is a var to print
     int length = sprintf(buffer, label.c_str(), *val_ptr);
     screen::print(txt_fmt, x, y, "%*c   ", length);
     screen::print(txt_fmt, x, y, "%s", buffer);
   }
-  else screen::print(txt_fmt, x, y, label.c_str());
+  else screen::print(txt_fmt, x, y, label.c_str()); //Plain text (no var)
   prevVal = *val_ptr;
 }
 
@@ -278,13 +347,14 @@ void Slider::draw(){
     screen::fill_rect(x1+1, y1+1, x1+(x2-x1)*(val-min)/(max-min), y2-1); //Draws bar upto its value
     screen::print(TEXT_SMALL, x1, text_y, "%d", min);
     screen::print(TEXT_SMALL, x2, text_y, "%d", max);
+    screen::print(TEXT_SMALL, text_x, text_y, "%s:%.f", label.c_str(), val);
   }
   else{
     screen::fill_rect(x1+1, y2-(y2-y1)*(val-min)/(max-min), x2-1, y2-1); //Draws bar (vertical)
-    screen::print(TEXT_SMALL, x1-30-Page::char_width, text_y, "%d", min);
-    screen::print(TEXT_SMALL, x2+30, text_y, "%d", max);
+    screen::print(TEXT_SMALL, x1-25, y2, "%d", min);
+    screen::print(TEXT_SMALL, x1-25, y1, "%d", max);
+    screen::print(TEXT_SMALL, text_x, y1-27-Page::char_height, "%s:%.f", label.c_str(), val);
   }
-  screen::print(TEXT_SMALL, text_x, text_y, "%s:%.f", label.c_str(), val);
 }
 
 void Button::draw(){
@@ -307,7 +377,7 @@ void Button::drawPressed(){
 
 void Button::del(){ //Not really used
   //Looks for the button in the list of buttons for its page
-  std::vector <Button*>::iterator it = find(((page)->buttons).begin(), (page->buttons).end(), this);
+  std::vector <Button*>::iterator it = std::find(((page)->buttons).begin(), (page->buttons).end(), this);
 
   //If the button is on the list it is removed
   if(it != (page->buttons).end()){
@@ -316,10 +386,18 @@ void Button::del(){ //Not really used
   }
 }
 
+void Button::createOptions(std::vector<Button*> buttons){
+  for (std::vector <Button*>::iterator it = buttons.begin(); it != buttons.end(); it++){
+    if ((*it)->form != LATCH) printf("Option Feature is only available for latch buttons!\n");
+    (*it)->options = buttons;
+  }
+}
+
 void Button::runTask(){
   if (func) func();
 }
 
+//Updating data and presses
 void Page::updateScreenStatus() {
   screen_touch_status_s_t status = c::screen_touch_status();
   touch_status = status.touch_status;
@@ -360,22 +438,17 @@ bool Button::newRelease(){
   return (!pressed() && lastPressed);
 }
 
-void Button::createOptions(std::vector<Button*> buttons){
-  for (std::vector <Button*>::iterator it = buttons.begin(); it != buttons.end(); it++){
-    if ((*it)->form != LATCH) printf("Option Feature is only available for latch buttons!\n");
-    (*it)->options = buttons;
-  }
-}
-
 void Page::update(){
   Page::updateScreenStatus();
   if (currentPage->func) currentPage->func();
 }
 
 void Text::update(){
-  for (std::vector<Text*>::iterator it = (Page::currentPage->texts).begin(); it != (Page::currentPage->texts).end(); it++){
-    if((*it)->prevVal != *((*it)->val_ptr)) (*it)->draw();
-  }
+  // for (std::vector<Text*>::iterator it = (Page::currentPage->texts).begin(); it != (Page::currentPage->texts).end(); it++){
+  //   if ((*it)->val_ptr != nullptr){
+  //     if((*it)->prevVal != *((*it)->val_ptr)) (*it)->draw();
+  //   }
+  // }
 }
 
 Slider* Slider::update(){
@@ -393,7 +466,6 @@ Slider* Slider::update(){
 
 Button* Button::update(){
   //Loops through the list of buttons on the current page to check for presses
-
   for (std::vector <Button*>::iterator it = (Page::currentPage->buttons).begin(); it != (Page::currentPage->buttons).end(); it++){
     Button* btn_id = *it;
 
@@ -421,12 +493,14 @@ Button* Button::update(){
           btn_id->drawPressed();
           //If radio button
           for (std::vector <Button*>::iterator option_it = (btn_id->options).begin(); option_it != (btn_id->options).end(); option_it++){
-            if ((*option_it) != btn_id) (*option_it)->latched = 0;
-            (*option_it)->draw(); //Try without this
+            if ((*option_it) != btn_id){
+              (*option_it)->latched = 0;
+              (*option_it)->draw();
+            }
           }
 
         }
-        else btn_id->draw();
+        else btn_id->draw(); //Just unpressed
 
         return btn_id;
       }
@@ -472,7 +546,7 @@ void backgroundStuff(){ //To be called continously
   Text::update();
   end_flash();
 
-  //Saving vars
+  //Saving vars for text display
   flTemp = front_l.get_temperature();
   blTemp = back_l.get_temperature();
   frTemp = front_r.get_temperature();
