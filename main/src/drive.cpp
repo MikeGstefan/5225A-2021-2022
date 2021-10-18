@@ -6,18 +6,26 @@ Drivebase drivebase = {{
   driver("Nikhil", {E_CONTROLLER_ANALOG_LEFT_X, E_CONTROLLER_ANALOG_RIGHT_Y, E_CONTROLLER_ANALOG_RIGHT_X}, {0.0, 1.0, 2.5}),
   driver("Emily", {E_CONTROLLER_ANALOG_LEFT_X, E_CONTROLLER_ANALOG_RIGHT_Y, E_CONTROLLER_ANALOG_RIGHT_X}, {0.0, 1.0, 2.5}),
   driver("Sarah", {E_CONTROLLER_ANALOG_LEFT_X, E_CONTROLLER_ANALOG_RIGHT_Y, E_CONTROLLER_ANALOG_RIGHT_X}, {0.0, 1.0, 2.5}),
+  driver("Alex", {E_CONTROLLER_ANALOG_LEFT_X, E_CONTROLLER_ANALOG_LEFT_Y, E_CONTROLLER_ANALOG_RIGHT_X}, {0.0, 1.0, 2.5}),
+  driver("Left-stick", {E_CONTROLLER_ANALOG_RIGHT_X, E_CONTROLLER_ANALOG_LEFT_Y, E_CONTROLLER_ANALOG_LEFT_X}, {0.0, 1.0, 2.5}),
 }};
 
 // curve file_template
 // curvature:0.0
-// curvature:1.0
-// curvature:2.5
+// curvature:0.5
+// curvature:2.0
 // curvature:0.0
-// curvature:1.0
-// curvature:2.5
+// curvature:0.5
+// curvature:2.0
 // curvature:0.0
-// curvature:1.0
-// curvature:2.5
+// curvature:0.5
+// curvature:2.0
+// curvature:0.0
+// curvature:0.5
+// curvature:2.0
+// curvature:0.0
+// curvature:0.5
+// curvature:2.0
 
 // custom drive methods
 
@@ -53,7 +61,7 @@ name(name), joy_sticks{joy_sticks[0], joy_sticks[1], joy_sticks[2]}, custom_driv
 {}
 
 // Drivebase class constructor
-Drivebase::Drivebase(std::array<driver, 3> drivers): drivers(drivers){}
+Drivebase::Drivebase(std::array<driver, num_of_drivers> drivers) : drivers(drivers) {}
 
 void Drivebase::move(double x, double y, double a){
   front_l.move(x + y + a);
@@ -83,29 +91,29 @@ void Drivebase::update_screen(){
 void Drivebase::download_curve_data(){
   curve_file = nullptr;
   curve_file = fopen("/usd/curve_file.txt", "r");
-  bool curve_file_exists = curve_file != NULL;
+  curve_file_exists = curve_file != NULL;
   if(!curve_file_exists) {
     printf("WARNING: curve_file not found, using default data\n");
   }
-
+  // reads data for each driver from file
   for (short driver = 0; driver < num_of_drivers; driver++){  // reads curve curvature from curve file
-    printf("num of drivers:%d\n", num_of_drivers);
+    printf("num of drivers: %d\n", num_of_drivers);
     printf("DRIVER: %s\n", drivers[driver].name);
-    for (short curvature = 0; curvature < 3; curvature++){
+    for (short curvature = 0; curvature < 3; curvature++){  // reads data for each axis of motion
       if (curve_file_exists)  fscanf(curve_file, "curvature:%lf\n", &drivers[driver].custom_drives[curvature].curvature);
-      printf("curvature:%lf\n", drivers[driver].custom_drives[curvature].curvature);
+      printf("curvature: %lf\n", drivers[driver].custom_drives[curvature].curvature);
       drivers[driver].custom_drives[curvature].fill_lookup_table();
       delay(1);
     }
   }
-
+  fclose(curve_file);
 }
-// LOOK AT THIS LATER
+
 void Drivebase::update_lookup_table_util(){
     download_curve_data();
 
     master.clear();
-    screen_timer.reset(false);
+    screen_timer.reset();
     update_screen();
 
     while (!master.get_digital_new_press(E_CONTROLLER_DIGITAL_B)){  // user presses b to save and exit utility
@@ -153,16 +161,21 @@ void Drivebase::update_lookup_table_util(){
     }
     master.clear();
     screen_timer.reset();
-    curve_file = fopen("/usd/curve_file.txt", "w");
+    if(!curve_file_exists) {
+      printf("WARNING: curve_file not found, not writing to SD card\n");
+    }
+    else {
+      curve_file = fopen("/usd/curve_file.txt", "w");
 
-    for (short driver = 0; driver < num_of_drivers; driver++){  // uploads curve data to curve file
-      for (short curvature = 0; curvature < 3; curvature++){
-        fprintf(curve_file, "curvature:%lf\n", drivers[driver].custom_drives[curvature].curvature);
-        printf("curvature:%lf\n", drivers[driver].custom_drives[curvature].curvature);
+      for (short driver = 0; driver < num_of_drivers; driver++){  // uploads curve data to curve file
+        for (short curvature = 0; curvature < 3; curvature++){
+          fprintf(curve_file, "curvature:%lf\n", drivers[driver].custom_drives[curvature].curvature);
+          printf("curvature:%lf\n", drivers[driver].custom_drives[curvature].curvature);
+        }
       }
+      fclose(curve_file);
     }
 
-    fclose(curve_file);
     WAIT_FOR_SCREEN_REFRESH();
     master.print(0, 0, "Saved.");
     delay(200);
@@ -183,29 +196,30 @@ void Drivebase::handle_input(){
 void Drivebase::driver_practice(){
   master.clear();
   delay(50);
+  cur_driver = 0; // defaults driver to Nikhil
   master.print(2, 0, "Driver: %s", drivers[cur_driver].name);
   screen_timer.reset();
   while(true){
     while(!master.get_digital_new_press(E_CONTROLLER_DIGITAL_B)){
-      if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_UP)){
+      if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_UP)){ // goes to next driver
         cur_driver++;
         cur_driver %= num_of_drivers; // rollover
         WAIT_FOR_SCREEN_REFRESH();
         // spaces in the controller print are to overwrite names
         master.print(2, 0, "Driver: %s          ", drivers[cur_driver].name);
       }
-      else if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_DOWN)){
+      else if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_DOWN)){  // goes to previous driver
         if (cur_driver == 0)  cur_driver = num_of_drivers - 1;
         else cur_driver--;
         WAIT_FOR_SCREEN_REFRESH();
         master.print(2, 0, "Driver: %s          ", drivers[cur_driver].name);
       }
       drivebase.handle_input();
-      // prints motor temps
+      // prints motor temps every 50 ms
       if(screen_timer.get_time() > 50){
         printf("fl%.0f r%.0f bl%.0f r%.0f\n", front_l.get_temperature(), front_r.get_temperature(), back_l.get_temperature(), back_r.get_temperature());
         master.print(0, 0, "fl%.0f r%.0f bl%.0f r%.0f\n", front_l.get_temperature(), front_r.get_temperature(), back_l.get_temperature(), back_r.get_temperature());
-        screen_timer.reset(false);
+        screen_timer.reset();
       }
       delay(10);
     }
@@ -214,6 +228,6 @@ void Drivebase::driver_practice(){
     master.clear();
     delay(50);
     master.print(2, 0, "Driver: %s", drivers[cur_driver].name);
-    screen_timer.reset(false);
+    screen_timer.reset();
   }
 }

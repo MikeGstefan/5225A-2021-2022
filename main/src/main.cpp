@@ -18,7 +18,9 @@
  * to keep execution time for this mode under a few seconds.
  */
 void initialize() {
-	// drivebase.download_curve_data();
+	drivebase.download_curve_data();
+	// logging_task_start();
+	Data::log_init();
 
 	delay(150);
 	tracking.x_coord = 0.0, tracking.y_coord = 0.0, tracking.global_angle = 0.0;
@@ -58,10 +60,7 @@ void competition_initialize() {}
  * from where it left off.
  */
 void autonomous() {
-	f_bar.move(50);
-	c_bar.move(60);
 	// drivebase.update_lookup_table_util();
-	// printf("here\n");
 	// rush_goal2(0.0, -45.0, 0.0);
 	// drivebase.move(0,-127, 0);
 	// while(!claw_touch.get_value()) delay(10);
