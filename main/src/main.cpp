@@ -95,19 +95,27 @@ void opcontrol() {
 	waitUntil(!gyro.is_calibrating());
 	printf("DONE CALIBRATION");
 	cal_timer.print();
-
-	while(true){
-		pros::c::euler_s_t eu = gyro.get_euler();
-    printf("IMU euler angles: {pitch: %f, roll: %f, yaw: %f}\n", eu.pitch, eu.roll, eu.yaw);
-		// printf("%lf", );
-		// pros::c::quaternion_s_t qt = gyro.get_quaternion();
-		// printf("IMU quaternion: {x: %f, y: %f, z: %f, w: %f}\n", qt.x, qt.y, qt.z, qt.w);
-		if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_A)){
-			gyro.reset();
-			waitUntil(!gyro.is_calibrating());
-			printf("DONE CALIBRATION");
+	pros::c::euler_s_t eu = gyro.get_euler();
+	Task([&](){
+		while(true){
+			eu = gyro.get_euler();
+			imu_data.print("IMU euler angles: {pitch: %f, roll: %f, yaw: %f}\n", eu.pitch, eu.roll, eu.yaw);
 		}
-		delay(10);
-	}
+
+	});
+	drivebase.driver_practice();
+	// while(true){
+	// 	pros::c::euler_s_t eu = gyro.get_euler();
+  //   printf("IMU euler angles: {pitch: %f, roll: %f, yaw: %f}\n", eu.pitch, eu.roll, eu.yaw);
+	// 	// printf("%lf", );
+	// 	// pros::c::quaternion_s_t qt = gyro.get_quaternion();
+	// 	// printf("IMU quaternion: {x: %f, y: %f, z: %f, w: %f}\n", qt.x, qt.y, qt.z, qt.w);
+	// 	if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_A)){
+	// 		gyro.reset();
+	// 		waitUntil(!gyro.is_calibrating());
+	// 		printf("DONE CALIBRATION");
+	// 	}
+	// 	delay(10);
+	// }
 
 }
