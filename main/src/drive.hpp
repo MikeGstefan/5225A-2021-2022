@@ -11,6 +11,29 @@
 
 using namespace pros;
 
+// Buttons
+
+// dropoff buttons
+pros::controller_digital_e_t ring_dropoff_button = E_CONTROLLER_DIGITAL_L1;
+pros::controller_digital_e_t switch_dropoff_side_button = E_CONTROLLER_DIGITAL_L2;
+
+// spinning buttons
+pros::controller_digital_e_t turn_mogo_cw_button = E_CONTROLLER_DIGITAL_RIGHT;
+pros::controller_digital_e_t turn_mogo_ccw_button = E_CONTROLLER_DIGITAL_LEFT;
+
+// fbar buttons
+pros::controller_digital_e_t f_bar_down_button = E_CONTROLLER_DIGITAL_DOWN;
+pros::controller_digital_e_t f_bar_up_button = E_CONTROLLER_DIGITAL_UP;
+
+// misc buttons
+pros::controller_digital_e_t cancel_dropoff_button = E_CONTROLLER_DIGITAL_B;
+pros::controller_digital_e_t pickup_rings_button = E_CONTROLLER_DIGITAL_X;
+pros::controller_digital_e_t fill_top_goal_button = E_CONTROLLER_DIGITAL_Y;
+pros::controller_digital_e_t platform_down_button = E_CONTROLLER_DIGITAL_A;
+
+pros::controller_digital_e_t mogo_toggle_button = E_CONTROLLER_DIGITAL_R1;
+pros::controller_digital_e_t tip_mogo_button = E_CONTROLLER_DIGITAL_R2;
+
 // aliases to make code more readable, used to encode vales of drive.cur_driver
 // enum class drivers{Nikhil = 0, Emily = 1, Sarah = 2};
 

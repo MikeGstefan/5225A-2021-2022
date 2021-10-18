@@ -15,7 +15,7 @@ double PID::get_output() const {
     return output;
 }
 
-void PID::compute(double input, double target){
+double PID::compute(double input, double target){
 
     error = target - input;
 
@@ -37,4 +37,5 @@ void PID::compute(double input, double target){
         last_error = error;
     }
     output = proportional + integral + derivative + bias;
+    return output;
 }

@@ -268,8 +268,7 @@ void Lift::move_on_line(double target_y, double target_z_start, double target_z_
       ratio = get_arm_velocity_ratio(target_y);
       // printf("ratio: %lf, f_bar_pos: %lf, f_bar_pos_rad: %lf, f_bar_vel: %lf, acc_vel: %lf\n", ratio, f_bar.get_position(), deg_to_rad(f_bar.get_position()), f_bar.get_actual_velocity(), ratio * f_bar.get_actual_velocity());
       open_loop_velocity = ratio * f_bar.get_actual_velocity();
-      top_arm.compute(c_bar.get_position(), find_top_arm_angle(target_y));
-      closed_loop_velocity = top_arm.get_output();
+      closed_loop_velocity = top_arm.compute(c_bar.get_position(), find_top_arm_angle(target_y));
 
       c_bar.move_velocity(open_loop_velocity + closed_loop_velocity);
       // c_bar.move_velocity(open_loop_velocity + closed_loop_velocity);
@@ -279,8 +278,78 @@ void Lift::move_on_line(double target_y, double target_z_start, double target_z_
   c_bar.move_relative(0, 100); // stops motor
 }
 
-void Lift::pickup_rings(const double speed){
-  move_on_line(-3.25, 20.0, 9.5, speed);
-  // delay(300);
-  move_on_line(-2.75, 9.5, 20.0, speed);
+void Lift::pickup_rings(){
+  stop_pickup_task();
+  task = new Task(::pickup_rings);  // calls global function pickup rings asynchronously
+}
+
+void Lift::stop_pickup_task(){
+  if(task != nullptr){
+    task->remove();
+    delete task;
+    task = nullptr;
+  }
+}
+
+void Lift::set_state(const states next_state){
+  printf("Lift | Going from %d to %d", state, next_state);
+  last_state = state;
+  state = next_state;
+}
+
+void Lift::handle(){
+  switch(state){
+    case idle:
+      /*
+      if (intake.state == intake.states::full){ // pickup rings if the intake is full
+        pickup_rings();
+        set_state(full);
+        intake.set_state(intake.states::searching);
+      }
+      */
+      if (master.get_digital_new_press(f_bar_down_button)){ // lowers f_bar to pickup mogos with forks if fbar down is pressed
+        lower_f_bar();
+        set_state(down);
+      }
+      if (master.get_digital_new_press(cancel_dropoff_button)){ // brings to neutral position
+        move_to_neutral_position();
+      }
+
+
+      break;
+    case full:
+      if (master.get_digital_new_press(ring_dropoff_button)){
+        if (dropoff_front){
+
+        }
+        else{
+
+        }
+      }
+      break;
+    case down:
+
+      break;
+    case raised:
+
+      break;
+    case platform:
+
+      break;
+    case tip:
+
+      break;
+    case dropoff:
+
+      break;
+  }
+
+}
+
+
+void pickup_rings(void* params){  // async overload of Lift::pickup_rings
+  // close stabber
+  lift.move_on_line(-3.25, 20.0, 9.5, 70);
+  // open stabber
+  lift.move_on_line(-2.75, 9.5, 20.0, 70);
 }

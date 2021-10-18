@@ -18,7 +18,6 @@ void updateStopTask(){
 }
 void Tracking::move_stop_task(){
   if(moveTask != nullptr){
-    // printf("here1");
     moveTask->remove();
     delete moveTask;
     moveTask = nullptr;

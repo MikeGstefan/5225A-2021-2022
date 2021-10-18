@@ -90,10 +90,10 @@ void autonomous() {
 void opcontrol() {
 	lift.c_bar_cal();
 	lift.f_bar_cal();
-	// while(true){
-	// 	printf("%lf\n", f_bar.get_position() / 7.0);
-	// 	delay(10);
-	// }
+
+
+	// ring pickup max speed utility
+	/*
 	while(true){
 		lift.move_to_target(-6.0, 20.0);
 		master.clear();
@@ -121,4 +121,5 @@ void opcontrol() {
 		lift.pickup_rings(speed);
 		waitUntil(master.get_digital_new_press(E_CONTROLLER_DIGITAL_A));
 	}
+	*/
 }
