@@ -14,28 +14,29 @@ using namespace pros;
 // Buttons
 
 // dropoff buttons
-pros::controller_digital_e_t ring_dropoff_button = E_CONTROLLER_DIGITAL_L1;
-pros::controller_digital_e_t switch_dropoff_side_button = E_CONTROLLER_DIGITAL_L2;
+extern controller_digital_e_t ring_dropoff_button;
+extern controller_digital_e_t switch_dropoff_side_button;
 
 // spinning buttons
-pros::controller_digital_e_t turn_mogo_cw_button = E_CONTROLLER_DIGITAL_RIGHT;
-pros::controller_digital_e_t turn_mogo_ccw_button = E_CONTROLLER_DIGITAL_LEFT;
+extern controller_digital_e_t turn_mogo_cw_button;
+extern controller_digital_e_t turn_mogo_ccw_button;
 
 // fbar buttons
-pros::controller_digital_e_t f_bar_down_button = E_CONTROLLER_DIGITAL_DOWN;
-pros::controller_digital_e_t f_bar_up_button = E_CONTROLLER_DIGITAL_UP;
+extern controller_digital_e_t f_bar_up_button;
+extern controller_digital_e_t f_bar_down_button;
 
 // misc buttons
-pros::controller_digital_e_t cancel_dropoff_button = E_CONTROLLER_DIGITAL_B;
-pros::controller_digital_e_t pickup_rings_button = E_CONTROLLER_DIGITAL_X;
-pros::controller_digital_e_t fill_top_goal_button = E_CONTROLLER_DIGITAL_Y;
-pros::controller_digital_e_t platform_down_button = E_CONTROLLER_DIGITAL_A;
+extern controller_digital_e_t cancel_dropoff_button;
+extern controller_digital_e_t fill_top_goal_button;
+extern controller_digital_e_t pickup_rings_button;
+extern controller_digital_e_t platform_down_button;
 
-pros::controller_digital_e_t mogo_toggle_button = E_CONTROLLER_DIGITAL_R1;
-pros::controller_digital_e_t tip_mogo_button = E_CONTROLLER_DIGITAL_R2;
+extern controller_digital_e_t mogo_toggle_button;
+extern controller_digital_e_t tip_mogo_button;
 
 // aliases to make code more readable, used to encode vales of drive.cur_driver
 // enum class drivers{Nikhil = 0, Emily = 1, Sarah = 2};
+
 
 #define WAIT_FOR_SCREEN_REFRESH() {\
   delay(screen_timer.get_time() < 50 ? 50 - screen_timer.get_time() : 0);\
@@ -69,7 +70,6 @@ struct driver{
 // Nikhil is 0, Emily is 1, Sarah is 2
 
 class Drivebase{
-  Timer screen_timer {"screen_timer"};
   int cur_screen;
   int deadzone = 5;
   const char* screen_text[3] = {"LOCAL_X CURVE:", "LOCAL_Y CURVE:", "LOCAL_A CURVE:"};

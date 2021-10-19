@@ -6,6 +6,8 @@
 
 using namespace pros;
 
+extern Timer screen_timer;  // timer to measure how to it's been since scren updates
+
 #define waitUntil(condition) while(!(condition)) delay(10);
 
 // cycle check macro (checks a condition for a specified amount of cycles)
@@ -33,7 +35,6 @@ double rad_to_deg(double rad);
 double deg_to_rad(double deg);
 
 struct Vector2D{
-    Vector2D(double x, double y) : x(x), y(y) {}
     double x, y;
 };
 

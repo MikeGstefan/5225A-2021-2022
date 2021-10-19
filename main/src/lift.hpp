@@ -15,6 +15,21 @@ enum class lift_position_types{
 
 // NOTE: all y positions passed in should be negative on the inside of the lift
 class Lift {
+public:
+
+  bool full = false; // if end_effector has rings
+  const char* state_names[6] = {"neutral", "tip", "down", "raised", "platform", "release_mogo"};
+
+  // public lift state machine variables
+  enum states {
+    neutral,
+    tip,
+    down,
+    raised,
+    platform,
+    release_mogo
+  };
+
 private:
 
   // lift calculation constants
@@ -29,36 +44,42 @@ private:
   double bottom_arm_lower_limit = 0, bottom_arm_upper_limit = 700, top_arm_lower_limit = 0, top_arm_upper_limit = 500; // arm limits in encoder degrees
 
   // lift state machine variables
-  enum states {
-    idle,
-    full,
-    down,
-    raised,
-    platform,
-    tip,
-    dropoff
-  };
+
+  // latest arm targets for lift state machine
+  double cur_top_arm_target;
+  double cur_bottom_arm_target;
+
+  // private state machine variables
 
   states state;
   states last_state;
 
   Task* task = nullptr;
 
-  bool dropoff_front = true;
-
+  // ring dropoff variables
+  bool dropoff_front;
+  int ring_dropoff_level;
+  Vector2D dropoff_coords[2][3];  // ring dropoff coords
 
 public:
 
+  Lift(); // constructor
+
+  // arm calibration methods
   void f_bar_cal();
   void c_bar_cal();
 
-  void f_bar_elastic_util();
+  void f_bar_elastic_util();  // utility to test of elastics on f_bar are worn out
 
   tuple<double, double, double, double, double, double, bool> find_arm_angles(double target_y, double target_z, const lift_position_types lift_position_type = lift_position_types::fastest);  // solves for arm_angles
 
-  void move_to_target(double target_y, double target_z, const lift_position_types lift_position_type = lift_position_types::fastest, const bool wait_for_complete = true, const double bottom_arm_speed = 200, const double top_arm_speed = 100);  // actual method to move the lift to a target
+  // methods relating to move to target
+  void move_to_target(const Vector2D target, const lift_position_types lift_position_type = lift_position_types::fastest, const bool wait_for_complete = true, const double bottom_arm_speed = 200, const double top_arm_speed = 100);  // actual method to move the lift to a target
+  void wait_for_complete(); // waits for move_to_target to reach
 
   void move_to_target_util(); // utility to move arm with controller
+
+  void move_f_bar_to_height(double target_z, const double speed = 200);
 
   double find_y_pos();  // solves for current y position of end effector
   double find_z_pos();  // solves for current z position of end effector
@@ -70,17 +91,34 @@ public:
   void move_on_line(const double target_y, const double target_z_start, const double target_z_end, const double speed); // moves the end effector in a vertical line
 
   // state machine methods
-  void handle();  // is called once per loop in drive to handle current state of lift
-  void set_state(const states next_state); // sets state of machine and logs the change
 
-  void stop_pickup_task();
-  void pickup_rings();  // creates a task to pickup rings
-  void lower_f_bar();
-  void move_to_neutral_position();
-  void move_to_tip_mogo_position();
+  void set_state(const states next_state); // sets state of machine and logs the change
+  void handle();  // is called once per loop in drive to handle current state of lift
+
+  void start_task(task_fn_t function);  // starts a task given a function
+  void stop_task(); // ends that task
+
+  void move_to_neutral(); // moves lift to position right above ring stack
+  void move_f_bar_tip();  //
+  void raise_f_bar(); // brings f_bar just above the ground
+  void raise_f_bar_to_platform();
+
+  void open_forks();
+  void close_forks();
+  void open_stabber();
+  void close_stabber();
+
+  // getters (for async lift functions)
+  double get_bottom_arm_target() const;
+  double get_bottom_arm_end_error() const;
 
 };
 
 extern Lift lift;
 
-void pickup_rings();  // async overload of Lift::pickup_rings
+// Async functions
+// Note: These functions should be methods of the lift class, but that doesn't work for creating async methods
+
+void pickup_rings(void* params);
+void lower_f_bar(void* params);
+void dropoff_rings(void* params);
