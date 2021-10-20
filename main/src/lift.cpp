@@ -186,7 +186,7 @@ tuple<double, double, double, double, double, double, bool> Lift::find_arm_angle
   return {top_arm_angle, bottom_arm_angle, top_arm_pos_angle, bottom_arm_pos_angle, top_arm_neg_angle, bottom_arm_neg_angle, move_valid};
 }
 
-void Lift::move_to_target(const Vector2D target, const lift_position_types lift_position_type, const bool wait_for_complete, const double bottom_arm_speed, const double top_arm_speed){
+void Lift::move_to_target(const Vector2D& target, const lift_position_types lift_position_type, const bool wait_for_complete, const double bottom_arm_speed, const double top_arm_speed){
   auto[top_arm_angle, bottom_arm_angle, top_arm_pos_angle, bottom_arm_pos_angle, top_arm_neg_angle, bottom_arm_neg_angle, move_valid] = find_arm_angles(target.x, target.y, lift_position_type);
 
   // updates arm targets for lift state machine
@@ -342,7 +342,7 @@ void Lift::handle(){
     set_state(neutral);
   }
   // brings f_bar to mogo tipping height
-  if (master.get_digital_new_press(tip_mogo_button)){
+  else if (master.get_digital_new_press(tip_mogo_button)){
     stop_task();
     lift.close_forks();
     move_f_bar_tip();
@@ -361,7 +361,6 @@ void Lift::handle(){
       ring_dropoff_level++;
       ring_dropoff_level %= 3; // resets level to 0 after exceeding 2
       if (dropoff_front && ring_dropoff_level == 0) ring_dropoff_level = 1;
-      move_to_target(dropoff_coords[dropoff_front][ring_dropoff_level], lift_position_types::fastest, false);
       start_task(dropoff_rings);
     }
   }
@@ -452,6 +451,18 @@ double Lift::get_bottom_arm_end_error() const{
   return bottom_arm_end_error;
 }
 
+// for ring dropoff function
+array<array<Vector2D, 3>, 2>& Lift::get_dropoff_coords(){
+  return dropoff_coords;
+}
+
+bool Lift::is_dropoff_front() const{
+  return dropoff_front;
+}
+
+double Lift::get_ring_dropoff_level() const{
+  return ring_dropoff_level;
+}
 // Async Functions
 
 void pickup_rings(void* params){
@@ -472,7 +483,8 @@ void lower_f_bar(void* params){
 }
 
 void dropoff_rings(void* params){
-  lift.wait_for_complete();// waits for lift to reach its ring dropoff target
+  lift.move_to_target(lift.get_dropoff_coords()[lift.is_dropoff_front()][lift.get_ring_dropoff_level()]);
+  // waits for lift to reach its ring dropoff target
   lift.open_stabber();
   lift.full = false;
   delay(200); // waits for rings to slide down end_effector
