@@ -15,7 +15,7 @@ Lift::Lift(){ // constructor
   dropoff_coords[0][0] = {-24.0, 15.0}; // alliance goal in back
   dropoff_coords[0][1] = {-22.0, 18.0}; // short neutral goal in back
   dropoff_coords[0][2] = {-22.0, -30.0};  // tall neutral goal in back
-  dropoff_coords[1][0] = {5.0, 17.0}; // alliance goal in front (not possible)
+  dropoff_coords[1][0] = {0.0, 0.0}; // alliance goal in front (not possible)
   dropoff_coords[1][1] = {3.0, 20.0}; // short neutral in front
   dropoff_coords[1][2] = {3.0, 32.0}; // tall goal in front
 
@@ -312,11 +312,11 @@ void Lift::move_on_line(double target_y, double target_z_start, double target_z_
 
 void Lift::start_task(task_fn_t function){
   stop_task();
-  task = new Task(function);  // calls global function pickup rings asynchronously
+  task = new Task(function);
 }
 
 void Lift::stop_task(){
-  ring_dropoff_level = 0;
+  ring_dropoff_level = -1;
   if(task != nullptr){
     task->remove();
     delete task;
@@ -355,22 +355,19 @@ void Lift::handle(){
     set_state(down);
   }
   // ring dropoff
-  else if (full){
+  else if (full){ // later check if mogo is oriented as well
     if (master.get_digital_new_press(ring_dropoff_button)){
       stop_task();
+      ring_dropoff_level++;
       ring_dropoff_level %= 3; // resets level to 0 after exceeding 2
       if (dropoff_front && ring_dropoff_level == 0) ring_dropoff_level = 1;
       move_to_target(dropoff_coords[dropoff_front][ring_dropoff_level], lift_position_types::fastest, false);
-      // if end effector has reach it's target
-      if (fabs(cur_bottom_arm_target - f_bar.get_position()) < bottom_arm_end_error && fabs(cur_top_arm_target - c_bar.get_position()) < top_arm_end_error){
-        start_task(dropoff_rings);
-        set_state(neutral);
-      }
+      start_task(dropoff_rings);
     }
   }
   // switches dropoff side
   else if (master.get_digital_new_press(switch_dropoff_side_button)){
-    WAIT_FOR_SCREEN_REFRESH();
+    WAIT_FOR_SCREEN_REFRESH(); // remove this later
     screen_timer.reset();
     dropoff_front = !dropoff_front;
   }
@@ -378,7 +375,7 @@ void Lift::handle(){
     case neutral:
       /*
       if (intake.state == intake.states::full){ // pickup rings if the intake is full
-        pickup_rings();
+        start_task(pickup_rings);
         intake.set_state(intake.states::searching);
       }
       */
@@ -388,6 +385,7 @@ void Lift::handle(){
       break;
     case down:
       if(master.get_digital_new_press(f_bar_up_button)){
+        // move c_bar out of the way
         raise_f_bar();
         set_state(raised);
       }
@@ -400,8 +398,8 @@ void Lift::handle(){
       break;
     case platform:
       if(master.get_digital_new_press(f_bar_up_button)){
-        // open forklift
-        set_state(down);
+        lift.open_forks();
+        set_state(release_mogo);
       }
       break;
     case release_mogo:
@@ -474,6 +472,7 @@ void lower_f_bar(void* params){
 }
 
 void dropoff_rings(void* params){
+  lift.wait_for_complete();// waits for lift to reach its ring dropoff target
   lift.open_stabber();
   lift.full = false;
   delay(200); // waits for rings to slide down end_effector
