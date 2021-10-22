@@ -242,8 +242,9 @@ void Lift::move_to_target_util(){
 }
 
 void Lift::move_f_bar_to_height(double target_z, const double speed){
-  target_z += -base_height + 3.5;  // 3.5 inches is how much below the forks are from the pivot point
+  target_z += -base_height + 3.5;  // 3.5 inches is how much below the forks are from the top pivot point
   cur_bottom_arm_target = bottom_arm_gear_ratio * (rad_to_deg(asin(target_z / bottom_arm_len)) + bottom_arm_offset_a);
+  c_bar.move_absolute(200, 100);
   f_bar.move_absolute(cur_bottom_arm_target, speed);
 }
 
@@ -313,11 +314,14 @@ void Lift::move_on_line(double target_y, double target_z_start, double target_z_
 void Lift::start_task(task_fn_t function){
   stop_task();
   task = new Task(function);
+  printf("created task\n");
+
 }
 
 void Lift::stop_task(){
   ring_dropoff_level = -1;
   if(task != nullptr){
+    printf("deallocated memory\n");
     task->remove();
     delete task;
     task = nullptr;
@@ -325,7 +329,7 @@ void Lift::stop_task(){
 }
 
 void Lift::set_state(const states next_state){
-  printf("Lift | Going from %s to %s", state_names[state], state_names[next_state]);
+  printf("Lift | Going from %s to %s\n", state_names[state], state_names[next_state]);
   last_state = state;
   state = next_state;
 }
@@ -336,6 +340,7 @@ void Lift::handle(){
 
   // Bring to neutral (cancel operation)
   if (master.get_digital_new_press(cancel_dropoff_button)){ // brings to neutral position
+    printf("cancel button pressed\n");
     stop_task();
     lift.close_forks();
     move_to_neutral();
@@ -343,6 +348,7 @@ void Lift::handle(){
   }
   // brings f_bar to mogo tipping height
   else if (master.get_digital_new_press(tip_mogo_button)){
+    printf("tip mogo button pressed\n");
     stop_task();
     lift.close_forks();
     move_f_bar_tip();
@@ -350,6 +356,7 @@ void Lift::handle(){
   }
   // lowers f_bar
   else if (master.get_digital_new_press(f_bar_down_button)){ // lowers f_bar to pickup mogos with forks if fbar down is pressed
+    printf("fbar down button pressed\n");
     stop_task();
     start_task(lower_f_bar);
     set_state(down);
@@ -357,6 +364,7 @@ void Lift::handle(){
   // ring dropoff
   else if (full){ // later check if mogo is oriented as well
     if (master.get_digital_new_press(ring_dropoff_button)){
+      printf("ring dropoff button pressed\n");
       stop_task();
       ring_dropoff_level++;
       ring_dropoff_level %= 3; // resets level to 0 after exceeding 2
@@ -366,6 +374,7 @@ void Lift::handle(){
   }
   // switches dropoff side
   else if (master.get_digital_new_press(switch_dropoff_side_button)){
+    printf("switch dropoff side button pressed\n");
     WAIT_FOR_SCREEN_REFRESH(); // remove this later
     screen_timer.reset();
     dropoff_front = !dropoff_front;
@@ -384,6 +393,7 @@ void Lift::handle(){
       break;
     case down:
       if(master.get_digital_new_press(f_bar_up_button)){
+        printf("f_bar up button pressed\n");
         // move c_bar out of the way
         raise_f_bar();
         set_state(raised);
@@ -391,18 +401,21 @@ void Lift::handle(){
       break;
     case raised:
       if(master.get_digital_new_press(f_bar_up_button)){
+        printf("f_bar up button pressed\n");
         raise_f_bar_to_platform();
         set_state(platform);
       }
       break;
     case platform:
       if(master.get_digital_new_press(f_bar_up_button)){
+        printf("f_bar up button pressed\n");
         lift.open_forks();
         set_state(release_mogo);
       }
       break;
     case release_mogo:
       if(master.get_digital_new_press(f_bar_up_button)){
+        printf("f_bar up button pressed\n");
         start_task(lower_f_bar);
         set_state(down);
       }
@@ -415,7 +428,7 @@ void Lift::move_to_neutral(){
 }
 
 void Lift::move_f_bar_tip(){
-  move_f_bar_to_height(5.0);
+  move_f_bar_to_height(10.0);
 }
 
 void Lift::raise_f_bar(){ // brings f_bar just above the ground
@@ -476,7 +489,7 @@ void pickup_rings(void* params){
 
 void lower_f_bar(void* params){
   lift.close_forks();
-  lift.move_f_bar_to_height(0.5);
+  lift.move_f_bar_to_height(5.0);
   waitUntil(f_bar.get_position() - fabs(lift.get_bottom_arm_target()) < lift.get_bottom_arm_end_error());
   lift.open_forks();
   lift.stop_task();

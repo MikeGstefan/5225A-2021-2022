@@ -91,6 +91,35 @@ void opcontrol() {
 	lift.c_bar_cal();
 	lift.f_bar_cal();
 
+	/*
+	double target_z = 15.0;
+	master.clear();
+	delay(10);
+	master.print(0, 0, "z: %lf", target_z);
+	lift.move_f_bar_to_height(target_z);
+
+	while(true){
+		if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_UP)){
+			target_z++;
+			lift.move_f_bar_to_height(target_z);
+			master.print(0, 0, "z: %lf", target_z);
+		}
+		if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_DOWN)){
+			target_z--;
+			lift.move_f_bar_to_height(target_z);
+			master.print(0, 0, "z: %lf", target_z);
+		}
+		delay(10);
+	}
+	*/
+
+	lift.move_to_neutral();
+	while(true){
+		// printf("");
+		lift.handle();
+		delay(10);
+	}
+	
 
 	// ring pickup max speed utility
 	/*
