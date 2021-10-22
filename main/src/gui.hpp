@@ -5,6 +5,7 @@
 #include "tracking.hpp"
 #include "config.hpp"
 using namespace pros;
+#define PAGES_COUNT 9
 
 //Forward-Declaration
 class Page;
@@ -20,17 +21,14 @@ namespace Style{
   };
 };
 
-extern double flTemp, blTemp, frTemp, brTemp, angle;
+extern int ring_count, cur_driver;
+extern double flTemp, blTemp, frTemp, brTemp, ringCount, angle;
 extern Page liftElastic, liftMove, track, moving, autoSel, driverCurve, intkTest, temps, mContr;
-extern Text trackX, trackY, trackA, tempfl, tempbl, tempfr, tempbr;
-extern Button resX, resY, resA, goToXYA;
-extern Slider xVal, yVal, aVal;
-
-extern int cur_driver;
+// extern std::array<driver, num_of_drivers> drivers;
 
 void guiSetup();
 void backgroundStuff();
-void alignedCoords (int x_objects, int y_objects, int x_btn_size, int y_btn_size);
+void alignedCoords (int x_objects, int y_objects, int x_btn, int y_btn, int x_range = 480, int y_range = 220);
 void flash(std::uint32_t color, std::uint32_t time);
 
 //All constructor args are in the format points, format, page, text, color
@@ -67,7 +65,7 @@ class Page{
 
     //Vars
     static Page* currentPage;
-    static std::array<Page*, 9> pages;
+    static std::array<Page*, PAGES_COUNT> pages;
     std::function <void()> func;
     std::vector<Button*> buttons;
     std::vector<Slider*> sliders;

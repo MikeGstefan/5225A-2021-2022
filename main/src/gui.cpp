@@ -1,11 +1,11 @@
 #include "gui.hpp"
 
 //Var init for text monitoring
-double flTemp, blTemp, frTemp, brTemp, angle;
+double flTemp, blTemp, frTemp, brTemp, ringCount, angle;
 
 //Static Variable Declarations
 Page* Page::currentPage = 0;
-std::array<Page*, 9> Page::pages = {}; //If size is changed, please change in class Page (.hpp), goTo(), toNext(), and toPrev()
+std::array<Page*, PAGES_COUNT> Page::pages = {};
 last_touch_e_t Page::touch_status = E_TOUCH_RELEASED;
 int16_t Page::x = 0, Page::y = 0;
 
@@ -22,29 +22,37 @@ Page track (3, "Tracking", COLOR_BLUE); //Display tracking vals and reset btns
 Text trackX(50, 45, Style::CENTRE, TEXT_SMALL, &track, "X:%.1f", &tracking.x_coord);
 Text trackY(135, 45, Style::CENTRE, TEXT_SMALL, &track, "Y:%.1f", &tracking.y_coord);
 Text trackA(220, 45, Style::CENTRE, TEXT_SMALL, &track, "A:%.1f", &angle);
-Button resX(15, 60, 70, 55, Style::SIZE, Button::SINGLE, &track, "Reset X", COLOR_RED, COLOR_BLACK);
-Button resY(100, 60, 70, 55, Style::SIZE, Button::SINGLE, &track, "Reset Y", COLOR_RED, COLOR_BLACK);
-Button resA(185, 60, 70, 55, Style::SIZE, Button::SINGLE, &track, "Reset A", COLOR_RED, COLOR_BLACK);
+Button resX(15, 60, 70, 55, Style::SIZE, Button::SINGLE, &track, "Reset X", COLOR_ORANGE, COLOR_BLACK);
+Button resY(100, 60, 70, 55, Style::SIZE, Button::SINGLE, &track, "Reset Y", COLOR_ORANGE, COLOR_BLACK);
+Button resA(185, 60, 70, 55, Style::SIZE, Button::SINGLE, &track, "Reset A", COLOR_ORANGE, COLOR_BLACK);
 
 Page moving (4, "Moving", COLOR_BLUE);
 Slider xVal(35, 45, 250, 40, Style::SIZE, Slider::HORIZONTAL, 0, 144, &moving, "X", COLOR_WHITE, COLOR_GREEN);
 Slider yVal(35, 110, 250, 40, Style::SIZE, Slider::HORIZONTAL, 0, 144, &moving, "Y", COLOR_WHITE, COLOR_YELLOW);
 Slider aVal(35, 175, 250, 40, Style::SIZE, Slider::HORIZONTAL, 0, 144, &moving, "A", COLOR_WHITE, COLOR_YELLOW);
-Button goToXYA(320, 45, 150, 40, Style::SIZE, Button::SINGLE, &moving, "Target", COLOR_RED, COLOR_BLACK);
-Button goHome(320, 110, 150, 40, Style::SIZE, Button::SINGLE, &moving, "Home", COLOR_RED, COLOR_BLACK);
-Button goCentre(320, 175, 150, 40, Style::SIZE, Button::SINGLE, &moving, "Centre", COLOR_RED, COLOR_BLACK);
+Button goToXYA(320, 45, 150, 40, Style::SIZE, Button::SINGLE, &moving, "Target", COLOR_ORANGE, COLOR_BLACK);
+Button goHome(320, 110, 150, 40, Style::SIZE, Button::SINGLE, &moving, "Home", COLOR_ORANGE, COLOR_BLACK);
+Button goCentre(320, 175, 150, 40, Style::SIZE, Button::SINGLE, &moving, "Centre", COLOR_ORANGE, COLOR_BLACK);
 
 Page autoSel (5, "Auton"); //Select auton routes
-// Button route1(120);
+Button route1 (45, 90, 100, 80, Style::SIZE, Button::LATCH, &autoSel, "Route 1", COLOR_ORANGE, COLOR_BLACK);
+Button route2 (190, 90, 100, 80, Style::SIZE, Button::LATCH, &autoSel, "Route 2", COLOR_ORANGE, COLOR_BLACK);
+Button route3 (335, 90, 100, 80, Style::SIZE, Button::LATCH, &autoSel, "Route 3", COLOR_ORANGE, COLOR_BLACK);
 
 
 Page driverCurve (6, "Drivers"); //Select a driver and their exp curve
-Button Nik(30, Page::mid_y-30, 120, 60, Style::SIZE, Button::LATCH, &driverCurve, "Nikhil", COLOR_RED, COLOR_WHITE);
-Button Em(180, Page::mid_y-30, 120, 60, Style::SIZE, Button::LATCH, &driverCurve, "Emily", COLOR_RED, COLOR_WHITE);
-Button Sar(330, Page::mid_y-30, 120, 60, Style::SIZE, Button::LATCH, &driverCurve, "Sarah", COLOR_RED, COLOR_WHITE);
+
+Button Nik(80, 40, 120, 80, Style::SIZE, Button::LATCH, &driverCurve, "Nikhil", COLOR_RED, COLOR_WHITE);
+Button Em(280, 40, 120, 80, Style::SIZE, Button::LATCH, &driverCurve, "Emily", COLOR_RED, COLOR_WHITE);
+Button Sar(80, 140, 120, 80, Style::SIZE, Button::LATCH, &driverCurve, "Sarah", COLOR_RED, COLOR_WHITE);
+Button Ale(280, 140, 120, 80, Style::SIZE, Button::LATCH, &driverCurve, "Alex", COLOR_RED, COLOR_WHITE);
 Text drivr(Page::mid_x, 45, Style::CORNER, TEXT_LARGE, &driverCurve, "chng to drivr name");
 
 Page intkTest (7, "Intake"); //Test for intake with rings
+Text rings(Page::mid_x, 45, Style::CENTRE, TEXT_SMALL, &intkTest, "Ring Count: %d", &ringCount);
+Button resI (45, 90, 100, 80, Style::SIZE, Button::SINGLE, &intkTest, "Reset Motor", COLOR_ORANGE, COLOR_BLACK);
+Button onOff (190, 90, 100, 80, Style::SIZE, Button::SINGLE, &intkTest, "Start/Stop", COLOR_ORANGE, COLOR_BLACK);
+Button resRings (335, 90, 100, 80, Style::SIZE, Button::SINGLE, &intkTest, "Reset Ring Count", COLOR_ORANGE, COLOR_BLACK);
 
 Page temps (8, "Temperature"); //Motor temps
 Text tempfl(25, 100, Style::CORNER, TEXT_SMALL, &temps, "Front Left: %.1f", &flTemp);
@@ -59,18 +67,17 @@ void draw_field(){
   screen::draw_rect(270, 30, 470, 230);
   screen::draw_line(370, 30, 370, 230);
   screen::draw_line(270, 130, 470, 130);
-  screen::set_pen(COLOR_RED);
+  screen::set_pen(COLOR_ORANGE);
   screen::draw_pixel(270+tracking.x_coord, 230-tracking.y_coord);
 }
 void Page::toPrev(){
-  if (currentPage == pages[1]) Page::goTo(8);
+  if (currentPage == pages[1]) Page::goTo(PAGES_COUNT-1);
   else goTo((currentPage->pageNum)-1);
 }
 void Page::toNext(){
-  if (currentPage == pages[8]) Page::goTo(1);
+  if (currentPage == pages[PAGES_COUNT-1]) Page::goTo(1);
   else goTo((currentPage->pageNum)+1);
 }
-
 
 void guiSetup(){ //Call once at start [in initialize()?]
   prevPage.func = &(Page::toPrev);
@@ -89,22 +96,22 @@ void guiSetup(){ //Call once at start [in initialize()?]
   Nik.func = [&driver=cur_driver](){driver=0;};
   Em.func = [&driver=cur_driver](){driver=1;};
   Sar.func = [&driver=cur_driver](){driver=2;};
+  Ale.func = [&driver=cur_driver](){driver=3;};
 
   Page::goTo(1);
 }
 
 //Utility to get coordinates for aligned objects, (buttons, sliders...) of same size
-void alignedCoords (int x_objects, int y_objects, int x_btn, int y_btn){
+void alignedCoords (int x_objects, int y_objects, int x_btn, int y_btn, int x_range, int y_range){
   std::string strX = "(", subStrX, strY = "(", subStrY;
 
-  double x_space = (480.0-x_objects*x_btn)/(x_objects+1.0);
-  double y_space = (220.0-y_objects*y_btn)/(y_objects+1.0);
+  double x_space = (x_range-x_objects*x_btn)/(x_objects+1.0);
+  double y_space = (y_range-y_objects*y_btn)/(y_objects+1.0);
 
   for (int y = 0; y < y_objects; y++){
     for (int x = 0; x < x_objects; x++){
-      printf("(%.1f, %.1f, %d, %d, Button::SIZE)\n", x_space*(x+1) + x_btn*x, y_space*(y+1) + y_btn*y, x_btn, y_btn);
+      printf("(%.1f, %.1f, %d, %d, Style::SIZE)\n", x_space*(x+1) + x_btn*x, y_space*(y+1) + y_btn*y + 20, x_btn, y_btn);
     }
-    printf("\n");
   }
   printf("\n");
 
@@ -115,21 +122,20 @@ void alignedCoords (int x_objects, int y_objects, int x_btn, int y_btn){
     double x_space_new = x_space;
     double y_space_new = y_space;
 
-    while (fmod(x_space, 1) != 0){
+    while (fmod(x_space_new, 1) != 0){
       x_btn_new++;
-      x_space_new = (480-x_objects*x_btn_new)/(x_objects+1);
+      x_space_new = (x_range-x_objects*x_btn_new)/(x_objects+1.0);
     }
 
-    while (fmod(y_space, 1) != 0){
+    while (fmod(y_space_new, 1) != 0){
       y_btn_new++;
-      y_space_new = (480-x_objects*y_btn_new)/(y_objects+1);
+      y_space_new = (y_range-y_objects*y_btn_new)/(y_objects+1.0);
     }
 
     for (int y = 0; y < y_objects; y++){
       for (int x = 0; x < x_objects; x++){
-        printf("(%.1f, %.1f, %d, %d, Button::SIZE)\n", x_space_new*(x+1) + x_btn_new*x, y_space_new*(y+1) + y_btn_new*y, x_btn_new, y_btn_new);
+        printf("(%d, %d, %d, %d, Style::SIZE)\n", int(x_space_new*(x+1) + x_btn_new*x), int(y_space_new*(y+1) + y_btn_new*y + 20), x_btn_new, y_btn_new);
       }
-      printf("\n");
     }
     printf("\n");
 
@@ -138,24 +144,23 @@ void alignedCoords (int x_objects, int y_objects, int x_btn, int y_btn){
     x_space_new = x_space;
     y_space_new = y_space;
 
-    while (fmod(x_space, 1) != 0){
+    while (fmod(x_space_new, 1) != 0){
       x_btn_new--;
-      x_space_new = (480-x_objects*x_btn_new)/(x_objects+1);
+      x_space_new = (x_range-x_objects*x_btn_new)/(x_objects+1.0);
     }
 
-    while (fmod(y_space, 1) != 0){
+    while (fmod(y_space_new, 1) != 0){
       y_btn_new--;
-      y_space_new = (480-x_objects*y_btn_new)/(y_objects+1);
+      y_space_new = (y_range-y_objects*y_btn_new)/(y_objects+1.0);
     }
 
     for (int y = 0; y < y_objects; y++){
       for (int x = 0; x < x_objects; x++){
-        printf("(%.1f, %.1f, %d, %d, Button::SIZE)\n", x_space_new*(x+1) + x_btn_new*x, y_space_new*(y+1) + y_btn_new*y, x_btn_new, y_btn_new);
+        printf("(%d, %d, %d, %d, Style::SIZE)\n", int(x_space_new*(x+1) + x_btn_new*x), int(y_space_new*(y+1) + y_btn_new*y + 20), x_btn_new, y_btn_new);
       }
       printf("\n");
     }
   }
-
 }
 
 //Flashing
@@ -303,7 +308,7 @@ Page::Page(int page_number, std::string name, std::uint32_t background_color){
 
 //Methods
 void Page::goTo(Page* page){
-  std::array <Page*, 9>::iterator it = std::find(pages.begin(), pages.end(), page);
+  std::array <Page*, PAGES_COUNT>::iterator it = std::find(pages.begin(), pages.end(), page);
   if (it == pages.end()) return;
   clearScreen(page->bcol);
   currentPage = page; //Saves new page then draws all the buttons on the page
@@ -500,7 +505,7 @@ Button* Button::update(){
           }
 
         }
-        else btn_id->draw(); //Just unpressed
+        else btn_id->draw(); //Newly unpressed
 
         return btn_id;
       }
@@ -512,9 +517,8 @@ Button* Button::update(){
       if (btn_id->latched){ //If in pressed state
         btn_id->runTask();
         delay(10);
+        return btn_id; //If multiple buttons are latched but only one is being run, then get rid of this line
       }
-
-      if (btn_id->latched) return btn_id; //If multiple buttons are latched but only one is being run, then get rid of this line
     }
 
     else if (btn_id->form == Button::HOLD){
@@ -551,5 +555,6 @@ void backgroundStuff(){ //To be called continously
   blTemp = back_l.get_temperature();
   frTemp = front_r.get_temperature();
   brTemp = back_r.get_temperature();
+  ringCount = ring_count;
   angle = rad_to_deg(tracking.global_angle);
 }

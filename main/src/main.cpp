@@ -4,8 +4,6 @@
 #include "util.hpp"
 #include "tracking.hpp"
 #include "gui.hpp"
-// using namespace std;
-// using namespace pros;
 
 
 /**
@@ -65,14 +63,16 @@ void autonomous() {}
  * task, not resume it from where it left off.
  */
 
-int cur_driver = 1; //Get rid of this once drivers is implemented
+int cur_driver = 1, ring_count = 0; //Get rid of this once merged
+// std::array<driver, num_of_drivers> drivers;
+
 void opcontrol() {
   Page::goTo(&moving);
 
 	Slider ok(100, 100, 130, 200, Style::CORNER, Slider::VERTICAL, 0, 144, &autoSel, "A", COLOR_WHITE, COLOR_YELLOW);
-	// alignedCoords(3, 2, 90, 80);
+	//Check driver selection
+	//Reset tracking by stopping task
 
-  //Check that vertical sliders work
   //Check for variadic text args in constructor for screen printing
 	while(1) {backgroundStuff(); delay(20);}
 }
