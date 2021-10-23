@@ -2,8 +2,13 @@
 #include "logging.hpp"
 #include "config.hpp"
 #include "util.hpp"
-#include "tracking.hpp"
 #include "gui.hpp"
+#include "Tracking.hpp"
+#include "lift.hpp"
+#include "drive.hpp"
+
+// using namespace std;
+// using namespace pros;
 
 
 /**
@@ -13,7 +18,12 @@
  * to keep execution time for this mode under a few seconds.
  */
 void initialize() {
+	drivebase.download_curve_data();
+	// logging_task_start();
+	Data::log_init();
+
 	delay(150);
+	tracking.x_coord = 0.0, tracking.y_coord = 0.0, tracking.global_angle = 0.0;
 	updateStartTask();
 	guiSetup();
 }
@@ -47,7 +57,20 @@ void competition_initialize() {}
  * will be stopped. Re-enabling the robot will restart the task, not re-start it
  * from where it left off.
  */
-void autonomous() {}
+void autonomous() {
+	// drivebase.update_lookup_table_util();
+	// rush_goal2(0.0, -45.0, 0.0);
+	// drivebase.move(0,-127, 0);
+	// while(!claw_touch.get_value()) delay(10);
+	// master.print(0, 0, "inches: %lf", tracking.y_coord);
+/*
+	Timer move_timer{"move_timer"};
+	// move_to_target_async(0.0, -45.0, 0.0);	// got to goal
+	// while(tracking.y_coord > -45.0)	delay(10);
+	master.print(0, 0, "time: %d", move_timer.get_time());
+	rush_goal(0.0, -20.0, 0.0);
+*/
+}
 
 /**
  * Runs the operator control code. This function will be started in its own task
@@ -72,4 +95,5 @@ void opcontrol() {
 
   //Check for variadic text args in constructor for screen printing
 	while(1) {guiBackground(); delay(10);}
+	drivebase.driver_practice();	
 }
