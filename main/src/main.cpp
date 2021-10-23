@@ -2,7 +2,7 @@
 #include "logging.hpp"
 #include "config.hpp"
 #include "util.hpp"
-// using namespace std;
+using namespace std;
 // using namespace pros;
 
 // Data test(Levels::both, "/usd/test.txt");
@@ -16,6 +16,7 @@
 void initialize() {
 	// logging_task_start();
 	Data::log_init();
+
 
 }
 
@@ -64,28 +65,37 @@ void autonomous() {}
  * task, not resume it from where it left off.
  */
 void opcontrol() {
-	uint64_t timer, total_time = 0;
-	Task([&](){
-		for(int x = 0; x<100000;x++){
-			timer = micros();
-			test_log2.print("t:%d \n",x);
-			total_time += micros() - timer;
-			delay(10);
-		}
-	});
-	for(int x = 0; x<100000;x++){
-		timer = micros();
-		test_log.print("t:%d \n",x);
-		total_time += micros() - timer;
-		delay(10);
-	}
+  ofstream file;
+  printf("%d\n",usd::is_installed ( ) );
+  file.open("/usd/test.txt",ofstream::out);
+  printf("%d\n",file.is_open());
+  file.close();
+  printf("%d\n",file.is_open());
+
+  // printf("%d\n",reinterpret_cast<uintptr_t>(file));
+  // cout<<file;
+	// uint64_t timer, total_time = 0;
+	// Task([&](){
+	// 	for(int x = 0; x<100000;x++){
+	// 		timer = micros();
+	// 		test_log2.print("t:%d \n",x);
+	// 		total_time += micros() - timer;
+	// 		delay(10);
+	// 	}
+	// });
+	// for(int x = 0; x<100000;x++){
+	// 	timer = micros();
+	// 	test_log.print("t:%d \n",x);
+	// 	total_time += micros() - timer;
+	// 	delay(10);
+	// }
 	// for(int x = 0; x<100;x++){
 	// 	timer = micros();
 	// 	test_log.log_print("t:%d ",x);
 	// 	total_time += micros() - timer;
 	// 	delay(10);
 	// }
-	printf("%llu\n",total_time);
+	// printf("%llu\n",total_time);
   // queue_handle();
   // print("helk");
 	// print("helk");

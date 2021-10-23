@@ -3,7 +3,7 @@ import os
 # print(os.getcwd())
 dir = os.getcwd()
 meta_file_name = 'meta_data.txt'
-file_name = 'test.txt'
+file_name = 'data.txt'
 output_folder = 'output'
 SEP = '$'
 
