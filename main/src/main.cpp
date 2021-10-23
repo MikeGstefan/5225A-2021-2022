@@ -90,7 +90,25 @@ void autonomous() {
 void opcontrol() {
 	lift.c_bar_cal();
 	lift.f_bar_cal();
+	master.clear();
+	delay(50);	// waits for screen to clear
 
+	// lift.move_to_target(lift.get_dropoff_coords()[1][2]);
+
+
+	// lower_f_bar(nullptr);
+	// lift.raise_f_bar_to_platform();
+	// /*
+		lift.move_to_neutral();
+		while(true){
+			// printf("");
+			lift.handle();
+			delay(10);
+		}
+	// */
+
+
+	// f_bar_move_to_height testing
 	/*
 	double target_z = 15.0;
 	master.clear();
@@ -113,13 +131,6 @@ void opcontrol() {
 	}
 	*/
 
-	lift.move_to_neutral();
-	while(true){
-		// printf("");
-		lift.handle();
-		delay(10);
-	}
-	
 
 	// ring pickup max speed utility
 	/*
