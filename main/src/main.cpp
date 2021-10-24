@@ -88,11 +88,16 @@ void autonomous() {
  * task, not resume it from where it left off.
  */
 void opcontrol() {
+	master.rumble("---");
 	lift.c_bar_cal();
 	lift.f_bar_cal();
+
+	lift.move_to_target({-6.0, 20.0});	// moves lift out of the way
+
 	master.clear();
 	delay(50);	// waits for screen to clear
-
+	master.print(0, 0, "Dropoff: %s", lift.is_dropoff_front() ? "front" : "back");
+	delay(50);
 	// lift.move_to_target(lift.get_dropoff_coords()[1][2]);
 
 

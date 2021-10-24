@@ -27,7 +27,8 @@ public:
     down,
     raised,
     platform,
-    release_mogo
+    release_mogo,
+    async // this state is empty, and is used when running tasks because no buttons IN the switch should be accessible  
   };
 
 private:

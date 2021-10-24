@@ -76,7 +76,7 @@ class Drivebase{
   void update_screen();
 
 public:
-  int cur_driver = 0;  // driver to defaults to Emily
+  int cur_driver = 0;  // driver defaults to Nikhil rn
   int num_of_drivers = 3;
   FILE* curve_file;
   std::array<driver, 3> drivers;  // driver profiles
