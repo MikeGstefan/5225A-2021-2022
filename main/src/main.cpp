@@ -55,8 +55,7 @@ void competition_initialize() {}
  */
 void autonomous() {
 	// drivebase.update_lookup_table_util();
-	printf("here\n");
-	//rush_goal2(0.0, -45.0, 0.0);
+	// rush_goal2(0.0, -45.0, 0.0);
 	// drivebase.move(0,-127, 0);
 	// while(!claw_touch.get_value()) delay(10);
 	// master.print(0, 0, "inches: %lf", tracking.y_coord);
@@ -83,25 +82,23 @@ void autonomous() {
  * task, not resume it from where it left off.
  */
 
-<<<<<<< HEAD
-
-
-
-
+int cur_driver = 1; //Get rid of this once merged
+// std::array<driver, num_of_drivers> drivers;
 
 void opcontrol() {
 	Page page1 (1,"",COLOR_GREY);
 	Page::goTo(&page1);
-	Button Text(0,10,0,100, Button::CORNER,0,&page1, "Intake in Port 6", COLOR_GREY, COLOR_WHITE);
-	Button Intake_Button(150,50,300,150, Button::CORNER,0,&page1, "Intake Switch", COLOR_WHITE);
-	Button Reset_Button(250,200,300,150, Button::CORNER,0,&page1, "Reset Button", COLOR_WHITE);
-	Intake_Button.setTask(&On_Off_Task);
-	Reset_Button.setTask(&Reset);
+	Button Text(0,10,0,100, Style::CORNER,Button::SINGLE,&page1, "Intake in Port 6", COLOR_GREY, COLOR_WHITE);
+	Button Intake_Button(150,50,300,150, Style::CORNER,Button::SINGLE,&page1, "Intake Switch", COLOR_WHITE);
+	Button Reset_Button(250,200,300,150, Style::CORNER,Button::SINGLE,&page1, "Reset Button", COLOR_WHITE);
+	Intake_Button.func = &On_Off_Task;
+	Reset_Button.func = &Reset;
 	Intake_Setup();
 	StartInTask();
 	while (1) {
-		Page::updateScreenStatus();
-		Button::getPress();
+		guiBackground();
+		// Page::updateScreenStatus();
+		// Button::getPress();
 		//Intake_debug();
 		delay(50);
 		/* code */
@@ -220,16 +217,4 @@ void opcontrol() {
 		delay(10);
 	}
 */
-=======
-int cur_driver = 1; //Get rid of this once drivers is implemented
-void opcontrol() {
-  Page::goTo(&moving);
-
-	Slider ok(100, 100, 130, 200, Style::CORNER, Slider::VERTICAL, 0, 144, &autoSel, "A", COLOR_WHITE, COLOR_YELLOW);
-	// alignedCoords(3, 2, 90, 80);
-
-  //Check that vertical sliders work
-  //Check for variadic text args in constructor for screen printing
-	while(1) {backgroundStuff(); delay(20);}
->>>>>>> GUI
 }

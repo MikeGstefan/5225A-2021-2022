@@ -5,6 +5,24 @@
 #include "tracking.hpp"
 #include "config.hpp"
 using namespace pros;
+#define PAGE_COUNT 9
+#define PAGE_LEFT 0
+#define PAGE_UP 0
+#define PAGE_RIGHT 480
+#define PAGE_DOWN 240
+#define USER_LEFT 0
+#define USER_UP 25
+#define USER_RIGHT 479
+#define USER_DOWN 239
+#define MID_X 240
+#define MID_Y 120
+#define CHAR_HEIGHT_SMALL 12
+#define CHAR_WIDTH_SMALL 7
+#define CHAR_HEIGHT_MEDIUM 16
+#define CHAR_WIDTH_MEDIUM 9
+#define CHAR_HEIGHT_LARGE 32
+#define CHAR_WIDTH_LARGE 19
+
 
 //Forward-Declaration
 class Page;
@@ -20,21 +38,16 @@ namespace Style{
   };
 };
 
-extern double flTemp, blTemp, frTemp, brTemp, angle;
+extern int ring_count, cur_driver;
 extern Page liftElastic, liftMove, track, moving, autoSel, driverCurve, intkTest, temps, mContr;
-extern Text trackX, trackY, trackA, tempfl, tempbl, tempfr, tempbr;
-extern Button resX, resY, resA, goToXYA;
-extern Slider xVal, yVal, aVal;
-
-extern int cur_driver;
+// extern std::array<driver, num_of_drivers> drivers;
 
 void guiSetup();
-void backgroundStuff();
-void alignedCoords (int x_objects, int y_objects, int x_btn_size, int y_btn_size);
+void guiBackground();
+void alignedCoords (int x_objects, int y_objects, int x_btn, int y_btn, int x_range = 480, int y_range = 220);
 void flash(std::uint32_t color, std::uint32_t time);
 
 //All constructor args are in the format points, format, page, text, color
-
 class Page{
   friend class Text;
   friend class Button;
@@ -44,30 +57,16 @@ class Page{
     //Vars
     static last_touch_e_t touch_status;
     static int16_t x, y;
-    std::uint32_t bcol;
+    std::uint32_t bcol, inv_bcol;
     std::string title;
 
   public:
-    enum { //Display Constants
-      left = 0,
-      user_left = 0,
-      up = 0,
-      user_up = 25,
-      right = 480,
-      user_right = 479,
-      down = 240,
-      user_down = 239,
-      mid_x = 240,
-      mid_y = 120,
-      char_height = 12,
-      char_width = 7
-    };
     //Page num, Title, Bcolor
     Page(int, std::string, std::uint32_t = COLOR_BLACK);
 
     //Vars
     static Page* currentPage;
-    static std::array<Page*, 9> pages;
+    static std::array<Page*, PAGE_COUNT> pages;
     std::function <void()> func;
     std::vector<Button*> buttons;
     std::vector<Slider*> sliders;
@@ -97,8 +96,8 @@ class Button{
   private:
     //Vars
     std::uint32_t lcol, bcol, dark_bcol;
-    std::string label;
-    int16_t x1, y1, x2, y2, text_x, text_y;
+    std::string label, label1="";
+    int16_t x1, y1, x2, y2, text_x, text_y, text_x1, text_y1;
     // void (*funcPtr)(); //This is a var because it is a pointer to a void function, not a void function in itself
     bool lastPressed=0;
     press_type form;

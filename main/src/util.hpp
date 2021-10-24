@@ -32,6 +32,11 @@ double operator "" _rad(long double radians);
 double rad_to_deg(double rad);
 double deg_to_rad(double deg);
 
+struct Vector2D{
+    Vector2D(double x, double y) : x(x), y(y) {}
+    double x, y;
+};
+
 struct Coord{   // stores members variables for a coordinate: x, y and angle    MUST BE DEINFED HERE, OTHERWISE CIRCULAR HEADER FILE DEPENDENCY OCCURS
     double x, y, angle;
     Coord(double x, double y, double angle);
