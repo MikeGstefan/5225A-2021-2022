@@ -105,7 +105,6 @@ void opcontrol() {
 	// /*
 		lift.move_to_neutral();
 		while(true){
-			// printf("");
 			lift.handle();
 			delay(10);
 		}

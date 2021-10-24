@@ -18,12 +18,13 @@ class Lift {
 public:
 
   bool full = false; // if end_effector has rings
-  const char* state_names[7] = {"neutral", "tip", "down", "raised", "platform", "release_mogo", "async"};
+  const char* state_names[8] = {"neutral", "tip", "lowering", "down", "raised", "platform", "release_mogo", "async"};
 
   // public lift state machine variables
   enum states {
     neutral,
     tip,
+    lowering,
     down,
     raised,
     platform,
@@ -104,6 +105,7 @@ public:
   void move_f_bar_tip();  //
   void raise_f_bar(); // brings f_bar just above the ground
   void raise_f_bar_to_platform();
+  void lower_f_bar();
 
   void open_forks();
   void close_forks();
@@ -129,5 +131,4 @@ extern Lift lift;
 // Note: These functions should be methods of the lift class, but that doesn't work for creating async methods
 
 void pickup_rings(void* params);
-void lower_f_bar(void* params);
 void dropoff_rings(void* params);

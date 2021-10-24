@@ -346,7 +346,7 @@ void Lift::handle(){
   // Buttons accessible in any state
 
   // Bring to neutral (cancel operation)
-  if (master.get_digital_new_press(cancel_dropoff_button)){ // brings to neutral position
+  if (master.get_digital_new_press(cancel_dropoff_button) && state != neutral){ // brings to neutral position
     printf("cancel button pressed\n");
     stop_task();
     lift.close_forks();
@@ -354,7 +354,7 @@ void Lift::handle(){
     set_state(neutral);
   }
   // brings f_bar to mogo tipping height
-  else if (master.get_digital_new_press(tip_mogo_button)){
+  else if (master.get_digital_new_press(tip_mogo_button) && state != tip){
     printf("tip mogo button pressed\n");
     stop_task();
     lift.close_forks();
@@ -362,10 +362,11 @@ void Lift::handle(){
     set_state(tip);
   }
   // lowers f_bar
-  else if (master.get_digital_new_press(f_bar_down_button)){ // lowers f_bar to pickup mogos with forks if fbar down is pressed
+  else if (master.get_digital_new_press(f_bar_down_button) && state != down){ // lowers f_bar to pickup mogos with forks if fbar down is pressed
     printf("fbar down button pressed\n");
     stop_task();
-    start_task(lower_f_bar);
+    lower_f_bar();
+    set_state(lowering);
   }
   // ring dropoff
   else if (full || true){ // later check if mogo is oriented as well, is orring with true just for testing since we can't sense if it is full yet
@@ -404,10 +405,16 @@ void Lift::handle(){
     case tip:
         // all buttons to exit tip state are above the switch statement
       break;
+    case lowering:
+      if(fabs(get_bottom_arm_target() - f_bar.get_position()) < get_bottom_arm_end_error()){
+          printf("\n\n FINISHED LOWERING F_BAR! %d\n\n", millis());
+          open_forks();
+          set_state(lift.states::down);
+      }
+      break;
     case down:
       if (master.get_digital_new_press(f_bar_up_button)){
         printf("f_bar up button pressed\n");
-        // move c_bar out of the way
         raise_f_bar();
         set_state(raised);
       }
@@ -429,7 +436,8 @@ void Lift::handle(){
     case release_mogo:
       if (master.get_digital_new_press(f_bar_up_button)){
         printf("f_bar up button pressed\n");
-        start_task(lower_f_bar);
+        lower_f_bar();
+        set_state(lowering);
       }
       break;
     case async: // this state is empty, and is used when running tasks because no buttons IN the switch should be accessibles
@@ -439,23 +447,19 @@ void Lift::handle(){
 
 void Lift::move_to_neutral(){ // moves lift to position right above ring stack
   move_to_target({-3.25, 20.0}, lift_position_types::fastest, false);
-  set_state(neutral);
 }
 
 void Lift::move_f_bar_tip(){  // moves f_bar to mogo tipping height
   move_f_bar_to_height(8.0);
-  set_state(tip);
 }
 
 void Lift::raise_f_bar(){ // brings f_bar just above the ground
   close_forks();
   move_f_bar_to_height(6.0);
-  set_state(raised);
 }
 
 void Lift::raise_f_bar_to_platform(){
   move_f_bar_to_height(12.0);
-  set_state(platform);
 }
 
 void Lift::open_forks(){
@@ -498,29 +502,22 @@ double Lift::get_ring_dropoff_level() const{
 
 void pickup_rings(void* params){
   lift.open_stabber();
-  lift.move_on_line(-3.25, 18.0, 9.5, 60);
+  lift.move_on_line(-3.00, 18.0, 9.5, 60);
   lift.close_stabber();
+  delay(120); // waits for arm to stabilize
   lift.full = true;
-  lift.move_on_line(-2.75, 9.5, 20.0, 60);
+  lift.move_on_line(-2.5, 9.5, 20.0, 55);
   lift.stop_task();
   lift.set_state(lift.states::neutral);
   lift.stop_task();
 }
 
-void lower_f_bar(void* params){
+void Lift::lower_f_bar(){
   lift.close_forks();
   lift.move_f_bar_to_height(5.0);
+
   // waits for f_bar to reach lowered height
   printf("\n\n STARTED LOWERING F_BAR! %d \n\n", millis());
-  waitUntil(fabs(lift.get_bottom_arm_target() - f_bar.get_position()) < lift.get_bottom_arm_end_error());
-
-  lift.open_forks();
-  printf("\n\n FINISHED LOWERING F_BAR! %d\n\n", millis());
-  // while(true){
-  //   delay(10);
-  // }
-  lift.set_state(lift.states::down);
-  lift.stop_task();
 }
 
 void dropoff_rings(void* params){
