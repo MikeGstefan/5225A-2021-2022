@@ -88,7 +88,6 @@ void autonomous() {
  * task, not resume it from where it left off.
  */
 void opcontrol() {
-	master.rumble("---");
 	lift.c_bar_cal();
 	lift.f_bar_cal();
 

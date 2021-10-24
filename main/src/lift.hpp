@@ -18,7 +18,7 @@ class Lift {
 public:
 
   bool full = false; // if end_effector has rings
-  const char* state_names[6] = {"neutral", "tip", "down", "raised", "platform", "release_mogo"};
+  const char* state_names[7] = {"neutral", "tip", "down", "raised", "platform", "release_mogo", "async"};
 
   // public lift state machine variables
   enum states {
@@ -28,7 +28,7 @@ public:
     raised,
     platform,
     release_mogo,
-    async // this state is empty, and is used when running tasks because no buttons IN the switch should be accessible  
+    async // this state is empty, and is used when running tasks because no buttons IN the switch should be accessible
   };
 
 private:
@@ -55,8 +55,9 @@ private:
   states state;
   states last_state;
 
-  Task* task = nullptr;
+  Task* task_ptr = nullptr;
 
+  bool task_removed;
   // ring dropoff variables
   bool dropoff_front;
   int ring_dropoff_level;
