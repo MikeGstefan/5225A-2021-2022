@@ -4,6 +4,7 @@
 #include "main.h"
 #include "tracking.hpp"
 #include "config.hpp"
+#include "intake.hpp"
 using namespace pros;
 #define PAGE_COUNT 9
 #define PAGE_LEFT 0

@@ -86,14 +86,9 @@ int cur_driver = 1; //Get rid of this once merged
 // std::array<driver, num_of_drivers> drivers;
 
 void opcontrol() {
-	Page page1 (1,"",COLOR_GREY);
-	Page::goTo(&page1);
-	Button Text(0,10,0,100, Style::CORNER,Button::SINGLE,&page1, "Intake in Port 6", COLOR_GREY, COLOR_WHITE);
-	Button Intake_Button(150,50,300,150, Style::CORNER,Button::SINGLE,&page1, "Intake Switch", COLOR_WHITE);
-	Button Reset_Button(250,200,300,150, Style::CORNER,Button::SINGLE,&page1, "Reset Button", COLOR_WHITE);
-	Intake_Button.func = &On_Off_Task;
-	Reset_Button.func = &Reset;
-	Intake_Setup();
+	Page::goTo(&intkTest);
+	// Intake_Button.func = &On_Off_Task;
+	// Reset_Button.func = &Reset;
 	StartInTask();
 	while (1) {
 		guiBackground();

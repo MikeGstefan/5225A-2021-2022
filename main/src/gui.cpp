@@ -45,10 +45,13 @@ Text drivr(MID_X, MID_Y, Style::CENTRE, TEXT_LARGE, &driverCurve, "drivr name");
 Button nextDrivr(340, 70, 100, 120, Style::SIZE, Button::SINGLE, &driverCurve, "Next Driver", COLOR_ORANGE, COLOR_BLACK);
 
 Page intkTest (7, "Intake"); //Test for intake with rings
-Text rings(MID_X, 50, Style::CENTRE, TEXT_SMALL, &intkTest, "Ring Count: %d", &ringCount);
+Text rings(MID_X, 50, Style::CENTRE, TEXT_SMALL, &intkTest, "Ring Count: %.0f", &ringCount);
+Text ports(MID_X, 70, Style::CENTRE, TEXT_SMALL, &intkTest, "Motor: 6, Vision: 7, Limit Switch: A");
 Button resI (30, 90, 120, 80, Style::SIZE, Button::SINGLE, &intkTest, "Reset Motor", COLOR_ORANGE, COLOR_BLACK);
 Button onOff (180, 90, 120, 80, Style::SIZE, Button::SINGLE, &intkTest, "Start/Stop", COLOR_ORANGE, COLOR_BLACK);
-Button resRings (330, 90, 120, 80, Style::SIZE, Button::SINGLE, &intkTest, "Reset Ring Count", COLOR_ORANGE, COLOR_BLACK);
+Button upRings (330, 90, 120, 35, Style::SIZE, Button::SINGLE, &intkTest, "Ring +", COLOR_ORANGE, COLOR_BLACK);
+Button downRings (330, 135, 120, 35, Style::SIZE, Button::SINGLE, &intkTest, "Ring -", COLOR_ORANGE, COLOR_BLACK);
+
 
 Page temps (8, "Temperature"); //Motor temps
 Text tempfl(25, 100, Style::CORNER, TEXT_SMALL, &temps, "Front Left: %.1f", &flTemp);
@@ -88,6 +91,11 @@ void guiSetup(){ //Call once at start [in initialize()?]
 
   prevDrivr.func = [&driver=cur_driver](){driver--;};
   nextDrivr.func = [&driver=cur_driver](){driver++;};
+
+  upRings.func = &ringup;
+  downRings.func = &ringdown;
+  resI.func = &Reset;
+  onOff.func = &On_Off_Task;
 
   Button::createOptions({&route1, &route2, &route3});
 
@@ -355,8 +363,7 @@ void Text::draw(){
   screen::set_pen(lcol);
   char buffer [70];
   if (val_ptr != nullptr) { //If there is a var to print
-    int length = sprintf(buffer, label.c_str(), *val_ptr);
-    screen::print(txt_fmt, x, y, "%*c   ", length);
+    sprintf(buffer, label.c_str(), *val_ptr);
     screen::print(txt_fmt, x, y, "%s", buffer);
     prevVal = *val_ptr;
   }
@@ -566,8 +573,8 @@ void guiBackground(){ //To be called continously
   Slider::update();
   Text::update();
   end_flash();
-
   //Saving vars for text display
+  // ring_count++;
   flTemp = front_l.get_temperature();
   blTemp = back_l.get_temperature();
   frTemp = front_r.get_temperature();
