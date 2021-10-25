@@ -18,18 +18,29 @@ class Lift {
 public:
 
   bool full = false; // if end_effector has rings
-  const char* state_names[8] = {"neutral", "tip", "lowering", "down", "raised", "platform", "release_mogo", "async"};
+  const char* state_names[15] = {
+    "neutral", "ring_pickup", "tip", "lowering", "down", "raised", "platform", "release_mogo",
+    "ring_dropoff", "dropoff_start", "dropoff_back_alliance", "dropoff_back_mid", "dropoff_back_top", "dropoff_front_mid", "dropoff_front_top"
+  };
 
   // public lift state machine variables
   enum states {
     neutral,
+    ring_pickup,
     tip,
     lowering,
     down,
     raised,
     platform,
     release_mogo,
-    async // this state is empty, and is used when running tasks because no buttons IN the switch should be accessible
+    // async // this state is empty, and is used when running tasks because no buttons IN the switch should be accessible
+    ring_dropoff,
+    dropoff_start,  // state is just used avoid repeated code
+    dropoff_back_alliance,
+    dropoff_back_mid,
+    dropoff_back_top,
+    dropoff_front_mid,
+    dropoff_front_top,
   };
 
 private:
@@ -59,10 +70,13 @@ private:
   Task* task_ptr = nullptr;
 
   bool task_removed;
+
   // ring dropoff variables
   bool dropoff_front;
   int ring_dropoff_level;
   array<array<Vector2D, 3>, 2> dropoff_coords;  // ring dropoff coords
+  Timer last_dropoff_press_timer{"last_dropoff"}; // used to detect multiple consecutive ring dropoff button presses
+  static constexpr int dropoff_double_press_time = 100;
 
 public:
 
@@ -102,10 +116,10 @@ public:
   void stop_task(); // ends that task
 
   void move_to_neutral(); // moves lift to position right above ring stack
-  void move_f_bar_tip();  //
+  void move_f_bar_tip();
+  void lower_f_bar();
   void raise_f_bar(); // brings f_bar just above the ground
   void raise_f_bar_to_platform();
-  void lower_f_bar();
 
   void open_forks();
   void close_forks();

@@ -38,7 +38,7 @@ struct Vector2D{
     double x, y;
 };
 
-struct Coord{   // stores members variables for a coordinate: x, y and angle    MUST BE DEINFED HERE, OTHERWISE CIRCULAR HEADER FILE DEPENDENCY OCCURS
+struct Coord{   // stores members variables for a coordinate: x, y and angle    MUST BE DEFINED HERE, OTHERWISE IT'LL CAUSE CIRCULAR HEADER FILE DEPENDENCY OCCURS
     double x, y, angle;
     Coord(double x, double y, double angle);
     Coord();
