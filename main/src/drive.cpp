@@ -98,7 +98,7 @@ void Drivebase::download_curve_data(){
   // reads data for each driver from file
   for (short driver = 0; driver < num_of_drivers; driver++){  // reads curve curvature from curve file
     printf("num of drivers: %d\n", num_of_drivers);
-    printf("DRIVER: %s\n", drivers[driver].name);
+    printf("\nDRIVER: %s\n", drivers[driver].name);
     for (short curvature = 0; curvature < 3; curvature++){  // reads data for each axis of motion
       if (curve_file_exists)  fscanf(curve_file, "curvature:%lf\n", &drivers[driver].custom_drives[curvature].curvature);
       printf("curvature: %lf\n", drivers[driver].custom_drives[curvature].curvature);

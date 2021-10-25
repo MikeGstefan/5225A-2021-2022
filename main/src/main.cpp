@@ -2,10 +2,10 @@
 #include "logging.hpp"
 #include "config.hpp"
 #include "util.hpp"
-#include "gui.hpp"
 #include "Tracking.hpp"
 #include "lift.hpp"
 #include "drive.hpp"
+#include "gui.hpp"
 
 // using namespace std;
 // using namespace pros;
@@ -86,14 +86,26 @@ void autonomous() {
  * task, not resume it from where it left off.
  */
 
-int cur_driver = 1, ring_count = 0; //Get rid of this once merged
-// std::array<driver, num_of_drivers> drivers;
+int ring_count = 0; //Get rid of this once merged
 
 void opcontrol() {
-	//Check driver selection
+	//Try to get rid of pair for elastic time
+	//instead of manually pushing back prev and next buttons from perm, have each page just save everything from perms text, buttons, and slider vectors
 	//Reset tracking by stopping task
 
-  //Check for variadic text args in constructor for screen printing
-	while(1) {guiBackground(); delay(10);}
-	drivebase.driver_practice();	
+	while(true){
+		guiBackground();
+		drivebase.handle_input();
+
+
+		if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_B)){ //Update expo util
+			drivebase.update_lookup_table_util();
+			delay(50);
+			master.clear();
+			drivebase.screen_timer.reset();
+		}
+		else if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_UP)) nextDriver();
+		else if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_DOWN)) prevDriver();
+		delay(10);
+	}
 }

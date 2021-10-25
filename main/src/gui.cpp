@@ -1,7 +1,9 @@
 #include "gui.hpp"
 
 //Var init for text monitoring
-double flTemp, blTemp, frTemp, brTemp, ringCount, angle;
+double ringCount, angle, elasticUpTime, elasticDownTime;
+double motor_temperatures[8];
+std::pair <int, int> elasticTime;
 
 //Static Variable Declarations
 Page* Page::currentPage = 0;
@@ -15,8 +17,12 @@ Page perm (0, "PERM BTNS", COLOR_PINK); //Page perm only exists because its a pr
 Button prevPage(0, 0, 75, 20, Style::SIZE, Button::SINGLE, &perm, "<-");
 Button nextPage(480, 0, -75, 20, Style::SIZE, Button::SINGLE, &perm, "->");
 
-Page liftElastic (1, "Lift - Elastic Test"); //Testing the elastics on the lift
-Page liftMove (2, "Lift - Moving"); //Moving the lift to an xyz position
+Page elastic (1, "Elastic Test"); //Testing the elastics on the lift
+Button runElastic(165, 60, 150, 55, Style::SIZE, Button::SINGLE, &elastic, "Run Elastic Test", COLOR_ORANGE, COLOR_BLACK);
+Text upTime (MID_X, 160, Style::CENTRE, TEXT_SMALL, &elastic, "Up Time: %.0f", &elasticUpTime);
+Text downTime(MID_X, 180, Style::CENTRE, TEXT_SMALL, &elastic, "Down Time: %.0f", &elasticDownTime);
+
+Page liftMove (2, "Lift"); //Moving the lift to an xyz position
 
 Page track (3, "Tracking", COLOR_WHITE); //Display tracking vals and reset btns
 Text trackX(50, 45, Style::CENTRE, TEXT_SMALL, &track, "X:%.1f", &tracking.x_coord, COLOR_BLACK);
@@ -40,21 +46,25 @@ Button route2 (190, 90, 100, 80, Style::SIZE, Button::LATCH, &autoSel, "Route 2"
 Button route3 (335, 90, 100, 80, Style::SIZE, Button::LATCH, &autoSel, "Route 3", COLOR_ORANGE, COLOR_BLACK);
 
 Page driverCurve (6, "Drivers"); //Select a driver and their exp curve
-Button prevDrivr(40, 70, 100, 120, Style::SIZE, Button::SINGLE, &driverCurve, "Prev Driver", COLOR_ORANGE, COLOR_BLACK);
-Text drivr(MID_X, MID_Y, Style::CENTRE, TEXT_LARGE, &driverCurve, "drivr name");
-Button nextDrivr(340, 70, 100, 120, Style::SIZE, Button::SINGLE, &driverCurve, "Next Driver", COLOR_ORANGE, COLOR_BLACK);
+Button prevDrivr(30, 70, 100, 120, Style::SIZE, Button::SINGLE, &driverCurve, "Prev Driver", COLOR_ORANGE, COLOR_BLACK);
+Text drivrName(MID_X, MID_Y, Style::CENTRE, TEXT_LARGE, &driverCurve, "[Driver Name]", COLOR_WHITE);
+Button nextDrivr(350, 70, 100, 120, Style::SIZE, Button::SINGLE, &driverCurve, "Next Driver", COLOR_ORANGE, COLOR_BLACK);
 
 Page intkTest (7, "Intake"); //Test for intake with rings
-Text rings(MID_X, 50, Style::CENTRE, TEXT_SMALL, &intkTest, "Ring Count: %d", &ringCount);
+Text rings(MID_X, 50, Style::CENTRE, TEXT_SMALL, &intkTest, "Ring Count: %.0f", &ringCount);
 Button resI (30, 90, 120, 80, Style::SIZE, Button::SINGLE, &intkTest, "Reset Motor", COLOR_ORANGE, COLOR_BLACK);
 Button onOff (180, 90, 120, 80, Style::SIZE, Button::SINGLE, &intkTest, "Start/Stop", COLOR_ORANGE, COLOR_BLACK);
 Button resRings (330, 90, 120, 80, Style::SIZE, Button::SINGLE, &intkTest, "Reset Ring Count", COLOR_ORANGE, COLOR_BLACK);
 
 Page temps (8, "Temperature"); //Motor temps
-Text tempfl(25, 100, Style::CORNER, TEXT_SMALL, &temps, "Front Left: %.1f", &flTemp);
-Text tempbl(25, 200, Style::CORNER, TEXT_SMALL, &temps, "Back Left: %.1f", &blTemp);
-Text tempfr(250, 100, Style::CORNER, TEXT_SMALL, &temps, "Front Right: %.1f", &frTemp);
-Text tempbr(250, 200, Style::CORNER, TEXT_SMALL, &temps, "Back Right: %.1f", &brTemp);
+Text tempfl(75, 85, Style::CENTRE, TEXT_SMALL, &temps, "FL: %.1f", &motor_temperatures[0]);
+Text tempbl(185, 85, Style::CENTRE, TEXT_SMALL, &temps, "BL: %.1f", &motor_temperatures[1]);
+Text tempfr(295, 85, Style::CENTRE, TEXT_SMALL, &temps, "FR: %.1f", &motor_temperatures[2]);
+Text tempbr(405, 85, Style::CENTRE, TEXT_SMALL, &temps, "BR: %.1f", &motor_temperatures[3]);
+Text tempc(75, 175, Style::CENTRE, TEXT_SMALL, &temps, "C: %.1f", &motor_temperatures[4]);
+Text tempf(185, 175, Style::CENTRE, TEXT_SMALL, &temps, "F: %.1f", &motor_temperatures[5]);
+Text tempi(295, 175, Style::CENTRE, TEXT_SMALL, &temps, "I: %.1f", &motor_temperatures[6]);
+Text tempu(405, 175, Style::CENTRE, TEXT_SMALL, &temps, "U: %.1f", &motor_temperatures[7]);
 
 //Functions
 void draw_field(){
@@ -65,17 +75,37 @@ void draw_field(){
   screen::draw_pixel(270+(200*tracking.x_coord/144), 230-(200*tracking.y_coord/144));
 }
 void Page::toPrev(){
-  if (currentPage == pages[1]) Page::goTo(PAGE_COUNT-1);
+  if (currentPage == pages[1]) goTo(PAGE_COUNT-1);
   else goTo((currentPage->pageNum)-1);
 }
 void Page::toNext(){
-  if (currentPage == pages[PAGE_COUNT-1]) Page::goTo(1);
+  if (currentPage == pages[PAGE_COUNT-1]) goTo(1);
   else goTo((currentPage->pageNum)+1);
 }
+void prevDriver(){
+  if (drivebase.cur_driver == 0) drivebase.cur_driver = drivebase.num_of_drivers - 1;
+  else drivebase.cur_driver--;
+  WAIT_FOR_SCREEN_REFRESH();
+  // screen::fill_rect(130, 70, 350, 190);
+  master.print(2, 0, "Driver: %s          ", drivebase.drivers[drivebase.cur_driver].name);
+}
+void nextDriver(){
+  drivebase.cur_driver++;
+  drivebase.cur_driver %= drivebase.num_of_drivers;
+  WAIT_FOR_SCREEN_REFRESH();
+  // screen::fill_rect(130, 70, 350, 190);
+  master.print(2, 0, "Driver: %s          ", drivebase.drivers[drivebase.cur_driver].name);
+}
+std::pair <int, int> elasticUtil(){
+  elasticTime = std::make_pair(800, 800);
+  return elasticTime;
+}
 
-void guiSetup(){ //Call once at start [in initialize()?]
+void guiSetup(){ //Call once at start in initialize()
   prevPage.func = &(Page::toPrev);
   nextPage.func = &(Page::toNext);
+
+  runElastic.func = &elasticUtil;
 
   resX.func = [&coord=tracking.x_coord](){printf("RESET X PLACEHOLDER\n");};
   resY.func = [&coord=tracking.y_coord](){printf("RESET Y PLACEHOLDER\n");};
@@ -86,8 +116,19 @@ void guiSetup(){ //Call once at start [in initialize()?]
   goHome.func = [](){delay(1000); move_to_target_sync(0, 0, 0, false);};
   goCentre.func = [](){delay(1000); move_to_target_sync(72, 72, 0, false);};
 
-  prevDrivr.func = [&driver=cur_driver](){driver--;};
-  nextDrivr.func = [&driver=cur_driver](){driver++;};
+  prevDrivr.func = &prevDriver;
+  nextDrivr.func = &nextDriver;
+  drivrName.setBackground(130, 70, 350, 190, Style::CORNER, COLOR_BLACK);
+
+  tempfl.setBackground(40, 60, 70, 50, Style::SIZE);
+  tempbl.setBackground(150, 60, 70, 50, Style::SIZE);
+  tempfr.setBackground(260, 60, 70, 50, Style::SIZE);
+  tempbr.setBackground(370, 60, 70, 50, Style::SIZE);
+
+  tempc.setBackground(40, 150, 70, 50, Style::SIZE);
+  tempf.setBackground(150, 150, 70, 50, Style::SIZE);
+  tempi.setBackground(260, 150, 70, 50, Style::SIZE);
+  tempu.setBackground(370, 150, 70, 50, Style::SIZE);
 
   Button::createOptions({&route1, &route2, &route3});
 
@@ -159,9 +200,11 @@ void alignedCoords (int x_objects, int y_objects, int x_btn, int y_btn, int x_ra
 //Flashing
 bool flashing=false;
 std::uint32_t end_time=millis();
-void flash(std::uint32_t color, std::uint32_t time){ //has a delay
+void flash(std::uint32_t color, std::uint32_t time, std::string text){ //has a delay
   flashing = true;
   Page::clearScreen(color);
+  screen::print(TEXT_LARGE, (480-text.length()*CHAR_WIDTH_LARGE)/2, 95, text.c_str());
+  master.rumble("-.-.-.-.");
   end_time = millis() + time;
 }
 
@@ -172,7 +215,6 @@ void end_flash (){
   }
 }
 
-//Class Functions
 std::tuple<int, int, int, int> fixPoints (int p1, int p2,int p3, int p4, Style::style type){
   int x1=p1, y1=p2, x2=p3, y2=p4, temp;
 
@@ -202,35 +244,14 @@ std::tuple<int, int, int, int> fixPoints (int p1, int p2,int p3, int p4, Style::
 
 //Constructors
 void Text::construct (int16_t pt1, int16_t pt2, Style::style type, text_format_e_t size, Page* page_ptr, std::string text, std::uint32_t label_color){
-  x = pt1;
-  y = pt2;
   txt_fmt = size;
   page = page_ptr;
-  label = text;
   lcol = label_color;
 
-  if (type == Style::CENTRE){
-    if (size == TEXT_SMALL){
-      x -= (label.length()*CHAR_WIDTH_SMALL)/2;
-      y -= CHAR_HEIGHT_SMALL/2;
-    }
+  setTitle(pt1, pt2, type, text);
 
-    else if (size == TEXT_MEDIUM){
-      x -= (label.length()*CHAR_WIDTH_MEDIUM)/2;
-      y -= CHAR_HEIGHT_MEDIUM/2;
-    }
-
-    else if (size == TEXT_LARGE){
-      x -= (label.length()*CHAR_WIDTH_LARGE)/2;
-      y -= CHAR_HEIGHT_LARGE/2;
-    }
-  }
-
-  else if (type == Style::SIZE) printf("SIZE format is not available for Text!\n");
 
   (page->texts).push_back(this);
-
-  if(Page::currentPage == page || &perm == page) draw();
 }
 
 void Button::construct(int16_t pt1, int16_t pt2, int16_t pt3, int16_t pt4, Style::style type, press_type prType, Page* page_ptr, std::string text, std::uint32_t background_color, std::uint32_t label_color){
@@ -263,17 +284,14 @@ void Button::construct(int16_t pt1, int16_t pt2, int16_t pt3, int16_t pt4, Style
         text_y1 = (y1+y2-CHAR_HEIGHT_SMALL)/2+CHAR_HEIGHT_SMALL;
       }
     }
-
-
-    if(Page::currentPage == page || &perm == page) draw();
 }
 
 Text::Text (int16_t pt1, int16_t pt2, Style::style type, text_format_e_t size, Page* page_ptr, std::string text, std::uint32_t label_color){
-  construct(pt1, pt2, type, size, page_ptr, text,label_color);
+  construct(pt1, pt2, type, size, page_ptr, text, label_color);
 }
 
 Text::Text (int16_t pt1, int16_t pt2, Style::style type, text_format_e_t size, Page* page_ptr, std::string text, double* val_ref, std::uint32_t label_color){
-  construct(pt1, pt2, type, size, page_ptr, text,label_color);
+  construct(pt1, pt2, type, size, page_ptr, text, label_color);
   val_ptr = val_ref;
 }
 
@@ -319,9 +337,8 @@ Page::Page(int page_number, std::string name, std::uint32_t background_color){
   //Should call Page::goTo() to actually show the page
   pageNum = page_number;
   pages[pageNum] = this;
-  title = name;
+  title = name + " - " + std::to_string(pageNum);
   bcol = background_color;
-  inv_bcol = ~bcol&0xFFFFFF;
 
   buttons.push_back(&prevPage);
   buttons.push_back(&nextPage);
@@ -333,8 +350,10 @@ void Page::goTo(Page* page){
   if (it == pages.end()) return;
   clearScreen(page->bcol);
   currentPage = page; //Saves new page then draws all the buttons on the page
-  screen::set_pen(page->inv_bcol);
-  screen::set_eraser(page->bcol);
+  screen::set_pen(COLOR_BLACK);
+  screen::set_eraser(COLOR_BLACK);
+  screen::fill_rect(75, 0, 405, 20);
+  screen::set_pen(page->bcol);
   screen::print(TEXT_SMALL, MID_X-(page->title.length()*CHAR_WIDTH_SMALL)/2, 10, "%s", page->title);
   for (std::vector <Button*>::iterator it = (page->buttons).begin(); it != (page->buttons).end(); it++) (*it)->draw();
   for (std::vector <Slider*>::iterator it = (page->sliders).begin(); it != (page->sliders).end(); it++) (*it)->draw();
@@ -350,17 +369,55 @@ void Page::clearScreen(std::uint32_t color){
   screen::fill_rect(PAGE_LEFT, PAGE_UP, PAGE_RIGHT, PAGE_DOWN);
 }
 
+void Text::setTitle (int16_t pt1, int16_t pt2, Style::style type, std::string text){
+  label = text;
+  x = pt1;
+  y = pt2;
+
+  if (type == Style::CENTRE){
+    if (txt_fmt == TEXT_SMALL){
+      x -= (label.length()*CHAR_WIDTH_SMALL)/2;
+      y -= CHAR_HEIGHT_SMALL/2;
+    }
+
+    else if (txt_fmt == TEXT_MEDIUM){
+      x -= (label.length()*CHAR_WIDTH_MEDIUM)/2;
+      y -= CHAR_HEIGHT_MEDIUM/2;
+    }
+
+    else if (txt_fmt == TEXT_LARGE){
+      x -= (label.length()*CHAR_WIDTH_LARGE)/2;
+      y -= CHAR_HEIGHT_LARGE/2;
+    }
+  }
+
+}
+
+void Text::setBackground (int16_t pt1, int16_t pt2, int16_t pt3, int16_t pt4, Style::style type, std::uint32_t colour){
+    std::tie(x1, y1, x2, y2) = fixPoints(pt1, pt2, pt3, pt4, type);
+    bcol = colour;
+}
+
 void Text::draw(){
-  screen::set_eraser(page->bcol);
-  screen::set_pen(lcol);
-  char buffer [70];
+  if (x2 != 0 && y2 != 0){
+    screen::set_pen(lcol);
+    screen::fill_rect(x, y, x2, y2);
+    screen::set_pen(page->bcol);
+    screen::set_eraser(lcol);
+  }
+  else{
+    screen::set_pen(lcol);
+    screen::set_eraser(page->bcol);
+  }
+
   if (val_ptr != nullptr) { //If there is a var to print
-    int length = sprintf(buffer, label.c_str(), *val_ptr);
-    screen::print(txt_fmt, x, y, "%*c   ", length);
+    char buffer [70];
+    sprintf(buffer, label.c_str(), *val_ptr);
     screen::print(txt_fmt, x, y, "%s", buffer);
     prevVal = *val_ptr;
   }
-  else screen::print(txt_fmt, x, y, label.c_str()); //Plain text (no var)
+  else screen::print(txt_fmt, x, y, "%s", label.c_str()); //Plain text (no var)
+  prevLabel = label;
 }
 
 void Slider::draw(){
@@ -472,9 +529,11 @@ void Page::update(){
 
 void Text::update(){
   for (std::vector<Text*>::iterator it = (Page::currentPage->texts).begin(); it != (Page::currentPage->texts).end(); it++){
-    if ((*it)->val_ptr != nullptr){
-      if((*it)->prevVal != *((*it)->val_ptr)) (*it)->draw();
+    Text* text_id = *it;
+    if(text_id->val_ptr != nullptr){ //If variable given
+      if(text_id->prevVal != *(text_id->val_ptr)) text_id->draw(); //If var has changed value
     }
+    if(text_id->prevLabel != text_id->label) text_id->draw(); //If text has changed
   }
 }
 
@@ -561,17 +620,34 @@ Button* Button::update(){
 }
 
 void guiBackground(){ //To be called continously
+  //Saving vars for text display
+  motor_temperatures[0] = front_l.get_temperature();
+  motor_temperatures[1] = back_l.get_temperature();
+  motor_temperatures[2] = front_r.get_temperature();
+  motor_temperatures[3] = back_r.get_temperature();
+  motor_temperatures[4] = c_bar.get_temperature();
+  motor_temperatures[5] = f_bar.get_temperature();
+  // motor_temperatures[6] = intake.get_temperature();
+  // motor_temperatures[7] = uptake.get_temperature();
+  ringCount = ring_count;
+  elasticUpTime = elasticTime.first;
+  elasticDownTime = elasticTime.second;
+  angle = fmod(rad_to_deg(tracking.global_angle), 360);
+  drivrName.setTitle (MID_X, MID_Y, Style::CENTRE, drivebase.drivers[drivebase.cur_driver].name);
+
+  if (!flashing){ //Overheating Motors
+    for (int i = 0; i < 8; i++){
+      if (motor_temperatures[i] >= 50 && motor_temperatures[i] != 2147483647){
+        Page::goTo(&temps);
+        flash(COLOR_RED, 10000, "MOTOR TEMP EXCEEDED");
+        break;
+      }
+    }
+  }
+
   Page::update();
   Button::update();
   Slider::update();
   Text::update();
   end_flash();
-
-  //Saving vars for text display
-  flTemp = front_l.get_temperature();
-  blTemp = back_l.get_temperature();
-  frTemp = front_r.get_temperature();
-  brTemp = back_r.get_temperature();
-  ringCount = ring_count;
-  angle = fmod(rad_to_deg(tracking.global_angle), 360);
 }

@@ -2,9 +2,11 @@
 #include <vector>
 #include <string>
 #include "main.h"
-#include "tracking.hpp"
 #include "config.hpp"
+#include "drive.hpp"
+#include "tracking.hpp"
 using namespace pros;
+
 #define PAGE_COUNT 9
 #define PAGE_LEFT 0
 #define PAGE_UP 0
@@ -38,14 +40,13 @@ namespace Style{
   };
 };
 
-extern int ring_count, cur_driver;
-extern Page liftElastic, liftMove, track, moving, autoSel, driverCurve, intkTest, temps, mContr;
-// extern std::array<driver, num_of_drivers> drivers;
+extern int ring_count; //For gui.cpp to use
+// extern Page elastic, liftMove, track, moving, autoSel, driverCurve, intkTest, temps, mContr;
 
-void guiSetup();
-void guiBackground();
+void guiSetup(), guiBackground();
 void alignedCoords (int x_objects, int y_objects, int x_btn, int y_btn, int x_range = 480, int y_range = 220);
-void flash(std::uint32_t color, std::uint32_t time);
+void flash(std::uint32_t color, std::uint32_t time, std::string = "");
+void prevDriver(), nextDriver();
 
 //All constructor args are in the format points, format, page, text, color
 class Page{
@@ -57,12 +58,12 @@ class Page{
     //Vars
     static last_touch_e_t touch_status;
     static int16_t x, y;
-    std::uint32_t bcol, inv_bcol;
+    std::uint32_t bcol;
     std::string title;
 
   public:
     //Page num, Title, Bcolor
-    Page(int, std::string, std::uint32_t = COLOR_BLACK);
+    Page(int, std::string, std::uint32_t = COLOR_DARK_GRAY);
 
     //Vars
     static Page* currentPage;
@@ -167,21 +168,23 @@ class Text{
   friend class Page;
 
   private:
-    int16_t x, y;
+    int16_t x, y, x1, y1, x2, y2;
     text_format_e_t txt_fmt;
-    std::string label;
-    std::uint32_t lcol;
+    std::string label, prevLabel="";
+    std::uint32_t lcol, bcol;
     Page* page;
     double* val_ptr=nullptr;
     double prevVal;
 
-    void construct (int16_t, int16_t, Style::style, text_format_e_t, Page*, std::string, std::uint32_t label_color);
+    void construct (int16_t, int16_t, Style::style, text_format_e_t, Page*, std::string, std::uint32_t);
     void draw();
 
   public:
-    //Points, Format, Page, Label, [var], Lcolor
+    //Points, Format, Page, Label, [var], Lcolor, other points for background
     Text (int16_t, int16_t, Style::style, text_format_e_t, Page*, std::string, std::uint32_t label_color = COLOR_WHITE);
     Text (int16_t, int16_t, Style::style, text_format_e_t, Page*, std::string, double*, std::uint32_t label_color = COLOR_WHITE);
 
     static void update();
+    void setTitle (int16_t, int16_t, Style::style, std::string);
+    void setBackground (int16_t, int16_t, int16_t, int16_t, Style::style, std::uint32_t = COLOR_GREEN);
 };

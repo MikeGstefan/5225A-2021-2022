@@ -16,8 +16,8 @@ using namespace pros;
 
 // wait until at least 50 ms since the last reset
 #define WAIT_FOR_SCREEN_REFRESH() {\
-  delay(screen_timer.get_time() < 50 ? 50 - screen_timer.get_time() : 0);\
-  screen_timer.reset();\
+  delay(drivebase.screen_timer.get_time() < 50 ? 50 - drivebase.screen_timer.get_time() : 0);\
+  drivebase.screen_timer.reset();\
 }
 
 class custom_drive{
@@ -45,13 +45,13 @@ struct driver{
 // Nikhil is 0, Emily is 1, Sarah is 2
 
 class Drivebase {
-  Timer screen_timer = {"screen_timer"};
   int cur_screen;
   int deadzone = 5;
   const char* screen_text[3] = {"LOCAL_X CURVE:", "LOCAL_Y CURVE:", "LOCAL_A CURVE:"};
   void update_screen();
 
 public:
+    Timer screen_timer = {"screen_timer"};
   int cur_driver = 0;  // driver to defaults to Nikhil
   static constexpr int num_of_drivers = 5;
   FILE* curve_file;
