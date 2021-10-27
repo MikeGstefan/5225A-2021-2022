@@ -215,10 +215,18 @@ void Drivebase::driver_practice(){
         master.print(2, 0, "Driver: %s          ", drivers[cur_driver].name);
       }
       drivebase.handle_input();
+      if(front_l.get_temperature() >= 55 || front_r.get_temperature() >= 55 || back_r.get_temperature() >= 55 || back_l.get_temperature() >= 55){
+        delay(50);
+        master.rumble("- - - ");
+        delay(50);
+        master.print(0, 0, "fl%.0f r%.0f bl%.0f r%.0f\n", front_l.get_temperature(), front_r.get_temperature(), back_l.get_temperature(), back_r.get_temperature());
+        return;
+      }
       // prints motor temps every 50 ms
       if(screen_timer.get_time() > 50){
         printf("fl%.0f r%.0f bl%.0f r%.0f\n", front_l.get_temperature(), front_r.get_temperature(), back_l.get_temperature(), back_r.get_temperature());
         master.print(0, 0, "fl%.0f r%.0f bl%.0f r%.0f\n", front_l.get_temperature(), front_r.get_temperature(), back_l.get_temperature(), back_r.get_temperature());
+        // rumbles controllers if motors are hot
         screen_timer.reset();
       }
       delay(10);
