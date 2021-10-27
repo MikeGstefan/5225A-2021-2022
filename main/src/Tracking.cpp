@@ -425,3 +425,29 @@ void rush_goal2(double target_x, double target_y, double target_a){
     }
 
 }
+
+void move_on_arc(Vector2D start, Coord target, double radius, bool positive){
+    Coord power, error;
+
+    // variable 'd' in diagram
+    double chord_dist = sqrt(pow(target.x - start.x, 2) + pow(target.y - start.y, 2));
+    printf("chord_dist = %f\n", chord_dist);
+    double theta = atan2(target.y - start.y, target.x - start.x);
+    printf("theta = %f\n", rad_to_deg(theta));
+    double half_chord_dist = chord_dist / 2.0;
+    printf("half_chord_dist: %lf\n", half_chord_dist);
+    double alpha = acos(half_chord_dist / radius);
+    printf("alpha: %lf\n", rad_to_deg(alpha));
+    theta += positive ? alpha : -alpha;
+
+    printf("new_alpha: %lf\n", rad_to_deg(theta));
+
+    Vector2D arc_centre = {start.x + cos(theta) * radius, start.y + sin(theta) * radius};
+    printf("x: %lf, y: %lf", arc_centre.x, arc_centre.y);
+    // while(true){
+    error.angle = target.angle - tracking.global_angle;
+
+
+    // delay(10);
+    // }
+}
