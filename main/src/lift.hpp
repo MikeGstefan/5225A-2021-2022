@@ -54,7 +54,7 @@ private:
   double offset_h = base_height + dist_between_axles; // height offset
   double bottom_arm_offset_a = 42.5; // this will be in arm degrees
   double top_arm_offset_a = 65.0; // this will be in arm degrees
-  double bottom_arm_lower_limit = 0, bottom_arm_upper_limit = 700, top_arm_lower_limit = 0, top_arm_upper_limit = 500; // arm limits in encoder degrees
+  double bottom_arm_lower_limit = 0, bottom_arm_upper_limit = 700, top_arm_lower_limit = 0, top_arm_upper_limit = 800; // arm limits in encoder degrees
 
   // lift state machine variables
 

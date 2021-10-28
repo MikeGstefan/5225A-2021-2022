@@ -363,7 +363,7 @@ void Lift::handle(){
     set_state(tip);
   }
   // lowers f_bar
-  else if (master.get_digital_new_press(f_bar_down_button) && state != down){ // lowers f_bar to pickup mogos with forks if f_bar down is pressed
+  else if (master.get_digital_new_press(f_bar_down_button) && state != down && state != release_mogo){ // lowers f_bar to pickup mogos with forks if f_bar down is pressed
     printf("fbar down button pressed\n");
     lower_f_bar();
     set_state(lowering);
@@ -431,8 +431,7 @@ void Lift::handle(){
       }
       break;
     case in_platform:
-      if (master.get_digital_new_press(f_bar_up_button)){
-        printf("f_bar up button pressed\n");
+      if(fabs(cur_bottom_arm_target - f_bar.get_position()) < bottom_arm_end_error){  // drops mogo once it reaches the target position
         open_forks();
         set_state(release_mogo);
       }
@@ -440,8 +439,14 @@ void Lift::handle(){
     case release_mogo:
       if (master.get_digital_new_press(f_bar_up_button)){
         printf("f_bar up button pressed\n");
-        lower_f_bar();
-        set_state(lowering);
+        close_forks();  // picks up mogo
+        raise_f_bar_above_platform();
+        set_state(above_platform);
+      }
+      else if (master.get_digital_new_press(f_bar_down_button)){  // goes back up without picking up mogo
+        printf("f_bar up button pressed\n");
+        raise_f_bar_above_platform();
+        set_state(above_platform);
       }
       break;
     case ring_dropoff:  // Actual async ring dropoff state
@@ -461,7 +466,8 @@ void Lift::handle(){
       }
       break;
     case dropoff_back_alliance:
-      if (last_dropoff_press_timer.get_time() > dropoff_double_press_time){
+      // waits for press timer to timeout and to reach target
+      if (last_dropoff_press_timer.get_time() > dropoff_double_press_time && fabs(cur_bottom_arm_target - f_bar.get_position()) < bottom_arm_end_error && fabs(cur_top_arm_target - c_bar.get_position()) < top_arm_end_error){
         start_task(dropoff_rings);
         set_state(ring_dropoff);
       }
@@ -473,7 +479,8 @@ void Lift::handle(){
       }
       break;
     case dropoff_back_mid:
-      if (last_dropoff_press_timer.get_time() > dropoff_double_press_time){
+      // waits for press timer to timeout and to reach target
+      if (last_dropoff_press_timer.get_time() > dropoff_double_press_time && fabs(cur_bottom_arm_target - f_bar.get_position()) < bottom_arm_end_error && fabs(cur_top_arm_target - c_bar.get_position()) < top_arm_end_error){
         start_task(dropoff_rings);
         set_state(ring_dropoff);
       }
@@ -485,7 +492,8 @@ void Lift::handle(){
       }
       break;
     case dropoff_back_top:
-      if (last_dropoff_press_timer.get_time() > dropoff_double_press_time){
+      // waits for press timer to timeout and to reach target
+      if (last_dropoff_press_timer.get_time() > dropoff_double_press_time && fabs(cur_bottom_arm_target - f_bar.get_position()) < bottom_arm_end_error && fabs(cur_top_arm_target - c_bar.get_position()) < top_arm_end_error){
         start_task(dropoff_rings);
         set_state(ring_dropoff);
       }
@@ -495,7 +503,8 @@ void Lift::handle(){
       }
       break;
     case dropoff_front_mid:
-      if (last_dropoff_press_timer.get_time() > dropoff_double_press_time){
+      // waits for press timer to timeout and to reach target
+      if (last_dropoff_press_timer.get_time() > dropoff_double_press_time && fabs(cur_bottom_arm_target - f_bar.get_position()) < bottom_arm_end_error && fabs(cur_top_arm_target - c_bar.get_position()) < top_arm_end_error){
         start_task(dropoff_rings);
         set_state(ring_dropoff);
       }
@@ -507,7 +516,8 @@ void Lift::handle(){
       }
       break;
     case dropoff_front_top:
-      if (last_dropoff_press_timer.get_time() > dropoff_double_press_time){
+      // waits for press timer to timeout and to reach target
+      if (last_dropoff_press_timer.get_time() > dropoff_double_press_time && fabs(cur_bottom_arm_target - f_bar.get_position()) < bottom_arm_end_error && fabs(cur_top_arm_target - c_bar.get_position()) < top_arm_end_error){
         start_task(dropoff_rings);
         set_state(ring_dropoff);
       }
@@ -534,7 +544,7 @@ void Lift::move_f_bar_tip(){  // moves f_bar to mogo tipping height
 void Lift::lower_f_bar(){
   stop_task();
   close_forks();
-  move_f_bar_to_height(5.0);
+  move_f_bar_to_height(6.0);
 
   printf("\n\n STARTED LOWERING F_BAR %d \n\n", millis());
 }
@@ -542,7 +552,7 @@ void Lift::lower_f_bar(){
 void Lift::raise_f_bar(){ // brings f_bar just above the ground
   stop_task();
   close_forks();
-  move_f_bar_to_height(6.0);
+  move_f_bar_to_height(7.0);
 }
 
 void Lift::raise_f_bar_above_platform(){
@@ -594,7 +604,6 @@ double Lift::get_ring_dropoff_level() const{
 // Async Functions
 
 void pickup_rings(void* params){
-  // lift.stop_task();
   lift.open_stabber();
   lift.move_on_line(-3.00, 20.0, 9.5, 60);
   lift.close_stabber();
@@ -606,7 +615,6 @@ void pickup_rings(void* params){
 }
 
 void dropoff_rings(void* params){
-  // lift.stop_task();
   printf("started ring dropoff %d\n", millis());
   lift.open_stabber();
   lift.full = false;
@@ -615,6 +623,5 @@ void dropoff_rings(void* params){
   lift.set_state(lift.states::neutral);
   lift.close_stabber();  // in case cancel was pressed during ring pickup (to prevent a jam)
   lift.move_to_target({-3.0, 20.0}, lift_position_types::fastest, true);
-  // lift.move_to_neutral(); // resets lift to pickup more rings
-  lift.stop_task(); // doesn't actuall get called because move to neutral stops task
+  lift.stop_task();
 }
