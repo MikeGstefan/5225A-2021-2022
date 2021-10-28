@@ -91,50 +91,34 @@ void opcontrol() {
 	lift.c_bar_cal();
 	lift.f_bar_cal();
 
+	// while()
+
+/*
+	Timer press_timer{"press_timer"};
+	while(true){
+		if(master.get_digital_new_press(ring_dropoff_button)){
+			press_timer.print();
+		}
+		delay(10);
+	}
+// */
+
+// /*
 	lift.move_to_target({-6.0, 20.0});	// moves lift out of the way
 
 	master.clear();
 	delay(50);	// waits for screen to clear
 	master.print(0, 0, "Dropoff: %s", lift.is_dropoff_front() ? "front" : "back");
 	delay(50);
-	// lift.move_to_target(lift.get_dropoff_coords()[1][2]);
 
-
-	// lower_f_bar(nullptr);
-	// lift.raise_f_bar_to_platform();
-	// /*
-		lift.move_to_neutral();
-		while(true){
-			lift.handle();
-			delay(10);
-		}
-	// */
-
-
-	// f_bar_move_to_height testing
-	/*
-	double target_z = 15.0;
-	master.clear();
-	delay(10);
-	master.print(0, 0, "z: %lf", target_z);
-	lift.move_f_bar_to_height(target_z);
-
+	lift.move_to_neutral();
 	while(true){
-		if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_UP)){
-			target_z++;
-			lift.move_f_bar_to_height(target_z);
-			master.print(0, 0, "z: %lf", target_z);
-		}
-		if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_DOWN)){
-			target_z--;
-			lift.move_f_bar_to_height(target_z);
-			master.print(0, 0, "z: %lf", target_z);
-		}
+		lift.handle();
 		delay(10);
 	}
-	*/
+// */
 
-
+	// */
 	// ring pickup max speed utility
 	/*
 	while(true){

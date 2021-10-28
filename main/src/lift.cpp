@@ -17,7 +17,7 @@ Lift::Lift(){ // constructor
   dropoff_coords[0][1] = {-23.0, 22.0}; // short neutral goal in back
   dropoff_coords[0][2] = {-19.0, 40.0};  // tall neutral goal in back
   dropoff_coords[1][0] = {0.0, 0.0}; // alliance goal in front (not possible)
-  dropoff_coords[1][1] = {-1.0, 20.0}; // short neutral in front
+  dropoff_coords[1][1] = {-1.0, 22.0}; // short neutral in front
   dropoff_coords[1][2] = {-1.0, 32.0}; // tall goal in front
 
 }
@@ -195,8 +195,9 @@ void Lift::move_to_target(const Vector2D& target, const lift_position_types lift
   cur_bottom_arm_target = bottom_arm_angle;
 
   if (move_valid){
+    printf("Lift | Starting moving to target: y: %lf, z: %lf\n", target.x, target.y);
     f_bar.move_absolute(bottom_arm_angle, bottom_arm_speed);
-    if(bottom_arm_angle / bottom_arm_gear_ratio > bottom_arm_offset_a) waitUntil(f_bar.get_position() / bottom_arm_gear_ratio > bottom_arm_offset_a);
+    if(wait_for_complete && bottom_arm_angle / bottom_arm_gear_ratio > bottom_arm_offset_a) waitUntil(f_bar.get_position() / bottom_arm_gear_ratio > bottom_arm_offset_a * 0.6);
     c_bar.move_absolute(top_arm_angle, top_arm_speed);
     if (wait_for_complete)  lift.wait_for_complete();
   }
@@ -313,18 +314,22 @@ void Lift::move_on_line(double target_y, double target_z_start, double target_z_
 }
 
 void Lift::start_task(task_fn_t function){
-  if (!task_removed && task_ptr != nullptr)  stop_task();
+  stop_task();
   delete task_ptr;
   task_ptr = nullptr;
+  task_removed = false;
   task_ptr = new Task(function);
   printf("created task\n");
 }
 
 void Lift::stop_task(){
   ring_dropoff_level = -1;
-
+  if(task_removed) printf("task removed\n");
+  if(task_ptr != nullptr) printf("taskptr not null\n");
+  delay(10);
   if(!task_removed && task_ptr != nullptr){
     printf("stopping task, IS deallocating memory\n");
+    task_removed = true;
     task_ptr->remove();
     printf("REMOVED TASK\n");
     delete task_ptr;
@@ -341,6 +346,7 @@ void Lift::set_state(const states next_state){
 }
 
 void Lift::handle(){
+  printf("state: %s\n", state_names[state]);
 
   // Buttons accessible in any state (all functions called should stop the lift task if it is running)
 
@@ -413,14 +419,21 @@ void Lift::handle(){
     case raised:
       if (master.get_digital_new_press(f_bar_up_button)){
         printf("f_bar up button pressed\n");
-        raise_f_bar_to_platform();
-        set_state(platform);
+        raise_f_bar_above_platform();
+        set_state(above_platform);
       }
       break;
-    case platform:
+    case above_platform:
       if (master.get_digital_new_press(f_bar_up_button)){
         printf("f_bar up button pressed\n");
-        lift.open_forks();
+        lower_f_bar_in_platform();
+        set_state(in_platform);
+      }
+      break;
+    case in_platform:
+      if (master.get_digital_new_press(f_bar_up_button)){
+        printf("f_bar up button pressed\n");
+        open_forks();
         set_state(release_mogo);
       }
       break;
@@ -450,7 +463,7 @@ void Lift::handle(){
     case dropoff_back_alliance:
       if (last_dropoff_press_timer.get_time() > dropoff_double_press_time){
         start_task(dropoff_rings);
-        set_state(ring_pickup);
+        set_state(ring_dropoff);
       }
       else if (master.get_digital_new_press(ring_dropoff_button)){
         last_dropoff_press_timer.reset();
@@ -478,7 +491,7 @@ void Lift::handle(){
       }
       else if (master.get_digital_new_press(ring_dropoff_button)){
         last_dropoff_press_timer.reset();
-        set_state(dropoff_start); // moves to higher beginning height
+        set_state(dropoff_start); // moves to beginning height
       }
       break;
     case dropoff_front_mid:
@@ -489,7 +502,7 @@ void Lift::handle(){
       else if (master.get_digital_new_press(ring_dropoff_button)){
         last_dropoff_press_timer.reset();
         move_to_target(dropoff_coords[dropoff_front][2], lift_position_types::fastest, false);
-        set_state(dropoff_back_mid);
+        set_state(dropoff_front_mid);
         // moves to higher dropoff height
       }
       break;
@@ -508,8 +521,9 @@ void Lift::handle(){
 
 void Lift::move_to_neutral(){ // moves lift to position right above ring stack
   stop_task();
+  printf("starting mtt\n");
   close_stabber();  // in case cancel was pressed during ring pickup (to prevent a jam)
-  move_to_target({-3.0, 20.0}, lift_position_types::fastest, false);
+  move_to_target({-3.0, 20.0}, lift_position_types::fastest, true);
 }
 
 void Lift::move_f_bar_tip(){  // moves f_bar to mogo tipping height
@@ -526,12 +540,19 @@ void Lift::lower_f_bar(){
 }
 
 void Lift::raise_f_bar(){ // brings f_bar just above the ground
+  stop_task();
   close_forks();
   move_f_bar_to_height(6.0);
 }
 
-void Lift::raise_f_bar_to_platform(){
+void Lift::raise_f_bar_above_platform(){
+  stop_task();
   move_f_bar_to_height(12.0);
+}
+
+void Lift::lower_f_bar_in_platform(){
+  stop_task();
+  move_f_bar_to_height(9.5);
 }
 
 void Lift::open_forks(){
@@ -573,7 +594,7 @@ double Lift::get_ring_dropoff_level() const{
 // Async Functions
 
 void pickup_rings(void* params){
-  lift.stop_task();
+  // lift.stop_task();
   lift.open_stabber();
   lift.move_on_line(-3.00, 20.0, 9.5, 60);
   lift.close_stabber();
@@ -585,11 +606,15 @@ void pickup_rings(void* params){
 }
 
 void dropoff_rings(void* params){
-  lift.stop_task();
+  // lift.stop_task();
+  printf("started ring dropoff %d\n", millis());
   lift.open_stabber();
   lift.full = false;
   delay(200); // waits for rings to slide down end_effector
-  lift.move_to_neutral(); // resets lift to pickup more rings
+  printf("finished ring dropoff %d\n", millis());
   lift.set_state(lift.states::neutral);
-  lift.stop_task();
+  lift.close_stabber();  // in case cancel was pressed during ring pickup (to prevent a jam)
+  lift.move_to_target({-3.0, 20.0}, lift_position_types::fastest, true);
+  // lift.move_to_neutral(); // resets lift to pickup more rings
+  lift.stop_task(); // doesn't actuall get called because move to neutral stops task
 }
