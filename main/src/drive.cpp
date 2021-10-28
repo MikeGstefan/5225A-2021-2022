@@ -216,6 +216,7 @@ void Drivebase::driver_practice(){
       }
       drivebase.handle_input();
       if(front_l.get_temperature() >= 55 || front_r.get_temperature() >= 55 || back_r.get_temperature() >= 55 || back_l.get_temperature() >= 55){
+        move(0, 0, 0);  // stops movement
         delay(50);
         master.rumble("- - - ");
         delay(50);
