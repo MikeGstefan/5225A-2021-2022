@@ -45,7 +45,7 @@ Text drivr(MID_X, MID_Y, Style::CENTRE, TEXT_LARGE, &driverCurve, "drivr name");
 Button nextDrivr(340, 70, 100, 120, Style::SIZE, Button::SINGLE, &driverCurve, "Next Driver", COLOR_ORANGE, COLOR_BLACK);
 
 Page intkTest (7, "Intake"); //Test for intake with rings
-Text rings(MID_X, 50, Style::CENTRE, TEXT_SMALL, &intkTest, "Ring Count: %.0f", &ringCount);
+Text rings(MID_X, 50, Style::CENTRE, TEXT_SMALL, &intkTest, "Ring Count: %.0f", &intake.ring_count);
 Text ports(MID_X, 70, Style::CENTRE, TEXT_SMALL, &intkTest, "Motor: 6, Vision: 7, Limit Switch: A");
 Button resI (30, 90, 120, 80, Style::SIZE, Button::SINGLE, &intkTest, "Reset Motor", COLOR_ORANGE, COLOR_BLACK);
 Button onOff (180, 90, 120, 80, Style::SIZE, Button::SINGLE, &intkTest, "Start/Stop", COLOR_ORANGE, COLOR_BLACK);
@@ -579,6 +579,6 @@ void guiBackground(){ //To be called continously
   blTemp = back_l.get_temperature();
   frTemp = front_r.get_temperature();
   brTemp = back_r.get_temperature();
-  ringCount = ring_count;
+  ringCount = intake.ring_count;
   angle = fmod(rad_to_deg(tracking.global_angle), 360);
 }

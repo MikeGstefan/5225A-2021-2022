@@ -16,6 +16,16 @@ enum class Intake_States{
   Holding
 };
 
+class Intake{
+
+public:
+  double error;
+  double ring_count = 0;
+  double target = 950;
+};
+
+extern Intake intake;
+
 void Intake_loop();
 void setIntakeState(Intake_States state);
 void On_Off_Task();
@@ -27,4 +37,3 @@ void ringup();
 void ringdown();
 
 extern Intake_States Intake_State;
-extern int ring_count;
