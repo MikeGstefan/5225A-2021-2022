@@ -88,6 +88,11 @@ void autonomous() {
  * task, not resume it from where it left off.
  */
 void opcontrol() {
+
+	move_on_arc({0.0, 0.0}, {10.0, -10.0, 0.0}, 30.0, true, false, true);
+
+
+	/*
 	lift.c_bar_cal();
 	lift.f_bar_cal();
 
@@ -102,7 +107,7 @@ void opcontrol() {
 
 	// lower_f_bar(nullptr);
 	// lift.raise_f_bar_to_platform();
-	// /*
+	//
 		lift.move_to_neutral();
 		while(true){
 			lift.handle();

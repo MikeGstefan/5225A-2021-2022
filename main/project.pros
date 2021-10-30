@@ -1,7 +1,7 @@
 {
     "py/object": "pros.conductor.project.Project",
     "py/state": {
-        "project_name": "lift-testing",
+        "project_name": "move-on-arc",
         "target": "v5",
         "templates": {
             "kernel": {

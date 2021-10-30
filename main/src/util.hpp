@@ -34,6 +34,8 @@ double operator "" _rad(long double radians);
 double rad_to_deg(double rad);
 double deg_to_rad(double deg);
 
+double near_angle(double angle, double reference);
+
 struct Vector2D{
     double x, y;
 };

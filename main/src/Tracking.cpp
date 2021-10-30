@@ -116,7 +116,7 @@ void update(void* params){
 
       // printf("%f,%f\n", tracking.x_coord, tracking.y_coord);
 
-    // printf("time: %d, TRACKING: %f %f, %f \n", millis(), tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle));
+    printf("time: %d, TRACKING: %f %f, %f \n", millis(), tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle));
     // printf("time: %d, TOTAL: %f, %f, %f \n", millis(), total_x, total_y, rad_to_deg(total_a));
     // printf("%d pow_a: %.1f, pow_x: %.1f, pow_y: %.1f, total_pow: %.1f\n",millis(),  tracking.power_a, tracking.power_x, tracking.power_y, fabs(tracking.power_a) + fabs(tracking.power_x) + fabs(tracking.power_y));
 
@@ -426,28 +426,69 @@ void rush_goal2(double target_x, double target_y, double target_a){
 
 }
 
-void move_on_arc(Vector2D start, Coord target, double radius, bool positive){
-    Coord power, error;
+void move_on_arc(const Vector2D start, Coord target, const double radius, const bool positive, const bool angle_relative_to_arc, const bool brake){
+  Coord error, kp = Coord(20.0, 7.0, 50.0);
 
-    // variable 'd' in diagram
-    double chord_dist = sqrt(pow(target.x - start.x, 2) + pow(target.y - start.y, 2));
-    printf("chord_dist = %f\n", chord_dist);
-    double theta = atan2(target.y - start.y, target.x - start.x);
-    printf("theta = %f\n", rad_to_deg(theta));
-    double half_chord_dist = chord_dist / 2.0;
-    printf("half_chord_dist: %lf\n", half_chord_dist);
-    double alpha = acos(half_chord_dist / radius);
-    printf("alpha: %lf\n", rad_to_deg(alpha));
-    theta += positive ? alpha : -alpha;
+  target.angle = deg_to_rad(target.angle);
+  // variable 'd' in diagram
+  double chord_dist = sqrt(pow(target.x - start.x, 2) + pow(target.y - start.y, 2));
+  printf("chord_dist = %f\n", chord_dist);
+  double theta = atan2(target.y - start.y, target.x - start.x);
+  printf("theta = %f\n", rad_to_deg(theta));
+  double half_chord_dist = chord_dist / 2.0;
+  printf("half_chord_dist: %lf\n", half_chord_dist);
+  if(radius < half_chord_dist){
+    printf("The radius needs to be at least %d inches.\n", half_chord_dist);
+    return;
+  }
+  double alpha = acos(half_chord_dist / radius);
+  printf("alpha: %lf\n", rad_to_deg(alpha));
+  theta += positive ? alpha : -alpha;
 
-    printf("new_alpha: %lf\n", rad_to_deg(theta));
+  printf("new_theta: %lf\n", rad_to_deg(theta));
 
-    Vector2D arc_centre = {start.x + cos(theta) * radius, start.y + sin(theta) * radius};
-    printf("x: %lf, y: %lf", arc_centre.x, arc_centre.y);
-    // while(true){
-    error.angle = target.angle - tracking.global_angle;
+  Vector2D arc_centre = {start.x + cos(theta) * radius, start.y + sin(theta) * radius};
+  printf("Arc centre: x: %lf, y: %lf\n", arc_centre.x, arc_centre.y);
 
+  Coord arc_disp;
+  double hypotenuse, h;
+  double angle_of_arc = atan2(target.y - arc_centre.y, target.x - arc_centre.x);
+  double beta; // angle relative to horizontal of h + robot angle + arc_disp.angle
 
-    // delay(10);
-    // }
+  while(true){
+    arc_disp.angle = atan2(tracking.y_coord - arc_centre.y, tracking.x_coord - arc_centre.x);
+    hypotenuse = sqrt(pow(tracking.x_coord - arc_centre.x, 2) + pow(tracking.y_coord - arc_centre.y, 2)); // dist from centre of arc to cur position
+    arc_disp.x = radius - hypotenuse;
+    arc_disp.y = radius * near_angle(angle_of_arc, arc_disp.angle);
+    printf("Arc displacements | x: %lf, y: %lf\n", arc_disp.x, arc_disp.y);
+
+    // rotating arc displacements
+    h = sqrt(pow(arc_disp.x, 2) + pow(arc_disp.y, 2));
+    printf("h: %lf\n", h);
+    // beta = atan2(arc_disp.y, arc_disp.x) + tracking.angle + atan2(arc_centre.y - tracking.y, arc_centre.x - tracking.x);
+    beta = atan2(arc_disp.y, arc_disp.x) + tracking.global_angle + arc_disp.angle;
+    printf("beta: %lf, arc_disp.angle: %lf, tracking_angle: %lf\n", rad_to_deg(atan2(arc_disp.y, arc_disp.x)), rad_to_deg(arc_disp.angle), rad_to_deg(tracking.global_angle));
+    printf("total: %lf\n", rad_to_deg(beta));
+
+    error.x = h * cos(beta);
+    error.y = h * sin(beta);
+    printf("Errors | x: %lf, y: %lf", error.x, error.y);
+
+    if (angle_relative_to_arc)  error.angle = near_angle(-arc_disp.angle, tracking.global_angle);
+    else    error.angle = near_angle(target.angle, tracking.global_angle);
+
+    tracking.power_x = error.x * kp.x;
+    tracking.power_y = error.y * kp.y;
+    tracking.power_a = error.angle * kp.angle;
+
+    drivebase.move(tracking.power_x, tracking.power_y, tracking.power_a);
+    if (fabs(target.x - tracking.x_coord) < 0.5 && fabs(target.y - tracking.y_coord) < 0.5 && error.angle < 5.0){
+      printf("x: %lf, y: %lf, a: %lf\n", tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle));
+      printf("MOVE FINISHED\n");
+      if(brake) drivebase.brake();
+      else drivebase.move(0, 0, 0);
+      break;
+    }
+    delay(10);
+  }
 }
