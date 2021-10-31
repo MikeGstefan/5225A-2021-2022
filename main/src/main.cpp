@@ -13,7 +13,7 @@
 void initialize() {
 	delay(150);
 	guiSetup();
-	in.set_brake_mode(E_MOTOR_BRAKE_HOLD);
+	intk.set_brake_mode(E_MOTOR_BRAKE_HOLD);
 }
 
 void disabled() {}
@@ -26,7 +26,7 @@ int cur_driver = 1; //Get rid of this once merged
 
 void opcontrol() {
 	Page::goTo(&intkTest);
-	StartInTask();
+	intake.StartInTask();
 	while(true){
 		guiBackground();
 		delay(50);

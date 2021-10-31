@@ -22,18 +22,23 @@ public:
   double error;
   double ring_count = 0;
   double target = 950;
+  bool running = 0;
+  bool have_ring = 0;
+
+  void setIntakeState(Intake_States state);
+  void Intake_brake(int time);
+  void Intake_Setup();
+  void StartInTask();
+
 };
+void Reset();
+void On_Off_Task();
+void ringup();
+void ringdown();
+void Intake_loop();
 
 extern Intake intake;
 
-void Intake_loop();
-void setIntakeState(Intake_States state);
-void On_Off_Task();
-void Intake_brake(int time);
-void Intake_Setup();
-void Reset();
-void StartInTask();
-void ringup();
-void ringdown();
+
 
 extern Intake_States Intake_State;

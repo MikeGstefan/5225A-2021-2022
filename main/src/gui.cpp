@@ -104,6 +104,7 @@ void guiSetup(){ //Call once at start [in initialize()?]
 
 //Utility to get coordinates for aligned objects, (buttons, sliders...) of same size
 void alignedCoords (int x_objects, int y_objects, int x_btn, int y_btn, int x_range, int y_range){
+
   std::string strX = "(", subStrX, strY = "(", subStrY;
 
   double x_space = (x_range-x_objects*x_btn)/(x_objects+1.0);
