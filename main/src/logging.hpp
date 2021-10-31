@@ -1,5 +1,6 @@
 #pragma once
 #include "util.hpp"
+#include "timer.hpp"
 #include <iostream>
 #include <vector>
 #include <string>
