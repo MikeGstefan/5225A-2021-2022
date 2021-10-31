@@ -635,15 +635,15 @@ void guiBackground(){ //To be called continously
   angle = fmod(rad_to_deg(tracking.global_angle), 360);
   drivrName.setTitle (MID_X, MID_Y, Style::CENTRE, drivebase.drivers[drivebase.cur_driver].name);
 
-  if (!flashing){ //Overheating Motors
-    for (int i = 0; i < 8; i++){
-      if (motor_temperatures[i] >= 50 && motor_temperatures[i] != 2147483647){
-        Page::goTo(&temps);
-        flash(COLOR_RED, 10000, "MOTOR TEMP EXCEEDED");
-        break;
-      }
-    }
-  }
+  // if (!flashing){ //Overheating Motors
+  //   for (int i = 0; i < 8; i++){
+  //     if (motor_temperatures[i] >= 50 && motor_temperatures[i] != 2147483647){
+  //       Page::goTo(&temps);
+  //       flash(COLOR_RED, 10000, "MOTOR TEMP EXCEEDED");
+  //       break;
+  //     }
+  //   }
+  // }
 
   Page::update();
   Button::update();

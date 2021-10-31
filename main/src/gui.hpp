@@ -7,7 +7,7 @@
 #include "tracking.hpp"
 using namespace pros;
 
-#define PAGE_COUNT 9
+#define PAGE_COUNT 10
 #define PAGE_LEFT 0
 #define PAGE_UP 0
 #define PAGE_RIGHT 480

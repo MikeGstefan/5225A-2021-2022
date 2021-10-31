@@ -26,6 +26,7 @@ void initialize() {
 	tracking.x_coord = 0.0, tracking.y_coord = 0.0, tracking.global_angle = 0.0;
 	updateStartTask();
 	guiSetup();
+	printf("here\n");
 }
 
 /**
@@ -88,13 +89,31 @@ void autonomous() {
 
 int ring_count = 0; //Get rid of this once merged
 
+Page mogo_test(9,"mogo",0x00202020);
+
+Slider mogo_power(50,150,450,200,Style::CORNER, Slider::HORIZONTAL, 0,100,&mogo_test,"POWER");
+Button mogo_start(50,50,450,100, Style::CORNER, Button::SINGLE, &mogo_test, "go");
+void move_mogo(){
+	printf("in ur mom \n");
+	mogo.move_velocity(mogo_power.val);
+	while(!mogo_limit.get_value())delay(10);
+	mogo.move(0);
+}
 void opcontrol() {
 	//Try to get rid of pair for elastic time
 	//instead of manually pushing back prev and next buttons from perm, have each page just save everything from perms text, buttons, and slider vectors
 	//Reset tracking by stopping task
 
+	Page::goTo(9);
+
+	mogo_power.val = 0;
+
+	mogo_start.func = &move_mogo;
+
 	while(true){
+
 		guiBackground();
+
 		drivebase.handle_input();
 
 
