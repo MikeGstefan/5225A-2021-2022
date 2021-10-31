@@ -3,6 +3,7 @@
 #include "config.hpp"
 #include "util.hpp"
 #include "tracking.hpp"
+#include "task.hpp"
 // using namespace std;
 // using namespace pros;
 
@@ -65,17 +66,65 @@ void autonomous() {}
  * operator control task will be stopped. Re-enabling the robot will restart the
  * task, not resume it from where it left off.
  */
-void opcontrol() {
-	int power_x, power_y, power_a;
+Task *tester = nullptr;
+int test = 0;
+
+
+void task_testing(void* params){
+	Tasks* task_ptr = Tasks::get_obj(params);
 	while(true){
-		power_x = master.get_analog(E_CONTROLLER_ANALOG_RIGHT_X);
-		power_y = master.get_analog(E_CONTROLLER_ANALOG_LEFT_Y);
-		power_a = master.get_analog(E_CONTROLLER_ANALOG_LEFT_X);
-		if(fabs(power_x) < 15)power_x = 0;
-		if(fabs(power_y) < 15)power_y = 0;
-		if(fabs(power_a) < 15)power_a = 0;
-		move(power_x, power_y, power_a);
-		delay(10);
+		printf("ur mom\n");
+		if(task_ptr->notify_handle())return;
+		printf("data: %d\n",test);
+		delay(1000);
+	}
+}
+
+void task_testing2(void* params){
+	Tasks* task_ptr = Tasks::get_obj(params);
+	while(true){
+		printf("in rebound\n");
+		if(task_ptr->notify_handle())return;
+		delay(1000);
+	}
+}
+
+
+
+
+
+void opcontrol() {
+	printf("here1\n");
+	Tasks test_task(task_testing);
+	printf("here2\n");
+	test_task.task_start();
+	printf("here4\n");
+	delay(300);
+	test_task.task_rebind(task_testing2);
+	delay(3000);
+	test_task.task_kill();
+
+	// test_task.data_update();
+	delay(100);
+	while(true){
+		// std::cout<< test_task.get_task_ptr()->get_state()<<"\n";
+		printf("in loop \n");
+		delay(100);
 	}
 
+	// test = 1;
+	// test_task.done_update();
+
+	// tester = new Task(task_testing);
+	// int timer  = micros();
+	// while(tester->get_state() ==1)delay(10);
+	// std::cout<<micros()-timer<<" "<< tester->get_state()<<"\n";
+	// tester->notify();
+	// tester->notify();
+	// tester->notify();
+	// std::cout<< tester->get_state()<<"\n";
+	while(true){
+		// std::cout<<"not in ur mom"<< tester->get_state()<<"\n";
+		delay(50);
+	}
 }

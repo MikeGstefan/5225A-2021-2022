@@ -49,7 +49,7 @@ double rad_to_deg(double rad){
 
 
 Timer::Timer(const char* name): name(name){ // constructor
-    printf("%s's initialize time is: %d\n", name, pros::millis());
+    // printf("%s's initialize time is: %d\n", name, pros::millis());
     reset();
 }
 

@@ -20,9 +20,8 @@ Data::Data(const char* obj_name, const char* id_code, log_types log_type_param, 
 
 
 
-Data test_log("tracking.txt","$01", error, log_locations::both);
-Data test_log2("pos.txt","$02", warning, log_locations::both);
-Data test_log3("tracking.txt","$03", warning, log_locations::both);
+Data task_log("tasks.txt","$01", general, log_locations::t);
+
 
 
 vector<Data*> Data::get_objs(){
