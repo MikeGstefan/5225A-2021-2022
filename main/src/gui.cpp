@@ -1,6 +1,6 @@
 #include "gui.hpp"
 
-//Miscallaneous Tings
+//Miscellaneous Tings
 Timer Flash("Flash Timer", false);
 std::array<std::tuple<Motor*, Text*, std::string, double>, 8> motors;
 std::uint32_t flash_end = std::numeric_limits<std::uint32_t>::max();
@@ -14,7 +14,7 @@ std::array<Page*, PAGE_COUNT> Page::pages = {};
 last_touch_e_t Page::touch_status = E_TOUCH_RELEASED;
 int16_t Page::x = 0, Page::y = 0;
 
-//Base Pages
+//Pages and associated stuff
 Page perm (0, "PERM BTNS", COLOR_PINK); //Page perm only exists because its a problem if permanent buttons think they belong to every page.
 //So they think they belong to page perm, but every page knows they own these buttons.
 Button prevPage(0, 0, 75, 20, Style::SIZE, Button::SINGLE, &perm, "<-");
@@ -91,7 +91,7 @@ void setup_field(){
 }
 void draw_field(){
   screen::set_pen(COLOR_RED);
-  screen::draw_pixel(270+(200*tracking.x_coord/144), 230-(200*tracking.y_coord/144));
+  screen::draw_pixel(270+(200*tracking.x_coord/144), 230-(200*tracking.y_coord/144)); //Scales to screen
 }
 void Page::toPrev(){
   if (currentPage == pages[1]) goTo(PAGE_COUNT-1);
@@ -105,16 +105,15 @@ void prevDriver(){
   if (drivebase.cur_driver == 0) drivebase.cur_driver = drivebase.num_of_drivers - 1;
   else drivebase.cur_driver--;
   WAIT_FOR_SCREEN_REFRESH();
-  // screen::fill_rect(130, 70, 350, 190);
   master.print(2, 0, "Driver: %s          ", drivebase.drivers[drivebase.cur_driver].name);
 }
 void nextDriver(){
   drivebase.cur_driver++;
   drivebase.cur_driver %= drivebase.num_of_drivers;
   WAIT_FOR_SCREEN_REFRESH();
-  // screen::fill_rect(130, 70, 350, 190);
   master.print(2, 0, "Driver: %s          ", drivebase.drivers[drivebase.cur_driver].name);
 }
+//Placeholder until func is actually written
 std::pair <int, int> elasticUtil(){
   elasticUpTime = 800;
   elasticDownTime = 800;
@@ -122,8 +121,8 @@ std::pair <int, int> elasticUtil(){
 }
 
 void guiSetup(){ //Call once at start in initialize()
-  prevPage.func = &(Page::toPrev);
-  nextPage.func = &(Page::toNext);
+  prevPage.func = &(Page::toPrev); //Gives the left and right buttons their functions
+  nextPage.func = &(Page::toNext); //Same thing for all following buttons
 
   runElastic.func = &elasticUtil;
 
@@ -137,7 +136,7 @@ void guiSetup(){ //Call once at start in initialize()
   goHome.func = [](){delay(1000); move_to_target_sync(0, 0, 0, false);};
   goCentre.func = [](){delay(1000); move_to_target_sync(72, 72, 0, false);};
 
-  Button::createOptions({&route1, &route2, &route3});
+  Button::createOptions({&route1, &route2, &route3}); //Makes them exclusive, only one can be selected at a time
 
   prevDrivr.func = &prevDriver;
   nextDrivr.func = &nextDriver;
@@ -152,19 +151,20 @@ void guiSetup(){ //Call once at start in initialize()
   tempi.setBackground(260, 150, 70, 50, Style::SIZE);
   tempu.setBackground(370, 150, 70, 50, Style::SIZE);
   //hate that i have to do it like this
-  motors[0] = std::make_tuple(&front_l, &tempfl, "FRONT LEFT",  0);
-  motors[1] = std::make_tuple(&front_r, &tempbl, "FRONT RIGHT", 0);
-  motors[2] = std::make_tuple(&back_l,  &tempfr, "BACK LEFT",   0);
-  motors[3] = std::make_tuple(&back_r,  &tempbr, "BACK RIGHT",  0);
-  motors[4] = std::make_tuple(&f_bar,   &tempc,  "FOUR BAR",    0);
-  motors[5] = std::make_tuple(&c_bar,   &tempf,  "CHAIN BAR",   0);
-  motors[6] = std::make_tuple(&intk,    &tempi,  "INTAKE",      0);
-  motors[7] = std::make_tuple(&uptk,    &tempu,  "UPTAKE",      0);
+  motors[0] = {&front_l, &tempfl, "FRONT LEFT", 0};
+ motors[1] = {&front_r, &tempbl, "FRONT RIGHT", 0};
+ motors[2] = {&back_l, &tempfr, "BACK LEFT", 0};
+ motors[3] = {&back_r, &tempbr, "BACK RIGHT", 0};
+ motors[4] = {&f_bar, &tempc, "FOUR BAR", 0};
+ motors[5] = {&c_bar, &tempf, "CHAIN BAR", 0};
+ motors[6] = {&intk, &tempi, "INTAKE", 0};
+ motors[7] = {&uptk, &tempu, "UPTAKE", 0};
 
-  Page::goTo(1);
+  Page::goTo(1); //Sets it to page 1, page num can be changed if you really need to, but don't delete this.
 }
 
 //Utility to get coordinates for aligned objects, (buttons, sliders...) of same size
+//Put in how many of buttons/sliders you want, and get properly spaced coords
 void alignedCoords (int x_objects, int y_objects, int x_btn, int y_btn, int x_range, int y_range){
 
   double x_space = (x_range-x_objects*x_btn)/(x_objects+1.0);
@@ -188,12 +188,12 @@ void alignedCoords (int x_objects, int y_objects, int x_btn, int y_btn, int x_ra
 }
 
 //Flashing
-void flash(std::uint32_t color, std::uint32_t time, std::string text){ //has a delay
+void flash(std::uint32_t color, std::uint32_t time, std::string text){
   Page::clearScreen(color);
-  screen::set_pen(~color&0xFFFFFF);
+  screen::set_pen(~color&0xFFFFFF); //Makes text inverted color of background so it is always visible
   screen::set_eraser(color);
 
-  std::size_t space = text.find(' ', text.length()/2);
+  std::size_t space = text.find(' ', text.length()/2); //Spaces it out over 2 lines
   if (space != std::string::npos){
     screen::print(TEXT_LARGE, (480-text.length()*CHAR_WIDTH_LARGE)/2, 70, text.substr(0, space).c_str());
     screen::print(TEXT_LARGE, (480-text.length()*CHAR_WIDTH_LARGE)/2, 100, text.substr(space+1).c_str());
@@ -201,7 +201,7 @@ void flash(std::uint32_t color, std::uint32_t time, std::string text){ //has a d
   else screen::print(TEXT_LARGE, (480-text.length()*CHAR_WIDTH_LARGE)/2, 95, text.c_str());
 
   master.rumble("-.-.-.-.");
-  Flash.reset();
+  Flash.reset(); //Starts counting
   flash_end = time;
 }
 
@@ -209,14 +209,15 @@ void end_flash (){
   if (Flash.get_time() >= flash_end){
     Flash.reset(false);
     Page::goTo(Page::currentPage);
-    std::uint32_t flash_end=std::numeric_limits<std::uint32_t>::max();
+    std::uint32_t flash_end = std::numeric_limits<std::uint32_t>::max(); //Sets it to max val so it'll never flash at weird times like 0
   }
 }
 
+//Formats coordinates based on a style (always in x1, y1, x2, y2)
 std::tuple<int, int, int, int> fixPoints (int p1, int p2,int p3, int p4, Style type){
   int x1=p1, y1=p2, x2=p3, y2=p4, temp;
 
-  // Different styles of evaluating the given coordinates
+  // (p1, p2) is centre. p3, p4 are sizes from centre
   if (type == Style::CENTRE){
     x1 -= p3;
     y1 -= p4;
@@ -224,12 +225,13 @@ std::tuple<int, int, int, int> fixPoints (int p1, int p2,int p3, int p4, Style t
     y2 += p2;
   }
 
+  //p1, p2 is first coord. p3, p4 is how much it extends
   if (type == Style::SIZE){
     x2 += x1;
     y2 += y1;
   }
 
-  //Putting coordinates in a left-right up-down order
+  //Putting coordinates in a left-right up-down order in case it was accidentally reversed or given negatives. Makes checking presses easier
   temp = std::max(x1, x2);
   x1 = std::min(x1, x2);
   x2 = temp;
@@ -237,7 +239,7 @@ std::tuple<int, int, int, int> fixPoints (int p1, int p2,int p3, int p4, Style t
   temp = std::max(y1, y2);
   y1 = std::min(y1, y2);
   y2 = temp;
-  return {x1,y1,x2,y2};
+  return {x1,y1,x2,y2}; //Gives back the fixed points as a tuple
 }
 
 //Constructors
@@ -246,9 +248,7 @@ void Text::construct (int16_t pt1, int16_t pt2, Style type, text_format_e_t size
   page = page_ptr;
   lcol = label_color;
 
-  setTitle(pt1, pt2, type, text);
-
-
+  setTitle(pt1, pt2, type, text); //Formats title with proper spacing, color, and size
   (page->texts).push_back(this);
 }
 
@@ -256,7 +256,7 @@ void Button::construct(int16_t pt1, int16_t pt2, int16_t pt3, int16_t pt4, Style
 
     //Saves params to class private vars
     bcol = background_color;
-    dark_bcol = RGB2COLOR(int(COLOR2R(bcol)*0.9), int(COLOR2G(bcol)*0.9), int(COLOR2B(bcol)*0.9));
+    dark_bcol = RGB2COLOR(int(COLOR2R(bcol)*0.8), int(COLOR2G(bcol)*0.8), int(COLOR2B(bcol)*0.8));
     lcol = label_color;
     form = prType;
 
@@ -270,7 +270,7 @@ void Button::construct(int16_t pt1, int16_t pt2, int16_t pt3, int16_t pt4, Style
       text_y = (y1+y2-CHAR_HEIGHT_SMALL)/2;
       label = text;
     }
-    else{
+    else{ //Spaces it if it's too long for one line
       std::size_t space = text.find(' ', text.length()/2);
       if (space != std::string::npos){
         label = text.substr(0, space);

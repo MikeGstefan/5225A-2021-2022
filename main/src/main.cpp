@@ -90,8 +90,7 @@ int ring_count = 0; //Get rid of this once merged
 
 void opcontrol() {
 	// Reset tracking by stopping task
-
-	
+	//Page for tracking tests
 
 	while(true){
 		guiBackground();
