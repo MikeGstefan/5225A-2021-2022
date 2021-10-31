@@ -7,7 +7,10 @@
 #include "tracking.hpp"
 using namespace pros;
 
-#define PAGE_COUNT 9
+#define ORANGE 0x00F36421
+#define GREY 0x00202020
+
+#define PAGE_COUNT 10
 #define PAGE_LEFT 0
 #define PAGE_UP 0
 #define PAGE_RIGHT 480
@@ -25,19 +28,16 @@ using namespace pros;
 #define CHAR_HEIGHT_LARGE 32
 #define CHAR_WIDTH_LARGE 19
 
-
 //Forward-Declaration
 class Page;
 class Button;
 class Slider;
 class Text;
 
-namespace Style{
-  enum style{ //how the rect coords get evaluated
+enum class Style{ //how the rect coords get evaluated
     CENTRE,
     CORNER,
     SIZE
-  };
 };
 
 extern int ring_count; //For gui.cpp to use
@@ -45,7 +45,7 @@ extern int ring_count; //For gui.cpp to use
 
 void guiSetup(), guiBackground();
 void alignedCoords (int x_objects, int y_objects, int x_btn, int y_btn, int x_range = 480, int y_range = 220);
-void flash(std::uint32_t color, std::uint32_t time, std::string = "");
+void flash (std::uint32_t color, std::uint32_t time, std::string = "");
 void prevDriver(), nextDriver();
 
 //All constructor args are in the format points, format, page, text, color
@@ -63,12 +63,12 @@ class Page{
 
   public:
     //Page num, Title, Bcolor
-    Page(int, std::string, std::uint32_t = COLOR_DARK_GRAY);
+    Page(int, std::string, std::uint32_t = GREY);
 
     //Vars
     static Page* currentPage;
     static std::array<Page*, PAGE_COUNT> pages;
-    std::function <void()> func;
+    std::function <void()> setupFunc, loopFunc;
     std::vector<Button*> buttons;
     std::vector<Slider*> sliders;
     std::vector<Text*> texts;
@@ -115,9 +115,9 @@ class Button{
   public:
     //Constructor
     //Points, Format, Page, Label, Bcolor, Lcolor
-    Button (int16_t, int16_t, int16_t, int16_t, Style::style, press_type, Page*, std::string = "", std::uint32_t = COLOR_WHITE, std::uint32_t = COLOR_BLACK);
+    Button (int16_t, int16_t, int16_t, int16_t, Style, press_type, Page*, std::string = "", std::uint32_t = ORANGE, std::uint32_t = COLOR_BLACK);
     Button (){};
-    void construct (int16_t, int16_t, int16_t, int16_t, Style::style, press_type, Page*, std::string, std::uint32_t, std::uint32_t);
+    void construct (int16_t, int16_t, int16_t, int16_t, Style, press_type, Page*, std::string, std::uint32_t, std::uint32_t);
 
     //Vars
     Page* page;
@@ -153,7 +153,7 @@ class Slider{
 
   public:
     //Points, Format, Min, Max, Page, Label, Bcolor, Lcolor
-    Slider (int16_t, int16_t, int16_t, int16_t, Style::style, direction, int, int, Page*, std::string = "", std::uint32_t = COLOR_WHITE, std::uint32_t = COLOR_YELLOW);
+    Slider (int16_t, int16_t, int16_t, int16_t, Style, direction, int, int, Page*, std::string = "", std::uint32_t = COLOR_WHITE, std::uint32_t = COLOR_YELLOW);
 
     //Vars
     Page* page;
@@ -176,15 +176,16 @@ class Text{
     double* val_ptr=nullptr;
     double prevVal;
 
-    void construct (int16_t, int16_t, Style::style, text_format_e_t, Page*, std::string, std::uint32_t);
+    void construct (int16_t, int16_t, Style, text_format_e_t, Page*, std::string, std::uint32_t);
     void draw();
 
   public:
     //Points, Format, Page, Label, [var], Lcolor, other points for background
-    Text (int16_t, int16_t, Style::style, text_format_e_t, Page*, std::string, std::uint32_t label_color = COLOR_WHITE);
-    Text (int16_t, int16_t, Style::style, text_format_e_t, Page*, std::string, double*, std::uint32_t label_color = COLOR_WHITE);
+    Text (int16_t, int16_t, Style, text_format_e_t, Page*, std::string, std::uint32_t label_color = COLOR_WHITE);
+    Text (int16_t, int16_t, Style, text_format_e_t, Page*, std::string, double*, std::uint32_t label_color = COLOR_WHITE);
 
     static void update();
-    void setTitle (int16_t, int16_t, Style::style, std::string);
-    void setBackground (int16_t, int16_t, int16_t, int16_t, Style::style, std::uint32_t = COLOR_GREEN);
+    void setTitle (int16_t, int16_t, Style, std::string);
+    void setBackground (int16_t, int16_t, int16_t, int16_t, Style, std::uint32_t = GREY);
+    void setBackground (std::uint32_t);
 };

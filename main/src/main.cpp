@@ -89,9 +89,9 @@ void autonomous() {
 int ring_count = 0; //Get rid of this once merged
 
 void opcontrol() {
-	//Try to get rid of pair for elastic time
-	//instead of manually pushing back prev and next buttons from perm, have each page just save everything from perms text, buttons, and slider vectors
-	//Reset tracking by stopping task
+	// Reset tracking by stopping task
+
+	
 
 	while(true){
 		guiBackground();
