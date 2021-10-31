@@ -18,7 +18,7 @@
 
 enum notify_types{
   none = 0,
-  kill = 1,
+  stop = 1,
   reset = 2,
 };
 
@@ -34,15 +34,15 @@ private:
 
 public:
   Tasks(pros::task_fn_t function, const char* name = "", void* params = NULL, std::uint32_t prio = TASK_PRIORITY_DEFAULT, std::uint16_t stack_depth = TASK_STACK_DEPTH_DEFAULT);
-  // ~Tasks();
+  ~Tasks();
 
   static Tasks* get_obj(void* params);
   static void* get_params(void* params);
 
   bool notify_handle();
-  void task_start();
-  void task_kill(bool wait_for_comp = true);
-  void task_rebind(pros::task_fn_t);
+  void start();
+  void kill();
+  void rebind(pros::task_fn_t);
 
 
   pros::Task* get_task_ptr()const;

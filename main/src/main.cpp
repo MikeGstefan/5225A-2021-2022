@@ -17,7 +17,7 @@
 void initialize() {
 	delay(150);
 	updateStartTask();
-	// logging_task_start();
+	// logging_start();
 	Data::log_init();
 
 }
@@ -66,7 +66,7 @@ void autonomous() {}
  * operator control task will be stopped. Re-enabling the robot will restart the
  * task, not resume it from where it left off.
  */
-Task *tester = nullptr;
+
 int test = 0;
 
 
@@ -97,12 +97,12 @@ void opcontrol() {
 	printf("here1\n");
 	Tasks test_task(task_testing);
 	printf("here2\n");
-	test_task.task_start();
+	test_task.start();
 	printf("here4\n");
 	delay(300);
-	test_task.task_rebind(task_testing2);
+	test_task.rebind(task_testing2);
 	delay(3000);
-	test_task.task_kill();
+	test_task.kill();
 
 	// test_task.data_update();
 	delay(100);
