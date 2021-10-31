@@ -48,3 +48,7 @@ void Timer::print(const char* str){
 uint64_t Timer::get_time_in_timing_unit(){ // returns time in either millis or micros
     return pros::micros() * (timing_unit == timing_units::micros ? 1 : 0.001);
 }
+
+bool Timer::playing(){
+  return !paused;
+}
