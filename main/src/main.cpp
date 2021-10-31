@@ -4,7 +4,7 @@
 #include "util.hpp"
 #include "tracking.hpp"
 #include "task.hpp"
-// using namespace std;
+using namespace std;
 // using namespace pros;
 
 
@@ -19,6 +19,7 @@ void initialize() {
 	updateStartTask();
 	// logging_start();
 	Data::log_init();
+
 
 }
 
