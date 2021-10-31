@@ -92,7 +92,9 @@ int ring_count = 0; //Get rid of this once merged
 Page mogo_test(9,"mogo",0x00202020);
 
 Slider mogo_power(50,150,450,200,Style::CORNER, Slider::HORIZONTAL, 0,100,&mogo_test,"POWER");
-Button mogo_start(50,50,450,100, Style::CORNER, Button::SINGLE, &mogo_test, "go");
+Button mogo_start(150,50,350,100, Style::CORNER, Button::SINGLE, &mogo_test, "go");
+Text motor_label(50,50,Style::CORNER, TEXT_SMALL,&mogo_test, "Motor: 5");
+Text sens_label(400,50,Style::CORNER, TEXT_SMALL,&mogo_test, "Sens: G");
 void move_mogo(){
 	printf("in ur mom \n");
 	mogo.move_velocity(mogo_power.val);
