@@ -1,6 +1,6 @@
 #include "logging.hpp"
 Task *logging_task = nullptr;
-const char* file_name= "/usd/test.txt";
+const char* file_name= "/usd/data.txt";
 const char* file_meta= "/usd/meta_data.txt";
 char queue[queue_size];
 char* front = queue;
@@ -20,9 +20,8 @@ Data::Data(const char* obj_name, const char* id_code, log_types log_type_param, 
 
 
 
-Data test_log("tracking.txt","$01", error, log_locations::both);
-Data test_log2("pos.txt","$02", warning, log_locations::both);
-Data test_log3("tracking.txt","$03", warning, log_locations::both);
+Data task_log("tasks.txt","$01", general, log_locations::sd);
+
 
 
 vector<Data*> Data::get_objs(){
@@ -49,20 +48,23 @@ void Data::log_init(){
     }
     return;
   }
-  char meta_data[256];
-  for(int i = 0; i< Data::obj_list.size(); i++){
-    if((Data::obj_list[i]->log_location == log_locations::sd || Data::obj_list[i]->log_location == log_locations::both) && int(Data::obj_list[i]->log_type)){
-      strcat(meta_data,Data::obj_list[i]->name);
-      strcat(meta_data,",");
-      strcat(meta_data,Data::obj_list[i]->id);
-      strcat(meta_data,",");
+  else{
+    char meta_data[256];
+    for(int i = 0; i< Data::obj_list.size(); i++){
+      if((Data::obj_list[i]->log_location == log_locations::sd || Data::obj_list[i]->log_location == log_locations::both) && int(Data::obj_list[i]->log_type)){
+        strcat(meta_data,Data::obj_list[i]->name);
+        strcat(meta_data,",");
+        strcat(meta_data,Data::obj_list[i]->id);
+        strcat(meta_data,",");
+      }
     }
+    file.write(meta_data,strlen(meta_data));
+    file.close();
+    file.open(file_name,ofstream::app);
+    file.close();
+    logging_task_start();
+
   }
-  file.write(meta_data,strlen(meta_data));
-  file.close();
-  file.open(file_name,ofstream::app);
-  file.close();
-  logging_task_start();
 }
 
 

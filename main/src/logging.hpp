@@ -15,7 +15,8 @@ using namespace pros;
 extern Task *printing;
 enum log_types{
   error = 1,
-  warning =1
+  warning =1,
+  general =1,
 };
 
 enum class log_locations
@@ -54,6 +55,4 @@ const int print_point = 800;
 const int print_max_time = 2000;
 
 
-extern Data test_log;
-extern Data test_log2;
-extern Data test_log3;
+extern Data task_log;
