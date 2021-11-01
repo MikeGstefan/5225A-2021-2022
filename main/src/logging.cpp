@@ -20,7 +20,7 @@ Data::Data(const char* obj_name, const char* id_code, log_types log_type_param, 
 
 
 
-Data task_log("tasks.txt","$01", general, log_locations::t);
+Data task_log("tasks.txt","$01", general, log_locations::sd);
 
 
 

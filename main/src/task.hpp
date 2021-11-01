@@ -40,9 +40,9 @@ public:
   static void* get_params(void* params);
 
   bool notify_handle();
-  void start();
+  void start(void* params = NULL);
   void kill();
-  void rebind(pros::task_fn_t);
+  void rebind(pros::task_fn_t, void* params = NULL);
 
 
   pros::Task* get_task_ptr()const;
