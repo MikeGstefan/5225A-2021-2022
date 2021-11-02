@@ -9,9 +9,6 @@
 #include <fstream>
 #include "main.h"
 
-using namespace std;
-using namespace pros;
-
 extern Task *printing;
 enum log_types{
   error = 1,

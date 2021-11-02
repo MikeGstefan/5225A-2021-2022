@@ -2,8 +2,8 @@
 
 //Miscellaneous Tings
 Timer Flash("Flash Timer", false);
-std::array<std::tuple<Motor*, Text*, std::string, double>, 8> motors;
-std::uint32_t flash_end = std::numeric_limits<std::uint32_t>::max();
+std::array<std::tuple<Motor*, Text*, std::string, double>, 8> motors; //holds motor info for temperature checking
+std::uint32_t flash_end = std::numeric_limits<std::uint32_t>::max(); //Sets the flash's end time to max possible val
 
 //Var init for text monitoring
 double ringCount, angle, elasticUpTime, elasticDownTime;
@@ -82,17 +82,16 @@ Text tempf(185, 175, Style::CENTRE, TEXT_SMALL, &temps, "F: %.1f", &std::get<3>(
 Text tempi(295, 175, Style::CENTRE, TEXT_SMALL, &temps, "I: %.1f", &std::get<3>(motors[6]), COLOR_BLACK);
 Text tempu(405, 175, Style::CENTRE, TEXT_SMALL, &temps, "U: %.1f", &std::get<3>(motors[7]), COLOR_BLACK);
 
+Page tuning (10, "Tuning Tracking"); //Tests to tune tracking when on new base
+Text tuningInstructions(MID_X, 40, Style::CENTRE, TEXT_SMALL, &tuning, "Press your desired tracking test, and follow the terminal for instructions");
+Button turn10 (10, 40, 225, 80, Style::SIZE, Button::SINGLE, &tuning, "10 Turns");
+Button perpErr (245, 40, 225, 80, Style::SIZE, Button::SINGLE, &tuning, "Perpendicular Error");
+Button grid (10, 140, 225, 80, Style::SIZE, Button::SINGLE, &tuning, "Grid");
+Button spin360 (245, 140, 225, 80, Style::SIZE, Button::SINGLE, &tuning, "360 Spin");
+
+Page testing (11, "Testing"); //Blank page made so it already exists when new tests need to be run
+
 //Functions
-void setup_field(){
-  screen::set_pen(COLOR_WHITE);
-  screen::draw_rect(270, 30, 470, 230);
-  screen::draw_line(370, 30, 370, 230);
-  screen::draw_line(270, 130, 470, 130);
-}
-void draw_field(){
-  screen::set_pen(COLOR_RED);
-  screen::draw_pixel(270+(200*tracking.x_coord/144), 230-(200*tracking.y_coord/144)); //Scales to screen
-}
 void Page::toPrev(){
   if (currentPage == pages[1]) goTo(PAGE_COUNT-1);
   else goTo((currentPage->pageNum)-1);
@@ -114,10 +113,69 @@ void nextDriver(){
   master.print(2, 0, "Driver: %s          ", drivebase.drivers[drivebase.cur_driver].name);
 }
 //Placeholder until func is actually written
-std::pair <int, int> elasticUtil(){
+std::pair <int, int> elasticUtil(){ //No need to return pair
   elasticUpTime = 800;
   elasticDownTime = 800;
   return std::make_pair(elasticUpTime, elasticDownTime);
+}
+void resetX(){
+  tracking.x_coord = 0;
+  printf("Get Mike to write this as a task procedure");
+}
+void resetY(){
+  tracking.y_coord = 0;
+  printf("Get Mike to write this as a task procedure");
+}
+void resetA(){
+  tracking.global_angle = 0;
+  printf("Get Mike to write this as a task procedure");
+}
+void tuning10(){
+  printf("Press go when ready. The robot will spin 10 turns.\n");
+  resetX();
+  resetY();
+  resetA();
+  printf("Go button\n");
+  printf("GET SOMEONE TO CALL THE FUNCTION TO SPIN 10 TIMES\n\n");
+  printf("Please check how far off the robot is from 10 rotations. Make the necessary changes to the tracking constants.\n");
+}
+void tuningStrafe(){
+  printf("Please run the robot along a known straight line in the y-axis.\n");
+  printf("Press go when ready\n. Press Again when done.\n");
+  resetX();
+  resetY();
+  resetA();
+  printf("Go button\n");
+  if (tracking.x_coord < 0) printf("The robot thinks it strafed %d inches to the left\n. Consider turning the back tracking wheel counter-clockwise\n", tracking.x_coord);
+  else if (tracking.x_coord > 0) printf("The robot thinks it strafed %d inches to the right\n. Consider turning the back tracking wheel clockwise\n", tracking.x_coord);
+  else printf("The robot knows it strafed a perfect %d inches\n", tracking.x_coord); //Printing the tracking val just in case something went wrong. But it should always be 0
+}
+void tuningGrid(){
+  printf("Please move the robot haphazardly around the field. Then return it back to the starting point\n");
+  printf("Press go when ready\n. Press Again when done.\n");
+  resetX();
+  resetY();
+  resetA();
+  printf("Go button\n");
+  printf("The robot thinks it deviated %d inches to the %s\n", fabs(tracking.x_coord), (tracking.x_coord < 0 ? "left" : "right"));
+  printf("The robot thinks it deviated %d inches %s\n", fabs(tracking.y_coord), (tracking.y_coord < 0 ? "back" : "forward"));
+  printf("The robot thinks it deviated %d degrees %s\n", fabs(rad_to_deg(tracking.global_angle)), (tracking.global_angle < 0 ? "counter-clockwise" : "clockwise"));
+}
+void tuning360(){
+  printf("Please spin the robot any number of rotations. Then return it back to the starting point\n");
+  printf("Press go when ready\n. Press Again when done.\n");
+  resetX();
+  resetY();
+  resetA();
+  printf("Go button\n");
+  printf("The robot is %d inches %s and %d inches %s. However...\n");
+
+  int turned = fmod(rad_to_deg(tracking.global_angle), 360);
+  int lost = 360-turned;
+  float rotations = round(rad_to_deg(tracking.global_angle)/180)/2.0;
+  if (180 < turned || turned < 355) printf("The robot lost %d degrees over %.1f rotations\n. Consider increasing the DistanceLR.\n", lost, rotations);
+  else if (5 < turned || turned < 180) printf("The robot gained %d degrees over %.1f rotations\n. Consider decreasing the DistanceLR.\n", turned, rotations);
+  else printf("This seems pretty accurate. It's %d or %d degrees off of %.1f rotations.\n", turned, lost, rotations);
 }
 
 void guiSetup(){ //Call once at start in initialize()
@@ -126,21 +184,34 @@ void guiSetup(){ //Call once at start in initialize()
 
   runElastic.func = &elasticUtil;
 
-  resX.func = [&coord=tracking.x_coord](){printf("RESET X PLACEHOLDER\n");};
-  resY.func = [&coord=tracking.y_coord](){printf("RESET Y PLACEHOLDER\n");};
-  resA.func = [&coord=tracking.global_angle](){printf("RESET Angle PLACEHOLDER\n");};
-  track.setupFunc = &setup_field;
-  track.loopFunc = &draw_field;
+  resX.func = &resetX;
+  resY.func = &resetY;
+  resA.func = &resetA;
+  track.setupFunc = [](){
+    screen::set_pen(COLOR_WHITE);
+    screen::draw_rect(270, 30, 470, 230);
+    screen::draw_line(370, 30, 370, 230);
+    screen::draw_line(270, 130, 470, 130);
+  };
+  track.loopFunc = [](){
+    screen::set_pen(COLOR_RED);
+    screen::draw_pixel(270+(200*tracking.x_coord/144), 230-(200*tracking.y_coord/144)); //Scales to screen
+  };
 
-  goToXYA.func = [&x=xVal.val, &y=yVal.val, &a=aVal.val](){delay(1000); move_to_target_sync(x, y, a, false);};
-  goHome.func = [](){delay(1000); move_to_target_sync(0, 0, 0, false);};
-  goCentre.func = [](){delay(1000); move_to_target_sync(72, 72, 0, false);};
+  goToXYA.func = [&x=xVal.val, &y=yVal.val, &a=aVal.val](){printf("GO BUTTON\n"); move_to_target_sync(x, y, a, false);};
+  goHome.func = [](){printf("GO BUTTON\n"); move_to_target_sync(0, 0, 0, false);};
+  goCentre.func = [](){printf("GO BUTTON\n"); move_to_target_sync(72, 72, 0, false);};
 
   Button::createOptions({&route1, &route2, &route3}); //Makes them exclusive, only one can be selected at a time
 
   prevDrivr.func = &prevDriver;
   nextDrivr.func = &nextDriver;
   drivrName.setBackground(130, 70, 350, 190, Style::CORNER);
+
+  turn10.func = &tuning10;
+  perpErr.func = &tuningStrafe;
+  grid.func = &tuningGrid;
+  spin360.func = &tuning360;
 
   tempfl.setBackground(40, 60, 70, 50, Style::SIZE);
   tempbl.setBackground(150, 60, 70, 50, Style::SIZE);
@@ -152,13 +223,13 @@ void guiSetup(){ //Call once at start in initialize()
   tempu.setBackground(370, 150, 70, 50, Style::SIZE);
   //hate that i have to do it like this
   motors[0] = {&front_l, &tempfl, "FRONT LEFT", 0};
- motors[1] = {&front_r, &tempbl, "FRONT RIGHT", 0};
- motors[2] = {&back_l, &tempfr, "BACK LEFT", 0};
- motors[3] = {&back_r, &tempbr, "BACK RIGHT", 0};
- motors[4] = {&f_bar, &tempc, "FOUR BAR", 0};
- motors[5] = {&c_bar, &tempf, "CHAIN BAR", 0};
- motors[6] = {&intk, &tempi, "INTAKE", 0};
- motors[7] = {&uptk, &tempu, "UPTAKE", 0};
+  motors[1] = {&front_r, &tempbl, "FRONT RIGHT", 0};
+  motors[2] = {&back_l, &tempfr, "BACK LEFT", 0};
+  motors[3] = {&back_r, &tempbr, "BACK RIGHT", 0};
+  motors[4] = {&f_bar, &tempc, "FOUR BAR", 0};
+  motors[5] = {&c_bar, &tempf, "CHAIN BAR", 0};
+  motors[6] = {&intk, &tempi, "INTAKE", 0};
+  motors[7] = {&uptk, &tempu, "UPTAKE", 0};
 
   Page::goTo(1); //Sets it to page 1, page num can be changed if you really need to, but don't delete this.
 }
@@ -170,7 +241,7 @@ void alignedCoords (int x_objects, int y_objects, int x_btn, int y_btn, int x_ra
   double x_space = (x_range-x_objects*x_btn)/(x_objects+1.0);
   double y_space = (y_range-y_objects*y_btn)/(y_objects+1.0);
 
-  while ((fmod(x_space, 5) != 0))
+  while ((fmod(x_space, 5) != 0)) //Recalculates until it gets a nice multiple of 5
     x_space = ((--x_range)-x_objects*x_btn)/(x_objects+1.0);
 
   while((fmod(y_space, 5) != 0))
@@ -338,9 +409,6 @@ Page::Page(int page_number, std::string name, std::uint32_t background_color){
   title = name + " - " + std::to_string(pageNum);
   bcol = background_color;
 
-  // if (1) printf("This is not perm, it is %s\n", name.c_str());
-
-  // buttons.push_back
   buttons.push_back(&prevPage);
   buttons.push_back(&nextPage);
 }
@@ -610,7 +678,7 @@ Button* Button::update(){
 
     }
 
-    else if (btn_id->form == Button::HOLD){
+    else if (btn_id->form == Button::HOLD){ //Keeps running while pressed. Not blocking
       if (btn_id->newPress()){
         btn_id->lastPressed = 1;
         btn_id->drawPressed();

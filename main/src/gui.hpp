@@ -5,7 +5,6 @@
 #include "config.hpp"
 #include "drive.hpp"
 #include "tracking.hpp"
-using namespace pros;
 
 #define ORANGE 0x00F36421
 #define GREY 0x00202020
@@ -41,7 +40,7 @@ enum class Style{ //how the rect coords get evaluated
 };
 
 extern int ring_count; //For gui.cpp to use
-// extern Page elastic, liftMove, track, moving, autoSel, driverCurve, intkTest, temps, mContr; //For other files to use
+extern Page testing;
 
 void guiSetup(), guiBackground();
 void alignedCoords (int x_objects, int y_objects, int x_btn, int y_btn, int x_range = 480, int y_range = 220);

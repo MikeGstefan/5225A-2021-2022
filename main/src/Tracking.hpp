@@ -8,8 +8,6 @@
 #include <memory>
 #include <vector>
 
-using namespace pros;
-
 // extern Task *updateTask = nullptr;
 extern Task *moveTask;
 // extern Task *moveTask = nullptr;

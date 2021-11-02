@@ -57,20 +57,7 @@ void competition_initialize() {}
  * will be stopped. Re-enabling the robot will restart the task, not re-start it
  * from where it left off.
  */
-void autonomous() {
-	// drivebase.update_lookup_table_util();
-	// rush_goal2(0.0, -45.0, 0.0);
-	// drivebase.move(0,-127, 0);
-	// while(!claw_touch.get_value()) delay(10);
-	// master.print(0, 0, "inches: %lf", tracking.y_coord);
-/*
-	Timer move_timer{"move_timer"};
-	// move_to_target_async(0.0, -45.0, 0.0);	// got to goal
-	// while(tracking.y_coord > -45.0)	delay(10);
-	master.print(0, 0, "time: %d", move_timer.get_time());
-	rush_goal(0.0, -20.0, 0.0);
-*/
-}
+void autonomous() {}
 
 /**
  * Runs the operator control code. This function will be started in its own task
@@ -90,7 +77,9 @@ int ring_count = 0; //Get rid of this once merged
 
 void opcontrol() {
 	// Reset tracking by stopping task
-	//Page for tracking tests
+	//Go button sequence. Create a button that will wait until pressed, then run the task. Used to verify the user is out of the way.
+	//Try getting rid of the != 0 in alignedcoords
+	master.print(2, 0, "Driver: %s", drivebase.drivers[drivebase.cur_driver].name);
 
 	while(true){
 		guiBackground();

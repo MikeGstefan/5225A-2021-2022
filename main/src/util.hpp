@@ -5,6 +5,7 @@
 #include <cmath>
 
 using namespace pros;
+using namespace std;
 
 #define waitUntil(condition) while(!(condition)) delay(10);
 
