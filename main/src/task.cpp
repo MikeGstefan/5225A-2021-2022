@@ -29,27 +29,27 @@ pros::Task* Tasks::get_task_ptr()const{
 }
 
 void Tasks::start(void* params){
-   task_log.print("%d| %s starting", millis(), this->name);
+   task_log.print("%d| %s starting\n", millis(), this->name);
    if(this->task_ptr != NULL){
-     task_log.print("%d| %s was already started", millis(), this->name);
+     task_log.print("%d| %s was already started\n", millis(), this->name);
      this->kill();
    }
    this->params = std::make_tuple(this,params);
    this->task_ptr = new pros::Task(this->function, &this->params, this->prio, this->stack_depth, this->name);
-   task_log.print("%d| %s started", millis(), this->name);
+   task_log.print("%d| %s started\n", millis(), this->name);
 }
 
 void Tasks::kill(){
   if(this->task_ptr != NULL){
-    task_log.print("%d| %s killing", millis(), this->name);
+    task_log.print("%d| %s killing\n", millis(), this->name);
     this->task_ptr->notify_ext((int)stop, E_NOTIFY_ACTION_OWRITE,NULL);
     while(this->task_ptr->get_state()!=4)delay(10);
     delete this->task_ptr;
     this->task_ptr = NULL;
-    task_log.print("%d| %s killed", millis(), this->name);
+    task_log.print("%d| %s killed\n", millis(), this->name);
   }
   else {
-    task_log.print("%d| %s kill failed: already dead", millis(), this->name);
+    task_log.print("%d| %s kill failed: already dead\n", millis(), this->name);
   }
 }
 
@@ -71,7 +71,7 @@ bool Tasks::notify_handle(){
 
 bool Tasks::data_update(){
   if(this->task_ptr->get_state() >=3)return false;
-  task_log.print("%d| %s pausing for data", millis(), this->name);
+  task_log.print("%d| %s pausing for data\n", millis(), this->name);
   this->task_ptr->notify_ext((int)reset, E_NOTIFY_ACTION_OWRITE,NULL);
   while(this->task_ptr->get_state()!=3)delay(10);
   return true;
@@ -80,16 +80,16 @@ bool Tasks::data_update(){
 bool Tasks::done_update(){
   if(this->task_ptr->get_state() !=3)return false;
   this->task_ptr->resume();
-  task_log.print("%d| %s done data update, resuming", millis(), this->name);
+  task_log.print("%d| %s done data update, resuming\n", millis(), this->name);
   return true;
 }
 
 
 
 void Tasks::rebind(pros::task_fn_t function, void* params){
-  task_log.print("%d| %s rebinding", millis(), this->name);
+  task_log.print("%d| %s rebinding\n", millis(), this->name);
   this->kill();
   this->function = function;
   this->start(params);
-  task_log.print("%d| %s rebound", millis(), this->name);
+  task_log.print("%d| %s rebound\n", millis(), this->name);
 }

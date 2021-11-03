@@ -87,23 +87,9 @@ void autonomous() {
  * task, not resume it from where it left off.
  */
 
-int ring_count = 0; //Get rid of this once merged
 
 void opcontrol() {
-	// Reset tracking by stopping task
 
-	while(true){
-		guiBackground();
-		drivebase.handle_input();
 
-		if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_B)){ //Update expo util
-			drivebase.update_lookup_table_util();
-			delay(50);
-			master.clear();
-			drivebase.screen_timer.reset();
-		}
-		else if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_UP)) nextDriver();
-		else if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_DOWN)) prevDriver();
-		delay(10);
-	}
+
 }
