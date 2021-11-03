@@ -81,7 +81,7 @@ void Lift::f_bar_elastic_util(){
 }
 
 
-tuple<double, double, double, double, double, double, bool> Lift::find_arm_angles(double target_y, double target_z, lift_position_types lift_position_type){
+tuple<double, double, double, double, double, double, bool> Lift::find_arm_angles(double target_y, double target_z, move_types move_type){
   // variables to determine postion type for lift
   double top_arm_speed = 100, bottom_arm_speed = 200; // in pros velocity units
   double pos_time, neg_time;
@@ -142,18 +142,18 @@ tuple<double, double, double, double, double, double, bool> Lift::find_arm_angle
   pos_position_valid = bottom_arm_pos_angle < bottom_arm_upper_limit && bottom_arm_pos_angle > bottom_arm_lower_limit && top_arm_pos_angle < top_arm_upper_limit && top_arm_pos_angle > top_arm_lower_limit;
   neg_position_valid = bottom_arm_neg_angle < bottom_arm_upper_limit && bottom_arm_neg_angle > bottom_arm_lower_limit && top_arm_neg_angle < top_arm_upper_limit && top_arm_neg_angle > top_arm_lower_limit;
 
-  switch(lift_position_type){
-  case lift_position_types::positive:
+  switch(move_type){
+  case move_types::positive:
     bottom_arm_angle = bottom_arm_pos_angle;
     top_arm_angle = top_arm_pos_angle;
     move_valid = pos_position_valid;
     break;
-  case lift_position_types::negative:
+  case move_types::negative:
     bottom_arm_angle = bottom_arm_neg_angle;
     top_arm_angle = top_arm_neg_angle;
     move_valid = neg_position_valid;
     break;
-  case lift_position_types::fastest:
+  case move_types::fastest:
     if (pos_position_valid && neg_position_valid){
       pos_time = max((f_bar.get_position() - bottom_arm_pos_angle) / bottom_arm_speed, (c_bar.get_position() - top_arm_pos_angle) / top_arm_speed);
       neg_time = max((f_bar.get_position() - bottom_arm_neg_angle) / bottom_arm_speed, (c_bar.get_position() - top_arm_neg_angle) / top_arm_speed);
@@ -187,8 +187,8 @@ tuple<double, double, double, double, double, double, bool> Lift::find_arm_angle
   return {top_arm_angle, bottom_arm_angle, top_arm_pos_angle, bottom_arm_pos_angle, top_arm_neg_angle, bottom_arm_neg_angle, move_valid};
 }
 
-void Lift::move_to_target(const Vector2D& target, const lift_position_types lift_position_type, const bool wait_for_complete, const double bottom_arm_speed, const double top_arm_speed){
-  auto[top_arm_angle, bottom_arm_angle, top_arm_pos_angle, bottom_arm_pos_angle, top_arm_neg_angle, bottom_arm_neg_angle, move_valid] = find_arm_angles(target.x, target.y, lift_position_type);
+void Lift::move_to_target(const Vector2D& target, const move_types move_type, const bool wait_for_complete, const double bottom_arm_speed, const double top_arm_speed){
+  auto[top_arm_angle, bottom_arm_angle, top_arm_pos_angle, bottom_arm_pos_angle, top_arm_neg_angle, bottom_arm_neg_angle, move_valid] = find_arm_angles(target.x, target.y, move_type);
 
   // updates arm targets for lift state machine
   cur_top_arm_target = top_arm_angle;
@@ -219,25 +219,25 @@ void Lift::move_to_target_util(){
 			target_y++;
 			delay(50);
 			master.print(1, 0, "y: %lf", target_y);
-      move_to_target({target_y, target_z}, lift_position_types::fastest, false);
+      move_to_target({target_y, target_z}, move_types::fastest, false);
 		}
 		else if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_LEFT)){  // decrease height
 			target_y--;
 			delay(50);
 			master.print(1, 0, "y: %lf", target_y);
-      move_to_target({target_y, target_z}, lift_position_types::fastest, false);
+      move_to_target({target_y, target_z}, move_types::fastest, false);
 		}
 		if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_UP)){  // increase height
 			target_z++;
 			delay(50);
 			master.print(0, 0, "z: %lf", target_z);
-      move_to_target({target_y, target_z}, lift_position_types::fastest, false);
+      move_to_target({target_y, target_z}, move_types::fastest, false);
 		}
 		else if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_DOWN)){  // decrease height
 			target_z--;
 			delay(50);
 			master.print(0, 0, "z: %lf", target_z);
-      move_to_target({target_y, target_z}, lift_position_types::fastest, false);
+      move_to_target({target_y, target_z}, move_types::fastest, false);
 		}
 		delay(10);
 	}
@@ -288,7 +288,7 @@ double Lift::get_arm_velocity_ratio(const double target_y){
 }
 
 void Lift::move_on_line(double target_y, double target_z_start, double target_z_end, const double speed){
-  move_to_target({target_y, target_z_start}, lift_position_types::fastest, true); // goes to position above the rings
+  move_to_target({target_y, target_z_start}, move_types::fastest, true); // goes to position above the rings
   // delay(300);
   // grabs position for f_bar to reach when at bottom of ring stack
   auto[top_arm_angle, bottom_arm_angle, top_arm_pos_angle, bottom_arm_pos_angle, top_arm_neg_angle, bottom_arm_neg_angle, move_valid] = lift.find_arm_angles(target_y, target_z_end);
@@ -363,7 +363,7 @@ void Lift::handle(){
     set_state(tip);
   }
   // lowers f_bar
-  else if (master.get_digital_new_press(f_bar_down_button) && state != down && state != release_mogo){ // lowers f_bar to pickup mogos with forks if f_bar down is pressed
+  else if (master.get_digital_new_press(f_bar_down_button) && state != down){ // lowers f_bar to pickup mogos with forks if f_bar down is pressed
     printf("fbar down button pressed\n");
     lower_f_bar();
     set_state(lowering);
@@ -419,19 +419,13 @@ void Lift::handle(){
     case raised:
       if (master.get_digital_new_press(f_bar_up_button)){
         printf("f_bar up button pressed\n");
-        raise_f_bar_above_platform();
-        set_state(above_platform);
+        raise_f_bar_to_platform();
+        set_state(platform);
       }
       break;
-    case above_platform:
+    case platform:
       if (master.get_digital_new_press(f_bar_up_button)){
         printf("f_bar up button pressed\n");
-        lower_f_bar_in_platform();
-        set_state(in_platform);
-      }
-      break;
-    case in_platform:
-      if(fabs(cur_bottom_arm_target - f_bar.get_position()) < bottom_arm_end_error){  // drops mogo once it reaches the target position
         open_forks();
         set_state(release_mogo);
       }
@@ -439,14 +433,8 @@ void Lift::handle(){
     case release_mogo:
       if (master.get_digital_new_press(f_bar_up_button)){
         printf("f_bar up button pressed\n");
-        close_forks();  // picks up mogo
-        raise_f_bar_above_platform();
-        set_state(above_platform);
-      }
-      else if (master.get_digital_new_press(f_bar_down_button)){  // goes back up without picking up mogo
-        printf("f_bar up button pressed\n");
-        raise_f_bar_above_platform();
-        set_state(above_platform);
+        lower_f_bar();
+        set_state(lowering);
       }
       break;
     case ring_dropoff:  // Actual async ring dropoff state
@@ -457,11 +445,11 @@ void Lift::handle(){
       printf("ring dropoff button pressed\n");
       stop_task();
       if (dropoff_front){
-        move_to_target(dropoff_coords[dropoff_front][1], lift_position_types::fastest, false);
+        move_to_target(dropoff_coords[dropoff_front][1], move_types::fastest, false);
         set_state(dropoff_front_mid);
       }
       else{
-        move_to_target(dropoff_coords[dropoff_front][0], lift_position_types::fastest, false);
+        move_to_target(dropoff_coords[dropoff_front][0], move_types::fastest, false);
         set_state(dropoff_back_alliance);
       }
       break;
@@ -473,7 +461,7 @@ void Lift::handle(){
       }
       else if (master.get_digital_new_press(ring_dropoff_button)){
         last_dropoff_press_timer.reset();
-        move_to_target(dropoff_coords[dropoff_front][1], lift_position_types::fastest, false);
+        move_to_target(dropoff_coords[dropoff_front][1], move_types::fastest, false);
         set_state(dropoff_back_mid);
         // moves to higher dropoff height
       }
@@ -486,7 +474,7 @@ void Lift::handle(){
       }
       else if (master.get_digital_new_press(ring_dropoff_button)){
         last_dropoff_press_timer.reset();
-        move_to_target(dropoff_coords[dropoff_front][2], lift_position_types::fastest, false);
+        move_to_target(dropoff_coords[dropoff_front][2], move_types::fastest, false);
         set_state(dropoff_back_mid);
         // moves to higher dropoff height
       }
@@ -510,7 +498,7 @@ void Lift::handle(){
       }
       else if (master.get_digital_new_press(ring_dropoff_button)){
         last_dropoff_press_timer.reset();
-        move_to_target(dropoff_coords[dropoff_front][2], lift_position_types::fastest, false);
+        move_to_target(dropoff_coords[dropoff_front][2], move_types::fastest, false);
         set_state(dropoff_front_mid);
         // moves to higher dropoff height
       }
@@ -523,7 +511,7 @@ void Lift::handle(){
       }
       else if (master.get_digital_new_press(ring_dropoff_button)){
         last_dropoff_press_timer.reset();
-        set_state(dropoff_start); // moves to higher beginning height
+        set_state(dropoff_start); // moves to beginning height
       }
       break;
   }
@@ -531,9 +519,8 @@ void Lift::handle(){
 
 void Lift::move_to_neutral(){ // moves lift to position right above ring stack
   stop_task();
-  printf("starting mtt\n");
   close_stabber();  // in case cancel was pressed during ring pickup (to prevent a jam)
-  move_to_target({-3.0, 20.0}, lift_position_types::fastest, true);
+  move_to_target({-3.0, 20.0}, move_types::fastest, true);
 }
 
 void Lift::move_f_bar_tip(){  // moves f_bar to mogo tipping height
@@ -555,14 +542,9 @@ void Lift::raise_f_bar(){ // brings f_bar just above the ground
   move_f_bar_to_height(7.0);
 }
 
-void Lift::raise_f_bar_above_platform(){
+void Lift::raise_f_bar_to_platform(){
   stop_task();
   move_f_bar_to_height(12.0);
-}
-
-void Lift::lower_f_bar_in_platform(){
-  stop_task();
-  move_f_bar_to_height(9.5);
 }
 
 void Lift::open_forks(){
@@ -622,6 +604,6 @@ void dropoff_rings(void* params){
   printf("finished ring dropoff %d\n", millis());
   lift.set_state(lift.states::neutral);
   lift.close_stabber();  // in case cancel was pressed during ring pickup (to prevent a jam)
-  lift.move_to_target({-3.0, 20.0}, lift_position_types::fastest, true);
+  lift.move_to_target({-3.0, 20.0}, Lift::move_types::fastest, true);
   lift.stop_task();
 }

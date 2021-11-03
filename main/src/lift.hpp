@@ -7,11 +7,7 @@
 using namespace pros;
 using namespace std;
 
-enum class lift_position_types{
-  positive,
-  negative,
-  fastest
-};
+
 
 // NOTE: all y positions passed in should be negative on the inside of the lift
 class Lift {
@@ -19,8 +15,8 @@ public:
 
   bool full = false; // if end_effector has rings
   const char* state_names[16] = {
-    "neutral", "ring_pickup", "tip", "lowering", "down", "raised", "above_platform", "in_platform", "release_mogo",
-    "ring_dropoff", "dropoff_start", "dropoff_back_alliance", "dropoff_back_mid", "dropoff_back_top", "dropoff_front_mid", "dropoff_front_top"
+    "neutral", "ring_pickup", "tip", "lowering", "down", "raised", "platform", "release_mogo", "ring_dropoff", "dropoff_start",
+    "dropoff_back_alliance", "dropoff_back_mid", "dropoff_back_top", "dropoff_front_mid", "dropoff_front_top"
   };
 
   // public lift state machine variables
@@ -31,8 +27,7 @@ public:
     lowering,
     down,
     raised,
-    above_platform,
-    in_platform,
+    platform,
     release_mogo,
     ring_dropoff,
     dropoff_start,  // state is just used avoid repeated code
@@ -41,6 +36,13 @@ public:
     dropoff_back_top,
     dropoff_front_mid,
     dropoff_front_top,
+  };
+
+  // for move to targets
+  enum move_types{
+    positive,
+    negative,
+    fastest
   };
 
 private:
@@ -88,10 +90,10 @@ public:
 
   void f_bar_elastic_util();  // utility to test of elastics on f_bar are worn out
 
-  tuple<double, double, double, double, double, double, bool> find_arm_angles(double target_y, double target_z, const lift_position_types lift_position_type = lift_position_types::fastest);  // solves for arm_angles
+  tuple<double, double, double, double, double, double, bool> find_arm_angles(double target_y, double target_z, const move_types move_type = move_types::fastest);  // solves for arm_angles
 
   // methods relating to move to target
-  void move_to_target(const Vector2D& target, const lift_position_types lift_position_type = lift_position_types::fastest, const bool wait_for_complete = true, const double bottom_arm_speed = 200, const double top_arm_speed = 100);  // actual method to move the lift to a target
+  void move_to_target(const Vector2D& target, const move_types move_type = move_types::fastest, const bool wait_for_complete = true, const double bottom_arm_speed = 200, const double top_arm_speed = 100);  // actual method to move the lift to a target
   void wait_for_complete(); // waits for move_to_target to reach
 
   void move_to_target_util(); // utility to move arm with controller
@@ -119,8 +121,7 @@ public:
   void move_f_bar_tip();
   void lower_f_bar();
   void raise_f_bar(); // brings f_bar just above the ground
-  void raise_f_bar_above_platform();
-  void lower_f_bar_in_platform();
+  void raise_f_bar_to_platform();
 
   void open_forks();
   void close_forks();
