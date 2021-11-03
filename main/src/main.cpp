@@ -8,6 +8,8 @@
 #include "gui.hpp"
 
 // using namespace std;
+#include "task.hpp"
+using namespace std;
 // using namespace pros;
 
 
