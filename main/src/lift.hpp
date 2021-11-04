@@ -1,12 +1,12 @@
 #pragma once
 #include <tuple>
+#include <unordered_map>
 #include "main.h"
 #include "util.hpp"
 #include "drive.hpp"
 #include "pid.hpp"
 using namespace pros;
 using namespace std;
-
 
 
 // NOTE: all y positions passed in should be negative on the inside of the lift
@@ -16,8 +16,10 @@ public:
   bool full = false; // if end_effector has rings
   const char* state_names[16] = {
     "neutral", "ring_pickup", "tip", "lowering", "down", "raised", "platform", "release_mogo", "ring_dropoff", "dropoff_start",
-    "dropoff_back_alliance", "dropoff_back_mid", "dropoff_back_top", "dropoff_front_mid", "dropoff_front_top"
+    "dropoff_back_alliance", "dropoff_back_mid", "dropoff_back_top", "dropoff_forks_alliance", "dropoff_front_mid", "dropoff_front_top"
   };
+
+  const char* dropoff_side_names[3] = {"Back ", "Forks", "Front"};  // used for printing to controller what current dropoff side is
 
   // public lift state machine variables
   enum states {
@@ -34,6 +36,7 @@ public:
     dropoff_back_alliance,
     dropoff_back_mid,
     dropoff_back_top,
+    dropoff_forks_alliance,
     dropoff_front_mid,
     dropoff_front_top,
   };
@@ -43,6 +46,12 @@ public:
     positive,
     negative,
     fastest
+  };
+
+  enum dropoff_sides{
+    back,
+    forks,
+    front
   };
 
 private:
@@ -68,15 +77,17 @@ private:
 
   states state;
   states last_state;
+  // states dropoff_state; // temporary state variable when entering dropoff state chain
 
   Task* task_ptr = nullptr;
 
   bool task_removed;
 
   // ring dropoff variables
-  bool dropoff_front;
-  int ring_dropoff_level;
-  array<array<Vector2D, 3>, 2> dropoff_coords;  // ring dropoff coords
+  dropoff_sides dropoff_side; // if we dropoff rings in back, forks or front of robot
+  // array<array<Vector2D, 3>, 2> dropoff_coords;  // ring dropoff coords
+  static constexpr double top_arm_fork_dropoff_angle = 500; // in motor degrees;
+  unordered_map<states, Vector2D> dropoff_coords;  // ring dropoff coords
   Timer last_dropoff_press_timer{"last_dropoff"}; // used to detect multiple consecutive ring dropoff button presses
   static constexpr int dropoff_double_press_time = 500;
 
@@ -123,6 +134,7 @@ public:
   void raise_f_bar(); // brings f_bar just above the ground
   void raise_f_bar_to_platform();
 
+  // lift pneumatic methods
   void open_forks();
   void close_forks();
   void open_stabber();
@@ -134,10 +146,9 @@ public:
   double get_bottom_arm_target() const;
   double get_bottom_arm_end_error() const;
 
-  // for ring dropoff function
-  array<array<Vector2D, 3>, 2>& get_dropoff_coords();
-  bool is_dropoff_front() const;
-  double get_ring_dropoff_level() const;
+  // dropoff related methods
+  dropoff_sides get_dropoff_side() const;
+  void dropoff_handle(const states next_state); // handles repeated code for exiting every dropoff state
 
 };
 

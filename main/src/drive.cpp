@@ -5,7 +5,7 @@
 
 // dropoff buttons
 controller_digital_e_t ring_dropoff_button = E_CONTROLLER_DIGITAL_UP;
-controller_digital_e_t switch_dropoff_side_button = E_CONTROLLER_DIGITAL_DOWN;
+controller_digital_e_t change_dropoff_side_button = E_CONTROLLER_DIGITAL_DOWN;
 
 // spinning buttons
 controller_digital_e_t turn_mogo_cw_button = E_CONTROLLER_DIGITAL_RIGHT;

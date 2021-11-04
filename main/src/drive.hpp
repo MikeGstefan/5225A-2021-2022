@@ -15,7 +15,7 @@ using namespace pros;
 
 // dropoff buttons
 extern controller_digital_e_t ring_dropoff_button;
-extern controller_digital_e_t switch_dropoff_side_button;
+extern controller_digital_e_t change_dropoff_side_button;
 
 // spinning buttons
 extern controller_digital_e_t turn_mogo_cw_button;
