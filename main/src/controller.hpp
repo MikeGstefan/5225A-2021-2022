@@ -13,7 +13,7 @@ class Tasks;
 
 class Controller_ : public pros::Controller{
 private:
-  std::array<std::function<void()>,5> queue;
+  std::array<std::function<void()>,20> queue;
   int front = 0, back = 0;
   static std::array<Controller_*, num_controller> objs;
   void add_to_queue(std::function<void()>);
