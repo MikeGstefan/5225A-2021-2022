@@ -3,20 +3,19 @@
 Tracking tracking;
 move_target_params move_params;
 
-// Task *updateTask =(nullptr);
-_Task update_task(update, "Tracking update");
+Task *updateTask =(nullptr);
 Task *moveTask = nullptr;
 
-// void updateStartTask(){
-//   updateTask = new Task(update);
-// }
-// void updateStopTask(){
-//   if(updateTask != nullptr){
-//     updateTask->remove();
-//     delete updateTask;
-//     updateTask = nullptr;
-//   }
-// }
+void updateStartTask(){
+  updateTask = new Task(update);
+}
+void updateStopTask(){
+  if(updateTask != nullptr){
+    updateTask->remove();
+    delete updateTask;
+    updateTask = nullptr;
+  }
+}
 
 void Tracking::move_stop_task(){
   if(moveTask != nullptr){
@@ -119,7 +118,7 @@ void update(void* params){
 
       // printf("%f,%f\n", tracking.x_coord, tracking.y_coord);
 
-    printf("time: %d, TRACKING: %f %f, %f \n", millis(), tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle));
+    // printf("time: %d, TRACKING: %f %f, %f \n", millis(), tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle));
     // printf("time: %d, TOTAL: %f, %f, %f \n", millis(), total_x, total_y, rad_to_deg(total_a));
     // printf("%d pow_a: %.1f, pow_x: %.1f, pow_y: %.1f, total_pow: %.1f\n",millis(),  tracking.power_a, tracking.power_x, tracking.power_y, fabs(tracking.power_a) + fabs(tracking.power_x) + fabs(tracking.power_y));
 
