@@ -12,8 +12,9 @@ enum class Intake_States{
   Jammed,
   Off,
   Searching,
-  Intaking,
-  Holding
+  Fast,
+  Holding,
+  DropOff
 };
 
 class Intake{
@@ -24,7 +25,7 @@ public:
   double target = 950;
   bool running = 0;
   bool have_ring = 0;
-
+  double power = 80;
   void setIntakeState(Intake_States state);
   void Intake_brake(int time);
   void Intake_Setup();
