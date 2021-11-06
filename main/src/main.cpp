@@ -90,15 +90,6 @@ void autonomous() {
 
 
 void opcontrol() {
-	master.clear();
-	for(int j = 0; j < 10; j++){
-		for(int i = 0; i <3; i++){
-			printf("here\n");
-			master.print(i,0,"test: %d",j);
-			// partner.print(i,0,"test: %d",j);
-		}
-		delay(500);
-	}
 
 
 

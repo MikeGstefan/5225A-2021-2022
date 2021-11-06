@@ -1,7 +1,6 @@
 #include "config.hpp"
 
 Controller_ master(pros::E_CONTROLLER_MASTER);
-// Controller_ partner(pros::E_CONTROLLER_PARTNER);
 
 // new robot config
 // pros::Motor front_l(1, pros::E_MOTOR_GEARSET_18, true, pros::E_MOTOR_ENCODER_DEGREES);

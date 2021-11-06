@@ -1,31 +1,26 @@
 #include "controller.hpp"
-std::array<Controller_*, num_controller> Controller_::objs = {nullptr};
+std::array<Controller_*, num_controller> Controller_::objs; //= {nullptr};
 Tasks Controller_::controller_task = nullptr;
 
+int constructed = 0;
 
 Controller_::Controller_(pros::controller_id_e_t id): pros::Controller{id}
   {
-    if(num_controller >1 && !Controller_::objs.empty()){
-      // printf("here3\n");
-      objs[1] = this;
-      this->controller_num = 2;
-    }
-    else{
-      // printf("here3 else\n");
-      objs[0] = this;
-      this->controller_num = 1;
-    }
+      objs[constructed] = this;
+      this->controller_num = constructed+1;
+      constructed++;
   }
 
 void Controller_::print_queue(void* params){
   Tasks* ptr = Tasks::get_obj(params);
   while(true){
     for(int i = 0; i < num_controller; i++){
-      controller_queue.print("%d| handle queue for controller %d\n", millis(), i+1);
+      controller_queue.print("%d| handle queue for controller %d\n", millis(), objs[i]->controller_num);
       objs[i]->queue_handle();
+      delay(50);
     }
     if(ptr->notify_handle())break;
-    delay(50);
+
   }
 }
 
