@@ -1,9 +1,9 @@
 #pragma once
 #include "main.h"
+#include "task.hpp"
 #include "config.hpp"
 #include "util.hpp"
 #include "drive.hpp"
-#include "task.hpp"
 #include <iostream>
 #include <cmath>
 #include <memory>
@@ -14,7 +14,7 @@ using namespace pros;
 // extern Task *updateTask = nullptr;
 extern Task *moveTask;
 // extern Task *moveTask = nullptr;
-
+extern _Task update_task;
 
 void update(void* params);
 void updateStartTask();
