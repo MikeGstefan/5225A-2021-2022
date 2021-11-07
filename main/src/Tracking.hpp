@@ -61,9 +61,9 @@ void rush_goal(double target_x, double target_y, double target_a);
 void rush_goal2(double target_x, double target_y, double target_a);
 void move_on_arc(const Vector2D start, Coord target, const double radius, const bool positive, const double max_power, const bool angle_relative_to_arc, const double min_angle_percent, const double min_x_line_percent, const bool brake = true);
 
-const int min_power_a = 18;
-const int min_power_x = 35;
-const int min_power_y = 12;
+const int min_power_a = 23;
+const int min_power_x = 40;
+const int min_power_y = 17;
 
 
 // extern bool lineup_first_default;

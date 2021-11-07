@@ -88,14 +88,35 @@ void autonomous() {
  * task, not resume it from where it left off.
  */
 void opcontrol() {
+	move_on_arc({0.0, 0.0}, {-10.0, 10.0, 0.0}, 10.0, true, 127, true, 50, 30, true);
 	// move_on_arc(const Vector2D start, Coord target, const double radius, const bool positive, const double max_power, const bool angle_relative_to_arc, const double min_angle_percent, const double min_x_line_percent, const bool brake = true);
-	double error;
-	while(true){
-			error = M_PI - tracking.global_angle;
-			drivebase.move(0, 0, fabs(error * 75) < 20 ? 20 : sgn(error) * error * 75);
-			printf("%lf\n", rad_to_deg(error));
-		delay(10);
-	}
+	// double error, target = 40.0, kp = 30.0, min_power_y = 40;
+	// Timer pid_timer{"pid_timer"};
+	// pid_timer.print();
+	// while(true){
+	//
+	// 	error = target - tracking.x_coord;
+	// 	tracking.power_y = kp * error;
+	//
+	// 	if (fabs(tracking.power_y) < min_power_a) tracking.power_y = sgn(error) * min_power_y;
+	//
+	// 	drivebase.move(tracking.power_y, 0, 0);
+	//
+	// 	printf("cur_x: %lf, error: %lf, power_a: %lf\n", tracking.x_coord, error, tracking.power_y);
+	//
+	// 	if(error < 0.5)	break;
+	// 		// drivebase.move(0, 17, 0);
+	// 	delay(10);
+	// }
+	// // drivebase.move(0, 0, 0);
+	// drivebase.brake();
+	// printf("DONE.");
+	// pid_timer.print();
+	// while(true){
+	// 	printf("cur_x: %lf, error: %lf, power_a: %lf\n", tracking.x_coord, error, tracking.power_y);
+	// 	delay(10);
+	// }
+
 	// move_on_arc({0.0, 0.0}, {-10.0, 10.0, 0.0}, 10.0, true, 127.0, true, 0.9, 0.0, true);
 
 

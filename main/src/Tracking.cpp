@@ -427,7 +427,7 @@ void rush_goal2(double target_x, double target_y, double target_a){
 }
 
 void move_on_arc(const Vector2D start, Coord target, const double radius, const bool positive, const double max_power, const bool angle_relative_to_arc, const double min_angle_percent, const double min_x_line_percent, const bool brake){
-  Coord error, kp = Coord(20.0, 7.0, 50.0);
+  Coord error, kp = Coord(30.0, 12.0, 180.0);
 
   target.angle = deg_to_rad(target.angle);
   // variable 'd' in diagram
@@ -576,7 +576,7 @@ void move_on_arc(const Vector2D start, Coord target, const double radius, const 
 
         tracking.power_x = arc_x_local_x_power + arc_y_local_x_power;
         tracking.power_y = arc_x_local_y_power + arc_y_local_y_power;
-        */
+      
         // end of move on arc stuff
 
         // return power_a;
