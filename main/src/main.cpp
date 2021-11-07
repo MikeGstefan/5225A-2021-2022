@@ -1,15 +1,9 @@
-#include "main.h"
-#include "logging.hpp"
-#include "config.hpp"
-#include "util.hpp"
-#include "Tracking.hpp"
-#include "lift.hpp"
 #include "drive.hpp"
 #include "gui.hpp"
-
-// using namespace std;
-// using namespace pros;
-
+#include "lift.hpp"
+#include "logging.hpp"
+#include "Tracking.hpp"
+#include "util.hpp"
 
 /**
  * Runs initialization code. This occurs as soon as the program is started.
@@ -19,13 +13,14 @@
  */
 void initialize() {
 	drivebase.download_curve_data();
-	// logging_task_start();
 	Data::log_init();
 
 	delay(150);
 	tracking.x_coord = 0.0, tracking.y_coord = 0.0, tracking.global_angle = 0.0;
 	updateStartTask();
 	guiSetup();
+	WAIT_FOR_SCREEN_REFRESH();
+	master.print(2, 0, "Driver: %s", drivebase.drivers[drivebase.cur_driver].name);
 }
 
 /**
@@ -76,15 +71,11 @@ void autonomous() {}
 int ring_count = 0; //Get rid of this once merged
 
 void opcontrol() {
-	// Reset tracking by stopping task
-	//Go button sequence. Create a button that will wait until pressed, then run the task. Used to verify the user is out of the way.
-	//Try getting rid of the != 0 in alignedcoords
-	master.print(2, 0, "Driver: %s", drivebase.drivers[drivebase.cur_driver].name);
+	//Reset tracking by stopping task
 
 	while(true){
 		guiBackground();
 		drivebase.handle_input();
-
 
 		if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_B)){ //Update expo util
 			drivebase.update_lookup_table_util();

@@ -1,12 +1,6 @@
 #pragma once
-#include "main.h"
-#include "config.hpp"
-#include "util.hpp"
 #include "drive.hpp"
-#include <iostream>
-#include <cmath>
-#include <memory>
-#include <vector>
+#include "util.hpp"
 
 // extern Task *updateTask = nullptr;
 extern Task *moveTask;

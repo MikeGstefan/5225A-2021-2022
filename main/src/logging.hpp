@@ -1,13 +1,7 @@
 #pragma once
 #include "util.hpp"
-#include "timer.hpp"
-#include <iostream>
-#include <vector>
-#include <string>
 #include <cstdarg>
-#include <array>
 #include <fstream>
-#include "main.h"
 
 extern Task *printing;
 enum log_types{

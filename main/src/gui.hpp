@@ -1,15 +1,12 @@
 #pragma once
-#include <vector>
-#include <string>
-#include "main.h"
-#include "config.hpp"
 #include "drive.hpp"
-#include "tracking.hpp"
+#include "Tracking.hpp"
+#include "util.hpp"
 
 #define ORANGE 0x00F36421
 #define GREY 0x00202020
 
-#define PAGE_COUNT 10
+#define PAGE_COUNT 11
 #define PAGE_LEFT 0
 #define PAGE_UP 0
 #define PAGE_RIGHT 480
@@ -87,7 +84,7 @@ class Page{
 
 class Button{
   friend class Page;
-  public: enum press_type{
+  public: enum pressType{
       SINGLE,
       LATCH,
       HOLD
@@ -98,9 +95,8 @@ class Button{
     std::uint32_t lcol, bcol, dark_bcol;
     std::string label, label1="";
     int16_t x1, y1, x2, y2, text_x, text_y, text_x1, text_y1;
-    // void (*funcPtr)(); //This is a var because it is a pointer to a void function, not a void function in itself
     bool lastPressed=0;
-    press_type form;
+    pressType form;
 
     //For latch buttons
     bool latched=0;
@@ -114,9 +110,9 @@ class Button{
   public:
     //Constructor
     //Points, Format, Page, Label, Bcolor, Lcolor
-    Button (int16_t, int16_t, int16_t, int16_t, Style, press_type, Page*, std::string = "", std::uint32_t = ORANGE, std::uint32_t = COLOR_BLACK);
+    Button (int16_t, int16_t, int16_t, int16_t, Style, pressType, Page*, std::string = "", std::uint32_t = ORANGE, std::uint32_t = COLOR_BLACK);
     Button (){};
-    void construct (int16_t, int16_t, int16_t, int16_t, Style, press_type, Page*, std::string, std::uint32_t, std::uint32_t);
+    void construct (int16_t, int16_t, int16_t, int16_t, Style, pressType, Page*, std::string, std::uint32_t, std::uint32_t);
 
     //Vars
     Page* page;
@@ -152,7 +148,7 @@ class Slider{
 
   public:
     //Points, Format, Min, Max, Page, Label, Bcolor, Lcolor
-    Slider (int16_t, int16_t, int16_t, int16_t, Style, direction, int, int, Page*, std::string = "", std::uint32_t = COLOR_WHITE, std::uint32_t = COLOR_YELLOW);
+    Slider (int16_t, int16_t, int16_t, int16_t, Style, direction, int, int, Page*, std::string = "", std::uint32_t = COLOR_WHITE, std::uint32_t = ORANGE);
 
     //Vars
     Page* page;

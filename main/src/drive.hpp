@@ -1,13 +1,6 @@
 #pragma once
-#include "main.h"
-#include "config.hpp"
-#include "util.hpp"
 #include "Tracking.hpp"
-#include <iostream>
-#include <cmath>
-#include <memory>
-#include <vector>
-#include <array>
+#include "util.hpp"
 
 // aliases to make code more readable, used to encode vales of drive.cur_driver
 // enum class drivers{Nikhil = 0, Emily = 1, Sarah = 2};
