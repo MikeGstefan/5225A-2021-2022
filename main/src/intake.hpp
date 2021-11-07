@@ -30,6 +30,7 @@ public:
   void Intake_brake(int time);
   void Intake_Setup();
   void StartInTask();
+  void MoveTo(double speed, double pos);
 
 };
 void Reset();

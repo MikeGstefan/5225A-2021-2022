@@ -13,7 +13,6 @@
 void initialize() {
 	delay(150);
 	guiSetup();
-	intk.set_brake_mode(E_MOTOR_BRAKE_HOLD);
 }
 
 void disabled() {}
@@ -28,6 +27,7 @@ void opcontrol() {
 	Page::goTo(&intkTest);
 	intake.StartInTask();
 	while(true){
+		//printf("Pos: %f\n", intk.get_position());
 		guiBackground();
 		delay(50);
 	}
