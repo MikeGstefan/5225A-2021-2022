@@ -69,9 +69,11 @@ void autonomous() {}
  */
 
 int ring_count = 0; //Get rid of this once merged
+double cur_auton = 1;
 
 void opcontrol() {
 	//Reset tracking by stopping task
+	//remove perm. make left and right members of page.
 
 	while(true){
 		guiBackground();

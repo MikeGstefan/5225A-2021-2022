@@ -37,7 +37,8 @@ enum class Style{ //how the rect coords get evaluated
 };
 
 extern int ring_count; //For gui.cpp to use
-extern Page testing;
+extern double cur_auton;
+extern Page testing; //For use in opcontrol
 
 void guiSetup(), guiBackground();
 void alignedCoords (int x_objects, int y_objects, int x_btn, int y_btn, int x_range = 480, int y_range = 220);
@@ -56,6 +57,7 @@ class Page{
     static int16_t x, y;
     std::uint32_t bcol;
     std::string title;
+    // Button prev, next;
 
   public:
     //Page num, Title, Bcolor
@@ -87,7 +89,8 @@ class Button{
   public: enum pressType{
       SINGLE,
       LATCH,
-      HOLD
+      REPEAT,
+      TOGGLE
     };
 
   private:
@@ -99,7 +102,7 @@ class Button{
     pressType form;
 
     //For latch buttons
-    bool latched=0;
+    bool latched=0, on=0; //on is for toggle
     std::vector<Button*> options;
 
     //Functions
@@ -116,7 +119,7 @@ class Button{
 
     //Vars
     Page* page;
-    std::function <void()> func;
+    std::function <void()> func, toggleOff_func; //toggle is only for toggle type buttons
 
     //Functions
     static Button* update();
@@ -148,7 +151,7 @@ class Slider{
 
   public:
     //Points, Format, Min, Max, Page, Label, Bcolor, Lcolor
-    Slider (int16_t, int16_t, int16_t, int16_t, Style, direction, int, int, Page*, std::string = "", std::uint32_t = COLOR_WHITE, std::uint32_t = ORANGE);
+    Slider (int16_t, int16_t, int16_t, int16_t, Style, direction, int, int, Page*, std::string = "Value", std::uint32_t = COLOR_WHITE, std::uint32_t = ORANGE);
 
     //Vars
     Page* page;

@@ -22,7 +22,7 @@ Button nextPage(480, 0, -75, 20, Style::SIZE, Button::SINGLE, &perm, "->");
 
 Page driverCurve (1, "Drivers"); //Select a driver and their exp curve
 Button prevDrivr(30, 70, 100, 120, Style::SIZE, Button::SINGLE, &driverCurve, "Prev Driver");
-Text drivrName(MID_X, MID_Y, Style::CENTRE, TEXT_LARGE, &driverCurve, "[Name]", COLOR_WHITE); //[Driver Name] should never show up, since it is instantly overwritten by the actual name
+Text drivrName(MID_X, MID_Y, Style::CENTRE, TEXT_LARGE, &driverCurve, "[Name]", COLOR_WHITE); //[Name] should never show up, since it is instantly overwritten by the actual name
 Button nextDrivr(350, 70, 100, 120, Style::SIZE, Button::SINGLE, &driverCurve, "Next Driver");
 
 Page temps (2, "Temperature"); //Motor temps
@@ -36,9 +36,10 @@ Text tempi(295, 175, Style::CENTRE, TEXT_SMALL, &temps, " I: %.0fC", &std::get<3
 Text tempu(405, 175, Style::CENTRE, TEXT_SMALL, &temps, " U: %.0fC", &std::get<3>(motors[7]), COLOR_BLACK);
 
 Page autoSel (3, "Auton"); //Select auton routes
-Button route1 (45, 90, 100, 80, Style::SIZE, Button::LATCH, &autoSel, "Route 1");
-Button route2 (190, 90, 100, 80, Style::SIZE, Button::LATCH, &autoSel, "Route 2");
-Button route3 (335, 90, 100, 80, Style::SIZE, Button::LATCH, &autoSel, "Route 3");
+Text route (MID_X, 60, Style::CENTRE, TEXT_LARGE, &autoSel, " Auton %.0f", &cur_auton);
+Button route1 (45, 90, 100, 80, Style::SIZE, Button::TOGGLE, &autoSel, "Route 1");
+Button route2 (190, 90, 100, 80, Style::SIZE, Button::TOGGLE, &autoSel, "Route 2");
+Button route3 (335, 90, 100, 80, Style::SIZE, Button::TOGGLE, &autoSel, "Route 3");
 
 Page track (4, "Tracking"); //Display tracking vals and reset btns
 Text trackX(50, 45, Style::CENTRE, TEXT_SMALL, &track, "X:%.1f", &tracking.x_coord);
@@ -57,7 +58,7 @@ Button goHome(320, 110, 150, 40, Style::SIZE, Button::SINGLE, &moving, "Home");
 Button goCentre(320, 175, 150, 40, Style::SIZE, Button::SINGLE, &moving, "Centre");
 
 Page intkTest (6, "Intake"); //Test for intake with rings
-Text rings(MID_X, 50, Style::CENTRE, TEXT_SMALL, &intkTest, "Ring Count: %.0f", &ringCount);
+Text rings(MID_X, 50, Style::CENTRE, TEXT_LARGE, &intkTest, "Ring Count: %.0f", &ringCount);
 Button resI (30, 90, 120, 80, Style::SIZE, Button::SINGLE, &intkTest, "Reset Motor");
 Button onOff (180, 90, 120, 80, Style::SIZE, Button::SINGLE, &intkTest, "Start/Stop");
 Button resRings (330, 90, 120, 80, Style::SIZE, Button::SINGLE, &intkTest, "Reset Ring Count");
@@ -96,10 +97,10 @@ Text testing_text_1 (125, 50, Style::CENTRE, TEXT_SMALL, &testing, "BLANK TEXT 1
 Text testing_text_2 (350, 50, Style::CENTRE, TEXT_SMALL, &testing, "BLANK TEXT 2");
 Button testing_button_1 (25, 70, 200, 80, Style::SIZE, Button::SINGLE, &testing, "BLANK BUTTON 1");
 Button testing_button_2 (250, 70, 200, 80, Style::SIZE, Button::SINGLE, &testing, "BLANK BUTTON 2");
-Slider testing_slider (MID_X, 200, 200 , 20, Style::CENTRE, Slider::HORIZONTAL, -3, 3, &testing, "BLANK SLIDER");
+Slider testing_slider (MID_X, 200, 200 , 20, Style::CENTRE, Slider::HORIZONTAL, -100, 100, &testing, "BLANK SLIDER");
 
 Page goSequence (PAGE_COUNT+1, "GO SEQUENCE");
-Button goButton (MID_X, MID_Y, 180, 100, Style::CENTRE, Button::HOLD, &goSequence, "CONTINUE");
+Button goButton (MID_X, MID_Y, 180, 100, Style::CENTRE, Button::SINGLE, &goSequence, "CONTINUE");
 
 //Functions
 void Page::toPrev(){
@@ -223,10 +224,14 @@ void tuningTurns(){
 }
 
 void guiSetup(){ //Call once at start in initialize()
-  prevPage.func = &(Page::toPrev); //Gives the left and right buttons their functions
-  nextPage.func = &(Page::toNext); //Same thing for all following buttons
+  prevPage.func = &Page::toPrev; //Gives the left and right buttons their functions
+  nextPage.func = &Page::toNext; //Same thing for all following buttons
 
   runElastic.func = &elasticUtil;
+
+  route1.func = [&auton=cur_auton](){auton = 1;};
+  route2.func = [&auton=cur_auton](){auton = 2;};
+  route3.func = [&auton=cur_auton](){auton = 3;};
 
   resX.func = &resetX;
   resY.func = &resetY;
@@ -364,7 +369,7 @@ void Text::construct (int16_t pt1, int16_t pt2, Style type, text_format_e_t size
   lcol = label_color;
 
   setTitle(pt1, pt2, type, text); //Formats title with proper spacing, color, and size
-  (page->texts).push_back(this);
+  page->texts.push_back(this);
 }
 
 void Button::construct(int16_t pt1, int16_t pt2, int16_t pt3, int16_t pt4, Style type, pressType prType, Page* page_ptr, std::string text, std::uint32_t background_color, std::uint32_t label_color){
@@ -380,7 +385,7 @@ void Button::construct(int16_t pt1, int16_t pt2, int16_t pt3, int16_t pt4, Style
     (page->buttons).push_back(this);
     std::tie(x1, y1, x2, y2) = fixPoints(pt1, pt2, pt3, pt4, type);
 
-    if (8*text.length() < x2-x1){
+    if (8*text.length()+5 < x2-x1){
       text_x = (x1+x2-(text.length()*CHAR_WIDTH_SMALL))/2;
       text_y = (y1+y2-CHAR_HEIGHT_SMALL)/2;
       label = text;
@@ -455,6 +460,8 @@ Page::Page(int page_number, std::string name, std::uint32_t background_color){
 
   buttons.push_back(&prevPage);
   buttons.push_back(&nextPage);
+  // prev.construct(0, 0, 75, 20, Style::SIZE, Button::SINGLE, this, "<-");
+  // next.construct(480, 0, -75, 20, Style::SIZE, Button::SINGLE, this, "->");
 }
 
 //Methods
@@ -550,7 +557,7 @@ void Slider::draw(){
   if(dir == HORIZONTAL){
     screen::fill_rect(x1+1, y1+1, x1+(x2-x1)*(val-min)/(max-min), y2-1); //Draws bar upto its value
     screen::print(TEXT_SMALL, x1, text_y, "%d", min);
-    screen::print(TEXT_SMALL, x2, text_y, "%d", max);
+    screen::print(TEXT_SMALL, x2-CHAR_WIDTH_SMALL*std::to_string(max).length(), text_y, "%d", max);
     screen::print(TEXT_SMALL, text_x, text_y, "%s:%.f", label.c_str(), val);
   }
   else{
@@ -623,9 +630,16 @@ void Button::del(){ //Not really used
 }
 
 void Button::createOptions(std::vector<Button*> buttons){
-  for (std::vector <Button*>::iterator it = buttons.begin(); it != buttons.end(); it++){
-    if ((*it)->form != LATCH) printf("Option Feature is only available for latch buttons!\n");
-    (*it)->options = buttons;
+  std::vector<Button*>::iterator it, it2; //For clarity
+
+  for (it = buttons.begin(); it != buttons.end(); it++){
+    if ((*it)->form != LATCH && (*it)->form != TOGGLE) {printf("Option Feature is only available for latch and toggle buttons!\n"); return;}
+  }
+
+  for (it = buttons.begin(); it != buttons.end(); it++){//For each button in the list
+    for (it2 = buttons.begin(); it2 != buttons.end(); it2++){//Go through the list and save each button
+      if (*it != *it2) (*it)->options.push_back(*it2);
+    }
   }
 }
 
@@ -707,7 +721,7 @@ Button* Button::update(){
   for (std::vector <Button*>::iterator it = (Page::currentPage->buttons).begin(); it != (Page::currentPage->buttons).end(); it++){
     Button* btn_id = *it;
 
-    if (btn_id->form == Button::SINGLE){
+    if (btn_id->form == Button::SINGLE){ //Runs once when pressed
       if (btn_id->newPress()){
         btn_id->lastPressed = 1;
         btn_id->drawPressed();
@@ -721,35 +735,35 @@ Button* Button::update(){
       }
     }
 
-    else if (btn_id->form == Button::LATCH){
+    else if (btn_id->form == Button::LATCH){ //Runs while latched
       if (btn_id->newPress()){
         btn_id->lastPressed = 1;
-        btn_id->latched = !(btn_id->latched); //Toggles the latch
+        btn_id->latched = !btn_id->latched; //Toggles the latch
 
         //Draws button's new state
         if(btn_id->latched){
-          btn_id->drawPressed();
-          //If radio button
+          //Deselects connected buttons
           for (std::vector <Button*>::iterator option_it = (btn_id->options).begin(); option_it != (btn_id->options).end(); option_it++){
-            if ((*option_it) != btn_id){
-              (*option_it)->latched = 0;
-              (*option_it)->draw();
-            }
+            (*option_it)->latched = 0;
+            (*option_it)->draw();
           }
+
+          btn_id->drawPressed();
           btn_id->runTask();
 
         }
-        else btn_id->draw(); //Newly unpressed
+        else btn_id->draw(); //New press deselected it
         return btn_id;
       }
 
       else if (btn_id->newRelease()){
         btn_id->lastPressed = 0;
       }
+      if(btn_id->latched) btn_id->runTask();
 
     }
 
-    else if (btn_id->form == Button::HOLD){ //Keeps running while pressed. Not blocking
+    else if (btn_id->form == Button::REPEAT){ //Keeps running while pressed. Not blocking
       if (btn_id->newPress()){
         btn_id->lastPressed = 1;
         btn_id->drawPressed();
@@ -757,12 +771,40 @@ Button* Button::update(){
         return btn_id;
       }
 
+      else if (btn_id->newRelease()){
+        btn_id->lastPressed = 0;
+        btn_id->draw();
+      }
+
       if (btn_id->pressed()) btn_id->runTask();
+    }
+
+    else if (btn_id->form == Button::TOGGLE){ //Runs once when turned on
+      if (btn_id->newPress()){
+        btn_id->lastPressed = 1;
+        btn_id->on = !btn_id->on;
+
+        //Draws button's new state
+        if(btn_id->on){ //Just turned on
+          //Turns off connected buttons
+          for (std::vector <Button*>::iterator option_it = (btn_id->options).begin(); option_it != (btn_id->options).end(); option_it++){
+            if ((*option_it)->on){ //If the other button is in the on state and has an off function
+              (*option_it)->on = false;
+              if ((*option_it)->toggleOff_func) (*option_it)->toggleOff_func();
+            }
+          }
+
+          btn_id->runTask();
+        }
+        else if (btn_id->toggleOff_func) btn_id->toggleOff_func(); //Just turned off
+
+        btn_id->drawPressed();
+        return btn_id;
+      }
 
       else if (btn_id->newRelease()){
         btn_id->lastPressed = 0;
         btn_id->draw();
-        //end the task
       }
     }
 
