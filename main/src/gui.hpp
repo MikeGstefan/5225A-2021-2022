@@ -2,6 +2,7 @@
 #include "drive.hpp"
 #include "Tracking.hpp"
 #include "util.hpp"
+#include <bitset>
 
 #define ORANGE 0x00F36421
 #define GREY 0x00202020
@@ -99,7 +100,7 @@ class Button{
     std::string label, label1="";
     int16_t x1, y1, x2, y2, text_x, text_y, text_x1, text_y1;
     bool lastPressed=0;
-    pressType form;
+    pressType form; //What type of button
 
     //For latch buttons
     bool latched=0, on=0; //on is for toggle

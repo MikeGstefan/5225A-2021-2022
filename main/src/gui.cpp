@@ -4,6 +4,7 @@
 Timer Flash("Flash Timer", false);
 std::array<std::tuple<Motor*, Text*, std::string, double>, 8> motors; //holds motor info for temperature checking
 std::uint32_t flash_end = std::numeric_limits<std::uint32_t>::max(); //Sets the flash's end time to max possible val
+std::vector<std::bitset<200>> field;
 
 //Var init for text monitoring
 double ringCount, angle, elasticUpTime, elasticDownTime;
@@ -241,10 +242,17 @@ void guiSetup(){ //Call once at start in initialize()
     screen::draw_rect(270, 30, 470, 230);
     screen::draw_line(370, 30, 370, 230);
     screen::draw_line(270, 130, 470, 130);
+    for (int x = 0; x<200; x++){
+      for (int y = 0; y<200; y++){
+        if(field[x][y]) screen::draw_pixel(270+x, 230-y);
+      }
+    }
   };
   track.loopFunc = [](){
     screen::set_pen(COLOR_RED);
-    screen::draw_pixel(270+(200*tracking.x_coord/144), 230-(200*tracking.y_coord/144)); //Scales to screen
+    int x = 200*tracking.x_coord/144, y = 200*tracking.y_coord/144;
+    screen::draw_pixel(270+x, 230-y); //Scales to screen
+    field[x].set(y); //Sets position (x,y) to true
   };
 
   goToXYA.func = [&x=xVal.val, &y=yVal.val, &a=aVal.val](){printf("GO BUTTON\n"); move_to_target_sync(x, y, a, false);};
@@ -523,7 +531,7 @@ void Text::setBackground (int16_t pt1, int16_t pt2, int16_t pt3, int16_t pt4, St
 void Text::setBackground (std::uint32_t colour){
     std::uint32_t prevCol = bcol;
     bcol = colour;
-    if (prevCol != bcol && page == Page::currentPage) draw();
+    if (prevCol != bcol && page == Page::currentPage) draw(); //Only redraws if color has changed
 }
 
 void Text::draw(){

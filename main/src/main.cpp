@@ -74,6 +74,7 @@ double cur_auton = 1;
 void opcontrol() {
 	//Reset tracking by stopping task
 	//remove perm. make left and right members of page.
+	//erase only bar with slider
 
 	while(true){
 		guiBackground();
