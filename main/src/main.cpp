@@ -88,7 +88,13 @@ void autonomous() {
  * task, not resume it from where it left off.
  */
 void opcontrol() {
-	move_on_arc({0.0, 0.0}, {10.0, 10.0, 0.0}, 10.0, true, 127, true, 0.0, 0.0, true);
+	Timer move = {"move"};
+	printf("START\n");
+	move.print();
+	tank_move_to_target({0.0, 20.0, 50.0}, true);
+	move.print();
+	printf("DONE\n");
+	// move_on_arc({0.0, 0.0}, {10.0, 10.0, 0.0}, 10.0, true, 127, true, 0.0, 0.0, true);
 	// move_on_arc(const Vector2D start, Coord target, const double radius, const bool positive, const double max_power, const bool angle_relative_to_arc, const double min_angle_percent, const double min_x_line_percent, const bool brake = true);
 	// double error, target = 40.0, kp = 30.0, min_power_y = 40;
 	// Timer pid_timer{"pid_timer"};

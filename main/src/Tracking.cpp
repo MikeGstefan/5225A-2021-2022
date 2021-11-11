@@ -615,3 +615,108 @@ void move_on_arc(const Vector2D start, Coord target, const double radius, const 
     delay(10);
   }
 }
+
+// TANK MOVE ALGORITHMS
+
+void tank_move_to_target(const Coord target, const bool turn_dir_if_0, const double max_power, const double min_angle_percent, const bool brake){
+    // Coord tracking = {0.0, 0.0, deg_to_rad(10.0)};
+    Vector2D local_error;
+    Coord error;
+
+    double total_power, max_power_scale;
+    int sgn_local_error_y;
+    double difference_a;
+    double hypotenuse;
+
+    double kp_y = 9.0, kp_a = 150.0;
+    // printf("Local errors | x: %lf, y: %lf \n", local_error.x, local_error.y);
+    double min_power_a = max_power * min_angle_percent;
+    double pre_scaled_power_a;
+    double end_error = 0.5;
+
+  // OVERSHOOT variables
+    double cur_point_angle, orig_point_angle = atan2(target.x - tracking.x_coord, target.x - tracking.x_coord);
+    bool quad_3_4;
+    double  orig_pos_angle, cur_pos_angle;
+    int orig_pos_sgn = sgn(orig_pos_angle), cur_pos_sgn;
+    if (fabs(orig_pos_angle) > M_PI/2) quad_3_4 = true;
+    else quad_3_4 = false;
+
+    while(true){
+      difference_a = tracking.global_angle + atan2(target.y - tracking.y_coord, target.x - tracking.x_coord);
+      hypotenuse = sqrt(pow(target.x - tracking.x_coord, 2.0) + pow(target.y - tracking.y_coord, 2.0));
+
+      // local_error.x = cos(difference_a) * hypotenuse; // unused
+
+      sgn_local_error_y = sgn(local_error.y);
+      printf("sgn_y: %d\n", sgn_local_error_y);
+      if(sgn_local_error_y == 0){
+        sgn_local_error_y = turn_dir_if_0 ? 1 : -1;
+        printf("triggered\n");
+      }
+      local_error.y = sin(difference_a) * hypotenuse;
+      error.angle = near_angle(sgn_local_error_y * M_PI / 2, difference_a);
+      printf("Errors | y: %lf, a: %lf\n", local_error.y, rad_to_deg(error.angle));
+
+      tracking.power_y = kp_y * local_error.y;
+      tracking.power_a = kp_a * error.angle;
+
+      // gives min power to local y if that is not satisfied
+      if (fabs(tracking.power_y) < min_power_y && fabs(local_error.y) > 0.5) tracking.power_y = min_power_y * sgn(local_error.y);
+
+      // scales powers
+      total_power = fabs(tracking.power_y) + fabs(tracking.power_a);
+      if (total_power > max_power){
+        // init variables
+
+        pre_scaled_power_a = tracking.power_a;
+
+        // end of init variables
+
+        max_power_scale = max_power / total_power;
+        tracking.power_y *= max_power_scale;
+        tracking.power_a *= max_power_scale;
+
+
+    // start of angle power guarantee
+
+
+        if (fabs(pre_scaled_power_a) > min_power_a){
+            if (fabs(tracking.power_a) < min_power_a)  tracking.power_a = min_power_a * sgn(tracking.power_a);  // power_a has been overshadowed
+        }
+        // angle gets the power it demanded if pre_scaled power_a was also less than min_power_a
+        else    tracking.power_a = pre_scaled_power_a;
+        tracking.power_y = sgn(local_error.y) * (max_power - fabs(tracking.power_a));
+        printf("****power_a: %lf, x:%lf, y: %lf, pre_scaled: %lf, min: %lf\n", tracking.power_a, tracking.power_x , tracking.power_y, pre_scaled_power_a, min_power_a);
+        // end of angle power guarantee
+
+      }
+      printf("Powers | y: %lf, a: %lf\n",tracking.power_y, tracking.power_a);
+      printf("time: %d, TRACKING: %f, %f, %f \n\n", millis(), tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle));
+
+      error.x = target.x - tracking.x_coord;
+      error.y = target.y - tracking.y_coord;
+
+      cur_point_angle = atan2(error.x, error.y);
+      cur_pos_sgn = sgn(cur_pos_angle);
+      if (quad_3_4 && cur_pos_sgn != orig_pos_sgn)   cur_pos_angle += orig_pos_sgn * (M_PI * 2); printf("trg\n");
+
+      if((fabs(target.x - tracking.x_coord) < end_error && fabs(target.y - tracking.y_coord) < end_error) || fabs(orig_point_angle - cur_point_angle) > M_PI/2){
+        if (brake) drivebase.brake();
+        tracking.move_complete = true;
+        printf("Ending move to target X: %f Y: %f A: %f at X: %f Y: %f A: %f \n", target.x, target.y, target.angle, tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle));
+        //log_time("ending starting time: %d, delta time: %d X: %f Y: %f A: %f from X: %f Y: %f A: %f \n", millis(),millis() -starttime, target_x, target_y, target_a, tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle));
+        // tracking.move_stop_task();
+        return;
+      }
+
+      if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_B)){
+        drivebase.brake();
+         return;
+      }
+      drivebase.move_tank(tracking.power_y, tracking.power_a);
+
+      delay(10);
+    }
+
+}
