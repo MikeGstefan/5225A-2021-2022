@@ -45,14 +45,15 @@ void Data::log_init(){
   if(!file.is_open()){
     printf("Log File not found\n");
     for(int i = 0; i< Data::obj_list.size(); i++){
-      if(Data::obj_list[i]->log_location == log_locations::sd && int(Data::obj_list[i]->log_type))Data::obj_list[i]->log_location = log_locations::t;
+      if(Data::obj_list[i]->log_location == log_locations::sd && int(Data::obj_list[i]->log_type) ==1)Data::obj_list[i]->log_location = log_locations::t;
+      if(int(Data::obj_list[i]->log_type) ==2)Data::obj_list[i]->log_type = off;
     }
     return;
   }
   else{
     char meta_data[256];
     for(int i = 0; i< Data::obj_list.size(); i++){
-      if((Data::obj_list[i]->log_location == log_locations::sd || Data::obj_list[i]->log_location == log_locations::both) && int(Data::obj_list[i]->log_type)){
+      if((Data::obj_list[i]->log_location == log_locations::sd || Data::obj_list[i]->log_location == log_locations::both) && int(Data::obj_list[i]->log_type) !=0){
         strcat(meta_data,Data::obj_list[i]->name);
         strcat(meta_data,",");
         strcat(meta_data,Data::obj_list[i]->id);
@@ -76,7 +77,7 @@ void Data::print(const char* format,...){
   int buffer_len = vsnprintf(buffer,256,format,args) + 3;
   va_end(args);
   // printf("%s, %d\n",this->name,this->log_type);
-  if(int(this->log_type)){
+  if(int(this->log_type) !=0){
     switch(log_location){
       case log_locations::t:
         printf("%s",buffer);
