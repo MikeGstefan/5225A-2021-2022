@@ -19,9 +19,10 @@
  * All other competition modes are blocked by initialize; it is recommended
  * to keep execution time for this mode under a few seconds.
  */
+
+
 void initialize() {
-	// drivebase.download_curve_data();
-	// logging_task_start();
+	drivebase.download_curve_data();
 	Data::log_init();
 	Controller_::init();
 	delay(150);
