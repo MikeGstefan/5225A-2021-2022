@@ -4,7 +4,8 @@
 Timer Flash("Flash Timer", false);
 std::array<std::tuple<Motor*, Text*, std::string, double>, 8> motors; //holds motor info for temperature checking
 std::uint32_t flash_end = std::numeric_limits<std::uint32_t>::max(); //Sets the flash's end time to max possible val
-std::vector<std::bitset<200>> field;
+std::vector<std::bitset<200>> field (0);
+std::array<std::bitset<200>, 200> blah;
 
 //Var init for text monitoring
 double ringCount, angle, elasticUpTime, elasticDownTime;
@@ -225,6 +226,8 @@ void tuningTurns(){
 }
 
 void guiSetup(){ //Call once at start in initialize()
+  field.reserve(200); //Makes sure the field vector is at least 200 big. DO NOT DELETE
+
   prevPage.func = &Page::toPrev; //Gives the left and right buttons their functions
   nextPage.func = &Page::toNext; //Same thing for all following buttons
 
@@ -244,7 +247,7 @@ void guiSetup(){ //Call once at start in initialize()
     screen::draw_line(270, 130, 470, 130);
     for (int x = 0; x<200; x++){
       for (int y = 0; y<200; y++){
-        if(field[x][y]) screen::draw_pixel(270+x, 230-y);
+        if(field[x].test(y)) screen::draw_pixel(270+x, 230-y); //Draws saved tracking values
       }
     }
   };
@@ -252,7 +255,7 @@ void guiSetup(){ //Call once at start in initialize()
     screen::set_pen(COLOR_RED);
     int x = 200*tracking.x_coord/144, y = 200*tracking.y_coord/144;
     screen::draw_pixel(270+x, 230-y); //Scales to screen
-    field[x].set(y); //Sets position (x,y) to true
+    field[x].set(y); //Saves position (x,y) to as tracked
   };
 
   goToXYA.func = [&x=xVal.val, &y=yVal.val, &a=aVal.val](){printf("GO BUTTON\n"); move_to_target_sync(x, y, a, false);};
