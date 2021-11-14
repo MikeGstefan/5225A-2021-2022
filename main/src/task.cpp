@@ -1,6 +1,6 @@
 #include "task.hpp"
 
-Tasks::Tasks(pros::task_fn_t function, const char* name, void* params, std::uint32_t prio, std::uint16_t stack_depth){
+_Task::_Task(pros::task_fn_t function, const char* name, void* params, std::uint32_t prio, std::uint16_t stack_depth){
   this->function = function;
   this->name = name;
   this->params = std::make_tuple(this,params);
@@ -8,27 +8,27 @@ Tasks::Tasks(pros::task_fn_t function, const char* name, void* params, std::uint
   this->stack_depth = stack_depth;
 }
 
-Tasks::~Tasks(){
+_Task::~_Task(){
   task_log.print("%d| %s entered deconstructor\n",millis(), this->name);
   this->kill();
 }
 
-Tasks* Tasks::get_obj(void* params){
-  //gets the Tasks class pointer out of tuple passed as void*
-  return std::get<0>(*(std::tuple<Tasks*, void*>*)(params));
+_Task* _Task::get_obj(void* params){
+  //gets the _Task class pointer out of tuple passed as void*
+  return std::get<0>(*(std::tuple<_Task*, void*>*)(params));
 }
 
-void* Tasks::get_params(void* params){
+void* _Task::get_params(void* params){
   //gets void* params from the tuple
-  return std::get<1>(*(std::tuple<Tasks*, void*>*)(params));
+  return std::get<1>(*(std::tuple<_Task*, void*>*)(params));
 }
 
 
-pros::Task* Tasks::get_task_ptr()const{
+pros::Task* _Task::get_task_ptr()const{
   return this->task_ptr;
 }
 
-void Tasks::start(void* params){
+void _Task::start(void* params){
    task_log.print("%d| %s starting\n", millis(), this->name);
    if(this->task_ptr != NULL){
      task_log.print("%d| %s was already started\n", millis(), this->name);
@@ -39,7 +39,7 @@ void Tasks::start(void* params){
    task_log.print("%d| %s started\n", millis(), this->name);
 }
 
-void Tasks::kill(){
+void _Task::kill(){
   if(this->task_ptr != NULL){
     task_log.print("%d| %s killing\n", millis(), this->name);
     this->task_ptr->notify_ext((int)stop, E_NOTIFY_ACTION_OWRITE,NULL);
@@ -53,7 +53,7 @@ void Tasks::kill(){
   }
 }
 
-bool Tasks::notify_handle(){
+bool _Task::notify_handle(){
   switch((notify_types)this->task_ptr->notify_take(1,0)){
     case stop:
       return true;
@@ -69,7 +69,7 @@ bool Tasks::notify_handle(){
   return false;
 }
 
-bool Tasks::data_update(){
+bool _Task::data_update(){
   if(this->task_ptr->get_state() >=3)return false;
   task_log.print("%d| %s pausing for data\n", millis(), this->name);
   this->task_ptr->notify_ext((int)reset, E_NOTIFY_ACTION_OWRITE,NULL);
@@ -77,7 +77,7 @@ bool Tasks::data_update(){
   return true;
 }
 
-bool Tasks::done_update(){
+bool _Task::done_update(){
   if(this->task_ptr->get_state() !=3)return false;
   this->task_ptr->resume();
   task_log.print("%d| %s done data update, resuming\n", millis(), this->name);
@@ -86,7 +86,7 @@ bool Tasks::done_update(){
 
 
 
-void Tasks::rebind(pros::task_fn_t function, void* params){
+void _Task::rebind(pros::task_fn_t function, void* params){
   task_log.print("%d| %s rebinding\n", millis(), this->name);
   this->kill();
   this->function = function;

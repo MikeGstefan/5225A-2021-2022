@@ -5,7 +5,7 @@
 
 
 /*
-  Tasks take 10ms to start
+  _Task take 10ms to start
 
   task.get_state():
   E_TASK_STATE_RUNNING = 0, activally being accessed
@@ -22,21 +22,21 @@ enum notify_types{
   reset = 2,
 };
 
-class Tasks{
+class _Task{
 private:
   pros::Task* task_ptr = NULL;
   pros::task_fn_t function;
-  std::tuple<Tasks*, void*>params;
+  std::tuple<_Task*, void*>params;
   std::uint32_t prio;
   std::uint16_t stack_depth;
   const char* name;
 
 
 public:
-  Tasks(pros::task_fn_t function, const char* name = "", void* params = NULL, std::uint32_t prio = TASK_PRIORITY_DEFAULT, std::uint16_t stack_depth = TASK_STACK_DEPTH_DEFAULT);
-  ~Tasks();
+  _Task(pros::task_fn_t function, const char* name = "", void* params = NULL, std::uint32_t prio = TASK_PRIORITY_DEFAULT, std::uint16_t stack_depth = TASK_STACK_DEPTH_DEFAULT);
+  ~_Task();
 
-  static Tasks* get_obj(void* params);
+  static _Task* get_obj(void* params);
   static void* get_params(void* params);
 
   bool notify_handle();

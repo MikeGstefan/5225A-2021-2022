@@ -2,7 +2,7 @@
 #include "logging.hpp"
 #include "config.hpp"
 #include "util.hpp"
-#include "Tracking.hpp"
+#include "tracking.hpp"
 #include "lift.hpp"
 #include "drive.hpp"
 #include "gui.hpp"
@@ -25,7 +25,7 @@ using namespace std;
 void initialize() {
 	drivebase.download_curve_data();
 	Data::log_init();
-	Controller_::init();
+	_Controller::init();
 	delay(150);
 	tracking.x_coord = 0.0, tracking.y_coord = 0.0, tracking.global_angle = 0.0;
 	updateStartTask();
@@ -94,6 +94,7 @@ int ring_count = 0; //Get rid of this once merged
 
 void opcontrol() {
 	// Reset tracking by stopping task
+
 
 	while(true){
 		guiBackground();
