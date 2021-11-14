@@ -2,7 +2,7 @@
 #include "logging.hpp"
 #include "config.hpp"
 #include "util.hpp"
-#include "tracking.hpp"
+#include "Tracking.hpp"
 #include "lift.hpp"
 #include "drive.hpp"
 #include "gui.hpp"
@@ -30,6 +30,8 @@ void initialize() {
 	tracking.x_coord = 0.0, tracking.y_coord = 0.0, tracking.global_angle = 0.0;
 	updateStartTask();
 	guiSetup();
+	WAIT_FOR_SCREEN_REFRESH();
+	master.print(2, 0, "Driver: %s", drivebase.drivers[drivebase.cur_driver].name);
 }
 
 /**
@@ -61,20 +63,7 @@ void competition_initialize() {}
  * will be stopped. Re-enabling the robot will restart the task, not re-start it
  * from where it left off.
  */
-void autonomous() {
-	// drivebase.update_lookup_table_util();
-	// rush_goal2(0.0, -45.0, 0.0);
-	// drivebase.move(0,-127, 0);
-	// while(!claw_touch.get_value()) delay(10);
-	// master.print(0, 0, "inches: %lf", tracking.y_coord);
-/*
-	Timer move_timer{"move_timer"};
-	// move_to_target_async(0.0, -45.0, 0.0);	// got to goal
-	// while(tracking.y_coord > -45.0)	delay(10);
-	master.print(0, 0, "time: %d", move_timer.get_time());
-	rush_goal(0.0, -20.0, 0.0);
-*/
-}
+void autonomous() {}
 
 /**
  * Runs the operator control code. This function will be started in its own task
@@ -91,9 +80,11 @@ void autonomous() {
  */
 
 int ring_count = 0; //Get rid of this once merged
+double cur_auton = 1;
 
 void opcontrol() {
-	// Reset tracking by stopping task
+	//Reset tracking by stopping task
+	//remove perm. make left and right members of page.
 
 
 	while(true){

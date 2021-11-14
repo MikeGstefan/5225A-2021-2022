@@ -1,16 +1,13 @@
 #pragma once
-#include <vector>
-#include <string>
-#include "main.h"
-#include "config.hpp"
 #include "drive.hpp"
-#include "tracking.hpp"
-using namespace pros;
+#include "Tracking.hpp"
+#include "util.hpp"
+#include <bitset>
 
 #define ORANGE 0x00F36421
 #define GREY 0x00202020
 
-#define PAGE_COUNT 10
+#define PAGE_COUNT 11
 #define PAGE_LEFT 0
 #define PAGE_UP 0
 #define PAGE_RIGHT 480
@@ -41,7 +38,8 @@ enum class Style{ //how the rect coords get evaluated
 };
 
 extern int ring_count; //For gui.cpp to use
-// extern Page elastic, liftMove, track, moving, autoSel, driverCurve, intkTest, temps, mContr;
+extern double cur_auton;
+extern Page testing; //For use in opcontrol
 
 void guiSetup(), guiBackground();
 void alignedCoords (int x_objects, int y_objects, int x_btn, int y_btn, int x_range = 480, int y_range = 220);
@@ -60,6 +58,7 @@ class Page{
     static int16_t x, y;
     std::uint32_t bcol;
     std::string title;
+    // Button prev, next;
 
   public:
     //Page num, Title, Bcolor
@@ -88,10 +87,11 @@ class Page{
 
 class Button{
   friend class Page;
-  public: enum press_type{
+  public: enum pressType{
       SINGLE,
       LATCH,
-      HOLD
+      REPEAT,
+      TOGGLE
     };
 
   private:
@@ -99,12 +99,11 @@ class Button{
     std::uint32_t lcol, bcol, dark_bcol;
     std::string label, label1="";
     int16_t x1, y1, x2, y2, text_x, text_y, text_x1, text_y1;
-    // void (*funcPtr)(); //This is a var because it is a pointer to a void function, not a void function in itself
     bool lastPressed=0;
-    press_type form;
+    pressType form; //What type of button
 
     //For latch buttons
-    bool latched=0;
+    bool latched=0, on=0; //on is for toggle
     std::vector<Button*> options;
 
     //Functions
@@ -115,13 +114,13 @@ class Button{
   public:
     //Constructor
     //Points, Format, Page, Label, Bcolor, Lcolor
-    Button (int16_t, int16_t, int16_t, int16_t, Style, press_type, Page*, std::string = "", std::uint32_t = ORANGE, std::uint32_t = COLOR_BLACK);
+    Button (int16_t, int16_t, int16_t, int16_t, Style, pressType, Page*, std::string = "", std::uint32_t = ORANGE, std::uint32_t = COLOR_BLACK);
     Button (){};
-    void construct (int16_t, int16_t, int16_t, int16_t, Style, press_type, Page*, std::string, std::uint32_t, std::uint32_t);
+    void construct (int16_t, int16_t, int16_t, int16_t, Style, pressType, Page*, std::string, std::uint32_t, std::uint32_t);
 
     //Vars
     Page* page;
-    std::function <void()> func;
+    std::function <void()> func, off_func; //toggle is only for toggle type buttons
 
     //Functions
     static Button* update();
@@ -129,7 +128,6 @@ class Button{
     bool pressed();
     bool newPress();
     bool newRelease();
-    void del(); //Unused
 };
 
 class Slider{
@@ -150,10 +148,11 @@ class Slider{
 
     //Functions
     void draw();
+    void drawBar();
 
   public:
     //Points, Format, Min, Max, Page, Label, Bcolor, Lcolor
-    Slider (int16_t, int16_t, int16_t, int16_t, Style, direction, int, int, Page*, std::string = "", std::uint32_t = COLOR_WHITE, std::uint32_t = COLOR_YELLOW);
+    Slider (int16_t, int16_t, int16_t, int16_t, Style, direction, int, int, Page*, std::string = "Value", std::uint32_t = COLOR_WHITE, std::uint32_t = ORANGE);
 
     //Vars
     Page* page;

@@ -2,7 +2,7 @@
 #include "main.h"
 #include "config.hpp"
 #include "util.hpp"
-#include "tracking.hpp"
+#include "Tracking.hpp"
 #include <iostream>
 #include <cmath>
 #include <memory>
