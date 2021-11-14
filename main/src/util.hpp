@@ -26,6 +26,8 @@ using namespace std;
     }\
 }
 
+#define inRange(value, min, max) (min <= value && value <= max)
+
 // enum class claw_state{in,out,neut};
 
 // void set_claw_state(claw_state state);

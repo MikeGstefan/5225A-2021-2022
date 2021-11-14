@@ -4,8 +4,7 @@
 Timer Flash("Flash Timer", false);
 std::array<std::tuple<Motor*, Text*, std::string, double>, 8> motors; //holds motor info for temperature checking
 std::uint32_t flash_end = std::numeric_limits<std::uint32_t>::max(); //Sets the flash's end time to max possible val
-std::vector<std::bitset<200>> field (0);
-std::array<std::bitset<200>, 200> blah;
+std::vector<std::bitset<200>> field (200, std::bitset<200>{}); //Initializes to 200 blank bitsets
 
 //Var init for text monitoring
 double ringCount, angle, elasticUpTime, elasticDownTime;
@@ -133,15 +132,15 @@ std::pair <int, int> elasticUtil(){ //No need to return pair
 }
 void resetX(){
   tracking.x_coord = 0;
-  printf("Get Mike to write this as a task procedure\n");
+  printf("Write reset x as a task procedure\n");
 }
 void resetY(){
   tracking.y_coord = 0;
-  printf("Get Mike to write this as a task procedure\n");
+  printf("Write reset y as a task procedure\n");
 }
 void resetA(){
   tracking.global_angle = 0;
-  printf("Get Mike to write this as a task procedure\n");
+  printf("Write reset a as a task procedure\n");
 }
 
 void go(std::uint32_t delay_time=0){
@@ -226,7 +225,6 @@ void tuningTurns(){
 }
 
 void guiSetup(){ //Call once at start in initialize()
-  field.reserve(200); //Makes sure the field vector is at least 200 big. DO NOT DELETE
 
   prevPage.func = &Page::toPrev; //Gives the left and right buttons their functions
   nextPage.func = &Page::toNext; //Same thing for all following buttons
@@ -240,27 +238,24 @@ void guiSetup(){ //Call once at start in initialize()
   resX.func = &resetX;
   resY.func = &resetY;
   resA.func = &resetA;
+  for (int x = 0; x<200; x++) field[x].reset();
   track.setupFunc = [](){
     screen::set_pen(COLOR_WHITE);
     screen::draw_rect(270, 30, 470, 230);
     screen::draw_line(370, 30, 370, 230);
     screen::draw_line(270, 130, 470, 130);
     for (int x = 0; x<200; x++){
-      for (int y = 0; y<200; y++){
-        if(field[x].test(y)) screen::draw_pixel(270+x, 230-y); //Draws saved tracking values
-      }
+      for (int y = 0; y<200; y++) if(field[x].test(y)) screen::draw_pixel(270+x, 230-y); //Draws saved tracking values
     }
   };
   track.loopFunc = [](){
     screen::set_pen(COLOR_RED);
-    int x = 200*tracking.x_coord/144, y = 200*tracking.y_coord/144;
-    screen::draw_pixel(270+x, 230-y); //Scales to screen
-    field[x].set(y); //Saves position (x,y) to as tracked
+    screen::draw_pixel(270+(200*tracking.x_coord/144), 230-(200*tracking.y_coord/144)); //Scales to screen
   };
 
-  goToXYA.func = [&x=xVal.val, &y=yVal.val, &a=aVal.val](){printf("GO BUTTON\n"); move_to_target_sync(x, y, a, false);};
-  goHome.func = [](){printf("GO BUTTON\n"); move_to_target_sync(0, 0, 0, false);};
-  goCentre.func = [](){printf("GO BUTTON\n"); move_to_target_sync(72, 72, 0, false);};
+  goToXYA.func = [&x=xVal.val, &y=yVal.val, &a=aVal.val](){go(); move_to_target_sync(x, y, a, false);};
+  goHome.func = [](){go(); move_to_target_sync(0, 0, 0, false);};
+  goCentre.func = [](){go(); move_to_target_sync(72, 72, 0, false);};
 
   Button::createOptions({&route1, &route2, &route3}); //Makes them exclusive, only one can be selected at a time
 
@@ -528,7 +523,6 @@ void Text::setTitle (int16_t pt1, int16_t pt2, Style type, std::string text){
 void Text::setBackground (int16_t pt1, int16_t pt2, int16_t pt3, int16_t pt4, Style type, std::uint32_t colour){
     std::tie(x1, y1, x2, y2) = fixPoints(pt1, pt2, pt3, pt4, type);
     setBackground(colour);
-
 }
 
 void Text::setBackground (std::uint32_t colour){
@@ -566,15 +560,29 @@ void Slider::draw(){
   screen::fill_rect(x1, y1, x2, y2);
   screen::set_pen(lcol);
   if(dir == HORIZONTAL){
-    screen::fill_rect(x1+1, y1+1, x1+(x2-x1)*(val-min)/(max-min), y2-1); //Draws bar upto its value
-    screen::print(TEXT_SMALL, x1, text_y, "%d", min);
-    screen::print(TEXT_SMALL, x2-CHAR_WIDTH_SMALL*std::to_string(max).length(), text_y, "%d", max);
+    screen::fill_rect(x1+1, y1+1, x1+(x2-x1)*(val-min)/(max-min), y2-1); //Draws Bar
+    screen::print(TEXT_SMALL, x1, text_y, "%d", min); //Writes min
+    screen::print(TEXT_SMALL, x2-CHAR_WIDTH_SMALL*std::to_string(max).length(), text_y, "%d", max); //Writes max
+    screen::print(TEXT_SMALL, text_x, text_y, "%s:%.f", label.c_str(), val); //Writes current value
+  }
+  else{ //Vertical
+    screen::fill_rect(x1+1, y2-(y2-y1)*(val-min)/(max-min), x2-1, y2-1);
+    screen::print(TEXT_SMALL, x1-25, y2, "%d", min);
+    screen::print(TEXT_SMALL, x1-25, y1, "%d", max);
+    screen::print(TEXT_SMALL, text_x, y1-27-CHAR_HEIGHT_SMALL, "%s:%.f", label.c_str(), val);
+  }
+}
+
+void Slider::drawBar(){
+  screen::set_eraser(bcol);
+  screen::erase_rect(x1, y1, x2, y2);
+  screen::set_pen(lcol);
+  if(dir == HORIZONTAL){
+    screen::fill_rect(x1+1, y1+1, x1+(x2-x1)*(val-min)/(max-min), y2-1);
     screen::print(TEXT_SMALL, text_x, text_y, "%s:%.f", label.c_str(), val);
   }
   else{
-    screen::fill_rect(x1+1, y2-(y2-y1)*(val-min)/(max-min), x2-1, y2-1); //Draws bar (vertical)
-    screen::print(TEXT_SMALL, x1-25, y2, "%d", min);
-    screen::print(TEXT_SMALL, x1-25, y1, "%d", max);
+    screen::fill_rect(x1+1, y2-(y2-y1)*(val-min)/(max-min), x2-1, y2-1);
     screen::print(TEXT_SMALL, text_x, y1-27-CHAR_HEIGHT_SMALL, "%s:%.f", label.c_str(), val);
   }
 }
@@ -629,17 +637,6 @@ void Button::drawPressed(){
   screen::print(TEXT_SMALL, text_x1, text_y1, label1.c_str());
 }
 
-void Button::del(){ //Not really used
-  //Looks for the button in the list of buttons for its page
-  std::vector <Button*>::iterator it = std::find(((page)->buttons).begin(), (page->buttons).end(), this);
-
-  //If the button is on the list it is removed
-  if(it != (page->buttons).end()){
-    if(Page::currentPage == page) screen::erase_rect(x1, y1, x2, y2); //Only if on current page
-    (page)->buttons.erase(it);
-  }
-}
-
 void Button::createOptions(std::vector<Button*> buttons){
   std::vector<Button*>::iterator it, it2; //For clarity
 
@@ -667,7 +664,7 @@ void Page::updateScreenStatus(){
 }
 
 void Slider::updateVal(){
-  // returns true if the button is currently being pressed
+  // changes value if being touched
   if (page->pressed()){
     if ((x1 <= Page::x && Page::x <= x2) && (y1 <= Page::y && Page::y <= y2)){
       if (dir == HORIZONTAL) val = min+(max-min)*(Page::x-x1)/(x2-x1); //Gets val based on press location
@@ -801,13 +798,13 @@ Button* Button::update(){
           for (std::vector <Button*>::iterator option_it = (btn_id->options).begin(); option_it != (btn_id->options).end(); option_it++){
             if ((*option_it)->on){ //If the other button is in the on state and has an off function
               (*option_it)->on = false;
-              if ((*option_it)->toggleOff_func) (*option_it)->toggleOff_func();
+              if ((*option_it)->off_func) (*option_it)->off_func();
             }
           }
 
           btn_id->runTask();
         }
-        else if (btn_id->toggleOff_func) btn_id->toggleOff_func(); //Just turned off
+        else if (btn_id->off_func) btn_id->off_func(); //Just turned off
 
         btn_id->drawPressed();
         return btn_id;
@@ -826,6 +823,10 @@ Button* Button::update(){
 
 bool temp_flashed = false; //Is never set back to false. Once it warns the driver, it won't again until program restarted
 void guiBackground(){ //To be called continously
+  //Saving Field coords
+  int x = 200*tracking.x_coord/144, y = 200*tracking.y_coord/144;
+  if(inRange(x, 0, 199) && inRange(y, 0, 199)) field[x].set(y); //Saves position (x,y) to as tracked
+
   //Saving vars for text display
   std::array<std::tuple<Motor*, Text*, std::string, double>, 8>::iterator it;
   for (it = motors.begin(); it != motors.end(); it++){ //Setting Motor temps
@@ -851,10 +852,12 @@ void guiBackground(){ //To be called continously
   }
 
   for (it = motors.begin(); it != motors.end(); it++){ //Setting motor background colors
-    if (std::get<3>(*it) <= 25) std::get<1>(*it)->setBackground(COLOR_DODGER_BLUE); //...20, 25
-    else if (std::get<3>(*it) <= 35) std::get<1>(*it)->setBackground(COLOR_LAWN_GREEN); //30, 35
-    else if (std::get<3>(*it) <= 45) std::get<1>(*it)->setBackground(COLOR_YELLOW); //40, 45
-    else std::get<1>(*it)->setBackground(COLOR_RED); //50, 55, ...
+    Text* text = std::get<1>(*it);
+    double temp = std::get<3>(*it);
+    if (temp <= 25) text->setBackground(COLOR_DODGER_BLUE); //...20, 25
+    else if (temp <= 35) text->setBackground(COLOR_LAWN_GREEN); //30, 35
+    else if (temp <= 45) text->setBackground(COLOR_YELLOW); //40, 45
+    else text->setBackground(COLOR_RED); //50, 55, ...
   }
 
   Page::update();

@@ -120,7 +120,7 @@ class Button{
 
     //Vars
     Page* page;
-    std::function <void()> func, toggleOff_func; //toggle is only for toggle type buttons
+    std::function <void()> func, off_func; //toggle is only for toggle type buttons
 
     //Functions
     static Button* update();
@@ -128,7 +128,6 @@ class Button{
     bool pressed();
     bool newPress();
     bool newRelease();
-    void del(); //Unused
 };
 
 class Slider{
@@ -149,6 +148,7 @@ class Slider{
 
     //Functions
     void draw();
+    void drawBar();
 
   public:
     //Points, Format, Min, Max, Page, Label, Bcolor, Lcolor
