@@ -1,5 +1,5 @@
 #include "gui.hpp"
-
+//full gui but nathan is bad
 //Miscellaneous Tings
 Timer Flash("Flash Timer", false);
 std::array<std::tuple<Motor*, Text*, std::string, double>, 8> motors; //holds motor info for temperature checking
