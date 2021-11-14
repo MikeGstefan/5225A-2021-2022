@@ -11,7 +11,7 @@ enum class coord_types {VECTOR, POLAR};
 
 class Point {
 
-    double x, y, magnitude, direction;
+    double x, y, magnitude, angle;
 
 public:
     // "constructors"
@@ -28,9 +28,9 @@ public:
     double get_x() const;
     double get_y() const;
     double get_magnitude() const;
-    double get_direction() const;
+    double get_angle() const;
 
-    // arithemtic operator overloads
+    // arithmetic operator overloads
     Point operator +(const Point& p2) const;
     Point operator -(const Point& p2) const;
 

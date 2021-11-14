@@ -3,6 +3,7 @@
 #include "config.hpp"
 #include "util.hpp"
 #include "drive.hpp"
+#include "geometry.hpp"
 #include <iostream>
 #include <cmath>
 #include <memory>
@@ -63,6 +64,7 @@ void move_on_arc(const Vector2D start, Coord target, const double radius, const 
 
 // tank drive move algorithms
 void tank_move_to_target(const Coord target, const bool turn_dir_if_0, const double max_power = 127.0, const double min_angle_percent = 1.0, const bool brake = true);
+void tank_move_on_line(const Coord target, const bool turn_dir_if_0, const double max_power = 127.0, const double min_angle_percent = 1.0, const bool brake = true);
 
 const int min_power_a = 23;
 const int min_power_x = 40;

@@ -9,13 +9,13 @@ Point::Point(const double param_1, const double param_2, coord_types type){
     // configures point as cartesian vector, with x and y coordinates
 void Point::set_vector(const double x, const double y){
   this-> x = x, this-> y = y;
-  magnitude = sqrt (pow(x, 2) + pow(y, 2)), direction = atan2(y, x);
+  magnitude = sqrt (pow(x, 2) + pow(y, 2)), angle = atan2(y, x);
 }
 
 // configures point as polar vector, with an angle and magnitude
-void Point::set_polar(const double magnitude, const double direction){
-  this-> magnitude = magnitude, this-> direction = direction;
-  x = magnitude * cos(direction), y = magnitude * sin(direction);
+void Point::set_polar(const double magnitude, const double angle){
+  this-> magnitude = magnitude, this-> angle = angle;
+  x = magnitude * cos(angle), y = magnitude * sin(angle);
 }
 
 // getters
@@ -28,8 +28,8 @@ double Point::get_y() const{
 double Point::get_magnitude() const{
     return this-> magnitude;
 }
-double Point::get_direction() const{
-    return this-> direction;
+double Point::get_angle() const{
+    return this-> angle;
 }
 
 // operator overloads
