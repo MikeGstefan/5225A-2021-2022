@@ -9,7 +9,7 @@
 
   task.get_state():
   E_TASK_STATE_RUNNING = 0, activally being accessed
-  E_TASK_STATE_READY = 1, is going to be started, hasnt yet
+  E_TASK_STATE_READY = 1, ready to be run, waiting to be 
   E_TASK_STATE_BLOCKED = 2, is in a delay or being blocked by another operation ( mutexes and shit)
   E_TASK_STATE_SUSPENDED = 3, paused
   E_TASK_STATE_DELETED = 4, deleted
@@ -24,7 +24,7 @@ enum notify_types{
 
 class _Task{
 private:
-  pros::Task* task_ptr;
+  pros::Task* task_ptr = NULL;
   pros::task_fn_t function;
   std::tuple<_Task*, void*>params;
   std::uint32_t prio;

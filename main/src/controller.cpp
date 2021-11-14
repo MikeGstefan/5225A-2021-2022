@@ -15,7 +15,6 @@ void _Controller::print_queue(void* params){
   _Task* ptr = _Task::get_obj(params);
   while(true){
     for(int i = 0; i < num_controller; i++){
-      controller_queue.print("%d| handle queue for controller %d\n", millis(), objs[i]->controller_num);
       objs[i]->queue_handle();
       delay(50);
     }
@@ -25,7 +24,6 @@ void _Controller::print_queue(void* params){
 }
 
 void _Controller::init(){
-  printf("here2\n");
   _Task ct(print_queue,"controller task");
   _Controller::controller_task = std::move(ct);
   controller_task.start();
@@ -40,23 +38,17 @@ void _Controller::add_to_queue(std::function<void()> func){
       this->back = 0;
     }
     else this->back++;
-    printf("%d, %d, %d\n", this->queue.size() -1,this->back, this->front);
 
   }
 }
 
 void _Controller::queue_handle(){
-  printf("in queue handle %d\n",this->controller_num);
   if(this->front != this->back){
     controller_queue.print("%d| running command on controller %d\n",millis(), this->controller_num);
     this->queue[this->front]();
     if(this->front == this->queue.size()-1) this->front = 0;
     else this->front++;
   }
-  else{
-    printf("in the else\n");
-  }
-  printf("%d, %d, %d\n", this->queue.size() -1,this->back, this->front);
 }
 
 void _Controller::print(std::uint8_t line, std::uint8_t col, const char* fmt, ... ){
@@ -65,19 +57,28 @@ void _Controller::print(std::uint8_t line, std::uint8_t col, const char* fmt, ..
   va_start(args, fmt);
   vsnprintf(buffer,19,fmt,args);
   va_end(args);
-  std::function<void()> func = [=](){pros::Controller::print(line,col,buffer);};
+  std::function<void()> func = [=](){
+    pros::Controller::print(line,col,buffer);
+    controller_queue.print("%d| printing %s to %d\n",millis(), buffer, this->controller_num);
+  };
   this->add_to_queue(func);
   controller_queue.print("%d| adding print to queue for controller %d\n",millis(), this->controller_num);
 
 }
 void _Controller::clear_line (std::uint8_t line){
-  std::function<void()> func = [=](){pros::Controller::clear_line(line);};
+  std::function<void()> func = [=](){
+    pros::Controller::clear_line(line);
+    controller_queue.print("%d| clearing line %d for controller %d\n",millis(), line, this->controller_num);
+  };
   this->add_to_queue(func);
   controller_queue.print("%d| adding clear_line to queue for controller %d\n",millis(), this->controller_num);
-  // return std::bind(pros::Controller::clear_line,line);
 }
+
 void _Controller::clear(){
-  std::function<void()> func = [=](){pros::Controller::clear();printf("in function\n");};
+  std::function<void()> func = [=](){
+    pros::Controller::clear();
+    controller_queue.print("%d| clearing %d\n",millis(), this->controller_num);
+  };
   this->add_to_queue(func);
   controller_queue.print("%d| adding clear to queue for controller %d\n",millis(), this->controller_num);
 }

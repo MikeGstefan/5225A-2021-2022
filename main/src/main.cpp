@@ -20,9 +20,10 @@ using namespace std;
  * All other competition modes are blocked by initialize; it is recommended
  * to keep execution time for this mode under a few seconds.
  */
+
+
 void initialize() {
 	drivebase.download_curve_data();
-	// logging_task_start();
 	Data::log_init();
 	_Controller::init();
 	delay(150);
@@ -93,6 +94,7 @@ int ring_count = 0; //Get rid of this once merged
 
 void opcontrol() {
 	// Reset tracking by stopping task
+
 
 	while(true){
 		guiBackground();
