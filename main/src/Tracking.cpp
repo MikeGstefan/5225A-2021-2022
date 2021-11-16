@@ -707,7 +707,7 @@ void tank_move_to_target(const Coord target, const bool turn_dir_if_0, const dou
         printf("Ending move to target X: %f Y: %f A: %f at X: %f Y: %f A: %f \n", target.x, target.y, target.angle, tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle));
         //log_time("ending starting time: %d, delta time: %d X: %f Y: %f A: %f from X: %f Y: %f A: %f \n", millis(),millis() -starttime, target_x, target_y, target_a, tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle));
         // tracking.move_stop_task();
-        return;
+        break;
       }
 
       if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_B)){
@@ -718,6 +718,7 @@ void tank_move_to_target(const Coord target, const bool turn_dir_if_0, const dou
 
       delay(10);
     }
+    tank_turn_to_angle(target.angle, brake);
 
 }
 
@@ -812,7 +813,7 @@ void tank_move_on_line(const Coord target, const bool turn_dir_if_0, const doubl
         printf("Ending move to target X: %f Y: %f A: %f at X: %f Y: %f A: %f \n", target.x, target.y, target.angle, tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle));
         //log_time("ending starting time: %d, delta time: %d X: %f Y: %f A: %f from X: %f Y: %f A: %f \n", millis(),millis() -starttime, target_x, target_y, target_a, tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle));
         // tracking.move_stop_task();
-        return;
+        break;
       }
 
       if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_B)){
@@ -823,5 +824,30 @@ void tank_move_on_line(const Coord target, const bool turn_dir_if_0, const doubl
 
       delay(10);
     }
+    tank_turn_to_angle(target.angle, brake);
+}
 
+void tank_turn_to_angle(double target_a, const bool brake){
+  PID angle_pid(200.0, 0.0, 0.0, 0.0, true, 0.0, 360.0);
+  // drivebase.move_tank(0, angle_pid.compute(tracking.global_angle, near_angle(target_a, tracking.global_angle) + tracking.global_angle));
+  target_a = deg_to_rad(target_a);
+  double error_a, power_a, kp_a = 200.0;
+
+  while(true){
+    drivebase.move_tank(0, angle_pid.compute(tracking.global_angle, near_angle(target_a, tracking.global_angle) + tracking.global_angle));
+    // error_a = near_angle(target_a, tracking.global_angle);
+    // power_a = sgn(error_a) * max(fabs(error_a * kp_a), (double)min_power_a);
+    // drivebase.move_tank(0, power_a);
+    if(fabs(rad_to_deg(angle_pid.get_error()) < 1.5)){
+    // if(fabs(rad_to_deg(error_a)) < 1.5){
+      printf("Ending turn to angle : %f at X: %f Y: %f A: %f \n", rad_to_deg(target_a), tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle));
+      drivebase.move_tank(0, 0);
+      if(brake) drivebase.brake();
+      return;
+    }
+  }
+}
+
+void tank_turn_to_target(const Vector2D target, const bool brake){
+  tank_turn_to_angle(rad_to_deg(atan2(target.x - tracking.x_coord, target.y - tracking.y_coord)), brake);
 }
