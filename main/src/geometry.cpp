@@ -1,75 +1,47 @@
 #include "geometry.hpp"
 
+// Position constructor definition
+Position::Position(double x, double y, double angle): x(x), y(y), angle(angle){}
+Position::Position(): x(0.0), y(0.0), angle(0.0){}
 
-Point::Point(const double param_1, const double param_2, coord_types type){
-  if (type == coord_types::POLAR)  set_polar(param_1, param_2);
-  else  set_vector(param_1, param_2);
+// vector methods
+
+Vector::Vector(const double param_1, const double param_2, vector_types type){
+  if (type == vector_types::POLAR)  set_polar(param_1, param_2);
+  else  set_cartesian(param_1, param_2);
 }
 
-    // configures point as cartesian vector, with x and y coordinates
-void Point::set_vector(const double x, const double y){
+// configures point as cartesian vector, with x and y coordinates
+void Vector::set_cartesian(const double x, const double y){
   this-> x = x, this-> y = y;
   magnitude = sqrt (pow(x, 2) + pow(y, 2)), angle = atan2(y, x);
 }
 
 // configures point as polar vector, with an angle and magnitude
-void Point::set_polar(const double magnitude, const double angle){
+void Vector::set_polar(const double magnitude, const double angle){
   this-> magnitude = magnitude, this-> angle = angle;
   x = magnitude * cos(angle), y = magnitude * sin(angle);
 }
 
 // getters
-double Point::get_x() const{
+double Vector::get_x() const{
     return this-> x;
 }
-double Point::get_y() const{
+double Vector::get_y() const{
     return this-> y;
 }
-double Point::get_magnitude() const{
+double Vector::get_magnitude() const{
     return this-> magnitude;
 }
-double Point::get_angle() const{
+double Vector::get_angle() const{
     return this-> angle;
 }
 
 // operator overloads
-Point Point::operator +(const Point& p2) const{
-    return Point(x + p2.get_x(), y + p2.get_y(), coord_types::VECTOR);
+Vector Vector::operator +(const Vector& p2) const{
+    return Vector(x + p2.get_x(), y + p2.get_y(), vector_types::CARTESIAN);
 }
 
-Point Point::operator -(const Point& p2) const{
-    return Point(x - p2.get_x(), y - p2.get_y(), coord_types::VECTOR);
-}
-
-
-
-Line::Line(Point p1, Point p2): p1(p1), p2(p2){
-    this-> angle = atan2(p2.get_y() - p1.get_y(), p2.get_x() - p1.get_x());
-    this-> length = sqrt(pow(p2.get_x() - p1.get_x(), 2) + pow(p2.get_y() - p1.get_y(), 2));
-}
-
-// getters
-
-double Line::get_angle() const{
-    return this-> angle;
-}
-
-double Line::get_length() const{
-    return this-> length;
-}
-Point Line::get_point(short point) const{
-    if (point == 1) return p1;
-    else return p2;
-}
-
-// setters
-
-void Line::set_angle(double angle){
-    this-> angle = angle;
-    p2.set_vector(p1.get_x() + length * cos(angle), p1.get_y() + length * sin(angle));
-}
-
-void Line::set_length(double length){
-    this-> length = length;
-    p2.set_vector(p1.get_x() + length * cos(angle), p1.get_y() + length * sin(angle));
+Vector Vector::operator -(const Vector& p2) const{
+    return Vector(x - p2.get_x(), y - p2.get_y(), vector_types::CARTESIAN);
 }

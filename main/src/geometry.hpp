@@ -1,25 +1,30 @@
 #pragma once
-#include <tuple>
 #include "main.h"
-#include "util.hpp"
-#include "drive.hpp"
-#include "pid.hpp"
-using namespace pros;
-using namespace std;
 
-enum class coord_types {VECTOR, POLAR};
+struct Point{
+    double x, y;
+};
 
-class Point {
+struct Position{   // stores members variables for a coordinate: x, y and angle    MUST BE DEFINED HERE, OTHERWISE IT'LL CAUSE CIRCULAR HEADER FILE DEPENDENCY OCCURS
+    double x, y, angle;
+    Position(double x, double y, double angle);
+    Position();
+    // default constructor
+};
+
+enum class vector_types {CARTESIAN, POLAR};
+
+class Vector{
 
     double x, y, magnitude, angle;
 
 public:
     // "constructors"
 
-    Point(const double param_1, const double param_2, coord_types type = coord_types::VECTOR);
+    Vector(const double param_1, const double param_2, vector_types type = vector_types::CARTESIAN);
 
     // configures point as cartesian vector, with x and y coordinates
-    void set_vector(const double x, const double y);
+    void set_cartesian(const double x, const double y);
 
     // configures point as polar vector, with an angle and magnitude
     void set_polar(const double magnitude, const double direction);
@@ -31,27 +36,7 @@ public:
     double get_angle() const;
 
     // arithmetic operator overloads
-    Point operator +(const Point& p2) const;
-    Point operator -(const Point& p2) const;
+    Vector operator +(const Vector& p2) const;
+    Vector operator -(const Vector& p2) const;
 
-};
-
-
-class Line {
-
-    Point p1, p2;
-    double angle, length;
-
-public:
-
-    Line(Point p1, Point p2);
-
-    // getters
-    double get_angle() const;
-    double get_length() const;
-    Point get_point(short point = 1) const;
-
-    // setters
-    void set_angle(double angle);
-    void set_length(double length);
 };

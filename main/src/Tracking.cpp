@@ -38,7 +38,7 @@ void update(void* params){
   double last_x = 0, last_y = 0, last_a = 0;
   double last_vel_l = 0, last_vel_r = 0, last_vel_b = 0;
 
-  Coord last_coord;  // last position of robot
+  Position last_position; // last position of robot
   int last_velocity_time = 0;    // time of last velocity update
   int velocity_update_time = 0; // time SINCE last velocity update
 
@@ -67,11 +67,11 @@ void update(void* params){
         last_vel_b = NewBack;
 
         // gives us linear velocity in inches per second, and angular velocity in radians per second
-        tracking.g_velocity.x = (tracking.x_coord - last_coord.x) / velocity_update_time * 1000;
-        tracking.g_velocity.y = (tracking.y_coord - last_coord.y) / velocity_update_time * 1000;
-        tracking.g_velocity.angle = (tracking.global_angle - last_coord.angle) / velocity_update_time * 1000;
+        tracking.g_velocity.x = (tracking.x_coord - last_position.x) / velocity_update_time * 1000;
+        tracking.g_velocity.y = (tracking.y_coord - last_position.y) / velocity_update_time * 1000;
+        tracking.g_velocity.angle = (tracking.global_angle - last_position.angle) / velocity_update_time * 1000;
 
-        last_coord = {tracking.x_coord, tracking.y_coord, tracking.global_angle};
+        last_position = {tracking.x_coord, tracking.y_coord, tracking.global_angle};
 
         last_velocity_time = millis();
     }
@@ -426,8 +426,8 @@ void rush_goal2(double target_x, double target_y, double target_a){
 
 }
 
-void move_on_arc(const Vector2D start, Coord target, const double radius, const bool positive, const double max_power, const bool angle_relative_to_arc, const double min_angle_percent, const double min_x_line_percent, const bool brake){
-  Coord error, kp = Coord(30.0, 12.0, 180.0);
+void move_on_arc(const Point start, Position target, const double radius, const bool positive, const double max_power, const bool angle_relative_to_arc, const double min_angle_percent, const double min_x_line_percent, const bool brake){
+  Position error, kp = Position(30.0, 12.0, 180.0);
 
   target.angle = deg_to_rad(target.angle);
   // variable 'd' in diagram
@@ -447,10 +447,10 @@ void move_on_arc(const Vector2D start, Coord target, const double radius, const 
 
   printf("new_theta: %lf\n", rad_to_deg(theta));
 
-  Vector2D arc_centre = {start.x + cos(theta) * radius, start.y + sin(theta) * radius};
+  Point arc_centre = {start.x + cos(theta) * radius, start.y + sin(theta) * radius};
   printf("Arc centre: x: %lf, y: %lf\n", arc_centre.x, arc_centre.y);
 
-  Coord arc_disp;
+  Position arc_disp;
   double hypotenuse, h;
   double angle_of_arc = atan2(target.y - arc_centre.y, target.x - arc_centre.x);
   double beta; // angle relative to horizontal of h + robot angle + arc_disp.angle
@@ -618,10 +618,10 @@ void move_on_arc(const Vector2D start, Coord target, const double radius, const 
 
 // TANK MOVE ALGORITHMS
 
-void tank_move_to_target(const Coord target, const bool turn_dir_if_0, const double max_power, const double min_angle_percent, const bool brake){
+void tank_move_to_target(const Position target, const bool turn_dir_if_0, const double max_power, const double min_angle_percent, const bool brake){
     // Coord tracking = {0.0, 0.0, deg_to_rad(10.0)};
-    Vector2D local_error;
-    Coord error;
+    Point local_error;
+    Position error;
 
     double total_power, max_power_scale;
     int sgn_local_error_y;
@@ -722,10 +722,10 @@ void tank_move_to_target(const Coord target, const bool turn_dir_if_0, const dou
 
 }
 
-void tank_move_on_line(const Coord target, const bool turn_dir_if_0, const double max_power, const double min_angle_percent, const bool brake){
+void tank_move_on_line(const Position target, const bool turn_dir_if_0, const double max_power, const double min_angle_percent, const bool brake){
     // Coord tracking = {0.0, 0.0, deg_to_rad(10.0)};
-    Vector2D local_error;
-    Coord error;
+    Point local_error;
+    Position error;
 
     double total_power, max_power_scale;
     int sgn_local_error_y;
@@ -739,17 +739,16 @@ void tank_move_on_line(const Coord target, const bool turn_dir_if_0, const doubl
     double end_error = 0.5;
 
     // move on line variables
-    Line follow_line = Line({tracking.x_coord, tracking.y_coord}, {target.x, target.y});
-    double line_angle = M_PI/2 - follow_line.get_angle();  // angle of follow_line relative to the vertical
-    Point line_disp = Point(target.x - tracking.x_coord, target.y - tracking.y_coord);  // displacements relative to line
+    Vector follow_line(target.y - tracking.y_coord, target.x - tracking.x_coord); // used to keep track of angle of follow_line relative to the vertical
+    Vector line_disp(target.x - tracking.x_coord, target.y - tracking.y_coord);  // displacements relative to line
     double line_y_local_y; // local_y component of power along line
 
     while(true){
       // start of move_on_line stuff
-      line_disp = Point(target.x - tracking.x_coord, target.y - tracking.y_coord);  // displacements relative to line
-      line_disp.set_polar(line_disp.get_magnitude(), line_disp.get_angle() + line_angle);  // rotates vector by line angle
+      line_disp = Vector(target.x - tracking.x_coord, target.y - tracking.y_coord);  // displacements relative to line
+      line_disp.set_polar(line_disp.get_magnitude(), line_disp.get_angle() + follow_line.get_angle());  // rotates vector by line angle
       line_disp.get_y();
-      line_y_local_y = line_disp.get_y() * cos(tracking.global_angle - line_angle);
+      line_y_local_y = line_disp.get_y() * cos(tracking.global_angle - follow_line.get_angle());
 
       // end of move_on_line stuff
       difference_a = tracking.global_angle + atan2(target.y - tracking.y_coord, target.x - tracking.x_coord);
@@ -838,7 +837,7 @@ void tank_turn_to_angle(double target_a, const bool brake){
     // error_a = near_angle(target_a, tracking.global_angle);
     // power_a = sgn(error_a) * max(fabs(error_a * kp_a), (double)min_power_a);
     // drivebase.move_tank(0, power_a);
-    if(fabs(rad_to_deg(angle_pid.get_error()) < 1.5)){
+    if(fabs(rad_to_deg(angle_pid.get_error())) < 1.5){
     // if(fabs(rad_to_deg(error_a)) < 1.5){
       printf("Ending turn to angle : %f at X: %f Y: %f A: %f \n", rad_to_deg(target_a), tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle));
       drivebase.move_tank(0, 0);
@@ -848,6 +847,6 @@ void tank_turn_to_angle(double target_a, const bool brake){
   }
 }
 
-void tank_turn_to_target(const Vector2D target, const bool brake){
+void tank_turn_to_target(const Point target, const bool brake){
   tank_turn_to_angle(rad_to_deg(atan2(target.x - tracking.x_coord, target.y - tracking.y_coord)), brake);
 }

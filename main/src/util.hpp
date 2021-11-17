@@ -35,14 +35,3 @@ double rad_to_deg(double rad);
 double deg_to_rad(double deg);
 
 double near_angle(double angle, double reference);
-
-struct Vector2D{
-    double x, y;
-};
-
-struct Coord{   // stores members variables for a coordinate: x, y and angle    MUST BE DEFINED HERE, OTHERWISE IT'LL CAUSE CIRCULAR HEADER FILE DEPENDENCY OCCURS
-    double x, y, angle;
-    Coord(double x, double y, double angle);
-    Coord();
-    // default constructor
-};
