@@ -116,7 +116,7 @@ void update(void* params){
 
       // printf("%f,%f\n", tracking.x_coord, tracking.y_coord);
 
-    printf("\ntime: %d, TRACKING: %f, %f, %f \n", millis(), tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle));
+    // printf("\ntime: %d, TRACKING: %f, %f, %f \n", millis(), tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle));
     // printf("time: %d, TOTAL: %f, %f, %f \n", millis(), total_x, total_y, rad_to_deg(total_a));
     // printf("%d pow_a: %.1f, pow_x: %.1f, pow_y: %.1f, total_pow: %.1f\n",millis(),  tracking.power_a, tracking.power_x, tracking.power_y, fabs(tracking.power_a) + fabs(tracking.power_x) + fabs(tracking.power_y));
 
@@ -806,7 +806,7 @@ void tank_move_on_line(const Position target, const bool turn_dir_if_0, const do
       error.x = target.x - tracking.x_coord;
       error.y = target.y - tracking.y_coord;
 
-      if(fabs(line_disp.get_y() < 0.5)){
+      if(fabs(line_disp.get_y()) < 0.5){
         if (brake) drivebase.brake();
         tracking.move_complete = true;
         printf("Ending move to target X: %f Y: %f A: %f at X: %f Y: %f A: %f \n", target.x, target.y, target.angle, tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle));
@@ -850,3 +850,102 @@ void tank_turn_to_angle(double target_a, const bool brake){
 void tank_turn_to_target(const Point target, const bool brake){
   tank_turn_to_angle(rad_to_deg(atan2(target.x - tracking.x_coord, target.y - tracking.y_coord)), brake);
 }
+
+void tank_move_on_arc(Position target, const Point start_pos, const double power, const double max_power, const bool brake){
+  Vector p2 = {start_pos.x, start_pos.y}, p1 = {target.x, target.y};  // p2 and p2 are switched because Nikhil messed up the math
+
+  Vector disp = p2 - p1;
+  target.angle = deg_to_rad(target.angle);
+  disp.set_polar(disp.get_magnitude(), disp.get_angle() + target.angle);
+  double theta = 2.0 * atan2(disp.get_x(), disp.get_y());
+  double radius = disp.get_magnitude() / 2.0 / sin(theta / 2.0);
+  printf("radius: %lf\n", radius);
+  printf("theta: %lf\n", rad_to_deg(theta));
+  Point centre = {p1.get_x() + cos(target.angle) * radius, p1.get_y() - sin(target.angle) * radius};
+  printf("centre | x: %lf, y: %lf\n", centre.x, centre.y);
+  // finished calculating centre coord
+
+  // init variables
+  Point g_position;
+  Vector arc_velocity = {0.0, 0.0};
+  double linear_velocity, angular_velocity;
+  double total_power, max_power_scale;
+  const double kR = 15.0, kA = 5.0, kB = 50.0, kP = 30.0, kD = 40.0;
+  uint32_t last_d_update_time;  // for derivative
+  double last_angular_velocity = tracking.g_velocity.angle; // for derivative
+  int orig_angle_error_sgn = sgn(target.angle - tracking.global_angle);
+  // radius = fabs(radius);
+  // positive means ccw
+  int turn_dir = -sgn(rad_to_deg(near_angle(atan2(target.y - centre.y, target.x - centre.x), atan2(tracking.y_coord - centre.y, tracking.x_coord - centre.x))));
+  while(true){
+    g_position = {tracking.x_coord, tracking.y_coord};
+    disp = g_position - centre;
+    // printf("local_a: %lf\n", rad_to_deg(disp.get_angle()));
+
+    arc_velocity.set_cartesian(tracking.g_velocity.x, tracking.g_velocity.y);
+    arc_velocity.set_polar(arc_velocity.get_magnitude(), arc_velocity.get_angle() - disp.get_angle());
+
+    // printf("mag: %lf, a: %lf\n", arc_velocity.get_magnitude(), rad_to_deg(arc_velocity.get_angle()));
+    linear_velocity = arc_velocity.get_y();
+    // printf("x: %lf, linear_v: %lf \n", arc_velocity.get_x(), linear_velocity);
+    angular_velocity = linear_velocity / disp.get_magnitude() + kR * log(disp.get_magnitude() / radius) + kA * (tracking.global_angle + disp.get_angle() + (power < 0.0 ? M_PI : 0));
+    // angular_velocity = linear_velocity / disp.get_magnitude();  // this doesn't work because it=sn't always the right sign
+    // angular_velocity = kR * log(disp.get_magnitude() / radius); // sgn is unkonw here as well
+    printf("disp_angle: %lf\n", rad_to_deg(disp.get_angle()));
+    // angular_velocity = kA * (tracking.global_angle + disp.get_angle() + (power < 0.0 ? M_PI : 0));
+
+    // tracking.power_a = turn_dir * (kB * angular_velocity + kP * tracking.g_velocity.angle + kD * (tracking.g_velocity.angle - last_angular_velocity) / (millis() - last_d_update_time));
+    tracking.power_a = turn_dir * angular_velocity;
+    last_d_update_time = millis();
+    last_angular_velocity = tracking.g_velocity.angle;
+    // finished calculating angular velocity
+
+    // printf("Angular displacement velocity: %lf", rad_to_deg(tracking.global_angle + disp.get_angle()));
+    tracking.power_y = power;
+    // power scaling
+    total_power = fabs(tracking.power_y) + fabs(tracking.power_a);
+    if (total_power > max_power){
+      max_power_scale = max_power / total_power;
+      tracking.power_y *= max_power_scale;
+      tracking.power_a *= max_power_scale;
+    }
+    // exit condition
+    if (orig_angle_error_sgn != sgn(target.angle - tracking.global_angle)){
+      drivebase.move_tank(0.0, 0.0);
+      if (brake)  drivebase.brake();
+      printf("Ending move on arc to target X: %f Y: %f A: %f at X: %f Y: %f A: %f \n", target.x, target.y, target.angle, tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle));
+      return;
+    }
+    printf("power_y:%lf, power_a: %lf\n",tracking.power_y, tracking.power_a);
+    drivebase.move_tank(tracking.power_y, tracking.power_a);
+    delay(10);
+  }
+}
+
+/*
+// Start of velocity relation testing
+	master.clear();
+	delay(50);
+	tracking.power_a = 127;
+	while(true){
+		// printf("")
+		// if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_UP))	tracking.power_a += 5;
+		// if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_DOWN))	tracking.power_a -= 5;
+		master.print(0, 0, "pow:%.lf, vel:%.lf", tracking.power_a, rad_to_deg(tracking.g_velocity.angle));
+		printf("pow:%.lf, vel:%.lf, raw:%lf, predicted: %lf\n", tracking.power_a, rad_to_deg(tracking.g_velocity.angle), tracking.g_velocity.angle, 50 * deg_to_rad(1.6));
+		// drivebase.move_tank(0, tracking.power_a);
+		drivebase.move_tank(0, 50);
+		delay(50);
+	}
+// "approximately" x power will result in (1.6x)degrees/sec
+// OR x power will result in (0.02792526803x)radians/sec
+
+// power: 30, velocity: 35 | 1.16
+// power: 60, velocity: 90 | 1.5
+// power: 75, velocity: 120	| 1.6
+// power: 90, velocity: 150 | 1.6
+// power: 95, velocity: 165 | 1.7
+// power: 127, velocity: 230 | 1.8
+
+// End of velocity relation testing
+*/

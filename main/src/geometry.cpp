@@ -45,3 +45,11 @@ Vector Vector::operator +(const Vector& p2) const{
 Vector Vector::operator -(const Vector& p2) const{
     return Vector(x - p2.get_x(), y - p2.get_y(), vector_types::CARTESIAN);
 }
+
+// point operators
+Vector Point::operator +(const Point& p2) const{
+  return Vector(x + p2.x, y + p2.y, vector_types::CARTESIAN);
+}
+Vector Point::operator -(const Point& p2) const{
+  return Vector(x - p2.x, y - p2.y, vector_types::CARTESIAN);
+}

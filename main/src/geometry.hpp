@@ -1,10 +1,6 @@
 #pragma once
 #include "main.h"
 
-struct Point{
-    double x, y;
-};
-
 struct Position{   // stores members variables for a coordinate: x, y and angle    MUST BE DEFINED HERE, OTHERWISE IT'LL CAUSE CIRCULAR HEADER FILE DEPENDENCY OCCURS
     double x, y, angle;
     Position(double x, double y, double angle);
@@ -39,4 +35,11 @@ public:
     Vector operator +(const Vector& p2) const;
     Vector operator -(const Vector& p2) const;
 
+};
+
+struct Point{
+    double x, y;
+    // arithmetic operator overloads
+    Vector operator +(const Point& p2) const;
+    Vector operator -(const Point& p2) const;
 };
