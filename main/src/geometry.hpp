@@ -19,11 +19,13 @@ public:
 
     Vector(const double param_1, const double param_2, vector_types type = vector_types::CARTESIAN);
 
-    // configures point as cartesian vector, with x and y coordinates
+    // configures vector as cartesian vector, with x and y coordinates
     void set_cartesian(const double x, const double y);
 
-    // configures point as polar vector, with an angle and magnitude
+    // configures vector as polar vector, with an angle and magnitude
     void set_polar(const double magnitude, const double direction);
+
+    void rotate(const double rotation_angle);
 
     // getters
     double get_x() const;

@@ -23,6 +23,11 @@ void Vector::set_polar(const double magnitude, const double angle){
   x = magnitude * cos(angle), y = magnitude * sin(angle);
 }
 
+// configures point as polar vector, with an angle and magnitude
+void Vector::rotate(const double rotation_angle){
+  set_polar(magnitude, angle + rotation_angle);
+}
+
 // getters
 double Vector::get_x() const{
     return this-> x;
