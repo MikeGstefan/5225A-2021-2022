@@ -22,6 +22,7 @@ Data::Data(const char* obj_name, const char* id_code, log_types log_type_param, 
 
 Data task_log("tasks.txt","$01", general, log_locations::sd);
 Data controller_queue("controller.txt","$02", general,log_locations::sd);
+Data tracking_data("tracking.txt","$03",general,log_locations::both);
 
 
 
@@ -46,7 +47,10 @@ void Data::log_init(){
     printf("Log File not found\n");
     for(int i = 0; i< Data::obj_list.size(); i++){
       if(Data::obj_list[i]->log_location == log_locations::sd && int(Data::obj_list[i]->log_type) ==1)Data::obj_list[i]->log_location = log_locations::t;
-      if(int(Data::obj_list[i]->log_type) ==2)Data::obj_list[i]->log_type = off;
+      if(int(Data::obj_list[i]->log_type) ==2){
+        if(Data::obj_list[i]->log_location == log_locations::both)Data::obj_list[i]->log_location= log_locations::t;
+        else Data::obj_list[i]->log_type = off;
+      }
     }
     return;
   }

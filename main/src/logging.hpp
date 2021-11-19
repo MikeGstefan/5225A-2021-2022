@@ -63,3 +63,4 @@ const int print_max_time = 2000;
 
 extern Data task_log;
 extern Data controller_queue;
+extern Data tracking_data;

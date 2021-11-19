@@ -11,9 +11,9 @@
 
 using namespace pros;
 
-// extern Task *updateTask = nullptr;
+extern _Task update_t;
 extern Task *moveTask;
-// extern Task *moveTask = nullptr;
+
 
 
 void update(void* params);
@@ -36,6 +36,8 @@ public:
     void wait_for_error(double distance);
     Coord g_velocity;   // global g_velocity stores x, y and angular velocities
     void wait_for_dist(double distance);
+
+    void reset(double x, double y, double a);
 
 };
 struct move_target_params{
