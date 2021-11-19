@@ -1,6 +1,7 @@
 #pragma once
 #include "util.hpp"
 #include "timer.hpp"
+#include "task.hpp"
 #include <iostream>
 #include <vector>
 #include <string>
@@ -11,8 +12,8 @@
 
 using namespace std;
 using namespace pros;
-
-extern Task *printing;
+class _Task;
+extern _Task log_t;
 /*
 1 is print, if there is no sd card, print to terminal
 2 is print. if there is no sd card, ignore
@@ -34,8 +35,8 @@ enum class log_locations
 };
 
 
-void logging_task_start();
-void logging_task_stop();
+// void logging_task_start();
+// void logging_task_stop();
 
 class Data{
 private:
@@ -48,9 +49,8 @@ public:
   static vector<Data*> get_objs();
   void print(const char* format, ...);
   void log_print(char* buffer, int buffer_len);
-  bool will_log();
   Data(const char* obj_name, const char* id_code, log_types log_type_param, log_locations log_location_param);
-  static void log_init();
+  static void init();
 };
 
 
@@ -63,3 +63,4 @@ const int print_max_time = 2000;
 
 extern Data task_log;
 extern Data controller_queue;
+extern Data tracking_data;

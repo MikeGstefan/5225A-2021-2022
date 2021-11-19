@@ -24,11 +24,12 @@ using namespace std;
 
 void initialize() {
 	drivebase.download_curve_data();
-	Data::log_init();
+	Data::init();
 	_Controller::init();
 	delay(150);
 	tracking.x_coord = 0.0, tracking.y_coord = 0.0, tracking.global_angle = 0.0;
-	updateStartTask();
+	// updateStartTask();
+	update_t.start();
 	guiSetup();
 	WAIT_FOR_SCREEN_REFRESH();
 	master.print(2, 0, "Driver: %s", drivebase.drivers[drivebase.cur_driver].name);
