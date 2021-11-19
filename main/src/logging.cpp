@@ -1,5 +1,4 @@
 #include "logging.hpp"
-Task *logging_task = nullptr;
 const char* file_name= "/usd/data.txt";
 const char* file_meta= "/usd/meta_data.txt";
 char queue[queue_size];
@@ -9,6 +8,7 @@ char* back = queue;
 ofstream file;
 uintptr_t queue_start = reinterpret_cast<uintptr_t>(&queue);
 vector<Data*> Data::obj_list;
+_Task log_t(queue_handle, "logging");
 
 Data::Data(const char* obj_name, const char* id_code, log_types log_type_param, log_locations log_location_param){
   this->id = id_code;
@@ -30,18 +30,18 @@ vector<Data*> Data::get_objs(){
   return obj_list;
 }
 
-void logging_task_start(){
-  logging_task = new Task(queue_handle);
-}
-void logging_task_stop(){
-  if(logging_task != nullptr){
-    logging_task->remove();
-    delete logging_task;
-    logging_task = nullptr;
-  }
-}
+// void logging_task_start(){
+//   logging_task = new Task(queue_handle);
+// }
+// void logging_task_stop(){
+//   if(logging_task != nullptr){
+//     logging_task->remove();
+//     delete logging_task;
+//     logging_task = nullptr;
+//   }
+// }
 
-void Data::log_init(){
+void Data::init(){
   file.open(file_meta,ofstream::trunc | ofstream::out);
   if(!file.is_open()){
     printf("Log File not found\n");
@@ -68,7 +68,8 @@ void Data::log_init(){
     file.close();
     file.open(file_name,ofstream::app);
     file.close();
-    logging_task_start();
+    // logging_task_start();
+    log_t.start();
 
   }
 }
