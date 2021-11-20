@@ -52,3 +52,5 @@ struct Coord{   // stores members variables for a coordinate: x, y and angle    
     Coord();
     // default constructor
 };
+
+void drive_side(int l, int r);

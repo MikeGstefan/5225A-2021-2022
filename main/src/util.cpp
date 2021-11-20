@@ -46,3 +46,13 @@ double rad_to_deg(double rad){
 // Coord constructor definition
 Coord::Coord(double x, double y, double angle): x(x), y(y), angle(angle){}
 Coord::Coord(): x(0.0), y(0.0), angle(0.0){}
+
+
+void drive_side(int l, int r){
+  l1.move(l);
+  l2.move(l);
+  l2.move(l);
+  r1.move(r);
+  r2.move(r);
+  r3.move(r);
+}
