@@ -32,6 +32,8 @@ void initialize() {
 	guiSetup();
 	WAIT_FOR_SCREEN_REFRESH();
 	master.print(2, 0, "Driver: %s", drivebase.drivers[drivebase.cur_driver].name);
+
+	gyro.reset();
 }
 
 /**
@@ -79,17 +81,33 @@ void autonomous() {}
  * task, not resume it from where it left off.
  */
 
+ void climb_ramp(int on_ramp_angle, int ramp_levelling_angle){
+ 	gyro.tare_roll();
+	drivebase.move(0, 65, 0);
+	waitUntil(gyro.get_roll() < on_ramp_angle)
+	printf("ON RAMP\n");
+	waitUntil(gyro.get_roll() > ramp_levelling_angle)
+	printf("DONE\n");
+	drivebase.brake();
+ }
+
 int ring_count = 0; //Get rid of this once merged
 double cur_auton = 1;
 
 void opcontrol() {
 	//Reset tracking by stopping task
 	//remove perm. make left and right members of page.
+	//
+	while (gyro.is_calibrating()){
+		printf("Calbrating Gyro...\n");
+		delay(10);
+	}
 
+	climb_ramp(-22, -20);
 
 	while(true){
 		guiBackground();
-		drivebase.handle_input();
+		// drivebase.handle_input();
 
 		if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_B)){ //Update expo util
 			drivebase.update_lookup_table_util();
