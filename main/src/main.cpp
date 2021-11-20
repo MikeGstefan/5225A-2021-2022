@@ -104,6 +104,11 @@ void opcontrol() {
 	}
 
 	climb_ramp(-22, -20);
+	while(true){
+		double error = gyro.get_roll();
+		printf("%f\n", gyro.get_roll());
+		delay(10);
+	}
 
 	while(true){
 		guiBackground();
