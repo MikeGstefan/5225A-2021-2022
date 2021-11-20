@@ -868,34 +868,57 @@ void tank_move_on_arc(Position target, const Point start_pos, const double power
   // init variables
   Point g_position;
   Vector arc_velocity = {0.0, 0.0};
-  double linear_velocity, angular_velocity;
+  double linear_velocity, angular_velocity_target;
   double total_power, max_power_scale;
-  const double kR = 15.0, kA = 5.0, kB = 50.0, kP = 30.0, kD = 40.0;
-  uint32_t last_d_update_time;  // for derivative
+  // robot travels at 220 degrees/second while power is 127; kp = 175
+  // from power to velocity * 1.6
+  // from velocity to power / 1.6 or * 0.625
+  const double pwm_to_vel = 1.6;
+  const double kR = 700.0, kA = pwm_to_vel * 150.0, kB = 1 / pwm_to_vel, kP = 0.7, kD = 150.0;
+
+  uint32_t last_d_update_time = millis();  // for derivative
   double last_angular_velocity = tracking.g_velocity.angle; // for derivative
   int orig_angle_error_sgn = sgn(target.angle - tracking.global_angle);
-  // radius = fabs(radius);
-  // positive means ccw
+  double angle_diff;
+  double radial_diff;
+  radius = fabs(radius);
+  // positive turn_dir means cw
   int turn_dir = -sgn(rad_to_deg(near_angle(atan2(target.y - centre.y, target.x - centre.x), atan2(tracking.y_coord - centre.y, tracking.x_coord - centre.x))));
+  printf("turn_dir: %d\n", turn_dir);
   while(true){
     g_position = {tracking.x_coord, tracking.y_coord};
     disp = g_position - centre;
     // printf("local_a: %lf\n", rad_to_deg(disp.get_angle()));
 
     arc_velocity.set_cartesian(tracking.g_velocity.x, tracking.g_velocity.y);
-    arc_velocity.set_polar(arc_velocity.get_magnitude(), arc_velocity.get_angle() - disp.get_angle());
+    arc_velocity.set_polar(arc_velocity.get_magnitude(), arc_velocity.get_angle() - disp.get_angle() + (turn_dir == -1 ? 0 : M_PI));
+
+    // difference between target angle and current angle taking into account direction of movement and sign of power
+    angle_diff = near_angle(-disp.get_angle() + (turn_dir == -1 ? 0 : M_PI), tracking.global_angle + (power < 0.0 ? M_PI : 0));
 
     // printf("mag: %lf, a: %lf\n", arc_velocity.get_magnitude(), rad_to_deg(arc_velocity.get_angle()));
     linear_velocity = arc_velocity.get_y();
+    // printf("linear_vel: %lf\n", linear_velocity);
     // printf("x: %lf, linear_v: %lf \n", arc_velocity.get_x(), linear_velocity);
-    angular_velocity = linear_velocity / disp.get_magnitude() + kR * log(disp.get_magnitude() / radius) + kA * (tracking.global_angle + disp.get_angle() + (power < 0.0 ? M_PI : 0));
+    // angular_velocity = turn_dir * (linear_velocity / disp.get_magnitude() + kR * log(disp.get_magnitude() / radius)) + kA * angle_diff;
+    radial_diff = disp.get_magnitude() / radius;
+    // signs radial diff
+    if (radial_diff < 1) radial_diff = -1/radial_diff + 1;
+    else radial_diff = radial_diff -1;
+    angular_velocity_target = turn_dir * (linear_velocity / disp.get_magnitude() + kR * radial_diff) + kA * angle_diff;
+    // angular_vel + radial_correction + angle_diff
+    // vel + pwm + pwm
+
+
     // angular_velocity = linear_velocity / disp.get_magnitude();  // this doesn't work because it=sn't always the right sign
-    // angular_velocity = kR * log(disp.get_magnitude() / radius); // sgn is unkonw here as well
-    printf("disp_angle: %lf\n", rad_to_deg(disp.get_angle()));
+    // angular_velocity = kR * log(disp.get_magnitude() / radius); // sgn is unknown here as well
+    // printf("disp_angle: %lf\n", rad_to_deg(disp.get_angle()));
     // angular_velocity = kA * (tracking.global_angle + disp.get_angle() + (power < 0.0 ? M_PI : 0));
+    printf("angular_vel: %lf, radial_error: %lf, radial_correction: %lf, angle_diff: %lf, angle_correction: %lf\n", turn_dir * linear_velocity / disp.get_magnitude(), disp.get_magnitude() - radius, kB * turn_dir * kR * log(disp.get_magnitude() / radius), rad_to_deg(angle_diff), kB * kA * angle_diff);
 
     // tracking.power_a = turn_dir * (kB * angular_velocity + kP * tracking.g_velocity.angle + kD * (tracking.g_velocity.angle - last_angular_velocity) / (millis() - last_d_update_time));
-    tracking.power_a = turn_dir * angular_velocity;
+    tracking.power_a = kB * angular_velocity_target + kP * (angular_velocity_target - tracking.g_velocity.angle) + kD * (tracking.g_velocity.angle - last_angular_velocity) / (millis() - last_d_update_time);
+    printf("p:%lf, d:%lf\n",  kP * (angular_velocity_target - tracking.g_velocity.angle), kD * (tracking.g_velocity.angle - last_angular_velocity));
     last_d_update_time = millis();
     last_angular_velocity = tracking.g_velocity.angle;
     // finished calculating angular velocity

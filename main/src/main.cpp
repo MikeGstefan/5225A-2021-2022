@@ -97,7 +97,7 @@ void opcontrol() {
 	// tank_turn_to_angle(40.0);
 	move.print();
 	printf("DONE\n");
-	tank_move_on_arc({10.0, 10.0, 90.0}, {0.0, 0.0}, 30.0, 127.0);
+	tank_move_on_arc({24.0, 24.0, 90.0}, {0.0, 0.0}, 127.0, 127.0, true);
 
 	// move_on_arc({0.0, 0.0}, {10.0, 10.0, 0.0}, 10.0, true, 127, true, 0.0, 0.0, true);
 	// move_on_arc(const Vector2D start, Coord target, const double radius, const bool positive, const double max_power, const bool angle_relative_to_arc, const double min_angle_percent, const double min_x_line_percent, const bool brake = true);
