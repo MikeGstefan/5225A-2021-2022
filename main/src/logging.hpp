@@ -13,10 +13,16 @@ using namespace std;
 using namespace pros;
 
 extern Task *printing;
+/*
+1 is print, if there is no sd card, print to terminal
+2 is print. if there is no sd card, ignore
+0 is off
+*/
 enum log_types{
   error = 1,
   warning =1,
-  data = 1
+  general =2,
+  off = 0,
 };
 
 enum class log_locations
@@ -55,4 +61,5 @@ const int print_point = 800;
 const int print_max_time = 2000;
 
 
-extern Data imu_data;
+extern Data task_log;
+extern Data controller_queue;

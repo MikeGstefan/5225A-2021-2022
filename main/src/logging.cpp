@@ -1,6 +1,6 @@
 #include "logging.hpp"
 Task *logging_task = nullptr;
-const char* file_name= "/usd/test.txt";
+const char* file_name= "/usd/data.txt";
 const char* file_meta= "/usd/meta_data.txt";
 char queue[queue_size];
 char* front = queue;
@@ -20,7 +20,8 @@ Data::Data(const char* obj_name, const char* id_code, log_types log_type_param, 
 
 
 
-Data imu_data("imu.txt","$01", data, log_locations::sd);
+Data task_log("tasks.txt","$01", general, log_locations::sd);
+Data controller_queue("controller.txt","$02", general,log_locations::sd);
 
 
 
@@ -44,24 +45,28 @@ void Data::log_init(){
   if(!file.is_open()){
     printf("Log File not found\n");
     for(int i = 0; i< Data::obj_list.size(); i++){
-      if(Data::obj_list[i]->log_location == log_locations::sd && int(Data::obj_list[i]->log_type))Data::obj_list[i]->log_location = log_locations::t;
+      if(Data::obj_list[i]->log_location == log_locations::sd && int(Data::obj_list[i]->log_type) ==1)Data::obj_list[i]->log_location = log_locations::t;
+      if(int(Data::obj_list[i]->log_type) ==2)Data::obj_list[i]->log_type = off;
     }
     return;
   }
-  char meta_data[256];
-  for(int i = 0; i< Data::obj_list.size(); i++){
-    if((Data::obj_list[i]->log_location == log_locations::sd || Data::obj_list[i]->log_location == log_locations::both) && int(Data::obj_list[i]->log_type)){
-      strcat(meta_data,Data::obj_list[i]->name);
-      strcat(meta_data,",");
-      strcat(meta_data,Data::obj_list[i]->id);
-      strcat(meta_data,",");
+  else{
+    char meta_data[256];
+    for(int i = 0; i< Data::obj_list.size(); i++){
+      if((Data::obj_list[i]->log_location == log_locations::sd || Data::obj_list[i]->log_location == log_locations::both) && int(Data::obj_list[i]->log_type) !=0){
+        strcat(meta_data,Data::obj_list[i]->name);
+        strcat(meta_data,",");
+        strcat(meta_data,Data::obj_list[i]->id);
+        strcat(meta_data,",");
+      }
     }
+    file.write(meta_data,strlen(meta_data));
+    file.close();
+    file.open(file_name,ofstream::app);
+    file.close();
+    logging_task_start();
+
   }
-  file.write(meta_data,strlen(meta_data));
-  file.close();
-  file.open(file_name,ofstream::app);
-  file.close();
-  logging_task_start();
 }
 
 
@@ -72,7 +77,7 @@ void Data::print(const char* format,...){
   int buffer_len = vsnprintf(buffer,256,format,args) + 3;
   va_end(args);
   // printf("%s, %d\n",this->name,this->log_type);
-  if(int(this->log_type)){
+  if(int(this->log_type) !=0){
     switch(log_location){
       case log_locations::t:
         printf("%s",buffer);

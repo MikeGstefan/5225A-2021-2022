@@ -2,9 +2,16 @@
 #include "main.h"
 #include "config.hpp"
 #include "timer.hpp"
+#include <array>
 #include <cmath>
+#include <iostream>
+#include <memory>
+#include <string>
+#include <tuple>
+#include <vector>
 
 using namespace pros;
+using namespace std;
 
 #define waitUntil(condition) while(!(condition)) delay(10);
 
@@ -18,6 +25,8 @@ using namespace pros;
         delay(delayTime);\
     }\
 }
+
+#define inRange(value, min, max) (min <= value && value <= max)
 
 // enum class claw_state{in,out,neut};
 
