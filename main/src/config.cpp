@@ -21,4 +21,3 @@ pros::Imu gyro(12);
 pros::ADIEncoder LeftEncoder(1, 2, false), RightEncoder(3, 4, true), BackEncoder(5, 6, false);
 pros::ADIDigitalOut claw_in(7), claw_out(8);
 pros::ADIDigitalIn claw_touch({{6, 6}});
-pros::Imu gyro(11);

@@ -105,9 +105,10 @@ void opcontrol() {
 	}
 
 	climb_ramp(-22, -20);
+
+	// PID gyro_correct(1, 0, 0);
 	while(true){
-		double error = gyro.get_roll();
-		printf("%f\n", gyro.get_roll());
+		// printf("%f\n", gyro_correct.compute());
 		delay(10);
 	}
 
