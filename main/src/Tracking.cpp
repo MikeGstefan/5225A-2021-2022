@@ -852,7 +852,7 @@ void tank_turn_to_target(const Point target, const bool brake){
 }
 
 void tank_move_on_arc(Position target, const Point start_pos, const double power, const double max_power, const bool brake){
-  Vector p2 = {start_pos.x, start_pos.y}, p1 = {target.x, target.y};  // p2 and p2 are switched because Nikhil messed up the math
+  Vector p2 = {start_pos.x, start_pos.y}, p1 = {target.x, target.y};  // p2 and p1 are switched because Nikhil messed up the math
 
   Vector disp = p2 - p1;
   target.angle = deg_to_rad(target.angle);
@@ -873,8 +873,13 @@ void tank_move_on_arc(Position target, const Point start_pos, const double power
   // robot travels at 220 degrees/second while power is 127; kp = 175
   // from power to velocity * 1.6
   // from velocity to power / 1.6 or * 0.625
-  const double pwm_to_vel = 1.6;
-  const double kR = 700.0, kA = pwm_to_vel * 150.0, kB = 1 / pwm_to_vel, kP = 0.7, kD = 150.0;
+  // const double pwm_to_vel = 1.6;
+  const double pwm_to_vel = 0.02792526803;
+  const double kR = 25.0; // for ratio
+  // const double kR = 0.75; // for difference
+
+  const double kA = pwm_to_vel * 150.0, kB = 1 / pwm_to_vel, kP = 0.7, kD = 150.0;
+  const double final_angle = atan2(target.y - centre.y, target.x - centre.x); // angle of final position to centre at end of move
 
   uint32_t last_d_update_time = millis();  // for derivative
   double last_angular_velocity = tracking.g_velocity.angle; // for derivative
@@ -900,25 +905,44 @@ void tank_move_on_arc(Position target, const Point start_pos, const double power
     linear_velocity = arc_velocity.get_y();
     // printf("linear_vel: %lf\n", linear_velocity);
     // printf("x: %lf, linear_v: %lf \n", arc_velocity.get_x(), linear_velocity);
-    // angular_velocity = turn_dir * (linear_velocity / disp.get_magnitude() + kR * log(disp.get_magnitude() / radius)) + kA * angle_diff;
+
+    // logarithm version
+    // angular_velocity_target = turn_dir * (linear_velocity / disp.get_magnitude() + kR * log(disp.get_magnitude() / radius)) + kA * angle_diff;
+
+    // linear version
     radial_diff = disp.get_magnitude() / radius;
     // signs radial diff
     if (radial_diff < 1) radial_diff = -1/radial_diff + 1;
     else radial_diff = radial_diff -1;
     angular_velocity_target = turn_dir * (linear_velocity / disp.get_magnitude() + kR * radial_diff) + kA * angle_diff;
-    // angular_vel + radial_correction + angle_diff
-    // vel + pwm + pwm
+
+    // difference version
+    // angular_velocity_target = turn_dir * (linear_velocity / disp.get_magnitude() + kR * (disp.get_magnitude() - radius)) + kA * angle_diff;
+
 
 
     // angular_velocity = linear_velocity / disp.get_magnitude();  // this doesn't work because it=sn't always the right sign
     // angular_velocity = kR * log(disp.get_magnitude() / radius); // sgn is unknown here as well
     // printf("disp_angle: %lf\n", rad_to_deg(disp.get_angle()));
     // angular_velocity = kA * (tracking.global_angle + disp.get_angle() + (power < 0.0 ? M_PI : 0));
-    printf("angular_vel: %lf, radial_error: %lf, radial_correction: %lf, angle_diff: %lf, angle_correction: %lf\n", turn_dir * linear_velocity / disp.get_magnitude(), disp.get_magnitude() - radius, kB * turn_dir * kR * log(disp.get_magnitude() / radius), rad_to_deg(angle_diff), kB * kA * angle_diff);
+#ifndef xy_enable
+    // radial ratio
+    printf("radius:%lf, angular_vel: %lf, radial_error: %lf, radial_correction: %lf, angle_diff: %lf, angle_correction: %lf\n", radius, kB * turn_dir * linear_velocity / disp.get_magnitude(), radius - disp.get_magnitude(), kB * turn_dir * kR * log(disp.get_magnitude() / radius), rad_to_deg(angle_diff), kB * kA * angle_diff);
+    // radial diff
+    // printf("radius:%lf, disp_mag: %lf, angular_vel: %lf, radial_error: %lf, radial_correction: %lf, angle_diff: %lf, angle_correction: %lf\n", radius, disp.get_magnitude(), kB * turn_dir * linear_velocity / disp.get_magnitude(),  turn_dir * (disp.get_magnitude() - radius), kB * turn_dir * kR * (disp.get_magnitude() - radius), rad_to_deg(angle_diff), kB * kA * angle_diff);
 
+#endif
     // tracking.power_a = turn_dir * (kB * angular_velocity + kP * tracking.g_velocity.angle + kD * (tracking.g_velocity.angle - last_angular_velocity) / (millis() - last_d_update_time));
-    tracking.power_a = kB * angular_velocity_target + kP * (angular_velocity_target - tracking.g_velocity.angle) + kD * (tracking.g_velocity.angle - last_angular_velocity) / (millis() - last_d_update_time);
-    printf("p:%lf, d:%lf\n",  kP * (angular_velocity_target - tracking.g_velocity.angle), kD * (tracking.g_velocity.angle - last_angular_velocity));
+
+    // without p and d
+    tracking.power_a = kB * angular_velocity_target;
+
+
+    // tracking.power_a = kB * angular_velocity_target + kP * (angular_velocity_target - tracking.g_velocity.angle) + kD * (tracking.g_velocity.angle - last_angular_velocity) / (millis() - last_d_update_time);
+
+
+
+    // printf("p:%lf, d:%lf\n",  kP * (angular_velocity_target - tracking.g_velocity.angle), kD * (tracking.g_velocity.angle - last_angular_velocity));
     last_d_update_time = millis();
     last_angular_velocity = tracking.g_velocity.angle;
     // finished calculating angular velocity
@@ -933,13 +957,19 @@ void tank_move_on_arc(Position target, const Point start_pos, const double power
       tracking.power_a *= max_power_scale;
     }
     // exit condition
-    if (orig_angle_error_sgn != sgn(target.angle - tracking.global_angle)){
+    // if (orig_angle_error_sgn != sgn(target.angle - tracking.global_angle)){
+    if (rad_to_deg(fabs(final_angle - atan2(tracking.y_coord - centre.y, tracking.x_coord - centre.x))) < 1.5){
+      printf("ang: %lf\n", atan2(tracking.y_coord - centre.y, tracking.x_coord - centre.x));
       drivebase.move_tank(0.0, 0.0);
       if (brake)  drivebase.brake();
       printf("Ending move on arc to target X: %f Y: %f A: %f at X: %f Y: %f A: %f \n", target.x, target.y, target.angle, tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle));
       return;
     }
+#ifdef xy_enable
+    printf("%lf,%lf\n", tracking.x_coord, tracking.y_coord);
+#else
     printf("power_y:%lf, power_a: %lf\n",tracking.power_y, tracking.power_a);
+#endif
     drivebase.move_tank(tracking.power_y, tracking.power_a);
     delay(10);
   }

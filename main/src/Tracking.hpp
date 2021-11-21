@@ -75,5 +75,6 @@ const int min_power_a = 23;
 const int min_power_x = 40;
 const int min_power_y = 17;
 
+#define xy_enable a
 
 // extern bool lineup_first_default;
