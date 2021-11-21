@@ -59,10 +59,16 @@ Button goHome(320, 110, 150, 40, Style::SIZE, Button::SINGLE, &moving, "Home");
 Button goCentre(320, 175, 150, 40, Style::SIZE, Button::SINGLE, &moving, "Centre");
 
 Page intkTest (6, "Intake"); //Test for intake with rings
-Text rings(MID_X, 50, Style::CENTRE, TEXT_LARGE, &intkTest, "Ring Count: %.0f", &ringCount);
-Button resI (30, 90, 120, 80, Style::SIZE, Button::SINGLE, &intkTest, "Reset Motor");
-Button onOff (180, 90, 120, 80, Style::SIZE, Button::SINGLE, &intkTest, "Start/Stop");
-Button resRings (330, 90, 120, 80, Style::SIZE, Button::SINGLE, &intkTest, "Reset Ring Count");
+Slider mogo_power(50,150,450,200,Style::CORNER, Slider::HORIZONTAL, 0,600,&intkTest,"POWER");
+Button mogo_start(100,50,200,100, Style::CORNER, Button::SINGLE, &intkTest, "go");
+Button Stop(250,50,350,100, Style::CORNER, Button::SINGLE, &intkTest, "Stop");
+Text motor_label(50,50,Style::CORNER, TEXT_SMALL,&intkTest, "Motor: 6");
+
+void move_mogo(){
+	intk.move_velocity(mogo_power.val);
+  delay(10);
+	printf("A\n");
+}
 
 Page elastic (7, "Elastic Test"); //Testing the elastics on the lift
 Button runElastic(165, 60, 150, 55, Style::SIZE, Button::SINGLE, &elastic, "Run Elastic Test");
@@ -230,11 +236,11 @@ void guiSetup(){ //Call once at start in initialize()
   nextPage.func = &Page::toNext; //Same thing for all following buttons
 
   runElastic.func = &elasticUtil;
-
+	Stop.func = &dead;
   route1.func = [&auton=cur_auton](){auton = 1;};
   route2.func = [&auton=cur_auton](){auton = 2;};
   route3.func = [&auton=cur_auton](){auton = 3;};
-
+	mogo_start.func = &move_mogo;
   resX.func = &resetX;
   resY.func = &resetY;
   resA.func = &resetA;

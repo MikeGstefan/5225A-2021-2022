@@ -1,6 +1,7 @@
 #pragma once
 #include "drive.hpp"
 #include "Tracking.hpp"
+#include "intake.hpp"
 #include "util.hpp"
 #include <bitset>
 

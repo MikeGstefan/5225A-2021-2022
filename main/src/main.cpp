@@ -87,7 +87,7 @@ void opcontrol() {
 	//Reset tracking by stopping task
 	//remove perm. make left and right members of page.
 
-
+	Page::goTo(6);
 	while(true){
 		guiBackground();
 		drivebase.handle_input();
