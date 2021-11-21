@@ -1,9 +1,12 @@
 #include "drive.hpp"
 #include "gui.hpp"
-#include "lift.hpp"
-#include "logging.hpp"
-#include "Tracking.hpp"
-#include "util.hpp"
+#include "controller.hpp"
+
+// using namespace std;
+#include "task.hpp"
+using namespace std;
+// using namespace pros;
+
 
 /**
  * Runs initialization code. This occurs as soon as the program is started.
@@ -11,13 +14,16 @@
  * All other competition modes are blocked by initialize; it is recommended
  * to keep execution time for this mode under a few seconds.
  */
+
+
 void initialize() {
 	drivebase.download_curve_data();
-	Data::log_init();
-
+	Data::init();
+	_Controller::init();
 	delay(150);
 	tracking.x_coord = 0.0, tracking.y_coord = 0.0, tracking.global_angle = 0.0;
-	updateStartTask();
+	// updateStartTask();
+	update_t.start();
 	guiSetup();
 	WAIT_FOR_SCREEN_REFRESH();
 	master.print(2, 0, "Driver: %s", drivebase.drivers[drivebase.cur_driver].name);
@@ -74,6 +80,7 @@ double cur_auton = 1;
 void opcontrol() {
 	//Reset tracking by stopping task
 	//remove perm. make left and right members of page.
+
 
 	while(true){
 		guiBackground();

@@ -1,6 +1,5 @@
 #include "logging.hpp"
-Task *logging_task = nullptr;
-const char* file_name= "/usd/test.txt";
+const char* file_name= "/usd/data.txt";
 const char* file_meta= "/usd/meta_data.txt";
 char queue[queue_size];
 char* front = queue;
@@ -9,6 +8,7 @@ char* back = queue;
 ofstream file;
 uintptr_t queue_start = reinterpret_cast<uintptr_t>(&queue);
 vector<Data*> Data::obj_list;
+_Task log_t(queue_handle, "logging");
 
 Data::Data(const char* obj_name, const char* id_code, log_types log_type_param, log_locations log_location_param){
   this->id = id_code;
@@ -20,49 +20,58 @@ Data::Data(const char* obj_name, const char* id_code, log_types log_type_param, 
 
 
 
-Data test_log("tracking.txt","$01", error, log_locations::both);
-Data test_log2("pos.txt","$02", warning, log_locations::both);
-Data test_log3("tracking.txt","$03", warning, log_locations::both);
+Data task_log("tasks.txt","$01", general, log_locations::sd);
+Data controller_queue("controller.txt","$02", general,log_locations::sd);
+Data tracking_data("tracking.txt","$03",general,log_locations::both);
+
 
 
 vector<Data*> Data::get_objs(){
   return obj_list;
 }
 
-void logging_task_start(){
-  logging_task = new Task(queue_handle);
-}
-void logging_task_stop(){
-  if(logging_task != nullptr){
-    logging_task->remove();
-    delete logging_task;
-    logging_task = nullptr;
-  }
-}
+// void logging_task_start(){
+//   logging_task = new Task(queue_handle);
+// }
+// void logging_task_stop(){
+//   if(logging_task != nullptr){
+//     logging_task->remove();
+//     delete logging_task;
+//     logging_task = nullptr;
+//   }
+// }
 
-void Data::log_init(){
+void Data::init(){
   file.open(file_meta,ofstream::trunc | ofstream::out);
   if(!file.is_open()){
     printf("Log File not found\n");
     for(int i = 0; i< Data::obj_list.size(); i++){
-      if(Data::obj_list[i]->log_location == log_locations::sd && int(Data::obj_list[i]->log_type))Data::obj_list[i]->log_location = log_locations::t;
+      if(Data::obj_list[i]->log_location == log_locations::sd && int(Data::obj_list[i]->log_type) ==1)Data::obj_list[i]->log_location = log_locations::t;
+      if(int(Data::obj_list[i]->log_type) ==2){
+        if(Data::obj_list[i]->log_location == log_locations::both)Data::obj_list[i]->log_location= log_locations::t;
+        else Data::obj_list[i]->log_type = off;
+      }
     }
     return;
   }
-  char meta_data[256];
-  for(int i = 0; i< Data::obj_list.size(); i++){
-    if((Data::obj_list[i]->log_location == log_locations::sd || Data::obj_list[i]->log_location == log_locations::both) && int(Data::obj_list[i]->log_type)){
-      strcat(meta_data,Data::obj_list[i]->name);
-      strcat(meta_data,",");
-      strcat(meta_data,Data::obj_list[i]->id);
-      strcat(meta_data,",");
+  else{
+    char meta_data[256];
+    for(int i = 0; i< Data::obj_list.size(); i++){
+      if((Data::obj_list[i]->log_location == log_locations::sd || Data::obj_list[i]->log_location == log_locations::both) && int(Data::obj_list[i]->log_type) !=0){
+        strcat(meta_data,Data::obj_list[i]->name);
+        strcat(meta_data,",");
+        strcat(meta_data,Data::obj_list[i]->id);
+        strcat(meta_data,",");
+      }
     }
+    file.write(meta_data,strlen(meta_data));
+    file.close();
+    file.open(file_name,ofstream::app);
+    file.close();
+    // logging_task_start();
+    log_t.start();
+
   }
-  file.write(meta_data,strlen(meta_data));
-  file.close();
-  file.open(file_name,ofstream::app);
-  file.close();
-  logging_task_start();
 }
 
 
@@ -73,7 +82,7 @@ void Data::print(const char* format,...){
   int buffer_len = vsnprintf(buffer,256,format,args) + 3;
   va_end(args);
   // printf("%s, %d\n",this->name,this->log_type);
-  if(int(this->log_type)){
+  if(int(this->log_type) !=0){
     switch(log_location){
       case log_locations::t:
         printf("%s",buffer);
