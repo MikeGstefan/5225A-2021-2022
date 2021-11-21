@@ -56,8 +56,8 @@ class Page{
     //Vars
     static last_touch_e_t touch_status;
     static int16_t x, y;
-    std::function <void()> setupFunc, loopFunc;
-    std::uint32_t bcol;
+    std::function <void()> setup_func, loop_func;
+    std::uint32_t b_col;
     std::string title;
     // Button prev, next;
 
@@ -66,12 +66,12 @@ class Page{
     Page(int, std::string, std::uint32_t = GREY);
 
     //Vars
-    static Page* currentPage;
+    static Page* current_page;
     static std::array<Page*, PAGE_COUNT> pages;
     std::vector<Button*> buttons;
     std::vector<Slider*> sliders;
     std::vector<Text*> texts;
-    int pageNum;
+    int page_num;
 
     //Functions
     static void update_screen_status();
@@ -96,10 +96,10 @@ class Button{
 
   private:
     //Vars
-    std::uint32_t lcol, bcol, dark_bcol;
+    std::uint32_t l_col, b_col, b_col_dark;
     std::string label, label1="";
     int16_t x1, y1, x2, y2, text_x, text_y, text_x1, text_y1;
-    bool lastPressed=0;
+    bool last_pressed=0;
     pressType form; //What type of button
     std::function <void()> func, off_func; //toggle is only for toggle type buttons
 
@@ -140,7 +140,7 @@ class Slider{
 
   private:
     //Vars
-    std::uint32_t lcol, bcol;
+    std::uint32_t l_col, b_col;
     std::string label;
     int16_t x1, y1, x2, y2, text_x, text_y;
     int min, max;
@@ -157,7 +157,7 @@ class Slider{
 
     //Vars
     Page* page;
-    double val=0.0, prevVal;
+    double val=0.0, prev_val;
 
     //Functions
     static Slider* update();
@@ -170,11 +170,11 @@ class Text{
   private:
     int16_t x, y, x1, y1, x2, y2;
     text_format_e_t txt_fmt;
-    std::string label, prevLabel="";
-    std::uint32_t lcol, bcol;
+    std::string label, prev_label="";
+    std::uint32_t l_col, b_col;
     Page* page;
     double* val_ptr=nullptr;
-    double prevVal;
+    double prev_val;
 
     void construct (int16_t, int16_t, Style, text_format_e_t, Page*, std::string, std::uint32_t);
     void draw();

@@ -10,7 +10,7 @@ std::vector<std::bitset<200>> field (200, std::bitset<200>{}); //Initializes to 
 double ringCount, angle, elasticUpTime, elasticDownTime;
 
 //Static Variable Declarations
-Page* Page::currentPage = 0;
+Page* Page::current_page = 0;
 std::array<Page*, PAGE_COUNT> Page::pages = {};
 last_touch_e_t Page::touch_status = E_TOUCH_RELEASED;
 int16_t Page::x = 0, Page::y = 0;
@@ -105,12 +105,12 @@ Button goButton (MID_X, MID_Y, 180, 100, Style::CENTRE, Button::SINGLE, &goSeque
 
 //Functions
 void Page::to_prev(){
-  if (currentPage == pages[1]) go_to(PAGE_COUNT-1);
-  else go_to((currentPage->pageNum)-1);
+  if (current_page == pages[1]) go_to(PAGE_COUNT-1);
+  else go_to((current_page->page_num)-1);
 }
 void Page::to_next(){
-  if (currentPage == pages[PAGE_COUNT-1]) go_to(1);
-  else go_to((currentPage->pageNum)+1);
+  if (current_page == pages[PAGE_COUNT-1]) go_to(1);
+  else go_to((current_page->page_num)+1);
 }
 void prev_driver(){
   if (drivebase.cur_driver == 0) drivebase.cur_driver = drivebase.num_of_drivers - 1;
@@ -145,7 +145,7 @@ void resetA(){
 
 void go(std::uint32_t delay_time=0){
   bool pressed = false;
-  Page* page = Page::currentPage;
+  Page* page = Page::current_page;
   Page::go_to(&goSequence);
 
 
@@ -334,7 +334,7 @@ void flash(std::uint32_t color, std::uint32_t time, std::string text){
 void end_flash (){
   if (Flash.get_time() >= flash_end){
     Flash.reset(false);
-    Page::go_to(Page::currentPage);
+    Page::go_to(Page::current_page);
     std::uint32_t flash_end = std::numeric_limits<std::uint32_t>::max(); //Sets it to max val so it'll never flash at weird times like 0
   }
 }
@@ -372,7 +372,7 @@ std::tuple<int, int, int, int> fixPoints (int p1, int p2,int p3, int p4, Style t
 void Text::construct (int16_t pt1, int16_t pt2, Style type, text_format_e_t size, Page* page_ptr, std::string text, std::uint32_t label_color){
   txt_fmt = size;
   page = page_ptr;
-  lcol = label_color;
+  l_col = label_color;
 
   set_title(pt1, pt2, type, text); //Formats title with proper spacing, color, and size
   page->texts.push_back(this);
@@ -381,9 +381,9 @@ void Text::construct (int16_t pt1, int16_t pt2, Style type, text_format_e_t size
 void Button::construct(int16_t pt1, int16_t pt2, int16_t pt3, int16_t pt4, Style type, pressType prType, Page* page_ptr, std::string text, std::uint32_t background_color, std::uint32_t label_color){
 
     //Saves params to class private vars
-    bcol = background_color;
-    dark_bcol = RGB2COLOR(int(COLOR2R(bcol)*0.8), int(COLOR2G(bcol)*0.8), int(COLOR2B(bcol)*0.8));
-    lcol = label_color;
+    b_col = background_color;
+    b_col_dark = RGB2COLOR(int(COLOR2R(b_col)*0.8), int(COLOR2G(b_col)*0.8), int(COLOR2B(b_col)*0.8));
+    l_col = label_color;
     form = prType;
 
     //Saves the buttons owning page
@@ -427,8 +427,8 @@ Slider::Slider (int16_t pt1, int16_t pt2, int16_t pt3, int16_t pt4, Style type, 
   //Saves params to class private vars
   max = maximum;
   min = minimum;
-  bcol = background_color;
-  lcol = label_color;
+  b_col = background_color;
+  l_col = label_color;
   label = text;
   dir = direction;
 
@@ -441,14 +441,14 @@ Slider::Slider (int16_t pt1, int16_t pt2, int16_t pt3, int16_t pt4, Style type, 
   if (dir == HORIZONTAL){
     text_x = (x1+x2-(label.length()*CHAR_WIDTH_SMALL))/2;
     text_y = y1-CHAR_HEIGHT_SMALL-2;
-    inc.construct(x2+5, y1, x2+25, y2, Style::CORNER, Button::SINGLE, page, ">", lcol, bcol);
-    dec.construct(x1-25, y1, x1-5, y2, Style::CORNER, Button::SINGLE, page, "<", lcol, bcol);
+    inc.construct(x2+5, y1, x2+25, y2, Style::CORNER, Button::SINGLE, page, ">", l_col, b_col);
+    dec.construct(x1-25, y1, x1-5, y2, Style::CORNER, Button::SINGLE, page, "<", l_col, b_col);
   }
   else{
     text_x = (x1+x2-(label.length()*CHAR_WIDTH_SMALL))/2;
     text_y = (y1+y2)/2;
-    inc.construct(x1, y1-25, x2, y1-5, Style::CORNER, Button::SINGLE, page, "▲", lcol, bcol);
-    dec.construct(x1, y2+5, x2, y2+25, Style::CORNER, Button::SINGLE, page, "▼", lcol, bcol);
+    inc.construct(x1, y1-25, x2, y1-5, Style::CORNER, Button::SINGLE, page, "▲", l_col, b_col);
+    dec.construct(x1, y2+5, x2, y2+25, Style::CORNER, Button::SINGLE, page, "▼", l_col, b_col);
   }
 
   //Buttons
@@ -459,10 +459,10 @@ Slider::Slider (int16_t pt1, int16_t pt2, int16_t pt3, int16_t pt4, Style type, 
 Page::Page(int page_number, std::string name, std::uint32_t background_color){
   //Page Constructor
   //Should call Page::go_to() to actually show the page
-  pageNum = page_number;
-  if (pageNum < PAGE_COUNT) pages[pageNum] = this;
-  title = name + " - " + std::to_string(pageNum);
-  bcol = background_color;
+  page_num = page_number;
+  if (page_num < PAGE_COUNT) pages[page_num] = this;
+  title = name + " - " + std::to_string(page_num);
+  b_col = background_color;
 
   buttons.push_back(&prevPage);
   buttons.push_back(&nextPage);
@@ -474,17 +474,17 @@ Page::Page(int page_number, std::string name, std::uint32_t background_color){
 void Page::go_to(Page* page){
   std::array <Page*, PAGE_COUNT>::iterator it = std::find(pages.begin(), pages.end(), page);
   if (it == pages.end() && page != &goSequence) return;
-  clear_screen(page->bcol);
-  currentPage = page; //Saves new page then draws all the buttons on the page
-  screen::set_pen(page->bcol);
-  screen::set_eraser(page->bcol);
+  clear_screen(page->b_col);
+  current_page = page; //Saves new page then draws all the buttons on the page
+  screen::set_pen(page->b_col);
+  screen::set_eraser(page->b_col);
   screen::fill_rect(75, 0, 405, 20);
   screen::set_pen(COLOR_WHITE);
   screen::print(TEXT_SMALL, MID_X-(page->title.length()*CHAR_WIDTH_SMALL)/2, 5, "%s", page->title);
   for (std::vector <Button*>::iterator it = (page->buttons).begin(); it != (page->buttons).end(); it++) (*it)->draw();
   for (std::vector <Slider*>::iterator it = (page->sliders).begin(); it != (page->sliders).end(); it++) (*it)->draw();
   for (std::vector<Text*>::iterator it = (page->texts).begin(); it != (page->texts).end(); it++) (*it)->draw();
-  if(page->setupFunc) page->setupFunc();
+  if(page->setup_func) page->setup_func();
 }
 
 void Page::go_to(int page) {go_to(pages[page]);}
@@ -524,39 +524,39 @@ void Text::set_background (int16_t pt1, int16_t pt2, int16_t pt3, int16_t pt4, S
 }
 
 void Text::set_background (std::uint32_t colour){
-    std::uint32_t prevCol = bcol;
-    bcol = colour;
-    if (prevCol != bcol && page == Page::currentPage) draw(); //Only redraws if color has changed
+    std::uint32_t prevCol = b_col;
+    b_col = colour;
+    if (prevCol != b_col && page == Page::current_page) draw(); //Only redraws if color has changed
 }
 
 void Text::draw(){
   if (x2 != 0 && y2 != 0){
-    screen::set_pen(bcol);
+    screen::set_pen(b_col);
     screen::fill_rect(x1, y1, x2, y2);
-    screen::set_pen(lcol);
-    screen::set_eraser(bcol);
+    screen::set_pen(l_col);
+    screen::set_eraser(b_col);
   }
   else{
-    screen::set_pen(lcol);
-    screen::set_eraser(page->bcol);
+    screen::set_pen(l_col);
+    screen::set_eraser(page->b_col);
   }
 
   if (val_ptr != nullptr){ //If there is a var to print
     char buffer [70];
     sprintf(buffer, label.c_str(), *val_ptr);
     screen::print(txt_fmt, x, y, "%s", buffer);
-    prevVal = *val_ptr;
+    prev_val = *val_ptr;
   }
   else screen::print(txt_fmt, x, y, "%s", label.c_str()); //Plain text (no var)
-  prevLabel = label;
+  prev_label = label;
 }
 
 void Slider::draw(){
-  screen::set_pen(bcol);
-  screen::set_eraser(page->bcol);
+  screen::set_pen(b_col);
+  screen::set_eraser(page->b_col);
   screen::erase_rect(x1, text_y, x2, y2);
   screen::fill_rect(x1, y1, x2, y2);
-  screen::set_pen(lcol);
+  screen::set_pen(l_col);
   if(dir == HORIZONTAL){
     screen::fill_rect(x1+1, y1+1, x1+(x2-x1)*(val-min)/(max-min), y2-1); //Draws Bar
     screen::print(TEXT_SMALL, x1, text_y, "%d", min); //Writes min
@@ -572,9 +572,9 @@ void Slider::draw(){
 }
 
 void Slider::draw_bar(){
-  screen::set_eraser(bcol);
+  screen::set_eraser(b_col);
   screen::erase_rect(x1, y1, x2, y2);
-  screen::set_pen(lcol);
+  screen::set_pen(l_col);
   if(dir == HORIZONTAL){
     screen::fill_rect(x1+1, y1+1, x1+(x2-x1)*(val-min)/(max-min), y2-1);
     screen::print(TEXT_SMALL, text_x, text_y, "%s:%.f", label.c_str(), val);
@@ -588,8 +588,8 @@ void Slider::draw_bar(){
 void Button::draw(){
   if (latched) {draw_pressed(); return;}
 
-  screen::set_pen(bcol);
-  screen::set_eraser(Page::currentPage->bcol);
+  screen::set_pen(b_col);
+  screen::set_eraser(Page::current_page->b_col);
   screen::fill_rect(x1, y1, x2, y2);
 
   int r = std::min(x2-x1, y2-y1)*0.15; //Scale for how rounded the button edges should be
@@ -603,18 +603,18 @@ void Button::draw(){
   screen::fill_circle(x1+r, y2-r, r);
   screen::fill_circle(x2-r, y2-r, r);
 
-  screen::set_pen(lcol);
-  screen::set_eraser(bcol);
+  screen::set_pen(l_col);
+  screen::set_eraser(b_col);
   screen::print(TEXT_SMALL, text_x, text_y, label.c_str());
   screen::print(TEXT_SMALL, text_x1, text_y1, label1.c_str());
 }
 
 void Button::draw_pressed(){
-  screen::set_eraser(page->bcol); //Erases button
+  screen::set_eraser(page->b_col); //Erases button
   screen::erase_rect(x1, y1, x2, y2);
 
-  screen::set_pen(dark_bcol);
-  screen::set_eraser(Page::currentPage->bcol);
+  screen::set_pen(b_col_dark);
+  screen::set_eraser(Page::current_page->b_col);
   int s = std::min(x2-x1, y2-y1)*0.04; //Scale for shrinking button (pressed look)
   screen::fill_rect(x1+s, y1+s, x2-s, y2-s);
 
@@ -629,8 +629,8 @@ void Button::draw_pressed(){
   screen::fill_circle(x1+s+r, y2-s-r, r);
   screen::fill_circle(x2-s-r, y2-s-r, r);
 
-  screen::set_pen(lcol);
-  screen::set_eraser(dark_bcol);
+  screen::set_pen(l_col);
+  screen::set_eraser(b_col_dark);
   screen::print(TEXT_SMALL, text_x, text_y, label.c_str());
   screen::print(TEXT_SMALL, text_x1, text_y1, label1.c_str());
 }
@@ -651,9 +651,9 @@ void Button::create_options(std::vector<Button*> buttons){
 
 
 //Function Handling
-void Page::set_setup_func(std::function <void()> function) {setupFunc = function;}
+void Page::set_setup_func(std::function <void()> function) {setup_func = function;}
 
-void Page::set_loop_func(std::function <void()> function) {loopFunc = function;}
+void Page::set_loop_func(std::function <void()> function) {loop_func = function;}
 
 void Button::set_func(std::function <void()> function) {func = function;}
 
@@ -680,7 +680,7 @@ void Slider::update_val(){
 }
 
 bool Page::pressed(){
-  if (this == Page::currentPage){
+  if (this == Page::current_page){
     if (Page::touch_status == TOUCH_PRESSED || Page::touch_status == TOUCH_HELD) return true;
   }
   return false;
@@ -688,42 +688,42 @@ bool Page::pressed(){
 
 bool Button::pressed(){
   // returns true if the button is currently being pressed
-  if (Page::currentPage->pressed()){
+  if (Page::current_page->pressed()){
     if ((x1 <= Page::x && Page::x <= x2) && (y1 <= Page::y && Page::y <= y2)) return true;
   }
   return false;
 }
 
 bool Button::new_press(){
-  return (pressed() && !lastPressed);
+  return (pressed() && !last_pressed);
 }
 
 bool Button::new_release(){
-  return (!pressed() && lastPressed);
+  return (!pressed() && last_pressed);
 }
 
 void Page::update(){
   Page::update_screen_status();
-  if (currentPage->loopFunc) currentPage->loopFunc();
+  if (current_page->loop_func) current_page->loop_func();
 }
 
 void Text::update(){
-  for (std::vector<Text*>::iterator it = (Page::currentPage->texts).begin(); it != (Page::currentPage->texts).end(); it++){
+  for (std::vector<Text*>::iterator it = (Page::current_page->texts).begin(); it != (Page::current_page->texts).end(); it++){
     Text* text_id = *it;
     if(text_id->val_ptr != nullptr){ //If variable given
-      if(text_id->prevVal != *(text_id->val_ptr)) text_id->draw(); //If var has changed value
+      if(text_id->prev_val != *(text_id->val_ptr)) text_id->draw(); //If var has changed value
     }
-    if(text_id->prevLabel != text_id->label) text_id->draw(); //If text has changed
+    if(text_id->prev_label != text_id->label) text_id->draw(); //If text has changed
   }
 }
 
 Slider* Slider::update(){
-  for (std::vector <Slider*>::iterator it = (Page::currentPage->sliders).begin(); it != (Page::currentPage->sliders).end(); it++){
+  for (std::vector <Slider*>::iterator it = (Page::current_page->sliders).begin(); it != (Page::current_page->sliders).end(); it++){
     Slider* sl_id = *it;
     sl_id->update_val();
-    if (sl_id->val != sl_id->prevVal){
+    if (sl_id->val != sl_id->prev_val){
       sl_id->draw();
-      sl_id->prevVal = sl_id->val;
+      sl_id->prev_val = sl_id->val;
       return sl_id;
     }
   }
@@ -732,26 +732,26 @@ Slider* Slider::update(){
 
 Button* Button::update(){
   //Loops through the list of buttons on the current page to check for presses
-  for (std::vector <Button*>::iterator it = (Page::currentPage->buttons).begin(); it != (Page::currentPage->buttons).end(); it++){
+  for (std::vector <Button*>::iterator it = (Page::current_page->buttons).begin(); it != (Page::current_page->buttons).end(); it++){
     Button* btn_id = *it;
 
     if (btn_id->form == Button::SINGLE){ //Runs once when pressed
       if (btn_id->new_press()){
-        btn_id->lastPressed = 1;
+        btn_id->last_pressed = 1;
         btn_id->draw_pressed();
         btn_id->run_func();
         return btn_id;
       }
 
       else if (btn_id->new_release()){
-        btn_id->lastPressed = 0;
+        btn_id->last_pressed = 0;
         btn_id->draw();
       }
     }
 
     else if (btn_id->form == Button::LATCH){ //Runs while latched
       if (btn_id->new_press()){
-        btn_id->lastPressed = 1;
+        btn_id->last_pressed = 1;
         btn_id->latched = !btn_id->latched; //Toggles the latch
 
         //Draws button's new state
@@ -771,7 +771,7 @@ Button* Button::update(){
       }
 
       else if (btn_id->new_release()){
-        btn_id->lastPressed = 0;
+        btn_id->last_pressed = 0;
       }
       if(btn_id->latched) btn_id->run_func();
 
@@ -779,14 +779,14 @@ Button* Button::update(){
 
     else if (btn_id->form == Button::REPEAT){ //Keeps running while pressed. Not blocking
       if (btn_id->new_press()){
-        btn_id->lastPressed = 1;
+        btn_id->last_pressed = 1;
         btn_id->draw_pressed();
         btn_id->run_func();
         return btn_id;
       }
 
       else if (btn_id->new_release()){
-        btn_id->lastPressed = 0;
+        btn_id->last_pressed = 0;
         btn_id->draw();
       }
 
@@ -795,7 +795,7 @@ Button* Button::update(){
 
     else if (btn_id->form == Button::TOGGLE){ //Runs once when turned on
       if (btn_id->new_press()){
-        btn_id->lastPressed = 1;
+        btn_id->last_pressed = 1;
         btn_id->on = !btn_id->on;
 
         //Draws button's new state
@@ -817,7 +817,7 @@ Button* Button::update(){
       }
 
       else if (btn_id->new_release()){
-        btn_id->lastPressed = 0;
+        btn_id->last_pressed = 0;
         btn_id->draw();
       }
     }
