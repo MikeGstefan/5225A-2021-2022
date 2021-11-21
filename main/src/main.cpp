@@ -82,15 +82,30 @@ void autonomous() {}
  * task, not resume it from where it left off.
  */
 
- void climb_ramp(int on_ramp_angle, int ramp_levelling_angle){
- 	gyro.tare_roll();
-	drivebase.move(0, 65, 0);
+void climb_ramp(int on_ramp_angle, int ramp_levelling_angle){
+	while (gyro.is_calibrating()){ //Makes sure it's calibrated before started (should already be)
+		printf("Calbrating Gyro...\n");
+		delay(10);
+	}
+
+	PID gyro_correct(1, 0, 0, 0);
+
+	gyro.tare_roll();
+	// drivebase.move(0, 65, 0);
 	waitUntil(gyro.get_roll() < on_ramp_angle)
 	printf("ON RAMP\n");
-	waitUntil(gyro.get_roll() > ramp_levelling_angle)
+
+	while(true){
+		gyro_correct.compute(gyro.get_roll(), ramp_levelling_angle);
+		printf("%f\n", gyro_correct.get_output());
+		// drivebase.move(0, gyro_correct.get_output(), 0);
+
+		delay(10);
+	}
+
 	printf("DONE\n");
 	drivebase.brake();
- }
+}
 
 int ring_count = 0; //Get rid of this once merged
 double cur_auton = 1;
@@ -98,19 +113,13 @@ double cur_auton = 1;
 void opcontrol() {
 	//Reset tracking by stopping task
 	//remove perm. make left and right members of page.
-	//
-	while (gyro.is_calibrating()){
+
+	while (gyro.is_calibrating()){ //Finishes calibrating gyro before program starts
 		printf("Calbrating Gyro...\n");
 		delay(10);
 	}
 
 	climb_ramp(-22, -20);
-
-	// PID gyro_correct(1, 0, 0);
-	while(true){
-		// printf("%f\n", gyro_correct.compute());
-		delay(10);
-	}
 
 	while(true){
 		guiBackground();
