@@ -54,7 +54,7 @@ Page moving (5, "Moving"); //Moves to target, home, or centre
 Slider xVal(35, 45, 250, 40, Style::SIZE, Slider::HORIZONTAL, 0, 144, &moving, "X");
 Slider yVal(35, 110, 250, 40, Style::SIZE, Slider::HORIZONTAL, 0, 144, &moving, "Y");
 Slider aVal(35, 175, 250, 40, Style::SIZE, Slider::HORIZONTAL, 0, 144, &moving, "A");
-Button goToXYA(320, 45, 150, 40, Style::SIZE, Button::SINGLE, &moving, "Target");
+Button go_toXYA(320, 45, 150, 40, Style::SIZE, Button::SINGLE, &moving, "Target");
 Button goHome(320, 110, 150, 40, Style::SIZE, Button::SINGLE, &moving, "Home");
 Button goCentre(320, 175, 150, 40, Style::SIZE, Button::SINGLE, &moving, "Centre");
 
@@ -72,7 +72,7 @@ Text downTime(MID_X, 180, Style::CENTRE, TEXT_SMALL, &elastic, "Down Time: %.0f"
 Page liftMove (8, "Lift"); //Moving the lift to an xyz position
 Slider liftXVal(35, 65, 250, 40, Style::SIZE, Slider::HORIZONTAL, 0, 144, &liftMove, "X");
 Slider liftYVal(35, 150, 250, 40, Style::SIZE, Slider::HORIZONTAL, 0, 144, &liftMove, "Y");
-Button goToLiftXY(400, 128, 70, 50, Style::CENTRE, Button::SINGLE, &liftMove, "Move Lift To Target");
+Button go_toLiftXY(400, 128, 70, 50, Style::CENTRE, Button::SINGLE, &liftMove, "Move Lift To Target");
 
 Page liftStates (9, "Lift States"); //Moving to various lift states
 Button Neutral (15, 45, 100, 75, Style::SIZE, Button::SINGLE, &liftStates, "Neutral"); //Names are caps to avoid conflicts
@@ -104,21 +104,21 @@ Page goSequence (PAGE_COUNT+1, "GO SEQUENCE");
 Button goButton (MID_X, MID_Y, 180, 100, Style::CENTRE, Button::SINGLE, &goSequence, "CONTINUE");
 
 //Functions
-void Page::toPrev(){
-  if (currentPage == pages[1]) goTo(PAGE_COUNT-1);
-  else goTo((currentPage->pageNum)-1);
+void Page::to_prev(){
+  if (currentPage == pages[1]) go_to(PAGE_COUNT-1);
+  else go_to((currentPage->pageNum)-1);
 }
-void Page::toNext(){
-  if (currentPage == pages[PAGE_COUNT-1]) goTo(1);
-  else goTo((currentPage->pageNum)+1);
+void Page::to_next(){
+  if (currentPage == pages[PAGE_COUNT-1]) go_to(1);
+  else go_to((currentPage->pageNum)+1);
 }
-void prevDriver(){
+void prev_driver(){
   if (drivebase.cur_driver == 0) drivebase.cur_driver = drivebase.num_of_drivers - 1;
   else drivebase.cur_driver--;
   WAIT_FOR_SCREEN_REFRESH();
   master.print(2, 0, "Driver: %s          ", drivebase.drivers[drivebase.cur_driver].name);
 }
-void nextDriver(){
+void next_driver(){
   drivebase.cur_driver++;
   drivebase.cur_driver %= drivebase.num_of_drivers;
   WAIT_FOR_SCREEN_REFRESH();
@@ -146,27 +146,27 @@ void resetA(){
 void go(std::uint32_t delay_time=0){
   bool pressed = false;
   Page* page = Page::currentPage;
-  Page::goTo(&goSequence);
+  Page::go_to(&goSequence);
 
 
   while(goButton.pressed()){ //Wait for Release
-    Page::updateScreenStatus();
+    Page::update_screen_status();
     delay(2);
   }
   while(!goButton.pressed()){ //Wait for Press
-    Page::updateScreenStatus();
+    Page::update_screen_status();
     delay(2);
   }
   while(goButton.pressed()){ //Wait for Release
-    Page::updateScreenStatus();
+    Page::update_screen_status();
     delay(2);
   }
 
   delay(delay_time);
-  Page::goTo(page);
+  Page::go_to(page);
 }
 
-void tuningEncoder(){
+void tuning_encoder(){
   printf("\n\nPlease spin the encoder any number of rotations.\n");
   printf("Press go when ready.\n");
   resetX();
@@ -179,7 +179,7 @@ void tuningEncoder(){
   printf("The right encoder found %d ticks\n", RightEncoder.get_value() % 360);
   printf("The back encoder found %d ticks\n", BackEncoder.get_value() % 360);
 }
-void tuningStrafe(){
+void tuning_strafe(){
   printf("\n\nPlease run the robot along a known straight line in the y-axis.\n");
   printf("Press go when ready.\n");
   resetX();
@@ -192,7 +192,7 @@ void tuningStrafe(){
   else if (tracking.x_coord > 0) printf("The robot thinks it strafed %.2f inches to the right.\nConsider turning the back tracking wheel clockwise\n", tracking.x_coord);
   else printf("The robot knows it strafed a perfect %.2f inches\n", tracking.x_coord); //Printing the tracking val just in case something went wrong. But it should always be 0
 }
-void tuningGrid(){
+void tuning_grid(){
   printf("\n\nPlease move the robot haphazardly around the field. Then return it back to the starting point\n");
   printf("Press go when ready.\n");
   resetX();
@@ -205,7 +205,7 @@ void tuningGrid(){
   printf("The robot thinks it deviated %.2f inches %s\n", fabs(tracking.y_coord), (tracking.y_coord < 0 ? "back" : "forward"));
   printf("The robot thinks it deviated %.2f degrees %s\n", fabs(rad_to_deg(tracking.global_angle)), (tracking.global_angle < 0 ? "counter-clockwise" : "clockwise"));
 }
-void tuningTurns(){
+void tuning_turns(){
   printf("\n\nPlease spin the robot any number of rotations. Then return it back to the starting point\n");
   printf("Press go when ready.\n");
   resetX();
@@ -224,22 +224,22 @@ void tuningTurns(){
   else printf("This seems pretty accurate. It's %d degrees off of %.1f rotations.\n", turned >= fmod(rotations*360, 360) ? turned : lost, rotations);
 }
 
-void guiSetup(){ //Call once at start in initialize()
+void gui_setup(){ //Call once at start in initialize()
 
-  prevPage.func = &Page::toPrev; //Gives the left and right buttons their functions
-  nextPage.func = &Page::toNext; //Same thing for all following buttons
+  prevPage.set_func(&Page::to_prev); //Gives the left and right buttons their functions
+  nextPage.set_func(&Page::to_next); //Same thing for all following buttons
 
-  runElastic.func = &elasticUtil;
+  runElastic.set_func(&elasticUtil);
 
-  route1.func = [&auton=cur_auton](){auton = 1;};
-  route2.func = [&auton=cur_auton](){auton = 2;};
-  route3.func = [&auton=cur_auton](){auton = 3;};
+  route1.set_func([&auton=cur_auton](){auton = 1;});
+  route2.set_func([&auton=cur_auton](){auton = 2;});
+  route3.set_func([&auton=cur_auton](){auton = 3;});
 
-  resX.func = &resetX;
-  resY.func = &resetY;
-  resA.func = &resetA;
+  resX.set_func(&resetX);
+  resY.set_func(&resetY);
+  resA.set_func(&resetA);
   for (int x = 0; x<200; x++) field[x].reset();
-  track.setupFunc = [](){
+  track.set_setup_func([](){
     screen::set_pen(COLOR_WHITE);
     screen::draw_rect(270, 30, 470, 230);
     screen::draw_line(370, 30, 370, 230);
@@ -247,35 +247,35 @@ void guiSetup(){ //Call once at start in initialize()
     for (int x = 0; x<200; x++){
       for (int y = 0; y<200; y++) if(field[x].test(y)) screen::draw_pixel(270+x, 230-y); //Draws saved tracking values
     }
-  };
-  track.loopFunc = [](){
+  });
+  track.set_loop_func([](){
     screen::set_pen(COLOR_RED);
     screen::draw_pixel(270+(200*tracking.x_coord/144), 230-(200*tracking.y_coord/144)); //Scales to screen
-  };
+  });
 
-  goToXYA.func = [&x=xVal.val, &y=yVal.val, &a=aVal.val](){go(); move_to_target_sync(x, y, a, false);};
-  goHome.func = [](){go(); move_to_target_sync(0, 0, 0, false);};
-  goCentre.func = [](){go(); move_to_target_sync(72, 72, 0, false);};
+  go_toXYA.set_func([&x=xVal.val, &y=yVal.val, &a=aVal.val](){go(); move_to_target_sync(x, y, a, false);});
+  goHome.set_func([](){go(); move_to_target_sync(0, 0, 0, false);});
+  goCentre.set_func([](){go(); move_to_target_sync(72, 72, 0, false);});
 
-  Button::createOptions({&route1, &route2, &route3}); //Makes them exclusive, only one can be selected at a time
+  Button::create_options({&route1, &route2, &route3}); //Makes them exclusive, only one can be selected at a time
 
-  prevDrivr.func = &prevDriver;
-  nextDrivr.func = &nextDriver;
-  drivrName.setBackground(130, 70, 350, 190, Style::CORNER);
+  prevDrivr.set_func(&prev_driver);
+  nextDrivr.set_func(&next_driver);
+  drivrName.set_background(130, 70, 350, 190, Style::CORNER);
 
-  turnEncode.func = &tuningEncoder;
-  perpErr.func = &tuningStrafe;
-  grid.func = &tuningGrid;
-  spin360.func = &tuningTurns;
+  turnEncode.set_func(&tuning_encoder);
+  perpErr.set_func(&tuning_strafe);
+  grid.set_func(&tuning_grid);
+  spin360.set_func(&tuning_turns);
 
-  tempfl.setBackground(40, 60, 70, 50, Style::SIZE);
-  tempbl.setBackground(150, 60, 70, 50, Style::SIZE);
-  tempfr.setBackground(260, 60, 70, 50, Style::SIZE);
-  tempbr.setBackground(370, 60, 70, 50, Style::SIZE);
-  tempc.setBackground(40, 150, 70, 50, Style::SIZE);
-  tempf.setBackground(150, 150, 70, 50, Style::SIZE);
-  tempi.setBackground(260, 150, 70, 50, Style::SIZE);
-  tempu.setBackground(370, 150, 70, 50, Style::SIZE);
+  tempfl.set_background(40, 60, 70, 50, Style::SIZE);
+  tempbl.set_background(150, 60, 70, 50, Style::SIZE);
+  tempfr.set_background(260, 60, 70, 50, Style::SIZE);
+  tempbr.set_background(370, 60, 70, 50, Style::SIZE);
+  tempc.set_background(40, 150, 70, 50, Style::SIZE);
+  tempf.set_background(150, 150, 70, 50, Style::SIZE);
+  tempi.set_background(260, 150, 70, 50, Style::SIZE);
+  tempu.set_background(370, 150, 70, 50, Style::SIZE);
   //hate that i have to do it like this
   motors[0] = {&front_l, &tempfl, "FRONT LEFT", 0};
   motors[1] = {&front_r, &tempbl, "FRONT RIGHT", 0};
@@ -286,12 +286,12 @@ void guiSetup(){ //Call once at start in initialize()
   motors[6] = {&intk, &tempi, "INTAKE", 0};
   motors[7] = {&uptk, &tempu, "UPTAKE", 0};
 
-  Page::goTo(1); //Sets it to page 1, page num can be changed if you really need to, but don't delete this.
+  Page::go_to(1); //Sets it to page 1, page num can be changed if you really need to, but don't delete this.
 }
 
 //Utility to get coordinates for aligned objects, (buttons, sliders...) of same size
 //Put in how many of buttons/sliders you want, and get properly spaced coords
-void alignedCoords (int x_objects, int y_objects, int x_btn, int y_btn, int x_range, int y_range){
+void aligned_coords (int x_objects, int y_objects, int x_btn, int y_btn, int x_range, int y_range){
 
   double x_space = (x_range-x_objects*x_btn)/(x_objects+1.0);
   double y_space = (y_range-y_objects*y_btn)/(y_objects+1.0);
@@ -315,7 +315,7 @@ void alignedCoords (int x_objects, int y_objects, int x_btn, int y_btn, int x_ra
 
 //Flashing
 void flash(std::uint32_t color, std::uint32_t time, std::string text){
-  Page::clearScreen(color);
+  Page::clear_screen(color);
   screen::set_pen(~color&0xFFFFFF); //Makes text inverted color of background so it is always visible
   screen::set_eraser(color);
 
@@ -334,7 +334,7 @@ void flash(std::uint32_t color, std::uint32_t time, std::string text){
 void end_flash (){
   if (Flash.get_time() >= flash_end){
     Flash.reset(false);
-    Page::goTo(Page::currentPage);
+    Page::go_to(Page::currentPage);
     std::uint32_t flash_end = std::numeric_limits<std::uint32_t>::max(); //Sets it to max val so it'll never flash at weird times like 0
   }
 }
@@ -374,7 +374,7 @@ void Text::construct (int16_t pt1, int16_t pt2, Style type, text_format_e_t size
   page = page_ptr;
   lcol = label_color;
 
-  setTitle(pt1, pt2, type, text); //Formats title with proper spacing, color, and size
+  set_title(pt1, pt2, type, text); //Formats title with proper spacing, color, and size
   page->texts.push_back(this);
 }
 
@@ -452,13 +452,13 @@ Slider::Slider (int16_t pt1, int16_t pt2, int16_t pt3, int16_t pt4, Style type, 
   }
 
   //Buttons
-  dec.func = [&value=val, &minimum=this->min](){if(value != minimum) value--;};
-  inc.func = [&value=val, &maximum=this->max](){if (value != maximum) value++;};
+  dec.set_func([&value=val, &minimum=this->min](){if(value != minimum) value--;});
+  inc.set_func([&value=val, &maximum=this->max](){if (value != maximum) value++;});
 }
 
 Page::Page(int page_number, std::string name, std::uint32_t background_color){
   //Page Constructor
-  //Should call Page::goTo() to actually show the page
+  //Should call Page::go_to() to actually show the page
   pageNum = page_number;
   if (pageNum < PAGE_COUNT) pages[pageNum] = this;
   title = name + " - " + std::to_string(pageNum);
@@ -471,10 +471,10 @@ Page::Page(int page_number, std::string name, std::uint32_t background_color){
 }
 
 //Methods
-void Page::goTo(Page* page){
+void Page::go_to(Page* page){
   std::array <Page*, PAGE_COUNT>::iterator it = std::find(pages.begin(), pages.end(), page);
   if (it == pages.end() && page != &goSequence) return;
-  clearScreen(page->bcol);
+  clear_screen(page->bcol);
   currentPage = page; //Saves new page then draws all the buttons on the page
   screen::set_pen(page->bcol);
   screen::set_eraser(page->bcol);
@@ -487,16 +487,14 @@ void Page::goTo(Page* page){
   if(page->setupFunc) page->setupFunc();
 }
 
-void Page::goTo(int page){
-  goTo(pages[page]);
-}
+void Page::go_to(int page) {go_to(pages[page]);}
 
-void Page::clearScreen(std::uint32_t color){
+void Page::clear_screen(std::uint32_t color){
   screen::set_pen(color);
   screen::fill_rect(PAGE_LEFT, PAGE_UP, PAGE_RIGHT, PAGE_DOWN);
 }
 
-void Text::setTitle (int16_t pt1, int16_t pt2, Style type, std::string text){
+void Text::set_title (int16_t pt1, int16_t pt2, Style type, std::string text){
   label = text;
   x = pt1;
   y = pt2;
@@ -520,12 +518,12 @@ void Text::setTitle (int16_t pt1, int16_t pt2, Style type, std::string text){
 
 }
 
-void Text::setBackground (int16_t pt1, int16_t pt2, int16_t pt3, int16_t pt4, Style type, std::uint32_t colour){
+void Text::set_background (int16_t pt1, int16_t pt2, int16_t pt3, int16_t pt4, Style type, std::uint32_t colour){
     std::tie(x1, y1, x2, y2) = fixPoints(pt1, pt2, pt3, pt4, type);
-    setBackground(colour);
+    set_background(colour);
 }
 
-void Text::setBackground (std::uint32_t colour){
+void Text::set_background (std::uint32_t colour){
     std::uint32_t prevCol = bcol;
     bcol = colour;
     if (prevCol != bcol && page == Page::currentPage) draw(); //Only redraws if color has changed
@@ -573,7 +571,7 @@ void Slider::draw(){
   }
 }
 
-void Slider::drawBar(){
+void Slider::draw_bar(){
   screen::set_eraser(bcol);
   screen::erase_rect(x1, y1, x2, y2);
   screen::set_pen(lcol);
@@ -588,7 +586,7 @@ void Slider::drawBar(){
 }
 
 void Button::draw(){
-  if (latched) {drawPressed(); return;}
+  if (latched) {draw_pressed(); return;}
 
   screen::set_pen(bcol);
   screen::set_eraser(Page::currentPage->bcol);
@@ -611,7 +609,7 @@ void Button::draw(){
   screen::print(TEXT_SMALL, text_x1, text_y1, label1.c_str());
 }
 
-void Button::drawPressed(){
+void Button::draw_pressed(){
   screen::set_eraser(page->bcol); //Erases button
   screen::erase_rect(x1, y1, x2, y2);
 
@@ -637,7 +635,7 @@ void Button::drawPressed(){
   screen::print(TEXT_SMALL, text_x1, text_y1, label1.c_str());
 }
 
-void Button::createOptions(std::vector<Button*> buttons){
+void Button::create_options(std::vector<Button*> buttons){
   std::vector<Button*>::iterator it, it2; //For clarity
 
   for (it = buttons.begin(); it != buttons.end(); it++){
@@ -651,19 +649,27 @@ void Button::createOptions(std::vector<Button*> buttons){
   }
 }
 
-void Button::runTask(){
-  if (func) func();
-}
+
+//Function Handling
+void Page::set_setup_func(std::function <void()> function) {setupFunc = function;}
+
+void Page::set_loop_func(std::function <void()> function) {loopFunc = function;}
+
+void Button::set_func(std::function <void()> function) {func = function;}
+
+void Button::set_off_func(std::function <void()> function) {off_func = function;}
+
+void Button::run_func(){ if (func) func();}
 
 //Updating data and presses
-void Page::updateScreenStatus(){
+void Page::update_screen_status(){
   screen_touch_status_s_t status = c::screen_touch_status();
   touch_status = status.touch_status;
   x = status.x;
   y = status.y;
 }
 
-void Slider::updateVal(){
+void Slider::update_val(){
   // changes value if being touched
   if (page->pressed()){
     if ((x1 <= Page::x && Page::x <= x2) && (y1 <= Page::y && Page::y <= y2)){
@@ -688,16 +694,16 @@ bool Button::pressed(){
   return false;
 }
 
-bool Button::newPress(){
+bool Button::new_press(){
   return (pressed() && !lastPressed);
 }
 
-bool Button::newRelease(){
+bool Button::new_release(){
   return (!pressed() && lastPressed);
 }
 
 void Page::update(){
-  Page::updateScreenStatus();
+  Page::update_screen_status();
   if (currentPage->loopFunc) currentPage->loopFunc();
 }
 
@@ -714,7 +720,7 @@ void Text::update(){
 Slider* Slider::update(){
   for (std::vector <Slider*>::iterator it = (Page::currentPage->sliders).begin(); it != (Page::currentPage->sliders).end(); it++){
     Slider* sl_id = *it;
-    sl_id->updateVal();
+    sl_id->update_val();
     if (sl_id->val != sl_id->prevVal){
       sl_id->draw();
       sl_id->prevVal = sl_id->val;
@@ -730,21 +736,21 @@ Button* Button::update(){
     Button* btn_id = *it;
 
     if (btn_id->form == Button::SINGLE){ //Runs once when pressed
-      if (btn_id->newPress()){
+      if (btn_id->new_press()){
         btn_id->lastPressed = 1;
-        btn_id->drawPressed();
-        btn_id->runTask();
+        btn_id->draw_pressed();
+        btn_id->run_func();
         return btn_id;
       }
 
-      else if (btn_id->newRelease()){
+      else if (btn_id->new_release()){
         btn_id->lastPressed = 0;
         btn_id->draw();
       }
     }
 
     else if (btn_id->form == Button::LATCH){ //Runs while latched
-      if (btn_id->newPress()){
+      if (btn_id->new_press()){
         btn_id->lastPressed = 1;
         btn_id->latched = !btn_id->latched; //Toggles the latch
 
@@ -756,39 +762,39 @@ Button* Button::update(){
             (*option_it)->draw();
           }
 
-          btn_id->drawPressed();
-          btn_id->runTask();
+          btn_id->draw_pressed();
+          btn_id->run_func();
 
         }
         else btn_id->draw(); //New press deselected it
         return btn_id;
       }
 
-      else if (btn_id->newRelease()){
+      else if (btn_id->new_release()){
         btn_id->lastPressed = 0;
       }
-      if(btn_id->latched) btn_id->runTask();
+      if(btn_id->latched) btn_id->run_func();
 
     }
 
     else if (btn_id->form == Button::REPEAT){ //Keeps running while pressed. Not blocking
-      if (btn_id->newPress()){
+      if (btn_id->new_press()){
         btn_id->lastPressed = 1;
-        btn_id->drawPressed();
-        btn_id->runTask();
+        btn_id->draw_pressed();
+        btn_id->run_func();
         return btn_id;
       }
 
-      else if (btn_id->newRelease()){
+      else if (btn_id->new_release()){
         btn_id->lastPressed = 0;
         btn_id->draw();
       }
 
-      if (btn_id->pressed()) btn_id->runTask();
+      if (btn_id->pressed()) btn_id->run_func();
     }
 
     else if (btn_id->form == Button::TOGGLE){ //Runs once when turned on
-      if (btn_id->newPress()){
+      if (btn_id->new_press()){
         btn_id->lastPressed = 1;
         btn_id->on = !btn_id->on;
 
@@ -802,15 +808,15 @@ Button* Button::update(){
             }
           }
 
-          btn_id->runTask();
+          btn_id->run_func();
         }
         else if (btn_id->off_func) btn_id->off_func(); //Just turned off
 
-        btn_id->drawPressed();
+        btn_id->draw_pressed();
         return btn_id;
       }
 
-      else if (btn_id->newRelease()){
+      else if (btn_id->new_release()){
         btn_id->lastPressed = 0;
         btn_id->draw();
       }
@@ -822,7 +828,7 @@ Button* Button::update(){
 }
 
 bool temp_flashed = false; //Is never set back to false. Once it warns the driver, it won't again until program restarted
-void guiBackground(){ //To be called continously
+void gui_background(){ //To be called continously
   //Saving Field coords
   int x = 200*tracking.x_coord/144, y = 200*tracking.y_coord/144;
   if(inRange(x, 0, 199) && inRange(y, 0, 199)) field[x].set(y); //Saves position (x,y) to as tracked
@@ -836,13 +842,13 @@ void guiBackground(){ //To be called continously
 
   ringCount = ring_count;
   angle = fmod(rad_to_deg(tracking.global_angle), 360);
-  drivrName.setTitle (MID_X, MID_Y, Style::CENTRE, drivebase.drivers[drivebase.cur_driver].name);
+  drivrName.set_title (MID_X, MID_Y, Style::CENTRE, drivebase.drivers[drivebase.cur_driver].name);
 
   if (!Flash.playing() && !temp_flashed){ //Overheating Motors
     temp_flashed = true;
     for (it = motors.begin(); it != motors.end(); it++){
       if (std::get<3>(*it) >= 55){
-        Page::goTo(&temps);
+        Page::go_to(&temps);
         char buffer[50];
         sprintf(buffer, "%s motor is at %.0fC\n", std::get<2>(*it).c_str(), std::get<3>(*it));
         flash(COLOR_RED, 10000, buffer);
@@ -854,10 +860,10 @@ void guiBackground(){ //To be called continously
   for (it = motors.begin(); it != motors.end(); it++){ //Setting motor background colors
     Text* text = std::get<1>(*it);
     double temp = std::get<3>(*it);
-    if (temp <= 25) text->setBackground(COLOR_DODGER_BLUE); //...20, 25
-    else if (temp <= 35) text->setBackground(COLOR_LAWN_GREEN); //30, 35
-    else if (temp <= 45) text->setBackground(COLOR_YELLOW); //40, 45
-    else text->setBackground(COLOR_RED); //50, 55, ...
+    if (temp <= 25) text->set_background(COLOR_DODGER_BLUE); //...20, 25
+    else if (temp <= 35) text->set_background(COLOR_LAWN_GREEN); //30, 35
+    else if (temp <= 45) text->set_background(COLOR_YELLOW); //40, 45
+    else text->set_background(COLOR_RED); //50, 55, ...
   }
 
   Page::update();

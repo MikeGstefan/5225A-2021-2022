@@ -24,7 +24,7 @@ void initialize() {
 	tracking.x_coord = 0.0, tracking.y_coord = 0.0, tracking.global_angle = 0.0;
 	// updateStartTask();
 	update_t.start();
-	guiSetup();
+	gui_setup();
 	WAIT_FOR_SCREEN_REFRESH();
 	master.print(2, 0, "Driver: %s", drivebase.drivers[drivebase.cur_driver].name);
 }
@@ -83,7 +83,7 @@ void opcontrol() {
 
 
 	while(true){
-		guiBackground();
+		gui_background();
 		drivebase.handle_input();
 
 		if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_B)){ //Update expo util
@@ -92,8 +92,8 @@ void opcontrol() {
 			master.clear();
 			drivebase.screen_timer.reset();
 		}
-		else if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_UP)) nextDriver();
-		else if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_DOWN)) prevDriver();
+		else if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_UP)) next_driver();
+		else if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_DOWN)) prev_driver();
 		delay(10);
 	}
 }
