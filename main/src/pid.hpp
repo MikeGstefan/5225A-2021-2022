@@ -21,6 +21,6 @@ public:
     PID(double kP, double kI, double kD, double bias, bool integralSgnReset = true, double integralLowerBound = 0, double integralUpperBound = 1000000);
     double get_error() const;
     double get_output() const;
-    void compute(double input, double target);
+    double compute(double input, double target);
 
 };
