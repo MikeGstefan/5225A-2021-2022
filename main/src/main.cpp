@@ -89,12 +89,13 @@ void opcontrol() {
 	//Reset tracking by stopping task
 	//remove perm. make left and right members of page.
 	//
-	int y,a;
+	int y,a=0;
 	while(true){
-		guiBackground();
+		// guiBackground();
 		// drivebase.handle_input();
 		y = master.get_analog(E_CONTROLLER_ANALOG_LEFT_Y);
+		// printf("%d\n",y);
 		a = master.get_analog(E_CONTROLLER_ANALOG_LEFT_X);
-		drive_side(y +a, y-a);
+		drive_side(y+a,y-a);
 	}
 }
