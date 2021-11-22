@@ -6,9 +6,7 @@
 #include <vector>
 #include <string>
 #include <cstdarg>
-#include <array>
 #include <fstream>
-#include "main.h"
 
 using namespace std;
 using namespace pros;

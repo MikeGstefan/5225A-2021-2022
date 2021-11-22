@@ -41,10 +41,10 @@ extern int ring_count; //For gui.cpp to use
 extern double cur_auton;
 extern Page testing; //For use in opcontrol
 
-void guiSetup(), guiBackground();
-void alignedCoords (int x_objects, int y_objects, int x_btn, int y_btn, int x_range = 480, int y_range = 220);
+void gui_setup(), gui_background();
+void aligned_coords (int x_objects, int y_objects, int x_btn, int y_btn, int x_range = 480, int y_range = 220);
 void flash (std::uint32_t color, std::uint32_t time, std::string = "");
-void prevDriver(), nextDriver();
+void prev_driver(), next_driver();
 
 //All constructor args are in the format points, format, page, text, color
 class Page{
@@ -56,7 +56,8 @@ class Page{
     //Vars
     static last_touch_e_t touch_status;
     static int16_t x, y;
-    std::uint32_t bcol;
+    std::function <void()> setup_func, loop_func;
+    std::uint32_t b_col;
     std::string title;
     // Button prev, next;
 
@@ -65,24 +66,23 @@ class Page{
     Page(int, std::string, std::uint32_t = GREY);
 
     //Vars
-    static Page* currentPage;
+    static Page* current_page;
     static std::array<Page*, PAGE_COUNT> pages;
-    std::function <void()> setupFunc, loopFunc;
     std::vector<Button*> buttons;
     std::vector<Slider*> sliders;
     std::vector<Text*> texts;
-    int pageNum;
+    int page_num;
 
     //Functions
-    static void updateScreenStatus ();
-    static void goTo(Page*);
-    static void goTo(int);
-    static void clearScreen(std::uint32_t color);
-    static void toPrev();
-    static void toNext();
+    static void update_screen_status();
+    static void go_to(Page*);
+    static void go_to(int);
+    static void clear_screen(std::uint32_t color);
+    static void to_prev();
+    static void to_next();
     static void update();
+    void set_setup_func(std::function <void()>), set_loop_func(std::function <void()>);
     bool pressed();
-
 };
 
 class Button{
@@ -96,20 +96,21 @@ class Button{
 
   private:
     //Vars
-    std::uint32_t lcol, bcol, dark_bcol;
+    std::uint32_t l_col, b_col, b_col_dark;
     std::string label, label1="";
     int16_t x1, y1, x2, y2, text_x, text_y, text_x1, text_y1;
-    bool lastPressed=0;
+    bool last_pressed=0;
     pressType form; //What type of button
+    std::function <void()> func, off_func; //toggle is only for toggle type buttons
 
     //For latch buttons
     bool latched=0, on=0; //on is for toggle
     std::vector<Button*> options;
 
     //Functions
-    void runTask();
+    void run_func();
     void draw();
-    void drawPressed();
+    void draw_pressed();
 
   public:
     //Constructor
@@ -120,14 +121,14 @@ class Button{
 
     //Vars
     Page* page;
-    std::function <void()> func, off_func; //toggle is only for toggle type buttons
 
     //Functions
     static Button* update();
-    static void createOptions(std::vector<Button*>);
+    static void create_options(std::vector<Button*>);
+    void set_func(std::function <void()>), set_off_func(std::function <void()>);
     bool pressed();
-    bool newPress();
-    bool newRelease();
+    bool new_press();
+    bool new_release();
 };
 
 class Slider{
@@ -139,7 +140,7 @@ class Slider{
 
   private:
     //Vars
-    std::uint32_t lcol, bcol;
+    std::uint32_t l_col, b_col;
     std::string label;
     int16_t x1, y1, x2, y2, text_x, text_y;
     int min, max;
@@ -148,7 +149,7 @@ class Slider{
 
     //Functions
     void draw();
-    void drawBar();
+    void draw_bar();
 
   public:
     //Points, Format, Min, Max, Page, Label, Bcolor, Lcolor
@@ -156,11 +157,11 @@ class Slider{
 
     //Vars
     Page* page;
-    double val=0.0, prevVal;
+    double val=0.0, prev_val;
 
     //Functions
     static Slider* update();
-    void updateVal();
+    void update_val();
 };
 
 class Text{
@@ -169,11 +170,11 @@ class Text{
   private:
     int16_t x, y, x1, y1, x2, y2;
     text_format_e_t txt_fmt;
-    std::string label, prevLabel="";
-    std::uint32_t lcol, bcol;
+    std::string label, prev_label="";
+    std::uint32_t l_col, b_col;
     Page* page;
     double* val_ptr=nullptr;
-    double prevVal;
+    double prev_val;
 
     void construct (int16_t, int16_t, Style, text_format_e_t, Page*, std::string, std::uint32_t);
     void draw();
@@ -184,7 +185,7 @@ class Text{
     Text (int16_t, int16_t, Style, text_format_e_t, Page*, std::string, double*, std::uint32_t label_color = COLOR_WHITE);
 
     static void update();
-    void setTitle (int16_t, int16_t, Style, std::string);
-    void setBackground (int16_t, int16_t, int16_t, int16_t, Style, std::uint32_t = GREY);
-    void setBackground (std::uint32_t);
+    void set_title (int16_t, int16_t, Style, std::string);
+    void set_background (int16_t, int16_t, int16_t, int16_t, Style, std::uint32_t = GREY);
+    void set_background (std::uint32_t);
 };

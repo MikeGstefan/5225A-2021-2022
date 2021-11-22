@@ -1,9 +1,5 @@
 #pragma once
-#include <tuple>
-#include "main.h"
 #include "util.hpp"
-using namespace pros;
-using namespace std;
 
 enum class lift_position_types{
   positive,
