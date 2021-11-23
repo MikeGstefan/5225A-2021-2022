@@ -878,7 +878,7 @@ void tank_move_on_arc(Position target, const Point start_pos, const double power
   const double kR = 25.0; // for ratio
   // const double kR = 0.75; // for difference
 
-  const double kA = pwm_to_vel * 150.0, kB = 1 / pwm_to_vel, kP = 0.7, kD = 150.0;
+  const double kA = pwm_to_vel * 150.0, kB = 1 / pwm_to_vel, kP = 125.0, kD = 50.0;
   const double final_angle = atan2(target.y - centre.y, target.x - centre.x); // angle of final position to centre at end of move
 
   uint32_t last_d_update_time = millis();  // for derivative
@@ -935,10 +935,10 @@ void tank_move_on_arc(Position target, const Point start_pos, const double power
     // tracking.power_a = turn_dir * (kB * angular_velocity + kP * tracking.g_velocity.angle + kD * (tracking.g_velocity.angle - last_angular_velocity) / (millis() - last_d_update_time));
 
     // without p and d
-    tracking.power_a = kB * angular_velocity_target;
+    // tracking.power_a = kB * angular_velocity_target;
 
-
-    // tracking.power_a = kB * angular_velocity_target + kP * (angular_velocity_target - tracking.g_velocity.angle) + kD * (tracking.g_velocity.angle - last_angular_velocity) / (millis() - last_d_update_time);
+    // with p and d
+    tracking.power_a = kB * angular_velocity_target + kP * (angular_velocity_target - tracking.g_velocity.angle) + kD * (tracking.g_velocity.angle - last_angular_velocity) / (millis() - last_d_update_time);
 
 
 

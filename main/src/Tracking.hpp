@@ -69,7 +69,7 @@ void tank_move_to_target(const Position target, const bool turn_dir_if_0, const 
 void tank_move_on_line(const Position target, const bool turn_dir_if_0, const double max_power = 127.0, const double min_angle_percent = 1.0, const bool brake = true);
 void tank_turn_to_angle(const double target_a, const bool brake = true);
 void tank_turn_to_target(const Point target, const bool brake = true);
-void tank_move_on_arc(Position target, const Point start_pos, const double power, const double max_power = 127.0, const bool brake = false);
+void tank_move_on_arc(Position target, const Point start_pos, const double power, const double max_power = 127.0, const bool brake = false);  // min speed for smooth move is 100
 
 const int min_power_a = 23;
 const int min_power_x = 40;
