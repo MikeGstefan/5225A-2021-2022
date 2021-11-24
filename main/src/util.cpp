@@ -47,7 +47,3 @@ double rad_to_deg(double rad){
 double near_angle(double angle, double reference){
 	return round((reference - angle) / (2 * M_PI)) * (2 * M_PI) + angle - reference;
 }
-
-// Coord constructor definition
-Coord::Coord(double x, double y, double angle): x(x), y(y), angle(angle){}
-Coord::Coord(): x(0.0), y(0.0), angle(0.0){}

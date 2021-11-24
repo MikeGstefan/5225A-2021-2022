@@ -81,7 +81,12 @@ public:
   FILE* curve_file;
   std::array<driver, 3> drivers;  // driver profiles
   Drivebase(std::array<driver, 3> drivers); // constructor
+
+  // 'set-drive' methods
   void move(double x, double y, double a);
+  void move_tank(double y, double a);
+  void move_side(double l, double r);
+
   void brake();
   void download_curve_data();
   void update_lookup_table_util();

@@ -187,7 +187,7 @@ tuple<double, double, double, double, double, double, bool> Lift::find_arm_angle
   return {top_arm_angle, bottom_arm_angle, top_arm_pos_angle, bottom_arm_pos_angle, top_arm_neg_angle, bottom_arm_neg_angle, move_valid};
 }
 
-void Lift::move_to_target(const Vector2D& target, const lift_position_types lift_position_type, const bool wait_for_complete, const double bottom_arm_speed, const double top_arm_speed){
+void Lift::move_to_target(const Point& target, const lift_position_types lift_position_type, const bool wait_for_complete, const double bottom_arm_speed, const double top_arm_speed){
   auto[top_arm_angle, bottom_arm_angle, top_arm_pos_angle, bottom_arm_pos_angle, top_arm_neg_angle, bottom_arm_neg_angle, move_valid] = find_arm_angles(target.x, target.y, lift_position_type);
 
   // updates arm targets for lift state machine
@@ -559,7 +559,7 @@ double Lift::get_bottom_arm_end_error() const{
 }
 
 // for ring dropoff function
-array<array<Vector2D, 3>, 2>& Lift::get_dropoff_coords(){
+array<array<Point, 3>, 2>& Lift::get_dropoff_coords(){
   return dropoff_coords;
 }
 
