@@ -88,6 +88,53 @@ void autonomous() {
  * task, not resume it from where it left off.
  */
 void opcontrol() {
+	Timer move = {"move"};
+	printf("START\n");
+	move.print();
+	// tank_turn_to_target({10.0, 30.0}, true);
+	// tank_turn_to_angle(40.0);
+
+	tank_move_on_arc({-24.0, 24.0, -90.0}, {0.0, 0.0}, 127.0, 127.0, true);
+	tank_move_on_arc({0.0, 0.0, 0.0}, {-24.0, 24.0}, -127.0, 127.0, false);
+
+	// tank_move_to_target({-10.0, -20.0, 50.0}, true);
+
+	move.print();
+	printf("DONE\n");
+
+	// move_on_arc({0.0, 0.0}, {10.0, 10.0, 0.0}, 10.0, true, 127, true, 0.0, 0.0, true);
+	// move_on_arc(const Vector2D start, Coord target, const double radius, const bool positive, const double max_power, const bool angle_relative_to_arc, const double min_angle_percent, const double min_x_line_percent, const bool brake = true);
+	// double error, target = 40.0, kp = 30.0, min_power_y = 40;
+	// Timer pid_timer{"pid_timer"};
+	// pid_timer.print();
+	// while(true){
+	//
+	// 	error = target - tracking.x_coord;
+	// 	tracking.power_y = kp * error;
+	//
+	// 	if (fabs(tracking.power_y) < min_power_a) tracking.power_y = sgn(error) * min_power_y;
+	//
+	// 	drivebase.move(tracking.power_y, 0, 0);
+	//
+	// 	printf("cur_x: %lf, error: %lf, power_a: %lf\n", tracking.x_coord, error, tracking.power_y);
+	//
+	// 	if(error < 0.5)	break;
+	// 		// drivebase.move(0, 17, 0);
+	// 	delay(10);
+	// }
+	// // drivebase.move(0, 0, 0);
+	// drivebase.brake();
+	// printf("DONE.");
+	// pid_timer.print();
+	// while(true){
+	// 	printf("cur_x: %lf, error: %lf, power_a: %lf\n", tracking.x_coord, error, tracking.power_y);
+	// 	delay(10);
+	// }
+
+	// move_on_arc({0.0, 0.0}, {-10.0, 10.0, 0.0}, 10.0, true, 127.0, true, 0.9, 0.0, true);
+
+
+	/*
 	lift.c_bar_cal();
 	lift.f_bar_cal();
 
@@ -102,7 +149,7 @@ void opcontrol() {
 
 	// lower_f_bar(nullptr);
 	// lift.raise_f_bar_to_platform();
-	// /*
+	//
 		lift.move_to_neutral();
 		while(true){
 			lift.handle();
@@ -135,34 +182,5 @@ void opcontrol() {
 	*/
 
 
-	// ring pickup max speed utility
-	/*
-	while(true){
-		lift.move_to_target(-6.0, 20.0);
-		master.clear();
-		delay(50);
 
-		double speed = 70;
-		master.print(0, 0, "speed: %lf", speed);
-		delay(50);
-		while(!master.get_digital_new_press(E_CONTROLLER_DIGITAL_A)){
-
-			if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_UP)){
-					speed++;
-					delay(50);
-					master.print(0, 0, "speed: %lf", speed);
-			}
-			else if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_DOWN)){
-				speed--;
-				delay(50);
-				master.print(0, 0, "speed: %lf", speed);
-			}
-
-			delay(10);
-		}
-
-		lift.pickup_rings(speed);
-		waitUntil(master.get_digital_new_press(E_CONTROLLER_DIGITAL_A));
-	}
-	*/
 }

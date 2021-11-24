@@ -74,7 +74,7 @@ private:
   // ring dropoff variables
   bool dropoff_front;
   int ring_dropoff_level;
-  array<array<Vector2D, 3>, 2> dropoff_coords;  // ring dropoff coords
+  array<array<Point, 3>, 2> dropoff_coords;  // ring dropoff coords
   Timer last_dropoff_press_timer{"last_dropoff"}; // used to detect multiple consecutive ring dropoff button presses
   static constexpr int dropoff_double_press_time = 100;
 
@@ -91,7 +91,7 @@ public:
   tuple<double, double, double, double, double, double, bool> find_arm_angles(double target_y, double target_z, const lift_position_types lift_position_type = lift_position_types::fastest);  // solves for arm_angles
 
   // methods relating to move to target
-  void move_to_target(const Vector2D& target, const lift_position_types lift_position_type = lift_position_types::fastest, const bool wait_for_complete = true, const double bottom_arm_speed = 200, const double top_arm_speed = 100);  // actual method to move the lift to a target
+  void move_to_target(const Point& target, const lift_position_types lift_position_type = lift_position_types::fastest, const bool wait_for_complete = true, const double bottom_arm_speed = 200, const double top_arm_speed = 100);  // actual method to move the lift to a target
   void wait_for_complete(); // waits for move_to_target to reach
 
   void move_to_target_util(); // utility to move arm with controller
@@ -133,7 +133,7 @@ public:
   double get_bottom_arm_end_error() const;
 
   // for ring dropoff function
-  array<array<Vector2D, 3>, 2>& get_dropoff_coords();
+  array<array<Point, 3>, 2>& get_dropoff_coords();
   bool is_dropoff_front() const;
   double get_ring_dropoff_level() const;
 
