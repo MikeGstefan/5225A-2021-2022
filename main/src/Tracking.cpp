@@ -710,10 +710,6 @@ void tank_move_to_target(const Position target, const bool turn_dir_if_0, const 
         break;
       }
 
-      if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_B)){
-        drivebase.brake();
-         return;
-      }
       drivebase.move_tank(tracking.power_y, tracking.power_a);
 
       delay(10);
@@ -746,8 +742,8 @@ void tank_move_on_line(const Position target, const bool turn_dir_if_0, const do
     while(true){
       // start of move_on_line stuff
       line_disp = Vector(target.x - tracking.x_coord, target.y - tracking.y_coord);  // displacements relative to line
-      line_disp.set_polar(line_disp.get_magnitude(), line_disp.get_angle() + follow_line.get_angle());  // rotates vector by line angle
-      line_disp.get_y();
+      // line_disp.set_polar(line_disp.get_magnitude(), line_disp.get_angle() + follow_line.get_angle());  // rotates vector by line angle
+      line_disp.rotate(follow_line.get_angle());  // rotates vector by line angle
       line_y_local_y = line_disp.get_y() * cos(tracking.global_angle - follow_line.get_angle());
 
       // end of move_on_line stuff
@@ -766,8 +762,8 @@ void tank_move_on_line(const Position target, const bool turn_dir_if_0, const do
       error.angle = near_angle(sgn_local_error_y * M_PI / 2, difference_a);
       printf("Errors | y: %lf, a: %lf\n", local_error.y, rad_to_deg(error.angle));
 
-      // tracking.power_y = kp_y * local_error.y;
-      tracking.power_y = kp_y * line_y_local_y;
+      tracking.power_y = kp_y * local_error.y;
+      // tracking.power_y = kp_y * line_y_local_y;
       tracking.power_a = kp_a * error.angle;
 
       // gives min power to local y if that is not satisfied
@@ -814,11 +810,6 @@ void tank_move_on_line(const Position target, const bool turn_dir_if_0, const do
         // tracking.move_stop_task();
         break;
       }
-
-      if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_B)){
-        drivebase.brake();
-        return;
-      }
       drivebase.move_tank(tracking.power_y, tracking.power_a);
 
       delay(10);
@@ -856,7 +847,8 @@ void tank_move_on_arc(Position target, const Point start_pos, const double power
 
   Vector disp = p2 - p1;
   target.angle = deg_to_rad(target.angle);
-  disp.set_polar(disp.get_magnitude(), disp.get_angle() + target.angle);
+  // disp.set_polar(disp.get_magnitude(), disp.get_angle() + target.angle);
+  disp.rotate(target.angle);  // rotates displacement by target's angle to obtain right triangles from isosceles triangle forming the arc
   double theta = 2.0 * atan2(disp.get_x(), disp.get_y());
   double radius = disp.get_magnitude() / 2.0 / sin(theta / 2.0);
   printf("radius: %lf\n", radius);

@@ -95,26 +95,10 @@ void opcontrol() {
 	// tank_move_on_line({10.0, 20.0, 50.0}, true);
 	// tank_turn_to_target({10.0, 30.0}, true);
 	// tank_turn_to_angle(40.0);
-	// drivebase.move_side(2*48.694686, 2*26.703538);
 
-	// front_r.move_absolute(100*48.694686, 2*48.694686);
-	// back_r.move_absolute(100*48.694686, 2*48.694686);
-	// front_l.move_absolute(100*26.703538, 2*26.703538);
-	// back_l.move_absolute(100*26.703538, 2*26.703538);
-
-	// front_r.move_absolute(1000, 2*48.694686);
-	// back_r.move_absolute(1000, 2*48.694686);
-	// front_l.move_absolute(1000, 2*26.703538);
-	// back_l.move_absolute(1000, 2*26.703538);
-
-	// while(tracking.global_angle < M_PI/2){
-	// 	printf("%lf,%lf\n", tracking.x_coord, tracking.y_coord);
-	// 	delay(10);
-	// }
-	// drivebase.brake();
+	tank_move_on_arc({24.0, 24.0, 90.0}, {0.0, 0.0}, 100.0, 100.0, true);
 	move.print();
 	printf("DONE\n");
-	tank_move_on_arc({24.0, 24.0, 90.0}, {0.0, 0.0}, 100.0, 100.0, true);
 
 	// move_on_arc({0.0, 0.0}, {10.0, 10.0, 0.0}, 10.0, true, 127, true, 0.0, 0.0, true);
 	// move_on_arc(const Vector2D start, Coord target, const double radius, const bool positive, const double max_power, const bool angle_relative_to_arc, const double min_angle_percent, const double min_x_line_percent, const bool brake = true);
@@ -196,34 +180,5 @@ void opcontrol() {
 	*/
 
 
-	// ring pickup max speed utility
-	/*
-	while(true){
-		lift.move_to_target(-6.0, 20.0);
-		master.clear();
-		delay(50);
 
-		double speed = 70;
-		master.print(0, 0, "speed: %lf", speed);
-		delay(50);
-		while(!master.get_digital_new_press(E_CONTROLLER_DIGITAL_A)){
-
-			if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_UP)){
-					speed++;
-					delay(50);
-					master.print(0, 0, "speed: %lf", speed);
-			}
-			else if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_DOWN)){
-				speed--;
-				delay(50);
-				master.print(0, 0, "speed: %lf", speed);
-			}
-
-			delay(10);
-		}
-
-		lift.pickup_rings(speed);
-		waitUntil(master.get_digital_new_press(E_CONTROLLER_DIGITAL_A));
-	}
-	*/
 }
