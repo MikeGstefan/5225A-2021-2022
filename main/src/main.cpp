@@ -91,14 +91,8 @@ void opcontrol() {
 	Timer move = {"move"};
 	printf("START\n");
 	move.print();
-	// tank_turn_to_target({10.0, 30.0}, true);
-	// tank_turn_to_angle(40.0);
-
-	tank_move_on_arc({-24.0, 24.0, -90.0}, {0.0, 0.0}, 127.0, 127.0, true);
-	tank_move_on_arc({0.0, 0.0, 0.0}, {-24.0, 24.0}, -127.0, 127.0, false);
-
-	// tank_move_to_target({-10.0, -20.0, 50.0}, true);
-
+	move_on_arc({0.0, 0.0}, {-24.0, 24.0, 0.0}, 24.0, true, 127, true, 1.0, 0.0, true);
+	// move_on_arc({0.0, 0.0}, {10.0, 10.0, 0.0}, 10.0, false, 127, false, 0.3, 0.0, true);
 	move.print();
 	printf("DONE\n");
 

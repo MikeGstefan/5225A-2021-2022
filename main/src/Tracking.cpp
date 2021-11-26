@@ -427,7 +427,7 @@ void rush_goal2(double target_x, double target_y, double target_a){
 }
 
 void move_on_arc(const Point start, Position target, const double radius, const bool positive, const double max_power, const bool angle_relative_to_arc, const double min_angle_percent, const double min_x_line_percent, const bool brake){
-  Position error, kp = Position(30.0, 12.0, 180.0);
+  Position error, kp = Position(30.0, 12.0, 150.0);
 
   target.angle = deg_to_rad(target.angle);
   // variable 'd' in diagram
@@ -477,6 +477,9 @@ void move_on_arc(const Point start, Position target, const double radius, const 
   double arc_y_power_scale;
   double total_power;
 
+  // positive turn_dir means cw movement about the arc
+  int turn_dir = -sgn(rad_to_deg(near_angle(atan2(target.y - arc_centre.y, target.x - arc_centre.x), atan2(tracking.y_coord - arc_centre.y, tracking.x_coord - arc_centre.x))));
+  printf("turn_dir: %d\n", turn_dir);
   while(true){
     arc_disp.angle = atan2(tracking.y_coord - arc_centre.y, tracking.x_coord - arc_centre.x);
     // printf("arc_disp.angle: %lf\n", arc_disp.angle);
@@ -510,17 +513,20 @@ void move_on_arc(const Point start, Position target, const double radius, const 
     // printf("Local errors | x: %lf, y: %lf\n", error.x, error.y);
 
     if (angle_relative_to_arc){
-        error.angle = near_angle(-arc_disp.angle, tracking.global_angle);
-        printf("angle target: %lf, angle_error: %lf\n", rad_to_deg(-arc_disp.angle), rad_to_deg(error.angle));
+        // error.angle = near_angle(turn_dir * arc_disp.angle, tracking.global_angle);
+        error.angle = near_angle(target.angle - arc_disp.angle + (turn_dir == -1 ? 0 : M_PI), tracking.global_angle);
+
+        // printf("angle target: %lf, angle_error: %lf\n", rad_to_deg(target.angle - arc_disp.angle + (turn_dir == -1 ? 0 : M_PI)), rad_to_deg(error.angle));
     }
     else  error.angle = near_angle(target.angle, tracking.global_angle);
     tracking.power_x = error.x * kp.x;
     tracking.power_y = error.y * kp.y;
     tracking.power_a = error.angle * kp.angle;
+    printf("%lf,%lf\n", tracking.x_coord, tracking.y_coord);
 
     // MOVE ON ARC CODE
     total_power = fabs(tracking.power_x) + fabs(tracking.power_y) + fabs(tracking.power_a);
-    /*
+
     if(total_power > max_power){
         // init variables
 
@@ -534,15 +540,15 @@ void move_on_arc(const Point start, Position target, const double radius, const 
         tracking.power_x *= max_power_scale, tracking.power_y *= max_power_scale, tracking.power_a *= max_power_scale;
     // start of angle power guarantee
 
-        // power_xy = fabs(tracking.power_x) + fabs(tracking.power_y);
-        //
-        // if (fabs(pre_scaled_power_a) > min_power_a){
-        //     if (fabs(tracking.power_a) < min_power_a)  tracking.power_a = min_power_a * sgn(tracking.power_a);  // power_a has been overshadowed
-        // }
-        // // angle gets the power it demanded if pre_scaled power_a was also less than min_power_a
-        // else    tracking.power_a = pre_scaled_power_a;
-        // if (power_xy > 0)  angle_power_guarantee_xy_scale = (max_power - fabs(tracking.power_a)) / power_xy;
-        // tracking.power_x *= angle_power_guarantee_xy_scale, tracking.power_y *= angle_power_guarantee_xy_scale;
+        power_xy = fabs(tracking.power_x) + fabs(tracking.power_y);
+
+        if (fabs(pre_scaled_power_a) > min_power_a){
+            if (fabs(tracking.power_a) < min_power_a)  tracking.power_a = min_power_a * sgn(tracking.power_a);  // power_a has been overshadowed
+        }
+        // angle gets the power it demanded if pre_scaled power_a was also less than min_power_a
+        else    tracking.power_a = pre_scaled_power_a;
+        if (power_xy > 0)  angle_power_guarantee_xy_scale = (max_power - fabs(tracking.power_a)) / power_xy;
+        tracking.power_x *= angle_power_guarantee_xy_scale, tracking.power_y *= angle_power_guarantee_xy_scale;
         // printf("****power_a: %lf, x:%lf, y: %lf, pre_scaled: %lf, min: %lf\n", tracking.power_a, tracking.power_x , tracking.power_y, pre_scaled_power_a, min_power_a);
 
     // end of angle power guarantee
@@ -597,23 +603,27 @@ void move_on_arc(const Point start, Position target, const double radius, const 
 
         // return power_a;
     }
-    */
     // end of scaling
     double sum = fabs(tracking.power_a) + fabs(tracking.power_x) + fabs(tracking.power_y);
     // printf("power_a: %lf, power_x: %lf, power_y: %lf, sum: %lf\n", tracking.power_a, tracking.power_x, tracking.power_y, sum);
     // END OF MOVE ON ARC CODE
-    drivebase.move(tracking.power_x, tracking.power_y, 0);
+    drivebase.move(tracking.power_x, tracking.power_y, tracking.power_a);
 
     if (fabs(target.x - tracking.x_coord) < 0.5 && fabs(target.y - tracking.y_coord) < 0.5 && fabs(rad_to_deg(error.angle)) < 5.0){
-      printf("x: %lf, y: %lf, a: %lf\n", tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle));
+      printf("Ending move on arc to target X: %f Y: %f A: %f at X: %f Y: %f A: %f \n", target.x, target.y, target.angle, tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle));
       printf("MOVE FINISHED\n");
       if(brake) drivebase.brake();
       else drivebase.move(0, 0, 0);
       printf("min_a: %lf\n", min_power_a);
-      break;
+      return;
     }
     delay(10);
   }
+}
+
+void move_on_line(Point start, Position target){
+
+
 }
 
 // TANK MOVE ALGORITHMS
@@ -782,7 +792,7 @@ void tank_move_on_arc(Position target, const Point start_pos, const double power
     // printf("local_a: %lf\n", rad_to_deg(disp.get_angle()));
 
     arc_velocity.set_cartesian(tracking.g_velocity.x, tracking.g_velocity.y);
-    arc_velocity.set_polar(arc_velocity.get_magnitude(), arc_velocity.get_angle() - disp.get_angle() + (turn_dir == -1 ? 0 : M_PI));
+    arc_velocity.rotate(-disp.get_angle() + (turn_dir == -1 ? 0 : M_PI));
 
     // difference between target angle and current angle taking into account direction of movement and sign of power
     angle_diff = near_angle(-disp.get_angle() + (turn_dir == -1 ? 0 : M_PI), tracking.global_angle + (power < 0.0 ? M_PI : 0));
