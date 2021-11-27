@@ -91,17 +91,17 @@ void climb_ramp(int on_ramp_angle, int ramp_levelling_angle){
 	PID gyro_correct(1, 0, 0, 0);
 
 	gyro.tare_roll();
-	// drivebase.move(0, 65, 0);
+	drivebase.move(0, 65, 0);
 	waitUntil(gyro.get_roll() < on_ramp_angle)
 	printf("ON RAMP\n");
 
-	while(true){
-		gyro_correct.compute(gyro.get_roll(), ramp_levelling_angle);
-		printf("%f\n", gyro_correct.get_output());
-		// drivebase.move(0, gyro_correct.get_output(), 0);
-
-		delay(10);
-	}
+	// while(true){
+	// 	gyro_correct.compute(gyro.get_roll(), ramp_levelling_angle);
+	// 	printf("Angle: %f Corr: %f\n", gyro.get_roll(), gyro_correct.get_output());
+	// 	// drivebase.move(0, gyro_correct.get_output(), 0);
+	//
+	// 	delay(10);
+	// }
 
 	printf("DONE\n");
 	drivebase.brake();
@@ -115,7 +115,7 @@ void opcontrol() {
 	//remove perm. make left and right members of page.
 
 	while (gyro.is_calibrating()){ //Finishes calibrating gyro before program starts
-		printf("Calbrating Gyro...\n");
+		printf("Calibrating Gyro...\n");
 		delay(10);
 	}
 
