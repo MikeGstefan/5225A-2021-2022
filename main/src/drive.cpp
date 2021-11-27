@@ -190,7 +190,7 @@ void Drivebase::handle_input(){
   if(fabs(tracking.power_y) < deadzone) tracking.power_y = 0.0;
   if(fabs(tracking.power_a) < deadzone) tracking.power_a = 0.0;
 
-  move(0.0, tracking.power_y, tracking.power_a);
+  move(tracking.power_x, tracking.power_y, tracking.power_a);
 }
 
 void Drivebase::driver_practice(){
