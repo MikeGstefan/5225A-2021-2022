@@ -72,7 +72,12 @@ void autonomous() {}
  * task, not resume it from where it left off.
  */
 
+int ring_count = 0; //Get rid of this once merged
+double cur_auton = 1;
+
 void opcontrol() {
+	
+
 
 	
 
