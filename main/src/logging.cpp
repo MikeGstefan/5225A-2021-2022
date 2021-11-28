@@ -66,7 +66,7 @@ void Data::init(){
     }
     file.write(meta_data,strlen(meta_data));
     file.close();
-    file.open(file_name,ofstream::app);
+    file.open(file_name,ofstream::trunc);
     file.close();
     // logging_task_start();
     log_t.start();
