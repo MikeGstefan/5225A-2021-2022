@@ -78,7 +78,6 @@ double cur_auton = 1;
 void opcontrol() {
 	
 
-
 	
 
 	while(true){
@@ -87,9 +86,7 @@ void opcontrol() {
 
 		if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_B)){ //Update expo util
 			drivebase.update_lookup_table_util();
-			delay(50);
 			master.clear();
-			drivebase.screen_timer.reset();
 		}
 		else if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_UP)) next_driver();
 		else if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_DOWN)) prev_driver();
