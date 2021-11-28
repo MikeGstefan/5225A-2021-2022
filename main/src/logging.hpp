@@ -22,7 +22,8 @@ extern _Task log_t;
 enum log_types{
   error = 1,
   warning =1,
-  general =2,
+  general =1,
+  debug = 2,
   off = 0,
 };
 
@@ -66,3 +67,4 @@ const int print_max_time = 2000;
 extern Data task_log;
 extern Data controller_queue;
 extern Data tracking_data;
+extern Data tracking_imp;

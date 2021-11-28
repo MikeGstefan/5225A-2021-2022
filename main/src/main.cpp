@@ -92,11 +92,6 @@ void opcontrol() {
 	
 
 	while(true){
-		tracking_data.print(&test, 50,{
-			Data::to_char("test1 %d\n",millis()),
-			Data::to_char("test2 %d\n",millis()),
-			Data::to_char("test3 %d\n",millis())
-		});
 		delay(10);
 	}
 }
