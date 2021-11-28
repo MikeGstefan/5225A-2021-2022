@@ -98,7 +98,16 @@ void Data::print(const char* format,...){
       break;
     }
   }
+}
 
+void Data::print(Timer* tmr, int freq, std::vector<char*> str){
+  if(tmr->get_time() > freq){
+    for(int i = 0; i < str.size(); i++){ 
+        this->print(str[i]);
+        delete[] str[i];
+    }
+    tmr->reset();
+  } 
 }
 
 void Data::log_print(char* buffer, int buffer_len){
@@ -159,3 +168,16 @@ uintptr_t data_size(){//returns the number of characters needed to be printed fr
   if(reinterpret_cast<uintptr_t>(back) < reinterpret_cast<uintptr_t>(front))return(queue_size-1-( reinterpret_cast<uintptr_t>(front)-queue_start))+(reinterpret_cast<uintptr_t>(back)-queue_start);
   else return reinterpret_cast<uintptr_t>(back)- reinterpret_cast<uintptr_t>(front);
 }
+
+
+
+char* Data::to_char(const char* fmt, ...){
+    va_list args;
+    va_start(args, fmt);
+    char* buffer = new char[256];
+    vsnprintf(buffer, 256, fmt, args);
+    va_end(args);
+    return buffer;
+}
+
+

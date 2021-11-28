@@ -48,9 +48,11 @@ public:
   log_locations log_location;
   static vector<Data*> get_objs();
   void print(const char* format, ...);
+  void print(Timer* tmr,int freq, vector<char*> str);
   void log_print(char* buffer, int buffer_len);
   Data(const char* obj_name, const char* id_code, log_types log_type_param, log_locations log_location_param);
   static void init();
+  static char* to_char(const char* format, ...);
 };
 
 

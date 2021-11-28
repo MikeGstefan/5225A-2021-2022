@@ -87,19 +87,16 @@ void opcontrol() {
 	//Reset tracking by stopping task
 	//remove perm. make left and right members of page.
 
+	Timer test{"tester"};
+	
+	
 
 	while(true){
-		guiBackground();
-		drivebase.handle_input();
-
-		if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_B)){ //Update expo util
-			drivebase.update_lookup_table_util();
-			delay(50);
-			master.clear();
-			drivebase.screen_timer.reset();
-		}
-		else if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_UP)) nextDriver();
-		else if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_DOWN)) prevDriver();
+		tracking_data.print(&test, 50,{
+			Data::to_char("test1 %d\n",millis()),
+			Data::to_char("test2 %d\n",millis()),
+			Data::to_char("test3 %d\n",millis())
+		});
 		delay(10);
 	}
 }
