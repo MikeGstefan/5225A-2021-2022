@@ -31,16 +31,6 @@ vector<Data*> Data::get_objs(){
   return obj_list;
 }
 
-// void logging_task_start(){
-//   logging_task = new Task(queue_handle);
-// }
-// void logging_task_stop(){
-//   if(logging_task != nullptr){
-//     logging_task->remove();
-//     delete logging_task;
-//     logging_task = nullptr;
-//   }
-// }
 
 void Data::init(){
   file.open(file_meta,ofstream::trunc | ofstream::out);
@@ -69,7 +59,6 @@ void Data::init(){
     file.close();
     file.open(file_name,ofstream::trunc);
     file.close();
-    // logging_task_start();
     log_t.start();
 
   }
@@ -82,7 +71,6 @@ void Data::print(const char* format,...){
   va_start(args, format);
   int buffer_len = vsnprintf(buffer,256,format,args) + 3;
   va_end(args);
-  // printf("%s, %d\n",this->name,this->log_type);
   if(int(this->log_type) !=0){
     switch(log_location){
       case log_locations::t:
