@@ -40,7 +40,11 @@ enum class log_locations
 class Data{
 private:
   static vector<Data*> obj_list;
+  
 public:
+  static _Task log_t;
+
+
   const char* id;
   const char* name;
   log_types log_type;
@@ -52,6 +56,7 @@ public:
   Data(const char* obj_name, const char* id_code, log_types log_type_param, log_locations log_location_param);
   static void init();
   static char* to_char(const char* format, ...);
+
 };
 
 
@@ -66,3 +71,5 @@ extern Data task_log;
 extern Data controller_queue;
 extern Data tracking_data;
 extern Data tracking_imp;
+extern Data misc;
+extern Data drivers_data;

@@ -8,7 +8,7 @@ char* back = queue;
 ofstream file;
 uintptr_t queue_start = reinterpret_cast<uintptr_t>(&queue);
 vector<Data*> Data::obj_list;
-_Task log_t(queue_handle, "logging");
+_Task Data::log_t(queue_handle, "logging");
 
 Data::Data(const char* obj_name, const char* id_code, log_types log_type_param, log_locations log_location_param){
   this->id = id_code;
@@ -20,11 +20,12 @@ Data::Data(const char* obj_name, const char* id_code, log_types log_type_param, 
 
 
 
-Data task_log("tasks.txt","$01", general, log_locations::sd);
+Data task_log("tasks.txt","$01", general, log_locations::both);
 Data controller_queue("controller.txt","$02", general,log_locations::sd);
 Data tracking_data("tracking.txt","$03",debug,log_locations::both);
 Data tracking_imp("tracking.txt","$03",general,log_locations::both);
-
+Data misc("misc.txt", "$04",debug,log_locations::t);
+Data drivers_data("driver.txt", "$05", debug,log_locations::t);
 
 
 vector<Data*> Data::get_objs(){
@@ -59,10 +60,12 @@ void Data::init(){
     file.close();
     file.open(file_name,ofstream::trunc);
     file.close();
-    log_t.start();
+    Data::log_t.start();
 
   }
 }
+
+
 
 
 void Data::print(const char* format,...){
@@ -123,6 +126,7 @@ void Data::log_print(char* buffer, int buffer_len){
 }
 
 void queue_handle(void* params){
+  _Task* ptr = _Task::get_obj(params);
   Timer logging_tmr{"logging_tmr"};
   char * temp_back;
   while(true){
@@ -148,6 +152,7 @@ void queue_handle(void* params){
       logging_tmr.reset();
     }
     delay(10);
+    if(ptr->notify_handle())break;
   }
 
 
