@@ -746,7 +746,7 @@ void tank_turn_to_target(const Point target, const bool brake){
   tank_turn_to_angle(rad_to_deg(atan2(target.x - tracking.x_coord, target.y - tracking.y_coord)), brake);
 }
 
-void tank_move_on_arc(Position target, const Point start_pos, const double power, const double max_power, const bool brake){
+void tank_move_on_arc(const Point start_pos, Position target, const double power, const double max_power, const bool brake){
   Vector p2 = {start_pos.x, start_pos.y}, p1 = {target.x, target.y};  // p2 and p1 are switched because Nikhil messed up the math
 
   Vector disp = p2 - p1;
