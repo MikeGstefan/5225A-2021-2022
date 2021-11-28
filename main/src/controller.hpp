@@ -1,11 +1,5 @@
 #pragma once
-#include "main.h"
-#include "timer.hpp"
-#include "task.hpp"
-#include "logging.hpp"
-#include <cstdarg>
-#include <array>
-#include <functional>
+#include "common.hpp"
 
 #define num_controller 1
 

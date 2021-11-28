@@ -1,14 +1,6 @@
 #pragma once
+// #include "common.hpp"
 #include "main.h"
-#include "config.hpp"
-#include "timer.hpp"
-#include <array>
-#include <cmath>
-#include <iostream>
-#include <memory>
-#include <string>
-#include <tuple>
-#include <vector>
 
 using namespace pros;
 using namespace std;

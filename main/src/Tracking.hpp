@@ -1,12 +1,10 @@
 #pragma once
-#include "drive.hpp"
-#include "task.hpp"
-#include <iostream>
-#include <cmath>
-#include <memory>
-#include <vector>
+#include "util.hpp"
+#include "common.hpp"
 
 using namespace pros;
+// struct Coord;
+
 
 extern _Task update_t;
 extern Task *moveTask;

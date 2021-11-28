@@ -1,6 +1,5 @@
 #pragma once
-#include "main.h"
-#include "controller.hpp"
+#include "common.hpp"
 
 class _Controller;
 

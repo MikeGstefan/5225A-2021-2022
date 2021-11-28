@@ -1,9 +1,4 @@
-#include "drive.hpp"
-#include "gui.hpp"
-#include "controller.hpp"
-
-// using namespace std;
-#include "task.hpp"
+#include "common.hpp"
 using namespace std;
 // using namespace pros;
 
@@ -76,9 +71,6 @@ int ring_count = 0; //Get rid of this once merged
 double cur_auton = 1;
 
 void opcontrol() {
-	
-
-
 	
 
 	while(true){

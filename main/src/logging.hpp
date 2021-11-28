@@ -1,12 +1,6 @@
 #pragma once
-#include "util.hpp"
 #include "timer.hpp"
-#include "task.hpp"
-#include <iostream>
-#include <vector>
-#include <string>
-#include <cstdarg>
-#include <fstream>
+#include "common.hpp"
 
 using namespace std;
 using namespace pros;
@@ -66,3 +60,4 @@ extern Data task_log;
 extern Data controller_queue;
 extern Data tracking_data;
 extern Data tracking_imp;
+extern Data misc;

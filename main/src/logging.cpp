@@ -24,6 +24,7 @@ Data task_log("tasks.txt","$01", general, log_locations::sd);
 Data controller_queue("controller.txt","$02", general,log_locations::sd);
 Data tracking_data("tracking.txt","$03",debug,log_locations::both);
 Data tracking_imp("tracking.txt","$03",general,log_locations::both);
+Data misc("misc.txt","$04", debug,log_locations::t);
 
 
 

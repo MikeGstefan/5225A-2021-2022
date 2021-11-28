@@ -1,8 +1,5 @@
 #pragma once
-#include "drive.hpp"
-#include "Tracking.hpp"
-#include "util.hpp"
-#include <bitset>
+#include "common.hpp"
 
 #define ORANGE 0x00F36421
 #define GREY 0x00202020

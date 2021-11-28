@@ -1,7 +1,5 @@
 #pragma once
-#include "main.h"
-#include "logging.hpp"
-#include <tuple>
+#include "common.hpp"
 
 
 /*
