@@ -22,7 +22,8 @@ Data::Data(const char* obj_name, const char* id_code, log_types log_type_param, 
 
 Data task_log("tasks.txt","$01", general, log_locations::sd);
 Data controller_queue("controller.txt","$02", general,log_locations::sd);
-Data tracking_data("tracking.txt","$03",general,log_locations::both);
+Data tracking_data("tracking.txt","$03",debug,log_locations::both);
+Data tracking_imp("tracking.txt","$03",general,log_locations::both);
 
 
 
@@ -30,16 +31,6 @@ vector<Data*> Data::get_objs(){
   return obj_list;
 }
 
-// void logging_task_start(){
-//   logging_task = new Task(queue_handle);
-// }
-// void logging_task_stop(){
-//   if(logging_task != nullptr){
-//     logging_task->remove();
-//     delete logging_task;
-//     logging_task = nullptr;
-//   }
-// }
 
 void Data::init(){
   file.open(file_meta,ofstream::trunc | ofstream::out);
@@ -66,9 +57,8 @@ void Data::init(){
     }
     file.write(meta_data,strlen(meta_data));
     file.close();
-    file.open(file_name,ofstream::app);
+    file.open(file_name,ofstream::trunc);
     file.close();
-    // logging_task_start();
     log_t.start();
 
   }
@@ -81,7 +71,6 @@ void Data::print(const char* format,...){
   va_start(args, format);
   int buffer_len = vsnprintf(buffer,256,format,args) + 3;
   va_end(args);
-  // printf("%s, %d\n",this->name,this->log_type);
   if(int(this->log_type) !=0){
     switch(log_location){
       case log_locations::t:
@@ -98,7 +87,16 @@ void Data::print(const char* format,...){
       break;
     }
   }
+}
 
+void Data::print(Timer* tmr, int freq, std::vector<char*> str){
+  if(tmr->get_time() > freq){
+    for(int i = 0; i < str.size(); i++){ 
+        this->print(str[i]);
+        delete[] str[i];
+    }
+    tmr->reset();
+  } 
 }
 
 void Data::log_print(char* buffer, int buffer_len){
@@ -159,3 +157,16 @@ uintptr_t data_size(){//returns the number of characters needed to be printed fr
   if(reinterpret_cast<uintptr_t>(back) < reinterpret_cast<uintptr_t>(front))return(queue_size-1-( reinterpret_cast<uintptr_t>(front)-queue_start))+(reinterpret_cast<uintptr_t>(back)-queue_start);
   else return reinterpret_cast<uintptr_t>(back)- reinterpret_cast<uintptr_t>(front);
 }
+
+
+
+char* Data::to_char(const char* fmt, ...){
+    va_list args;
+    va_start(args, fmt);
+    char* buffer = new char[256];
+    vsnprintf(buffer, 256, fmt, args);
+    va_end(args);
+    return buffer;
+}
+
+
