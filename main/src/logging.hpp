@@ -20,7 +20,8 @@ extern _Task log_t;
 enum log_types{
   error = 1,
   warning =1,
-  general =2,
+  general =1,
+  debug = 2,
   off = 0,
 };
 
@@ -39,16 +40,23 @@ enum class log_locations
 class Data{
 private:
   static vector<Data*> obj_list;
+  
 public:
+  static _Task log_t;
+
+
   const char* id;
   const char* name;
   log_types log_type;
   log_locations log_location;
   static vector<Data*> get_objs();
   void print(const char* format, ...);
+  void print(Timer* tmr,int freq, vector<char*> str);
   void log_print(char* buffer, int buffer_len);
   Data(const char* obj_name, const char* id_code, log_types log_type_param, log_locations log_location_param);
   static void init();
+  static char* to_char(const char* format, ...);
+
 };
 
 
@@ -62,3 +70,6 @@ const int print_max_time = 2000;
 extern Data task_log;
 extern Data controller_queue;
 extern Data tracking_data;
+extern Data tracking_imp;
+extern Data misc;
+extern Data drivers_data;

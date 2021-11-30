@@ -1,6 +1,7 @@
 #pragma once
 #include "Tracking.hpp"
 #include "util.hpp"
+#include "logging.hpp"
 
 // aliases to make code more readable, used to encode vales of drive.cur_driver
 // enum class drivers{Nikhil = 0, Emily = 1, Sarah = 2};
