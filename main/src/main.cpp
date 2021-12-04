@@ -76,9 +76,9 @@ int ring_count = 0; //Get rid of this once merged
 double cur_auton = 1;
 
 void opcontrol() {
-	
-
-	
+	/*Gui:
+	Reset tracking by task
+	/**/
 
 	while(true){
 		gui_background();

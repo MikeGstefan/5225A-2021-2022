@@ -59,7 +59,6 @@ class Page{
     std::function <void()> setup_func, loop_func;
     std::uint32_t b_col;
     std::string title;
-    // Button prev, next;
 
   public:
     //Page num, Title, Bcolor
@@ -171,7 +170,7 @@ class Text{
     int16_t x, y, x1, y1, x2, y2;
     text_format_e_t txt_fmt;
     std::string label, prev_label="";
-    std::uint32_t l_col, b_col;
+    std::uint32_t l_col, b_col=COLOR_BLACK;
     Page* page;
     double* val_ptr=nullptr;
     double prev_val;

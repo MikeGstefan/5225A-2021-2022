@@ -18,7 +18,7 @@ int16_t Page::x = 0, Page::y = 0;
 //Pages and associated stuff
 Page perm (0, "PERM BTNS", COLOR_PINK); //Page perm only exists because its a problem if permanent buttons think they belong to every page.
 //So they think they belong to page perm, but every page knows they own these buttons.
-Button prevPage(0, 0, 75, 20, Style::SIZE, Button::SINGLE, &perm, "<-");
+Button prevPage(PAGE_LEFT, PAGE_UP, 75, 20, Style::SIZE, Button::SINGLE, &perm, "<-");
 Button nextPage(480, 0, -75, 20, Style::SIZE, Button::SINGLE, &perm, "->");
 
 Page driverCurve (1, "Drivers"); //Select a driver and their exp curve
@@ -54,7 +54,7 @@ Page moving (5, "Moving"); //Moves to target, home, or centre
 Slider xVal(35, 45, 250, 40, Style::SIZE, Slider::HORIZONTAL, 0, 144, &moving, "X");
 Slider yVal(35, 110, 250, 40, Style::SIZE, Slider::HORIZONTAL, 0, 144, &moving, "Y");
 Slider aVal(35, 175, 250, 40, Style::SIZE, Slider::HORIZONTAL, 0, 144, &moving, "A");
-Button go_toXYA(320, 45, 150, 40, Style::SIZE, Button::SINGLE, &moving, "Target");
+Button goToXYA(320, 45, 150, 40, Style::SIZE, Button::SINGLE, &moving, "Target");
 Button goHome(320, 110, 150, 40, Style::SIZE, Button::SINGLE, &moving, "Home");
 Button goCentre(320, 175, 150, 40, Style::SIZE, Button::SINGLE, &moving, "Centre");
 
@@ -101,7 +101,9 @@ Button testing_button_2 (250, 70, 200, 80, Style::SIZE, Button::SINGLE, &testing
 Slider testing_slider (MID_X, 200, 200 , 20, Style::CENTRE, Slider::HORIZONTAL, -100, 100, &testing, "BLANK SLIDER");
 
 Page goSequence (PAGE_COUNT+1, "GO SEQUENCE");
-Button goButton (MID_X, MID_Y, 180, 100, Style::CENTRE, Button::SINGLE, &goSequence, "CONTINUE");
+Button goButton (300, MID_Y, 160, 90, Style::CENTRE, Button::SINGLE, &goSequence, "CONTINUE TO");
+Button goBackButton (20, USER_UP, 100, 50, Style::SIZE, Button::SINGLE, &goSequence, "BACK");
+Text goButtonText (300, 150, Style::CENTRE, TEXT_SMALL, &goSequence, "", (std::uint32_t)COLOR_BLACK);
 
 //Functions
 void Page::to_prev(){
@@ -143,91 +145,76 @@ void resetA(){
   printf("Write reset a as a task procedure\n");
 }
 
-void go(std::uint32_t delay_time=0){
-  bool pressed = false;
+bool go(std::string message, std::uint32_t delay_time=0){ //Start
+  printf("\n\n%s\n", message.c_str());
+  printf("Press \"Continue\" when ready.\n");
+  goButtonText.set_title(300, 150, Style::CENTRE, "START");
+
+  bool pressed = false, interrupted = false;
   Page* page = Page::current_page;
   Page::go_to(&goSequence);
 
+  while(goButton.pressed() && !interrupted){ //Wait for Release
+    Page::update_screen_status();
+    if (goBackButton.pressed()) interrupted = true;
+    delay(2);
+  }
+  while(!goButton.pressed() && !interrupted){ //Wait for Press
+    Page::update_screen_status();
+    if (goBackButton.pressed()) interrupted = true;
+    delay(2);
+  }
+  while(goButton.pressed() && !interrupted){ //Wait for Release
+    Page::update_screen_status();
+    if (goBackButton.pressed()) interrupted = true;
+    delay(2);
+  }
+  delay(delay_time);
+  Page::go_to(page);
+  if (interrupted) printf("Interrupted\n");
+  else printf("Running\n");
+  return !interrupted;
+}
 
-  while(goButton.pressed()){ //Wait for Release
+bool go(std::uint32_t delay_time=0){ //End
+  printf("Press Again when done.\n");
+  goButtonText.set_title(300, 150, Style::CENTRE, "END");
+
+  bool pressed = false, interrupted = false;
+  Page* page = Page::current_page;
+  Page::go_to(&goSequence);
+
+  while(goButton.pressed() && !interrupted){ //Wait for Release
     Page::update_screen_status();
+    if (goBackButton.pressed()) interrupted = true;
     delay(2);
   }
-  while(!goButton.pressed()){ //Wait for Press
+  while(!goButton.pressed() && !interrupted){ //Wait for Press
     Page::update_screen_status();
+    if (goBackButton.pressed()) interrupted = true;
     delay(2);
   }
-  while(goButton.pressed()){ //Wait for Release
+  while(goButton.pressed() && !interrupted){ //Wait for Release
     Page::update_screen_status();
+    if (goBackButton.pressed()) interrupted = true;
     delay(2);
   }
 
   delay(delay_time);
   Page::go_to(page);
-}
-
-void tuning_encoder(){
-  printf("\n\nPlease spin the encoder any number of rotations.\n");
-  printf("Press go when ready.\n");
-  resetX();
-  resetY();
-  resetA();
-  go();
-  printf("Press Again when done.\n");
-  go();
-  printf("The left encoder found %d ticks\n", LeftEncoder.get_value() % 360);
-  printf("The right encoder found %d ticks\n", RightEncoder.get_value() % 360);
-  printf("The back encoder found %d ticks\n", BackEncoder.get_value() % 360);
-}
-void tuning_strafe(){
-  printf("\n\nPlease run the robot along a known straight line in the y-axis.\n");
-  printf("Press go when ready.\n");
-  resetX();
-  resetY();
-  resetA();
-  go();
-  printf("Press Again when done.\n");
-  go();
-  if (tracking.x_coord < 0) printf("The robot thinks it strafed %.2f inches to the left.\nConsider turning the back tracking wheel counter-clockwise\n", tracking.x_coord);
-  else if (tracking.x_coord > 0) printf("The robot thinks it strafed %.2f inches to the right.\nConsider turning the back tracking wheel clockwise\n", tracking.x_coord);
-  else printf("The robot knows it strafed a perfect %.2f inches\n", tracking.x_coord); //Printing the tracking val just in case something went wrong. But it should always be 0
-}
-void tuning_grid(){
-  printf("\n\nPlease move the robot haphazardly around the field. Then return it back to the starting point\n");
-  printf("Press go when ready.\n");
-  resetX();
-  resetY();
-  resetA();
-  go();
-  printf("Press Again when done.\n");
-  go();
-  printf("The robot thinks it deviated %.2f inches to the %s\n", fabs(tracking.x_coord), (tracking.x_coord < 0 ? "left" : "right"));
-  printf("The robot thinks it deviated %.2f inches %s\n", fabs(tracking.y_coord), (tracking.y_coord < 0 ? "back" : "forward"));
-  printf("The robot thinks it deviated %.2f degrees %s\n", fabs(rad_to_deg(tracking.global_angle)), (tracking.global_angle < 0 ? "counter-clockwise" : "clockwise"));
-}
-void tuning_turns(){
-  printf("\n\nPlease spin the robot any number of rotations. Then return it back to the starting point\n");
-  printf("Press go when ready.\n");
-  resetX();
-  resetY();
-  resetA();
-  go();
-  printf("Press Again when done.\n");
-  go();
-  printf("The robot is %.2f inches %s and %.2f inches %s off the starting point.\n", fabs(tracking.x_coord), (tracking.x_coord < 0 ? "left" : "right"), fabs(tracking.y_coord), (tracking.y_coord < 0 ? "back" : "forward"));
-
-  int turned = fmod(rad_to_deg(tracking.global_angle), 360);
-  int lost = 360-turned;
-  float rotations = round(rad_to_deg(tracking.global_angle)/180)/2.0;
-  if (180 < turned && turned < 355) printf("However, the robot lost %d degrees over %.1f rotations.\n Consider increasing the DistanceLR.\n", lost, rotations);
-  else if (5 < turned && turned < 180) printf("However, The robot gained %d degrees over %.1f rotations.\n Consider decreasing the DistanceLR.\n", turned, rotations);
-  else printf("This seems pretty accurate. It's %d degrees off of %.1f rotations.\n", turned >= fmod(rotations*360, 360) ? turned : lost, rotations);
+  if (interrupted) printf("Interrupted\n");
+  else printf("Ended\n");
+  return !interrupted;
 }
 
 void gui_setup(){ //Call once at start in initialize()
+  Page::go_to(0);
 
   prevPage.set_func(&Page::to_prev); //Gives the left and right buttons their functions
   nextPage.set_func(&Page::to_next); //Same thing for all following buttons
+
+  goSequence.buttons.erase(goSequence.buttons.begin(), goSequence.buttons.begin()+2);
+  goButtonText.set_background(ORANGE);
 
   runElastic.set_func(&elasticUtil);
 
@@ -253,9 +240,13 @@ void gui_setup(){ //Call once at start in initialize()
     screen::draw_pixel(270+(200*tracking.x_coord/144), 230-(200*tracking.y_coord/144)); //Scales to screen
   });
 
-  go_toXYA.set_func([&x=xVal.val, &y=yVal.val, &a=aVal.val](){go(); move_to_target_sync(x, y, a, false);});
-  goHome.set_func([](){go(); move_to_target_sync(0, 0, 0, false);});
-  goCentre.set_func([](){go(); move_to_target_sync(72, 72, 0, false);});
+  goToXYA.set_func([&x=xVal.val, &y=yVal.val, &a=aVal.val](){
+    char buffer[65];
+    sprintf(buffer, "Press to move to target selected by sliders (%.0f, %.0f, %.0f)", x, y, a);
+    if (go(std::string(buffer), 1000)) move_to_target_sync(x, y, a, false);
+  });
+  goHome.set_func([](){if (go("Press to go to starting point (0, 0, 0)", 1000)) move_to_target_sync(0, 0, 0, false);});
+  goCentre.set_func([](){if (go("Press to go to centre field (72, 72, 0)", 1000)) move_to_target_sync(72, 72, 0, false);});
 
   Button::create_options({&route1, &route2, &route3}); //Makes them exclusive, only one can be selected at a time
 
@@ -263,10 +254,59 @@ void gui_setup(){ //Call once at start in initialize()
   nextDrivr.set_func(&next_driver);
   drivrName.set_background(130, 70, 350, 190, Style::CORNER);
 
-  turnEncode.set_func(&tuning_encoder);
-  perpErr.set_func(&tuning_strafe);
-  grid.set_func(&tuning_grid);
-  spin360.set_func(&tuning_turns);
+  turnEncode.set_func([](){ //Turn the encoder
+    if (go("Please spin the encoder any number of rotations.")){
+      resetX();
+      resetY();
+      resetA();
+      if (go()){
+        printf("The left encoder found %d ticks\n", LeftEncoder.get_value() % 360);
+        printf("The right encoder found %d ticks\n", RightEncoder.get_value() % 360);
+        printf("The back encoder found %d ticks\n", BackEncoder.get_value() % 360);
+      }
+    }
+  });
+  perpErr.set_func([](){ //Perpendicular Error
+    if (go("Please run the robot along a known straight line in the y-axis.")){
+      resetX();
+      resetY();
+      resetA();
+      if (go()){
+        if (tracking.x_coord < 0) printf("The robot thinks it strafed %.2f inches to the left.\nConsider turning the back tracking wheel counter-clockwise\n", tracking.x_coord);
+        else if (tracking.x_coord > 0) printf("The robot thinks it strafed %.2f inches to the right.\nConsider turning the back tracking wheel clockwise\n", tracking.x_coord);
+        else printf("The robot knows it strafed a perfect %.2f inches\n", tracking.x_coord); //Printing the tracking val just in case something went wrong. But it should always be 0
+      }
+    }
+  });
+  grid.set_func([](){ //Move in a random motion
+    if (go("Please move the robot haphazardly around the field. Then return it back to the starting point.")){
+      resetX();
+      resetY();
+      resetA();
+      if (go()){
+        printf("The robot thinks it deviated %.2f inches to the %s\n", fabs(tracking.x_coord), (tracking.x_coord < 0 ? "left" : "right"));
+        printf("The robot thinks it deviated %.2f inches %s\n", fabs(tracking.y_coord), (tracking.y_coord < 0 ? "back" : "forward"));
+        printf("The robot thinks it deviated %.2f degrees %s\n", fabs(rad_to_deg(tracking.global_angle)), (tracking.global_angle < 0 ? "counter-clockwise" : "clockwise"));
+      }
+    }
+  });
+  spin360.set_func([](){ //Robot turn accuracy
+    if (go("Please spin the robot any number of rotations. Then return it back to the starting point")){
+      resetX();
+      resetY();
+      resetA();
+      if(go()){
+        printf("The robot is %.2f inches %s and %.2f inches %s off the starting point.\n", fabs(tracking.x_coord), (tracking.x_coord < 0 ? "left" : "right"), fabs(tracking.y_coord), (tracking.y_coord < 0 ? "back" : "forward"));
+
+        int turned = fmod(rad_to_deg(tracking.global_angle), 360);
+        int lost = 360-turned;
+        float rotations = round(rad_to_deg(tracking.global_angle)/180)/2.0;
+        if (180 < turned && turned < 355) printf("However, the robot lost %d degrees over %.1f rotations.\n Consider increasing the DistanceLR.\n", lost, rotations);
+        else if (5 < turned && turned < 180) printf("However, The robot gained %d degrees over %.1f rotations.\n Consider decreasing the DistanceLR.\n", turned, rotations);
+        else printf("This seems pretty accurate. It's %d degrees off of %.1f rotations.\n", turned >= fmod(rotations*360, 360) ? turned : lost, rotations);
+      }
+    }
+  });
 
   tempfl.set_background(40, 60, 70, 50, Style::SIZE);
   tempbl.set_background(150, 60, 70, 50, Style::SIZE);
@@ -286,7 +326,7 @@ void gui_setup(){ //Call once at start in initialize()
   motors[6] = {&intk, &tempi, "INTAKE", 0};
   motors[7] = {&uptk, &tempu, "UPTAKE", 0};
 
-  Page::go_to(1); //Sets it to page 1, page num can be changed if you really need to, but don't delete this.
+  Page::go_to(1); //Sets it to page 1 for program start. Don't delete this. If you want to change the starting page, call this in initialize()
 }
 
 //Utility to get coordinates for aligned objects, (buttons, sliders...) of same size
@@ -368,11 +408,27 @@ std::tuple<int, int, int, int> fixPoints (int p1, int p2,int p3, int p4, Style t
   return {x1,y1,x2,y2}; //Gives back the fixed points as a tuple
 }
 
+void draw_oblong(int16_t x1, int16_t y1, int16_t x2, int16_t y2, double kS, double kR){ //ks and kr and scale values for shrink and radius
+  int s = std::min(x2-x1, y2-y1)*kS; //Scale for shrinking button (pressed look)
+  int r = std::min(x2-x1, y2-y1)*kR; //Scale for how rounded the button edges should be
+
+  screen::fill_rect(x1+s, y1+s, x2-s, y2-s);
+  screen::erase_rect(x1+s, y1+s, x1+s+r, y1+s+r);
+  screen::erase_rect(x2-s, y1+s, x2-s-r, y1+s+r);
+  screen::erase_rect(x1+s, y2-s, x1+s+r, y2-s-r);
+  screen::erase_rect(x2-s, y2-s, x2-s-r, y2-s-r);
+  screen::fill_circle(x1+s+r, y1+s+r, r);
+  screen::fill_circle(x2-s-r, y1+s+r, r);
+  screen::fill_circle(x1+s+r, y2-s-r, r);
+  screen::fill_circle(x2-s-r, y2-s-r, r);
+}
+
 //Constructors
 void Text::construct (int16_t pt1, int16_t pt2, Style type, text_format_e_t size, Page* page_ptr, std::string text, std::uint32_t label_color){
   txt_fmt = size;
   page = page_ptr;
   l_col = label_color;
+  b_col = page->b_col;
 
   set_title(pt1, pt2, type, text); //Formats title with proper spacing, color, and size
   page->texts.push_back(this);
@@ -466,8 +522,6 @@ Page::Page(int page_number, std::string name, std::uint32_t background_color){
 
   buttons.push_back(&prevPage);
   buttons.push_back(&nextPage);
-  // prev.construct(0, 0, 75, 20, Style::SIZE, Button::SINGLE, this, "<-");
-  // next.construct(480, 0, -75, 20, Style::SIZE, Button::SINGLE, this, "->");
 }
 
 //Methods
@@ -524,21 +578,26 @@ void Text::set_background (int16_t pt1, int16_t pt2, int16_t pt3, int16_t pt4, S
 }
 
 void Text::set_background (std::uint32_t colour){
-    std::uint32_t prevCol = b_col;
     b_col = colour;
-    if (prevCol != b_col && page == Page::current_page) draw(); //Only redraws if color has changed
+    if (b_col != colour && page == Page::current_page)
+    {draw();
+    printf("UPDATED\n");
+  }
 }
 
 void Text::draw(){
   if (x2 != 0 && y2 != 0){
+    screen::set_eraser(page->b_col); //Erases previous box
+    screen::erase_rect(x1, y1, x2, y2);
+
     screen::set_pen(b_col);
-    screen::fill_rect(x1, y1, x2, y2);
+    draw_oblong(x1, y1, x2, y2, 0, 0.15);
     screen::set_pen(l_col);
     screen::set_eraser(b_col);
   }
   else{
     screen::set_pen(l_col);
-    screen::set_eraser(page->b_col);
+    screen::set_eraser(b_col);
   }
 
   if (val_ptr != nullptr){ //If there is a var to print
@@ -586,22 +645,15 @@ void Slider::draw_bar(){
 }
 
 void Button::draw(){
-  if (latched) {draw_pressed(); return;}
+  if (latched) { //Latched buttons must be drawn in a pressed state
+    draw_pressed();
+    return;
+  }
 
   screen::set_pen(b_col);
   screen::set_eraser(Page::current_page->b_col);
   screen::fill_rect(x1, y1, x2, y2);
-
-  int r = std::min(x2-x1, y2-y1)*0.15; //Scale for how rounded the button edges should be
-  screen::erase_rect(x1, y1, x1+r, y1+r);
-  screen::erase_rect(x2, y1, x2-r, y1+r);
-  screen::erase_rect(x1, y2, x1+r, y2-r);
-  screen::erase_rect(x2, y2, x2-r, y2-r);
-
-  screen::fill_circle(x1+r, y1+r, r);
-  screen::fill_circle(x2-r, y1+r, r);
-  screen::fill_circle(x1+r, y2-r, r);
-  screen::fill_circle(x2-r, y2-r, r);
+  draw_oblong(x1, y1, x2, y2, 0, 0.15);
 
   screen::set_pen(l_col);
   screen::set_eraser(b_col);
@@ -615,19 +667,7 @@ void Button::draw_pressed(){
 
   screen::set_pen(b_col_dark);
   screen::set_eraser(Page::current_page->b_col);
-  int s = std::min(x2-x1, y2-y1)*0.04; //Scale for shrinking button (pressed look)
-  screen::fill_rect(x1+s, y1+s, x2-s, y2-s);
-
-  int r = std::min(x2-x1, y2-y1)*0.2; //Scale for how rounded the button edges should be
-  screen::erase_rect(x1+s, y1+s, x1+s+r, y1+s+r);
-  screen::erase_rect(x2-s, y1+s, x2-s-r, y1+s+r);
-  screen::erase_rect(x1+s, y2-s, x1+s+r, y2-s-r);
-  screen::erase_rect(x2-s, y2-s, x2-s-r, y2-s-r);
-
-  screen::fill_circle(x1+s+r, y1+s+r, r);
-  screen::fill_circle(x2-s-r, y1+s+r, r);
-  screen::fill_circle(x1+s+r, y2-s-r, r);
-  screen::fill_circle(x2-s-r, y2-s-r, r);
+  draw_oblong(x1, y1, x2, y2, 0.04, 0.2);
 
   screen::set_pen(l_col);
   screen::set_eraser(b_col_dark);
@@ -659,7 +699,7 @@ void Button::set_func(std::function <void()> function) {func = function;}
 
 void Button::set_off_func(std::function <void()> function) {off_func = function;}
 
-void Button::run_func(){ if (func) func();}
+void Button::run_func() {if (func) func();}
 
 //Updating data and presses
 void Page::update_screen_status(){
