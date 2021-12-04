@@ -279,12 +279,12 @@ void move_to_target(void* params){
 
     tracking.power_x = lx + dx;
     if(fabs(error_x) < end_error - 0.2) tracking.power_x = 0.0;
-    else if(fabs(tracking.power_x) < min_power_x)tracking.power_x = sgn(tracking.power_x)*min_power_x;
+    else if(fabs(tracking.power_x) < min_move_power_x)tracking.power_x = sgn(tracking.power_x)*min_move_power_x;
     tracking.power_y = ly + dy;
     if(fabs(error_y) < end_error - 0.2) tracking.power_y = 0.0;
-    else if(fabs(tracking.power_y) < min_power_y)tracking.power_y = sgn(tracking.power_y)*min_power_y;
+    else if(fabs(tracking.power_y) < min_move_power_y)tracking.power_y = sgn(tracking.power_y)*min_move_power_y;
     if(fabs(rad_to_deg(error_a)) < end_error_a - 1.0)tracking.power_a = 0.0;
-    else if(fabs(tracking.power_a) < min_power_a)tracking.power_a = sgn(tracking.power_a)*min_power_a;
+    else if(fabs(tracking.power_a) < min_move_power_a)tracking.power_a = sgn(tracking.power_a)*min_move_power_a;
 
 
 
@@ -426,8 +426,8 @@ void rush_goal2(double target_x, double target_y, double target_a){
 
 }
 
-void move_on_arc(const Point start, Position target, const double radius, const bool positive, const double max_power, const bool angle_relative_to_arc, const double min_angle_percent, const double min_x_line_percent, const bool brake){
-  Position error, kp = Position(30.0, 12.0, 150.0);
+void move_on_arc(const Point start, Position target, const double radius, const bool positive, const double max_power, const bool angle_relative_to_arc, const double min_angle_percent, const double min_x_line_percent, const bool brake, const double decel_dist, const double decel_speed){
+  Position error, kp = Position(30.0, 12.0, 175.0);
 
   target.angle = deg_to_rad(target.angle);
   // variable 'd' in diagram
@@ -476,6 +476,10 @@ void move_on_arc(const Point start, Position target, const double radius, const 
   double arc_x_power_scale;
   double arc_y_power_scale;
   double total_power;
+  
+  double decel_power, decel_power_scale;
+  
+  const double final_angle = atan2(target.y - arc_centre.y, target.x - arc_centre.x); // angle of final position to centre at end of move
 
   // positive turn_dir means cw movement about the arc
   int turn_dir = -sgn(rad_to_deg(near_angle(atan2(target.y - arc_centre.y, target.x - arc_centre.x), atan2(tracking.y_coord - arc_centre.y, tracking.x_coord - arc_centre.x))));
@@ -519,9 +523,32 @@ void move_on_arc(const Point start, Position target, const double radius, const 
         // printf("angle target: %lf, angle_error: %lf\n", rad_to_deg(target.angle - arc_disp.angle + (turn_dir == -1 ? 0 : M_PI)), rad_to_deg(error.angle));
     }
     else  error.angle = near_angle(target.angle, tracking.global_angle);
-    tracking.power_x = error.x * kp.x;
-    tracking.power_y = error.y * kp.y;
+      
+    // deceleration code
+    if(decel_dist){
+      if(h < decel_dist){
+        decel_power = map(h, decel_dist, max_power / kp.y, decel_speed, max_power);
+        if (decel_power < decel_speed) decel_power = decel_speed;
+        decel_power_scale = fabs(error.x * kp.x + error.y * kp.y) / decel_power;
+        tracking.power_x = decel_power_scale * (error.x * kp.x);
+        tracking.power_y = decel_power_scale * (error.y * kp.y);
+      }
+      else{
+        tracking.power_x = max_power * kp.x;
+        tracking.power_y = max_power * kp.y;
+      }
+    }
+    else{
+      tracking.power_x = error.x * kp.x;
+      tracking.power_y = error.y * kp.y;
+    }
     tracking.power_a = error.angle * kp.angle;
+    
+    // gives minimum move powers if not satisfied
+    if (fabs(tracking.power_a) < min_move_power_a) tracking.power_a = sgn(error.angle) * min_move_power_a;
+    if (fabs(tracking.power_x) < min_move_power_x) tracking.power_x = sgn(error.x) * min_move_power_x;
+    if (fabs(tracking.power_y) < min_move_power_y) tracking.power_y = sgn(error.y) * min_move_power_y;    
+    
     printf("%lf,%lf\n", tracking.x_coord, tracking.y_coord);
 
     // MOVE ON ARC CODE
@@ -609,7 +636,7 @@ void move_on_arc(const Point start, Position target, const double radius, const 
     // END OF MOVE ON ARC CODE
     drivebase.move(tracking.power_x, tracking.power_y, tracking.power_a);
 
-    if (fabs(target.x - tracking.x_coord) < 0.5 && fabs(target.y - tracking.y_coord) < 0.5 && fabs(rad_to_deg(error.angle)) < 5.0){
+    if (rad_to_deg(fabs(near_angle(final_angle, atan2(tracking.y_coord - arc_centre.y, tracking.x_coord - arc_centre.x)))) < 1.5){
       printf("Ending move on arc to target X: %f Y: %f A: %f at X: %f Y: %f A: %f \n", target.x, target.y, target.angle, tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle));
       printf("MOVE FINISHED\n");
       if(brake) drivebase.brake();
@@ -649,6 +676,7 @@ void tank_move_to_target(const Position target, const bool turn_dir_if_0, const 
     Vector line_disp(target.x - tracking.x_coord, target.y - tracking.y_coord);  // displacements relative to line
     double line_y_local_y; // local_y component of power along line
 
+
     while(true){
       // start of move_on_line stuff
       line_disp = Vector(target.x - tracking.x_coord, target.y - tracking.y_coord);  // displacements relative to line
@@ -677,7 +705,7 @@ void tank_move_to_target(const Position target, const bool turn_dir_if_0, const 
       tracking.power_a = kp_a * error.angle;
 
       // gives min power to local y if that is not satisfied
-      if (fabs(tracking.power_y) < min_power_y && fabs(local_error.y) > 0.5) tracking.power_y = min_power_y * sgn(local_error.y);
+      if (fabs(tracking.power_y) < min_move_power_y && fabs(local_error.y) > 0.5) tracking.power_y = min_move_power_y * sgn(local_error.y);
 
       // scales powers
       total_power = fabs(tracking.power_y) + fabs(tracking.power_a);
@@ -831,7 +859,9 @@ void tank_move_on_arc(const Point start_pos, Position target, const double power
       tracking.power_a *= max_power_scale;
     }
     // exit condition is waiting for the angle formed between the current position and the arc centre to be within 1.5 degrees of the target
-    if (rad_to_deg(fabs(final_angle - atan2(tracking.y_coord - centre.y, tracking.x_coord - centre.x))) < 1.5){
+    // if (rad_to_deg(fabs(final_angle - atan2(tracking.y_coord - centre.y, tracking.x_coord - centre.x))) < 1.5){
+    if (rad_to_deg(fabs(near_angle(final_angle, atan2(tracking.y_coord - centre.y, tracking.x_coord - centre.x)))) < 1.5){
+    
       printf("ang: %lf\n", atan2(tracking.y_coord - centre.y, tracking.x_coord - centre.x));
       drivebase.move_tank(0.0, 0.0);
       if (brake)  drivebase.brake();
