@@ -8,6 +8,7 @@
 #include "gui.hpp"
 #include "controller.hpp"
 #include "pid.hpp"
+#include "auton_util.hpp"
 
 // using namespace std;
 #include "task.hpp"
@@ -24,6 +25,7 @@ using namespace std;
 
 
 void initialize() {
+	gyro.reset();
 	drivebase.download_curve_data();
 	Data::log_init();
 	_Controller::init();
@@ -33,8 +35,6 @@ void initialize() {
 	guiSetup();
 	WAIT_FOR_SCREEN_REFRESH();
 	master.print(2, 0, "Driver: %s", drivebase.drivers[drivebase.cur_driver].name);
-
-	gyro.reset();
 }
 
 /**
@@ -82,56 +82,12 @@ void autonomous() {}
  * task, not resume it from where it left off.
  */
 
-void calibrate_gyro(){
-	while (gyro.is_calibrating()){
-		printf("Calibrating Gyro...\n");
-		delay(10);
-	}
-}
-
-void climb_ramp(int on_ramp_angle, int ramp_levelling_angle){
-	calibrate_gyro(); //Makes sure it's calibrated before started (should already be)
-
-	PID gyro_correct(2, 0, 60, 0);
-
-	gyro.tare_roll();
-	drivebase.move(65, 0);
-	waitUntil(gyro.get_roll() < on_ramp_angle)
-	printf("ON RAMP\n");
-
-
-	double correction;
-	std::uint32_t steady_time = 0, last_steady_time = 0;
-	while(true){
-		correction = gyro_correct.compute(gyro.get_roll(), 0);
-		printf("Angle: %.2f  Corr: %.2f      ", gyro.get_roll(), correction);
-
-		drivebase.move(correction, 0);
-
-		if (fabs(gyro.get_roll()) > 1) steady_time = 0;
-		else 
-
-		if (steady_time > 2500) break;
-
-		last_steady_time = steady_time;
-		delay(10);
-	}
-
-	printf("DONE\n");
-	drivebase.brake();
-}
-
 int ring_count = 0; //Get rid of this once merged
 double cur_auton = 1;
 
 void opcontrol() {
-	//Reset tracking by stopping task
-	//remove perm. make left and right members of page.
-
 	calibrate_gyro(); //Finishes calibrating gyro before program starts
-
-	printf("START\n");
-	climb_ramp(-22, -17);
+	climb_ramp();
 
 	while(true){
 		guiBackground();

@@ -88,6 +88,11 @@ void Drivebase::brake(){
   r1.move_relative(0, 200);
   r2.move_relative(0, 200);
   r3.move_relative(0, 200);
+
+  // front_l.move_relative(0, 200);
+  // front_r.move_relative(0, 200);
+  // back_l.move_relative(0, 200);
+  // back_r.move_relative(0, 200);
 }
 
 void Drivebase::update_screen(){
