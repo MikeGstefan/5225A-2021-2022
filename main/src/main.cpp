@@ -91,7 +91,11 @@ void opcontrol() {
 	Timer move = {"move"};
 	printf("START\n");
 	move.print();
-	move_on_arc({0.0, 0.0}, {-24.0, 0.0, -180.0}, 12.0, false, 127, true, 1.0, 0.0, true, 20.0, 127.0);
+
+	// rush_goal2(0.0, -20.0, 0.0);
+	move_on_line({0.0, 0.0}, {0.0, 24.0, 00.0}, 127.0, false, 0.0, false);
+
+	// move_on_arc({0.0, 0.0}, {-24.0, 0.0, -180.0}, 12.0, false, 127, true, 1.0, true, 20.0, 127.0);
 	// tank_move_on_arc({0.0, 0.0}, {-24.0, 24.0, -90.0}, 127.0, 127.0, true);
 	// move_on_arc({0.0, 0.0}, {10.0, 10.0, 0.0}, 10.0, false, 127, false, 0.3, 0.0, true);
 	move.print();

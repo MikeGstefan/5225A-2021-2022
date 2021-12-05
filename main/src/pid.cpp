@@ -15,6 +15,10 @@ double PID::get_output() const {
     return output;
 }
 
+double PID::get_proportional() const{
+  return proportional;
+}
+
 double PID::compute(double input, double target){
 
     error = target - input;
@@ -25,7 +29,7 @@ double PID::compute(double input, double target){
         // resets integral if sign of error flips and user enabled this feature, or error is out of bounds
         if ((integral_sgn_reset && sgn(error) != last_error_sgn) || (fabs(error) < integral_lower_bound && fabs(error) > integral_upper_bound)){
           integral = 0;
-          // printf("sgn flipped\n");
+          // printf("INTEGRAL RESET ***********************\n");
         }
         else    integral += error * last_update_timer.get_time() * kI;
 
