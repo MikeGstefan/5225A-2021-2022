@@ -82,26 +82,40 @@ void autonomous() {}
  * task, not resume it from where it left off.
  */
 
-void climb_ramp(int on_ramp_angle, int ramp_levelling_angle){
-	while (gyro.is_calibrating()){ //Makes sure it's calibrated before started (should already be)
-		printf("Calbrating Gyro...\n");
+void calibrate_gyro(){
+	while (gyro.is_calibrating()){
+		printf("Calibrating Gyro...\n");
 		delay(10);
 	}
+}
 
-	PID gyro_correct(1, 0, 0, 0);
+void climb_ramp(int on_ramp_angle, int ramp_levelling_angle){
+	calibrate_gyro(); //Makes sure it's calibrated before started (should already be)
+
+	PID gyro_correct(2, 0, 60, 0);
 
 	gyro.tare_roll();
-	drivebase.move(0, 65, 0);
+	drivebase.move(65, 0);
 	waitUntil(gyro.get_roll() < on_ramp_angle)
 	printf("ON RAMP\n");
 
-	// while(true){
-	// 	gyro_correct.compute(gyro.get_roll(), ramp_levelling_angle);
-	// 	printf("Angle: %f Corr: %f\n", gyro.get_roll(), gyro_correct.get_output());
-	// 	// drivebase.move(0, gyro_correct.get_output(), 0);
-	//
-	// 	delay(10);
-	// }
+
+	double correction;
+	std::uint32_t steady_time = 0, last_steady_time = 0;
+	while(true){
+		correction = gyro_correct.compute(gyro.get_roll(), 0);
+		printf("Angle: %.2f  Corr: %.2f      ", gyro.get_roll(), correction);
+
+		drivebase.move(correction, 0);
+
+		if (fabs(gyro.get_roll()) > 1) steady_time = 0;
+		else 
+
+		if (steady_time > 2500) break;
+
+		last_steady_time = steady_time;
+		delay(10);
+	}
 
 	printf("DONE\n");
 	drivebase.brake();
@@ -114,16 +128,14 @@ void opcontrol() {
 	//Reset tracking by stopping task
 	//remove perm. make left and right members of page.
 
-	while (gyro.is_calibrating()){ //Finishes calibrating gyro before program starts
-		printf("Calibrating Gyro...\n");
-		delay(10);
-	}
+	calibrate_gyro(); //Finishes calibrating gyro before program starts
 
-	climb_ramp(-22, -20);
+	printf("START\n");
+	climb_ramp(-22, -17);
 
 	while(true){
 		guiBackground();
-		// drivebase.handle_input();
+		drivebase.handle_input();
 
 		if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_B)){ //Update expo util
 			drivebase.update_lookup_table_util();

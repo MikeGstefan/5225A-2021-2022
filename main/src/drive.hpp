@@ -51,7 +51,7 @@ class Drivebase {
   void update_screen();
 
 public:
-    Timer screen_timer = {"screen_timer"};
+  Timer screen_timer = {"screen_timer"};
   int cur_driver = 0;  // driver to defaults to Nikhil
   static constexpr int num_of_drivers = 5;
   FILE* curve_file;
@@ -59,6 +59,7 @@ public:
   std::array<driver, num_of_drivers> drivers;  // driver profiles
   Drivebase(std::array<driver, num_of_drivers> drivers); // constructor
   void move(double x, double y, double a);  // sets the power for each drive motor based on x, y and angular power
+  void move(double y, double a); //Move for new 6 motor drive
   void brake();
   void download_curve_data(); // grabs data from SD card and copies to driver arrays
   void update_lookup_table_util();  // utility to alter expo curves for any driver
