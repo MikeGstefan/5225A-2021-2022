@@ -323,7 +323,7 @@ void move_to_target(void* params){
 // #define exit_condition tracking.x_coord < target_x - 5.0 || tracking.y_coord > target_y + 5.0
 
 void rush_goal(double target_x, double target_y, double target_a){
-    double end_error = 0.5, end_error_a = 5.0, kp_x = 10.0, kp_a = 120.0, local_error_x, local_error_y, difference_a, error_a, error_d, max_power = 127, total_power, scale;
+    double end_error = 0.5, end_error_a = 5.0, kp_x = 30.0, kp_a = 175.0, local_error_x, local_error_y, difference_a, error_a, error_d, max_power = 127, total_power, scale;
     uint32_t last_time = millis();
     target_a = deg_to_rad(target_a);
     short orig_y_sgn = sgn(target_y - tracking.y_coord);
@@ -426,6 +426,7 @@ void rush_goal2(double target_x, double target_y, double target_a){
 
 }
 
+// this is 150-200 ms slower than tank move on arc on 24 radius 90 degree turn
 void move_on_arc(const Point start, Position target, const double radius, const bool positive, const double max_power, const bool angle_relative_to_arc, const double min_angle_percent, const double min_x_line_percent, const bool brake, const double decel_dist, const double decel_speed){
   Position error, kp = Position(30.0, 12.0, 175.0);
 
@@ -476,9 +477,9 @@ void move_on_arc(const Point start, Position target, const double radius, const 
   double arc_x_power_scale;
   double arc_y_power_scale;
   double total_power;
-  
+
   double decel_power, decel_power_scale;
-  
+
   const double final_angle = atan2(target.y - arc_centre.y, target.x - arc_centre.x); // angle of final position to centre at end of move
 
   // positive turn_dir means cw movement about the arc
@@ -493,25 +494,9 @@ void move_on_arc(const Point start, Position target, const double radius, const 
     // printf("\n Arc displacements | x: %lf, y: %lf\n", arc_disp.x, arc_disp.y);
 
     // rotating arc displacements
-    h = sqrt(pow(arc_disp.x, 2) + pow(arc_disp.y, 2));  // non-split calc
-    // printf("h: %lf\n", h);
-    // beta = tracking.global_angle + arc_disp.angle;
-    beta = atan2(arc_disp.y, arc_disp.x) + tracking.global_angle + arc_disp.angle;  // non-split calc
+    h = sqrt(pow(arc_disp.x, 2) + pow(arc_disp.y, 2));  // magnitude of displacement vector
+    beta = atan2(arc_disp.y, arc_disp.x) + tracking.global_angle + arc_disp.angle;  // angle of displacement vector local to robot
 
-    // printf("beta: %lf, arc_disp.angle: %lf, tracking_angle: %lf\n", rad_to_deg(atan2(arc_disp.y, arc_disp.x)), rad_to_deg(arc_disp.angle), rad_to_deg(tracking.global_angle));
-    // printf("total: %lf\n", rad_to_deg(beta));
-
-    // actually splits the powers now lol
-    // also put each power through a PID later
-    // arc_x_local_x_power = kp.x * fabs(arc_disp.x) * -cos(beta);
-    // arc_x_local_y_power = kp.y * fabs(arc_disp.x) * -sin(beta);
-    // arc_y_local_x_power = kp.x * fabs(arc_disp.y) * -sin(beta);
-    // arc_y_local_y_power = kp.y * fabs(arc_disp.y) * cos(beta);
-
-    // error.x = fabs(arc_disp.x) * -cos(beta) + fabs(arc_disp.y) * -sin(beta);
-    // error.y = fabs(arc_disp.x) * -sin(beta) + fabs(arc_disp.y) * cos(beta);
-
-    // non-split calc
     error.x = h * cos(beta);
     error.y = h * sin(beta);
     // printf("Local errors | x: %lf, y: %lf\n", error.x, error.y);
@@ -523,19 +508,20 @@ void move_on_arc(const Point start, Position target, const double radius, const 
         // printf("angle target: %lf, angle_error: %lf\n", rad_to_deg(target.angle - arc_disp.angle + (turn_dir == -1 ? 0 : M_PI)), rad_to_deg(error.angle));
     }
     else  error.angle = near_angle(target.angle, tracking.global_angle);
-      
+
     // deceleration code
     if(decel_dist){
-      if(h < decel_dist){
-        decel_power = map(h, decel_dist, max_power / kp.y, decel_speed, max_power);
+      if(h < decel_dist){ // robot is past decel dist
+        decel_power = constrain(map(h, decel_dist, max_power / kp.y, decel_speed, max_power), decel_speed, max_power);
         if (decel_power < decel_speed) decel_power = decel_speed;
-        decel_power_scale = fabs(error.x * kp.x + error.y * kp.y) / decel_power;
-        tracking.power_x = decel_power_scale * (error.x * kp.x);
-        tracking.power_y = decel_power_scale * (error.y * kp.y);
+        decel_power_scale = decel_power / h;
+        tracking.power_x = decel_power_scale * error.x;
+        tracking.power_y = decel_power_scale * error.y;
       }
-      else{
-        tracking.power_x = max_power * kp.x;
-        tracking.power_y = max_power * kp.y;
+      else{ // robot is before decel dist
+        decel_power_scale = max_power / (fabs(error.x) * kp.x + fabs(error.y) * kp.y);
+        tracking.power_x = error.x * kp.x * decel_power_scale;
+        tracking.power_y = error.y * kp.y * decel_power_scale;
       }
     }
     else{
@@ -543,29 +529,25 @@ void move_on_arc(const Point start, Position target, const double radius, const 
       tracking.power_y = error.y * kp.y;
     }
     tracking.power_a = error.angle * kp.angle;
-    
+
     // gives minimum move powers if not satisfied
     if (fabs(tracking.power_a) < min_move_power_a) tracking.power_a = sgn(error.angle) * min_move_power_a;
     if (fabs(tracking.power_x) < min_move_power_x) tracking.power_x = sgn(error.x) * min_move_power_x;
-    if (fabs(tracking.power_y) < min_move_power_y) tracking.power_y = sgn(error.y) * min_move_power_y;    
-    
+    if (fabs(tracking.power_y) < min_move_power_y) tracking.power_y = sgn(error.y) * min_move_power_y;
+
     printf("%lf,%lf\n", tracking.x_coord, tracking.y_coord);
 
     // MOVE ON ARC CODE
     total_power = fabs(tracking.power_x) + fabs(tracking.power_y) + fabs(tracking.power_a);
 
     if(total_power > max_power){
-        // init variables
 
         pre_scaled_power_a = tracking.power_a;
-
         angle_power_guarantee_xy_scale = 1.0;
-        // end of init variables
 
         max_power_scale = max_power / total_power;
-        // printf("max_power: %lf\n", total_power * max_power_scale);
         tracking.power_x *= max_power_scale, tracking.power_y *= max_power_scale, tracking.power_a *= max_power_scale;
-    // start of angle power guarantee
+        // start of angle power guarantee
 
         power_xy = fabs(tracking.power_x) + fabs(tracking.power_y);
 
@@ -577,66 +559,12 @@ void move_on_arc(const Point start, Position target, const double radius, const 
         if (power_xy > 0)  angle_power_guarantee_xy_scale = (max_power - fabs(tracking.power_a)) / power_xy;
         tracking.power_x *= angle_power_guarantee_xy_scale, tracking.power_y *= angle_power_guarantee_xy_scale;
         // printf("****power_a: %lf, x:%lf, y: %lf, pre_scaled: %lf, min: %lf\n", tracking.power_a, tracking.power_x , tracking.power_y, pre_scaled_power_a, min_power_a);
-
-    // end of angle power guarantee
-
-    // start of arc_x_power guarantee
-        // scaling from local x and y powers to arc x and y
-        //
-        // arc_x_local_x_power *= angle_power_guarantee_xy_scale;
-        // arc_y_local_x_power *= angle_power_guarantee_xy_scale;
-        //
-        // arc_x_local_y_power *= angle_power_guarantee_xy_scale;
-        // arc_y_local_y_power *= angle_power_guarantee_xy_scale;
-        // // move on arc stuff
-        // //init
-        //
-        // pre_scaled_arc_x_power = arc_x_power = fabs(arc_x_local_x_power) + fabs(arc_x_local_y_power);
-        // arc_y_power = fabs(arc_y_local_x_power) + fabs(arc_y_local_y_power);
-        // // pre_scaled_arc_x_power = arc_x_power;
-        //
-        // power_xy = arc_x_power + arc_y_power;
-        //
-        // arc_x_power_scale = 1.0;
-        // arc_y_power_scale = 1.0;
-        //
-        // total_power = power_xy + fabs(tracking.power_a);
-        // ///////
-        // // giver arc_x as much as possible without taking away power already guaranteed to angle
-        // min_arc_x_power = power_xy - min_arc_x_power < 0 ? power_xy : min_x_line_percent * max_power;
-        // // end of init
-        // if (pre_scaled_arc_x_power > min_arc_x_power){
-        //     if (arc_x_power < min_arc_x_power){   // arc_x_power has been overshadowed
-        //         arc_x_power = min_arc_x_power;
-        //     }
-        // }
-        // // x_arc_power gets the power it demanded if pre_scaled arc_power was also less than min_x_arc_power
-        // else    arc_x_power = pre_scaled_arc_x_power;
-        //
-        // // prevents division by 0 issue
-        // if (pre_scaled_arc_x_power > 0)   arc_x_power_scale = arc_x_power / pre_scaled_arc_x_power;
-        // if (arc_y_power > 0) arc_y_power_scale = (power_xy - arc_x_power) / arc_y_power;
-        //
-        // arc_x_local_x_power *= arc_x_power_scale;
-        // arc_y_local_x_power *= arc_y_power_scale;
-        //
-        // arc_x_local_y_power *= arc_x_power_scale;
-        // arc_y_local_y_power *= arc_y_power_scale;
-        //
-        // tracking.power_x = arc_x_local_x_power + arc_y_local_x_power;
-        // tracking.power_y = arc_x_local_y_power + arc_y_local_y_power;
-
-    // end of move on arc stuff
-
-        // return power_a;
     }
     // end of scaling
-    double sum = fabs(tracking.power_a) + fabs(tracking.power_x) + fabs(tracking.power_y);
-    // printf("power_a: %lf, power_x: %lf, power_y: %lf, sum: %lf\n", tracking.power_a, tracking.power_x, tracking.power_y, sum);
     // END OF MOVE ON ARC CODE
     drivebase.move(tracking.power_x, tracking.power_y, tracking.power_a);
-
-    if (rad_to_deg(fabs(near_angle(final_angle, atan2(tracking.y_coord - arc_centre.y, tracking.x_coord - arc_centre.x)))) < 1.5){
+    // waits for arc angle to become less than 1 degree
+    if (rad_to_deg(fabs(near_angle(final_angle, atan2(tracking.y_coord - arc_centre.y, tracking.x_coord - arc_centre.x)))) < 1.0){
       printf("Ending move on arc to target X: %f Y: %f A: %f at X: %f Y: %f A: %f \n", target.x, target.y, target.angle, tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle));
       printf("MOVE FINISHED\n");
       if(brake) drivebase.brake();
@@ -644,6 +572,8 @@ void move_on_arc(const Point start, Position target, const double radius, const 
       printf("min_a: %lf\n", min_power_a);
       return;
     }
+    // printf("****power_a: %lf, x:%lf, y: %lf, pre_scaled: %lf, min: %lf, sum: %lf\n", tracking.power_a, tracking.power_x , tracking.power_y, pre_scaled_power_a, min_power_a, fabs(tracking.power_a) + fabs(tracking.power_x) + fabs(tracking.power_y));
+
     delay(10);
   }
 }
@@ -858,10 +788,10 @@ void tank_move_on_arc(const Point start_pos, Position target, const double power
       tracking.power_y *= max_power_scale;
       tracking.power_a *= max_power_scale;
     }
-    // exit condition is waiting for the angle formed between the current position and the arc centre to be within 1.5 degrees of the target
-    // if (rad_to_deg(fabs(final_angle - atan2(tracking.y_coord - centre.y, tracking.x_coord - centre.x))) < 1.5){
-    if (rad_to_deg(fabs(near_angle(final_angle, atan2(tracking.y_coord - centre.y, tracking.x_coord - centre.x)))) < 1.5){
-    
+
+    // waits for arc angle to become less than 1 degree
+    if (rad_to_deg(fabs(near_angle(final_angle, atan2(tracking.y_coord - centre.y, tracking.x_coord - centre.x)))) < 1.0){
+
       printf("ang: %lf\n", atan2(tracking.y_coord - centre.y, tracking.x_coord - centre.x));
       drivebase.move_tank(0.0, 0.0);
       if (brake)  drivebase.brake();
