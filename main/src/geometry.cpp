@@ -1,8 +1,17 @@
 #include "geometry.hpp"
 
-// Position constructor definition
+// point operators
+Vector Point::operator +(const Point& p2) const{
+  return Vector(x + p2.x, y + p2.y, vector_types::CARTESIAN);
+}
+Vector Point::operator -(const Point& p2) const{
+  return Vector(x - p2.x, y - p2.y, vector_types::CARTESIAN);
+}
+
+// position constructors
 Position::Position(double x, double y, double angle): x(x), y(y), angle(angle){}
 Position::Position(): x(0.0), y(0.0), angle(0.0){}
+Position::Position(Point point): x(point.x), y(point.y), angle(0.0){}
 
 // vector methods
 
@@ -11,9 +20,18 @@ Vector::Vector(const double param_1, const double param_2, vector_types type){
   else  set_cartesian(param_1, param_2);
 }
 
+Vector::Vector(const Point point){
+  set_cartesian(point);
+}
+
 // configures point as cartesian vector, with x and y coordinates
 void Vector::set_cartesian(const double x, const double y){
   this-> x = x, this-> y = y;
+  magnitude = sqrt (pow(x, 2) + pow(y, 2)), angle = atan2(y, x);
+}
+// cartesian vector, taking in a point instead
+void Vector::set_cartesian(const Point point){
+  this-> x = point.x, this-> y = point.y;
   magnitude = sqrt (pow(x, 2) + pow(y, 2)), angle = atan2(y, x);
 }
 
@@ -42,19 +60,11 @@ double Vector::get_angle() const{
     return this-> angle;
 }
 
-// operator overloads
+// Vector operator overloads
 Vector Vector::operator +(const Vector& p2) const{
     return Vector(x + p2.get_x(), y + p2.get_y(), vector_types::CARTESIAN);
 }
 
 Vector Vector::operator -(const Vector& p2) const{
     return Vector(x - p2.get_x(), y - p2.get_y(), vector_types::CARTESIAN);
-}
-
-// point operators
-Vector Point::operator +(const Point& p2) const{
-  return Vector(x + p2.x, y + p2.y, vector_types::CARTESIAN);
-}
-Vector Point::operator -(const Point& p2) const{
-  return Vector(x - p2.x, y - p2.y, vector_types::CARTESIAN);
 }

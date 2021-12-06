@@ -703,7 +703,7 @@ void move_on_line(const Point start, Position target, const double max_power, co
 // TANK MOVE ALGORITHMS
 
 void tank_move_to_target(const Position target, const bool turn_dir_if_0, const double max_power, const double min_angle_percent, const bool brake){
-    // Coord tracking = {0.0, 0.0, deg_to_rad(10.0)};
+
     Point local_error;
     Position error;
 

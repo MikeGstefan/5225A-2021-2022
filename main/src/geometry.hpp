@@ -1,11 +1,20 @@
 #pragma once
 #include "main.h"
 
+class Vector; // forward declares Vector class
+
+struct Point{
+    double x, y;
+    // arithmetic operator overloads
+    Vector operator +(const Point& p2) const;
+    Vector operator -(const Point& p2) const;
+};
+
 struct Position{   // stores members variables for a coordinate: x, y and angle    MUST BE DEFINED HERE, OTHERWISE IT'LL CAUSE CIRCULAR HEADER FILE DEPENDENCY OCCURS
     double x, y, angle;
     Position(double x, double y, double angle);
-    Position();
-    // default constructor
+    Position(); // default constructor
+    Position(Point point);
 };
 
 enum class vector_types {CARTESIAN, POLAR};
@@ -15,12 +24,13 @@ class Vector{
     double x, y, magnitude, angle;
 
 public:
-    // "constructors"
-
+    // constructors
     Vector(const double param_1, const double param_2, vector_types type = vector_types::CARTESIAN);
+    Vector(const Point point);
 
     // configures vector as cartesian vector, with x and y coordinates
     void set_cartesian(const double x, const double y);
+    void set_cartesian(const Point point);
 
     // configures vector as polar vector, with an angle and magnitude
     void set_polar(const double magnitude, const double direction);
@@ -37,11 +47,4 @@ public:
     Vector operator +(const Vector& p2) const;
     Vector operator -(const Vector& p2) const;
 
-};
-
-struct Point{
-    double x, y;
-    // arithmetic operator overloads
-    Vector operator +(const Point& p2) const;
-    Vector operator -(const Point& p2) const;
 };
