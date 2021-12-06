@@ -10,4 +10,4 @@ extern pros::Motor l1, l2, l3, r1, r2, r3;
 extern pros::ADIEncoder LeftEncoder, RightEncoder, BackEncoder;
 extern pros::ADIDigitalOut claw_in, claw_out;
 extern pros::ADIDigitalIn claw_touch;
-extern pros::Imu gyro;
+extern pros::Imu imu_sensor;

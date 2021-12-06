@@ -24,7 +24,7 @@ pros::Motor intk(15, pros::E_MOTOR_GEARSET_06, false, pros::E_MOTOR_ENCODER_DEGR
 pros::Motor f_bar(7, pros::E_MOTOR_GEARSET_18, true, pros::E_MOTOR_ENCODER_DEGREES);
 pros::Motor c_bar(10, pros::E_MOTOR_GEARSET_36, true, pros::E_MOTOR_ENCODER_DEGREES);
 pros::Motor uptk(12);
-pros::Imu gyro(11);
+pros::Imu imu_sensor(11);
 
 pros::ADIEncoder LeftEncoder(1, 2, false), RightEncoder(3, 4, true), BackEncoder(5, 6, false);
 pros::ADIDigitalOut claw_in(7), claw_out(8);

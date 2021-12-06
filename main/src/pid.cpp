@@ -36,7 +36,7 @@ double PID::compute(double input, double target){
         last_error_sgn = sgn(error);
         last_error = error;
     }
-    printf("P: %f  D: %f\n", proportional, derivative);
+    
     output = proportional + integral + derivative + bias;
     return output;;
 }
