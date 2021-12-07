@@ -1,6 +1,4 @@
 #pragma once
-#include <tuple>
-#include "main.h"
 #include "util.hpp"
 #include "drive.hpp"
 #include "pid.hpp"

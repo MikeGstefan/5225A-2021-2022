@@ -1,0 +1,15 @@
+curvature:0.100000
+curvature:0.500000
+curvature:1.200000
+curvature:0.100000
+curvature:1.000000
+curvature:2.500000
+curvature:0.000000
+curvature:1.000000
+curvature:2.500000
+curvature:0.200000
+curvature:1.000000
+curvature:1.000000
+curvature:0.000000
+curvature:1.000000
+curvature:2.500000

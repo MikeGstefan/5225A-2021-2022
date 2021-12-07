@@ -1,13 +1,7 @@
 #pragma once
-#include "main.h"
-#include "config.hpp"
-#include "util.hpp"
 #include "Tracking.hpp"
-#include <iostream>
-#include <cmath>
-#include <memory>
-#include <vector>
-#include <array>
+#include "util.hpp"
+#include "logging.hpp"
 
 using namespace pros;
 
@@ -37,25 +31,22 @@ extern controller_digital_e_t tip_mogo_button;
 // aliases to make code more readable, used to encode vales of drive.cur_driver
 // enum class drivers{Nikhil = 0, Emily = 1, Sarah = 2};
 
-
 #define WAIT_FOR_SCREEN_REFRESH() {\
-  delay(screen_timer.get_time() < 50 ? 50 - screen_timer.get_time() : 0);\
-  screen_timer.reset();\
+  delay(drivebase.screen_timer.get_time() < 50 ? 50 - drivebase.screen_timer.get_time() : 0);\
+  drivebase.screen_timer.reset();\
 }
 
 class custom_drive{
-  // curve_types curve_type = curve_types::polynomial; // defaults to polynomial if not specified
   int lookup_table[255];
-
   // curve functions
-  int polynomial(int x);
-  int exponential(int x);
+  int polynomial(int x);  // transforms a linear input to a polynomially tranformed output
+  int exponential(int x);  // transforms a linear input to a exponentially tranformed output
 
 public:
   double curvature;
   custom_drive(double curvature); // constructor
-  void fill_lookup_table();
-  int lookup(int x);
+  void fill_lookup_table(); // transforms linear mapping to exponential mapping for a singular axis
+  int lookup(int x);  // returns transformed value from lookup table, taking in an x input
 };
 
 struct driver{
@@ -63,7 +54,7 @@ struct driver{
   // 0 is strafe, 1 is forward, 2 is turn
   std::array<controller_analog_e_t, 3> joy_sticks;
   std::array<custom_drive, 3> custom_drives;
-  driver(const char* name, std::array<controller_analog_e_t, 3> joy_sticks, std::array<custom_drive, 3> custom_drives);
+  driver(const char* name, std::array<controller_analog_e_t, 3> joy_sticks, std::array<custom_drive, 3> custom_drives); // constructor
 };
 
 
@@ -77,21 +68,25 @@ class Drivebase{
 
 public:
   int cur_driver = 0;  // driver defaults to Nikhil rn
-  int num_of_drivers = 3;
+  Timer screen_timer = {"screen_timer"};
+  static constexpr int num_of_drivers = 5;
   FILE* curve_file;
-  std::array<driver, 3> drivers;  // driver profiles
-  Drivebase(std::array<driver, 3> drivers); // constructor
+  bool curve_file_exists;
+  std::array<driver, num_of_drivers> drivers;  // driver profiles
+  Drivebase(std::array<driver, num_of_drivers> drivers); // constructor
 
   // 'set-drive' methods
   void move(double x, double y, double a);
   void move_tank(double y, double a);
   void move_side(double l, double r);
 
+  
+ 
   void brake();
-  void download_curve_data();
-  void update_lookup_table_util();
-  void handle_input();
-  void driver_practice();
+  void download_curve_data(); // grabs data from SD card and copies to driver arrays
+  void update_lookup_table_util();  // utility to alter expo curves for any driver
+  void handle_input();  // move the drivebase according to lookup tables from a joystick input
+  void driver_practice(); // method to let drivers drive and change driver profiles
 };
 
 extern Drivebase drivebase;
