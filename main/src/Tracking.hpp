@@ -77,4 +77,24 @@ const int min_move_power_y = 17;
 
 // #define xy_enable a
 
-// extern bool lineup_first_default;
+// macros for convenient modification of move algorithms
+
+#define polar_to_vector(start_x, start_y, magnitude, theta, angle){\
+  {start_x, start_y}, {start_x + sin(deg_to_rad(theta)) * magnitude, start_y + cos(deg_to_rad(theta)) * magnitude, angle}\
+}
+
+#define polar_to_vector_facing_line(start_x, start_y, magnitude, angle){\
+  polar_to_vector(start_x, start_y, magnitude, angle, angle + 180)\
+}
+
+#define polar_to_vector_facing_line_backwards(start_x, start_y, magnitude, angle){\
+  polar_to_vector(start_x, start_y, magnitude, angle, angle + 180)\
+}
+
+#define facing_line(start_x, start_y, target_x, target_y, forward){\
+  {start_x, start_y}, {target_x, target_y, atan2(target_x - start_x, target_y - start_y)}\
+}
+
+#define facing_line_backwards(start_x, start_y, target_x, target_y, forward){\
+  {start_x, start_y}, {target_x, target_y, rad_to_deg(atan2(target_x - start_x, target_y - start_y)) + 180}\
+}
