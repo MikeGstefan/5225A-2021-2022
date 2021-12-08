@@ -79,17 +79,56 @@ void opcontrol() {
 	/*Gui:
 	Reset tracking by task
 	/**/
+	// while(true){delay(10);}
+// 		f_bar.move(-60);
+//   		Timer vel_rise_timeout("f_bar_vel_rise");
+//   // waits for f_bar velocity to rise or timeout to trigger
+//   		while(fabs(f_bar.get_actual_velocity()) < 45.0){
+//     		printf("vel (rising loop): %lf\n", f_bar.get_actual_velocity());
+//     		if (vel_rise_timeout.get_time() > 50){
+//       			printf("f_bar rising timeout\n");
+//       			break;
+//     		}
+//     		delay(10);
+//   		}
+//   		printf("done rising\n");
+//   	// waits until f_bar velocity slows down for 5 cycles
+//   		cycleCheck(fabs(f_bar.get_actual_velocity()) < 5.0, 5, 10)
+//   		f_bar.tare_position();
+//   		printf("%d, f_bar reset %lf\n", millis(), f_bar.get_position());
+//   		f_bar.move(0);
 
+
+// 	f_bar.move_absolute(90,100);
+
+// 	// while(!claw_touch.get_value())delay(10);
+// 	// claw_in.set_value(0);
+
+// 	// delay(200);
+
+// 	// f_bar.move_absolute(400,100);
+// 	// while(true){
+// 	// 	printf("%f\n",f_bar.get_position());
+// 	// 	delay(50);
+// 	// }
+// 	while(!master.get_digital(E_CONTROLLER_DIGITAL_UP))delay(10);
+// 	rush_goal2(0,40,0);
+// 	// drivebase.move(0,0,0);
+// 	drivebase.brake();
+
+	// while(!master.get_digital_new_press(E_CONTROLLER_DIGITAL_UP))delay(10);
 	while(true){
-		gui_background();
-		drivebase.handle_input();
+		// gui_background();
+		// drivebase.handle_input();
 
-		if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_B)){ //Update expo util
-			drivebase.update_lookup_table_util();
-			master.clear();
-		}
-		else if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_UP)) next_driver();
-		else if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_DOWN)) prev_driver();
-		delay(10);
+		// if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_B)){ //Update expo util
+		// 	drivebase.update_lookup_table_util();
+		// 	master.clear();
+		// }
+		// else if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_UP)) next_driver();
+		// else if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_DOWN)) prev_driver();
+		// delay(10);
+		
+		
 	}
 }

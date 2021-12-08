@@ -41,7 +41,7 @@ void update(void* params){
   _Task* ptr = _Task::get_obj(params);
   Timer data_timer{"tracking logs"};
   // LeftEncoder.reset(); RightEncoder.reset(); BackEncoder.reset();
-  double DistanceLR = 14.79, DistanceB = 6.1;
+  double DistanceLR = 15.1, DistanceB = 6.1;
   double Left, Right, Back, NewLeft, NewRight, NewBack, LastLeft = LeftEncoder.get_value()/360.0 *(2.75*M_PI), LastRight =  RightEncoder.get_value()/360.0 *(2.75*M_PI), LastBack = BackEncoder.get_value()/360.0 *(2.77*M_PI);
   double Theta = 0.0, Beta = 0.0, Alpha = 0.0;
   double RadiusR, RadiusB, h, h2;
@@ -115,11 +115,11 @@ void update(void* params){
     tracking.global_angle += Theta;
 
     
-    tracking_data.print(&data_timer, 100, {
+    tracking_data.print(&data_timer, 300, {
       [=](){return Data::to_char("%d || x: %.2lf, y: %.2lf, a: %.2lf\n", millis(), tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle));},
-      [=](){return Data::to_char("%d || GLOBAL VELOCITY| x: %.2f, y: %.2f a: %.2f\n", millis(), tracking.g_velocity.x, tracking.g_velocity.y, rad_to_deg(tracking.g_velocity.angle));},
-      [=](){return Data::to_char("%d || ENCODER L: %d, R: %d, B:%d \n", millis(), LeftEncoder.get_value(), RightEncoder.get_value(), BackEncoder.get_value());},
-      [=](){return Data::to_char("%d || ENCODER VELO| l: %.2f, r: %.2f, b: %.2f\n", millis(), tracking.l_velo, tracking.r_velo, tracking.b_velo);}
+      // [=](){return Data::to_char("%d || GLOBAL VELOCITY| x: %.2f, y: %.2f a: %.2f\n", millis(), tracking.g_velocity.x, tracking.g_velocity.y, rad_to_deg(tracking.g_velocity.angle));},
+      // [=](){return Data::to_char("%d || ENCODER L: %d, R: %d, B:%d \n", millis(), LeftEncoder.get_value(), RightEncoder.get_value(), BackEncoder.get_value());},
+      // [=](){return Data::to_char("%d || ENCODER VELO| l: %.2f, r: %.2f, b: %.2f\n", millis(), tracking.l_velo, tracking.r_velo, tracking.b_velo);}
     });
 
 
@@ -393,16 +393,16 @@ void rush_goal2(double target_x, double target_y, double target_a){
         printf("pow_x %f, pow_y: %f, power_a: %f",tracking.power_x, tracking.power_y, tracking.power_a);
         printf("cur_y_sgn: %lf, cur_y: %lf\n", target_y - tracking.y_coord, tracking.y_coord);
         // exit condition
-        // if (claw_touch.get_value()){
-        //   // got_goal = goal_lim_switch_state;
-        //   claw_out.set_value(1);
-        // 	claw_in.set_value(0);
-        //   drivebase.brake();
-        //   printf("x: %lf, y: %lf, a: %lf\n", tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle));
-        //   printf("GOT TO GOAL: %d\n", millis());
-        //   return;
-        // }
-        if (fabs(tracking.y_coord) > fabs(target_y) + 10.0){
+        if (claw_touch.get_value()){
+          // got_goal = goal_lim_switch_state;
+          // claw_out.set_value(1);
+        	claw_in.set_value(0);
+          // drivebase.brake();
+          printf("x: %lf, y: %lf, a: %lf\n", tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle));
+          printf("GOT TO GOAL: %d\n", millis());
+          return;
+        }
+        if (fabs(tracking.y_coord) > fabs(target_y) + 25.0){
           printf("target_y: %lf\n", target_y);
           printf("x: %lf, y: %lf, a: %lf\n", tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle));
           printf("FAILED GETTING TO GOAL: %d\n", millis());
