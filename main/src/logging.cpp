@@ -92,11 +92,12 @@ void Data::print(const char* format,...){
   }
 }
 
-void Data::print(Timer* tmr, int freq, std::vector<char*> str){
+void Data::print(Timer* tmr, int freq, std::vector<std::function<char*()>> str){
   if(tmr->get_time() > freq){
     for(int i = 0; i < str.size(); i++){ 
-        this->print(str[i]);
-        delete[] str[i];
+        char* buffer = str[i]();
+        this->print(buffer);
+        delete[] buffer;
     }
     tmr->reset();
   } 
