@@ -123,7 +123,7 @@ void update(void* params){
     // printf("ENCODER L: %d, R: %d, B:%d \n", LeftEncoder.get_value(), RightEncoder.get_value(), BackEncoder.get_value());
     // printf("%d VELOCIT L: %f, R: %f\n", millis(), tracking.l_velo, tracking.r_velo);
 
-    // printf("GLOBAL VELOCITY| x: %.2f, y: %.2f a: %.2f\n", tracking.g_velocity.x, tracking.g_velocity.y, rad_to_deg(tracking.g_velocity.angle));
+    printf("GLOBAL VELOCITY| x: %.2f, y: %.2f a: %.2f\n", tracking.g_velocity.x, tracking.g_velocity.y, rad_to_deg(tracking.g_velocity.angle));
     // printf("power| x: %.2f, y: % 2.f a: %.2f\n", tracking.power_x, tracking.power_y, tracking.power_a);
 
     // printf(" %f, %f, %f, %f\n",tracking.l_velo, tracking.r_velo, tracking.power_y, tracking.y_coord);
@@ -450,8 +450,8 @@ void move_to_point(const Point start, Position target, const double max_power, c
     const double x_multiplier = 1.75; // how much slower the robot strafes than moves forwards
     // PID'S
 
-    PID x_pid(24.0, 0.0001, 0.0, 0.0, true, 0.2, 3.0);
-    PID y_pid(12.0, 0.0, 0.0, 0.0, true, 0.2, 3.0);
+    PID x_pid(15.0, 0.0, 0.0, 0.0, true, 0.2, 3.0);
+    PID y_pid(5.0, 0.0, 1.0, 0.0, true, 0.2, 3.0);
     PID angle_pid(150.0, 0.0, 0.0, 0.0, true, 0.0, 360.0);
 
     // decel variables
@@ -467,7 +467,7 @@ void move_to_point(const Point start, Position target, const double max_power, c
 
         tracking.power_x = x_pid.compute(-target_line.get_x(), 0.0);
         tracking.power_y = x_pid.compute(-target_line.get_y(), 0.0);
-        tracking.power_a = angle_pid.get_output();
+        tracking.power_a = angle_pid.compute(tracking.global_angle, near_angle(target.angle, tracking.global_angle) + tracking.global_angle);
 
         h = sqrt(pow(tracking.power_x, 2) + pow(tracking.power_y, 2));
         ////////////
@@ -530,13 +530,13 @@ void move_to_point(const Point start, Position target, const double max_power, c
         if (overshoot && sgn(target_line.get_y()) != orig_sgn_line_y){
           if(brake) drivebase.brake();
           else drivebase.move(0.0, 0.0, 0.0);
-          printf("Ending move on arc to target X: %f Y: %f A: %f at X: %f Y: %f A: %f \n", target.x, target.y, rad_to_deg(target.angle), tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle));
+          printf("Ending move to point X: %f Y: %f A: %f at X: %f Y: %f A: %f \n", target.x, target.y, rad_to_deg(target.angle), tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle));
           return;
         }
         else if(fabs(d) < 0.5 && fabs(rad_to_deg(angle_pid.get_error())) < 5.0){
             if(brake) drivebase.brake();
             else drivebase.move(0.0, 0.0, 0.0);
-            printf("Ending move on arc to target X: %f Y: %f A: %f at X: %f Y: %f A: %f \n", target.x, target.y, rad_to_deg(target.angle), tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle));
+            printf("Ending move to point X: %f Y: %f A: %f at X: %f Y: %f A: %f \n", target.x, target.y, rad_to_deg(target.angle), tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle));
             return;
         }
         printf("sum:%lf\n", fabs(tracking.power_x) + fabs(tracking.power_y) + fabs(tracking.power_a));
@@ -548,7 +548,7 @@ void move_to_point(const Point start, Position target, const double max_power, c
 
 // this is 150-200 ms slower than tank move on arc on 24 radius 90 degree turn
 void move_on_arc(const Point start, Position target, const double radius, const bool positive, const double max_power, const bool angle_relative_to_arc, const double min_angle_percent, const bool brake, const double decel_dist, const double decel_speed){
-  Position error, kp = Position(30.0, 12.0, 175.0);
+  Position error, kp = Position(15.0, 5.0, 150.0);
 
   target.angle = deg_to_rad(target.angle);
   // variable 'd' in diagram
@@ -559,7 +559,7 @@ void move_on_arc(const Point start, Position target, const double radius, const 
   double half_chord_dist = chord_dist / 2.0;
   printf("half_chord_dist: %lf\n", half_chord_dist);
   if(radius < half_chord_dist){
-    printf("The radius needs to be at least %lf inches.\n", half_chord_dist);
+    printf("The radius needs to be at least %lf inches, you inputted %lf as a radius.\n", half_chord_dist, radius);
     return;
   }
   double alpha = acos(half_chord_dist / radius);
@@ -708,11 +708,11 @@ void move_on_line(const Point start, Position target, const double max_power, co
     double power_xy;
     double total_power;
     double min_power_a = max_power * min_angle_percent;
-    const double x_multiplier = 1.75; // how much slower the robot strafes than moves forwards
+    const double x_multiplier = 1.25; // how much slower the robot strafes than moves forwards
     // PID'S
 
-    PID x_line_pid(18.0, 0.0001, 0.0, 0.0, true, 0.2, 3.0);
-    PID y_line_pid(12.0, 0.0, 0.0, 0.0, true, 0.2, 3.0);
+    PID x_line_pid(7.0, 0.0001, 0.0, 0.0, true, 0.2, 3.0);
+    PID y_line_pid(5.0, 0.0, 0.0, 0.0, true, 0.2, 3.0);
     // PID x_line_pid(12.0, 0.0, 0.0, 0.0, true, 0.2, 5.0);
     // PID y_line_pid(12.0, 0.0, 0.0, 0.0, true, 0.2, 5.0);
     PID angle_pid(150.0, 0.0, 0.0, 0.0, true, 0.0, 360.0);
@@ -804,13 +804,13 @@ void move_on_line(const Point start, Position target, const double max_power, co
         if (overshoot && sgn(target_line.get_y()) != orig_sgn_line_y){
           if(brake) drivebase.brake();
           else drivebase.move(0.0, 0.0, 0.0);
-          printf("Ending move on arc to target X: %f Y: %f A: %f at X: %f Y: %f A: %f \n", target.x, target.y, rad_to_deg(target.angle), tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle));
+          printf("Ending move on line to target X: %f Y: %f A: %f at X: %f Y: %f A: %f \n", target.x, target.y, rad_to_deg(target.angle), tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle));
           return;
         }
         else if(fabs(d) < 0.5 && fabs(rad_to_deg(angle_pid.get_error())) < 5.0){
             if(brake) drivebase.brake();
             else drivebase.move(0.0, 0.0, 0.0);
-            printf("Ending move on arc to target X: %f Y: %f A: %f at X: %f Y: %f A: %f \n", target.x, target.y, rad_to_deg(target.angle), tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle));
+            printf("Ending move on line to target X: %f Y: %f A: %f at X: %f Y: %f A: %f \n", target.x, target.y, rad_to_deg(target.angle), tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle));
             return;
         }
         printf("sum:%lf\n", fabs(tracking.power_x) + fabs(tracking.power_y) + fabs(tracking.power_a));

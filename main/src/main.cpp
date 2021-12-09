@@ -18,7 +18,7 @@
  * to keep execution time for this mode under a few seconds.
  */
 void initialize() {
-	// drivebase.download_curve_data();
+	drivebase.download_curve_data();
 
 	delay(150);
 	tracking.x_coord = 0.0, tracking.y_coord = 0.0, tracking.global_angle = 0.0;
@@ -57,8 +57,15 @@ void competition_initialize() {}
  * from where it left off.
  */
 void autonomous() {
-	f_bar.move(50);
-	c_bar.move(60);
+	f_bar.move_relative(0, 100);
+	Timer move = {"move"};
+	tank_move_on_arc({0.0, 0.0}, {24.0, 24.0, 90.0}, 127.0, 127.0, true);
+
+	// move_on_arc({0.0, 0.0}, {24.0, 24.0, 0.0}, 24.0, false, 127, true, 0.3, true);
+	// move_on_line({0.0, 0.0}, {12.0, 24.0, 0.0}, 127.0, false, 0.0, false);
+	// move_to_point({0.0, 0.0}, {24.0, 12.0, -80.0}, 127.0, false, 0.0, true);
+	move.print();
+
 	// drivebase.update_lookup_table_util();
 	// printf("here\n");
 	// rush_goal2(0.0, -45.0, 0.0);
@@ -88,12 +95,13 @@ void autonomous() {
  * task, not resume it from where it left off.
  */
 void opcontrol() {
+	f_bar.move_relative(0, 100);
 	Timer move = {"move"};
 	printf("START\n");
 	move.print();
-
+	drivebase.driver_practice();
 	// rush_goal2(0.0, -20.0, 0.0);
-	move_on_line({0.0, 0.0}, {0.0, 24.0, 00.0}, 127.0, false, 0.0, false);
+	// move_on_line({0.0, 0.0}, {0.0, 24.0, 00.0}, 127.0, false, 0.0, false);
 
 	// move_on_arc({0.0, 0.0}, {-24.0, 0.0, -180.0}, 12.0, false, 127, true, 1.0, true, 20.0, 127.0);
 	// tank_move_on_arc({0.0, 0.0}, {-24.0, 24.0, -90.0}, 127.0, 127.0, true);
