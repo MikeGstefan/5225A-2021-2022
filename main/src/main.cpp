@@ -24,7 +24,9 @@ void initialize() {
 	tracking.x_coord = 0.0, tracking.y_coord = 0.0, tracking.global_angle = 0.0;
 	update_t.start();
 	gui_setup();
-	master.print(2, 0, "Driver: %s", drivebase.drivers[drivebase.cur_driver].name);
+	// master.clear();
+	// delay(50);
+	// master.print(2, 0, "Driver: %s", drivebase.drivers[drivebase.cur_driver].name);
 }
 
 /**
@@ -76,20 +78,6 @@ int ring_count = 0; //Get rid of this once merged
 double cur_auton = 1;
 
 void opcontrol() {
-	/*Gui:
-	Reset tracking by task
-	/**/
+	drivebase.driver_practice();
 
-	while(true){
-		gui_background();
-		drivebase.handle_input();
-
-		if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_B)){ //Update expo util
-			drivebase.update_lookup_table_util();
-			master.clear();
-		}
-		else if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_UP)) next_driver();
-		else if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_DOWN)) prev_driver();
-		delay(10);
-	}
 }

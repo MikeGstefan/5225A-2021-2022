@@ -111,6 +111,7 @@ void Drivebase::update_lookup_table_util(){
     download_curve_data();
 
     master.clear();
+    update_screen();
 
     while (!master.get_digital_new_press(E_CONTROLLER_DIGITAL_B)){  // user presses b to save and exit utility
       if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_X)){  // moves to next driver
