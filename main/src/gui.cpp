@@ -92,8 +92,14 @@ Button perpErr (245, 75, 225, 70, Style::SIZE, Button::SINGLE, &tuning, "Perpend
 Button grid (10, 155, 225, 70, Style::SIZE, Button::SINGLE, &tuning, "Grid");
 Button spin360 (245, 155, 225, 70, Style::SIZE, Button::SINGLE, &tuning, "360 Spin");
 
+Page pneumatic (11, "Pneumatics"); //Pneumatic testing page
+Text pneum_text_1 (125, 50, Style::CENTRE, TEXT_SMALL, &pneumatic, "PORT 7: OFF");
+Text pneum_text_2 (350, 50, Style::CENTRE, TEXT_SMALL, &pneumatic, "PORT 8: OFF");
+Button pneum_btn_1 (25, 70, 200, 80, Style::SIZE, Button::TOGGLE, &pneumatic, "PNEUMATIC 1");
+Button pneum_btn_2 (250, 70, 200, 80, Style::SIZE, Button::TOGGLE, &pneumatic, "PNEUMATIC 2");
+
 //The following are not normal pages and should not be accessible by scrolling through the GUI.
-Page testing (11, "Testing"); //Blank page made so it already exists when quick tests are created
+Page testing (12, "Testing"); //Blank page made so it already exists when quick tests are created
 Text testing_text_1 (125, 50, Style::CENTRE, TEXT_SMALL, &testing, "BLANK TEXT 1");
 Text testing_text_2 (350, 50, Style::CENTRE, TEXT_SMALL, &testing, "BLANK TEXT 2");
 Button testing_button_1 (25, 70, 200, 80, Style::SIZE, Button::SINGLE, &testing, "BLANK BUTTON 1");
@@ -308,6 +314,14 @@ void gui_setup(){ //Call once at start in initialize()
     }
   });
 
+  pneum_text_1.set_background(40, 15);
+  pneum_btn_1.set_func([](){claw_in.set_value(1); pneum_text_1.set_title(125, 50, Style::CENTRE, "PORT 7: ON");});
+  pneum_btn_1.set_off_func([](){claw_in.set_value(0); pneum_text_1.set_title(125, 50, Style::CENTRE, "PORT 7: OFF");});
+
+  pneum_text_2.set_background(40, 15);
+  pneum_btn_2.set_func([](){claw_out.set_value(1); pneum_text_2.set_title(350, 50, Style::CENTRE, "PORT 8: ON");});
+  pneum_btn_2.set_off_func([](){claw_out.set_value(0); pneum_text_2.set_title(350, 50, Style::CENTRE, "PORT 8: OFF");});
+
   tempfl.set_background(40, 60, 70, 50, Style::SIZE);
   tempbl.set_background(150, 60, 70, 50, Style::SIZE);
   tempfr.set_background(260, 60, 70, 50, Style::SIZE);
@@ -384,17 +398,18 @@ std::tuple<int, int, int, int> fixPoints (int p1, int p2,int p3, int p4, Style t
   int x1=p1, y1=p2, x2=p3, y2=p4, temp;
 
   // (p1, p2) is centre. p3, p4 are sizes from centre
-  if (type == Style::CENTRE){
-    x1 -= p3;
-    y1 -= p4;
-    x2 += p1;
-    y2 += p2;
-  }
+  switch(type){
+    case Style::CENTRE:
+      x1 -= p3;
+      y1 -= p4;
+      x2 += p1;
+      y2 += p2;
+      break;
 
-  //p1, p2 is first coord. p3, p4 is how much it extends
-  if (type == Style::SIZE){
-    x2 += x1;
-    y2 += y1;
+    case Style::SIZE:
+      x2 += x1;
+      y2 += y1;
+      break;
   }
 
   //Putting coordinates in a left-right up-down order in case it was accidentally reversed or given negatives. Makes checking presses easier
@@ -494,17 +509,20 @@ Slider::Slider (int16_t pt1, int16_t pt2, int16_t pt3, int16_t pt4, Style type, 
 
   std::tie(x1, y1, x2, y2) = fixPoints(pt1, pt2, pt3, pt4, type);
 
-  if (dir == HORIZONTAL){
-    text_x = (x1+x2-(label.length()*CHAR_WIDTH_SMALL))/2;
-    text_y = y1-CHAR_HEIGHT_SMALL-2;
-    inc.construct(x2+5, y1, x2+25, y2, Style::CORNER, Button::SINGLE, page, ">", l_col, b_col);
-    dec.construct(x1-25, y1, x1-5, y2, Style::CORNER, Button::SINGLE, page, "<", l_col, b_col);
-  }
-  else{
-    text_x = (x1+x2-(label.length()*CHAR_WIDTH_SMALL))/2;
-    text_y = (y1+y2)/2;
-    inc.construct(x1, y1-25, x2, y1-5, Style::CORNER, Button::SINGLE, page, "▲", l_col, b_col);
-    dec.construct(x1, y2+5, x2, y2+25, Style::CORNER, Button::SINGLE, page, "▼", l_col, b_col);
+  switch(dir){
+    case HORIZONTAL:
+      text_x = (x1+x2-(label.length()*CHAR_WIDTH_SMALL))/2;
+      text_y = y1-CHAR_HEIGHT_SMALL-2;
+      inc.construct(x2+5, y1, x2+25, y2, Style::CORNER, Button::SINGLE, page, ">", l_col, b_col);
+      dec.construct(x1-25, y1, x1-5, y2, Style::CORNER, Button::SINGLE, page, "<", l_col, b_col);
+      break;
+
+    case VERTICAL:
+      text_x = (x1+x2-(label.length()*CHAR_WIDTH_SMALL))/2;
+      text_y = (y1+y2)/2;
+      inc.construct(x1, y1-25, x2, y1-5, Style::CORNER, Button::SINGLE, page, "▲", l_col, b_col);
+      dec.construct(x1, y2+5, x2, y2+25, Style::CORNER, Button::SINGLE, page, "▼", l_col, b_col);
+      break;
   }
 
   //Buttons
@@ -554,22 +572,30 @@ void Text::set_title (int16_t pt1, int16_t pt2, Style type, std::string text){
   y = pt2;
 
   if (type == Style::CENTRE){
-    if (txt_fmt == TEXT_SMALL){
-      x -= (label.length()*CHAR_WIDTH_SMALL)/2;
-      y -= CHAR_HEIGHT_SMALL/2;
-    }
+    switch(txt_fmt){
+      case TEXT_SMALL:
+        x -= (label.length()*CHAR_WIDTH_SMALL)/2;
+        y -= CHAR_HEIGHT_SMALL/2;
+        break;
 
-    else if (txt_fmt == TEXT_MEDIUM){
-      x -= (label.length()*CHAR_WIDTH_MEDIUM)/2;
-      y -= CHAR_HEIGHT_MEDIUM/2;
-    }
+      case TEXT_MEDIUM:
+        x -= (label.length()*CHAR_WIDTH_MEDIUM)/2;
+        y -= CHAR_HEIGHT_MEDIUM/2;
+        break;
 
-    else if (txt_fmt == TEXT_LARGE){
-      x -= (label.length()*CHAR_WIDTH_LARGE)/2;
-      y -= CHAR_HEIGHT_LARGE/2;
+      case TEXT_LARGE:
+        x -= (label.length()*CHAR_WIDTH_LARGE)/2;
+        y -= CHAR_HEIGHT_LARGE/2;
+        break;
     }
   }
 
+}
+
+void Text::set_background (int16_t pt3, int16_t pt4, std::uint32_t colour){
+    pt3 /= 2;
+    pt4 /= 2;
+    set_background(x-pt3, y-pt4, x+pt3+(label.length()*CHAR_WIDTH_SMALL), y+pt4+CHAR_HEIGHT_SMALL, Style::CORNER, colour);
 }
 
 void Text::set_background (int16_t pt1, int16_t pt2, int16_t pt3, int16_t pt4, Style type, std::uint32_t colour){
@@ -579,10 +605,7 @@ void Text::set_background (int16_t pt1, int16_t pt2, int16_t pt3, int16_t pt4, S
 
 void Text::set_background (std::uint32_t colour){
     b_col = colour;
-    if (b_col != colour && page == Page::current_page)
-    {draw();
-    printf("UPDATED\n");
-  }
+    if (b_col != colour && page == Page::current_page) draw();
 }
 
 void Text::draw(){
@@ -634,13 +657,17 @@ void Slider::draw_bar(){
   screen::set_eraser(b_col);
   screen::erase_rect(x1, y1, x2, y2);
   screen::set_pen(l_col);
-  if(dir == HORIZONTAL){
-    screen::fill_rect(x1+1, y1+1, x1+(x2-x1)*(val-min)/(max-min), y2-1);
-    screen::print(TEXT_SMALL, text_x, text_y, "%s:%.f", label.c_str(), val);
-  }
-  else{
-    screen::fill_rect(x1+1, y2-(y2-y1)*(val-min)/(max-min), x2-1, y2-1);
-    screen::print(TEXT_SMALL, text_x, y1-27-CHAR_HEIGHT_SMALL, "%s:%.f", label.c_str(), val);
+
+  switch(dir){
+    case HORIZONTAL:
+      screen::fill_rect(x1+1, y1+1, x1+(x2-x1)*(val-min)/(max-min), y2-1);
+      screen::print(TEXT_SMALL, text_x, text_y, "%s:%.f", label.c_str(), val);
+      break;
+
+    case VERTICAL:
+      screen::fill_rect(x1+1, y2-(y2-y1)*(val-min)/(max-min), x2-1, y2-1);
+      screen::print(TEXT_SMALL, text_x, y1-27-CHAR_HEIGHT_SMALL, "%s:%.f", label.c_str(), val);
+      break;
   }
 }
 
@@ -775,91 +802,92 @@ Button* Button::update(){
   for (std::vector <Button*>::iterator it = (Page::current_page->buttons).begin(); it != (Page::current_page->buttons).end(); it++){
     Button* btn_id = *it;
 
-    if (btn_id->form == Button::SINGLE){ //Runs once when pressed
-      if (btn_id->new_press()){
-        btn_id->last_pressed = 1;
-        btn_id->draw_pressed();
-        btn_id->run_func();
-        return btn_id;
-      }
-
-      else if (btn_id->new_release()){
-        btn_id->last_pressed = 0;
-        btn_id->draw();
-      }
-    }
-
-    else if (btn_id->form == Button::LATCH){ //Runs while latched
-      if (btn_id->new_press()){
-        btn_id->last_pressed = 1;
-        btn_id->latched = !btn_id->latched; //Toggles the latch
-
-        //Draws button's new state
-        if(btn_id->latched){
-          //Deselects connected buttons
-          for (std::vector <Button*>::iterator option_it = (btn_id->options).begin(); option_it != (btn_id->options).end(); option_it++){
-            (*option_it)->latched = 0;
-            (*option_it)->draw();
-          }
-
+    switch(btn_id->form){
+      case Button::SINGLE:
+        if (btn_id->new_press()){
+          btn_id->last_pressed = 1;
           btn_id->draw_pressed();
           btn_id->run_func();
-
+          return btn_id;
         }
-        else btn_id->draw(); //New press deselected it
-        return btn_id;
-      }
 
-      else if (btn_id->new_release()){
-        btn_id->last_pressed = 0;
-      }
-      if(btn_id->latched) btn_id->run_func();
+        else if (btn_id->new_release()){
+          btn_id->last_pressed = 0;
+          btn_id->draw();
+        }
+        break;
 
-    }
+      case Button::LATCH:
+        if (btn_id->new_press()){
+          btn_id->last_pressed = 1;
+          btn_id->latched = !btn_id->latched; //Toggles the latch
 
-    else if (btn_id->form == Button::REPEAT){ //Keeps running while pressed. Not blocking
-      if (btn_id->new_press()){
-        btn_id->last_pressed = 1;
-        btn_id->draw_pressed();
-        btn_id->run_func();
-        return btn_id;
-      }
-
-      else if (btn_id->new_release()){
-        btn_id->last_pressed = 0;
-        btn_id->draw();
-      }
-
-      if (btn_id->pressed()) btn_id->run_func();
-    }
-
-    else if (btn_id->form == Button::TOGGLE){ //Runs once when turned on
-      if (btn_id->new_press()){
-        btn_id->last_pressed = 1;
-        btn_id->on = !btn_id->on;
-
-        //Draws button's new state
-        if(btn_id->on){ //Just turned on
-          //Turns off connected buttons
-          for (std::vector <Button*>::iterator option_it = (btn_id->options).begin(); option_it != (btn_id->options).end(); option_it++){
-            if ((*option_it)->on){ //If the other button is in the on state and has an off function
-              (*option_it)->on = false;
-              if ((*option_it)->off_func) (*option_it)->off_func();
+          //Draws button's new state
+          if(btn_id->latched){
+            //Deselects connected buttons
+            for (std::vector <Button*>::iterator option_it = (btn_id->options).begin(); option_it != (btn_id->options).end(); option_it++){
+              (*option_it)->latched = 0;
+              (*option_it)->draw();
             }
+
+            btn_id->draw_pressed();
+            btn_id->run_func();
+
           }
-
-          btn_id->run_func();
+          else btn_id->draw(); //New press deselected it
+          return btn_id;
         }
-        else if (btn_id->off_func) btn_id->off_func(); //Just turned off
 
-        btn_id->draw_pressed();
-        return btn_id;
-      }
+        else if (btn_id->new_release()){
+          btn_id->last_pressed = 0;
+        }
+        if(btn_id->latched) btn_id->run_func();
+        break;
 
-      else if (btn_id->new_release()){
-        btn_id->last_pressed = 0;
-        btn_id->draw();
-      }
+      case Button::REPEAT:
+        if (btn_id->new_press()){
+          btn_id->last_pressed = 1;
+          btn_id->draw_pressed();
+          btn_id->run_func();
+          return btn_id;
+        }
+
+        else if (btn_id->new_release()){
+          btn_id->last_pressed = 0;
+          btn_id->draw();
+        }
+
+        if (btn_id->pressed()) btn_id->run_func();
+        break;
+
+      case Button::TOGGLE:
+        if (btn_id->new_press()){
+          btn_id->last_pressed = 1;
+          btn_id->on = !btn_id->on;
+
+          //Draws button's new state
+          if(btn_id->on){ //Just turned on
+            //Turns off connected buttons
+            for (std::vector <Button*>::iterator option_it = (btn_id->options).begin(); option_it != (btn_id->options).end(); option_it++){
+              if ((*option_it)->on){ //If the other button is in the on state and has an off function
+                (*option_it)->on = false;
+                if ((*option_it)->off_func) (*option_it)->off_func();
+              }
+            }
+
+            btn_id->run_func();
+          }
+          else if (btn_id->off_func) btn_id->off_func(); //Just turned off
+
+          btn_id->draw_pressed();
+          return btn_id;
+        }
+
+        else if (btn_id->new_release()){
+          btn_id->last_pressed = 0;
+          btn_id->draw();
+        }
+        break;
     }
 
   }
@@ -882,7 +910,7 @@ void gui_background(){ //To be called continously
 
   ringCount = ring_count;
   angle = fmod(rad_to_deg(tracking.global_angle), 360);
-  drivrName.set_title (MID_X, MID_Y, Style::CENTRE, drivebase.drivers[drivebase.cur_driver].name);
+  drivrName.set_title(MID_X, MID_Y, Style::CENTRE, drivebase.drivers[drivebase.cur_driver].name);
 
   if (!Flash.playing() && !temp_flashed){ //Overheating Motors
     temp_flashed = true;

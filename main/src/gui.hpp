@@ -3,11 +3,12 @@
 #include "Tracking.hpp"
 #include "util.hpp"
 #include <bitset>
+#include <variant>
 
 #define ORANGE 0x00F36421
 #define GREY 0x00202020
 
-#define PAGE_COUNT 11
+#define PAGE_COUNT 12
 #define PAGE_LEFT 0
 #define PAGE_UP 0
 #define PAGE_RIGHT 480
@@ -185,6 +186,7 @@ class Text{
 
     static void update();
     void set_title (int16_t, int16_t, Style, std::string);
+    void set_background (int16_t, int16_t, std::uint32_t = GREY);
     void set_background (int16_t, int16_t, int16_t, int16_t, Style, std::uint32_t = GREY);
     void set_background (std::uint32_t);
 };
