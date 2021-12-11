@@ -396,7 +396,7 @@ void rush_goal2(double target_x, double target_y, double target_a){
         if (claw_touch.get_value()){
           // got_goal = goal_lim_switch_state;
           // claw_out.set_value(1);
-        	claw_in.set_value(0);
+        	// claw_in.set_value(0);
           // drivebase.brake();
           printf("x: %lf, y: %lf, a: %lf\n", tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle));
           printf("GOT TO GOAL: %d\n", millis());

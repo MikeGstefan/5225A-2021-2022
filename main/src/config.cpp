@@ -18,5 +18,5 @@ pros::Motor c_bar(10, pros::E_MOTOR_GEARSET_36, true, pros::E_MOTOR_ENCODER_DEGR
 pros::Motor uptk(11);
 
 pros::ADIEncoder LeftEncoder(3, 4, false), RightEncoder(7, 8, true), BackEncoder(5, 6, false);
-pros::ADIDigitalOut claw_in(1, 1);
-pros::ADIDigitalIn claw_touch(2);
+pros::ADIDigitalOut claw_open(2),claw_close(3), btm_claw(4);
+pros::ADIDigitalIn claw_touch(1);

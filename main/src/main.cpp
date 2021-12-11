@@ -76,6 +76,23 @@ int ring_count = 0; //Get rid of this once merged
 double cur_auton = 1;
 
 void opcontrol() {
+	f_bar.move_relative(0,100);
+	claw_open.set_value(1);
+	claw_close.set_value(0);
+	btm_claw.set_value(0);
+	delay(100);
+	claw_open.set_value(0);
+	
+
+	while(true){
+		if(claw_touch.get_value()){
+			claw_open.set_value(0);
+			claw_close.set_value(1);
+			btm_claw.set_value(1);
+		}
+		if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_A))f_bar.move(0);
+		delay(10);
+	}
 	/*Gui:
 	Reset tracking by task
 	/**/
