@@ -23,4 +23,5 @@ public:
     void play();
     void pause();
     void print(const char* str = "");
+    bool playing();
 };
