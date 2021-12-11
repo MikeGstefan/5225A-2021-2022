@@ -74,6 +74,7 @@ void autonomous() {}
 
 int ring_count = 0; //Get rid of this once merged
 double cur_auton = 1;
+bool state = 0;
 
 void opcontrol() {
 	f_bar.move_relative(0,100);
@@ -85,12 +86,25 @@ void opcontrol() {
 	
 
 	while(true){
-		if(claw_touch.get_value()){
-			claw_open.set_value(0);
-			claw_close.set_value(1);
-			btm_claw.set_value(1);
+		
+		if(state == 0){
+			if(claw_touch.get_value()){
+				claw_open.set_value(0);
+				claw_close.set_value(1);
+				btm_claw.set_value(1);
+				state = 1;
+			}
+		}
+		else{ 
+			if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_B)){
+				claw_open.set_value(1);
+				claw_close.set_value(0);
+				btm_claw.set_value(0);
+				state = 0;
+			}
 		}
 		if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_A))f_bar.move(0);
+		drivebase.handle_input();
 		delay(10);
 	}
 	/*Gui:
