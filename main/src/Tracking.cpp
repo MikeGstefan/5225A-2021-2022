@@ -3,19 +3,28 @@
 Tracking tracking;
 move_target_params move_params;
 
-Task *updateTask =(nullptr);
+_Task update_t(update, "Tracking");
 Task *moveTask = nullptr;
 
-void updateStartTask(){
-  updateTask = new Task(update);
+// void updateStartTask(){
+//   update_t.start();
+// }
+// void updateStopTask(){
+//   if(updateTask != nullptr){
+//     updateTask->remove();
+//     delete updateTask;
+//     updateTask = nullptr;
+//   }
+// }
+void Tracking::reset(double x, double y, double a){
+  update_t.data_update();
+  tracking_imp.print("reseting tracking from %.2f, %.2f, %.2f to %.2f, %.2f, %.2f\n", tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle),x,y,a);
+  tracking.x_coord = x;
+  tracking.y_coord = y;
+  tracking.global_angle = deg_to_rad(a);
+  update_t.done_update();
 }
-void updateStopTask(){
-  if(updateTask != nullptr){
-    updateTask->remove();
-    delete updateTask;
-    updateTask = nullptr;
-  }
-}
+
 void Tracking::move_stop_task(){
   if(moveTask != nullptr){
     moveTask->remove();
@@ -28,13 +37,14 @@ void Tracking::move_start_task(){
 }
 
 void update(void* params){
+  _Task* ptr = _Task::get_obj(params);
+  Timer data_timer{"tracking logs"};
   // LeftEncoder.reset(); RightEncoder.reset(); BackEncoder.reset();
   double DistanceLR = 15.1, DistanceB = 6.1;
   double Left, Right, Back, NewLeft, NewRight, NewBack, LastLeft = LeftEncoder.get_value()/360.0 *(2.75*M_PI), LastRight =  RightEncoder.get_value()/360.0 *(2.75*M_PI), LastBack = BackEncoder.get_value()/360.0 *(2.77*M_PI);
   double Theta = 0.0, Beta = 0.0, Alpha = 0.0;
   double RadiusR, RadiusB, h, h2;
   double Xx, Xy, Yy, Yx;
-  int lasttime = 0;
   double last_x = 0, last_y = 0, last_a = 0;
   double last_vel_l = 0, last_vel_r = 0, last_vel_b = 0;
 
@@ -42,7 +52,6 @@ void update(void* params){
   int last_velocity_time = 0;    // time of last velocity update
   int velocity_update_time = 0; // time SINCE last velocity update
 
-  double total_x = 0.0, total_y = 0.0, total_d = 0.0, total_a = 0.0;
 
   while(true){
     NewLeft = LeftEncoder.get_value()/360.0 *(2.75*M_PI);
@@ -100,38 +109,32 @@ void update(void* params){
     Yx = h * sin(Alpha);
     Yy = h * cos(Alpha);
 
-  tracking.x_coord += Xx + Yx;
-  tracking.y_coord += Yy + Xy;
-  tracking.global_angle += Theta;
+    tracking.x_coord += Xx + Yx;
+    tracking.y_coord += Yy + Xy;
+    tracking.global_angle += Theta;
 
-  total_x += fabs(Xx+Yx);
-  total_y += fabs(Yy + Xy);
-  total_a += fabs(Theta);
-  // printf("time: %d, TRACKING: %f, %f, %f \n", millis(), tracking.x_coord, tracking.y_coord, tracking.global_angle/M_PI *180);
-  // printf("ENCODER L: %d, R: %d, B:%d \n", LeftEncoder.get_value(), RightEncoder.get_value(), BackEncoder.get_value());
 
-  if(millis() - 50 > lasttime){
-    // printf("powers| x: %lf, y: %lf, a: %lf\n", tracking.power_x, tracking.power_y, tracking.power_a);
-    // printf("x: %lf, y: %lf, a: %lf\n", tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle));
+    tracking_data.print(&data_timer, 100, {
+      [=](){return Data::to_char("%d || x: %.2lf, y: %.2lf, a: %.2lf\n", millis(), tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle));},
+      [=](){return Data::to_char("%d || GLOBAL VELOCITY| x: %.2f, y: %.2f a: %.2f\n", millis(), tracking.g_velocity.x, tracking.g_velocity.y, rad_to_deg(tracking.g_velocity.angle));},
+      [=](){return Data::to_char("%d || ENCODER L: %d, R: %d, B:%d \n", millis(), LeftEncoder.get_value(), RightEncoder.get_value(), BackEncoder.get_value());},
+      [=](){return Data::to_char("%d || ENCODER VELO| l: %.2f, r: %.2f, b: %.2f\n", millis(), tracking.l_velo, tracking.r_velo, tracking.b_velo);}
+    });
 
-      // printf("%f,%f\n", tracking.x_coord, tracking.y_coord);
+
 
     // printf("\ntime: %d, TRACKING: %f, %f, %f \n", millis(), tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle));
     // printf("time: %d, TOTAL: %f, %f, %f \n", millis(), total_x, total_y, rad_to_deg(total_a));
     // printf("%d pow_a: %.1f, pow_x: %.1f, pow_y: %.1f, total_pow: %.1f\n",millis(),  tracking.power_a, tracking.power_x, tracking.power_y, fabs(tracking.power_a) + fabs(tracking.power_x) + fabs(tracking.power_y));
 
-    // printf("ENCODER L: %d, R: %d, B:%d \n", LeftEncoder.get_value(), RightEncoder.get_value(), BackEncoder.get_value());
-    // printf("%d VELOCIT L: %f, R: %f\n", millis(), tracking.l_velo, tracking.r_velo);
+    if(ptr->notify_handle())return;
 
-    printf("GLOBAL VELOCITY| x: %.2f, y: %.2f a: %.2f\n", tracking.g_velocity.x, tracking.g_velocity.y, rad_to_deg(tracking.g_velocity.angle));
+    // printf("GLOBAL VELOCITY| x: %.2f, y: %.2f a: %.2f\n", tracking.g_velocity.x, tracking.g_velocity.y, rad_to_deg(tracking.g_velocity.angle));
     // printf("power| x: %.2f, y: % 2.f a: %.2f\n", tracking.power_x, tracking.power_y, tracking.power_a);
 
     // printf(" %f, %f, %f, %f\n",tracking.l_velo, tracking.r_velo, tracking.power_y, tracking.y_coord);
     // printf(" %f, %f, %f, %f\n",tracking.l_velo, tracking.r_velo, tracking.power_y, tracking.y_coord);
-    lasttime = millis();
-  }
 
-  delay(10);
   }
 }
 
