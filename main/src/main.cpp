@@ -60,7 +60,7 @@ void competition_initialize() {}
 void autonomous() {
 	f_bar.move_relative(0, 100);
 	Timer move = {"move"};
-	tank_move_on_arc({0.0, 0.0}, {24.0, 24.0, 90.0}, 127.0, 127.0, true);
+	// tank_move_on_arc({0.0, 0.0}, {24.0, 24.0, 90.0}, 127.0, 127.0, true);
 
 	// move_on_arc({0.0, 0.0}, {24.0, 24.0, 0.0}, 24.0, false, 127, true, 0.3, true);
 	// move_on_line({0.0, 0.0}, {12.0, 24.0, 0.0}, 127.0, false, 0.0, false);
@@ -99,13 +99,34 @@ void autonomous() {
  double cur_auton = 1;
  
 void opcontrol() {
-	f_bar.move_relative(0, 100);
+	/*Gui:
+	Reset tracking by task
+	/**/
 	Timer move = {"move"};
 	printf("START\n");
 	move.print();
-	drivebase.driver_practice();
+
 	// rush_goal2(0.0, -20.0, 0.0);
+	// move_start(move_types::tank_arc, tank_arc_params({0.0, 0.0}, {-24.0, 24.0, -90.0}, 127.0, 127.0, true));
+	while(true)delay(10);
+	// move_start(move_types::arc, arc_params({0.0, 0.0}, {-24.0, 0.0, -180.0}, 12.0, false, 127, true, 1.0, true, 20.0, 127.0));
 	// move_on_line({0.0, 0.0}, {0.0, 24.0, 00.0}, 127.0, false, 0.0, false);
 
+	// move_on_arc({0.0, 0.0}, {-24.0, 0.0, -180.0}, 12.0, false, 127, true, 1.0, true, 20.0, 127.0);
+	// tank_move_on_arc({0.0, 0.0}, {-24.0, 24.0, -90.0}, 127.0, 127.0, true);
+	// move_on_arc({0.0, 0.0}, {10.0, 10.0, 0.0}, 10.0, false, 127, false, 0.3, 0.0, true);
+	move.print();
+	printf("DONE\n");
+	// while(true){
+	// 	gui_background();
+	// 	drivebase.handle_input();
 
+	// 	if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_B)){ //Update expo util
+	// 		drivebase.update_lookup_table_util();
+	// 		master.clear();
+	// 	}
+	// 	else if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_UP)) next_driver();
+	// 	else if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_DOWN)) prev_driver();
+	// 	delay(10);
+	// }
 }

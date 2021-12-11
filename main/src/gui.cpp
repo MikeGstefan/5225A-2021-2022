@@ -243,10 +243,10 @@ void gui_setup(){ //Call once at start in initialize()
   goToXYA.set_func([&x=xVal.val, &y=yVal.val, &a=aVal.val](){
     char buffer[65];
     sprintf(buffer, "Press to move to target selected by sliders (%.0f, %.0f, %.0f)", x, y, a);
-    if (go(std::string(buffer), 1000)) move_to_target_sync(x, y, a, false);
+    // if (go(std::string(buffer), 1000)) move_to_target_sync(x, y, a, false);
   });
-  goHome.set_func([](){if (go("Press to go to starting point (0, 0, 0)", 1000)) move_to_target_sync(0, 0, 0, false);});
-  goCentre.set_func([](){if (go("Press to go to centre field (72, 72, 0)", 1000)) move_to_target_sync(72, 72, 0, false);});
+  // goHome.set_func([](){if (go("Press to go to starting point (0, 0, 0)", 1000)) move_to_target_sync(0, 0, 0, false);});
+  // goCentre.set_func([](){if (go("Press to go to centre field (72, 72, 0)", 1000)) move_to_target_sync(72, 72, 0, false);});
 
   Button::create_options({&route1, &route2, &route3}); //Makes them exclusive, only one can be selected at a time
 

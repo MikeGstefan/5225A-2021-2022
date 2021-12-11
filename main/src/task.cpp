@@ -3,7 +3,7 @@
 _Task::_Task(pros::task_fn_t function, const char* name, void* params, std::uint32_t prio, std::uint16_t stack_depth){
   this->function = function;
   this->name = name;
-  this->params = std::make_tuple(this,params);
+  this->params = std::make_tuple(this,std::move(params));
   this->prio = prio;
   this->stack_depth = stack_depth;
 }
@@ -34,7 +34,7 @@ void _Task::start(void* params){
      task_log.print("%d| %s was already started\n", millis(), this->name);
      this->kill();
    }
-   this->params = std::make_tuple(this,params);
+   this->params = std::make_tuple(this,std::move(params));
    this->task_ptr = new pros::Task(this->function, &this->params, this->prio, this->stack_depth, this->name);
    task_log.print("%d| %s started\n", millis(), this->name);
 }
