@@ -1,20 +1,20 @@
 #include "auton_util.hpp"
 
-Gyro gyro(imu_sensor);
+Gyro gyro(&imu_sensor);
 
-Gyro::Gyro(Imu imu): inertial(imu){}
+Gyro::Gyro(Imu* imu): inertial(imu){}
 
 double Gyro::get_angle() {
-  angle = GYRO_SIDE*inertial.GYRO_AXIS();
+  angle = GYRO_SIDE*inertial->GYRO_AXIS();
   return angle;
 }
 
 void Gyro::calibrate(){
-  inertial.reset();
+  inertial->reset();
 }
 
 void Gyro::finish_calibrating(){
-	while (inertial.is_calibrating()){
+	while (imu_sensor.is_calibrating()){
 		printf("Calibrating Gyro...\n");
 		delay(10);
 	}
@@ -24,9 +24,9 @@ void Gyro::finish_calibrating(){
 void Gyro::climb_ramp(){
   finish_calibrating(); //Makes sure it's calibrated before starting (should already be)
 
-	inertial.tare_roll();
-  inertial.tare_pitch();
-	drivebase.move(127, 0);
+	inertial->tare_roll();
+  inertial->tare_pitch();
+	drivebase.move(0, 127, 0);
 	waitUntil(fabs(get_angle()) > 22)
 	printf("ON RAMP\n");
 
@@ -44,7 +44,7 @@ void Gyro::level(double kP, double kD){
 	while(true){
     get_angle();
     speed = gyro_pid.compute(-angle, 0);
-		drivebase.move(speed, 0);
+		drivebase.move(0, speed, 0);
 		printf("Angle: %f   Speed: %d  \n", angle, speed);
 
 		if (fabs(angle-last_angle) > 0.6) last_steady_time = millis(); //Unsteady, Resets the last known steady time
@@ -58,8 +58,7 @@ void Gyro::level(double kP, double kD){
 	}
 
 	printf("\nLevelled on ramp\n\n\n");
-  drivebase.move(0, 0);
-	// drivebase.brake();
+	drivebase.brake();
 }
 
 bool controller_interrupt(bool analog, bool digital){

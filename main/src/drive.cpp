@@ -82,17 +82,17 @@ void Drivebase::move(double y, double a){
 }
 
 void Drivebase::brake(){
-  l1.move_relative(0, 200);
-  l2.move_relative(0, 200);
-  l3.move_relative(0, 200);
-  r1.move_relative(0, 200);
-  r2.move_relative(0, 200);
-  r3.move_relative(0, 200);
+  // l1.move_relative(0, 200);
+  // l2.move_relative(0, 200);
+  // l3.move_relative(0, 200);
+  // r1.move_relative(0, 200);
+  // r2.move_relative(0, 200);
+  // r3.move_relative(0, 200);
 
-  // front_l.move_relative(0, 200);
-  // front_r.move_relative(0, 200);
-  // back_l.move_relative(0, 200);
-  // back_r.move_relative(0, 200);
+  front_l.move_relative(0, 200);
+  front_r.move_relative(0, 200);
+  back_l.move_relative(0, 200);
+  back_r.move_relative(0, 200);
 }
 
 void Drivebase::update_screen(){
@@ -208,8 +208,8 @@ void Drivebase::handle_input(){
   if(fabs(tracking.power_y) < deadzone) tracking.power_y = 0.0;
   if(fabs(tracking.power_a) < deadzone) tracking.power_a = 0.0;
 
-  // move(tracking.power_x, tracking.power_y, tracking.power_a);
-  move(tracking.power_y, tracking.power_a);
+  move(tracking.power_x, tracking.power_y, tracking.power_a);
+  // move(tracking.power_y, tracking.power_a);
 }
 
 void Drivebase::driver_practice(){

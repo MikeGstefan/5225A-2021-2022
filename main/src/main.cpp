@@ -87,16 +87,15 @@ int ring_count = 0; //Get rid of this once merged
 double cur_auton = 1;
 
 void opcontrol() {
-	// gyro.climb_ramp();
-	// gyro.level(2, 250);
-	// delay(2000); //To make sure robot is longer moving from momentum. May be taken out if non-drive commands are called.
-	drivebase.move(0, 0);
+	gyro.climb_ramp();
+	gyro.level(1.4, 0); //(2, 250) for 6 motor
 
+	delay(2000); //To make sure robot is longer moving from momentum. May be taken out if non-drive commands are called.
 	while(true){
 		guiBackground();
-		// drivebase.handle_input();
+		drivebase.handle_input();
 		printf("%f\n", fabs(gyro.get_angle()));
-		if (fabs(gyro.get_angle()) > 10) gyro.level(2.2, 180); //Strayed off balance
+		if (fabs(gyro.get_angle()) > 10) gyro.level(2.2, 250); //Strayed off balance
 
 		if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_B)){ //Update expo util
 			drivebase.update_lookup_table_util();
