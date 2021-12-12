@@ -4,6 +4,7 @@
 #include "util.hpp"
 #include <bitset>
 #include <variant>
+#include <typeinfo>
 
 #define ORANGE 0x00F36421
 #define GREY 0x00202020
@@ -38,8 +39,7 @@ enum class Style{ //how the rect coords get evaluated
     SIZE
 };
 
-extern int ring_count; //For gui.cpp to use
-extern double cur_auton;
+extern int ring_count, cur_auton; //For gui.cpp to use
 extern Page testing; //For use in opcontrol
 
 void gui_setup(), gui_background();
@@ -170,22 +170,26 @@ class Text{
   private:
     int16_t x, y, x1, y1, x2, y2;
     text_format_e_t txt_fmt;
-    std::string label, prev_label="";
+    std::string label;
     std::uint32_t l_col, b_col=COLOR_BLACK;
+    Style type;
     Page* page;
-    double* val_ptr=nullptr;
-    double prev_val;
 
-    void construct (int16_t, int16_t, Style, text_format_e_t, Page*, std::string, std::uint32_t);
+    std::variant<std::monostate, double*, int*, std::string*> val_ptr;
+    std::variant<std::monostate, double, int, std::string> prev_val;
+    const std::type_info& val_type;
+
+    void construct (int16_t, int16_t, Style, text_format_e_t, Page*, std::string, std::variant<std::monostate, double*, int*, std::string*>, std::uint32_t);
     void draw();
 
   public:
     //Points, Format, Page, Label, [var], Lcolor, other points for background
     Text (int16_t, int16_t, Style, text_format_e_t, Page*, std::string, std::uint32_t label_color = COLOR_WHITE);
     Text (int16_t, int16_t, Style, text_format_e_t, Page*, std::string, double*, std::uint32_t label_color = COLOR_WHITE);
+    Text (int16_t, int16_t, Style, text_format_e_t, Page*, std::string, int*, std::uint32_t label_color = COLOR_WHITE);
+    Text (int16_t, int16_t, Style, text_format_e_t, Page*, std::string, std::string*, std::uint32_t label_color = COLOR_WHITE);
 
     static void update();
-    void set_title (int16_t, int16_t, Style, std::string);
     void set_background (int16_t, int16_t, std::uint32_t = GREY);
     void set_background (int16_t, int16_t, int16_t, int16_t, Style, std::uint32_t = GREY);
     void set_background (std::uint32_t);

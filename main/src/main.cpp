@@ -72,12 +72,12 @@ void autonomous() {}
  * task, not resume it from where it left off.
  */
 
-int ring_count = 0; //Get rid of this once merged
-double cur_auton = 1;
+int ring_count = 0, cur_auton = 1; //Get rid of this once merged
 
 void opcontrol() {
 	/*Gui:
 	Reset tracking by task
+	add variant support for c-string as char*
 	/**/
 
 	while(true){
