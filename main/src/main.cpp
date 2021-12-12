@@ -88,7 +88,7 @@ double cur_auton = 1;
 
 void opcontrol() {
 	gyro.climb_ramp();
-	gyro.level(1.4, 0); //(2, 250) for 6 motor
+	gyro.level(2, 250);
 
 	delay(2000); //To make sure robot is longer moving from momentum. May be taken out if non-drive commands are called.
 	while(true){

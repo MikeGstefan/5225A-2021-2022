@@ -26,7 +26,7 @@ void Gyro::climb_ramp(){
 
 	inertial->tare_roll();
   inertial->tare_pitch();
-	drivebase.move(0, 127, 0);
+	drivebase.move(127, 0);
 	waitUntil(fabs(get_angle()) > 22)
 	printf("ON RAMP\n");
 
@@ -44,7 +44,7 @@ void Gyro::level(double kP, double kD){
 	while(true){
     get_angle();
     speed = gyro_pid.compute(-angle, 0);
-		drivebase.move(0, speed, 0);
+		drivebase.move(speed, 0);
 		printf("Angle: %f   Speed: %d  \n", angle, speed);
 
 		if (fabs(angle-last_angle) > 0.6) last_steady_time = millis(); //Unsteady, Resets the last known steady time
