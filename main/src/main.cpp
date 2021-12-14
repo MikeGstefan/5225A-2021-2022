@@ -78,6 +78,7 @@ void opcontrol() {
 	/*Gui:
 	Reset tracking by task
 	add variant support for c-string as char*
+	make flash look nice
 	/**/
 
 	while(true){

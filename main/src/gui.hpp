@@ -108,6 +108,7 @@ class Button{
     std::vector<Button*> options;
 
     //Functions
+    static Button* update();
     void run_func();
     void draw();
     void draw_pressed();
@@ -123,7 +124,6 @@ class Button{
     Page* page;
 
     //Functions
-    static Button* update();
     static void create_options(std::vector<Button*>);
     void set_func(std::function <void()>), set_off_func(std::function <void()>);
     bool pressed();
@@ -148,8 +148,10 @@ class Slider{
     direction dir;
 
     //Functions
+    static Slider* update();
     void draw();
     void draw_bar();
+    void update_val();
 
   public:
     //Points, Format, Min, Max, Page, Label, Bcolor, Lcolor
@@ -158,10 +160,6 @@ class Slider{
     //Vars
     Page* page;
     double val=0.0, prev_val;
-
-    //Functions
-    static Slider* update();
-    void update_val();
 };
 
 class Text{
@@ -174,22 +172,21 @@ class Text{
     std::uint32_t l_col, b_col=COLOR_BLACK;
     Style type;
     Page* page;
-
     std::variant<std::monostate, double*, int*, std::string*> val_ptr;
     std::variant<std::monostate, double, int, std::string> prev_val;
     const std::type_info& val_type;
-
+    
+    static void update();
     void construct (int16_t, int16_t, Style, text_format_e_t, Page*, std::string, std::variant<std::monostate, double*, int*, std::string*>, std::uint32_t);
     void draw();
 
   public:
-    //Points, Format, Page, Label, [var], Lcolor, other points for background
+    //Points, Format, Page, Label, [var], Lcolor
     Text (int16_t, int16_t, Style, text_format_e_t, Page*, std::string, std::uint32_t label_color = COLOR_WHITE);
     Text (int16_t, int16_t, Style, text_format_e_t, Page*, std::string, double*, std::uint32_t label_color = COLOR_WHITE);
     Text (int16_t, int16_t, Style, text_format_e_t, Page*, std::string, int*, std::uint32_t label_color = COLOR_WHITE);
     Text (int16_t, int16_t, Style, text_format_e_t, Page*, std::string, std::string*, std::uint32_t label_color = COLOR_WHITE);
 
-    static void update();
     void set_background (int16_t, int16_t, std::uint32_t = GREY);
     void set_background (int16_t, int16_t, int16_t, int16_t, Style, std::uint32_t = GREY);
     void set_background (std::uint32_t);
