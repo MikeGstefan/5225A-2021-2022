@@ -5,25 +5,21 @@
 
 using namespace pros;
 
-template <typename state_type, bool motorized, int num_of_states>
-class Subsystem: public Motor {
+// non-motorized subsystem
+template <typename state_type, int num_of_states>
+class Subsystem{
+protected:
   state_type state;
   state_type last_state;
-
-public:
   const char* name;
   std::array<const char*, num_of_states> state_names;
 
-
-  // constructor for motorized subsystem
-  template <class = std::enable_if<motorized>>
-  Subsystem(Motor& motor, const char* name, std::array<const char*, num_of_states> state_names);
-
+public:
 
   // constructor for non-motorized subsystem
-  template <class = std::enable_if<!motorized>>
-  Subsystem(const char* name, std::array<const char*, num_of_states> state_names);
-
+  Subsystem(const char* name, std::array<const char*, num_of_states> state_names):
+    name(name), state_names(state_names)
+  {}
 
   void set_state(const state_type next_state){
     printf("%s | Going from %s to %s\n", state_names[state], state_names[next_state]);
@@ -32,28 +28,37 @@ public:
   }
 
   void handle();  // has a switch containing the state machine for a given subsystem
+};
 
-  // only compiles the reset method for motorized subsystems
-  template <class = std::enable_if<motorized>>
+template <typename state_type, int num_of_states>
+class Motorized_subsystem: public Subsystem<state_type, num_of_states>, public Motor{
+public:
+  Motorized_subsystem(Subsystem<state_type, num_of_states> subsystem, Motor motor):
+    Subsystem<state_type, num_of_states>(subsystem), Motor(motor){}
+
+  // Motorized_subsystem(const char* name, std::array<const char*, num_of_states> state_names, Motor motor):
+  //   Subsystem<state_type, num_of_states>(subsystem), Motor(motor){}
+
   void reset(){
     move(-60);
     Timer vel_rise_timeout("vel_rise");
     // waits for motor's velocity to rise or timeout to trigger
     while(fabs(get_actual_velocity()) < 45.0){
-      printf("%s's velocity is (rising loop): %lf\n", name, get_actual_velocity());
+      printf("%s's velocity is (rising loop): %lf\n", this->name, get_actual_velocity());
       if (vel_rise_timeout.get_time() > 50){
-        printf("%s's rising loop timed out\n", name);
+        printf("%s's rising loop timed out\n", this->name);
         break;
       }
       delay(10);
     }
-    printf("%s's velocity done rising\n", name);
+    printf("%s's velocity done rising\n", this->name);
     // waits until motors velocity slows down for 5 cycles
     cycleCheck(fabs(get_actual_velocity()) < 5.0, 5, 10)
     tare_position();  // resets subsystems position
-    printf("%d, %s's reset %lf\n", millis(), name, get_position());
+    printf("%d, %s's reset %lf\n", millis(), this->name, get_position());
     move(0);
   }
+
 };
 
 
@@ -66,10 +71,12 @@ enum class six_bar_states{
   lowering  // on the way to lowered state from released
 };
 
-class Six_bar: public Subsystem<six_bar_states, true, 6> {
+class Six_bar: public Motorized_subsystem<six_bar_states, 6> {
 
 public:
-  Six_bar(Subsystem<six_bar_states, true, 6> subsystem);  // constructor
+  Six_bar(Motorized_subsystem<six_bar_states, 6> motorized_subsystem);  // constructor
   void handle();  // contains state machine code
 
 };
+
+extern Six_bar six_bar;
