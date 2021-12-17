@@ -26,9 +26,9 @@ std::array<std::tuple<pros::Motor*, Text*, int, std::string, const char*>, 8> mo
   std::make_tuple(&front_r, &mot_temp_2, 0, "Front Right", "FR"),
   std::make_tuple(&back_l, &mot_temp_3, 0, "Back Left", "BL"),
   std::make_tuple(&back_r, &mot_temp_4, 0, "Back Right", "BR"),
-  std::make_tuple(&intk, &mot_temp_5, 0, "Intake", "IN"),
+  // std::make_tuple(&intk, &mot_temp_5, 0, "Intake", "IN"),
+  std::make_tuple(nullptr, nullptr, 0, "", ""),
   std::make_tuple(&f_bar, &mot_temp_6, 0, "Four Bar", "FB"),
   std::make_tuple(&c_bar, &mot_temp_7, 0, "Chain Bar", "CB"),
   std::make_tuple(&uptk, &mot_temp_8, 0, "Uptake", "UP"),
-  // std::make_tuple(nullptr, nullptr, 0, "", "")
-};
+}; // std::make_tuple(nullptr, nullptr, 0, "", ""),

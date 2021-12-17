@@ -22,7 +22,7 @@ Data::Data(const char* obj_name, const char* id_code, log_types log_type_param, 
 
 Data task_log("tasks.txt","$01", general, log_locations::both);
 Data controller_queue("controller.txt","$02", general,log_locations::sd);
-Data tracking_data("tracking.txt","$03",debug,log_locations::both);
+Data tracking_data("tracking.txt","$03",debug,log_locations::sd);
 Data tracking_imp("tracking.txt","$03",general,log_locations::both);
 Data misc("misc.txt", "$04",debug,log_locations::t);
 Data drivers_data("driver.txt", "$05", debug,log_locations::t);
@@ -94,13 +94,13 @@ void Data::print(const char* format,...){
 
 void Data::print(Timer* tmr, int freq, std::vector<std::function<char*()>> str){
   if(tmr->get_time() > freq){
-    for(int i = 0; i < str.size(); i++){ 
+    for(int i = 0; i < str.size(); i++){
         char* buffer = str[i]();
         this->print(buffer);
         delete[] buffer;
     }
     tmr->reset();
-  } 
+  }
 }
 
 void Data::log_print(char* buffer, int buffer_len){
@@ -174,5 +174,3 @@ char* Data::to_char(const char* fmt, ...){
     va_end(args);
     return buffer;
 }
-
-

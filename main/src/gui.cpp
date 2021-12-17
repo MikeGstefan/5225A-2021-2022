@@ -6,7 +6,7 @@ std::uint32_t flash_end = std::numeric_limits<std::uint32_t>::max(); //Sets the 
 std::vector<std::bitset<200>> field (200, std::bitset<200>{}); //Initializes to 200 blank bitsets
 
 //Var init for text monitoring
-int angle, elastic_up_time, elastic_down_time;
+int angle, left_enc, right_enc, back_enc, elastic_up_time, elastic_down_time;
 std::string pneum_1_state, pneum_2_state, driver_text, go_string;
 
 //Static Variable Declarations
@@ -46,10 +46,13 @@ Page track (4, "Tracking"); //Display tracking vals and reset btns
 Text trackX(50, 45, Style::CENTRE, TEXT_SMALL, &track, "X:%.1f", &tracking.x_coord);
 Text trackY(135, 45, Style::CENTRE, TEXT_SMALL, &track, "Y:%.1f", &tracking.y_coord);
 Text trackA(220, 45, Style::CENTRE, TEXT_SMALL, &track, "A:%d", &angle);
+Text encL(50, 130, Style::CENTRE, TEXT_SMALL, &track, "L:%.1f", &left_enc);
+Text encR(135, 130, Style::CENTRE, TEXT_SMALL, &track, "R:%.1f", &right_enc);
+Text encB(220, 130, Style::CENTRE, TEXT_SMALL, &track, "B:%d", &back_enc);
 Button resX(15, 60, 70, 55, Style::SIZE, Button::SINGLE, &track, "Reset X");
 Button resY(100, 60, 70, 55, Style::SIZE, Button::SINGLE, &track, "Reset Y");
 Button resA(185, 60, 70, 55, Style::SIZE, Button::SINGLE, &track, "Reset A");
-Button resAll(15, 130, 240, 100, Style::SIZE, Button::SINGLE, &track, "Reset All");
+Button resAll(15, 160, 240, 60, Style::SIZE, Button::SINGLE, &track, "Reset All");
 
 Page moving (5, "Moving"); //Moves to target, home, or centre
 Slider xVal(35, 45, 250, 40, Style::SIZE, Slider::HORIZONTAL, 0, 144, &moving, "X");
@@ -141,18 +144,18 @@ std::pair <int, int> elasticUtil(){ //No need to return pair
 }
 void resetX(){
   tracking.x_coord = 0;
-  printf("Write reset x as a task procedure\n");
+  printf("Change to mike's task way of resetting x\n");
 }
 void resetY(){
   tracking.y_coord = 0;
-  printf("Write reset y as a task procedure\n");
+  printf("Change to mike's task way of resetting y\n");
 }
 void resetA(){
   tracking.global_angle = 0;
-  printf("Write reset a as a task procedure\n");
+  printf("Change to mike's task way of resetting a\n");
 }
 
-bool go( std::string name, std::string message, std::uint32_t delay_time=0){ //Start
+bool go(std::string name, std::string message, std::uint32_t delay_time){ //Start
   printf("\n\n%s\n", message.c_str());
   printf("Press \"Continue\" when ready.\n");
   go_string = name;
@@ -186,7 +189,7 @@ bool go( std::string name, std::string message, std::uint32_t delay_time=0){ //S
   return !interrupted;
 }
 
-bool go(std::string name, std::uint32_t delay_time=0){ //End
+bool go(std::string name, std::uint32_t delay_time){ //End
   printf("Press Again when done.\n");
   go_string = "END " + name;
 
@@ -237,7 +240,13 @@ void gui_setup(){ //Call once at start in initialize()
   resX.set_func(&resetX);
   resY.set_func(&resetY);
   resA.set_func(&resetA);
-  resA.set_func([](){resetX();resetY();resetA();});
+  resAll.set_func([](){resetX();resetY();resetA();});
+  trackX.set_background(35, 10);
+  trackY.set_background(35, 10);
+  trackA.set_background(35, 10);
+  encL.set_background(35, 10);
+  encR.set_background(35, 10);
+  encB.set_background(35, 10);
   for (int x = 0; x<200; x++) field[x].reset();
   track.set_setup_func([](){
     screen::set_pen(COLOR_WHITE);
@@ -453,7 +462,7 @@ void Text::construct (int16_t pt1, int16_t pt2, Style rect_type, text_format_e_t
   page->texts.push_back(this);
 }
 
-void Button::construct(int16_t pt1, int16_t pt2, int16_t pt3, int16_t pt4, Style rect_type, pressType prType, Page* page_ptr, std::string text, std::uint32_t background_color, std::uint32_t label_color){
+void Button::construct(int16_t pt1, int16_t pt2, int16_t pt3, int16_t pt4, Style rect_type, press_type prType, Page* page_ptr, std::string text, std::uint32_t background_color, std::uint32_t label_color){
 
     //Saves params to class private vars
     b_col = background_color;
@@ -505,7 +514,7 @@ val_type(typeid(std::string*)){
   construct(pt1, pt2, rect_type, size, page_ptr, text, val_ref, label_color);
 }
 
-Button::Button(int16_t pt1, int16_t pt2, int16_t pt3, int16_t pt4, Style type, pressType prType, Page* page_ptr, std::string text, std::uint32_t background_color, std::uint32_t label_color){
+Button::Button(int16_t pt1, int16_t pt2, int16_t pt3, int16_t pt4, Style type, press_type prType, Page* page_ptr, std::string text, std::uint32_t background_color, std::uint32_t label_color){
   construct(pt1, pt2, pt3, pt4, type, prType, page_ptr, text, background_color, label_color);
 }
 
@@ -591,8 +600,10 @@ void Text::set_background (int16_t pt1, int16_t pt2, int16_t pt3, int16_t pt4, S
 }
 
 void Text::set_background (std::uint32_t colour){
-  if (b_col != colour) b_col = colour;
-  if (page == Page::current_page) draw();
+  if (b_col != colour){
+    b_col = colour;
+    if (page == Page::current_page) draw();
+  }
 }
 
 void Text::draw(){
@@ -810,6 +821,7 @@ void Text::update(){
       }
 
       else if(text_id->val_type == typeid(int*)){
+        // printf("U-%s: %d     %d\n", (text_id->label).c_str(), *std::get<int*>(text_id->val_ptr),   (std::get<int>(text_id->prev_val) != *std::get<int*>(text_id->val_ptr)));
         if(std::get<int>(text_id->prev_val) != *std::get<int*>(text_id->val_ptr)) text_id->draw(); //If var has changed value
       }
 
@@ -948,6 +960,9 @@ void gui_background(){ //To be called continously
   }
 
   angle = fmod(rad_to_deg(tracking.global_angle), 360);
+  left_enc = LeftEncoder.get_value();
+  right_enc = RightEncoder.get_value();
+  back_enc = BackEncoder.get_value();
   driver_text = drivebase.drivers[drivebase.cur_driver].name;
 
   if (!Flash.playing() && !temp_flashed){ //Overheating Motors
@@ -965,11 +980,13 @@ void gui_background(){ //To be called continously
 
   for (it = motors.begin(); it != motors.end(); it++){ //Setting motor background colors
     Text* text = std::get<1>(*it);
-    int temp = std::get<2>(*it);
-    if (temp <= 25) text->set_background(COLOR_DODGER_BLUE); //...20, 25
-    else if (temp <= 35) text->set_background(COLOR_LAWN_GREEN); //30, 35
-    else if (temp <= 45) text->set_background(COLOR_YELLOW); //40, 45
-    else text->set_background(COLOR_RED); //50, 55, ...
+    if (text != nullptr){
+      int temp = std::get<2>(*it);
+      if (temp <= 25) text->set_background(COLOR_DODGER_BLUE); //...20, 25
+      else if (temp <= 35) text->set_background(COLOR_LAWN_GREEN); //30, 35
+      else if (temp <= 45) text->set_background(COLOR_YELLOW); //40, 45
+      else text->set_background(COLOR_RED); //50, 55, ...
+    }
   }
 
   Page::update();

@@ -46,6 +46,7 @@ void gui_setup(), gui_background();
 void aligned_coords (int x_objects, int y_objects, int x_btn, int y_btn, int x_range = 480, int y_range = 220);
 void flash (std::uint32_t color, std::uint32_t time, std::string = "");
 void prev_driver(), next_driver();
+bool go(std::string, std::string, std::uint32_t=0), go(std::string, std::uint32_t=0);
 
 //All constructor args are in the format points, format, page, text, color
 class Page{
@@ -87,7 +88,7 @@ class Page{
 
 class Button{
   friend class Page;
-  public: enum pressType{
+  public: enum press_type{
       SINGLE,
       LATCH,
       REPEAT,
@@ -100,7 +101,7 @@ class Button{
     std::string label, label1="";
     int16_t x1, y1, x2, y2, text_x, text_y, text_x1, text_y1;
     bool last_pressed=0;
-    pressType form; //What type of button
+    press_type form; //What type of button
     std::function <void()> func, off_func; //toggle is only for toggle type buttons
 
     //For latch buttons
@@ -116,9 +117,9 @@ class Button{
   public:
     //Constructor
     //Points, Format, Page, Label, Bcolor, Lcolor
-    Button (int16_t, int16_t, int16_t, int16_t, Style, pressType, Page*, std::string = "", std::uint32_t = ORANGE, std::uint32_t = COLOR_BLACK);
+    Button (int16_t, int16_t, int16_t, int16_t, Style, press_type, Page*, std::string = "", std::uint32_t = ORANGE, std::uint32_t = COLOR_BLACK);
     Button (){};
-    void construct (int16_t, int16_t, int16_t, int16_t, Style, pressType, Page*, std::string, std::uint32_t, std::uint32_t);
+    void construct (int16_t, int16_t, int16_t, int16_t, Style, press_type, Page*, std::string, std::uint32_t, std::uint32_t);
 
     //Vars
     Page* page;
@@ -136,7 +137,7 @@ class Slider{
   public: enum direction{
       VERTICAL,
       HORIZONTAL
-  };
+    };
 
   private:
     //Vars
@@ -175,7 +176,7 @@ class Text{
     std::variant<std::monostate, double*, int*, std::string*> val_ptr;
     std::variant<std::monostate, double, int, std::string> prev_val;
     const std::type_info& val_type;
-    
+
     static void update();
     void construct (int16_t, int16_t, Style, text_format_e_t, Page*, std::string, std::variant<std::monostate, double*, int*, std::string*>, std::uint32_t);
     void draw();
