@@ -1,89 +1,26 @@
 #include "lift.hpp"
-// mecanum wheel radius = 2in, para_arm_len = 7 holes = 3.5 in, gear diameter = 3.5 in, lift_base_height = 15.5 in, arm_len = 13 in., gear ratio 21, offset_s 43 deg
-// NOTE lift must reach 1336 deg to get to 35 inches
 
-
-
-// Lift lift (lift_m, 2.0, 3.5, 3.5, 15.5, 13.0, 7.0, 371.0);
-/*
-Lift::Lift(pros::Motor& lift_motor, double mecanum_wheel_radius, double parallel_arm_len, double gear_diameter, double lift_base_height, double arm_len, double gear_ratio, double offset_a):
-  pros::Motor(lift_motor),
-  arm_len(arm_len),
-  offset_a (offset_a),
-  offset_h(parallel_arm_len + gear_diameter + lift_base_height + mecanum_wheel_radius), // should 23.5 inches)
-  gear_ratio(gear_ratio)
-  {}
-
-void Lift::cal(void * params){
-  lift.move(-60);
-  Timer vel_rise_timeout("lift_vel_rise");
-  // waits for lift velocity to rise or timeout to trigger
-  while(fabs(lift.get_actual_velocity()) < 45.0){
-    printf("vel (rising loop): %lf\n", lift.get_actual_velocity());
-    if (vel_rise_timeout.get_time() > 50){
-      printf("lift rising timeout\n");
-      break;
-    }
-    delay(10);
-  }
-  printf("done rising\n");
-  // waits until lift velocity slows down for 5 cycles
-  cycleCheck(fabs(lift.get_actual_velocity()) < 5.0, 5, 10)
-  lift.tare_position();
-  printf("%d, lift reset %lf\n", millis(), lift.get_position());
-  delay(50);
-  lift.move(0);
-}
-
-// NOTE: these do not work yet
-double Lift::pos_to_height(double pos){
-  return offset_h + 2 * arm_len * sin(deg_to_rad((pos - offset_a) / gear_ratio));
-}
-double Lift::height_to_pos(double height){
-  return gear_ratio * (rad_to_deg(asin((height - offset_h) / (2 * arm_len)))) + offset_a;
-}
-
-void Lift::lift_height_util(){
-  lift.cal();
-	double target_height = 5.0; // default target height is 5 inches (bottom height)
-  master.clear();
-  delay(150);
-  Timer text_set_timer("text_set");
-  int text_set_line = 0;  // which line is next to be set
-	while (true){
-		printf("pos:%lf, height:%lf, target_height: %lf\n", lift.get_position(), lift.pos_to_height(lift.get_position()), target_height);
-
-    // delays allow for text-setting
-    if (text_set_timer.get_time() >= 50 && text_set_line == 0){
-      master.print(0, 0, "pos: %.1lf", lift.get_position());
-      text_set_timer.reset();
-      text_set_line++;
-    }
-    if (text_set_timer.get_time() >= 50 && text_set_line == 1){
-      master.print(1, 0, "height: %.1lf", lift.get_position());
-      text_set_timer.reset();
-      text_set_line++;
-    }
-    if (text_set_timer.get_time() >= 50 && text_set_line == 2){
-      master.print(2, 0, "target_height: %.1lf", target_height);
-      text_set_timer.reset();
-      text_set_line = 0;
-    }
-    // only allows alteration of height is within lift range
-    if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_UP)){
-      if(target_height < 48.0)  target_height += 1.0;
-    }
-    if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_DOWN)){
-      if(target_height > 5.0)  target_height -= 1.0;
-    }
-
-    lift.move_absolute(lift.height_to_pos(target_height), 100); // default speed is 100 rpm
-		// delay(60);
-	}
-
-}
-*/
 Lift lift;
+
+Lift::Lift(){ // constructor
+  // initializes variables
+  task_removed = true;
+  full = false;
+  dropoff_front = true;
+  ring_dropoff_level = 1; // not 0 since that isn't a valid position
+
+  state = neutral;
+  last_state = state;
+  // goal heights are 13.0, 22.0, 40.0
+  // initializing ring dropoff coords
+  dropoff_coords[0][0] = {-21.0, 13.0}; // alliance goal in back
+  dropoff_coords[0][1] = {-23.0, 22.0}; // short neutral goal in back
+  dropoff_coords[0][2] = {-19.0, 40.0};  // tall neutral goal in back
+  dropoff_coords[1][0] = {0.0, 0.0}; // alliance goal in front (not possible)
+  dropoff_coords[1][1] = {-1.0, 20.0}; // short neutral in front
+  dropoff_coords[1][2] = {-1.0, 32.0}; // tall goal in front
+
+}
 
 void Lift::f_bar_cal(){
   f_bar.move(-60);
@@ -250,15 +187,18 @@ tuple<double, double, double, double, double, double, bool> Lift::find_arm_angle
   return {top_arm_angle, bottom_arm_angle, top_arm_pos_angle, bottom_arm_pos_angle, top_arm_neg_angle, bottom_arm_neg_angle, move_valid};
 }
 
-void Lift::move_to_target(const double target_y, const double target_z, const lift_position_types lift_position_type, const bool wait_for_complete, const double bottom_arm_speed, const double top_arm_speed){
-  auto[top_arm_angle, bottom_arm_angle, top_arm_pos_angle, bottom_arm_pos_angle, top_arm_neg_angle, bottom_arm_neg_angle, move_valid] = find_arm_angles(target_y, target_z, lift_position_type);
+void Lift::move_to_target(const Point& target, const lift_position_types lift_position_type, const bool wait_for_complete, const double bottom_arm_speed, const double top_arm_speed){
+  auto[top_arm_angle, bottom_arm_angle, top_arm_pos_angle, bottom_arm_pos_angle, top_arm_neg_angle, bottom_arm_neg_angle, move_valid] = find_arm_angles(target.x, target.y, lift_position_type);
+
+  // updates arm targets for lift state machine
+  cur_top_arm_target = top_arm_angle;
+  cur_bottom_arm_target = bottom_arm_angle;
+
   if (move_valid){
     f_bar.move_absolute(bottom_arm_angle, bottom_arm_speed);
     if(bottom_arm_angle / bottom_arm_gear_ratio > bottom_arm_offset_a) waitUntil(f_bar.get_position() / bottom_arm_gear_ratio > bottom_arm_offset_a);
     c_bar.move_absolute(top_arm_angle, top_arm_speed);
-    if (wait_for_complete){
-      waitUntil(fabs(f_bar.get_position() - bottom_arm_angle) < bottom_arm_end_error && fabs(c_bar.get_position() - top_arm_angle) < top_arm_end_error);
-    }
+    if (wait_for_complete)  lift.wait_for_complete();
   }
   else printf("POSITION IS INVALID | POS: TOP: %lf, BOTTOM: %lf | NEG: TOP: %lf, BOTTOM: %lf\n", top_arm_pos_angle, bottom_arm_pos_angle, top_arm_neg_angle, bottom_arm_neg_angle);
 }
@@ -271,35 +211,54 @@ void Lift::move_to_target_util(){
   master.print(0, 0, "z: %lf", target_z);
   delay(50);
   master.print(1, 0, "y: %lf", target_y);
-  move_to_target(target_y, target_z);
+  move_to_target({target_y, target_z});
 
 	while(true){
 		if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_RIGHT)){
 			target_y++;
 			delay(50);
 			master.print(1, 0, "y: %lf", target_y);
-      move_to_target(target_y, target_z);
+      move_to_target({target_y, target_z}, lift_position_types::fastest, false);
 		}
 		else if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_LEFT)){  // decrease height
 			target_y--;
 			delay(50);
 			master.print(1, 0, "y: %lf", target_y);
-      move_to_target(target_y, target_z);
+      move_to_target({target_y, target_z}, lift_position_types::fastest, false);
 		}
 		if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_UP)){  // increase height
 			target_z++;
 			delay(50);
 			master.print(0, 0, "z: %lf", target_z);
-      move_to_target(target_y, target_z);
+      move_to_target({target_y, target_z}, lift_position_types::fastest, false);
 		}
 		else if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_DOWN)){  // decrease height
 			target_z--;
 			delay(50);
 			master.print(0, 0, "z: %lf", target_z);
-      move_to_target(target_y, target_z);
+      move_to_target({target_y, target_z}, lift_position_types::fastest, false);
 		}
 		delay(10);
 	}
+}
+
+void Lift::move_f_bar_to_height(double target_z, const double speed){
+  target_z += -base_height + 3.5;  // 3.5 inches is how much below the forks are from the top pivot point
+  cur_bottom_arm_target = bottom_arm_gear_ratio * (rad_to_deg(asin(target_z / bottom_arm_len)) + bottom_arm_offset_a);
+  // c_bar.move_absolute(200, 100);
+  f_bar.move_absolute(cur_bottom_arm_target, speed);
+}
+
+void Lift::wait_for_complete(){
+  waitUntil(fabs(cur_bottom_arm_target - f_bar.get_position()) < bottom_arm_end_error && fabs(cur_top_arm_target - c_bar.get_position()) < top_arm_end_error);
+}
+
+double Lift::find_y_pos(){
+    return top_arm_len * cos(deg_to_rad(c_bar.get_position() / top_arm_gear_ratio - top_arm_offset_a)) - bottom_arm_len * cos(deg_to_rad(f_bar.get_position() / bottom_arm_gear_ratio - bottom_arm_offset_a));
+}
+
+double Lift::find_z_pos(){
+    return offset_h + top_arm_len * sin(deg_to_rad(c_bar.get_position() / top_arm_gear_ratio - top_arm_offset_a)) + bottom_arm_len * sin(deg_to_rad(f_bar.get_position() / bottom_arm_gear_ratio - bottom_arm_offset_a));
 }
 
 double Lift::find_top_arm_angle(const double target_y){
@@ -315,34 +274,322 @@ void Lift::touch_line(const double target_y, double speed){ // should be in moto
 }
 
 double Lift::get_arm_velocity_ratio(const double target_y){
-  double bottom_arm_angle = deg_to_rad(f_bar.get_position());
+
+  // system delay is 61.111111 ms
+  // or 0.00101851851667 minutes
+  double system_delay = 0.00102;
+
+  double bottom_arm_angle = deg_to_rad(f_bar.get_position() + system_delay * f_bar.get_actual_velocity());
+  // printf("acc f_bar_position_rad: %lf\t", deg_to_rad(f_bar.get_position()));
   // is returning derivative of find_top_arm_angle function
-  return (bottom_arm_len * top_arm_gear_ratio * sin(bottom_arm_offset_a - bottom_arm_angle / bottom_arm_gear_ratio)) / (top_arm_len * bottom_arm_gear_ratio * sqrt(1 - pow(bottom_arm_len * cos(bottom_arm_offset_a - bottom_arm_angle / bottom_arm_gear_ratio) + target_y, 2) / pow(top_arm_len, 2)));
+  return (bottom_arm_len * top_arm_gear_ratio * sin(deg_to_rad(bottom_arm_offset_a) - bottom_arm_angle / bottom_arm_gear_ratio)) / (top_arm_len * bottom_arm_gear_ratio * sqrt(1 - pow(bottom_arm_len * cos(deg_to_rad(bottom_arm_offset_a) - bottom_arm_angle / bottom_arm_gear_ratio) + target_y, 2) / pow(top_arm_len, 2)));
 
 }
 
-// void Lift::move_on_line(double target_y, double target_z_start, double target_z_end){
-//   move_to_target(target_y, target_z_start); // goes to position above the rings
-//   // grabs position for f_bar to reach when at bottom of ring stack
-//   auto[top_arm_angle, bottom_arm_angle, top_arm_pos_angle, bottom_arm_pos_angle, top_arm_neg_angle, bottom_arm_neg_angle, move_valid] = lift.find_arm_angles(target_y, target_z_end);
-//   f_bar.move(bottom_arm_angle); // moves f_bar to bottom of ring stack
-//   while(fabs(f_bar.get_position() - bottom_arm_angle) > bottom_arm_end_error){  // moves the chain bar to maintain the horizontal distance
-//       touch_line(target_y, f_bar.get_position());
-//       delay(10);
-//   }
-// }
-
-void Lift::new_move_on_line(double target_y, double target_z_start, double target_z_end){
-  move_to_target(target_y, target_z_start); // goes to position above the rings
+void Lift::move_on_line(double target_y, double target_z_start, double target_z_end, const double speed){
+  move_to_target({target_y, target_z_start}, lift_position_types::fastest, true); // goes to position above the rings
+  // delay(300);
   // grabs position for f_bar to reach when at bottom of ring stack
   auto[top_arm_angle, bottom_arm_angle, top_arm_pos_angle, bottom_arm_pos_angle, top_arm_neg_angle, bottom_arm_neg_angle, move_valid] = lift.find_arm_angles(target_y, target_z_end);
-  f_bar.move(bottom_arm_angle); // moves f_bar to bottom of ring stack
-  while(fabs(f_bar.get_position() - bottom_arm_angle) > bottom_arm_end_error){  // moves the chain bar to maintain the horizontal distance
-      touch_line(target_y, f_bar.get_position());
+  f_bar.move_absolute(bottom_arm_angle, speed); // moves f_bar to bottom of ring stack
+  double top_arm_target, open_loop_velocity, closed_loop_velocity;
+  double ratio;
+  PID top_arm(0.5, 0.0, 0.3, 0.0, true, 0.0, 100.0);
+
+  while(fabs(target_z_end - find_z_pos()) > 0.5 || fabs(target_y - find_y_pos()) > 0.5){  // moves the chain bar to maintain the horizontal distance
+      top_arm_target = find_top_arm_angle(target_y);
+      // printf("target: %lf, actual: %lf, diff: %lf, vel: %lf\n", top_arm_target, c_bar.get_position(), find_top_arm_angle(target_y) - c_bar.get_position(), (find_top_arm_angle(target_y) - c_bar.get_position()) * top_arm_kp);
+      ratio = get_arm_velocity_ratio(target_y);
+      // printf("ratio: %lf, f_bar_pos: %lf, f_bar_pos_rad: %lf, f_bar_vel: %lf, acc_vel: %lf\n", ratio, f_bar.get_position(), deg_to_rad(f_bar.get_position()), f_bar.get_actual_velocity(), ratio * f_bar.get_actual_velocity());
+      open_loop_velocity = ratio * f_bar.get_actual_velocity();
+      closed_loop_velocity = top_arm.compute(c_bar.get_position(), find_top_arm_angle(target_y));
+
+      c_bar.move_velocity(open_loop_velocity + closed_loop_velocity);
+      // c_bar.move_velocity(open_loop_velocity + closed_loop_velocity);
+      printf("%lf, %lf\n", find_y_pos(), find_z_pos());
       delay(10);
+  }
+  c_bar.move_relative(0, 100); // stops motor
+}
+
+void Lift::start_task(task_fn_t function){
+  if (!task_removed && task_ptr != nullptr)  stop_task();
+  delete task_ptr;
+  task_ptr = nullptr;
+  task_ptr = new Task(function);
+  printf("created task\n");
+}
+
+void Lift::stop_task(){
+  ring_dropoff_level = -1;
+
+  if(!task_removed && task_ptr != nullptr){
+    printf("stopping task, IS deallocating memory\n");
+    task_ptr->remove();
+    printf("REMOVED TASK\n");
+    delete task_ptr;
+    printf("DELETED TASK POINTER\n");
+    task_ptr = nullptr;
+  }
+  else    printf("stopping task, NOT deallocating memory\n");
+}
+
+void Lift::set_state(const states next_state){
+  printf("Lift | Going from %s to %s\n", state_names[state], state_names[next_state]);
+  last_state = state;
+  state = next_state;
+}
+
+void Lift::handle(){
+
+  // Buttons accessible in any state (all functions called should stop the lift task if it is running)
+
+  // Bring to neutral (cancel operation)
+  if (master.get_digital_new_press(cancel_dropoff_button) && state != neutral){ // brings to neutral position
+    printf("cancel button pressed\n");
+    move_to_neutral();
+    set_state(neutral);
+  }
+  // brings f_bar to mogo tipping height
+  else if (master.get_digital_new_press(tip_mogo_button) && state != tip){
+    printf("tip mogo button pressed\n");
+    move_f_bar_tip();
+    set_state(tip);
+  }
+  // lowers f_bar
+  else if (master.get_digital_new_press(f_bar_down_button) && state != down){ // lowers f_bar to pickup mogos with forks if f_bar down is pressed
+    printf("fbar down button pressed\n");
+    lower_f_bar();
+    set_state(lowering);
+  }
+  // switches dropoff side
+  if (master.get_digital_new_press(switch_dropoff_side_button)){
+    printf("switch dropoff side button pressed\n");
+    dropoff_front = !dropoff_front;
+    WAIT_FOR_SCREEN_REFRESH(); // remove this later
+    master.print(0, 0, "Dropoff: %s", dropoff_front ? "front" : "back ");
+    screen_timer.reset();
+    printf("Dropoff side: %s\n",  dropoff_front ? "front" : "back ");
+  }
+
+  switch(state){
+    case neutral:
+      /*
+      if (intake.state == intake.states::full){ // pickup rings if the intake is full
+        start_task(pickup_rings);
+        set_state(ring_pickup);
+        intake.set_state(intake.states::searching);
+      }
+      */
+      if (master.get_digital_new_press(pickup_rings_button)){  // picks up rings if pickup rings button is pressed
+        start_task(pickup_rings);
+        set_state(ring_pickup);
+      }
+      // ring dropoff
+      else if (master.get_digital_new_press(ring_dropoff_button) && (full || true)){ // later check if mogo is oriented as well, is orring with true just for testing since we can't sense if it is full yet
+          set_state(dropoff_start);
+      }
+      break;
+    case ring_pickup:
+      // ring_pickup is an empty state and therefore only buttons above switch statement are accessible
+      break;
+    case tip:
+      // tip is an empty state and therefore only buttons above switch statement are accessible
+      break;
+    case lowering:
+      if(fabs(get_bottom_arm_target() - f_bar.get_position()) < get_bottom_arm_end_error()){  // waits for f_bar to reach target
+          printf("\n\n FINISHED LOWERING F_BAR %d\n\n", millis());
+          open_forks(); // releases mogo
+          set_state(lift.states::down);
+      }
+      break;
+    case down:
+      if (master.get_digital_new_press(f_bar_up_button)){
+        printf("f_bar up button pressed\n");
+        raise_f_bar();
+        set_state(raised);
+      }
+      break;
+    case raised:
+      if (master.get_digital_new_press(f_bar_up_button)){
+        printf("f_bar up button pressed\n");
+        raise_f_bar_to_platform();
+        set_state(platform);
+      }
+      break;
+    case platform:
+      if (master.get_digital_new_press(f_bar_up_button)){
+        printf("f_bar up button pressed\n");
+        lift.open_forks();
+        set_state(release_mogo);
+      }
+      break;
+    case release_mogo:
+      if (master.get_digital_new_press(f_bar_up_button)){
+        printf("f_bar up button pressed\n");
+        lower_f_bar();
+        set_state(lowering);
+      }
+      break;
+    case ring_dropoff:  // Actual async ring dropoff state
+      // ring_dropoff is an empty state and therefore only buttons above switch statement are accessible
+      break;
+    case dropoff_start:
+      last_dropoff_press_timer.reset();
+      printf("ring dropoff button pressed\n");
+      stop_task();
+      if (dropoff_front){
+        move_to_target(dropoff_coords[dropoff_front][1], lift_position_types::fastest, false);
+        set_state(dropoff_front_mid);
+      }
+      else{
+        move_to_target(dropoff_coords[dropoff_front][0], lift_position_types::fastest, false);
+        set_state(dropoff_back_alliance);
+      }
+      break;
+    case dropoff_back_alliance:
+      if (last_dropoff_press_timer.get_time() > dropoff_double_press_time){
+        start_task(dropoff_rings);
+        set_state(ring_pickup);
+      }
+      else if (master.get_digital_new_press(ring_dropoff_button)){
+        last_dropoff_press_timer.reset();
+        move_to_target(dropoff_coords[dropoff_front][1], lift_position_types::fastest, false);
+        set_state(dropoff_back_mid);
+        // moves to higher dropoff height
+      }
+      break;
+    case dropoff_back_mid:
+      if (last_dropoff_press_timer.get_time() > dropoff_double_press_time){
+        start_task(dropoff_rings);
+        set_state(ring_dropoff);
+      }
+      else if (master.get_digital_new_press(ring_dropoff_button)){
+        last_dropoff_press_timer.reset();
+        move_to_target(dropoff_coords[dropoff_front][2], lift_position_types::fastest, false);
+        set_state(dropoff_back_mid);
+        // moves to higher dropoff height
+      }
+      break;
+    case dropoff_back_top:
+      if (last_dropoff_press_timer.get_time() > dropoff_double_press_time){
+        start_task(dropoff_rings);
+        set_state(ring_dropoff);
+      }
+      else if (master.get_digital_new_press(ring_dropoff_button)){
+        last_dropoff_press_timer.reset();
+        set_state(dropoff_start); // moves to higher beginning height
+      }
+      break;
+    case dropoff_front_mid:
+      if (last_dropoff_press_timer.get_time() > dropoff_double_press_time){
+        start_task(dropoff_rings);
+        set_state(ring_dropoff);
+      }
+      else if (master.get_digital_new_press(ring_dropoff_button)){
+        last_dropoff_press_timer.reset();
+        move_to_target(dropoff_coords[dropoff_front][2], lift_position_types::fastest, false);
+        set_state(dropoff_back_mid);
+        // moves to higher dropoff height
+      }
+      break;
+    case dropoff_front_top:
+      if (last_dropoff_press_timer.get_time() > dropoff_double_press_time){
+        start_task(dropoff_rings);
+        set_state(ring_dropoff);
+      }
+      else if (master.get_digital_new_press(ring_dropoff_button)){
+        last_dropoff_press_timer.reset();
+        set_state(dropoff_start); // moves to higher beginning height
+      }
+      break;
   }
 }
 
-void Lift::pickup_rings(){
-  move_on_line(-6.0, 25.0, 13.0);
+void Lift::move_to_neutral(){ // moves lift to position right above ring stack
+  stop_task();
+  close_stabber();  // in case cancel was pressed during ring pickup (to prevent a jam)
+  move_to_target({-3.0, 20.0}, lift_position_types::fastest, false);
+}
+
+void Lift::move_f_bar_tip(){  // moves f_bar to mogo tipping height
+  stop_task();
+  move_f_bar_to_height(8.0);
+}
+
+void Lift::lower_f_bar(){
+  stop_task();
+  close_forks();
+  move_f_bar_to_height(5.0);
+
+  printf("\n\n STARTED LOWERING F_BAR %d \n\n", millis());
+}
+
+void Lift::raise_f_bar(){ // brings f_bar just above the ground
+  close_forks();
+  move_f_bar_to_height(6.0);
+}
+
+void Lift::raise_f_bar_to_platform(){
+  move_f_bar_to_height(12.0);
+}
+
+void Lift::open_forks(){
+  // open forks
+}
+
+void Lift::close_forks(){
+  // close forks
+}
+
+void Lift::open_stabber(){
+  // open stabber
+}
+
+void Lift::close_stabber(){
+  // close stabber
+}
+
+double Lift::get_bottom_arm_target() const{
+  return cur_bottom_arm_target;
+}
+
+double Lift::get_bottom_arm_end_error() const{
+  return bottom_arm_end_error;
+}
+
+// for ring dropoff function
+array<array<Point, 3>, 2>& Lift::get_dropoff_coords(){
+  return dropoff_coords;
+}
+
+bool Lift::is_dropoff_front() const{
+  return dropoff_front;
+}
+
+double Lift::get_ring_dropoff_level() const{
+  return ring_dropoff_level;
+}
+// Async Functions
+
+void pickup_rings(void* params){
+  lift.stop_task();
+  lift.open_stabber();
+  lift.move_on_line(-3.00, 20.0, 9.5, 60);
+  lift.close_stabber();
+  delay(120); // waits for arm to stabilize
+  lift.full = true;
+  lift.move_on_line(-2.5, 9.5, 20.0, 55);
+  lift.set_state(lift.states::neutral);
+  lift.stop_task();
+}
+
+void dropoff_rings(void* params){
+  lift.stop_task();
+  lift.open_stabber();
+  lift.full = false;
+  delay(200); // waits for rings to slide down end_effector
+  lift.move_to_neutral(); // resets lift to pickup more rings
+  lift.set_state(lift.states::neutral);
+  lift.stop_task();
 }

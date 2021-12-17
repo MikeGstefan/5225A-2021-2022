@@ -3,6 +3,31 @@
 #include "util.hpp"
 #include "logging.hpp"
 
+using namespace pros;
+
+// Buttons
+
+// dropoff buttons
+extern controller_digital_e_t ring_dropoff_button;
+extern controller_digital_e_t switch_dropoff_side_button;
+
+// spinning buttons
+extern controller_digital_e_t turn_mogo_cw_button;
+extern controller_digital_e_t turn_mogo_ccw_button;
+
+// fbar buttons
+extern controller_digital_e_t f_bar_up_button;
+extern controller_digital_e_t f_bar_down_button;
+
+// misc buttons
+extern controller_digital_e_t cancel_dropoff_button;
+extern controller_digital_e_t fill_top_goal_button;
+extern controller_digital_e_t pickup_rings_button;
+extern controller_digital_e_t platform_down_button;
+
+extern controller_digital_e_t mogo_toggle_button;
+extern controller_digital_e_t tip_mogo_button;
+
 // aliases to make code more readable, used to encode vales of drive.cur_driver
 // enum class drivers{Nikhil = 0, Emily = 1, Sarah = 2};
 
@@ -36,21 +61,28 @@ struct driver{
 
 // Nikhil is 0, Emily is 1, Sarah is 2
 
-class Drivebase {
+class Drivebase{
   int cur_screen;
   int deadzone = 5;
   const char* screen_text[3] = {"LOCAL_X CURVE:", "LOCAL_Y CURVE:", "LOCAL_A CURVE:"};
   void update_screen();
 
 public:
-    Timer screen_timer = {"screen_timer"};
-  int cur_driver = 0;  // driver to defaults to Nikhil
+  int cur_driver = 0;  // driver defaults to Nikhil rn
+  Timer screen_timer = {"screen_timer"};
   static constexpr int num_of_drivers = 5;
   FILE* curve_file;
   bool curve_file_exists;
   std::array<driver, num_of_drivers> drivers;  // driver profiles
   Drivebase(std::array<driver, num_of_drivers> drivers); // constructor
-  void move(double x, double y, double a);  // sets the power for each drive motor based on x, y and angular power
+
+  // 'set-drive' methods
+  void move(double x, double y, double a);
+  void move_tank(double y, double a);
+  void move_side(double l, double r);
+
+  
+ 
   void brake();
   void download_curve_data(); // grabs data from SD card and copies to driver arrays
   void update_lookup_table_util();  // utility to alter expo curves for any driver

@@ -1,6 +1,29 @@
 #include "drive.hpp"
 // custom drive class methods
 
+// Buttons
+
+// dropoff buttons
+controller_digital_e_t ring_dropoff_button = E_CONTROLLER_DIGITAL_UP;
+controller_digital_e_t switch_dropoff_side_button = E_CONTROLLER_DIGITAL_DOWN;
+
+// spinning buttons
+controller_digital_e_t turn_mogo_cw_button = E_CONTROLLER_DIGITAL_RIGHT;
+controller_digital_e_t turn_mogo_ccw_button = E_CONTROLLER_DIGITAL_LEFT;
+
+// fbar buttons
+controller_digital_e_t f_bar_up_button = E_CONTROLLER_DIGITAL_L1;
+controller_digital_e_t f_bar_down_button = E_CONTROLLER_DIGITAL_L2;
+
+// misc buttons
+controller_digital_e_t cancel_dropoff_button = E_CONTROLLER_DIGITAL_B;
+controller_digital_e_t fill_top_goal_button = E_CONTROLLER_DIGITAL_Y;
+controller_digital_e_t pickup_rings_button = E_CONTROLLER_DIGITAL_X;
+controller_digital_e_t platform_down_button = E_CONTROLLER_DIGITAL_A;
+
+controller_digital_e_t mogo_toggle_button = E_CONTROLLER_DIGITAL_R1;
+controller_digital_e_t tip_mogo_button = E_CONTROLLER_DIGITAL_R2;
+
 // singleton drivebase instance
 Drivebase drivebase = {{
   driver("Nikhil", {E_CONTROLLER_ANALOG_LEFT_X, E_CONTROLLER_ANALOG_RIGHT_Y, E_CONTROLLER_ANALOG_RIGHT_X}, {0.0, 0.5, 1.0}),
@@ -68,6 +91,17 @@ void Drivebase::move(double x, double y, double a){
   front_r.move(-x + y - a);
   back_l.move(-x + y + a);
   back_r.move(x + y - a);
+}
+
+void Drivebase::move_tank(double y, double a){
+  move(0.0, y, a);
+}
+
+void Drivebase::move_side(double l, double r){
+  front_l.move(l);
+  front_r.move(r);
+  back_l.move(l);
+  back_r.move(r);
 }
 
 void Drivebase::brake(){
