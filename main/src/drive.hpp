@@ -7,26 +7,18 @@ using namespace pros;
 
 // Buttons
 
-// dropoff buttons
-extern controller_digital_e_t ring_dropoff_button;
-extern controller_digital_e_t switch_dropoff_side_button;
+// lift buttons
+extern controller_digital_e_t lift_up_button;
+extern controller_digital_e_t lift_down_button;
 
-// spinning buttons
-extern controller_digital_e_t turn_mogo_cw_button;
-extern controller_digital_e_t turn_mogo_ccw_button;
-
-// fbar buttons
-extern controller_digital_e_t f_bar_up_button;
-extern controller_digital_e_t f_bar_down_button;
+extern controller_digital_e_t tilter_button;
+extern controller_digital_e_t hitch_button;
 
 // misc buttons
-extern controller_digital_e_t cancel_dropoff_button;
+extern controller_digital_e_t cancel_button;
 extern controller_digital_e_t fill_top_goal_button;
-extern controller_digital_e_t pickup_rings_button;
-extern controller_digital_e_t platform_down_button;
-
-extern controller_digital_e_t mogo_toggle_button;
-extern controller_digital_e_t tip_mogo_button;
+extern controller_digital_e_t climb_platform_button;
+extern controller_digital_e_t intake_on_button;
 
 // aliases to make code more readable, used to encode vales of drive.cur_driver
 // enum class drivers{Nikhil = 0, Emily = 1, Sarah = 2};
@@ -80,8 +72,8 @@ public:
   void move_tank(double y, double a);
   void move_side(double l, double r);
 
-  
- 
+
+
   void brake();
   void download_curve_data(); // grabs data from SD card and copies to driver arrays
   void update_lookup_table_util();  // utility to alter expo curves for any driver

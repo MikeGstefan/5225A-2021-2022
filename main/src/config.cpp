@@ -21,3 +21,4 @@ pros::Motor uptk(11);
 pros::ADIEncoder LeftEncoder(3, 4, false), RightEncoder(7, 8, true), BackEncoder(5, 6, false);
 pros::ADIDigitalOut claw_in(1, 1);
 pros::ADIDigitalIn claw_touch(2);
+// pros::ADIDigitalIn lift_trigger(), tilter_trigger, hitch_trigger;

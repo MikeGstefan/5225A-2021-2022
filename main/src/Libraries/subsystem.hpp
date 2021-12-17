@@ -1,7 +1,10 @@
 #pragma once
-#include "util.hpp"
-#include "timer.hpp"
-#include "config.hpp"
+#include "../util.hpp"
+#include "../timer.hpp"
+#include "../config.hpp"
+#include "../drive.hpp"
+
+
 
 using namespace pros;
 
@@ -22,7 +25,7 @@ public:
   {}
 
   void set_state(const state_type next_state){
-    printf("%s | Going from %s to %s\n", state_names[state], state_names[next_state]);
+    printf("%s | Going from %s to %s\n", state_names[static_cast<int>(state)], state_names[static_cast<int>(next_state)]);
     last_state = state;
     state = next_state;
   }
@@ -33,11 +36,8 @@ public:
 template <typename state_type, int num_of_states>
 class Motorized_subsystem: public Subsystem<state_type, num_of_states>, public Motor{
 public:
-  Motorized_subsystem(Subsystem<state_type, num_of_states> subsystem, Motor motor):
+  Motorized_subsystem(Subsystem<state_type, num_of_states> subsystem, Motor& motor):
     Subsystem<state_type, num_of_states>(subsystem), Motor(motor){}
-
-  // Motorized_subsystem(const char* name, std::array<const char*, num_of_states> state_names, Motor motor):
-  //   Subsystem<state_type, num_of_states>(subsystem), Motor(motor){}
 
   void reset(){
     move(-60);
@@ -60,23 +60,3 @@ public:
   }
 
 };
-
-
-enum class six_bar_states{
-  searching,  // at lowest height waiting for lim switch to pickup goals
-  lowered,  //  at lowest height, not waiting to pikcup mogos
-  raised, // at height for intake to fill alliance mogo
-  platform, // holding mogo at platform dropoff height
-  released, // mogo is released at platform height
-  lowering  // on the way to lowered state from released
-};
-
-class Six_bar: public Motorized_subsystem<six_bar_states, 6> {
-
-public:
-  Six_bar(Motorized_subsystem<six_bar_states, 6> motorized_subsystem);  // constructor
-  void handle();  // contains state machine code
-
-};
-
-extern Six_bar six_bar;
