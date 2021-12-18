@@ -952,37 +952,33 @@ void gui_background(){ //To be called continously
   if(inRange(x, 0, 199) && inRange(y, 0, 199)) field[x].set(y); //Saves position (x,y) to as tracked
 
   //Saving vars for text display
-  std::array<std::tuple<pros::Motor*, Text*, int, std::string, const char*>, 8>::iterator it;
-  for (it = motors.begin(); it != motors.end(); it++){ //Setting Motor temps
-    Motor* motor= std::get<0>(*it);
-    int temperature = motor != nullptr ? motor->get_temperature() : 0;
-    std::get<2>(*it) = temperature == std::numeric_limits<int>::max() ? 0 : temperature;
-  }
-
   angle = fmod(rad_to_deg(tracking.global_angle), 360);
   left_enc = LeftEncoder.get_value();
   right_enc = RightEncoder.get_value();
   back_enc = BackEncoder.get_value();
   driver_text = drivebase.drivers[drivebase.cur_driver].name;
 
-  if (!Flash.playing() && !temp_flashed){ //Overheating Motors
-    temp_flashed = true;
-    for (it = motors.begin(); it != motors.end(); it++){
-      if (std::get<2>(*it) >= 55){
-        Page::go_to(&temps);
-        char buffer[50];
-        sprintf(buffer, "%s motor is at %dC\n", std::get<3>(*it).c_str(), std::get<2>(*it));
-        flash(COLOR_RED, 10000, buffer);
-        break;
-      }
-    }
-  }
-
-  for (it = motors.begin(); it != motors.end(); it++){ //Setting motor background colors
+  std::array<std::tuple<pros::Motor*, Text*, int, std::string, const char*>, 8>::iterator it;
+  for (it = motors.begin(); it != motors.end(); it++){
+    Motor* motor= std::get<0>(*it);
     Text* text = std::get<1>(*it);
-    if (text != nullptr){
-      int temp = std::get<2>(*it);
-      if (temp <= 25) text->set_background(COLOR_DODGER_BLUE); //...20, 25
+    int temp = std::get<2>(*it);
+    int temperature = motor != nullptr ? motor->get_temperature() : 0;
+    temperature = temperature == std::numeric_limits<int>::max() ? 0 : temperature;
+    std::get<2>(*it) = temperature;
+
+    if (temp >= 55 && !Flash.playing() && !temp_flashed){ //Overheating
+      temp_flashed = true;
+      Page::go_to(&temps);
+      char buffer[50];
+      sprintf(buffer, "%s motor is at %dC\n", std::get<3>(*it).c_str(), temp);
+      flash(COLOR_RED, 10000, buffer);
+      break;
+    }
+
+    if (text != nullptr){ //Background Colors (temperature based)
+      if (temp == 0) text->set_background(COLOR_WHITE); //0
+      else if (temp <= 25) text->set_background(COLOR_DODGER_BLUE); //...20, 25
       else if (temp <= 35) text->set_background(COLOR_LAWN_GREEN); //30, 35
       else if (temp <= 45) text->set_background(COLOR_YELLOW); //40, 45
       else text->set_background(COLOR_RED); //50, 55, ...

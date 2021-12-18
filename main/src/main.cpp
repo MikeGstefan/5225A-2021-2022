@@ -81,6 +81,12 @@ void opcontrol() {
 	make flash look nice
 	/**/
 
+	// while(true){
+	// 	printf("Dist:%d,   Conf:%d,   Size:%d,   Vel:%d\n", dist.get(), dist.get_confidence(), dist.get_object_size(), dist.get_object_velocity());
+	//
+	// 	delay(50);
+	// }
+
 	while(true){
 		gui_background();
 		drivebase.handle_input();
