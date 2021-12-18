@@ -1,11 +1,10 @@
 #pragma once
 #include "../Libraries/subsystem.hpp"
 
-#define NUM_OF_HITCH_STATES 3
+#define NUM_OF_HITCH_STATES 2
 
 enum class hitch_states{
-  searching,  // released but waiting for goal
-  released, // released but not waiting for goal
+  searching,  // released and waiting for goal
   grabbed // has goal
 };
 

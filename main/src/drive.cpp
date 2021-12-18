@@ -1,22 +1,6 @@
 #include "drive.hpp"
 // custom drive class methods
 
-// Buttons
-
-// lift buttons
-controller_digital_e_t lift_up_button = DIGITAL_R1;
-controller_digital_e_t lift_down_button = DIGITAL_R2;
-
-controller_digital_e_t tilter_button = DIGITAL_L1;
-controller_digital_e_t hitch_button = DIGITAL_L2;
-
-// misc buttons
-controller_digital_e_t cancel_button = DIGITAL_B;
-controller_digital_e_t fill_top_goal_button = DIGITAL_Y;
-controller_digital_e_t climb_platform_button = DIGITAL_UP;
-controller_digital_e_t intake_on_button = DIGITAL_A;
-
-
 // singleton drivebase instance
 Drivebase drivebase = {{
   driver("Nikhil", {E_CONTROLLER_ANALOG_LEFT_X, E_CONTROLLER_ANALOG_RIGHT_Y, E_CONTROLLER_ANALOG_RIGHT_X}, {0.0, 0.5, 1.0}),

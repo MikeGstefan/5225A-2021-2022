@@ -3,23 +3,9 @@
 #include "util.hpp"
 #include "logging.hpp"
 #include "Subsystems/lift.hpp"
+#include "Subsystems/hitch.hpp"
 
 using namespace pros;
-
-// Buttons
-
-// lift buttons
-extern controller_digital_e_t lift_up_button;
-extern controller_digital_e_t lift_down_button;
-
-extern controller_digital_e_t tilter_button;
-extern controller_digital_e_t hitch_button;
-
-// misc buttons
-extern controller_digital_e_t cancel_button;
-extern controller_digital_e_t fill_top_goal_button;
-extern controller_digital_e_t climb_platform_button;
-extern controller_digital_e_t intake_on_button;
 
 // aliases to make code more readable, used to encode vales of drive.cur_driver
 // enum class drivers{Nikhil = 0, Emily = 1, Sarah = 2};
