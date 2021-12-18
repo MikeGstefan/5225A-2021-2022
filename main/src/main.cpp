@@ -81,11 +81,16 @@ void opcontrol() {
 	make flash look nice
 	/**/
 
+	// flash(COLOR_RED, 10000, "ETXT");
+
 	// while(true){
-	// 	printf("Dist:%d,   Conf:%d,   Size:%d,   Vel:%d\n", dist.get(), dist.get_confidence(), dist.get_object_size(), dist.get_object_velocity());
-	//
-	// 	delay(50);
+	// 	printf("%d\n", dist.get());
+	// 	delay(10);
 	// }
+
+	// claw_in.set_value(1); //Open
+	// rush_goal2(0, -50, 0);
+
 
 	while(true){
 		gui_background();
@@ -97,6 +102,14 @@ void opcontrol() {
 		}
 		else if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_UP)) next_driver();
 		else if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_DOWN)) prev_driver();
+		else if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_X)) claw_in.set_value(1); //Open
+		else if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_Y)){
+			claw_in.set_value(1); //Open
+			drivebase.move(0, -127, 0);
+			waitUntil(dist.get() <= 190);
+			claw_in.set_value(0); //Close
+			drivebase.brake();
+		}
 		delay(10);
 	}
 }

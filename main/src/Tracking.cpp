@@ -114,7 +114,7 @@ void update(void* params){
     tracking.y_coord += Yy + Xy;
     tracking.global_angle += Theta;
 
-    
+
     tracking_data.print(&data_timer, 100, {
       [=](){return Data::to_char("%d || x: %.2lf, y: %.2lf, a: %.2lf\n", millis(), tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle));},
       [=](){return Data::to_char("%d || GLOBAL VELOCITY| x: %.2f, y: %.2f a: %.2f\n", millis(), tracking.g_velocity.x, tracking.g_velocity.y, rad_to_deg(tracking.g_velocity.angle));},
@@ -392,6 +392,13 @@ void rush_goal2(double target_x, double target_y, double target_a){
         else  tracking.power_y = sgn(orig_y_sgn) * (max_power - fabs(tracking.power_x) - fabs(tracking.power_a));
         printf("pow_x %f, pow_y: %f, power_a: %f",tracking.power_x, tracking.power_y, tracking.power_a);
         printf("cur_y_sgn: %lf, cur_y: %lf\n", target_y - tracking.y_coord, tracking.y_coord);
+
+        if(dist.get() <= 190){
+          claw_in.set_value(0); //Close
+          drivebase.brake();
+          return;
+        }
+
         // exit condition
         // if (claw_touch.get_value()){
         //   // got_goal = goal_lim_switch_state;

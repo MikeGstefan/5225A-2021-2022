@@ -450,46 +450,46 @@ void draw_oblong(int16_t x1, int16_t y1, int16_t x2, int16_t y2, double kS, doub
 
 //Constructors
 void Text::construct (int16_t pt1, int16_t pt2, Style rect_type, text_format_e_t size, Page* page_ptr, std::string text, std::variant<std::monostate, double*, int*, std::string*> val_pointer, std::uint32_t label_color){
-  x = pt1;
-  y = pt2;
-  type = rect_type;
-  txt_fmt = size;
-  page = page_ptr;
-  label = text;
-  val_ptr = val_pointer;
-  l_col = label_color;
-  b_col = page->b_col;
-  page->texts.push_back(this);
+  this->x = pt1;
+  this->y = pt2;
+  this->type = rect_type;
+  this->txt_fmt = size;
+  this->page = page_ptr;
+  this->label = text;
+  this->val_ptr = val_pointer;
+  this->l_col = label_color;
+  this->b_col = page->b_col;
+  this->page->texts.push_back(this);
 }
 
 void Button::construct(int16_t pt1, int16_t pt2, int16_t pt3, int16_t pt4, Style rect_type, press_type prType, Page* page_ptr, std::string text, std::uint32_t background_color, std::uint32_t label_color){
 
     //Saves params to class private vars
-    b_col = background_color;
-    b_col_dark = RGB2COLOR(int(COLOR2R(b_col)*0.8), int(COLOR2G(b_col)*0.8), int(COLOR2B(b_col)*0.8));
-    l_col = label_color;
-    form = prType;
+    this->b_col = background_color;
+    this->b_col_dark = RGB2COLOR(int(COLOR2R(b_col)*0.8), int(COLOR2G(b_col)*0.8), int(COLOR2B(b_col)*0.8));
+    this->l_col = label_color;
+    this->form = prType;
 
     //Saves the buttons owning page
-    page = page_ptr;
-    (page->buttons).push_back(this);
-    std::tie(x1, y1, x2, y2) = fixPoints(pt1, pt2, pt3, pt4, rect_type);
+    this->page = page_ptr;
+    (this->page->buttons).push_back(this);
+    std::tie(this->x1, this->y1, this->x2, this->y2) = fixPoints(pt1, pt2, pt3, pt4, rect_type);
 
     if (8*text.length()+5 < x2-x1){
-      text_x = (x1+x2-(text.length()*CHAR_WIDTH_SMALL))/2;
-      text_y = (y1+y2-CHAR_HEIGHT_SMALL)/2;
-      label = text;
+      this->text_x = (this->x1+this->x2-(text.length()*CHAR_WIDTH_SMALL))/2;
+      this->text_y = (this->y1+this->y2-CHAR_HEIGHT_SMALL)/2;
+      this->label = text;
     }
     else{ //Spaces it if it's too long for one line
       std::size_t space = text.find(' ', text.length()/2);
       if (space != std::string::npos){
-        label = text.substr(0, space);
-        label1 = text.substr(space+1);
+        this->label = text.substr(0, space);
+        this->label1 = text.substr(space+1);
 
-        text_x = (x1+x2-(label.length()*CHAR_WIDTH_SMALL))/2;
-        text_x1 = (x1+x2-(label1.length()*CHAR_WIDTH_SMALL))/2;
-        text_y = (y1+y2-CHAR_HEIGHT_SMALL)/2-CHAR_HEIGHT_SMALL;
-        text_y1 = (y1+y2-CHAR_HEIGHT_SMALL)/2+CHAR_HEIGHT_SMALL;
+        this->text_x = (this->x1+this->x2-(this->label.length()*CHAR_WIDTH_SMALL))/2;
+        this->text_x1 = (this->x1+this->x2-(this->label1.length()*CHAR_WIDTH_SMALL))/2;
+        this->text_y = (this->y1+this->y2-CHAR_HEIGHT_SMALL)/2-CHAR_HEIGHT_SMALL;
+        this->text_y1 = (this->y1+this->y2-CHAR_HEIGHT_SMALL)/2+CHAR_HEIGHT_SMALL;
       }
     }
 }
@@ -520,47 +520,47 @@ Button::Button(int16_t pt1, int16_t pt2, int16_t pt3, int16_t pt4, Style type, p
 
 Slider::Slider (int16_t pt1, int16_t pt2, int16_t pt3, int16_t pt4, Style type, direction direction, int minimum, int maximum, Page* page_ptr, std::string text, std::uint32_t background_color, std::uint32_t label_color){
   //Saves params to class private vars
-  max = maximum;
-  min = minimum;
-  b_col = background_color;
-  l_col = label_color;
-  label = text;
-  dir = direction;
+  this->max = maximum;
+  this->min = minimum;
+  this->b_col = background_color;
+  this->l_col = label_color;
+  this->label = text;
+  this->dir = direction;
 
   //Saves the buttons owning page
-  page = page_ptr;
-  (page->sliders).push_back(this);
+  this->page = page_ptr;
+  (this->page->sliders).push_back(this);
 
-  std::tie(x1, y1, x2, y2) = fixPoints(pt1, pt2, pt3, pt4, type);
+  std::tie(this->x1, this->y1, this->x2, this->y2) = fixPoints(pt1, pt2, pt3, pt4, type);
 
-  switch(dir){
+  switch(this->dir){
     case HORIZONTAL:
-      text_x = (x1+x2-(label.length()*CHAR_WIDTH_SMALL))/2;
-      text_y = y1-CHAR_HEIGHT_SMALL-2;
-      inc.construct(x2+5, y1, x2+25, y2, Style::CORNER, Button::SINGLE, page, ">", l_col, b_col);
-      dec.construct(x1-25, y1, x1-5, y2, Style::CORNER, Button::SINGLE, page, "<", l_col, b_col);
+      this->text_x = (this->x1+this->x2-(this->label.length()*CHAR_WIDTH_SMALL))/2;
+      this->text_y = this->y1-CHAR_HEIGHT_SMALL-2;
+      inc.construct(this->x2+5, this->y1, this->x2+25, this->y2, Style::CORNER, Button::SINGLE, this->page, ">", this->l_col, this->b_col);
+      dec.construct(this->x1-25, this->y1, this->x1-5, this->y2, Style::CORNER, Button::SINGLE, this->page, "<", this->l_col, this->b_col);
       break;
 
     case VERTICAL:
-      text_x = (x1+x2-(label.length()*CHAR_WIDTH_SMALL))/2;
-      text_y = (y1+y2)/2;
-      inc.construct(x1, y1-25, x2, y1-5, Style::CORNER, Button::SINGLE, page, "▲", l_col, b_col);
-      dec.construct(x1, y2+5, x2, y2+25, Style::CORNER, Button::SINGLE, page, "▼", l_col, b_col);
+      this->text_x = (this->x1+this->x2-(this->label.length()*CHAR_WIDTH_SMALL))/2;
+      this->text_y = (this->y1+this->y2)/2;
+      inc.construct(this->x1, this->y1-25, this->x2, this->y1-5, Style::CORNER, Button::SINGLE, this->page, "▲", l_col, b_col);
+      dec.construct(this->x1, this->y2+5, this->x2, this->y2+25, Style::CORNER, Button::SINGLE, this->page, "▼", l_col, b_col);
       break;
   }
 
   //Buttons
-  dec.set_func([&value=val, &minimum=this->min](){if(value != minimum) value--;});
-  inc.set_func([&value=val, &maximum=this->max](){if (value != maximum) value++;});
+  dec.set_func([&value=this->val, &mini=this->min](){if(value != mini) value--;});
+  inc.set_func([&value=this->val, &maxi=this->max](){if (value != maxi) value++;});
 }
 
 Page::Page(int page_number, std::string name, std::uint32_t background_color){
   //Page Constructor
   //Should call Page::go_to() to actually show the page
-  page_num = page_number;
-  if (page_num < PAGE_COUNT) pages[page_num] = this;
-  title = name + " - " + std::to_string(page_num);
-  b_col = background_color;
+  this->page_num = page_number;
+  if (this->page_num < PAGE_COUNT) pages[this->page_num] = this;
+  this->title = name + " - " + std::to_string(this->page_num);
+  this->b_col = background_color;
 
   buttons.push_back(&prev_page);
   buttons.push_back(&next_page);
