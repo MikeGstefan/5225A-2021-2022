@@ -2,6 +2,8 @@
 #include "gui.hpp"
 #include "controller.hpp"
 #include "pid.hpp"
+#include "Tracking.hpp"
+#include "task.hpp"
 
 // using namespace std;
 #include "task.hpp"
@@ -15,7 +17,7 @@ using namespace std;
  * All other competition modes are blocked by initialize; it is recommended
  * to keep execution time for this mode under a few seconds.
  */
-
+ pros::Task *updt = nullptr;
 
 void initialize() {
 	drivebase.download_curve_data();
@@ -24,8 +26,10 @@ void initialize() {
 	delay(150);
 	tracking.x_coord = 0.0, tracking.y_coord = 0.0, tracking.global_angle = 0.0;
 	update_t.start();
-	gui_setup();
-	master.print(2, 0, "Driver: %s", drivebase.drivers[drivebase.cur_driver].name);
+	// updt = new Task(update);
+	printf("here\n");
+	// gui_setup();
+	// master.print(2, 0, "Driver: %s", drivebase.drivers[drivebase.cur_driver].name);
 }
 
 /**
@@ -97,15 +101,74 @@ void autonomous() {
  */
  int ring_count = 0;
  double cur_auton = 1;
- 
-void opcontrol() {
-	f_bar.move_relative(0, 100);
-	Timer move = {"move"};
-	printf("START\n");
-	move.print();
-	drivebase.driver_practice();
-	// rush_goal2(0.0, -20.0, 0.0);
-	// move_on_line({0.0, 0.0}, {0.0, 24.0, 00.0}, 127.0, false, 0.0, false);
 
+void opcontrol() {
+	while(true)delay(10);
+// 	printf("in op\n");
+// 	// f_bar.move_relative(0, 100);
+// 	// Timer move = {"move"};
+// 	// printf("START\n");
+// 	// move.print();
+// 	// drivebase.driver_practice();
+// 	// rush_goal2(0.0, -20.0, 0.0);
+// 	// move_on_line({0.0, 0.0}, {0.0, 24.0, 00.0}, 127.0, false, 0.0, false);
+// 	lift.move(-60);
+// Timer vel_rise_timeout("f_bar_vel_rise");
+// // waits for f_bar velocity to rise or timeout to trigger
+// while(fabs(lift.get_actual_velocity()) < 45.0){
+// 	printf("vel (rising loop): %lf\n", lift.get_actual_velocity());
+// 	if (vel_rise_timeout.get_time() > 50){
+// 		printf("f_bar rising timeout\n");
+// 		break;
+// 	}
+// 	delay(10);
+// }
+// printf("done rising\n");
+// // waits until f_bar velocity slows down for 5 cycles
+// cycleCheck(fabs(lift.get_actual_velocity()) < 5.0, 5, 10)
+// lift.tare_position();
+// printf("%d, f_bar reset %lf\n", millis(), lift.get_position());
+// lift.move(-5);
+
+// //
+// //
+// 	bool state  = 0;
+// 	bool lift_state = 1;
+// 	int count = 0;
+// // 	printf("going in\n");
+// 	while(true){
+
+// 		// delay(10);
+// 		// state = !state;
+// 		// claw.set_value(state);
+// 		// count++;
+// 		// delay(1000);
+// 		// if(master.get_digital(E_CONTROLLER_DIGITAL_A)){
+// 		// 	printf("%d\n",count);
+// 		// 	break;
+// 		// }
+// 		if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_R2)){
+// 			printf("switching state\n");
+// 			state = !state;
+// 			claw.set_value(state);
+// 		}
+// 		if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_R1)){
+// 			if(lift_state){ 
+// 				lift.move_absolute(600, 100);
+// 			}
+// 			else lift.move_absolute(20, 100);
+// 			lift_state = !lift_state;
+			
+// 			// delay(2000);
+// 			// lift.move(5);
+// 		}
+// 		if(lift_state && !state && claw_touch.get_value()){ 
+// 			state = !state;
+// 			claw.set_value(state);
+// 		}
+// 		drivebase.handle_input();
+// 		delay(10);
+
+// 	}
 
 }
