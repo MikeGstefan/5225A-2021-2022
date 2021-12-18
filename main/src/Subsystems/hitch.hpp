@@ -1,4 +1,7 @@
+#pragma once
 #include "../Libraries/subsystem.hpp"
+
+#define NUM_OF_HITCH_STATES 3
 
 enum class hitch_states{
   searching,  // released but waiting for goal
@@ -6,10 +9,10 @@ enum class hitch_states{
   grabbed // has goal
 };
 
-class Hitch: public Subsystem<hitch_states, 3> {
+class Hitch: public Subsystem<hitch_states, NUM_OF_HITCH_STATES> {
 
 public:
-  Hitch(Subsystem<hitch_states, 3> subsystem);  // constructor
+  Hitch(Subsystem<hitch_states, NUM_OF_HITCH_STATES> subsystem);  // constructor
   void handle();  // contains state machine code
 
 };

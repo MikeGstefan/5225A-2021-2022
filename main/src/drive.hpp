@@ -2,6 +2,7 @@
 #include "Tracking.hpp"
 #include "util.hpp"
 #include "logging.hpp"
+#include "Subsystems/lift.hpp"
 
 using namespace pros;
 

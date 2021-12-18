@@ -4,11 +4,11 @@
 // Buttons
 
 // lift buttons
-controller_digital_e_t lift_up_button = DIGITAL_L1;
-controller_digital_e_t lift_down_button = DIGITAL_L2;
+controller_digital_e_t lift_up_button = DIGITAL_R1;
+controller_digital_e_t lift_down_button = DIGITAL_R2;
 
-controller_digital_e_t tilter_button = DIGITAL_R1;
-controller_digital_e_t hitch_button = DIGITAL_R2;
+controller_digital_e_t tilter_button = DIGITAL_L1;
+controller_digital_e_t hitch_button = DIGITAL_L2;
 
 // misc buttons
 controller_digital_e_t cancel_button = DIGITAL_B;
@@ -225,7 +225,12 @@ void Drivebase::driver_practice(){
         else cur_driver--;
         master.print(2, 0, "Driver: %s          ", drivers[cur_driver].name);
       }
+
+      // actual drive code
       drivebase.handle_input();
+      lift.handle();
+
+      // takes away control from driver when motors overheat
       if(front_l.get_temperature() >= 55 || front_r.get_temperature() >= 55 || back_r.get_temperature() >= 55 || back_l.get_temperature() >= 55){
         move(0, 0, 0);  // stops movement
         delay(50);

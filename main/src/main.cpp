@@ -1,3 +1,4 @@
+#include "Subsystems/lift.hpp"
 #include "drive.hpp"
 #include "gui.hpp"
 #include "controller.hpp"
@@ -97,15 +98,10 @@ void autonomous() {
  */
  int ring_count = 0;
  double cur_auton = 1;
- 
+
 void opcontrol() {
-	f_bar.move_relative(0, 100);
-	Timer move = {"move"};
-	printf("START\n");
-	move.print();
+	lift.reset();
 	drivebase.driver_practice();
-	// rush_goal2(0.0, -20.0, 0.0);
-	// move_on_line({0.0, 0.0}, {0.0, 24.0, 00.0}, 127.0, false, 0.0, false);
 
 
 }

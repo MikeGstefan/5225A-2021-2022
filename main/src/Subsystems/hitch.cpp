@@ -1,6 +1,15 @@
 #include "hitch.hpp"
 
-Hitch::Hitch(Subsystem<hitch_states, 3> subsystem): Subsystem(subsystem){ // constructor
+// hitch object
+Hitch hitch(Subsystem<hitch_states, NUM_OF_HITCH_STATES>("Hitch",
+{
+  "searching",
+  "released",
+  "grabbed",
+}
+));
+
+Hitch::Hitch(Subsystem<hitch_states, NUM_OF_HITCH_STATES> subsystem): Subsystem(subsystem){ // constructor
   state = hitch_states::released;
   last_state = state;
 }
