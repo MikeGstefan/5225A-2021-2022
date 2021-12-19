@@ -23,3 +23,19 @@ public:
 };
 
 extern Lift lift;
+
+// non-class stuff
+extern lift_states lift_state;
+extern lift_states last_lift_state;
+extern int lift_released_cycle_check;
+
+extern const int lift_bottom_position;
+extern const int lift_platform_position;
+extern const int lift_top_position;
+
+
+extern std::array<const char*, NUM_OF_LIFT_STATES> lift_state_names;
+
+void set_lift_state();
+void lift_handle();
+void lift_reset();

@@ -26,7 +26,7 @@ void initialize() {
 	delay(150);
 	tracking.x_coord = 0.0, tracking.y_coord = 0.0, tracking.global_angle = 0.0;
 	update_t.start();
-	gui_setup();
+	// gui_setup();
 	master.print(2, 0, "Driver: %s", drivebase.drivers[drivebase.cur_driver].name);
 }
 
@@ -60,7 +60,6 @@ void competition_initialize() {}
  * from where it left off.
  */
 void autonomous() {
-	f_bar.move_relative(0, 100);
 	Timer move = {"move"};
 	tank_move_on_arc({0.0, 0.0}, {24.0, 24.0, 90.0}, 127.0, 127.0, true);
 
@@ -101,8 +100,20 @@ void autonomous() {
  double cur_auton = 1;
 
 void opcontrol() {
-	lift.reset();
-	drivebase.driver_practice();
+	lift_piston.set_value(LOW);	// in searching state
+	printf("STARTED RESET\n");
+	lift_reset();
+	lift_motor.move_absolute(lift_bottom_position, 100);
+	printf("DONE RESET\n");
+	for(int i = 0; i < 7; i++)	printf("%s\n", lift_state_names[i]);
+	while(true){
+		// lift_piston.set_value(master.get_digital(E_CONTROLLER_DIGITAL_A));
+		// drivebase.handle_input();
+		// lift_handle();
+		drivebase.driver_practice();
+		delay(10);
+	}
+	// drivebase.driver_practice();
 
 
 }
