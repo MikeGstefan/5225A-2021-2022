@@ -1,6 +1,6 @@
 #include "drive.hpp"
-#include "gui.hpp"
 #include "controller.hpp"
+#include "gui/gui_main.hpp"
 
 // using namespace std;
 #include "task.hpp"

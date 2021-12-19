@@ -1,7 +1,7 @@
 #pragma once
-#include "drive.hpp"
-#include "Tracking.hpp"
-#include "util.hpp"
+#include "../drive.hpp"
+#include "../Tracking.hpp"
+#include "../util.hpp"
 #include <bitset>
 #include <variant>
 #include <typeinfo>
@@ -39,8 +39,10 @@ enum class Style{ //how the rect coords get evaluated
     SIZE
 };
 
-extern int ring_count, cur_auton; //For gui.cpp to use
-extern Page testing; //For use in opcontrol
+//For other gui hpp files
+void gui_general_setup(), gui_general_background();
+extern int ring_count, cur_auton; //For gui_objects to use
+extern Timer Flash;
 
 void gui_setup(), gui_background();
 void aligned_coords (int x_objects, int y_objects, int x_btn, int y_btn, int x_range = 480, int y_range = 220);
