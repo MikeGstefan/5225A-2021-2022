@@ -57,7 +57,7 @@ Button resAll(15, 160, 240, 60, Style::SIZE, Button::SINGLE, &track, "Reset All"
 Page moving (5, "Moving"); //Moves to target, home, or centre
 Slider xVal(35, 45, 250, 40, Style::SIZE, Slider::HORIZONTAL, 0, 144, &moving, "X");
 Slider yVal(35, 110, 250, 40, Style::SIZE, Slider::HORIZONTAL, 0, 144, &moving, "Y");
-Slider aVal(35, 175, 250, 40, Style::SIZE, Slider::HORIZONTAL, 0, 144, &moving, "A");
+Slider aVal(35, 175, 250, 40, Style::SIZE, Slider::HORIZONTAL, 0, 360, &moving, "A");
 Button go_to_xya(320, 45, 150, 40, Style::SIZE, Button::SINGLE, &moving, "Target");
 Button go_home(320, 110, 150, 40, Style::SIZE, Button::SINGLE, &moving, "Home");
 Button go_centre(320, 175, 150, 40, Style::SIZE, Button::SINGLE, &moving, "Centre");
@@ -170,6 +170,7 @@ bool go(std::string name, std::string message, std::uint32_t delay_time){ //Star
     delay(2);
   }
   while(!go_button.pressed() && !interrupted){ //Wait for Press
+    drivebase.handle_input();
     Page::update_screen_status();
     if (go_back_button.pressed()) interrupted = true;
     delay(2);
@@ -203,6 +204,7 @@ bool go(std::string name, std::uint32_t delay_time){ //End
     delay(2);
   }
   while(!go_button.pressed() && !interrupted){ //Wait for Press
+    drivebase.handle_input();
     Page::update_screen_status();
     if (go_back_button.pressed()) interrupted = true;
     delay(2);
@@ -339,16 +341,12 @@ void gui_setup(){ //Call once at start in initialize()
   pneum_btn_2.set_func([](){claw_out.set_value(1); pneum_2_state = "ON";});
   pneum_btn_2.set_off_func([](){claw_out.set_value(0); pneum_2_state = "OFF";});
 
-  mot_temp_1.set_background(40, 60, 70, 50, Style::SIZE);
-  mot_temp_2.set_background(150, 60, 70, 50, Style::SIZE);
-  mot_temp_3.set_background(260, 60, 70, 50, Style::SIZE);
-  mot_temp_4.set_background(370, 60, 70, 50, Style::SIZE);
-  mot_temp_5.set_background(40, 150, 70, 50, Style::SIZE);
-  mot_temp_6.set_background(150, 150, 70, 50, Style::SIZE);
-  mot_temp_7.set_background(260, 150, 70, 50, Style::SIZE);
-  mot_temp_8.set_background(370, 150, 70, 50, Style::SIZE);
+  for (int i = 0; i<4; i++){
+    std::get<1>(motors[i])->set_background(110*i+40, 60, 70, 50, Style::SIZE);
+    std::get<1>(motors[i+4])->set_background(110*i+40, 150, 70, 50, Style::SIZE);
+  }
 
-  Page::go_to(1); //Sets it to page 1 for program start. Don't delete this. If you want to change the starting page, call this in initialize()
+  Page::go_to(1); //Sets it to page 1 for program start. Don't delete this. If you want to change the starting page, re-call this in initialize()
 }
 
 //Utility to get coordinates for aligned objects, (buttons, sliders...) of same size
@@ -381,16 +379,21 @@ void flash(std::uint32_t color, std::uint32_t time, std::string text){
   screen::set_pen(~color&0xFFFFFF); //Makes text inverted color of background so it is always visible
   screen::set_eraser(color);
 
-  printf("%s", text.c_str());
+  printf("\n\nWARNING: %s\n\n", text.c_str());
 
-  std::size_t space = text.find(' ', text.length()/2); //Spaces it out over 2 lines
-  if (space != std::string::npos){
-    screen::print(TEXT_LARGE, (480-text.length()*CHAR_WIDTH_LARGE)/2, 70, text.substr(0, space).c_str());
-    screen::print(TEXT_LARGE, (480-text.length()*CHAR_WIDTH_LARGE)/2, 100, text.substr(space+1).c_str());
-  }
-  else screen::print(TEXT_LARGE, (480-text.length()*CHAR_WIDTH_LARGE)/2, 95, text.c_str());
+  int spaces = int(CHAR_WIDTH_LARGE*text.length()/460)+1;
+  std::size_t space, last_space=0;
+  std::string sub;
 
   master.rumble("-.-.-.-.");
+
+  for(int i=1; i <= spaces; i++){
+    space = text.find(' ', text.length()*i/spaces);
+    sub = text.substr(last_space, space-last_space);
+    screen::print(TEXT_LARGE, (480-sub.length()*CHAR_WIDTH_LARGE)/2, (CHAR_HEIGHT_LARGE+5)*(i-1), sub.c_str());
+    last_space = space+1;
+  }
+
   Flash.reset(); //Starts counting
   flash_end = time;
 }
@@ -404,16 +407,13 @@ void end_flash (){
 }
 
 //Formats coordinates based on a style (always in x1, y1, x2, y2)
-std::tuple<int, int, int, int> fixPoints (int p1, int p2,int p3, int p4, Style type){
-  int x1=p1, y1=p2, x2=p3, y2=p4, temp;
-
-  // (p1, p2) is centre. p3, p4 are sizes from centre
+std::tuple<int, int, int, int> fixPoints (int x1, int y1,int x2, int y2, Style type){
   switch(type){
     case Style::CENTRE:
-      x1 -= p3;
-      y1 -= p4;
-      x2 += p1;
-      y2 += p2;
+      x1 -= x2;
+      y1 -= y2;
+      x2 += x1+x2;
+      y2 += y1+y2;
       break;
 
     case Style::SIZE:
@@ -423,6 +423,8 @@ std::tuple<int, int, int, int> fixPoints (int p1, int p2,int p3, int p4, Style t
   }
 
   //Putting coordinates in a left-right up-down order in case it was accidentally reversed or given negatives. Makes checking presses easier
+  int temp;
+
   temp = std::max(x1, x2);
   x1 = std::min(x1, x2);
   x2 = temp;
@@ -449,33 +451,33 @@ void draw_oblong(int16_t x1, int16_t y1, int16_t x2, int16_t y2, double kS, doub
 }
 
 //Constructors
-void Text::construct (int16_t pt1, int16_t pt2, Style rect_type, text_format_e_t size, Page* page_ptr, std::string text, std::variant<std::monostate, double*, int*, std::string*> val_pointer, std::uint32_t label_color){
-  this->x = pt1;
-  this->y = pt2;
-  this->type = rect_type;
-  this->txt_fmt = size;
-  this->page = page_ptr;
-  this->label = text;
-  this->val_ptr = val_pointer;
-  this->l_col = label_color;
+void Text::construct (int16_t x, int16_t y, Style type, text_format_e_t txt_fmt, Page* page, std::string label, std::variant<std::monostate, double*, int*, std::string*> val_ptr, std::uint32_t l_col){
+  this->x = x;
+  this->y = y;
+  this->type = type;
+  this->txt_fmt = txt_fmt;
+  this->page = page;
+  this->label = label;
+  this->val_ptr = val_ptr;
+  this->l_col = l_col;
   this->b_col = page->b_col;
   this->page->texts.push_back(this);
 }
 
-void Button::construct(int16_t pt1, int16_t pt2, int16_t pt3, int16_t pt4, Style rect_type, press_type prType, Page* page_ptr, std::string text, std::uint32_t background_color, std::uint32_t label_color){
+void Button::construct(int16_t x1, int16_t y1, int16_t x2, int16_t y2, Style type, press_type form, Page* page, std::string text, std::uint32_t b_col, std::uint32_t l_col){
 
     //Saves params to class private vars
-    this->b_col = background_color;
+    this->b_col = b_col;
     this->b_col_dark = RGB2COLOR(int(COLOR2R(b_col)*0.8), int(COLOR2G(b_col)*0.8), int(COLOR2B(b_col)*0.8));
-    this->l_col = label_color;
-    this->form = prType;
+    this->l_col = l_col;
+    this->form = form;
 
     //Saves the buttons owning page
-    this->page = page_ptr;
+    this->page = page;
     (this->page->buttons).push_back(this);
-    std::tie(this->x1, this->y1, this->x2, this->y2) = fixPoints(pt1, pt2, pt3, pt4, rect_type);
+    std::tie(this->x1, this->y1, this->x2, this->y2) = fixPoints(x1, y1, x2, y2, type);
 
-    if (8*text.length()+5 < x2-x1){
+    if (8*text.length()+5 < this->x2-this->x1){
       this->text_x = (this->x1+this->x2-(text.length()*CHAR_WIDTH_SMALL))/2;
       this->text_y = (this->y1+this->y2-CHAR_HEIGHT_SMALL)/2;
       this->label = text;
@@ -494,44 +496,44 @@ void Button::construct(int16_t pt1, int16_t pt2, int16_t pt3, int16_t pt4, Style
     }
 }
 
-Text::Text (int16_t pt1, int16_t pt2, Style rect_type, text_format_e_t size, Page* page_ptr, std::string text, std::uint32_t label_color):
+Text::Text (int16_t x, int16_t y, Style rect_type, text_format_e_t size, Page* page, std::string text, std::uint32_t label_color):
 val_type(typeid(std::monostate)){
-  construct(pt1, pt2, rect_type, size, page_ptr, text, std::monostate{}, label_color);
+  construct(x, y, rect_type, size, page, text, std::monostate{}, label_color);
 }
 
-Text::Text (int16_t pt1, int16_t pt2, Style rect_type, text_format_e_t size, Page* page_ptr, std::string text, double* val_ref, std::uint32_t label_color):
+Text::Text (int16_t x, int16_t y, Style rect_type, text_format_e_t size, Page* page, std::string text, double* val_ref, std::uint32_t label_color):
 val_type(typeid(double*)){
-  construct(pt1, pt2, rect_type, size, page_ptr, text, val_ref, label_color);
+  construct(x, y, rect_type, size, page, text, val_ref, label_color);
 }
 
-Text::Text (int16_t pt1, int16_t pt2, Style rect_type, text_format_e_t size, Page* page_ptr, std::string text, int* val_ref, std::uint32_t label_color):
+Text::Text (int16_t x, int16_t y, Style rect_type, text_format_e_t size, Page* page, std::string text, int* val_ref, std::uint32_t label_color):
 val_type(typeid(int*)){
-  construct(pt1, pt2, rect_type, size, page_ptr, text, val_ref, label_color);
+  construct(x, y, rect_type, size, page, text, val_ref, label_color);
 }
 
-Text::Text (int16_t pt1, int16_t pt2, Style rect_type, text_format_e_t size, Page* page_ptr, std::string text, std::string* val_ref, std::uint32_t label_color):
+Text::Text (int16_t x, int16_t y, Style rect_type, text_format_e_t size, Page* page, std::string text, std::string* val_ref, std::uint32_t label_color):
 val_type(typeid(std::string*)){
-  construct(pt1, pt2, rect_type, size, page_ptr, text, val_ref, label_color);
+  construct(x, y, rect_type, size, page, text, val_ref, label_color);
 }
 
-Button::Button(int16_t pt1, int16_t pt2, int16_t pt3, int16_t pt4, Style type, press_type prType, Page* page_ptr, std::string text, std::uint32_t background_color, std::uint32_t label_color){
-  construct(pt1, pt2, pt3, pt4, type, prType, page_ptr, text, background_color, label_color);
+Button::Button(int16_t x1, int16_t y1, int16_t x2, int16_t y2, Style type, press_type form, Page* page, std::string text, std::uint32_t background_color, std::uint32_t label_color){
+  construct(x1, y1, x2, y2, type, form, page, text, background_color, label_color);
 }
 
-Slider::Slider (int16_t pt1, int16_t pt2, int16_t pt3, int16_t pt4, Style type, direction direction, int minimum, int maximum, Page* page_ptr, std::string text, std::uint32_t background_color, std::uint32_t label_color){
+Slider::Slider (int16_t x1, int16_t y1, int16_t x2, int16_t y2, Style type, direction dir, int min, int max, Page* page, std::string label, std::uint32_t b_col, std::uint32_t l_col){
   //Saves params to class private vars
-  this->max = maximum;
-  this->min = minimum;
-  this->b_col = background_color;
-  this->l_col = label_color;
-  this->label = text;
-  this->dir = direction;
+  this->max = max;
+  this->min = min;
+  this->b_col = b_col;
+  this->l_col = l_col;
+  this->label = label;
+  this->dir = dir;
 
   //Saves the buttons owning page
-  this->page = page_ptr;
+  this->page = page;
   (this->page->sliders).push_back(this);
 
-  std::tie(this->x1, this->y1, this->x2, this->y2) = fixPoints(pt1, pt2, pt3, pt4, type);
+  std::tie(this->x1, this->y1, this->x2, this->y2) = fixPoints(x1, y1, x2, y2, type);
 
   switch(this->dir){
     case HORIZONTAL:
@@ -544,8 +546,8 @@ Slider::Slider (int16_t pt1, int16_t pt2, int16_t pt3, int16_t pt4, Style type, 
     case VERTICAL:
       this->text_x = (this->x1+this->x2-(this->label.length()*CHAR_WIDTH_SMALL))/2;
       this->text_y = (this->y1+this->y2)/2;
-      inc.construct(this->x1, this->y1-25, this->x2, this->y1-5, Style::CORNER, Button::SINGLE, this->page, "▲", l_col, b_col);
-      dec.construct(this->x1, this->y2+5, this->x2, this->y2+25, Style::CORNER, Button::SINGLE, this->page, "▼", l_col, b_col);
+      inc.construct(this->x1, this->y1-25, this->x2, this->y1-5, Style::CORNER, Button::SINGLE, this->page, "▲", this->l_col, this->b_col);
+      dec.construct(this->x1, this->y2+5, this->x2, this->y2+25, Style::CORNER, Button::SINGLE, this->page, "▼", this->l_col, this->b_col);
       break;
   }
 
@@ -554,13 +556,13 @@ Slider::Slider (int16_t pt1, int16_t pt2, int16_t pt3, int16_t pt4, Style type, 
   inc.set_func([&value=this->val, &maxi=this->max](){if (value != maxi) value++;});
 }
 
-Page::Page(int page_number, std::string name, std::uint32_t background_color){
+Page::Page(int page_num, std::string title, std::uint32_t b_col){
   //Page Constructor
   //Should call Page::go_to() to actually show the page
-  this->page_num = page_number;
+  this->page_num = page_num;
   if (this->page_num < PAGE_COUNT) pages[this->page_num] = this;
-  this->title = name + " - " + std::to_string(this->page_num);
-  this->b_col = background_color;
+  this->title = title + " - " + std::to_string(this->page_num);
+  this->b_col = b_col;
 
   buttons.push_back(&prev_page);
   buttons.push_back(&next_page);
@@ -590,12 +592,12 @@ void Page::clear_screen(std::uint32_t color){
   screen::fill_rect(PAGE_LEFT, PAGE_UP, PAGE_RIGHT, PAGE_DOWN);
 }
 
-void Text::set_background (int16_t pt1, int16_t pt2, std::uint32_t colour){
-  set_background(x-pt1, y-pt2, x+pt1, y+pt2, Style::CORNER, colour);
+void Text::set_background (int16_t x1, int16_t y1, std::uint32_t colour){
+  set_background(x-x1, y-y1, x+x1, y+y1, Style::CORNER, colour);
 }
 
-void Text::set_background (int16_t pt1, int16_t pt2, int16_t pt3, int16_t pt4, Style type, std::uint32_t colour){
-    std::tie(x1, y1, x2, y2) = fixPoints(pt1, pt2, pt3, pt4, type);
+void Text::set_background (int16_t x1, int16_t y1, int16_t x2, int16_t y2, Style type, std::uint32_t colour){
+    std::tie(this->x1, this->y1, this->x2, this->y2) = fixPoints(x1, y1, x2, y2, type);
     set_background(colour);
 }
 
