@@ -101,9 +101,16 @@ void autonomous() {
  */
  int ring_count = 0;
  double cur_auton = 1;
-
+int x = 0;
 void opcontrol() {
-	while(true)delay(10);
+	while(true){
+		// x = master.get_analog(E_CONTROLLER_ANALOG_RIGHT_X);
+		// if(abs(x) < 20)x = 0;
+		// // if(x > 50)x = 50;
+		// drivebase.move(x, -25,0);
+		delay(10);
+		drivebase.handle_input();
+	}
 // 	printf("in op\n");
 // 	// f_bar.move_relative(0, 100);
 // 	// Timer move = {"move"};
@@ -113,7 +120,7 @@ void opcontrol() {
 // 	// rush_goal2(0.0, -20.0, 0.0);
 // 	// move_on_line({0.0, 0.0}, {0.0, 24.0, 00.0}, 127.0, false, 0.0, false);
 // 	lift.move(-60);
-// Timer vel_rise_timeout("f_bar_vel_rise");
+ // Timer vel_rise_timeout("f_bar_vel_rise");
 // // waits for f_bar velocity to rise or timeout to trigger
 // while(fabs(lift.get_actual_velocity()) < 45.0){
 // 	printf("vel (rising loop): %lf\n", lift.get_actual_velocity());
