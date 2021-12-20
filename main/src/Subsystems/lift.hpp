@@ -1,7 +1,7 @@
 #pragma once
 #include "../Libraries/subsystem.hpp"
 
-#define NUM_OF_LIFT_STATES 7
+#define NUM_OF_LIFT_STATES 8
 
 enum class lift_states{
   searching,  // released but waiting for goal
@@ -10,7 +10,8 @@ enum class lift_states{
   lifting, // lifting to platform height
   platform, // at platform height
   released, // mogo released at platform height
-  lowering  // lowering from released to lowered state
+  lowering,  // lowering from released to lowered state
+  manual  // controlled by joystick
 };
 
 class Lift: public Motorized_subsystem<lift_states, NUM_OF_LIFT_STATES> {
@@ -32,7 +33,7 @@ extern int lift_released_cycle_check;
 extern const int lift_bottom_position;
 extern const int lift_platform_position;
 extern const int lift_top_position;
-
+extern int lift_bad_count;
 
 extern std::array<const char*, NUM_OF_LIFT_STATES> lift_state_names;
 

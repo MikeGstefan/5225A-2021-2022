@@ -9,7 +9,8 @@ Lift lift({{"Lift",
   "lifting",
   "platform",
   "released",
-  "lowering"
+  "lowering",
+  "manual",
 }
 }, lift_motor});
 
@@ -106,10 +107,11 @@ lift_states lift_state = lift_states::searching;
 lift_states last_lift_state = lift_state;
 
 int lift_released_cycle_check = 0;
+int lift_bad_count = 0; // cycle checkfor safeties
 
 const int lift_bottom_position = 30;
-const int lift_platform_position = 550;
-const int top_position = 650;
+const int lift_platform_position = 600;
+const int lift_top_position = 650;
 
 std::array<const char*, NUM_OF_LIFT_STATES> lift_state_names = {
   "searching",
@@ -118,7 +120,8 @@ std::array<const char*, NUM_OF_LIFT_STATES> lift_state_names = {
   "lifting",
   "platform",
   "released",
-  "lowering"
+  "lowering",
+  "manual",
 };
 
 void set_lift_state(lift_states next_state){
@@ -128,10 +131,22 @@ void set_lift_state(lift_states next_state){
 }
 
 void lift_handle(){
+  if (fabs(lift_motor.get_actual_velocity()) < 5.0 && fabs(lift_motor.get_power()) > 25.0) lift_bad_count++;
+  else lift_bad_count = 0;
+  if(lift_bad_count > 50){
+    printf("OH SHIT SAFETY TRIGGERED\n");
+    lift_motor.move(0);
+    set_lift_state(lift_states::manual);
+  }
+
   switch(lift_state){
     case lift_states::searching:
       // grabs goal if limit switch is triggered or if up button is pressed
       if(lift_trigger.get_value() || master.get_digital_new_press(lift_up_button)){
+        delay(50);
+        master.rumble("-");
+        delay(50);
+        printf("*******************triggered\n");
         lift_piston.set_value(HIGH);
         set_lift_state(lift_states::grabbed);
       }
@@ -191,20 +206,23 @@ void lift_handle(){
 
     case lift_states::lowering:
       if(master.get_digital_new_press(lift_up_button)){ // lifts goal to platform height if up button is pressed
-        lift.move_absolute(lift_platform_position, 100);
+        lift_motor.move_absolute(lift_platform_position, 100);
         printf("YOOOOOO");
         set_lift_state(lift_states::lifting);
       }
       else if(fabs(lift_motor.get_position() - lift_bottom_position) < 25){  // waits for lift to reach bottom before setting state to searching
-        printf("HEREEE");
-
         if(last_lift_state == lift_states::released) set_lift_state(lift_states::searching);
         else set_lift_state(lift_states::grabbed);
-        // if(lift_trigger.get_value())  set_lift_state(lift_states::grabbed);
-        // else{
-        //   lift_piston.set_value(LOW);
-        //   set_lift_state(lift_states::searching);
-        // }
+      }
+      break;
+    case lift_states::manual:
+      int lift_power = master.get_analog(E_CONTROLLER_ANALOG_LEFT_Y);
+      if (lift_power < 0 && lift_motor.get_position() <= lift_bottom_position) lift_power = 0;
+      if (lift_power > 0 && lift_motor.get_position() >= lift_top_position) lift_power = 0;
+      lift_motor.move(lift_power);
+      if(master.get_digital_new_press(lift_up_button) || master.get_digital_new_press(lift_down_button)){
+        lift_motor.move_absolute(lift_bottom_position, 100);
+        set_lift_state(lift_states::searching);
       }
       break;
 

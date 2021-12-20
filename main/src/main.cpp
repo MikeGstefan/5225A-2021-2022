@@ -106,11 +106,13 @@ void opcontrol() {
 	lift_motor.move_absolute(lift_bottom_position, 100);
 	printf("DONE RESET\n");
 	for(int i = 0; i < 7; i++)	printf("%s\n", lift_state_names[i]);
+	// lift_motor.move_absolute(lift_top_position, 100);
 	while(true){
 		// lift_piston.set_value(master.get_digital(E_CONTROLLER_DIGITAL_A));
 		// drivebase.handle_input();
 		// lift_handle();
 		drivebase.driver_practice();
+		printf("power: %lf\n", lift_motor.get_power());
 		delay(10);
 	}
 	// drivebase.driver_practice();
