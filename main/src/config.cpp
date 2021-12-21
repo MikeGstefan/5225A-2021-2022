@@ -22,13 +22,14 @@ pros::ADIDigitalOut claw_in(1), claw_out(8);
 pros::ADIDigitalIn claw_touch({{6, 6}});
 pros::Distance dist(20);
 
-std::array<std::tuple<pros::Motor*, Text*, int, std::string, const char*>, 8> motors = {
-  std::make_tuple(&front_l, &mot_temp_1, 0, "Front Left", "FL"),
-  std::make_tuple(&front_r, &mot_temp_2, 0, "Front Right", "FR"),
-  std::make_tuple(&back_l, &mot_temp_3, 0, "Back Left", "BL"),
-  std::make_tuple(&back_r, &mot_temp_4, 0, "Back Right", "BR"),
-  std::make_tuple(&intk, &mot_temp_5, 0, "Intake", "IN"),
-  std::make_tuple(&f_bar, &mot_temp_6, 0, "Four Bar", "FB"),
-  std::make_tuple(&c_bar, &mot_temp_7, 0, "Chain Bar", "CB"),
-  std::make_tuple(&uptk, &mot_temp_8, 0, "Uptake", "UP"),
-}; // std::make_tuple(nullptr, nullptr, 0, "", ""),
+std::array<std::tuple<pros::Motor*, int, std::string, const char*, Text*>, 8> motors = {
+  std::make_tuple(&front_l, 1, "Front Left", "FL", nullptr),
+  std::make_tuple(&front_r, 1, "Front Right", "FR", nullptr),
+  std::make_tuple(&back_l, 1, "Back Left", "BL", nullptr),
+  std::make_tuple(&back_r, 1, "Back Right", "BR", nullptr),
+  std::make_tuple(&intk, 1, "Intake", "IN", nullptr),
+  std::make_tuple(&f_bar, 1, "Four Bar", "FB", nullptr),
+  std::make_tuple(&c_bar, 1, "Chain Bar", "CB", nullptr),
+  // std::make_tuple(&uptk, 0, "Uptake", "UP", nullptr),
+  std::make_tuple(nullptr, 0, "", "", nullptr),
+};

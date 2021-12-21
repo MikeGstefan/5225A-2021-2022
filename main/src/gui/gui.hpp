@@ -2,14 +2,13 @@
 #include "../drive.hpp"
 #include "../Tracking.hpp"
 #include "../util.hpp"
-#include <bitset>
 #include <variant>
 #include <typeinfo>
 
 #define ORANGE 0x00F36421
 #define GREY 0x00202020
 
-#define PAGE_COUNT 12
+#define PAGE_COUNT 4 //The number for testing if not included. Otherwise +1
 #define PAGE_LEFT 0
 #define PAGE_UP 0
 #define PAGE_RIGHT 480
@@ -27,11 +26,16 @@
 #define CHAR_HEIGHT_LARGE 32
 #define CHAR_WIDTH_LARGE 19
 
-//Forward-Declaration
-class Page;
-class Button;
-class Slider;
-class Text;
+class GUI{
+  private:
+    static void general_setup(), general_background();
+    static void end_flash();
+  public:
+    static void setup(), background();
+    static void aligned_coords (int x_objects, int y_objects, int x_btn, int y_btn, int x_range = 480, int y_range = 220);
+    static void flash (std::uint32_t color, std::uint32_t time, std::string = "");
+    static bool go(std::string, std::string, std::uint32_t=0), go(std::string, std::uint32_t=0);
+};
 
 enum class Style{ //how the rect coords get evaluated
     CENTRE,
@@ -39,16 +43,16 @@ enum class Style{ //how the rect coords get evaluated
     SIZE
 };
 
-//For other gui hpp files
-void gui_general_setup(), gui_general_background();
-extern int ring_count, cur_auton; //For gui_objects to use
-extern Timer Flash;
+// Forward-Declaration
+class Page;
+class Button;
+class Slider;
+class Text;
 
-void gui_setup(), gui_background();
-void aligned_coords (int x_objects, int y_objects, int x_btn, int y_btn, int x_range = 480, int y_range = 220);
-void flash (std::uint32_t color, std::uint32_t time, std::string = "");
-void prev_driver(), next_driver();
-bool go(std::string, std::string, std::uint32_t=0), go(std::string, std::uint32_t=0);
+//For other gui hpp files
+extern int ring_count, cur_auton; //For gui_objects to use
+extern void prev_driver(), next_driver(); //For gui_main to use
+extern Timer Flash;
 
 //All constructor args are in the format points, format, page, text, color
 class Page{
@@ -81,8 +85,6 @@ class Page{
     static void go_to(Page*);
     static void go_to(int);
     static void clear_screen(std::uint32_t color);
-    static void to_prev();
-    static void to_next();
     static void update();
     void set_setup_func(std::function <void()>), set_loop_func(std::function <void()>);
     bool pressed();
@@ -179,7 +181,6 @@ class Text{
     std::variant<std::monostate, double, int, std::string> prev_val;
     const std::type_info& val_type;
 
-    static void update();
     void construct (int16_t, int16_t, Style, text_format_e_t, Page*, std::string, std::variant<std::monostate, double*, int*, std::string*>, std::uint32_t);
     void draw();
 
@@ -193,4 +194,6 @@ class Text{
     void set_background (int16_t, int16_t, std::uint32_t = GREY);
     void set_background (int16_t, int16_t, int16_t, int16_t, Style, std::uint32_t = GREY);
     void set_background (std::uint32_t);
+
+    static void update();
 };

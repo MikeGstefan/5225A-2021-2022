@@ -1,5 +1,6 @@
 #pragma once
 #include "gui.hpp"
+#include <bitset>
 
 //Field array
 std::vector<std::bitset<200>> field (200, std::bitset<200>{}); //Initializes to 200 blank bitsets
@@ -14,14 +15,14 @@ Text drivr_name(MID_X, MID_Y, Style::CENTRE, TEXT_LARGE, &driver_curve, "%s", &d
 Button next_drivr(350, 70, 110, 120, Style::SIZE, Button::SINGLE, &driver_curve, "Next Driver");
 
 Page temps (2, "Temperature"); //Motor temps
-Text mot_temp_1(75, 85, Style::CENTRE, TEXT_SMALL, &temps, std::get<4>(motors[0]) + std::string(": %dC"), &std::get<2>(motors[0]), COLOR_BLACK);
-Text mot_temp_2(185, 85, Style::CENTRE, TEXT_SMALL, &temps, std::get<4>(motors[1]) + std::string(": %dC"), &std::get<2>(motors[1]), COLOR_BLACK);
-Text mot_temp_3(295, 85, Style::CENTRE, TEXT_SMALL, &temps, std::get<4>(motors[2]) + std::string(": %dC"), &std::get<2>(motors[2]), COLOR_BLACK);
-Text mot_temp_4(405, 85, Style::CENTRE, TEXT_SMALL, &temps, std::get<4>(motors[3]) + std::string(": %dC"), &std::get<2>(motors[3]), COLOR_BLACK);
-Text mot_temp_5(75, 175, Style::CENTRE, TEXT_SMALL, &temps, std::get<4>(motors[4]) + std::string(": %dC"), &std::get<2>(motors[4]), COLOR_BLACK);
-Text mot_temp_6(185, 175, Style::CENTRE, TEXT_SMALL, &temps, std::get<4>(motors[5]) + std::string(": %dC"), &std::get<2>(motors[5]), COLOR_BLACK);
-Text mot_temp_7(295, 175, Style::CENTRE, TEXT_SMALL, &temps, std::get<4>(motors[6]) + std::string(": %dC"), &std::get<2>(motors[6]), COLOR_BLACK);
-Text mot_temp_8(405, 175, Style::CENTRE, TEXT_SMALL, &temps, std::get<4>(motors[7]) + std::string(": %dC"), &std::get<2>(motors[7]), COLOR_BLACK);
+Text mot_temp_1(75, 85, Style::CENTRE, TEXT_SMALL, &temps, std::get<3>(motors[0]) + std::string(": %dC"), &std::get<1>(motors[0]), COLOR_BLACK);
+Text mot_temp_2(185, 85, Style::CENTRE, TEXT_SMALL, &temps, std::get<3>(motors[1]) + std::string(": %dC"), &std::get<1>(motors[1]), COLOR_BLACK);
+Text mot_temp_3(295, 85, Style::CENTRE, TEXT_SMALL, &temps, std::get<3>(motors[2]) + std::string(": %dC"), &std::get<1>(motors[2]), COLOR_BLACK);
+Text mot_temp_4(405, 85, Style::CENTRE, TEXT_SMALL, &temps, std::get<3>(motors[3]) + std::string(": %dC"), &std::get<1>(motors[3]), COLOR_BLACK);
+Text mot_temp_5(75, 175, Style::CENTRE, TEXT_SMALL, &temps, std::get<3>(motors[4]) + std::string(": %dC"), &std::get<1>(motors[4]), COLOR_BLACK);
+Text mot_temp_6(185, 175, Style::CENTRE, TEXT_SMALL, &temps, std::get<3>(motors[5]) + std::string(": %dC"), &std::get<1>(motors[5]), COLOR_BLACK);
+Text mot_temp_7(295, 175, Style::CENTRE, TEXT_SMALL, &temps, std::get<3>(motors[6]) + std::string(": %dC"), &std::get<1>(motors[6]), COLOR_BLACK);
+Text mot_temp_8(405, 175, Style::CENTRE, TEXT_SMALL, &temps, std::get<3>(motors[7]) + std::string(": %dC"), &std::get<1>(motors[7]), COLOR_BLACK);
 
 Page auto_selection (3, "Auton"); //Select auton routes
 Text route (MID_X, 60, Style::CENTRE, TEXT_LARGE, &auto_selection, "Auton %d", &cur_auton);
@@ -103,26 +104,6 @@ std::pair <int, int> elasticUtil(){ //Placeholder until func is actually written
   elastic_down_time = 800;
   return std::make_pair(elastic_up_time, elastic_down_time); //No need to return pair
 }
-void Page::to_prev(){
-  if (current_page == pages[1]) go_to(PAGE_COUNT-1);
-  else go_to((current_page->page_num)-1);
-}
-void Page::to_next(){
-  if (current_page == pages[PAGE_COUNT-1]) go_to(1);
-  else go_to((current_page->page_num)+1);
-}
-void prev_driver(){
-  if (drivebase.cur_driver == 0) drivebase.cur_driver = drivebase.num_of_drivers - 1;
-  else drivebase.cur_driver--;
-  WAIT_FOR_SCREEN_REFRESH();
-  master.print(2, 0, "Driver: %s          ", drivebase.drivers[drivebase.cur_driver].name);
-}
-void next_driver(){
-  drivebase.cur_driver++;
-  drivebase.cur_driver %= drivebase.num_of_drivers;
-  WAIT_FOR_SCREEN_REFRESH();
-  master.print(2, 0, "Driver: %s          ", drivebase.drivers[drivebase.cur_driver].name);
-}
 void resetX(){
   tracking.x_coord = 0;
   printf("Change to mike's task way of resetting x\n");
@@ -136,8 +117,8 @@ void resetA(){
   printf("Change to mike's task way of resetting a\n");
 }
 
-void gui_setup(){ //Call once at start in initialize()
-  gui_general_setup();
+void GUI::setup(){ //Call once at start in initialize()
+  GUI::general_setup();
   Page::go_to(0);
 
   run_elastic.set_func(&elasticUtil);
@@ -175,10 +156,10 @@ void gui_setup(){ //Call once at start in initialize()
     char coord_c[20];
     sprintf(coord_c, " (%d, %d, %d)", (int)x, (int)y, (int)a);
     std::string coord = coord_c;
-    if (go("GO TO" + coord, "Press to move to target selected by sliders" + coord, 1000)) move_to_target_sync(x, y, a, false);
+    if (GUI::go("GO TO" + coord, "Press to move to target selected by sliders" + coord, 1000)) move_to_target_sync(x, y, a, false);
   });
-  go_home.set_func([](){if (go("GO TO (0, 0, 0)", "Press to go to starting point (0, 0, 0)", 1000)) move_to_target_sync(0, 0, 0, false);});
-  go_centre.set_func([](){if (go("GO TO (72, 72, 0)", "Press to go to centre field (72, 72, 0)", 1000)) move_to_target_sync(72, 72, 0, false);});
+  go_home.set_func([](){if (GUI::go("GO TO (0, 0, 0)", "Press to go to starting point (0, 0, 0)", 1000)) move_to_target_sync(0, 0, 0, false);});
+  go_centre.set_func([](){if (GUI::go("GO TO (72, 72, 0)", "Press to go to centre field (72, 72, 0)", 1000)) move_to_target_sync(72, 72, 0, false);});
 
   Button::create_options({&route1, &route2, &route3}); //Makes them exclusive, only one can be selected at a time
 
@@ -187,11 +168,11 @@ void gui_setup(){ //Call once at start in initialize()
   drivr_name.set_background(130, 70, 350, 190, Style::CORNER);
 
   turn_encoder.set_func([](){ //Turn the encoder
-    if (go("START, THEN SPIN THE ENCODER", "Please spin the encoder any number of rotations.")){
+    if (GUI::go("START, THEN SPIN THE ENCODER", "Please spin the encoder any number of rotations.")){
       resetX();
       resetY();
       resetA();
-      if (go("WHEN STOPPED")){
+      if (GUI::go("WHEN STOPPED")){
         printf("The left encoder found %d ticks\n", LeftEncoder.get_value() % 360);
         printf("The right encoder found %d ticks\n", RightEncoder.get_value() % 360);
         printf("The back encoder found %d ticks\n", BackEncoder.get_value() % 360);
@@ -199,11 +180,11 @@ void gui_setup(){ //Call once at start in initialize()
     }
   });
   perpendicular_error.set_func([](){ //Perpendicular Error
-    if (go("START, THEN MOVE STRAIGHT ALONG Y", "Please run the robot along a known straight line in the y-axis.")){
+    if (GUI::go("START, THEN MOVE STRAIGHT ALONG Y", "Please run the robot along a known straight line in the y-axis.")){
       resetX();
       resetY();
       resetA();
-      if (go("WHEN STOPPED")){
+      if (GUI::go("WHEN STOPPED")){
         if (tracking.x_coord < 0) printf("The robot thinks it strafed %.2f inches to the left.\nConsider turning the back tracking wheel counter-clockwise\n", tracking.x_coord);
         else if (tracking.x_coord > 0) printf("The robot thinks it strafed %.2f inches to the right.\nConsider turning the back tracking wheel clockwise\n", tracking.x_coord);
         else printf("The robot knows it strafed a perfect %.2f inches\n", tracking.x_coord); //Printing the tracking val just in case something went wrong. But it should always be 0
@@ -211,11 +192,11 @@ void gui_setup(){ //Call once at start in initialize()
     }
   });
   grid.set_func([](){ //Move in a random motion
-    if (go("START, THEN MOVE RANDOMLY", "Please move the robot haphazardly around the field. Then return it back to the starting point.")){
+    if (GUI::go("START, THEN MOVE RANDOMLY", "Please move the robot haphazardly around the field. Then return it back to the starting point.")){
       resetX();
       resetY();
       resetA();
-      if (go("WHEN STOPPED")){
+      if (GUI::go("WHEN STOPPED")){
         printf("The robot thinks it deviated %.2f inches to the %s\n", fabs(tracking.x_coord), (tracking.x_coord < 0 ? "left" : "right"));
         printf("The robot thinks it deviated %.2f inches %s\n", fabs(tracking.y_coord), (tracking.y_coord < 0 ? "back" : "forward"));
         printf("The robot thinks it deviated %.2f degrees %s\n", fabs(rad_to_deg(tracking.global_angle)), (tracking.global_angle < 0 ? "counter-clockwise" : "clockwise"));
@@ -223,11 +204,11 @@ void gui_setup(){ //Call once at start in initialize()
     }
   });
   spin360.set_func([](){ //Robot turn accuracy
-    if (go("START, THEN SPIN THE ROBOT", "Please spin the robot any number of rotations. Then return it back to the starting point")){
+    if (GUI::go("START, THEN SPIN THE ROBOT", "Please spin the robot any number of rotations. Then return it back to the starting point")){
       resetX();
       resetY();
       resetA();
-      if(go("WHEN STOPPED")){
+      if(GUI::go("WHEN STOPPED")){
         printf("The robot is %.2f inches %s and %.2f inches %s off the starting point.\n", fabs(tracking.x_coord), (tracking.x_coord < 0 ? "left" : "right"), fabs(tracking.y_coord), (tracking.y_coord < 0 ? "back" : "forward"));
 
         int turned = fmod(rad_to_deg(tracking.global_angle), 360);
@@ -248,16 +229,25 @@ void gui_setup(){ //Call once at start in initialize()
   pneum_btn_2.set_func([](){claw_out.set_value(1); pneum_2_state = "ON";});
   pneum_btn_2.set_off_func([](){claw_out.set_value(0); pneum_2_state = "OFF";});
 
+  std::get<4>(motors[0]) = (std::get<0>(motors[0])) ? &mot_temp_1 : nullptr;
+  std::get<4>(motors[1]) = (std::get<0>(motors[1])) ? &mot_temp_2 : nullptr;
+  std::get<4>(motors[2]) = (std::get<0>(motors[2])) ? &mot_temp_3 : nullptr;
+  std::get<4>(motors[3]) = (std::get<0>(motors[3])) ? &mot_temp_4 : nullptr;
+  std::get<4>(motors[4]) = (std::get<0>(motors[4])) ? &mot_temp_5 : nullptr;
+  std::get<4>(motors[5]) = (std::get<0>(motors[5])) ? &mot_temp_6 : nullptr;
+  std::get<4>(motors[6]) = (std::get<0>(motors[6])) ? &mot_temp_7 : nullptr;
+  std::get<4>(motors[7]) = (std::get<0>(motors[7])) ? &mot_temp_8 : nullptr;
+
   for (int i = 0; i<4; i++){
-    std::get<1>(motors[i])->set_background(110*i+40, 60, 70, 50, Style::SIZE);
-    std::get<1>(motors[i+4])->set_background(110*i+40, 150, 70, 50, Style::SIZE);
+    if (std::get<4>(motors[i])) std::get<4>(motors[i])->set_background(110*i+40, 60, 70, 50, Style::SIZE);
+    if (std::get<4>(motors[i+4])) std::get<4>(motors[i+4])->set_background(110*i+40, 150, 70, 50, Style::SIZE);
   }
 
   Page::go_to(1); //Sets it to page 1 for program start. Don't delete this. If you want to change the starting page, re-call this in initialize()
 }
 
 bool temp_flashed = false; //Is never set back to false. Once it warns the driver, it won't again until program restarted
-void gui_background(){ //To be called continously
+void GUI::background(){ //To be called continously
   //Saving Field coords
   int x = 200*tracking.x_coord/144, y = 200*tracking.y_coord/144;
   if(inRange(x, 0, 199) && inRange(y, 0, 199)) field[x].set(y); //Saves position (x,y) to as tracked
@@ -269,21 +259,21 @@ void gui_background(){ //To be called continously
   back_enc = BackEncoder.get_value();
   driver_text = drivebase.drivers[drivebase.cur_driver].name;
 
-  std::array<std::tuple<pros::Motor*, Text*, int, std::string, const char*>, 8>::iterator it;
+  std::array<std::tuple<pros::Motor*, int, std::string, const char*, Text*>, 8>::iterator it;
   for (it = motors.begin(); it != motors.end(); it++){
-    Motor* motor= std::get<0>(*it);
-    Text* text = std::get<1>(*it);
-    int temp = std::get<2>(*it);
-    int temperature = motor != nullptr ? motor->get_temperature() : 0;
-    temperature = temperature == std::numeric_limits<int>::max() ? 0 : temperature;
-    std::get<2>(*it) = temperature;
+    std::tuple<pros::Motor*, int, std::string, const char*, Text*>& mot_tup = *it;
+    Motor* motor= std::get<0>(mot_tup);
+    Text* text = std::get<4>(mot_tup);
+    std::get<1>(mot_tup) = motor != nullptr ? motor->get_temperature() : std::numeric_limits<int>::max();
+    int temp = std::get<1>(mot_tup);
 
-    if (temp >= 55 && !Flash.playing() && !temp_flashed){ //Overheating
+    if (temp >= 55 && temp != std::numeric_limits<int>::max() && !Flash.playing() && !temp_flashed){ //Overheating
       temp_flashed = true;
       Page::go_to(&temps);
+      Text::update();
       char buffer[50];
-      sprintf(buffer, "%s motor is at %dC\n", std::get<3>(*it).c_str(), temp);
-      flash(COLOR_RED, 10000, buffer);
+      sprintf(buffer, "%s motor is at %dC\n", std::get<2>(mot_tup).c_str(), temp);
+      GUI::flash(COLOR_RED, 15000, buffer);
       break;
     }
 
@@ -295,5 +285,5 @@ void gui_background(){ //To be called continously
       else text->set_background(COLOR_RED); //50, 55, ...
     }
   }
-  gui_general_background();
+  GUI::general_background();
 }
