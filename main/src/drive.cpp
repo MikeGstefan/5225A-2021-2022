@@ -189,6 +189,17 @@ void Drivebase::handle_input(){
   if(fabs(tracking.power_y) < deadzone) tracking.power_y = 0.0;
   if(fabs(tracking.power_a) < deadzone) tracking.power_a = 0.0;
 
+  if(master.get_digital_new_press(reverse_drive_button)){
+    master.rumble("-");
+    reversed = !reversed;
+    if(reversed) master.print(1, 0, "Reversed");
+    else master.print(1, 0, "Direct");
+  }
+  if (reversed){
+    tracking.power_y *= -1;
+    tracking.power_x *= -1;
+  }
+
   move(tracking.power_x, tracking.power_y, tracking.power_a);
 }
 
@@ -212,8 +223,7 @@ void Drivebase::driver_practice(){
 
       // actual drive code
       drivebase.handle_input();
-      // lift.handle();
-      lift_handle();
+      lift.handle();
 
       // takes away control from driver when motors overheat
       if(front_l.get_temperature() >= 55 || front_r.get_temperature() >= 55 || back_r.get_temperature() >= 55 || back_l.get_temperature() >= 55){

@@ -14,6 +14,8 @@ controller_digital_e_t cancel_button = DIGITAL_B;
 controller_digital_e_t fill_top_goal_button = DIGITAL_Y;
 controller_digital_e_t climb_platform_button = DIGITAL_UP;
 controller_digital_e_t intake_on_button = DIGITAL_A;
+controller_digital_e_t reverse_drive_button = DIGITAL_RIGHT;
+
 
 
 std::array<_Controller*, num_controller> _Controller::objs; //= {nullptr};

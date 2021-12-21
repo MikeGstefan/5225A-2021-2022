@@ -41,6 +41,7 @@ struct driver{
 // Nikhil is 0, Emily is 1, Sarah is 2
 
 class Drivebase{
+  bool reversed; // if false forwards is the intake side
   int cur_screen;
   int deadzone = 5;
   const char* screen_text[3] = {"LOCAL_X CURVE:", "LOCAL_Y CURVE:", "LOCAL_A CURVE:"};

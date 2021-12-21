@@ -1,24 +1,26 @@
+#pragma once
 #include "../Libraries/subsystem.hpp"
-#define NUM_OF_ANGLER_STATES 4
+
+#define NUM_OF_ANGLER_STATES 5
 
 enum class angler_states {
-  lowered,
-  searching,
-  raised,
-  lowering
+  lowered,  // at bottom position, waiting for sensor or button to grab goal
+  searching,  // waiting to driv a certain distance before grabbing goal
+  raised, // has goal and raised
+  lowering,  // going from raised to lowered state_type
+  manual // controlled by joystick
 };
 
-extern angler_states angler_state;
-extern angler_states last_angler_state;
+class Angler: public Motorized_subsystem<angler_states, NUM_OF_ANGLER_STATES> {
+  const double bottom_position = 20.0, raised_position = 200.0, top_position = 300.0;
 
-extern int angler_encoder_position;
+  int bad_count = 0; // cycle check for safeties
+  int angler_encoder_position; // position of left tracking wheel when searching
 
-extern const int angler_bottom_position;
-extern const int angler_raised_position;
-extern const int angler_top_position;
+public:
+  Angler(Motorized_subsystem<angler_states, NUM_OF_ANGLER_STATES> motorized_subsystem);  // constructor
+  void handle();  // contains state machine code
 
-extern std::array<const char*, NUM_OF_ANGLER_STATES> angler_state_names;
+};
 
-void set_angler_state();
-void angler_handle();
-void angler_reset();
+extern Angler angler;
