@@ -109,7 +109,7 @@ lift_states last_lift_state = lift_state;
 int lift_released_cycle_check = 0;
 int lift_bad_count = 0; // cycle check for safeties
 
-const int lift_bottom_position = 20;
+const int lift_bottom_position = 40;
 const int lift_platform_position = 600;
 const int lift_top_position = 650;
 
@@ -131,7 +131,7 @@ void set_lift_state(lift_states next_state){
 }
 
 void lift_handle(){
-  if (fabs(lift_motor.get_actual_velocity()) < 5.0 && fabs(lift_motor.get_power()) > 25.0) lift_bad_count++;
+  if (fabs(lift_motor.get_voltage()) > 1000 && fabs(lift_motor.get_actual_velocity()) < 5.0) lift_bad_count++;
   else lift_bad_count = 0;
   if(lift_bad_count > 50){
     printf("OH SHIT SAFETY TRIGGERED\n");

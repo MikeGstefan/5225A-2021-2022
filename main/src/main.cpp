@@ -107,14 +107,28 @@ void opcontrol() {
 	printf("DONE RESET\n");
 	for(int i = 0; i < 7; i++)	printf("%s\n", lift_state_names[i]);
 	// lift_motor.move_absolute(lift_top_position, 100);
+	drivebase.driver_practice();
+	int bad_count = 0;
+	/*
 	while(true){
 		// lift_piston.set_value(master.get_digital(E_CONTROLLER_DIGITAL_A));
 		// drivebase.handle_input();
-		// lift_handle();
-		drivebase.driver_practice();
-		printf("power: %lf\n", lift_motor.get_power());
+		lift_handle();
+		if(fabs(lift_motor.get_voltage()) > 1000 && fabs(lift_motor.get_actual_velocity()) < 5){
+			bad_count++;
+			printf("BAD");
+		}
+
+		else bad_count = 0;
+		if(bad_count > 50)	break;
+		printf("power: %d, vel: %lf\n", lift_motor.get_voltage(), lift_motor.get_actual_velocity());
 		delay(10);
 	}
+	while(true){
+		lift_motor.move(master.get_analog(E_CONTROLLER_ANALOG_LEFT_Y));
+		delay(10);
+	}
+	*/
 	// drivebase.driver_practice();
 
 

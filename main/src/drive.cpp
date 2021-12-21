@@ -224,8 +224,8 @@ void Drivebase::driver_practice(){
         master.print(0, 0, "fl%.0f r%.0f bl%.0f r%.0f\n", front_l.get_temperature(), front_r.get_temperature(), back_l.get_temperature(), back_r.get_temperature());
         return;
       }
-      // prints motor temps every 50 ms
-      if(screen_timer.get_time() > 50){
+      // prints motor temps every 100 ms
+      if(screen_timer.get_time() > 100){
         drivers_data.print("fl%.0f r%.0f bl%.0f r%.0f\n", front_l.get_temperature(), front_r.get_temperature(), back_l.get_temperature(), back_r.get_temperature());
         master.print(0, 0, "fl%.0f r%.0f bl%.0f r%.0f\n", front_l.get_temperature(), front_r.get_temperature(), back_l.get_temperature(), back_r.get_temperature());
         // rumbles controllers if motors are hot
