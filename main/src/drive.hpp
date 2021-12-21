@@ -3,6 +3,7 @@
 #include "util.hpp"
 #include "logging.hpp"
 #include "Subsystems/lift.hpp"
+#include "Subsystems/angler.hpp"
 #include "Subsystems/hitch.hpp"
 
 using namespace pros;

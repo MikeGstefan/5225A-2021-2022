@@ -107,9 +107,9 @@ lift_states lift_state = lift_states::searching;
 lift_states last_lift_state = lift_state;
 
 int lift_released_cycle_check = 0;
-int lift_bad_count = 0; // cycle checkfor safeties
+int lift_bad_count = 0; // cycle check for safeties
 
-const int lift_bottom_position = 30;
+const int lift_bottom_position = 20;
 const int lift_platform_position = 600;
 const int lift_top_position = 650;
 
