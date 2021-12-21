@@ -8,7 +8,7 @@
 #define ORANGE 0x00F36421
 #define GREY 0x00202020
 
-#define PAGE_COUNT 4 //The number for testing if not included. Otherwise +1
+#define PAGE_COUNT 12 //The number for testing if not included. Otherwise +1
 #define PAGE_LEFT 0
 #define PAGE_UP 0
 #define PAGE_RIGHT 480
