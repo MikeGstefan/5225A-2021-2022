@@ -13,4 +13,4 @@ extern pros::ADIDigitalOut claw_in, claw_out;
 extern pros::ADIDigitalIn claw_touch;
 extern pros::Distance dist;
 
-extern std::array<std::tuple<pros::Motor*, Text*, int, std::string, const char*>, 8> motors;
+extern std::array<std::tuple<pros::Motor*, int, std::string, const char*, Text*>, 8> motors;

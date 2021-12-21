@@ -123,7 +123,7 @@ void flash(std::uint32_t color, std::uint32_t time, std::string text){
   screen::set_pen(~color&0xFFFFFF); //Makes text inverted color of background so it is always visible
   screen::set_eraser(color);
 
-  printf("\n\nWARNING: %s\n\n", text.c_str());
+  printf("\n\n\033[31mWARNING: %s\033[0m\n\n", text.c_str());
 
   int spaces = int(CHAR_WIDTH_LARGE*text.length()/460)+1;
   std::size_t space, last_space=0;

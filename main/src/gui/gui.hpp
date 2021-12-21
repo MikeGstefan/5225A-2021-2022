@@ -9,7 +9,7 @@
 #define ORANGE 0x00F36421
 #define GREY 0x00202020
 
-#define PAGE_COUNT 12
+#define PAGE_COUNT 4 //The number for testing if not included. Otherwise +1
 #define PAGE_LEFT 0
 #define PAGE_UP 0
 #define PAGE_RIGHT 480
@@ -179,7 +179,6 @@ class Text{
     std::variant<std::monostate, double, int, std::string> prev_val;
     const std::type_info& val_type;
 
-    static void update();
     void construct (int16_t, int16_t, Style, text_format_e_t, Page*, std::string, std::variant<std::monostate, double*, int*, std::string*>, std::uint32_t);
     void draw();
 
@@ -193,4 +192,6 @@ class Text{
     void set_background (int16_t, int16_t, std::uint32_t = GREY);
     void set_background (int16_t, int16_t, int16_t, int16_t, Style, std::uint32_t = GREY);
     void set_background (std::uint32_t);
+
+    static void update();
 };

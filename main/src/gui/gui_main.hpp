@@ -14,14 +14,14 @@ Text drivr_name(MID_X, MID_Y, Style::CENTRE, TEXT_LARGE, &driver_curve, "%s", &d
 Button next_drivr(350, 70, 110, 120, Style::SIZE, Button::SINGLE, &driver_curve, "Next Driver");
 
 Page temps (2, "Temperature"); //Motor temps
-Text mot_temp_1(75, 85, Style::CENTRE, TEXT_SMALL, &temps, std::get<4>(motors[0]) + std::string(": %dC"), &std::get<2>(motors[0]), COLOR_BLACK);
-Text mot_temp_2(185, 85, Style::CENTRE, TEXT_SMALL, &temps, std::get<4>(motors[1]) + std::string(": %dC"), &std::get<2>(motors[1]), COLOR_BLACK);
-Text mot_temp_3(295, 85, Style::CENTRE, TEXT_SMALL, &temps, std::get<4>(motors[2]) + std::string(": %dC"), &std::get<2>(motors[2]), COLOR_BLACK);
-Text mot_temp_4(405, 85, Style::CENTRE, TEXT_SMALL, &temps, std::get<4>(motors[3]) + std::string(": %dC"), &std::get<2>(motors[3]), COLOR_BLACK);
-Text mot_temp_5(75, 175, Style::CENTRE, TEXT_SMALL, &temps, std::get<4>(motors[4]) + std::string(": %dC"), &std::get<2>(motors[4]), COLOR_BLACK);
-Text mot_temp_6(185, 175, Style::CENTRE, TEXT_SMALL, &temps, std::get<4>(motors[5]) + std::string(": %dC"), &std::get<2>(motors[5]), COLOR_BLACK);
-Text mot_temp_7(295, 175, Style::CENTRE, TEXT_SMALL, &temps, std::get<4>(motors[6]) + std::string(": %dC"), &std::get<2>(motors[6]), COLOR_BLACK);
-Text mot_temp_8(405, 175, Style::CENTRE, TEXT_SMALL, &temps, std::get<4>(motors[7]) + std::string(": %dC"), &std::get<2>(motors[7]), COLOR_BLACK);
+Text mot_temp_1(75, 85, Style::CENTRE, TEXT_SMALL, &temps, std::get<3>(motors[0]) + std::string(": %dC"), &std::get<1>(motors[0]), COLOR_BLACK);
+Text mot_temp_2(185, 85, Style::CENTRE, TEXT_SMALL, &temps, std::get<3>(motors[1]) + std::string(": %dC"), &std::get<1>(motors[1]), COLOR_BLACK);
+Text mot_temp_3(295, 85, Style::CENTRE, TEXT_SMALL, &temps, std::get<3>(motors[2]) + std::string(": %dC"), &std::get<1>(motors[2]), COLOR_BLACK);
+Text mot_temp_4(405, 85, Style::CENTRE, TEXT_SMALL, &temps, std::get<3>(motors[3]) + std::string(": %dC"), &std::get<1>(motors[3]), COLOR_BLACK);
+Text mot_temp_5(75, 175, Style::CENTRE, TEXT_SMALL, &temps, std::get<3>(motors[4]) + std::string(": %dC"), &std::get<1>(motors[4]), COLOR_BLACK);
+Text mot_temp_6(185, 175, Style::CENTRE, TEXT_SMALL, &temps, std::get<3>(motors[5]) + std::string(": %dC"), &std::get<1>(motors[5]), COLOR_BLACK);
+Text mot_temp_7(295, 175, Style::CENTRE, TEXT_SMALL, &temps, std::get<3>(motors[6]) + std::string(": %dC"), &std::get<1>(motors[6]), COLOR_BLACK);
+Text mot_temp_8(405, 175, Style::CENTRE, TEXT_SMALL, &temps, std::get<3>(motors[7]) + std::string(": %dC"), &std::get<1>(motors[7]), COLOR_BLACK);
 
 Page auto_selection (3, "Auton"); //Select auton routes
 Text route (MID_X, 60, Style::CENTRE, TEXT_LARGE, &auto_selection, "Auton %d", &cur_auton);
@@ -248,10 +248,23 @@ void gui_setup(){ //Call once at start in initialize()
   pneum_btn_2.set_func([](){claw_out.set_value(1); pneum_2_state = "ON";});
   pneum_btn_2.set_off_func([](){claw_out.set_value(0); pneum_2_state = "OFF";});
 
+  std::get<4>(motors[0]) = (std::get<0>(motors[0])) ? &mot_temp_1 : nullptr;
+  std::get<4>(motors[1]) = (std::get<0>(motors[1])) ? &mot_temp_2 : nullptr;
+  std::get<4>(motors[2]) = (std::get<0>(motors[2])) ? &mot_temp_3 : nullptr;
+  std::get<4>(motors[3]) = (std::get<0>(motors[3])) ? &mot_temp_4 : nullptr;
+  std::get<4>(motors[4]) = (std::get<0>(motors[4])) ? &mot_temp_5 : nullptr;
+  std::get<4>(motors[5]) = (std::get<0>(motors[5])) ? &mot_temp_6 : nullptr;
+  std::get<4>(motors[6]) = (std::get<0>(motors[6])) ? &mot_temp_7 : nullptr;
+  std::get<4>(motors[7]) = (std::get<0>(motors[7])) ? &mot_temp_8 : nullptr;
+
+
+  // for (int i=0; i<8; i++) printf("%d: %p, %d\n", i, std::get<4>(motors[i]), std::get<4>(motors[i])==nullptr);
+
   for (int i = 0; i<4; i++){
-    std::get<1>(motors[i])->set_background(110*i+40, 60, 70, 50, Style::SIZE);
-    std::get<1>(motors[i+4])->set_background(110*i+40, 150, 70, 50, Style::SIZE);
+    if (std::get<4>(motors[i])) std::get<4>(motors[i])->set_background(110*i+40, 60, 70, 50, Style::SIZE);
+    if (std::get<4>(motors[i+4])) std::get<4>(motors[i+4])->set_background(110*i+40, 150, 70, 50, Style::SIZE);
   }
+  printf("Error Passed\n");
 
   Page::go_to(1); //Sets it to page 1 for program start. Don't delete this. If you want to change the starting page, re-call this in initialize()
 }
@@ -269,21 +282,24 @@ void gui_background(){ //To be called continously
   back_enc = BackEncoder.get_value();
   driver_text = drivebase.drivers[drivebase.cur_driver].name;
 
-  std::array<std::tuple<pros::Motor*, Text*, int, std::string, const char*>, 8>::iterator it;
+  std::array<std::tuple<pros::Motor*, int, std::string, const char*, Text*>, 8>::iterator it;
   for (it = motors.begin(); it != motors.end(); it++){
-    Motor* motor= std::get<0>(*it);
-    Text* text = std::get<1>(*it);
-    int temp = std::get<2>(*it);
+    std::tuple<pros::Motor*, int, std::string, const char*, Text*> mot_tup = *it;
+    Motor* motor= std::get<0>(mot_tup);
+    printf("%s motor is at %dC\n", std::get<2>(mot_tup).c_str(), motor->get_temperature());
+    Text* text = std::get<4>(mot_tup);
+    int temp = std::get<1>(mot_tup);
     int temperature = motor != nullptr ? motor->get_temperature() : 0;
     temperature = temperature == std::numeric_limits<int>::max() ? 0 : temperature;
-    std::get<2>(*it) = temperature;
+    std::get<1>(mot_tup) = temperature;
 
     if (temp >= 55 && !Flash.playing() && !temp_flashed){ //Overheating
       temp_flashed = true;
       Page::go_to(&temps);
+      Text::update();
       char buffer[50];
-      sprintf(buffer, "%s motor is at %dC\n", std::get<3>(*it).c_str(), temp);
-      flash(COLOR_RED, 10000, buffer);
+      sprintf(buffer, "%s motor is at %dC\n", std::get<2>(mot_tup).c_str(), temp);
+      flash(COLOR_RED, 15000, buffer);
       break;
     }
 
