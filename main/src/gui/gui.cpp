@@ -24,7 +24,7 @@ Button go_button (300, MID_Y, 160, 90, Style::CENTRE, Button::SINGLE, &go_sequen
 Button go_back_button (20, USER_UP, 100, 50, Style::SIZE, Button::SINGLE, &go_sequence, "BACK");
 Text go_button_text (300, 150, Style::CENTRE, TEXT_SMALL, &go_sequence, "%s", &go_string, (std::uint32_t)COLOR_BLACK);
 
-bool go(std::string name, std::string message, std::uint32_t delay_time){ //Start
+bool GUI::go(std::string name, std::string message, std::uint32_t delay_time){ //Start
   printf("\n\n%s\n", message.c_str());
   printf("Press \"Continue\" when ready.\n");
   go_string = name;
@@ -59,7 +59,7 @@ bool go(std::string name, std::string message, std::uint32_t delay_time){ //Star
   return !interrupted;
 }
 
-bool go(std::string name, std::uint32_t delay_time){ //End
+bool GUI::go(std::string name, std::uint32_t delay_time){ //End
   printf("Press Again when done.\n");
   go_string = "END " + name;
 
@@ -118,7 +118,7 @@ void aligned_coords (int x_objects, int y_objects, int x_btn, int y_btn, int x_r
 }
 
 //Flashing
-void flash(std::uint32_t color, std::uint32_t time, std::string text){
+void GUI::flash(std::uint32_t color, std::uint32_t time, std::string text){
   Page::clear_screen(color);
   screen::set_pen(~color&0xFFFFFF); //Makes text inverted color of background so it is always visible
   screen::set_eraser(color);
@@ -142,7 +142,7 @@ void flash(std::uint32_t color, std::uint32_t time, std::string text){
   flash_end = time;
 }
 
-void end_flash (){
+void GUI::end_flash (){
   if (Flash.get_time() >= flash_end){
     Flash.reset(false);
     Page::go_to(Page::current_page);
@@ -353,6 +353,30 @@ void Text::set_background (std::uint32_t colour){
 }
 
 void Text::draw(){
+  char buffer [100];
+  int length;
+
+  if(val_type == typeid(double*)){
+    length = sprintf(buffer, label.c_str(), *std::get<double*>(val_ptr));
+    prev_val = *std::get<double*>(val_ptr);
+    if (*std::get<double*>(val_ptr) == std::numeric_limits<double>::max()) return;
+  }
+
+  else if (val_type == typeid(int*)){
+    length = sprintf(buffer, label.c_str(), *std::get<int*>(val_ptr));
+    prev_val = *std::get<int*>(val_ptr);
+    if (*std::get<int*>(val_ptr) == std::numeric_limits<int>::max()) return;
+  }
+
+  else if (val_type == typeid(std::string*)){
+    length = sprintf(buffer, label.c_str(), (*std::get<std::string*>(val_ptr)).c_str());
+    prev_val = *std::get<std::string*>(val_ptr);
+  }
+
+  else if (val_type == typeid(std::monostate)){
+    length = sprintf(buffer, label.c_str());
+  }
+
   if (x2 != 0 && y2 != 0){
     screen::set_eraser(page->b_col); //Erases previous box
     screen::erase_rect(x1, y1, x2, y2);
@@ -365,28 +389,6 @@ void Text::draw(){
   else{
     screen::set_pen(l_col);
     screen::set_eraser(b_col);
-  }
-
-  char buffer [100];
-  int length;
-
-  if(val_type == typeid(double*)){
-    length = sprintf(buffer, label.c_str(), *std::get<double*>(val_ptr));
-    prev_val = *std::get<double*>(val_ptr);
-  }
-
-  else if (val_type == typeid(int*)){
-    length = sprintf(buffer, label.c_str(), *std::get<int*>(val_ptr));
-    prev_val = *std::get<int*>(val_ptr);
-  }
-
-  else if (val_type == typeid(std::string*)){
-    length = sprintf(buffer, label.c_str(), (*std::get<std::string*>(val_ptr)).c_str());
-    prev_val = *std::get<std::string*>(val_ptr);
-  }
-
-  else if (val_type == typeid(std::monostate)){
-    length = sprintf(buffer, label.c_str());
   }
 
   int x_coord = x, y_coord = y;
@@ -567,7 +569,6 @@ void Text::update(){
       }
 
       else if(text_id->val_type == typeid(int*)){
-        // printf("U-%s: %d     %d\n", (text_id->label).c_str(), *std::get<int*>(text_id->val_ptr),   (std::get<int>(text_id->prev_val) != *std::get<int*>(text_id->val_ptr)));
         if(std::get<int>(text_id->prev_val) != *std::get<int*>(text_id->val_ptr)) text_id->draw(); //If var has changed value
       }
 
@@ -691,15 +692,21 @@ Button* Button::update(){
   return 0;
 }
 
-void gui_general_setup(){
-    prev_page.set_func(&Page::to_prev); //Gives the left and right buttons their functions
-    next_page.set_func(&Page::to_next); //Same thing for all following buttons
+void GUI::general_setup(){
+    prev_page.set_func([&](){
+      if (Page::current_page == Page::pages[1]) Page::go_to(PAGE_COUNT-1);
+      else Page::go_to((Page::current_page->page_num)-1);
+    });
+    next_page.set_func([&](){
+      if (Page::current_page == Page::pages[PAGE_COUNT-1]) Page::go_to(1);
+      else Page::go_to((Page::current_page->page_num)+1);
+    });
 
     go_sequence.buttons.erase(go_sequence.buttons.begin(), go_sequence.buttons.begin()+2);
     go_button_text.set_background(ORANGE);
 }
 
-void gui_general_background(){
+void GUI::general_background(){
   Page::update();
   end_flash();
 }

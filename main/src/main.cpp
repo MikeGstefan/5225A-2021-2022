@@ -1,6 +1,6 @@
 #include "drive.hpp"
 #include "controller.hpp"
-#include "gui/gui_main.hpp"
+#include "gui/gui_util.hpp"
 
 // using namespace std;
 #include "task.hpp"
@@ -23,7 +23,7 @@ void initialize() {
 	delay(150);
 	tracking.x_coord = 0.0, tracking.y_coord = 0.0, tracking.global_angle = 0.0;
 	update_t.start();
-	gui_setup();
+	GUI::setup();
 	master.print(2, 0, "Driver: %s", drivebase.drivers[drivebase.cur_driver].name);
 }
 
@@ -72,6 +72,19 @@ void autonomous() {}
  * task, not resume it from where it left off.
  */
 
+void prev_driver(){
+	if (drivebase.cur_driver == 0) drivebase.cur_driver = drivebase.num_of_drivers - 1;
+	else drivebase.cur_driver--;
+	WAIT_FOR_SCREEN_REFRESH();
+	master.print(2, 0, "Driver: %s          ", drivebase.drivers[drivebase.cur_driver].name);
+}
+void next_driver(){
+	drivebase.cur_driver++;
+	drivebase.cur_driver %= drivebase.num_of_drivers;
+	WAIT_FOR_SCREEN_REFRESH();
+	master.print(2, 0, "Driver: %s          ", drivebase.drivers[drivebase.cur_driver].name);
+}
+
 int ring_count = 0, cur_auton = 1; //Get rid of this once merged
 
 void opcontrol() {
@@ -89,7 +102,7 @@ void opcontrol() {
 
 
 	while(true){
-		gui_background();
+		GUI::background();
 		drivebase.handle_input();
 
 		if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_B)){ //Update expo util
