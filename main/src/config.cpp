@@ -16,7 +16,7 @@ pros::Motor angler_motor(14, pros::E_MOTOR_GEARSET_36, false, pros::E_MOTOR_ENCO
 // pros::Motor intk(12, pros::E_MOTOR_GEARSET_36, true, pros::E_MOTOR_ENCODER_DEGREES);
 // pros::Motor uptk(11);
 pros::Distance angler_dist(9);
-pros::ADIEncoder LeftEncoder(1, 2, false), RightEncoder(3, 4, true), BackEncoder(5, 6, false);
+pros::ADIEncoder LeftEncoder(3, 4, false), RightEncoder(1, 2, true), BackEncoder(6, 5, true);
 pros::ADIDigitalOut lift_piston(7);
 pros::ADIDigitalIn lift_trigger(8);
 pros::ADIDigitalOut angler_piston(10);

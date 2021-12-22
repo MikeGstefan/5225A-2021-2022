@@ -18,7 +18,7 @@ Task *moveTask = nullptr;
 // }
 void Tracking::reset(double x, double y, double a){
   update_t.data_update();
-  tracking_imp.print("reseting tracking from %.2f, %.2f, %.2f to %.2f, %.2f, %.2f\n", tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle),x,y,a);
+  tracking_imp.print("resetting tracking from %.2f, %.2f, %.2f to %.2f, %.2f, %.2f\n", tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle),x,y,a);
   tracking.x_coord = x;
   tracking.y_coord = y;
   tracking.global_angle = deg_to_rad(a);
@@ -40,7 +40,7 @@ void update(void* params){
   _Task* ptr = _Task::get_obj(params);
   Timer data_timer{"tracking logs"};
   // LeftEncoder.reset(); RightEncoder.reset(); BackEncoder.reset();
-  double DistanceLR = 15.1, DistanceB = 6.1;
+  double DistanceLR = 15.18, DistanceB = 3.0;
   double Left, Right, Back, NewLeft, NewRight, NewBack, LastLeft = LeftEncoder.get_value()/360.0 *(2.75*M_PI), LastRight =  RightEncoder.get_value()/360.0 *(2.75*M_PI), LastBack = BackEncoder.get_value()/360.0 *(2.77*M_PI);
   double Theta = 0.0, Beta = 0.0, Alpha = 0.0;
   double RadiusR, RadiusB, h, h2;
@@ -450,12 +450,11 @@ void move_to_point(const Point start, Position target, const double max_power, c
     double power_xy;
     double total_power;
     double min_power_a = max_power * min_angle_percent;
-    const double x_multiplier = 1.75; // how much slower the robot strafes than moves forwards
     // PID'S
 
-    PID x_pid(15.0, 0.0, 0.0, 0.0, true, 0.2, 3.0);
-    PID y_pid(5.0, 0.0, 1.0, 0.0, true, 0.2, 3.0);
-    PID angle_pid(150.0, 0.0, 0.0, 0.0, true, 0.0, 360.0);
+    PID x_pid(30, 0.0, 0.0, 0.0, true, 0.2, 3.0);
+    PID y_pid(10.0, 0.0, 1.0, 0.0, true, 0.2, 3.0);
+    PID angle_pid(200.0, 0.0, 0.0, 0.0, true, 0.0, 360.0);
 
     // decel variables
     double h; // magnitude of power vector
@@ -469,13 +468,14 @@ void move_to_point(const Point start, Position target, const double max_power, c
         d = target_line.get_magnitude();
 
         tracking.power_x = x_pid.compute(-target_line.get_x(), 0.0);
-        tracking.power_y = x_pid.compute(-target_line.get_y(), 0.0);
+        tracking.power_y = y_pid.compute(-target_line.get_y(), 0.0);
         tracking.power_a = angle_pid.compute(tracking.global_angle, near_angle(target.angle, tracking.global_angle) + tracking.global_angle);
 
         h = sqrt(pow(tracking.power_x, 2) + pow(tracking.power_y, 2));
         ////////////
         // deceleration code
         if(decel_dist){
+          printf("DECEL\n");
           if(d < decel_dist){ // robot is past decel dist
             decel_power = constrain(map(d, decel_dist, max_power / decel_start, decel_speed, max_power), decel_speed, max_power);
             if (decel_power < decel_speed) decel_power = decel_speed;
@@ -542,7 +542,7 @@ void move_to_point(const Point start, Position target, const double max_power, c
             printf("Ending move to point X: %f Y: %f A: %f at X: %f Y: %f A: %f \n", target.x, target.y, rad_to_deg(target.angle), tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle));
             return;
         }
-        printf("sum:%lf\n", fabs(tracking.power_x) + fabs(tracking.power_y) + fabs(tracking.power_a));
+        // printf("sum:%lf\n", fabs(tracking.power_x) + fabs(tracking.power_y) + fabs(tracking.power_a));
         delay(10);
 
     }
@@ -711,7 +711,7 @@ void move_on_line(const Point start, Position target, const double max_power, co
     double power_xy;
     double total_power;
     double min_power_a = max_power * min_angle_percent;
-    const double x_multiplier = 1.25; // how much slower the robot strafes than moves forwards
+    const double x_multiplier = 2.0; // how much slower the robot strafes than moves forwards
     // PID'S
 
     PID x_line_pid(7.0, 0.0001, 0.0, 0.0, true, 0.2, 3.0);

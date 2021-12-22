@@ -80,7 +80,7 @@ const int min_move_power_a = 23;
 const int min_move_power_x = 40;
 const int min_move_power_y = 17;
 
-// #define xy_enable a
+#define xy_enable a
 
 // macros for convenient modification of move algorithms
 

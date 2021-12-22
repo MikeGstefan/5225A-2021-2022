@@ -101,10 +101,26 @@ void autonomous() {
 
 void opcontrol() {
 	lift_piston.set_value(LOW);	// in searching state
-	printf("STARTED RESET\n");
 	lift.reset();
 	lift.motor.move_absolute(40, 100);
-	drivebase.driver_practice();
+
+	Timer move_timer{"move"};
+	// x = 30 inches/sec
+	// y = 55-60/sec
+	// a = 200 deg/sec
+	// move_to_point({0.0}, {0.0, 0.0, 180.0});
+	tank_move_on_arc({0.0, 0.0}, {24.0, 24.0, 90.0}, 127.0, 127.0, true);
+	move_timer.print();
+	while(move_timer.get_time() < 1500){
+		// drivebase.handle_input();
+		printf("position | x: %lf, y: %lf a: %lf\n", tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle));
+		// printf("g velocities: x: %lf, y: %lf a: %lf\n", tracking.b_velo, tracking.l_velo, rad_to_deg(tracking.g_velocity.angle));
+		delay(10);
+	}
+	printf("DONE");
+	// drivebase.move(0.0, 0.0, 0.0);
+
+	// drivebase.driver_practice();
 
 
 }
