@@ -72,6 +72,7 @@ void autonomous() {}
  * task, not resume it from where it left off.
  */
 
+//Get rid of these once merged
 void prev_driver(){
 	if (drivebase.cur_driver == 0) drivebase.cur_driver = drivebase.num_of_drivers - 1;
 	else drivebase.cur_driver--;
@@ -85,11 +86,12 @@ void next_driver(){
 	master.print(2, 0, "Driver: %s          ", drivebase.drivers[drivebase.cur_driver].name);
 }
 
-int ring_count = 0, cur_auton = 1; //Get rid of this once merged
+int ring_count = 0, cur_auton = 1;
 
 void opcontrol() {
 	/*Gui:
 	Reset tracking by task
+	move abstract page methods to GUI class
 	/**/
 
 	// while(true){
@@ -103,7 +105,7 @@ void opcontrol() {
 
 	while(true){
 		GUI::background();
-		drivebase.handle_input();
+		// drivebase.handle_input();
 
 		if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_B)){ //Update expo util
 			drivebase.update_lookup_table_util();

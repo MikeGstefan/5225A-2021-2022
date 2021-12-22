@@ -119,7 +119,6 @@ void resetA(){
 
 void GUI::setup(){ //Call once at start in initialize()
   GUI::general_setup();
-  Page::go_to(0);
 
   run_elastic.set_func(&elasticUtil);
 

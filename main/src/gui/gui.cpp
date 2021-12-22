@@ -95,7 +95,7 @@ bool GUI::go(std::string name, std::uint32_t delay_time){ //End
 
 //Utility to get coordinates for aligned objects, (buttons, sliders...) of same size
 //Put in how many of buttons/sliders you want, and get properly spaced coords
-void aligned_coords (int x_objects, int y_objects, int x_btn, int y_btn, int x_range, int y_range){
+void GUI::aligned_coords (int x_objects, int y_objects, int x_btn, int y_btn, int x_range, int y_range){
 
   double x_space = (x_range-x_objects*x_btn)/(x_objects+1.0);
   double y_space = (y_range-y_objects*y_btn)/(y_objects+1.0);
@@ -115,6 +115,7 @@ void aligned_coords (int x_objects, int y_objects, int x_btn, int y_btn, int x_r
   printf("\nScreen Size: [%d, %d]\n", x_range, y_range);
   if ((x_space+x_btn)*(x_objects) > 480) printf("X out of bounds\n");
   if ((y_space+y_btn)*(y_objects) > 220) printf("Y out of bounds\n");
+  printf("\n\n");
 }
 
 //Flashing
@@ -704,6 +705,8 @@ void GUI::general_setup(){
 
     go_sequence.buttons.erase(go_sequence.buttons.begin(), go_sequence.buttons.begin()+2);
     go_button_text.set_background(ORANGE);
+
+    Page::go_to(0);
 }
 
 void GUI::general_background(){
