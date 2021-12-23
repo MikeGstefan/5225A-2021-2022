@@ -94,13 +94,13 @@ void Data::print(const char* format,...){
 
 void Data::print(Timer* tmr, int freq, std::vector<std::function<char*()>> str){
   if(tmr->get_time() > freq){
-    for(int i = 0; i < str.size(); i++){ 
+    for(int i = 0; i < str.size(); i++){
         char* buffer = str[i]();
         this->print(buffer);
         delete[] buffer;
     }
     tmr->reset();
-  } 
+  }
 }
 
 void Data::log_print(char* buffer, int buffer_len){
@@ -174,5 +174,3 @@ char* Data::to_char(const char* fmt, ...){
     va_end(args);
     return buffer;
 }
-
-

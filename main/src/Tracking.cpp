@@ -114,7 +114,7 @@ void update(void* params){
     tracking.y_coord += Yy + Xy;
     tracking.global_angle += Theta;
 
-    
+
     tracking_data.print(&data_timer, 100, {
       [=](){return Data::to_char("%d || x: %.2lf, y: %.2lf, a: %.2lf\n", millis(), tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle));},
       [=](){return Data::to_char("%d || GLOBAL VELOCITY| x: %.2f, y: %.2f a: %.2f\n", millis(), tracking.g_velocity.x, tracking.g_velocity.y, rad_to_deg(tracking.g_velocity.angle));},
@@ -367,7 +367,7 @@ void rush_goal(double target_x, double target_y, double target_a){
 }
 
 void rush_goal2(double target_x, double target_y, double target_a){
-    double end_error = 0.5, end_error_a = 5.0, kp_x = 10.0, kp_a = 120.0, local_error_x, local_error_y, difference_a, error_a, error_d, max_power = 127, total_power, scale;
+    double end_error = 0.5, end_error_a = 5.0, kp_x = 20.0, kp_a = 150.0, local_error_x, local_error_y, difference_a, error_a, error_d, max_power = 127.0, total_power, scale;
     uint32_t last_time = millis();
     target_a = deg_to_rad(target_a);
     short orig_y_sgn = sgn(target_y - tracking.y_coord);
@@ -392,6 +392,16 @@ void rush_goal2(double target_x, double target_y, double target_a){
         else  tracking.power_y = sgn(orig_y_sgn) * (max_power - fabs(tracking.power_x) - fabs(tracking.power_a));
         printf("pow_x %f, pow_y: %f, power_a: %f",tracking.power_x, tracking.power_y, tracking.power_a);
         printf("cur_y_sgn: %lf, cur_y: %lf\n", target_y - tracking.y_coord, tracking.y_coord);
+
+        if(dist.get() <= 100){
+          printf("\n\nV:%f\n\n\n", front_l.get_actual_velocity());
+          claw_in.set_value(0); //Close
+          // delay(150);
+          drivebase.brake();
+          return;
+        }
+        printf("X:%f A:%f\n", local_error_x, rad_to_deg(error_a));
+
         // exit condition
         // if (claw_touch.get_value()){
         //   // got_goal = goal_lim_switch_state;

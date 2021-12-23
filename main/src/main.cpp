@@ -1,6 +1,6 @@
 #include "drive.hpp"
-#include "gui.hpp"
 #include "controller.hpp"
+#include "gui/gui_main.hpp"
 
 // using namespace std;
 #include "task.hpp"
@@ -23,7 +23,7 @@ void initialize() {
 	delay(150);
 	tracking.x_coord = 0.0, tracking.y_coord = 0.0, tracking.global_angle = 0.0;
 	update_t.start();
-	gui_setup();
+	GUI::setup();
 	master.print(2, 0, "Driver: %s", drivebase.drivers[drivebase.cur_driver].name);
 }
 
@@ -72,16 +72,39 @@ void autonomous() {}
  * task, not resume it from where it left off.
  */
 
-int ring_count = 0; //Get rid of this once merged
-double cur_auton = 1;
+//Get rid of these once merged
+void prev_driver(){
+	if (drivebase.cur_driver == 0) drivebase.cur_driver = drivebase.num_of_drivers - 1;
+	else drivebase.cur_driver--;
+	WAIT_FOR_SCREEN_REFRESH();
+	master.print(2, 0, "Driver: %s          ", drivebase.drivers[drivebase.cur_driver].name);
+}
+void next_driver(){
+	drivebase.cur_driver++;
+	drivebase.cur_driver %= drivebase.num_of_drivers;
+	WAIT_FOR_SCREEN_REFRESH();
+	master.print(2, 0, "Driver: %s          ", drivebase.drivers[drivebase.cur_driver].name);
+}
+
+int ring_count = 0, cur_auton = 1;
 
 void opcontrol() {
 	/*Gui:
 	Reset tracking by task
+	move abstract page methods to GUI class
 	/**/
 
+	// while(true){
+	// 	printf("%d\n", dist.get());
+	// 	delay(10);
+	// }
+
+	// claw_in.set_value(1); //Open
+	// rush_goal2(0, 100, 0);
+
+
 	while(true){
-		gui_background();
+		GUI::background();
 		drivebase.handle_input();
 
 		if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_B)){ //Update expo util
@@ -90,6 +113,14 @@ void opcontrol() {
 		}
 		else if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_UP)) next_driver();
 		else if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_DOWN)) prev_driver();
+		else if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_X)) claw_in.set_value(1); //Open
+		else if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_Y)){
+			claw_in.set_value(1); //Open
+			drivebase.move(0, 127, 0);
+			waitUntil(dist.get() <= 100);
+			claw_in.set_value(0); //Close
+			drivebase.brake();
+		}
 		delay(10);
 	}
 }
