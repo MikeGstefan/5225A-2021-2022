@@ -1,6 +1,6 @@
 #include "drive.hpp"
 #include "controller.hpp"
-#include "gui/gui_util.hpp"
+#include "gui/gui_main.hpp"
 
 // using namespace std;
 #include "task.hpp"
@@ -105,7 +105,7 @@ void opcontrol() {
 
 	while(true){
 		GUI::background();
-		// drivebase.handle_input();
+		drivebase.handle_input();
 
 		if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_B)){ //Update expo util
 			drivebase.update_lookup_table_util();
