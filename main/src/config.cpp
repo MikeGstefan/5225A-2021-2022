@@ -30,6 +30,5 @@ std::array<std::tuple<pros::Motor*, int, std::string, const char*, Text*>, 8> mo
   std::make_tuple(&intk, 1, "Intake", "IN", nullptr),
   std::make_tuple(&f_bar, 1, "Four Bar", "FB", nullptr),
   std::make_tuple(&c_bar, 1, "Chain Bar", "CB", nullptr),
-  // std::make_tuple(&uptk, 0, "Uptake", "UP", nullptr),
-  std::make_tuple(nullptr, 0, "", "", nullptr),
-};
+  std::make_tuple(&uptk, 0, "Uptake", "UP", nullptr),
+};//std::make_tuple(nullptr, 0, "", "", nullptr),

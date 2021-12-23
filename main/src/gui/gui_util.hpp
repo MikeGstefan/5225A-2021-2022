@@ -11,7 +11,7 @@ ADIDigitalOut pneum_1(7), pneum_2(8);
 int left_enc, right_enc, back_enc;
 std::string pneum_1_state, pneum_2_state;
 std::string port_nums = "";
-std::array <std::tuple<int, Button*, Button*>, 8> motor_ports;
+std::array <std::tuple<int, Button*, Button*, int>, 8> motor_ports;
 
 Page ports (1, "Ports");
 Text mot (10, 50, Style::CORNER, TEXT_LARGE, &ports, "Motors: %s", &port_nums);
@@ -71,14 +71,14 @@ void GUI::setup(){ //Call once at start in initialize()
   GUI::general_setup();
 
   motor_ports = {
-    std::make_tuple(std::numeric_limits<int>::max(), &mot_update_1, &mot_stop_1),
-    std::make_tuple(std::numeric_limits<int>::max(), &mot_update_2, &mot_stop_2),
-    std::make_tuple(std::numeric_limits<int>::max(), &mot_update_3, &mot_stop_3),
-    std::make_tuple(std::numeric_limits<int>::max(), &mot_update_4, &mot_stop_4),
-    std::make_tuple(std::numeric_limits<int>::max(), &mot_update_5, &mot_stop_5),
-    std::make_tuple(std::numeric_limits<int>::max(), &mot_update_6, &mot_stop_6),
-    std::make_tuple(std::numeric_limits<int>::max(), &mot_update_7, &mot_stop_7),
-    std::make_tuple(std::numeric_limits<int>::max(), &mot_update_8, &mot_stop_8),
+    std::make_tuple(std::numeric_limits<int>::max(), &mot_update_1, &mot_stop_1, 0),
+    std::make_tuple(std::numeric_limits<int>::max(), &mot_update_2, &mot_stop_2, 0),
+    std::make_tuple(std::numeric_limits<int>::max(), &mot_update_3, &mot_stop_3, 0),
+    std::make_tuple(std::numeric_limits<int>::max(), &mot_update_4, &mot_stop_4, 0),
+    std::make_tuple(std::numeric_limits<int>::max(), &mot_update_5, &mot_stop_5, 0),
+    std::make_tuple(std::numeric_limits<int>::max(), &mot_update_6, &mot_stop_6, 0),
+    std::make_tuple(std::numeric_limits<int>::max(), &mot_update_7, &mot_stop_7, 0),
+    std::make_tuple(std::numeric_limits<int>::max(), &mot_update_8, &mot_stop_8, 0),
   };
 
   for (int port=0, i=0; port<=20; port++){
@@ -90,6 +90,10 @@ void GUI::setup(){ //Call once at start in initialize()
 
   for (int i = 0; i < 8; i++){
     if (std::get<0>(motor_ports[i]) != std::numeric_limits<int>::max()) port_nums.append(std::to_string(std::get<0>(motor_ports[i])) + ",");
+    else{
+      std::get<1>(motor_ports[i])->set_active(false);
+      std::get<2>(motor_ports[i])->set_active(false);
+    }
     std::get<1>(motor_ports[i])->set_func([i](){Motor motor(std::get<0>(motor_ports[i])); motor.move(mot_speed.val);});
     std::get<2>(motor_ports[i])->set_func([i](){Motor motor(std::get<0>(motor_ports[i])); motor.move(0);});
   }
@@ -120,6 +124,19 @@ void GUI::background(){ //To be called continously
   left_enc = encoderAB.get_value();
   right_enc = encoderCD.get_value();
   back_enc = encoderEF.get_value();
+
+  for (int i = 0; i < 8; i++){
+    if (std::get<0>(motor_ports[i]) != std::numeric_limits<int>::max()){
+      Motor motor(std::get<0>(motor_ports[i]));
+      if (fabs(motor.get_actual_velocity()) < fabs(motor.get_target_velocity())/4) std::get<3>(motor_ports[i]) += 1;
+      else std::get<3>(motor_ports[i]) = 0;
+      if (std::get<3>(motor_ports[i]) > 10){
+        std::get<3>(motor_ports[i]) = 0;
+        printf("Stopping Motor %d\n", std::get<0>(motor_ports[i]));
+        motor.move(0);
+      }
+    }
+  }
 
   GUI::general_background();
 }

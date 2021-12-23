@@ -118,7 +118,6 @@ void opcontrol() {
 			claw_in.set_value(1); //Open
 			drivebase.move(0, 127, 0);
 			waitUntil(dist.get() <= 100);
-			printf("V:%f\n", front_l.get_actual_velocity());
 			claw_in.set_value(0); //Close
 			drivebase.brake();
 		}
