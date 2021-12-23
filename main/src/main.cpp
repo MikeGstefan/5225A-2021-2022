@@ -24,7 +24,9 @@ void initialize() {
 	Data::init();
 	_Controller::init();
 	delay(150);
-	tracking.x_coord = 0.0, tracking.y_coord = 0.0, tracking.global_angle = 0.0;
+	tracking.x_coord = 144.0 - 10.25, tracking.y_coord = 14.75, tracking.global_angle = -M_PI_2;
+	// tracking.x_coord = 0.0, tracking.y_coord = 0.0, tracking.global_angle = 0.0;
+
 	update_t.start();
 	// gui_setup();
 	master.print(2, 0, "Driver: %s", drivebase.drivers[drivebase.cur_driver].name);
@@ -60,27 +62,43 @@ void competition_initialize() {}
  * from where it left off.
  */
 void autonomous() {
-	Timer move = {"move"};
-	tank_move_on_arc({0.0, 0.0}, {24.0, 24.0, 90.0}, 127.0, 127.0, true);
+	lift.reset();
+	lift_piston.set_value(LOW);
+	lift.motor.move_absolute(lift.bottom_position, 100);
 
-	// move_on_arc({0.0, 0.0}, {24.0, 24.0, 0.0}, 24.0, false, 127, true, 0.3, true);
-	// move_on_line({0.0, 0.0}, {12.0, 24.0, 0.0}, 127.0, false, 0.0, false);
-	// move_to_point({0.0, 0.0}, {24.0, 12.0, -80.0}, 127.0, false, 0.0, true);
-	move.print();
+	Timer move_timer{"move"};
+	move_to_point({112.5, 14.75, -90.0});
+	move_timer.print();
+	// tank_move_on_arc({110.0, 14.75}, {132.0, 24.0, -180.0}, 127.0);
+	// move_on_line(polar_to_vector(110.0, 14.75, 10.0, 45.0, -135.0));
+	move_to_point(polar_to_vector_point(110.0, 14.75, 17.5, 45.0, -135.0), 127.0, false, 1.0, false);	// grabs alliance goal
+	lift_piston.set_value(HIGH);
 
-	// drivebase.update_lookup_table_util();
-	// printf("here\n");
-	// rush_goal2(0.0, -45.0, 0.0);
-	// drivebase.move(0,-127, 0);
-	// while(!claw_touch.get_value()) delay(10);
-	// master.print(0, 0, "inches: %lf", tracking.y_coord);
-/*
-	Timer move_timer{"move_timer"};
-	// move_to_target_async(0.0, -45.0, 0.0);	// got to goal
-	// while(tracking.y_coord > -45.0)	delay(10);
-	master.print(0, 0, "time: %d", move_timer.get_time());
-	rush_goal(0.0, -20.0, 0.0);
-*/
+	tank_turn_to_target({108.0, 60.0});
+	// tank_move_to_target({110.0, 40.0, 0.0}, true, 127.0, 0.0, false);
+	move_to_point({110.0, 60.0, 0.0}, 127.0, false, 0.0, false);	// in front of small netural goal
+	move_to_point({110.0, 80.0, 0.0}, 127.0, false, 0.0, false);	// drives through small neutral goal
+	tank_move_on_arc({110.0, 84.0},{80.0, 96.0, -90.0}, 127.0);
+	move_to_point({60.0, 96.0, -90.0}, 80.0, false, 0.0, true);	// drives over rings
+	move_to_point({60.0, 108.0, -90.0}, 80.0, false, 0.0, true);	// drives to drop off small neutral
+	lift.motor.move_absolute(lift.platform_position, 100);
+	move_to_point({60.0, 108.0, -180.0}, 80.0, false, 0.0, true);	// drives to drop off small neutral
+	lift_piston.set_value(LOW);
+
+
+
+	move_timer.print();
+	/*
+	move_to_point({108.0, 60.0, 0.0}, 127.0, false, 0.0, false);
+	move_timer.print();
+	delay(1000);
+	move_to_point({108.0, 84.0, 0.0}, 127.0, false, 0.0, false);
+	move_timer.print();
+	*/
+
+	// move_on_arc({108.0, 0.0}, {132.0, 24.0, -180.0}, 24.0, true, 127.0, true, 1.0);
+	// move_timer.print();
+
 }
 
 /**
@@ -103,24 +121,7 @@ void opcontrol() {
 	lift_piston.set_value(LOW);	// in searching state
 	lift.reset();
 	lift.motor.move_absolute(40, 100);
-
-	Timer move_timer{"move"};
-	// x = 30 inches/sec
-	// y = 55-60/sec
-	// a = 200 deg/sec
-	// move_to_point({0.0}, {0.0, 0.0, 180.0});
-	tank_move_on_arc({0.0, 0.0}, {24.0, 24.0, 90.0}, 127.0, 127.0, true);
-	move_timer.print();
-	while(move_timer.get_time() < 1500){
-		// drivebase.handle_input();
-		printf("position | x: %lf, y: %lf a: %lf\n", tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle));
-		// printf("g velocities: x: %lf, y: %lf a: %lf\n", tracking.b_velo, tracking.l_velo, rad_to_deg(tracking.g_velocity.angle));
-		delay(10);
-	}
-	printf("DONE");
-	// drivebase.move(0.0, 0.0, 0.0);
-
-	// drivebase.driver_practice();
+	drivebase.driver_practice();
 
 
 }

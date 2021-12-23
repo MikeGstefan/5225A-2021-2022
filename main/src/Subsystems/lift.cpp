@@ -111,10 +111,19 @@ void Lift::handle(){
       if (lift_power > 0 && motor.get_position() >= top_position) lift_power = 0;
       motor.move(lift_power);
       if(master.get_digital_new_press(lift_up_button) || master.get_digital_new_press(lift_down_button)){
+        lift_piston.set_value(LOW);
         motor.move_absolute(bottom_position, 100);
         set_state(lift_states::searching);
       }
       break;
 
   }
+}
+
+double Lift::pos_to_height(double pos){
+  return offset_h + arm_len * sin(deg_to_rad((pos - offset_a) / gear_ratio));
+}
+
+double Lift::height_to_pos(double height){
+  return gear_ratio * (rad_to_deg(asin((height - offset_h) / (arm_len)))) + offset_a;
 }

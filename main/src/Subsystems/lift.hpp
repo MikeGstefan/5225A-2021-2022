@@ -15,14 +15,22 @@ enum class lift_states{
 };
 
 class Lift: public Motorized_subsystem<lift_states, NUM_OF_LIFT_STATES> {
-  const double bottom_position = 40.0, platform_position = 600.0, top_position = 650.0;
   int released_cycle_check = 0;
 
   int bad_count = 0; // cycle check for safeties
 
+  // height conversion concstants
+  double offset_a = 365.0, offset_h = 9.75;
+  double arm_len = 8.0;
+  double gear_ratio = 5.0;
+
 public:
+  const double bottom_position = 30.0, platform_position = 600.0, top_position = 650.0;
+  
   Lift(Motorized_subsystem<lift_states, NUM_OF_LIFT_STATES> motorized_subsystem);  // constructor
   void handle();  // contains state machine code
+  double pos_to_height(const double position);
+  double height_to_pos(const double height);
 
 };
 
