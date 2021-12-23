@@ -10,9 +10,11 @@ ADIDigitalOut pneum_1(7), pneum_2(8);
 //Var init for text monitoring
 int left_enc, right_enc, back_enc;
 std::string pneum_1_state, pneum_2_state;
+std::string port_nums = "";
+std::array <std::tuple<int, Button*, Button*>, 8> motor_ports;
 
 Page ports (1, "Ports");
-Text mot (10, 50, Style::CORNER, TEXT_LARGE, &ports, "Motors: 1,2,3,4,5,6,7,8");
+Text mot (10, 50, Style::CORNER, TEXT_LARGE, &ports, "Motors: %s", &port_nums);
 Text enc (10, 100, Style::CORNER, TEXT_LARGE, &ports, "Encoders: AB, CD, EF");
 Text pne (10, 150, Style::CORNER, TEXT_LARGE, &ports, "Pneumatics: G, H");
 
@@ -27,14 +29,14 @@ Button resAll (240, 180, 200, 30, Style::CENTRE, Button::SINGLE, &encoders, "Res
 
 Page motor (3, "Motor Control");
 Slider mot_speed (MID_X, 60, 200 , 15, Style::CENTRE, Slider::HORIZONTAL, -127, 127, &motor, "Speed");
-Text mot_text_1 (65, 115, Style::CENTRE, TEXT_SMALL, &motor, "Port 1");
-Text mot_text_2 (180, 115, Style::CENTRE, TEXT_SMALL, &motor, "Port 2");
-Text mot_text_3 (295, 115, Style::CENTRE, TEXT_SMALL, &motor, "Port 3");
-Text mot_text_4 (410, 115, Style::CENTRE, TEXT_SMALL, &motor, "Port 4");
-Text mot_text_5 (65, 180, Style::CENTRE, TEXT_SMALL, &motor, "Port 5");
-Text mot_text_6 (180, 180, Style::CENTRE, TEXT_SMALL, &motor, "Port 6");
-Text mot_text_7 (295, 180, Style::CENTRE, TEXT_SMALL, &motor, "Port 7");
-Text mot_text_8 (410, 180, Style::CENTRE, TEXT_SMALL, &motor, "Port 8");
+Text mot_text_1 (65, 115, Style::CENTRE, TEXT_SMALL, &motor, "Port %d", &std::get<0>(motor_ports[0]));
+Text mot_text_2 (180, 115, Style::CENTRE, TEXT_SMALL, &motor, "Port %d", &std::get<0>(motor_ports[1]));
+Text mot_text_3 (295, 115, Style::CENTRE, TEXT_SMALL, &motor, "Port %d", &std::get<0>(motor_ports[2]));
+Text mot_text_4 (410, 115, Style::CENTRE, TEXT_SMALL, &motor, "Port %d", &std::get<0>(motor_ports[3]));
+Text mot_text_5 (65, 180, Style::CENTRE, TEXT_SMALL, &motor, "Port %d", &std::get<0>(motor_ports[4]));
+Text mot_text_6 (180, 180, Style::CENTRE, TEXT_SMALL, &motor, "Port %d", &std::get<0>(motor_ports[5]));
+Text mot_text_7 (295, 180, Style::CENTRE, TEXT_SMALL, &motor, "Port %d", &std::get<0>(motor_ports[6]));
+Text mot_text_8 (410, 180, Style::CENTRE, TEXT_SMALL, &motor, "Port %d", &std::get<0>(motor_ports[7]));
 Button mot_update_1 (15, 125, 45, 30, Style::SIZE, Button::SINGLE, &motor, "Run");
 Button mot_update_2 (130, 125, 45, 30, Style::SIZE, Button::SINGLE, &motor, "Run");
 Button mot_update_3 (245, 125, 45, 30, Style::SIZE, Button::SINGLE, &motor, "Run");
@@ -68,15 +70,30 @@ Slider testing_slider (MID_X, 200, 200 , 20, Style::CENTRE, Slider::HORIZONTAL, 
 void GUI::setup(){ //Call once at start in initialize()
   GUI::general_setup();
 
-  std::array <int, 8> motors = {};
+  motor_ports = {
+    std::make_tuple(std::numeric_limits<int>::max(), &mot_update_1, &mot_stop_1),
+    std::make_tuple(std::numeric_limits<int>::max(), &mot_update_2, &mot_stop_2),
+    std::make_tuple(std::numeric_limits<int>::max(), &mot_update_3, &mot_stop_3),
+    std::make_tuple(std::numeric_limits<int>::max(), &mot_update_4, &mot_stop_4),
+    std::make_tuple(std::numeric_limits<int>::max(), &mot_update_5, &mot_stop_5),
+    std::make_tuple(std::numeric_limits<int>::max(), &mot_update_6, &mot_stop_6),
+    std::make_tuple(std::numeric_limits<int>::max(), &mot_update_7, &mot_stop_7),
+    std::make_tuple(std::numeric_limits<int>::max(), &mot_update_8, &mot_stop_8),
+  };
 
   for (int port=0, i=0; port<=20; port++){
     if (c::registry_get_plugged_type(port) == c::E_DEVICE_MOTOR && i < 8){
-      motors[i] = port+1;
+      std::get<0>(motor_ports[i]) = port+1;
       i++;
     }
   }
 
+  for (int i = 0; i < 8; i++){
+    if (std::get<0>(motor_ports[i]) != std::numeric_limits<int>::max()) port_nums.append(std::to_string(std::get<0>(motor_ports[i])) + ",");
+    std::get<1>(motor_ports[i])->set_func([i](){Motor motor(std::get<0>(motor_ports[i])); motor.move(mot_speed.val);});
+    std::get<2>(motor_ports[i])->set_func([i](){Motor motor(std::get<0>(motor_ports[i])); motor.move(0);});
+  }
+  if (port_nums.back() == ',') port_nums.pop_back();
 
   encAB.set_background(90, 15);
   encCD.set_background(90, 15);
@@ -85,23 +102,6 @@ void GUI::setup(){ //Call once at start in initialize()
   resCD.set_func([&](){encoderCD.reset();});
   resEF.set_func([&](){encoderEF.reset();});
   resAll.set_func([&](){encoderAB.reset(); encoderCD.reset(); encoderEF.reset();});
-
-  mot_update_1.set_func([&](){motor1.move(mot_speed.val);});
-  mot_stop_1.  set_func([&](){motor1.move(0);});
-  mot_update_2.set_func([&](){motor2.move(mot_speed.val);});
-  mot_stop_2.  set_func([&](){motor2.move(0);});
-  mot_update_3.set_func([&](){motor3.move(mot_speed.val);});
-  mot_stop_3.  set_func([&](){motor3.move(0);});
-  mot_update_4.set_func([&](){motor4.move(mot_speed.val);});
-  mot_stop_4.  set_func([&](){motor4.move(0);});
-  mot_update_5.set_func([&](){motor5.move(mot_speed.val);});
-  mot_stop_5.  set_func([&](){motor5.move(0);});
-  mot_update_6.set_func([&](){motor6.move(mot_speed.val);});
-  mot_stop_6.  set_func([&](){motor6.move(0);});
-  mot_update_7.set_func([&](){motor7.move(mot_speed.val);});
-  mot_stop_7.  set_func([&](){motor7.move(0);});
-  mot_update_8.set_func([&](){motor8.move(mot_speed.val);});
-  mot_stop_8.  set_func([&](){motor8.move(0);});
 
   pneum_text_1.set_background(50, 15);
   pneum_btn_1.set_func([](){pneum_1.set_value(1); pneum_1_state = "ON";});

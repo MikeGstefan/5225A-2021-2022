@@ -454,13 +454,14 @@ void Slider::draw_bar(){
 }
 
 void Button::draw(){
+  if (!active) return;
   if (latched) { //Latched buttons must be drawn in a pressed state
     draw_pressed();
     return;
   }
 
   screen::set_pen(b_col);
-  screen::set_eraser(Page::current_page->b_col);
+  screen::set_eraser(Page::current_page->b_col); //at some point figure out why this isn't (page->b_col)
   screen::fill_rect(x1, y1, x2, y2);
   draw_oblong(x1, y1, x2, y2, 0, 0.15);
 
@@ -471,6 +472,7 @@ void Button::draw(){
 }
 
 void Button::draw_pressed(){
+  if (!active) return;
   screen::set_eraser(page->b_col); //Erases button
   screen::erase_rect(x1, y1, x2, y2);
 
@@ -508,6 +510,15 @@ void Button::set_func(std::function <void()> function) {func = function;}
 
 void Button::set_off_func(std::function <void()> function) {off_func = function;}
 
+void Button::set_active(bool active) {
+  this->active = active;
+  if (active) draw();
+  else{
+    screen::set_pen(page->b_col);
+    screen::fill_rect(x1, y1, x2, y2);
+  }
+}
+
 void Button::run_func() {if (func) func();}
 
 //Updating data and presses
@@ -537,7 +548,7 @@ bool Page::pressed(){
 
 bool Button::pressed(){
   // returns true if the button is currently being pressed
-  if (Page::current_page->pressed()){
+  if (active && Page::current_page->pressed()){
     if ((x1 <= Page::x && Page::x <= x2) && (y1 <= Page::y && Page::y <= y2)) return true;
   }
   return false;

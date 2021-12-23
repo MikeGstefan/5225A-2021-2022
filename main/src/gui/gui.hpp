@@ -107,6 +107,7 @@ class Button{
     bool last_pressed=0;
     press_type form; //What type of button
     std::function <void()> func, off_func; //toggle is only for toggle type buttons
+    bool active = true;
 
     //For latch buttons
     bool latched=0, on=0; //on is for toggle
@@ -131,6 +132,7 @@ class Button{
     //Functions
     static void create_options(std::vector<Button*>);
     void set_func(std::function <void()>), set_off_func(std::function <void()>);
+    void set_active(bool=true);
     bool pressed();
     bool new_press();
     bool new_release();
