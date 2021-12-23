@@ -72,6 +72,7 @@ void autonomous() {}
  * task, not resume it from where it left off.
  */
 
+//Get rid of these once merged
 void prev_driver(){
 	if (drivebase.cur_driver == 0) drivebase.cur_driver = drivebase.num_of_drivers - 1;
 	else drivebase.cur_driver--;
@@ -85,11 +86,12 @@ void next_driver(){
 	master.print(2, 0, "Driver: %s          ", drivebase.drivers[drivebase.cur_driver].name);
 }
 
-int ring_count = 0, cur_auton = 1; //Get rid of this once merged
+int ring_count = 0, cur_auton = 1;
 
 void opcontrol() {
 	/*Gui:
 	Reset tracking by task
+	move abstract page methods to GUI class
 	/**/
 
 	// while(true){
@@ -116,7 +118,6 @@ void opcontrol() {
 			claw_in.set_value(1); //Open
 			drivebase.move(0, 127, 0);
 			waitUntil(dist.get() <= 100);
-			printf("V:%f\n", front_l.get_actual_velocity());
 			claw_in.set_value(0); //Close
 			drivebase.brake();
 		}

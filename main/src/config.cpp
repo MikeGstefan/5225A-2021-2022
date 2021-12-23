@@ -17,8 +17,8 @@ pros::Motor f_bar(7, pros::E_MOTOR_GEARSET_18, true, pros::E_MOTOR_ENCODER_DEGRE
 pros::Motor c_bar(10, pros::E_MOTOR_GEARSET_36, true, pros::E_MOTOR_ENCODER_DEGREES);
 pros::Motor uptk(11);
 
-pros::ADIEncoder LeftEncoder(5, 6, false), RightEncoder(5, 6, true), BackEncoder(5, 6, false);
-pros::ADIDigitalOut claw_in(1), claw_out(8);
+pros::ADIEncoder LeftEncoder(1, 2, false), RightEncoder(3, 4, true), BackEncoder(5, 6, false);
+pros::ADIDigitalOut claw_in(7), claw_out(8);
 pros::ADIDigitalIn claw_touch({{6, 6}});
 pros::Distance dist(20);
 
@@ -30,6 +30,5 @@ std::array<std::tuple<pros::Motor*, int, std::string, const char*, Text*>, 8> mo
   std::make_tuple(&intk, 1, "Intake", "IN", nullptr),
   std::make_tuple(&f_bar, 1, "Four Bar", "FB", nullptr),
   std::make_tuple(&c_bar, 1, "Chain Bar", "CB", nullptr),
-  // std::make_tuple(&uptk, 0, "Uptake", "UP", nullptr),
-  std::make_tuple(nullptr, 0, "", "", nullptr),
-};
+  std::make_tuple(&uptk, 0, "Uptake", "UP", nullptr),
+};//std::make_tuple(nullptr, 0, "", "", nullptr),

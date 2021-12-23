@@ -95,7 +95,7 @@ bool GUI::go(std::string name, std::uint32_t delay_time){ //End
 
 //Utility to get coordinates for aligned objects, (buttons, sliders...) of same size
 //Put in how many of buttons/sliders you want, and get properly spaced coords
-void aligned_coords (int x_objects, int y_objects, int x_btn, int y_btn, int x_range, int y_range){
+void GUI::aligned_coords (int x_objects, int y_objects, int x_btn, int y_btn, int x_range, int y_range){
 
   double x_space = (x_range-x_objects*x_btn)/(x_objects+1.0);
   double y_space = (y_range-y_objects*y_btn)/(y_objects+1.0);
@@ -115,6 +115,7 @@ void aligned_coords (int x_objects, int y_objects, int x_btn, int y_btn, int x_r
   printf("\nScreen Size: [%d, %d]\n", x_range, y_range);
   if ((x_space+x_btn)*(x_objects) > 480) printf("X out of bounds\n");
   if ((y_space+y_btn)*(y_objects) > 220) printf("Y out of bounds\n");
+  printf("\n\n");
 }
 
 //Flashing
@@ -453,13 +454,14 @@ void Slider::draw_bar(){
 }
 
 void Button::draw(){
+  if (!active) return;
   if (latched) { //Latched buttons must be drawn in a pressed state
     draw_pressed();
     return;
   }
 
   screen::set_pen(b_col);
-  screen::set_eraser(Page::current_page->b_col);
+  screen::set_eraser(Page::current_page->b_col); //at some point figure out why this isn't (page->b_col)
   screen::fill_rect(x1, y1, x2, y2);
   draw_oblong(x1, y1, x2, y2, 0, 0.15);
 
@@ -470,6 +472,7 @@ void Button::draw(){
 }
 
 void Button::draw_pressed(){
+  if (!active) return;
   screen::set_eraser(page->b_col); //Erases button
   screen::erase_rect(x1, y1, x2, y2);
 
@@ -507,6 +510,15 @@ void Button::set_func(std::function <void()> function) {func = function;}
 
 void Button::set_off_func(std::function <void()> function) {off_func = function;}
 
+void Button::set_active(bool active) {
+  this->active = active;
+  if (active) draw();
+  else{
+    screen::set_pen(page->b_col);
+    screen::fill_rect(x1, y1, x2, y2);
+  }
+}
+
 void Button::run_func() {if (func) func();}
 
 //Updating data and presses
@@ -536,7 +548,7 @@ bool Page::pressed(){
 
 bool Button::pressed(){
   // returns true if the button is currently being pressed
-  if (Page::current_page->pressed()){
+  if (active && Page::current_page->pressed()){
     if ((x1 <= Page::x && Page::x <= x2) && (y1 <= Page::y && Page::y <= y2)) return true;
   }
   return false;
@@ -704,6 +716,8 @@ void GUI::general_setup(){
 
     go_sequence.buttons.erase(go_sequence.buttons.begin(), go_sequence.buttons.begin()+2);
     go_button_text.set_background(ORANGE);
+
+    Page::go_to(0);
 }
 
 void GUI::general_background(){
