@@ -30,5 +30,7 @@ public:
   void print(std::uint8_t line, std::uint8_t col, const char* fmt, ... );
   void clear_line (std::uint8_t line);
   void clear();
+  void rumble(const char* rumble_pattern);
+
 
 };
