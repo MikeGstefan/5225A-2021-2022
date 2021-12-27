@@ -12,8 +12,7 @@ using namespace pros;
 template <typename state_type, int num_of_states>
 class Subsystem{
 protected:
-  state_type state;
-  state_type last_state;
+  state_type state, last_state;
   const char* name;
   std::array<const char*, num_of_states> state_names;
 
@@ -33,12 +32,16 @@ public:
   void handle();  // has a switch containing the state machine for a given subsystem
 };
 
-template <typename state_type, int num_of_states>
+template <typename state_type, int num_of_states, int default_velocity>
 class Motorized_subsystem: public Subsystem<state_type, num_of_states>{
+protected:
+  const int end_error;
+  double target, last_target;
+
 public:
   Motor& motor;
-  Motorized_subsystem(Subsystem<state_type, num_of_states> subsystem, Motor& motor):
-    Subsystem<state_type, num_of_states>(subsystem), motor(motor){}
+  Motorized_subsystem(Subsystem<state_type, num_of_states> subsystem, Motor& motor, int end_error = 10):
+    Subsystem<state_type, num_of_states>(subsystem), motor(motor), end_error(end_error){}
 
   // void reset(){
   //   move(-60);
@@ -80,4 +83,11 @@ public:
     printf("%d, %s's reset %lf\n", millis(), this->name, motor.get_position());
     motor.move(0);
   }
+
+  void move_absolute(double position, double velocity = default_velocity){ // sets target and last target
+    last_target = target;
+    target = position;
+    motor.move_absolute(position, velocity);
+  }
+
 };

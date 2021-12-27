@@ -11,14 +11,14 @@ Angler angler({{"Angler",
 }
 }, angler_motor});
 
-Angler::Angler(Motorized_subsystem<angler_states, NUM_OF_ANGLER_STATES> motorized_subsystem): Motorized_subsystem(motorized_subsystem){ // constructor
+Angler::Angler(Motorized_subsystem<angler_states, NUM_OF_ANGLER_STATES, ANGLER_MAX_VELOCITY> motorized_subsystem): Motorized_subsystem(motorized_subsystem){ // constructor
 
   state = angler_states::lowered;
   last_state = state;
 }
 
 void Angler::handle(){
-  if (fabs(motor.get_voltage()) > 1000 && fabs(motor.get_actual_velocity()) < 5.0) bad_count++;
+  if (fabs(motor.get_voltage()) > 2000 && fabs(motor.get_actual_velocity()) < 5.0) bad_count++;
   else bad_count = 0;
   if(bad_count > 50){
     printf("LIFT SAFETY TRIGGERED\n");
@@ -33,7 +33,7 @@ void Angler::handle(){
         set_state(angler_states::searching);
       }
       if(master.get_digital_new_press(angler_button)){  // grabs goal and raises angler when angler_button is pressed
-        motor.move_absolute(raised_position, 100);
+        move_absolute(raised_position);
         angler_piston.set_value(HIGH);
         set_state(angler_states::raised);
       }
@@ -41,7 +41,7 @@ void Angler::handle(){
     case angler_states::searching:
       // waits until robot thinks it hits the branch to grab the goal
       if(LeftEncoder.get_value()/360.0 *(2.75*M_PI) - angler_encoder_position > 2.0){
-        angler_motor.move_absolute(raised_position, 100);
+        move_absolute(raised_position);
         angler_piston.set_value(HIGH);
         set_state(angler_states::raised);
       }
@@ -52,17 +52,17 @@ void Angler::handle(){
 
     case angler_states::raised:
       if(master.get_digital_new_press(angler_button)){  // lowers angler to bottom when angler_button is pressed
-        angler_motor.move_absolute(bottom_position, 100);
+        move_absolute(bottom_position);
         set_state(angler_states::lowering);
       }
       break;
 
     case angler_states::lowering:
       if(master.get_digital_new_press(angler_button)){  // raises angler when angler_button is pressed
-        angler_motor.move_absolute(raised_position, 100);
+        move_absolute(raised_position);
         set_state(angler_states::raised);
       }
-      if(fabs(angler_motor.get_position() - bottom_position) < 25){  // releases goal once angler reaches bottom
+      if(fabs(angler_motor.get_position() - bottom_position) < end_error){  // releases goal once angler reaches bottom
         angler_piston.set_value(LOW);
         set_state(angler_states::searching);
       }
