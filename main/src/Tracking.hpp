@@ -67,14 +67,13 @@ struct line_params{
 };
 
 struct point_params{ 
-  const Point start;
   Position target;
   const double max_power;
   const bool overshoot;
   const double min_angle_percent;
   const bool brake;
   const double decel_dist, decel_speed;
-  point_params(const Point start, Position target, const double max_power = 127.0, const bool overshoot = false, const double min_angle_percent = 0.0, const bool brake = true, const double decel_dist = 0.0, const double decel_speed = 0.0);
+  point_params(Position target, const double max_power = 127.0, const bool overshoot = false, const double min_angle_percent = 0.0, const bool brake = true, const double decel_dist = 0.0, const double decel_speed = 0.0);
 };
 
 struct tank_arc_params{ 

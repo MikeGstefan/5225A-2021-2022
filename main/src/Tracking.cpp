@@ -235,8 +235,8 @@ arc_params::arc_params(const Point start, Position target, const double radius, 
 line_params::line_params(const Point start, Position target, const double max_power, const bool overshoot, const double min_angle_percent, const bool brake, const double decel_dist, const double decel_speed):
   start{start}, target{target}, max_power{max_power}, overshoot{overshoot}, min_angle_percent{min_angle_percent}, brake{brake}, decel_dist{decel_dist}, decel_speed{decel_speed}{}
 
-point_params::point_params(const Point start, Position target, const double max_power, const bool overshoot, const double min_angle_percent, const bool brake, const double decel_dist, const double decel_speed):
-  start{start}, target{target}, max_power{max_power}, overshoot{overshoot}, min_angle_percent{min_angle_percent}, brake{brake}, decel_dist{decel_dist}, decel_speed{decel_speed}{}
+point_params::point_params( Position target, const double max_power, const bool overshoot, const double min_angle_percent, const bool brake, const double decel_dist, const double decel_speed):
+  target{target}, max_power{max_power}, overshoot{overshoot}, min_angle_percent{min_angle_percent}, brake{brake}, decel_dist{decel_dist}, decel_speed{decel_speed}{}
 
 tank_arc_params::tank_arc_params(const Point start_pos, Position target, const double power, const double max_power, const bool brake):
   start_pos{start_pos}, target{target}, power{power}, max_power{max_power}, brake{brake}{}
@@ -293,7 +293,6 @@ void move_stop(bool brake){
 void move_to_point(void* params){
     _Task* ptr = _Task::get_obj(params);
     point_params* param_ptr = static_cast<point_params*>(_Task::get_params(params));
-    Point start = param_ptr->start;
     Position target = param_ptr->target;
     const double max_power = param_ptr->max_power;
     const bool overshoot = param_ptr->overshoot;
