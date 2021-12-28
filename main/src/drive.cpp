@@ -190,10 +190,12 @@ void Drivebase::handle_input(){
   if(fabs(tracking.power_a) < deadzone) tracking.power_a = 0.0;
 
   if(master.get_digital_new_press(reverse_drive_button)){
+    delay(50);
     master.rumble("-");
+    delay(50);
     reversed = !reversed;
-    if(reversed) master.print(1, 0, "Reversed");
-    else master.print(1, 0, "Direct");
+    if(reversed) master.print(1, 0, "Reverse");
+    else master.print(1, 0, "Forward");
   }
   if (reversed){
     tracking.power_y *= -1;
@@ -209,6 +211,7 @@ void Drivebase::driver_practice(){
   master.print(2, 0, "Driver: %s", drivers[cur_driver].name);
   while(true){
     while(!master.get_digital_new_press(E_CONTROLLER_DIGITAL_B)){
+      /*
       if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_UP)){ // goes to next driver
         cur_driver++;
         cur_driver %= num_of_drivers; // rollover
@@ -220,6 +223,7 @@ void Drivebase::driver_practice(){
         else cur_driver--;
         master.print(2, 0, "Driver: %s          ", drivers[cur_driver].name);
       }
+      */
 
       // actual drive code
       drivebase.handle_input();
@@ -229,6 +233,7 @@ void Drivebase::driver_practice(){
       if(front_l.get_temperature() >= 55 || front_r.get_temperature() >= 55 || back_r.get_temperature() >= 55 || back_l.get_temperature() >= 55){
         move(0, 0, 0);  // stops movement
         delay(50);
+        // rumbles controllers if motors are hot
         master.rumble("- - - ");
         delay(50);
         master.print(0, 0, "fl%.0f r%.0f bl%.0f r%.0f\n", front_l.get_temperature(), front_r.get_temperature(), back_l.get_temperature(), back_r.get_temperature());
@@ -238,7 +243,6 @@ void Drivebase::driver_practice(){
       if(screen_timer.get_time() > 1000){
         drivers_data.print("fl%.0f r%.0f bl%.0f r%.0f\n", front_l.get_temperature(), front_r.get_temperature(), back_l.get_temperature(), back_r.get_temperature());
         master.print(0, 0, "fl%.0f r%.0f bl%.0f r%.0f\n", front_l.get_temperature(), front_r.get_temperature(), back_l.get_temperature(), back_r.get_temperature());
-        // rumbles controllers if motors are hot
         screen_timer.reset();
       }
       delay(10);
