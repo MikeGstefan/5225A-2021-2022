@@ -64,32 +64,32 @@ void competition_initialize() {}
  * from where it left off.
  */
 void autonomous() {
-	lift.reset();
-	lift_piston.set_value(LOW);
-	lift.motor.move_absolute(lift.bottom_position, 100);
+	// lift.reset();
+	// lift_piston.set_value(LOW);
+	// lift.motor.move_absolute(lift.bottom_position, 100);
 
-	Timer move_timer{"move"};
-	move_to_point({112.5, 14.75, -90.0});
-	move_timer.print();
-	// tank_move_on_arc({110.0, 14.75}, {132.0, 24.0, -180.0}, 127.0);
-	// move_on_line(polar_to_vector(110.0, 14.75, 10.0, 45.0, -135.0));
-	move_to_point(polar_to_vector_point(110.0, 14.75, 17.5, 45.0, -135.0), 127.0, false, 1.0, false);	// grabs alliance goal
-	lift_piston.set_value(HIGH);
+	// Timer move_timer{"move"};
+	// move_to_point({112.5, 14.75, -90.0});
+	// move_timer.print();
+	// // tank_move_on_arc({110.0, 14.75}, {132.0, 24.0, -180.0}, 127.0);
+	// // move_on_line(polar_to_vector(110.0, 14.75, 10.0, 45.0, -135.0));
+	// move_to_point(polar_to_vector_point(110.0, 14.75, 17.5, 45.0, -135.0), 127.0, false, 1.0, false);	// grabs alliance goal
+	// lift_piston.set_value(HIGH);
 
-	tank_turn_to_target({108.0, 60.0});
-	// tank_move_to_target({110.0, 40.0, 0.0}, true, 127.0, 0.0, false);
-	move_to_point({110.0, 60.0, 0.0}, 127.0, false, 0.0, false);	// in front of small netural goal
-	move_to_point({110.0, 80.0, 0.0}, 127.0, false, 0.0, false);	// drives through small neutral goal
-	tank_move_on_arc({110.0, 84.0},{80.0, 96.0, -90.0}, 127.0);
-	move_to_point({60.0, 96.0, -90.0}, 80.0, false, 0.0, true);	// drives over rings
-	move_to_point({60.0, 108.0, -90.0}, 80.0, false, 0.0, true);	// drives to drop off small neutral
-	lift.motor.move_absolute(lift.platform_position, 100);
-	move_to_point({60.0, 108.0, -180.0}, 80.0, false, 0.0, true);	// drives to drop off small neutral
-	lift_piston.set_value(LOW);
+	// tank_turn_to_target({108.0, 60.0});
+	// // tank_move_to_target({110.0, 40.0, 0.0}, true, 127.0, 0.0, false);
+	// move_to_point({110.0, 60.0, 0.0}, 127.0, false, 0.0, false);	// in front of small netural goal
+	// move_to_point({110.0, 80.0, 0.0}, 127.0, false, 0.0, false);	// drives through small neutral goal
+	// tank_move_on_arc({110.0, 84.0},{80.0, 96.0, -90.0}, 127.0);
+	// move_to_point({60.0, 96.0, -90.0}, 80.0, false, 0.0, true);	// drives over rings
+	// move_to_point({60.0, 108.0, -90.0}, 80.0, false, 0.0, true);	// drives to drop off small neutral
+	// lift.motor.move_absolute(lift.platform_position, 100);
+	// move_to_point({60.0, 108.0, -180.0}, 80.0, false, 0.0, true);	// drives to drop off small neutral
+	// lift_piston.set_value(LOW);
 
 
 
-	move_timer.print();
+	// move_timer.print();
 	/*
 	move_to_point({108.0, 60.0, 0.0}, 127.0, false, 0.0, false);
 	move_timer.print();
@@ -125,7 +125,7 @@ void opcontrol() {
 	// move_on_arc({0.0, 0.0}, {-24.0, 0.0, -180.0}, 12.0, false, 127, true, 1.0, true, 20.0, 127.0);
 	// tank_move_on_arc({0.0, 0.0}, {-24.0, 24.0, -90.0}, 127.0, 127.0, true);
 	// move_on_arc({0.0, 0.0}, {10.0, 10.0, 0.0}, 10.0, false, 127, false, 0.3, 0.0, true);
-	move.print();
+	// move.print();
 	printf("DONE\n");
 	// while(true){
 	// 	gui_background();
