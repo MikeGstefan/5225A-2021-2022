@@ -945,6 +945,7 @@ void tank_turn_to_angle(double target_a, const bool brake){
       if(brake) drivebase.brake();
       return;
     }
+    delay(10);
   }
 }
 
@@ -961,6 +962,7 @@ void tank_turn_to_target(const Point target, const bool reverse, const bool brak
       if(brake) drivebase.brake();
       return;
     }
+    delay(10);
   }
 }
 
