@@ -82,3 +82,13 @@ void _Controller::clear(){
   this->add_to_queue(func);
   controller_queue.print("%d| adding clear to queue for controller %d\n",millis(), this->controller_num);
 }
+
+
+void _Controller::rumble(const char* rumble_pattern){
+  std::function<void()> func = [=](){
+    pros::Controller::rumble(rumble_pattern);
+    controller_queue.print("%d| rumble controller %d\n",millis(), this->controller_num);
+  };
+  this->add_to_queue(func);
+  controller_queue.print("%d| adding rumble to queue for controller %d\n",millis(), this->controller_num);
+}
