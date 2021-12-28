@@ -1,29 +1,6 @@
 #include "drive.hpp"
 // custom drive class methods
 
-// Buttons
-
-// dropoff buttons
-controller_digital_e_t ring_dropoff_button = E_CONTROLLER_DIGITAL_UP;
-controller_digital_e_t switch_dropoff_side_button = E_CONTROLLER_DIGITAL_DOWN;
-
-// spinning buttons
-controller_digital_e_t turn_mogo_cw_button = E_CONTROLLER_DIGITAL_RIGHT;
-controller_digital_e_t turn_mogo_ccw_button = E_CONTROLLER_DIGITAL_LEFT;
-
-// fbar buttons
-controller_digital_e_t f_bar_up_button = E_CONTROLLER_DIGITAL_L1;
-controller_digital_e_t f_bar_down_button = E_CONTROLLER_DIGITAL_L2;
-
-// misc buttons
-controller_digital_e_t cancel_dropoff_button = E_CONTROLLER_DIGITAL_B;
-controller_digital_e_t fill_top_goal_button = E_CONTROLLER_DIGITAL_Y;
-controller_digital_e_t pickup_rings_button = E_CONTROLLER_DIGITAL_X;
-controller_digital_e_t platform_down_button = E_CONTROLLER_DIGITAL_A;
-
-controller_digital_e_t mogo_toggle_button = E_CONTROLLER_DIGITAL_R1;
-controller_digital_e_t tip_mogo_button = E_CONTROLLER_DIGITAL_R2;
-
 // singleton drivebase instance
 Drivebase drivebase = {{
   driver("Nikhil", {E_CONTROLLER_ANALOG_LEFT_X, E_CONTROLLER_ANALOG_RIGHT_Y, E_CONTROLLER_ANALOG_RIGHT_X}, {0.0, 0.5, 1.0}),
@@ -212,6 +189,17 @@ void Drivebase::handle_input(){
   if(fabs(tracking.power_y) < deadzone) tracking.power_y = 0.0;
   if(fabs(tracking.power_a) < deadzone) tracking.power_a = 0.0;
 
+  if(master.get_digital_new_press(reverse_drive_button)){
+    master.rumble("-");
+    reversed = !reversed;
+    if(reversed) master.print(1, 0, "Reversed");
+    else master.print(1, 0, "Direct");
+  }
+  if (reversed){
+    tracking.power_y *= -1;
+    tracking.power_x *= -1;
+  }
+
   move(tracking.power_x, tracking.power_y, tracking.power_a);
 }
 
@@ -232,7 +220,12 @@ void Drivebase::driver_practice(){
         else cur_driver--;
         master.print(2, 0, "Driver: %s          ", drivers[cur_driver].name);
       }
+
+      // actual drive code
       drivebase.handle_input();
+      lift.handle();
+
+      // takes away control from driver when motors overheat
       if(front_l.get_temperature() >= 55 || front_r.get_temperature() >= 55 || back_r.get_temperature() >= 55 || back_l.get_temperature() >= 55){
         move(0, 0, 0);  // stops movement
         delay(50);
@@ -241,8 +234,8 @@ void Drivebase::driver_practice(){
         master.print(0, 0, "fl%.0f r%.0f bl%.0f r%.0f\n", front_l.get_temperature(), front_r.get_temperature(), back_l.get_temperature(), back_r.get_temperature());
         return;
       }
-      // prints motor temps every 50 ms
-      if(screen_timer.get_time() > 50){
+      // prints motor temps every second
+      if(screen_timer.get_time() > 1000){
         drivers_data.print("fl%.0f r%.0f bl%.0f r%.0f\n", front_l.get_temperature(), front_r.get_temperature(), back_l.get_temperature(), back_r.get_temperature());
         master.print(0, 0, "fl%.0f r%.0f bl%.0f r%.0f\n", front_l.get_temperature(), front_r.get_temperature(), back_l.get_temperature(), back_r.get_temperature());
         // rumbles controllers if motors are hot

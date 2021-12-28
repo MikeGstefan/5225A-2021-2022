@@ -145,26 +145,16 @@ const int min_move_power_a = 23;
 const int min_move_power_x = 40;
 const int min_move_power_y = 17;
 
-// #define xy_enable a
+#define xy_enable a
 
 // macros for convenient modification of move algorithms
 
-#define polar_to_vector(start_x, start_y, magnitude, theta, angle){\
+#define polar_to_vector_line(start_x, start_y, magnitude, theta, angle)\
   {start_x, start_y}, {start_x + sin(deg_to_rad(theta)) * magnitude, start_y + cos(deg_to_rad(theta)) * magnitude, angle}\
-}
 
 #define polar_to_vector_facing_line(start_x, start_y, magnitude, angle){\
   polar_to_vector(start_x, start_y, magnitude, angle, angle)\
 }
+#define polar_to_vector_point(start_x, start_y, magnitude, theta, angle)\
+  {start_x + sin(deg_to_rad(theta)) * magnitude, start_y + cos(deg_to_rad(theta)) * magnitude, angle}\
 
-#define polar_to_vector_facing_line_backwards(start_x, start_y, magnitude, angle){\
-  polar_to_vector(start_x, start_y, magnitude, angle, angle + 180)\
-}
-
-#define facing_line(start_x, start_y, target_x, target_y, forward){\
-  {start_x, start_y}, {target_x, target_y, atan2(target_x - start_x, target_y - start_y)}\
-}
-
-#define facing_line_backwards(start_x, start_y, target_x, target_y, forward){\
-  {start_x, start_y}, {target_x, target_y, rad_to_deg(atan2(target_x - start_x, target_y - start_y)) + 180}\
-}
