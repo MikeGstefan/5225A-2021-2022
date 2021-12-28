@@ -2,6 +2,8 @@
 #include "gui.hpp"
 #include "controller.hpp"
 #include "pid.hpp"
+#include "Tracking.hpp"
+#include "task.hpp"
 
 // using namespace std;
 #include "task.hpp"
@@ -15,7 +17,7 @@ using namespace std;
  * All other competition modes are blocked by initialize; it is recommended
  * to keep execution time for this mode under a few seconds.
  */
-
+ pros::Task *updt = nullptr;
 
 void initialize() {
 	drivebase.download_curve_data();
@@ -24,8 +26,10 @@ void initialize() {
 	delay(150);
 	tracking.x_coord = 0.0, tracking.y_coord = 0.0, tracking.global_angle = 0.0;
 	update_t.start();
-	gui_setup();
-	master.print(2, 0, "Driver: %s", drivebase.drivers[drivebase.cur_driver].name);
+	// updt = new Task(update);
+	printf("here\n");
+	// gui_setup();
+	// master.print(2, 0, "Driver: %s", drivebase.drivers[drivebase.cur_driver].name);
 }
 
 /**
@@ -97,7 +101,7 @@ void autonomous() {
  */
  int ring_count = 0;
  double cur_auton = 1;
- 
+int x = 0;
 void opcontrol() {
 	/*Gui:
 	Reset tracking by task

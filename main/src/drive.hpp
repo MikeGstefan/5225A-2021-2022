@@ -31,6 +31,7 @@ extern controller_digital_e_t tip_mogo_button;
 // aliases to make code more readable, used to encode vales of drive.cur_driver
 // enum class drivers{Nikhil = 0, Emily = 1, Sarah = 2};
 
+// wait until at least 50 ms since the last reset
 #define WAIT_FOR_SCREEN_REFRESH() {\
   delay(drivebase.screen_timer.get_time() < 50 ? 50 - drivebase.screen_timer.get_time() : 0);\
   drivebase.screen_timer.reset();\
