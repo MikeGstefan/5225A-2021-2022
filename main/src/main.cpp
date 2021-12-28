@@ -99,20 +99,30 @@ void autonomous() {
  * operator control task will be stopped. Re-enabling the robot will restart the
  * task, not resume it from where it left off.
  */
- int ring_count = 0;
- double cur_auton = 1;
-int x = 0;
+
+
+int ring_count = 0;
+double cur_auton = 1;
+ 
 void opcontrol() {
 	/*Gui:
 	Reset tracking by task
-	/**/
+	*/
 	Timer move = {"move"};
 	printf("START\n");
 	move.print();
 
 	// rush_goal2(0.0, -20.0, 0.0);
-	// move_start(move_types::tank_arc, tank_arc_params({0.0, 0.0}, {-24.0, 24.0, -90.0}, 127.0, 127.0, true));
-	while(true)delay(10);
+	// move_start(move_types::arc, arc_params({0.0, 0.0}, {-24.0, 0.0, -180.0}, 12.0, false, 127, true, 1.0, true, 20.0, 127.0), true);
+	// move_start(move_types::tank_arc, tank_arc_params({0.0, 0.0}, {10.0, 10.0, -90.0}, 127.0, 127.0, true));
+	move_start(move_types::line, line_params({0.0, 0.0}, {0.0, 24.0, 00.0}, 127.0, false, 0.0, false), true);
+	// drivebase.move(0,0,0);
+	// move_wait_for_complete();
+	misc.print("I MADE IT OUT OF THE MOVEMENT \n\n\n\n");
+	while(true){
+		gui_background();
+		delay(10);
+	}
 	// move_start(move_types::arc, arc_params({0.0, 0.0}, {-24.0, 0.0, -180.0}, 12.0, false, 127, true, 1.0, true, 20.0, 127.0));
 	// move_on_line({0.0, 0.0}, {0.0, 24.0, 00.0}, 127.0, false, 0.0, false);
 

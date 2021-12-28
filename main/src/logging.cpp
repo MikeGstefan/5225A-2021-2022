@@ -24,8 +24,10 @@ Data task_log("tasks.txt","$01", general, log_locations::both);
 Data controller_queue("controller.txt","$02", general,log_locations::sd);
 Data tracking_data("tracking.txt","$03",debug,log_locations::sd);
 Data tracking_imp("tracking.txt","$03",general,log_locations::both);
-Data misc("misc.txt", "$04",debug,log_locations::t);
+Data misc("misc.txt", "$04",debug,log_locations::both);
 Data drivers_data("driver.txt", "$05", debug,log_locations::t);
+Data motion_i("motion.txt","$06",general,log_locations::both);
+Data motion_d("motion.txt", "%06", debug,log_locations::both);
 
 
 vector<Data*> Data::get_objs(){

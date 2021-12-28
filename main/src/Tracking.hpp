@@ -30,6 +30,7 @@ public:
     double x_coord = 0.0; double y_coord = 0.0; double global_angle = 0.0; //double target_x = 0.0;
     double power_x, power_y, power_a;
     double l_velo, r_velo, b_velo;
+
     double drive_error;
     bool move_complete = true, move_started = false;
     int movetime = 0;
@@ -117,15 +118,17 @@ enum class move_types{
 };
 
 
-void move_start(move_types type, std::variant<arc_params, line_params, tank_arc_params, point_params, tank_point_params, turn_angle_params, turn_point_params> params);
-
+void move_start(move_types type, std::variant<arc_params, line_params, tank_arc_params, point_params, tank_point_params, turn_angle_params, turn_point_params> params, bool wait_for_comp = true);
+bool move_wait_for_complete();
+void move_stop(bool brake = false);
 
 
 void rush_goal(double target_x, double target_y, double target_a);
 void rush_goal2(double target_x, double target_y, double target_a);
+
+
 void move_to_point(void* params);
 void move_on_arc(void* params);
-
 void move_on_line(void* params);
 
 // tank drive move algorithms
@@ -133,6 +136,7 @@ void tank_move_to_target(void* params);
 void tank_move_on_arc(void* params);  // min speed for smooth move is 100
 
 void turn_to_angle(void* params);
+//overloaded to be called in another function DO NOT CALL ALONE
 void turn_to_angle(double target_a, const bool brake, _Task* ptr);
 void turn_to_point(void* params);
 
