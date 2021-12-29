@@ -8,6 +8,7 @@
 #include "Tracking.hpp"
 #include "task.hpp"
 #include "auton_util.hpp"
+#include "config.hpp"
 
 void red_tall_rush();
 void skills();

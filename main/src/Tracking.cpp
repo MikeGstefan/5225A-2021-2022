@@ -323,9 +323,9 @@ void move_to_point(void* params){
     double min_power_a = max_power * min_angle_percent;
     // PID'S
 
-    PID x_pid(30, 0.0, 0.0, 0.0, true, 0.2, 3.0);
+    PID x_pid(25, 0.0, 0.0, 0.0, true, 0.2, 3.0);
     PID y_pid(12.0, 0.0, 1.0, 0.0, true, 0.2, 3.0);
-    PID angle_pid(175.0, 0.0, 0.0, 0.0, true, 0.0, 360.0);
+    PID angle_pid(172.0, 0.0, 0.0, 0.0, true, 0.0, 360.0);
 
     // decel variables
     double h; // magnitude of power vector

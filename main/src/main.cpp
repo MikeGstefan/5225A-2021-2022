@@ -6,6 +6,7 @@
 #include "pid.hpp"
 #include "Tracking.hpp"
 #include "task.hpp"
+#include "auton.hpp"
 
 // using namespace std;
 #include "task.hpp"
@@ -64,6 +65,7 @@ void competition_initialize() {}
  * from where it left off.
  */
 void autonomous() {
+	skills();
 	// lift.reset();
 	// lift_piston.set_value(LOW);
 	// lift.motor.move_absolute(lift.bottom_position, 100);
@@ -120,13 +122,14 @@ void autonomous() {
  double cur_auton = 1;
 
 void opcontrol() {
-	move_start(move_types::line, line_params({0.0, 0.0}, {0.0, 24.0, 00.0}, 127.0, false, 0.0, false), true);
+	// move_start(move_types::line, line_params({0.0, 0.0}, {0.0, 24.0, 00.0}, 127.0, false, 0.0, false), true);
+	move_start(move_types::point, point_params({0.0,50.0,20.0}),true);
 
 	// move_on_arc({0.0, 0.0}, {-24.0, 0.0, -180.0}, 12.0, false, 127, true, 1.0, true, 20.0, 127.0);
 	// tank_move_on_arc({0.0, 0.0}, {-24.0, 24.0, -90.0}, 127.0, 127.0, true);
 	// move_on_arc({0.0, 0.0}, {10.0, 10.0, 0.0}, 10.0, false, 127, false, 0.3, 0.0, true);
 	// move.print();
-	printf("DONE\n");
+	// printf("DONE\n");
 	// while(true){
 	// 	gui_background();
 	// 	drivebase.handle_input();
