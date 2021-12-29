@@ -229,6 +229,7 @@ void Drivebase::driver_practice(){
       // actual drive code
       drivebase.handle_input();
       lift.handle();
+      tilter.handle();
 
       // takes away control from driver when motors overheat
       if(front_l.get_temperature() >= 55 || front_r.get_temperature() >= 55 || back_r.get_temperature() >= 55 || back_l.get_temperature() >= 55){

@@ -10,5 +10,5 @@ extern pros::Motor front_l, front_r, back_l, back_r, f_bar, c_bar, intk, uptk, l
 extern pros::ADIEncoder LeftEncoder, RightEncoder, BackEncoder;
 extern pros::ADIDigitalIn claw_touch;
 extern pros::ADIDigitalIn lift_trigger, tilter_trigger, hitch_trigger;
-extern pros::ADIDigitalOut lift_piston, tilter_piston, hitch_piston;
+extern pros::ADIDigitalOut lift_piston, tilter_bottom_piston, tilter_top_piston, hitch_piston;
 extern pros::Distance tilter_dist;

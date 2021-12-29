@@ -118,10 +118,24 @@ void autonomous() {
  double cur_auton = 1;
 
 void opcontrol() {
+	// driver gui_setup
+
 	lift_piston.set_value(LOW);	// in searching state
 	lift.reset();
+	tilter.reset();
 	lift.motor.move_absolute(35, 100);
+	tilter.move_absolute(500, 100);
+	tilter_bottom_piston.set_value(LOW);
+	tilter_top_piston.set_value(LOW);
+
+
 	drivebase.driver_practice();
+	// drivebase.move(0, 50, 0);
+
+	// while(true){
+	// 	printf("%d\n", tilter_dist.get());
+	// 	delay(10);
+	// }
 
 
 }
