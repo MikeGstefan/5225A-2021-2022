@@ -1,6 +1,6 @@
 #include "drive.hpp"
 #include "controller.hpp"
-#include "gui/gui_main.hpp"
+#include "gui/gui.hpp"
 
 // using namespace std;
 #include "task.hpp"
@@ -73,25 +73,11 @@ void autonomous() {}
  */
 
 //Get rid of these once merged
-void prev_driver(){
-	if (drivebase.cur_driver == 0) drivebase.cur_driver = drivebase.num_of_drivers - 1;
-	else drivebase.cur_driver--;
-	WAIT_FOR_SCREEN_REFRESH();
-	master.print(2, 0, "Driver: %s          ", drivebase.drivers[drivebase.cur_driver].name);
-}
-void next_driver(){
-	drivebase.cur_driver++;
-	drivebase.cur_driver %= drivebase.num_of_drivers;
-	WAIT_FOR_SCREEN_REFRESH();
-	master.print(2, 0, "Driver: %s          ", drivebase.drivers[drivebase.cur_driver].name);
-}
-
 int ring_count = 0, cur_auton = 1;
 
 void opcontrol() {
 	/*Gui:
 	Reset tracking by task
-	move abstract page methods to GUI class
 	/**/
 
 	// while(true){
@@ -102,7 +88,6 @@ void opcontrol() {
 	// claw_in.set_value(1); //Open
 	// rush_goal2(0, 100, 0);
 
-
 	while(true){
 		GUI::background();
 		drivebase.handle_input();
@@ -111,8 +96,8 @@ void opcontrol() {
 			drivebase.update_lookup_table_util();
 			master.clear();
 		}
-		else if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_UP)) next_driver();
-		else if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_DOWN)) prev_driver();
+		else if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_UP)) drivebase.next_driver();
+		else if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_DOWN)) drivebase.prev_driver();
 		else if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_X)) claw_in.set_value(1); //Open
 		else if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_Y)){
 			claw_in.set_value(1); //Open

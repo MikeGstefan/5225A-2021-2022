@@ -5,10 +5,21 @@
 #include <variant>
 #include <typeinfo>
 
+#ifdef GUI_MAIN
+#define PAGE_COUNT 12 //The number for testing if not included. Otherwise +1
+
+#elif defined(GUI_UTIL)
+#define PAGE_COUNT 5
+
+#else
+#define GUI_MAIN
+#define PAGE_COUNT 12
+
+#endif //MAIN
+
 #define ORANGE 0x00F36421
 #define GREY 0x00202020
 
-#define PAGE_COUNT 12 //The number for testing if not included. Otherwise +1
 #define PAGE_LEFT 0
 #define PAGE_UP 0
 #define PAGE_RIGHT 480
@@ -49,11 +60,11 @@ class GUI{ //Do not make a GUI object ever. To make different GUI's, create a ne
   friend class Button;
   friend class Slider;
   friend class Text;
-  
+
   private:
     static last_touch_e_t touch_status;
     static int16_t x, y;
-    
+
     static void update_screen_status(), update();
     static void general_setup(), general_background();
     static void end_flash();
@@ -76,7 +87,7 @@ class Page{
     std::function <void()> setup_func, loop_func;
     std::uint32_t b_col;
     std::string title;
-    
+
     //Functions
     static void update();
 
@@ -113,7 +124,7 @@ class Button{
 
   private:
     Button (){};
-    
+
     //Vars
     std::uint32_t l_col, b_col, b_col_dark;
     std::string label, label1="";
@@ -121,10 +132,11 @@ class Button{
     bool last_pressed=0;
     press_type form; //What type of button
     std::function <void()> func, off_func; //toggle is only for toggle type buttons
-    bool active = true;
+    bool active=true;
 
     //For latch buttons
-    bool latched=0, on=0; //on is for toggle
+    bool latched=0;
+    bool on=0; //on is for toggle
     std::vector<Button*> options;
 
     //Functions
@@ -135,7 +147,6 @@ class Button{
     void draw_pressed();
 
   public:
-    //Constructor
     //Points, Format, Page, Label, Bcolor, Lcolor
     Button (int16_t, int16_t, int16_t, int16_t, Style, press_type, Page&, std::string = "", std::uint32_t = ORANGE, std::uint32_t = COLOR_BLACK);
 
@@ -179,7 +190,7 @@ class Slider{
   public:
     //Points, Format, Min, Max, Page, Label, Bcolor, Lcolor
     Slider (int16_t, int16_t, int16_t, int16_t, Style, direction, int, int, Page&, std::string = "Value", std::uint32_t = COLOR_WHITE, std::uint32_t = ORANGE);
-    
+
     //Functions
     int get_val();
 };
@@ -189,6 +200,7 @@ class Text{
   friend class Page;
 
   private:
+    //Vars
     int16_t x, y, x1, y1, x2, y2;
     text_format_e_t txt_fmt;
     std::string label;
@@ -210,7 +222,7 @@ class Text{
     Text (int16_t, int16_t, Style, text_format_e_t, Page&, std::string, double*, std::uint32_t label_color = COLOR_WHITE);
     Text (int16_t, int16_t, Style, text_format_e_t, Page&, std::string, int*, std::uint32_t label_color = COLOR_WHITE);
     Text (int16_t, int16_t, Style, text_format_e_t, Page&, std::string, std::string*, std::uint32_t label_color = COLOR_WHITE);
-    
+
     //Functions
     void set_background (int16_t, int16_t, std::uint32_t = 0xFFFFFFFF);
     void set_background (int16_t, int16_t, int16_t, int16_t, Style, std::uint32_t = 0xFFFFFFFF);

@@ -188,15 +188,10 @@ void Drivebase::driver_practice(){
   while(true){
     while(!master.get_digital_new_press(E_CONTROLLER_DIGITAL_B)){
       if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_UP)){ // goes to next driver
-        cur_driver++;
-        cur_driver %= num_of_drivers; // rollover
-        // spaces in the controller print are to overwrite names
-        master.print(2, 0, "Driver: %s          ", drivers[cur_driver].name);
+        next_driver();
       }
       else if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_DOWN)){  // goes to previous driver
-        if (cur_driver == 0)  cur_driver = num_of_drivers - 1;
-        else cur_driver--;
-        master.print(2, 0, "Driver: %s          ", drivers[cur_driver].name);
+        prev_driver();
       }
       drivebase.handle_input();
       if(front_l.get_temperature() >= 55 || front_r.get_temperature() >= 55 || back_r.get_temperature() >= 55 || back_l.get_temperature() >= 55){
@@ -220,4 +215,18 @@ void Drivebase::driver_practice(){
     master.clear();
     master.print(2, 0, "Driver: %s", drivers[cur_driver].name);
   }
+}
+
+//Sadly these are static functions. But they'll only be called with drivebase object, so...
+void Drivebase::next_driver(){
+  drivebase.cur_driver++;
+  drivebase.cur_driver %= drivebase.num_of_drivers; // rollover
+  // spaces in the controller print are to overwrite names
+  master.print(2, 0, "Driver: %s          ", drivebase.drivers[drivebase.cur_driver].name);
+}
+
+void Drivebase::prev_driver(){
+  if (drivebase.cur_driver == 0)  drivebase.cur_driver = drivebase.num_of_drivers - 1;
+  else drivebase.cur_driver--;
+  master.print(2, 0, "Driver: %s          ", drivebase.drivers[drivebase.cur_driver].name);
 }

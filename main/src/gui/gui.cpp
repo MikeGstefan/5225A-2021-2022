@@ -135,7 +135,7 @@ void GUI::flash(std::uint32_t color, std::uint32_t time, std::string text){
   for(int i=1; i <= spaces; i++){
     space = text.find(' ', text.length()*i/spaces);
     sub = text.substr(last_space, space-last_space);
-    screen::print(TEXT_LARGE, (480-sub.length()*CHAR_WIDTH_LARGE)/2, (CHAR_HEIGHT_LARGE+5)*(i-1), sub.c_str());
+    screen::print(TEXT_LARGE, (480-sub.length()*CHAR_WIDTH_LARGE)/2, (CHAR_HEIGHT_LARGE+5)*i, sub.c_str());
     last_space = space+1;
   }
 
@@ -167,8 +167,7 @@ std::tuple<int, int, int, int> fixPoints (int x1, int y1,int x2, int y2, Style t
       break;
   }
 
-  //Putting coordinates in a left-right up-down order in case it was accidentally reversed or given negatives. Makes checking presses easier
-  int temp;
+  int temp; //Putting coordinates in a left-right up-down order in case it was accidentally reversed or given negatives. Makes checking presses easier
 
   temp = std::max(x1, x2);
   x1 = std::min(x1, x2);
@@ -341,7 +340,13 @@ void Button::create_options(std::vector<Button*> buttons){
   std::vector<Button*>::iterator it, it2; //For clarity
 
   for (it = buttons.begin(); it != buttons.end(); it++){
-    if ((*it)->form != LATCH && (*it)->form != TOGGLE) {printf("Option Feature is only available for latch and toggle buttons!\n"); return;}
+    Button* btn_id= *it;
+    if (btn_id->form != LATCH && btn_id->form != TOGGLE){
+      char error [100];
+      sprintf(error, "Option Feature is only available for latch and toggle buttons! Failed on \"%s\" button.\n", btn_id->label.c_str());
+      throw std::invalid_argument(error);
+      return;
+    }
   }
 
   for (it = buttons.begin(); it != buttons.end(); it++){//For each button in the list
