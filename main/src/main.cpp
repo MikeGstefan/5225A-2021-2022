@@ -120,7 +120,7 @@ void autonomous() {
 void opcontrol() {
 	lift_piston.set_value(LOW);	// in searching state
 	lift.reset();
-	lift.motor.move_absolute(40, 100);
+	lift.motor.move_absolute(35, 100);
 	drivebase.driver_practice();
 
 

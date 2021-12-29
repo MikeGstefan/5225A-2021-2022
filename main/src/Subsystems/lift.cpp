@@ -4,15 +4,13 @@
 Lift lift({{"Lift",
 {
   "searching",
+  "lowered",
   "grabbed",
-  "releasing",
-  "lifting",
   "raised",
   "platform",
   "level_platform_prep",
   "level_platform",
-  "released",
-  "lowering",
+  "dropoff",
   "manual",
 }
 }, lift_motor});
@@ -27,11 +25,14 @@ Lift::Lift(Motorized_subsystem<lift_states, NUM_OF_LIFT_STATES, LIFT_MAX_VELOCIT
 }
 
 void Lift::handle(){
-  if (fabs(motor.get_voltage()) > 2000 && fabs(motor.get_actual_velocity()) < 5.0) bad_count++;
+  if (fabs(target - motor.get_position()) > end_error && fabs(motor.get_actual_velocity()) < 5.0) bad_count++;
   else bad_count = 0;
-  if(bad_count > 30){
-    printf("LIFT SAFETY TRIGGERED\n");
+  if(bad_count > 25 && state != lift_states::manual){
     motor.move(0);
+    delay(50);
+    master.rumble("---");
+    delay(50);
+    printf("LIFT SAFETY TRIGGERED\n");
     set_state(lift_states::manual);
   }
 
@@ -46,57 +47,42 @@ void Lift::handle(){
         lift_piston.set_value(HIGH);
         set_state(lift_states::grabbed);
       }
-      break;
-
-    case lift_states::grabbed:
-      if(master.get_digital_new_press(lift_up_button)){ // lifts goal to platform height if up button is pressed
-        move_absolute(raised_position, 100);
-        set_state(lift_states::lifting);
-      }
-      if(master.get_digital_new_press(lift_down_button)){ // releases goal if down button is pressed
-        lift_piston.set_value(LOW);
-        set_state(lift_states::releasing);
-      }
-      if(master.get_digital_new_press(level_platform_button)){  // moves to top position if level platform button is pressed
-        move_absolute(top_position);
-        set_state(lift_states::level_platform_prep);
+      // switches state to lowered if down button is pressed
+      if(master.get_digital_new_press(lift_down_button)){
+        master.print(2, 0, "lowered     ");
+        // master.rumble("-");
+        set_state(lift_states::lowered);
       }
       break;
 
-    case lift_states::releasing:
+    case lift_states::lowered:
       // grabs goal if up button is pressed
       if(master.get_digital_new_press(lift_up_button)){
         lift_piston.set_value(HIGH);
         set_state(lift_states::grabbed);
       }
-      // waits for goal to leave trigger to enter searching state (checks for 5 cycles)
-      if(!lift_trigger.get_value()) released_cycle_check++;
-      else released_cycle_check = 0;
-      if(released_cycle_check >= 10)  set_state(lift_states::searching);
+      // switches state to searching if down button is pressed
+      if(master.get_digital_new_press(lift_down_button)){
+        master.print(2, 0, "searching     ");
+        // master.rumble("-");
+        set_state(lift_states::searching);
+      }
       break;
 
-    case lift_states::lifting:
+    case lift_states::grabbed:
+      if(master.get_digital_new_press(lift_up_button)){ // lifts goal to platform height if up button is pressed
+        move_absolute(raised_position, 100);
+        set_state(lift_states::raised);
+      }
+      // releases goal if down button is pressed
+      if(master.get_digital_new_press(lift_down_button) && fabs(bottom_position - motor.get_position()) < end_error){
+        lift_piston.set_value(LOW);
+        master.print(2, 0, "lowered     ");
+        set_state(lift_states::lowered);
+      }
       if(master.get_digital_new_press(level_platform_button)){  // moves to top position if level platform button is pressed
         move_absolute(top_position);
         set_state(lift_states::level_platform_prep);
-      }
-      if(master.get_digital_new_press(lift_down_button)){ // lowers goal if down button is pressed
-        move_absolute(last_target);
-        set_state(last_state);
-      }
-      if(target - motor.get_position() < end_error){ // waits for lift to reach target position before setting state
-        switch(last_state){
-          case lift_states::grabbed:
-            set_state(lift_states::raised);
-            break;
-
-          case lift_states::raised:
-            set_state(lift_states::platform);
-            break;
-
-          default:
-            printf("Invalid state encountered while lifting, last state was: %s\n", state_names[static_cast<int>(last_state)]);
-        }
       }
       break;
 
@@ -107,11 +93,11 @@ void Lift::handle(){
       }
       if(master.get_digital_new_press(lift_up_button)){ // lifts goal to platform height if up button is pressed
         move_absolute(platform_position);
-        set_state(lift_states::lifting);
+        set_state(lift_states::platform);
       }
       if(master.get_digital_new_press(lift_down_button)){ // lowers goal if down button is pressed
         move_absolute(bottom_position);
-        set_state(lift_states::lowering);
+        set_state(lift_states::grabbed);
       }
       break;
 
@@ -120,13 +106,14 @@ void Lift::handle(){
         move_absolute(top_position);
         set_state(lift_states::level_platform_prep);
       }
-      if(master.get_digital_new_press(lift_up_button)){ // releases goal if up button is pressed
+      // drops off goal if up button is pressed
+      if(master.get_digital_new_press(lift_up_button) && fabs(motor.get_position() - platform_position) < end_error){
         lift_piston.set_value(LOW);
-        set_state(lift_states::released);
+        set_state(lift_states::dropoff);
       }
       if(master.get_digital_new_press(lift_down_button)){ // lowers goal if down button is pressed
         move_absolute(raised_position);
-        set_state(lift_states::lowering);
+        set_state(lift_states::raised);
       }
       break;
 
@@ -134,7 +121,7 @@ void Lift::handle(){
       // goes to platform height if up or down buttons are pressed
       if(master.get_digital_new_press(lift_up_button) || master.get_digital_new_press(lift_down_button)){
         move_absolute(platform_position);
-        set_state(lift_states::lowering);
+        set_state(lift_states::platform);
       }
       // sets state to level platform once lift reaches top position
       if(fabs(motor.get_position() - top_position) < end_error) set_state(lift_states::level_platform);
@@ -144,52 +131,15 @@ void Lift::handle(){
       // goes to platform height if any of the lift buttons are pressed
       if(master.get_digital_new_press(lift_up_button) || master.get_digital_new_press(lift_down_button) || master.get_digital_new_press(level_platform_button)){
         move_absolute(platform_position);
-        set_state(lift_states::lowering);
+        set_state(lift_states::platform);
       }
       break;
 
-    case lift_states::released:
+    case lift_states::dropoff:
       // releases goal if up or down button is pressed
       if(master.get_digital_new_press(lift_up_button) || master.get_digital_new_press(lift_down_button)){
         move_absolute(bottom_position);
-        set_state(lift_states::lowering);
-      }
-      break;
-
-    case lift_states::lowering:
-      if(master.get_digital_new_press(level_platform_button)){  // moves to top position if level platform button is pressed
-        move_absolute(top_position);
-        set_state(lift_states::level_platform_prep);
-      }
-      if(master.get_digital_new_press(lift_up_button)){ // lifts goal if up button is pressed
-        move_absolute(last_target);
-        set_state(last_state);
-      }
-      else if(motor.get_position() - target < end_error){ // waits for lift to reach target position before setting state
-        switch(last_state){
-          case lift_states::raised:
-            set_state(lift_states::grabbed);
-            break;
-
-          case lift_states::platform:
-            set_state(lift_states::raised);
-            break;
-
-          case lift_states::released:
-            set_state(lift_states::searching);
-            break;
-
-          case lift_states::level_platform_prep:
-            set_state(lift_states::platform);
-            break;
-
-          case lift_states::level_platform:
-            set_state(lift_states::platform);
-            break;
-
-          default:
-            printf("Invalid state encountered while lowering, last state was: %s\n", state_names[static_cast<int>(last_state)]);
-        }
+        set_state(lift_states::searching);
       }
       break;
 
@@ -200,6 +150,7 @@ void Lift::handle(){
       if (lift_power > 0 && motor.get_position() >= top_position) lift_power = 0;
       motor.move(lift_power);
       if(master.get_digital_new_press(lift_up_button) || master.get_digital_new_press(lift_down_button)){
+        bad_count = 0;  // resets the safety
         lift_piston.set_value(LOW);
         move_absolute(bottom_position);
         set_state(lift_states::searching);

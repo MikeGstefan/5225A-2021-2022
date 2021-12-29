@@ -207,8 +207,9 @@ void Drivebase::handle_input(){
 
 void Drivebase::driver_practice(){
   master.clear();
+  master.print(2, 0, "searching     ");
   cur_driver = 0; // defaults driver to Nikhil
-  master.print(2, 0, "Driver: %s", drivers[cur_driver].name);
+  // master.print(2, 0, "Driver: %s", drivers[cur_driver].name);
   while(true){
     while(!master.get_digital_new_press(E_CONTROLLER_DIGITAL_B)){
       /*
