@@ -26,6 +26,7 @@ Data tracking_data("tracking.txt","$03",debug,log_locations::both);
 Data tracking_imp("tracking.txt","$03",general,log_locations::both);
 Data misc("misc.txt", "$04",debug,log_locations::t);
 Data drivers_data("driver.txt", "$05", debug,log_locations::t);
+Data term("terminal.txt","$06",general,log_locations::t);
 
 
 vector<Data*> Data::get_objs(){
