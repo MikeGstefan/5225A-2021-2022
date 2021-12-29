@@ -5,8 +5,10 @@
 // lift buttons
 controller_digital_e_t lift_up_button = DIGITAL_R1;
 controller_digital_e_t lift_down_button = DIGITAL_R2;
+controller_digital_e_t level_platform_button = DIGITAL_DOWN;
 
-controller_digital_e_t angler_button = DIGITAL_L1;
+
+controller_digital_e_t tilter_button = DIGITAL_L1;
 controller_digital_e_t hitch_button = DIGITAL_L2;
 
 // misc buttons

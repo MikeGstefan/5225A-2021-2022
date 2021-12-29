@@ -70,7 +70,7 @@ public:
     // waits for motor's velocity to rise or timeout to trigger
     while(fabs(motor.get_actual_velocity()) < 45.0){
       printf("%s's velocity is (rising loop): %lf\n", this->name, motor.get_actual_velocity());
-      if (vel_rise_timeout.get_time() > 50){
+      if (vel_rise_timeout.get_time() > 200){
         printf("%s's rising loop timed out\n", this->name);
         break;
       }
