@@ -20,7 +20,6 @@ pros::Motor uptk(11);
 pros::ADIEncoder LeftEncoder(1, 2, false), RightEncoder(3, 4, true), BackEncoder(5, 6, false);
 pros::ADIDigitalOut claw_in(7), claw_out(8);
 pros::ADIDigitalIn claw_touch({{6, 6}});
-pros::Distance dist(20);
 
 std::array<std::tuple<pros::Motor*, int, std::string, const char*, Text*>, 8> motors = {
   std::make_tuple(&front_l, 1, "Front Left", "FL", nullptr),

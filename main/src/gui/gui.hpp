@@ -71,7 +71,7 @@ class GUI{ //Do not make a GUI object ever. To make different GUI's, create a ne
     static void general_setup(), general_background();
     static void end_flash();
   public:
-    static void setup(), background();
+    static void init(), background();
     static void aligned_coords (int x_objects, int y_objects, int x_btn, int y_btn, int x_range = 480, int y_range = 220);
     static void flash (std::uint32_t color, std::uint32_t time, std::string = "");
     static bool go(std::string, std::string, std::uint32_t=0), go(std::string, std::uint32_t=0);

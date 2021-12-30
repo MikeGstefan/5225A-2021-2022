@@ -3,7 +3,7 @@
 #ifdef GUI_UTIL
 #include "gui_util.hpp"
 
-void GUI::setup(){ //Call once at start in initialize()
+void GUI::init(){ //Call once at start in initialize()
   GUI::general_setup();
 
   motor_ports = {

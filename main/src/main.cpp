@@ -20,10 +20,10 @@ void initialize() {
 	drivebase.download_curve_data();
 	Data::init();
 	_Controller::init();
+	GUI::init();
 	delay(150);
 	tracking.x_coord = 0.0, tracking.y_coord = 0.0, tracking.global_angle = 0.0;
 	update_t.start();
-	GUI::setup();
 	master.print(2, 0, "Driver: %s", drivebase.drivers[drivebase.cur_driver].name);
 }
 
@@ -86,14 +86,6 @@ void opcontrol() {
 	move GUI define to main
 	/**/
 
-	// while(true){
-	// 	printf("%d\n", dist.get());
-	// 	delay(10);
-	// }
-
-	// claw_in.set_value(1); //Open
-	// rush_goal2(0, 100, 0);
-
 	while(true){
 		GUI::background();
 		drivebase.handle_input();
@@ -104,14 +96,6 @@ void opcontrol() {
 		}
 		else if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_UP)) drivebase.next_driver();
 		else if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_DOWN)) drivebase.prev_driver();
-		else if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_X)) claw_in.set_value(1); //Open
-		else if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_Y)){
-			claw_in.set_value(1); //Open
-			drivebase.move(0, 127, 0);
-			waitUntil(dist.get() <= 100);
-			claw_in.set_value(0); //Close
-			drivebase.brake();
-		}
 		delay(10);
 	}
 }

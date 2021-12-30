@@ -56,8 +56,8 @@ public:
   void update_lookup_table_util();  // utility to alter expo curves for any driver
   void handle_input();  // move the drivebase according to lookup tables from a joystick input
   void driver_practice(); // method to let drivers drive and change driver profiles
-  static void next_driver(); //Goes to next driver. Called on drivebase object.
-  static void prev_driver(); //Goes to previous driver. Called on drivebase object.
+  void next_driver(); //Goes to next driver. Called on drivebase object.
+  void prev_driver(); //Goes to previous driver. Called on drivebase object.
 };
 
 extern Drivebase drivebase;

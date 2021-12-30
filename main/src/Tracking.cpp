@@ -393,15 +393,6 @@ void rush_goal2(double target_x, double target_y, double target_a){
         printf("pow_x %f, pow_y: %f, power_a: %f",tracking.power_x, tracking.power_y, tracking.power_a);
         printf("cur_y_sgn: %lf, cur_y: %lf\n", target_y - tracking.y_coord, tracking.y_coord);
 
-        if(dist.get() <= 100){
-          printf("\n\nV:%f\n\n\n", front_l.get_actual_velocity());
-          claw_in.set_value(0); //Close
-          // delay(150);
-          drivebase.brake();
-          return;
-        }
-        printf("X:%f A:%f\n", local_error_x, rad_to_deg(error_a));
-
         // exit condition
         // if (claw_touch.get_value()){
         //   // got_goal = goal_lim_switch_state;

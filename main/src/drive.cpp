@@ -219,14 +219,14 @@ void Drivebase::driver_practice(){
 
 //Sadly these are static functions. But they'll only be called with drivebase object, so...
 void Drivebase::next_driver(){
-  drivebase.cur_driver++;
-  drivebase.cur_driver %= drivebase.num_of_drivers; // rollover
+  cur_driver++;
+  cur_driver %= num_of_drivers; // rollover
   // spaces in the controller print are to overwrite names
-  master.print(2, 0, "Driver: %s          ", drivebase.drivers[drivebase.cur_driver].name);
+  master.print(2, 0, "Driver: %s          ", drivers[cur_driver].name);
 }
 
 void Drivebase::prev_driver(){
-  if (drivebase.cur_driver == 0)  drivebase.cur_driver = drivebase.num_of_drivers - 1;
-  else drivebase.cur_driver--;
-  master.print(2, 0, "Driver: %s          ", drivebase.drivers[drivebase.cur_driver].name);
+  if (cur_driver == 0)  cur_driver = num_of_drivers - 1;
+  else cur_driver--;
+  master.print(2, 0, "Driver: %s          ", drivers[cur_driver].name);
 }

@@ -22,7 +22,7 @@ void resetA(){
   printf("Change to mike's task way of resetting a\n");
 }
 
-void GUI::setup(){ //Call once at start in initialize()
+void GUI::init(){ //Call once at start in initialize()
   GUI::general_setup();
 
   run_elastic.set_func(&elasticUtil);
@@ -67,8 +67,8 @@ void GUI::setup(){ //Call once at start in initialize()
 
   Button::create_options({&route1, &route2, &route3}); //Makes them exclusive, only one can be selected at a time
 
-  prev_drivr.set_func(&Drivebase::prev_driver);
-  next_drivr.set_func(&Drivebase::next_driver);
+  prev_drivr.set_func([](){drivebase.prev_driver();});
+  next_drivr.set_func([](){drivebase.next_driver();});
   drivr_name.set_background(130, 70, 350, 190, Style::CORNER);
 
   turn_encoder.set_func([](){ //Turn the encoder
