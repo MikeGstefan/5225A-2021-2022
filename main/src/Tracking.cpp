@@ -195,8 +195,10 @@ void rush_goal2(double target_x, double target_y, double target_a){
             printf("WARNING: A ROBOT IS PUSHING US OR SOMETHING ELSE IS VERY WRONG.\n");
         }
         else  tracking.power_y = sgn(orig_y_sgn) * (max_power - fabs(tracking.power_x) - fabs(tracking.power_a));
-        printf("pow_x %f, pow_y: %f, power_a: %f",tracking.power_x, tracking.power_y, tracking.power_a);
-        printf("cur_y_sgn: %lf, cur_y: %lf\n", target_y - tracking.y_coord, tracking.y_coord);
+        printf("%d | %f, %f, %f, %f\n",millis(), front_l.get_actual_velocity(), front_r.get_actual_velocity(), back_l.get_actual_velocity(), back_r.get_actual_velocity());
+        // printf("pow_x %f, pow_y: %f, power_a: %f",tracking.power_x, tracking.power_y, tracking.power_a);
+        // printf("err %f, %f \n",local_error_x, error_a);
+        // printf("cur_y_sgn: %lf, cur_y: %lf\n", target_y - tracking.y_coord, tracking.y_coord);
         // exit condition
         // if (claw_touch.get_value()){
         //   // got_goal = goal_lim_switch_state;
@@ -207,6 +209,16 @@ void rush_goal2(double target_x, double target_y, double target_a){
         //   printf("GOT TO GOAL: %d\n", millis());
         //   return;
         // }
+        if(angler_dist.get() <= 70){
+			  	top_claw.set_value(1);
+			  	
+          angler.motor.move_absolute(200, 100);
+          drivebase.brake();
+          delay(100);
+          btm_claw.set_value(1);
+          return;
+			  }	
+
         if (fabs(tracking.y_coord) > fabs(target_y) + 10.0){
           printf("target_y: %lf\n", target_y);
           printf("x: %lf, y: %lf, a: %lf\n", tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle));

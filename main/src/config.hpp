@@ -13,3 +13,5 @@ extern pros::ADIDigitalIn claw_touch;
 extern pros::ADIDigitalIn lift_trigger, tilter_trigger, hitch_trigger;
 extern pros::ADIDigitalOut lift_piston, angler_piston, hitch_piston;
 extern pros::Distance angler_dist;
+extern pros::ADIDigitalOut top_claw;
+extern pros::ADIDigitalOut btm_claw;

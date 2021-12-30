@@ -1,11 +1,13 @@
 #include "Subsystems/lift.hpp"
 #include "Subsystems/hitch.hpp"
+#include "Subsystems/angler.hpp"
 #include "drive.hpp"
 #include "gui.hpp"
 #include "controller.hpp"
 #include "pid.hpp"
 #include "Tracking.hpp"
 #include "task.hpp"
+#include "auton.hpp"
 
 // using namespace std;
 #include "task.hpp"
@@ -26,8 +28,8 @@ void initialize() {
 	Data::init();
 	_Controller::init();
 	delay(150);
-	tracking.x_coord = 144.0 - 10.25, tracking.y_coord = 14.75, tracking.global_angle = -M_PI_2;
-	// tracking.x_coord = 0.0, tracking.y_coord = 0.0, tracking.global_angle = 0.0;
+	// tracking.x_coord = 144.0 - 10.25, tracking.y_coord = 14.75, tracking.global_angle = -M_PI_2;
+	tracking.x_coord = 0.0, tracking.y_coord = 0.0, tracking.global_angle = 0.0;
 
 	update_t.start();
 	// gui_setup();
@@ -66,7 +68,7 @@ void competition_initialize() {}
 void autonomous() {
 	// lift.reset();
 	// lift_piston.set_value(LOW);
-	// lift.motor.move_absolute(lift.bottom_position, 100);
+	// lift.angler_motor.move_absolute(lift.bottom_position, 100);
 
 	// Timer move_timer{"move"};
 	// move_to_point({112.5, 14.75, -90.0});
@@ -83,7 +85,7 @@ void autonomous() {
 	// tank_move_on_arc({110.0, 84.0},{80.0, 96.0, -90.0}, 127.0);
 	// move_to_point({60.0, 96.0, -90.0}, 80.0, false, 0.0, true);	// drives over rings
 	// move_to_point({60.0, 108.0, -90.0}, 80.0, false, 0.0, true);	// drives to drop off small neutral
-	// lift.motor.move_absolute(lift.platform_position, 100);
+	// lift.angler_motor.move_absolute(lift.platform_position, 100);
 	// move_to_point({60.0, 108.0, -180.0}, 80.0, false, 0.0, true);	// drives to drop off small neutral
 	// lift_piston.set_value(LOW);
 
@@ -120,7 +122,80 @@ void autonomous() {
  double cur_auton = 1;
 
 void opcontrol() {
-	move_start(move_types::line, line_params({0.0, 0.0}, {0.0, 24.0, 00.0}, 127.0, false, 0.0, false), true);
+	angler.reset();
+	top_claw.set_value(0);
+	btm_claw.set_value(0);
+	Timer angler_out{"timer"};
+	pros::Task([&](){
+		while(angler.motor.get_position() < 480)delay(10);
+		master.print(0,0,"%d",angler_out.get_time());
+	});
+	angler.motor.move_absolute(500, 100);
+
+
+	while(!master.get_digital(E_CONTROLLER_DIGITAL_A)){
+		// if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_A)){
+		// 	drivebase.move(0,127,0);
+		// 	if(angler_dist.get() <= 70){
+		// 		top_claw.set_value(1);
+		// 		btm_claw.set_value(1);
+		// 	}	
+		// }
+		// // if(angler_dist.get() <= 190){
+		// // 	top_claw.set_value(1);
+		// // 	btm_claw.set_value(1);
+		// // }
+		// printf("%d\n",angler_dist.get());
+		delay(10);
+	}
+	Timer grab_time{"time"};
+	rush_goal2(0.0,50.0,0.0);
+	master.print(0,0,"%d",grab_time.get_time());
+	while(!master.get_digital(E_CONTROLLER_DIGITAL_A)){
+		// if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_A)){
+		// 	drivebase.move(0,127,0);
+		// 	if(angler_dist.get() <= 70){
+		// 		top_claw.set_value(1);
+		// 		btm_claw.set_value(1);
+		// 	}	
+		// }
+		// // if(angler_dist.get() <= 190){
+		// // 	top_claw.set_value(1);
+		// // 	btm_claw.set_value(1);
+		// // }
+		// printf("%d\n",angler_dist.get());
+		delay(10);
+	}
+	top_claw.set_value(0);
+	btm_claw.set_value(0);
+
+	// claw_in.set_value(1); //Open
+	// drivebase.move(0, -127, 0);
+	// 		waitUntil(dist.get() <= 190);
+	// 		claw_in.set_value(0); //Close
+	// 		drivebase.brake();
+	// angler_motor.move(-60);
+
+
+	// while(true)delay(10);
+    // Timer vel_rise_timeout("vel_rise");
+    // // waits for angler_motor's velocity to rise or timeout to trigger
+    // while(fabs(angler_motor.get_actual_velocity()) < 45.0){
+    // //   printf("%s's velocity is (rising loop): %lf\n", this->name, angler_motor.get_actual_velocity());
+    //   if (vel_rise_timeout.get_time() > 50){
+    //     // printf("%s's rising loop timed out\n", this->name);
+    //     break;
+    //   }
+    //   delay(10);
+    // }
+    // // printf("%s's velocity done rising\n", this->name);
+    // // waits until angler_motors velocity slows down for 5 cycles
+    // cycleCheck(fabs(angler_motor.get_actual_velocity()) < 5.0, 5, 10)
+    // angler_motor.tare_position();  // resets subsystems position
+    // // printf("%d, %s's reset %lf\n", millis(), this->name, angler_motor.get_position());
+    // angler_motor.move(0);
+	// angler.angler_motor.move_absolute(100, 100);
+	// move_start(move_types::line, line_params({0.0, 0.0}, {0.0, 24.0, 00.0}, 127.0, false, 0.0, false), true);
 
 	// move_on_arc({0.0, 0.0}, {-24.0, 0.0, -180.0}, 12.0, false, 127, true, 1.0, true, 20.0, 127.0);
 	// tank_move_on_arc({0.0, 0.0}, {-24.0, 24.0, -90.0}, 127.0, 127.0, true);

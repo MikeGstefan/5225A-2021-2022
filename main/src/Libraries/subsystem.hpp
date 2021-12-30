@@ -65,7 +65,7 @@ public:
 
   void reset(){
     // printf("class's motor address******** : %p", &this->Motor);
-    motor.move(-60);
+    motor.move(-40);
     Timer vel_rise_timeout("vel_rise");
     // waits for motor's velocity to rise or timeout to trigger
     while(fabs(motor.get_actual_velocity()) < 45.0){
