@@ -8,7 +8,6 @@ ADIDigitalOut pneum_1(7), pneum_2(8);
 
 //Var init for text monitoring
 int left_enc, right_enc, back_enc;
-std::string pneum_1_state, pneum_2_state;
 std::string port_nums = "";
 std::array <std::tuple<int, Button*, Button*, int>, 8> motor_ports;
 
@@ -27,7 +26,7 @@ Button resEF (345, 75, 100, 50, Style::SIZE, Button::SINGLE, encoders, "Reset EF
 Button resAll (240, 180, 200, 30, Style::CENTRE, Button::SINGLE, encoders, "Reset All");
 
 Page motor (3, "Motor Control");
-Slider mot_speed (MID_X, 60, 200 , 15, Style::CENTRE, Slider::HORIZONTAL, -127, 127, motor, "Speed");
+Slider mot_speed (MID_X, 60, 180 , 15, Style::CENTRE, Slider::HORIZONTAL, -127, 127, motor, "Speed");
 Text mot_text_1 (65, 115, Style::CENTRE, TEXT_SMALL, motor, "Port %d", &std::get<0>(motor_ports[0]));
 Text mot_text_2 (180, 115, Style::CENTRE, TEXT_SMALL, motor, "Port %d", &std::get<0>(motor_ports[1]));
 Text mot_text_3 (295, 115, Style::CENTRE, TEXT_SMALL, motor, "Port %d", &std::get<0>(motor_ports[2]));
@@ -54,8 +53,8 @@ Button mot_stop_7 (300, 190, 45, 30, Style::SIZE, Button::SINGLE, motor, "Stop")
 Button mot_stop_8 (415, 190, 45, 30, Style::SIZE, Button::SINGLE, motor, "Stop");
 
 Page pneumatic (4, "Pneumatics"); //Pneumatic testing page
-Text pneum_text_1 (125, 50, Style::CENTRE, TEXT_SMALL, pneumatic, "PORT G: %s", &pneum_1_state);
-Text pneum_text_2 (350, 50, Style::CENTRE, TEXT_SMALL, pneumatic, "PORT H: %s", &pneum_2_state);
+Text pneum_text_1 (125, 50, Style::CENTRE, TEXT_SMALL, pneumatic, "PORT G");
+Text pneum_text_2 (350, 50, Style::CENTRE, TEXT_SMALL, pneumatic, "PORT H");
 Button pneum_btn_1 (25, 70, 200, 80, Style::SIZE, Button::TOGGLE, pneumatic, "PNEUMATIC 1");
 Button pneum_btn_2 (250, 70, 200, 80, Style::SIZE, Button::TOGGLE, pneumatic, "PNEUMATIC 2");
 

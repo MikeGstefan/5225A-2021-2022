@@ -5,7 +5,9 @@
 #include <variant>
 #include <typeinfo>
 
-#ifdef GUI_MAIN
+#define GUI_UTIL
+
+#if defined(GUI_MAIN)
 #define PAGE_COUNT 12 //The number for testing if not included. Otherwise +1
 
 #elif defined(GUI_UTIL)
@@ -135,14 +137,13 @@ class Button{
     bool active=true;
 
     //For latch buttons
-    bool latched=0;
     bool on=0; //on is for toggle
     std::vector<Button*> options;
 
     //Functions
-    static Button* update();
+    static void update();
     void construct (int16_t, int16_t, int16_t, int16_t, Style, press_type, Page*, std::string, std::uint32_t, std::uint32_t);
-    void run_func();
+    void run_func(), run_off_func();
     void draw();
     void draw_pressed();
 
@@ -182,7 +183,7 @@ class Slider{
     Button dec, inc;
 
     //Functions
-    static Slider* update();
+    static void update();
     void draw();
     void draw_bar();
     void update_val();

@@ -20,9 +20,9 @@ Button prev_page(PAGE_LEFT, PAGE_UP, 75, 20, Style::SIZE, Button::SINGLE, perm, 
 Button next_page(480, 0, -75, 20, Style::SIZE, Button::SINGLE, perm, "->");
 
 Page go_sequence (PAGE_COUNT+1, "GO SEQUENCE");
-Button go_button (300, MID_Y, 160, 90, Style::CENTRE, Button::SINGLE, go_sequence, "PRESS TO");
+Button go_button (300, MID_Y, 160, 90, Style::CENTRE, Button::SINGLE, go_sequence, "PRESS TO 👨🏻‍🚀👨🏻‍🚀👨🏻‍🚀👨🏻‍🚀👨🏻‍🚀👨🏻‍🚀👨🏻‍🚀👨🏻‍🚀👨🏻‍🚀👨🏻‍🚀👨🏻‍🚀👨🏻‍🚀👨🏻‍🚀👨🏻‍🚀👨🏻‍🚀👨🏻‍🚀👨🏻‍🚀👨🏻‍🚀👨🏻‍🚀👨🏻‍🚀👨🏻‍🚀👨🏻‍🚀👨🏻‍🚀👨🏻‍🚀👨🏻‍🚀👨🏻‍🚀👨🏻‍🚀👨🏻‍🚀👨🏻‍🚀👨🏻‍🚀");// Hack that works for some reason. Note that all emoji's don't work
 Button go_back_button (20, USER_UP, 100, 50, Style::SIZE, Button::SINGLE, go_sequence, "BACK");
-Text go_button_text (300, 150, Style::CENTRE, TEXT_SMALL, go_sequence, "%s", &go_string, (std::uint32_t)COLOR_BLACK);
+Text go_button_text (300, 140, Style::CENTRE, TEXT_SMALL, go_sequence, "%s", &go_string, (std::uint32_t)COLOR_BLACK);
 
 bool GUI::go(std::string name, std::string message, std::uint32_t delay_time){ //Start
   printf("\n\n%s\n", message.c_str());
@@ -54,7 +54,7 @@ bool GUI::go(std::string name, std::string message, std::uint32_t delay_time){ /
     delay(delay_time);
     printf("Running\n");
   }
-  else printf("Interrupted\n");
+  else printf("\033[31mInterrupted\033[0m\n");
   Page::go_to(page);
   return !interrupted;
 }
@@ -88,7 +88,7 @@ bool GUI::go(std::string name, std::uint32_t delay_time){ //End
     delay(delay_time);
     printf("Running\n");
   }
-  else printf("Interrupted\n");
+  else printf("\033[31mInterrupted\033[0m\n");
   Page::go_to(page);
   return !interrupted;
 }
@@ -124,7 +124,7 @@ void GUI::flash(std::uint32_t color, std::uint32_t time, std::string text){
   screen::set_pen(~color&0xFFFFFF); //Makes text inverted color of background so it is always visible
   screen::set_eraser(color);
 
-  printf("\n\n\033[31mWARNING: %s\033[0m\n\n", text.c_str());
+  printf("\n\n\033[31mWARNING: %s\033[0m\n\n", text.c_str()); //Mike if you see this, convert it to a log.
 
   int spaces = int(CHAR_WIDTH_LARGE*text.length()/460)+1;
   std::size_t space, last_space=0;
@@ -221,22 +221,24 @@ void Button::construct(int16_t x1, int16_t y1, int16_t x2, int16_t y2, Style typ
     (this->page->buttons).push_back(this);
     std::tie(this->x1, this->y1, this->x2, this->y2) = fixPoints(x1, y1, x2, y2, type);
 
-    if (8*text.length()+5 < this->x2-this->x1){
+
+    std::size_t next_space = text.find(' ', text.length()/2);
+    std::size_t prev_space = text.find_last_of(' ', text.length()/2);
+    std::size_t space = (next_space-text.length()/2 < text.length()/2-prev_space) ? next_space : prev_space;
+
+    if (space != std::string::npos && 8*text.length()+5 > this->x2-this->x1){ //Spaces it if it's too long for one line
+      this->label = text.substr(0, space);
+      this->label1 = text.substr(space+1);
+
+      this->text_x = (this->x1+this->x2-(this->label.length()*CHAR_WIDTH_SMALL))/2;
+      this->text_x1 = (this->x1+this->x2-(this->label1.length()*CHAR_WIDTH_SMALL))/2;
+      this->text_y = (this->y1+this->y2-CHAR_HEIGHT_SMALL)/2-CHAR_HEIGHT_SMALL;
+      this->text_y1 = (this->y1+this->y2-CHAR_HEIGHT_SMALL)/2+CHAR_HEIGHT_SMALL;
+    }
+    else{
       this->text_x = (this->x1+this->x2-(text.length()*CHAR_WIDTH_SMALL))/2;
       this->text_y = (this->y1+this->y2-CHAR_HEIGHT_SMALL)/2;
       this->label = text;
-    }
-    else{ //Spaces it if it's too long for one line
-      std::size_t space = text.find(' ', text.length()/2);
-      if (space != std::string::npos){
-        this->label = text.substr(0, space);
-        this->label1 = text.substr(space+1);
-
-        this->text_x = (this->x1+this->x2-(this->label.length()*CHAR_WIDTH_SMALL))/2;
-        this->text_x1 = (this->x1+this->x2-(this->label1.length()*CHAR_WIDTH_SMALL))/2;
-        this->text_y = (this->y1+this->y2-CHAR_HEIGHT_SMALL)/2-CHAR_HEIGHT_SMALL;
-        this->text_y1 = (this->y1+this->y2-CHAR_HEIGHT_SMALL)/2+CHAR_HEIGHT_SMALL;
-      }
     }
 }
 
@@ -376,7 +378,7 @@ void Text::set_background (std::uint32_t colour){
 
 void Button::draw(){
   if (!active) return;
-  if (latched) { //Latched buttons must be drawn in a pressed state
+  if (on) { //on buttons must be drawn in a pressed state
     draw_pressed();
     return;
   }
@@ -518,6 +520,8 @@ void Button::set_off_func(std::function <void()> function) {off_func = function;
 
 void Button::run_func() {if (func) func();}
 
+void Button::run_off_func() {if (off_func) off_func();}
+
 int Slider::get_val() {return val;}
 
 void Button::set_active(bool active) {
@@ -547,11 +551,19 @@ bool Button::pressed(){
 }
 
 bool Button::new_press(){
-  return (pressed() && !last_pressed);
+   if (pressed() && !last_pressed){
+     last_pressed = true;
+     return true;
+   }
+   return false;
 }
 
 bool Button::new_release(){
-  return (!pressed() && last_pressed);
+  if (!pressed() && last_pressed){
+    last_pressed = false;
+    return true;
+  }
+  return false;
 }
 
 void Slider::update_val(){
@@ -583,115 +595,112 @@ void Page::update(){
   if (current_page->loop_func) current_page->loop_func();
 }
 
-Button* Button::update(){
+void Button::update(){
   //Loops through the list of buttons on the current page to check for presses
   for (std::vector <Button*>::iterator it = (Page::current_page->buttons).begin(); it != (Page::current_page->buttons).end(); it++){
     Button* btn_id = *it;
+    if (!btn_id->active) return;
 
     switch(btn_id->form){
       case Button::SINGLE:
         if (btn_id->new_press()){
-          btn_id->last_pressed = 1;
+          // btn_id->last_pressed = true;
           btn_id->draw_pressed();
           btn_id->run_func();
-          return btn_id;
+
+          if (btn_id == &prev_page || btn_id == &next_page) return;
         }
 
         else if (btn_id->new_release()){
-          btn_id->last_pressed = 0;
+          // btn_id->last_pressed = false;
           btn_id->draw();
+          btn_id->run_off_func();
         }
+
         break;
 
       case Button::LATCH:
         if (btn_id->new_press()){
-          btn_id->last_pressed = 1;
-          btn_id->latched = !btn_id->latched; //Toggles the latch
+          // btn_id->last_pressed = true;
+          btn_id->on = !btn_id->on; //Toggles the latch
 
           //Draws button's new state
-          if(btn_id->latched){
+          if(btn_id->on){
             //Deselects connected buttons
             for (std::vector <Button*>::iterator option_it = (btn_id->options).begin(); option_it != (btn_id->options).end(); option_it++){
-              (*option_it)->latched = 0;
+              (*option_it)->on = false;
               (*option_it)->draw();
             }
-
-            btn_id->draw_pressed();
-            btn_id->run_func();
-
           }
-          else btn_id->draw(); //New press deselected it
-          return btn_id;
+
+          btn_id->draw();
         }
 
         else if (btn_id->new_release()){
-          btn_id->last_pressed = 0;
+          // btn_id->last_pressed = false;
+          btn_id->draw();
         }
-        if(btn_id->latched) btn_id->run_func();
+
+        if(btn_id->on) btn_id->run_func();
+        else btn_id->run_off_func();
+
         break;
 
       case Button::REPEAT:
         if (btn_id->new_press()){
-          btn_id->last_pressed = 1;
+          // btn_id->last_pressed = true;
           btn_id->draw_pressed();
           btn_id->run_func();
-          return btn_id;
         }
 
         else if (btn_id->new_release()){
-          btn_id->last_pressed = 0;
+          // btn_id->last_pressed = false;
           btn_id->draw();
+          btn_id->run_off_func();
         }
 
         if (btn_id->pressed()) btn_id->run_func();
+
         break;
 
       case Button::TOGGLE:
         if (btn_id->new_press()){
-          btn_id->last_pressed = 1;
+          // btn_id->last_pressed = true;
           btn_id->on = !btn_id->on;
 
           //Draws button's new state
-          if(btn_id->on){ //Just turned on
-            //Turns off connected buttons
+          if(btn_id->on){
+            //Deselects connected buttons
             for (std::vector <Button*>::iterator option_it = (btn_id->options).begin(); option_it != (btn_id->options).end(); option_it++){
-              if ((*option_it)->on){ //If the other button is in the on state and has an off function
-                (*option_it)->on = false;
-                if ((*option_it)->off_func) (*option_it)->off_func();
-              }
+              (*option_it)->on = false;
+              (*option_it)->draw();
             }
-
             btn_id->run_func();
           }
+
           else if (btn_id->off_func) btn_id->off_func(); //Just turned off
 
           btn_id->draw_pressed();
-          return btn_id;
         }
 
         else if (btn_id->new_release()){
-          btn_id->last_pressed = 0;
+          // btn_id->last_pressed = false;
           btn_id->draw();
         }
         break;
     }
-
   }
-
-  return 0;
 }
 
-Slider* Slider::update(){
+void Slider::update(){
   for (std::vector <Slider*>::iterator it = (Page::current_page->sliders).begin(); it != (Page::current_page->sliders).end(); it++){
     Slider* sl_id = *it;
     sl_id->update_val();
     if (sl_id->val != sl_id->prev_val){
       sl_id->draw();
       sl_id->prev_val = sl_id->val;
-      return sl_id;
     }
   }
-  return 0;
 }
 
 void Text::update(){

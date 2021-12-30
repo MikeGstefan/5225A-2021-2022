@@ -30,8 +30,8 @@ void GUI::setup(){ //Call once at start in initialize()
       std::get<1>(motor_ports[i])->set_active(false);
       std::get<2>(motor_ports[i])->set_active(false);
     }
-    std::get<1>(motor_ports[i])->set_func([i](){Motor motor(std::get<0>(motor_ports[i])); motor.move(mot_speed.val);});
-    std::get<2>(motor_ports[i])->set_func([i](){Motor motor(std::get<0>(motor_ports[i])); motor.move(0);});
+    std::get<1>(motor_ports[i])->set_func([i](){c::motor_move(std::get<0>(motor_ports[i]), mot_speed.val);});
+    std::get<2>(motor_ports[i])->set_func([i](){c::motor_move(std::get<0>(motor_ports[i]), 0);});
   }
   if (port_nums.back() == ',') port_nums.pop_back();
 
@@ -43,13 +43,11 @@ void GUI::setup(){ //Call once at start in initialize()
   resEF.set_func([&](){encoderEF.reset();});
   resAll.set_func([&](){encoderAB.reset(); encoderCD.reset(); encoderEF.reset();});
 
-  pneum_text_1.set_background(50, 15);
-  pneum_btn_1.set_func([](){pneum_1.set_value(1); pneum_1_state = "ON";});
-  pneum_btn_1.set_off_func([](){pneum_1.set_value(0); pneum_1_state = "OFF";});
+  pneum_btn_1.set_func([](){pneum_1.set_value(1);});
+  pneum_btn_1.set_off_func([](){pneum_1.set_value(0);});
 
-  pneum_text_2.set_background(50, 15);
-  pneum_btn_2.set_func([](){pneum_2.set_value(1); pneum_2_state = "ON";});
-  pneum_btn_2.set_off_func([](){pneum_2.set_value(0); pneum_2_state = "OFF";});
+  pneum_btn_2.set_func([](){pneum_2.set_value(1);});
+  pneum_btn_2.set_off_func([](){pneum_2.set_value(0);});
 
   Page::go_to(1); //Sets it to page 1 for program start. Don't delete this. If you want to change the starting page, re-call this in initialize()
 }
