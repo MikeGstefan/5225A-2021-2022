@@ -103,15 +103,31 @@ void next_driver(){
 
 void opcontrol() {
 	// driver setup
-
+	// intk.move(100);
 	lift_piston.set_value(LOW);	// in searching state
 	lift.reset();
-	tilter.reset();
-	lift.motor.move_absolute(35, 100);
-	tilter.move_absolute(500, 100);
-	tilter_bottom_piston.set_value(LOW);
-	tilter_top_piston.set_value(LOW);
+	// tilter.reset();
+	// lift.motor.move_absolute(35, 100);
+	// tilter.move_absolute(500, 100);
+	// tilter_bottom_piston.set_value(LOW);
+	// tilter_top_piston.set_value(LOW);
 
 
-	drivebase.driver_practice();
+	// drivebase.driver_practice();
+	master.print(0,0,"claw: A");
+	master.print(1,0,"intk: B");
+	bool pnue_state = false, mtr_state = false;
+	while(true){
+		if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_A)){
+			pnue_state = !pnue_state;
+			lift_piston.set_value(pnue_state);
+		}
+		if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_B)){
+			mtr_state= !mtr_state;
+			if(mtr_state)intk.move(127);
+			else intk.move(0);
+		}
+		// drivebase.handle_input();
+		delay(10);
+	}
 }
