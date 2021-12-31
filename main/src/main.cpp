@@ -66,42 +66,6 @@ void competition_initialize() {}
  */
 void autonomous() {
 	skills();
-	// lift.reset();
-	// lift_piston.set_value(LOW);
-	// lift.motor.move_absolute(lift.bottom_position, 100);
-
-	// Timer move_timer{"move"};
-	// move_to_point({112.5, 14.75, -90.0});
-	// move_timer.print();
-	// // tank_move_on_arc({110.0, 14.75}, {132.0, 24.0, -180.0}, 127.0);
-	// // move_on_line(polar_to_vector(110.0, 14.75, 10.0, 45.0, -135.0));
-	// move_to_point(polar_to_vector_point(110.0, 14.75, 17.5, 45.0, -135.0), 127.0, false, 1.0, false);	// grabs alliance goal
-	// lift_piston.set_value(HIGH);
-
-	// tank_turn_to_target({108.0, 60.0});
-	// // tank_move_to_target({110.0, 40.0, 0.0}, true, 127.0, 0.0, false);
-	// move_to_point({110.0, 60.0, 0.0}, 127.0, false, 0.0, false);	// in front of small netural goal
-	// move_to_point({110.0, 80.0, 0.0}, 127.0, false, 0.0, false);	// drives through small neutral goal
-	// tank_move_on_arc({110.0, 84.0},{80.0, 96.0, -90.0}, 127.0);
-	// move_to_point({60.0, 96.0, -90.0}, 80.0, false, 0.0, true);	// drives over rings
-	// move_to_point({60.0, 108.0, -90.0}, 80.0, false, 0.0, true);	// drives to drop off small neutral
-	// lift.motor.move_absolute(lift.platform_position, 100);
-	// move_to_point({60.0, 108.0, -180.0}, 80.0, false, 0.0, true);	// drives to drop off small neutral
-	// lift_piston.set_value(LOW);
-
-
-
-	// move_timer.print();
-	/*
-	move_to_point({108.0, 60.0, 0.0}, 127.0, false, 0.0, false);
-	move_timer.print();
-	delay(1000);
-	move_to_point({108.0, 84.0, 0.0}, 127.0, false, 0.0, false);
-	move_timer.print();
-	*/
-
-	// move_on_arc({108.0, 0.0}, {132.0, 24.0, -180.0}, 24.0, true, 127.0, true, 1.0);
-	// move_timer.print();
 
 }
 
@@ -122,24 +86,16 @@ void autonomous() {
  double cur_auton = 1;
 
 void opcontrol() {
-	// move_start(move_types::line, line_params({0.0, 0.0}, {0.0, 24.0, 00.0}, 127.0, false, 0.0, false), true);
-	move_start(move_types::point, point_params({0.0,50.0,20.0}),true);
+	// driver setup
 
-	// move_on_arc({0.0, 0.0}, {-24.0, 0.0, -180.0}, 12.0, false, 127, true, 1.0, true, 20.0, 127.0);
-	// tank_move_on_arc({0.0, 0.0}, {-24.0, 24.0, -90.0}, 127.0, 127.0, true);
-	// move_on_arc({0.0, 0.0}, {10.0, 10.0, 0.0}, 10.0, false, 127, false, 0.3, 0.0, true);
-	// move.print();
-	// printf("DONE\n");
-	// while(true){
-	// 	gui_background();
-	// 	drivebase.handle_input();
+	lift_piston.set_value(LOW);	// in searching state
+	lift.reset();
+	tilter.reset();
+	lift.motor.move_absolute(35, 100);
+	tilter.move_absolute(500, 100);
+	tilter_bottom_piston.set_value(LOW);
+	tilter_top_piston.set_value(LOW);
 
-	// 	if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_B)){ //Update expo util
-	// 		drivebase.update_lookup_table_util();
-	// 		master.clear();
-	// 	}
-	// 	else if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_UP)) next_driver();
-	// 	else if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_DOWN)) prev_driver();
-	// 	delay(10);
-	// }
+
+	drivebase.driver_practice();
 }
