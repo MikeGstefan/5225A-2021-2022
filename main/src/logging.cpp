@@ -28,6 +28,7 @@ Data misc("misc.txt", "$04",debug,log_locations::both);
 Data drivers_data("driver.txt", "$05", debug,log_locations::t);
 Data motion_i("motion.txt","$06",general,log_locations::both);
 Data motion_d("motion.txt", "%06", general,log_locations::both);
+Data term("terminal.txt","$06",general,log_locations::t);
 
 
 vector<Data*> Data::get_objs(){
@@ -96,13 +97,13 @@ void Data::print(const char* format,...){
 
 void Data::print(Timer* tmr, int freq, std::vector<std::function<char*()>> str){
   if(tmr->get_time() > freq){
-    for(int i = 0; i < str.size(); i++){ 
+    for(int i = 0; i < str.size(); i++){
         char* buffer = str[i]();
         this->print(buffer);
         delete[] buffer;
     }
     tmr->reset();
-  } 
+  }
 }
 
 void Data::log_print(char* buffer, int buffer_len){
@@ -176,5 +177,3 @@ char* Data::to_char(const char* fmt, ...){
     va_end(args);
     return buffer;
 }
-
-

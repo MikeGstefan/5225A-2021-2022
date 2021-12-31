@@ -11,7 +11,9 @@
 
 using namespace std;
 using namespace pros;
+//forawrd declarations
 class _Task;
+class Timer;
 extern _Task log_t;
 /*
 1 is print, if there is no sd card, print to terminal
@@ -74,6 +76,7 @@ extern Data tracking_data;
 extern Data tracking_imp;
 extern Data misc;
 extern Data drivers_data;
+extern Data term;
 extern Data motion_d;
 extern Data motion_i;
 

@@ -1,8 +1,8 @@
 #include "Subsystems/lift.hpp"
 #include "Subsystems/hitch.hpp"
 #include "drive.hpp"
-#include "gui.hpp"
 #include "controller.hpp"
+#include "gui/gui_main.hpp"
 #include "pid.hpp"
 #include "Tracking.hpp"
 #include "task.hpp"
@@ -31,7 +31,7 @@ void initialize() {
 	// tracking.x_coord = 0.0, tracking.y_coord = 0.0, tracking.global_angle = 0.0;
 
 	update_t.start();
-	// gui_setup();
+	GUI::setup();
 	master.print(2, 0, "Driver: %s", drivebase.drivers[drivebase.cur_driver].name);
 }
 
@@ -83,7 +83,23 @@ void autonomous() {
  * task, not resume it from where it left off.
  */
  int ring_count = 0;
- double cur_auton = 1;
+ int cur_auton = 1;
+
+//Get rid of these once merged
+void prev_driver(){
+	if (drivebase.cur_driver == 0) drivebase.cur_driver = drivebase.num_of_drivers - 1;
+	else drivebase.cur_driver--;
+	WAIT_FOR_SCREEN_REFRESH();
+	master.print(2, 0, "Driver: %s          ", drivebase.drivers[drivebase.cur_driver].name);
+}
+void next_driver(){
+	drivebase.cur_driver++;
+	drivebase.cur_driver %= drivebase.num_of_drivers;
+	WAIT_FOR_SCREEN_REFRESH();
+	master.print(2, 0, "Driver: %s          ", drivebase.drivers[drivebase.cur_driver].name);
+}
+
+// int ring_count = 0, cur_auton = 1;
 
 void opcontrol() {
 	// driver setup
