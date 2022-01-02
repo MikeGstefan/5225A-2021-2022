@@ -77,13 +77,9 @@ int ring_count = 0, cur_auton = 1;
 
 void opcontrol() {
 	/*Gui:
+	have util set up devices using c:: to avoid object creation
 	Reset tracking by task
 	convert some printfs to logs
-	btn set active for btn functions
-	remove pneumatic text
-	have util set up devices using c:: to avoid object creation
-	move setting lastpressed into new press/release()
-	move GUI define to main
 	/**/
 
 	while(true){

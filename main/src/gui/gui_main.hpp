@@ -7,36 +7,36 @@ std::vector<std::bitset<200>> field (200, std::bitset<200>{}); //Initializes to 
 
 //Var init for text monitoring
 int angle, left_enc, right_enc, back_enc, elastic_up_time, elastic_down_time;
-std::string pneum_1_state, pneum_2_state, driver_text;
+std::string driver_text;
 
 Page driver_curve (1, "Drivers"); //Select a driver and their exp curve
 Button prev_drivr(20, 70, 110, 120, Style::SIZE, Button::SINGLE, driver_curve, "Prev Driver");
-Text drivr_name(MID_X, MID_Y, Style::CENTRE, TEXT_LARGE, driver_curve, "%s", &driver_text);
+Text drivr_name(MID_X, MID_Y, Style::CENTRE, TEXT_LARGE, driver_curve, "%s", driver_text);
 Button next_drivr(350, 70, 110, 120, Style::SIZE, Button::SINGLE, driver_curve, "Next Driver");
 
 Page temps (2, "Temperature"); //Motor temps
-Text mot_temp_1(75, 85, Style::CENTRE, TEXT_SMALL, temps, std::get<3>(motors[0]) + std::string(": %dC"), &std::get<1>(motors[0]), COLOR_BLACK);
-Text mot_temp_2(185, 85, Style::CENTRE, TEXT_SMALL, temps, std::get<3>(motors[1]) + std::string(": %dC"), &std::get<1>(motors[1]), COLOR_BLACK);
-Text mot_temp_3(295, 85, Style::CENTRE, TEXT_SMALL, temps, std::get<3>(motors[2]) + std::string(": %dC"), &std::get<1>(motors[2]), COLOR_BLACK);
-Text mot_temp_4(405, 85, Style::CENTRE, TEXT_SMALL, temps, std::get<3>(motors[3]) + std::string(": %dC"), &std::get<1>(motors[3]), COLOR_BLACK);
-Text mot_temp_5(75, 175, Style::CENTRE, TEXT_SMALL, temps, std::get<3>(motors[4]) + std::string(": %dC"), &std::get<1>(motors[4]), COLOR_BLACK);
-Text mot_temp_6(185, 175, Style::CENTRE, TEXT_SMALL, temps, std::get<3>(motors[5]) + std::string(": %dC"), &std::get<1>(motors[5]), COLOR_BLACK);
-Text mot_temp_7(295, 175, Style::CENTRE, TEXT_SMALL, temps, std::get<3>(motors[6]) + std::string(": %dC"), &std::get<1>(motors[6]), COLOR_BLACK);
-Text mot_temp_8(405, 175, Style::CENTRE, TEXT_SMALL, temps, std::get<3>(motors[7]) + std::string(": %dC"), &std::get<1>(motors[7]), COLOR_BLACK);
+Text mot_temp_1(75, 85, Style::CENTRE, TEXT_SMALL, temps, std::get<3>(motors[0]) + std::string(": %dC"), std::get<1>(motors[0]), COLOR_BLACK);
+Text mot_temp_2(185, 85, Style::CENTRE, TEXT_SMALL, temps, std::get<3>(motors[1]) + std::string(": %dC"), std::get<1>(motors[1]), COLOR_BLACK);
+Text mot_temp_3(295, 85, Style::CENTRE, TEXT_SMALL, temps, std::get<3>(motors[2]) + std::string(": %dC"), std::get<1>(motors[2]), COLOR_BLACK);
+Text mot_temp_4(405, 85, Style::CENTRE, TEXT_SMALL, temps, std::get<3>(motors[3]) + std::string(": %dC"), std::get<1>(motors[3]), COLOR_BLACK);
+Text mot_temp_5(75, 175, Style::CENTRE, TEXT_SMALL, temps, std::get<3>(motors[4]) + std::string(": %dC"), std::get<1>(motors[4]), COLOR_BLACK);
+Text mot_temp_6(185, 175, Style::CENTRE, TEXT_SMALL, temps, std::get<3>(motors[5]) + std::string(": %dC"), std::get<1>(motors[5]), COLOR_BLACK);
+Text mot_temp_7(295, 175, Style::CENTRE, TEXT_SMALL, temps, std::get<3>(motors[6]) + std::string(": %dC"), std::get<1>(motors[6]), COLOR_BLACK);
+Text mot_temp_8(405, 175, Style::CENTRE, TEXT_SMALL, temps, std::get<3>(motors[7]) + std::string(": %dC"), std::get<1>(motors[7]), COLOR_BLACK);
 
 Page auto_selection (3, "Auton"); //Select auton routes
-Text route (MID_X, 60, Style::CENTRE, TEXT_LARGE, auto_selection, "Auton %d", &cur_auton);
+Text route (MID_X, 60, Style::CENTRE, TEXT_LARGE, auto_selection, "Auton %d", cur_auton);
 Button route1 (45, 90, 100, 80, Style::SIZE, Button::TOGGLE, auto_selection, "Route 1");
 Button route2 (190, 90, 100, 80, Style::SIZE, Button::TOGGLE, auto_selection, "Route 2");
 Button route3 (335, 90, 100, 80, Style::SIZE, Button::TOGGLE, auto_selection, "Route 3");
 
 Page track (4, "Tracking"); //Display tracking vals and reset btns
-Text trackX(50, 45, Style::CENTRE, TEXT_SMALL, track, "X:%.1f", &tracking.x_coord);
-Text trackY(135, 45, Style::CENTRE, TEXT_SMALL, track, "Y:%.1f", &tracking.y_coord);
-Text trackA(220, 45, Style::CENTRE, TEXT_SMALL, track, "A:%d", &angle);
-Text encL(50, 130, Style::CENTRE, TEXT_SMALL, track, "L:%.1f", &left_enc);
-Text encR(135, 130, Style::CENTRE, TEXT_SMALL, track, "R:%.1f", &right_enc);
-Text encB(220, 130, Style::CENTRE, TEXT_SMALL, track, "B:%d", &back_enc);
+Text trackX(50, 45, Style::CENTRE, TEXT_SMALL, track, "X:%.1f", tracking.x_coord);
+Text trackY(135, 45, Style::CENTRE, TEXT_SMALL, track, "Y:%.1f", tracking.y_coord);
+Text trackA(220, 45, Style::CENTRE, TEXT_SMALL, track, "A:%d", angle);
+Text encL(50, 130, Style::CENTRE, TEXT_SMALL, track, "L:%.1f", left_enc);
+Text encR(135, 130, Style::CENTRE, TEXT_SMALL, track, "R:%.1f", right_enc);
+Text encB(220, 130, Style::CENTRE, TEXT_SMALL, track, "B:%d", back_enc);
 Button resX(15, 60, 70, 55, Style::SIZE, Button::SINGLE, track, "Reset X");
 Button resY(100, 60, 70, 55, Style::SIZE, Button::SINGLE, track, "Reset Y");
 Button resA(185, 60, 70, 55, Style::SIZE, Button::SINGLE, track, "Reset A");
@@ -51,15 +51,15 @@ Button go_home(320, 110, 150, 40, Style::SIZE, Button::SINGLE, moving, "Home");
 Button go_centre(320, 175, 150, 40, Style::SIZE, Button::SINGLE, moving, "Centre");
 
 Page intake_test (6, "Intake"); //Test for intake with rings
-Text rings(MID_X, 50, Style::CENTRE, TEXT_LARGE, intake_test, "Ring Count: %d", &ring_count);
+Text rings(MID_X, 50, Style::CENTRE, TEXT_LARGE, intake_test, "Ring Count: %d", ring_count);
 Button reset_intake (30, 90, 120, 80, Style::SIZE, Button::SINGLE, intake_test, "Reset Motor");
 Button onOff (180, 90, 120, 80, Style::SIZE, Button::SINGLE, intake_test, "Start/Stop");
 Button reset_rings (330, 90, 120, 80, Style::SIZE, Button::SINGLE, intake_test, "Reset Ring Count");
 
 Page elastic (7, "Elastic Test"); //Testing the elastics on the lift
 Button run_elastic(165, 60, 150, 55, Style::SIZE, Button::SINGLE, elastic, "Run Elastic Test");
-Text elastic_up (MID_X, 160, Style::CENTRE, TEXT_SMALL, elastic, "Up Time: %d", &elastic_up_time);
-Text elastic_down(MID_X, 180, Style::CENTRE, TEXT_SMALL, elastic, "Down Time: %d", &elastic_down_time);
+Text elastic_up (MID_X, 160, Style::CENTRE, TEXT_SMALL, elastic, "Up Time: %d", elastic_up_time);
+Text elastic_down(MID_X, 180, Style::CENTRE, TEXT_SMALL, elastic, "Down Time: %d", elastic_down_time);
 
 Page liftMove (8, "Lift"); //Moving the lift to an xyz position
 Slider lift_x_val(35, 65, 250, 40, Style::SIZE, Slider::HORIZONTAL, 0, 144, liftMove, "X");
@@ -85,8 +85,8 @@ Button grid (10, 155, 225, 70, Style::SIZE, Button::SINGLE, tuning, "Grid");
 Button spin360 (245, 155, 225, 70, Style::SIZE, Button::SINGLE, tuning, "360 Spin");
 
 Page pneumatic (11, "Pneumatics"); //Pneumatic testing page
-Text pneum_text_1 (125, 50, Style::CENTRE, TEXT_SMALL, pneumatic, "PORT G: %s", &pneum_1_state);
-Text pneum_text_2 (350, 50, Style::CENTRE, TEXT_SMALL, pneumatic, "PORT H: %s", &pneum_2_state);
+Text pneum_text_1 (125, 50, Style::CENTRE, TEXT_SMALL, pneumatic, "PORT G");
+Text pneum_text_2 (350, 50, Style::CENTRE, TEXT_SMALL, pneumatic, "PORT H");
 Button pneum_btn_1 (25, 70, 200, 80, Style::SIZE, Button::TOGGLE, pneumatic, "PNEUMATIC 1");
 Button pneum_btn_2 (250, 70, 200, 80, Style::SIZE, Button::TOGGLE, pneumatic, "PNEUMATIC 2");
 

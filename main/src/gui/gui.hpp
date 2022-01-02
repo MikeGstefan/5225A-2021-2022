@@ -11,6 +11,7 @@
 #define PAGE_COUNT 12 //The number for testing if not included. Otherwise +1
 
 #elif defined(GUI_UTIL)
+#undef GUI_MAIN
 #define PAGE_COUNT 5
 
 #else
@@ -220,9 +221,9 @@ class Text{
   public:
     //Points, Format, Page, Label, [var], Lcolor
     Text (int16_t, int16_t, Style, text_format_e_t, Page&, std::string, std::uint32_t label_color = COLOR_WHITE);
-    Text (int16_t, int16_t, Style, text_format_e_t, Page&, std::string, double*, std::uint32_t label_color = COLOR_WHITE);
-    Text (int16_t, int16_t, Style, text_format_e_t, Page&, std::string, int*, std::uint32_t label_color = COLOR_WHITE);
-    Text (int16_t, int16_t, Style, text_format_e_t, Page&, std::string, std::string*, std::uint32_t label_color = COLOR_WHITE);
+    Text (int16_t, int16_t, Style, text_format_e_t, Page&, std::string, double&, std::uint32_t label_color = COLOR_WHITE);
+    Text (int16_t, int16_t, Style, text_format_e_t, Page&, std::string, int&, std::uint32_t label_color = COLOR_WHITE);
+    Text (int16_t, int16_t, Style, text_format_e_t, Page&, std::string, std::string&, std::uint32_t label_color = COLOR_WHITE);
 
     //Functions
     void set_background (int16_t, int16_t, std::uint32_t = 0xFFFFFFFF);

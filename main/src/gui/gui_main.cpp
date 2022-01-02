@@ -126,12 +126,12 @@ void GUI::init(){ //Call once at start in initialize()
   });
 
   pneum_text_1.set_background(50, 15);
-  pneum_btn_1.set_func([](){claw_in.set_value(1); pneum_1_state = "ON";});
-  pneum_btn_1.set_off_func([](){claw_in.set_value(0); pneum_1_state = "OFF";});
+  pneum_btn_1.set_func([](){claw_in.set_value(1);});
+  pneum_btn_1.set_off_func([](){claw_in.set_value(0);});
 
   pneum_text_2.set_background(50, 15);
-  pneum_btn_2.set_func([](){claw_out.set_value(1); pneum_2_state = "ON";});
-  pneum_btn_2.set_off_func([](){claw_out.set_value(0); pneum_2_state = "OFF";});
+  pneum_btn_2.set_func([](){claw_out.set_value(1);});
+  pneum_btn_2.set_off_func([](){claw_out.set_value(0);});
 
   std::get<4>(motors[0]) = (std::get<0>(motors[0])) ? &mot_temp_1 : nullptr;
   std::get<4>(motors[1]) = (std::get<0>(motors[1])) ? &mot_temp_2 : nullptr;

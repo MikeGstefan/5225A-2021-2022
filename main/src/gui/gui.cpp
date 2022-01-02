@@ -22,7 +22,7 @@ Button next_page(480, 0, -75, 20, Style::SIZE, Button::SINGLE, perm, "->");
 Page go_sequence (PAGE_COUNT+1, "GO SEQUENCE");
 Button go_button (300, MID_Y, 160, 90, Style::CENTRE, Button::SINGLE, go_sequence, "PRESS TO 👨🏻‍🚀👨🏻‍🚀👨🏻‍🚀👨🏻‍🚀👨🏻‍🚀👨🏻‍🚀👨🏻‍🚀👨🏻‍🚀👨🏻‍🚀👨🏻‍🚀👨🏻‍🚀👨🏻‍🚀👨🏻‍🚀👨🏻‍🚀👨🏻‍🚀👨🏻‍🚀👨🏻‍🚀👨🏻‍🚀👨🏻‍🚀👨🏻‍🚀👨🏻‍🚀👨🏻‍🚀👨🏻‍🚀👨🏻‍🚀👨🏻‍🚀👨🏻‍🚀👨🏻‍🚀👨🏻‍🚀👨🏻‍🚀👨🏻‍🚀");// Hack that works for some reason. Note that all emoji's don't work
 Button go_back_button (20, USER_UP, 100, 50, Style::SIZE, Button::SINGLE, go_sequence, "BACK");
-Text go_button_text (300, 140, Style::CENTRE, TEXT_SMALL, go_sequence, "%s", &go_string, (std::uint32_t)COLOR_BLACK);
+Text go_button_text (300, 140, Style::CENTRE, TEXT_SMALL, go_sequence, "%s", go_string, (std::uint32_t)COLOR_BLACK);
 
 bool GUI::go(std::string name, std::string message, std::uint32_t delay_time){ //Start
   printf("\n\n%s\n", message.c_str());
@@ -247,19 +247,19 @@ val_type(typeid(std::monostate)){
   construct(x, y, rect_type, size, &page, text, std::monostate{}, label_color);
 }
 
-Text::Text (int16_t x, int16_t y, Style rect_type, text_format_e_t size, Page& page, std::string text, double* val_ref, std::uint32_t label_color):
+Text::Text (int16_t x, int16_t y, Style rect_type, text_format_e_t size, Page& page, std::string text, double& val_ref, std::uint32_t label_color):
 val_type(typeid(double*)){
-  construct(x, y, rect_type, size, &page, text, val_ref, label_color);
+  construct(x, y, rect_type, size, &page, text, &val_ref, label_color);
 }
 
-Text::Text (int16_t x, int16_t y, Style rect_type, text_format_e_t size, Page& page, std::string text, int* val_ref, std::uint32_t label_color):
+Text::Text (int16_t x, int16_t y, Style rect_type, text_format_e_t size, Page& page, std::string text, int& val_ref, std::uint32_t label_color):
 val_type(typeid(int*)){
-  construct(x, y, rect_type, size, &page, text, val_ref, label_color);
+  construct(x, y, rect_type, size, &page, text, &val_ref, label_color);
 }
 
-Text::Text (int16_t x, int16_t y, Style rect_type, text_format_e_t size, Page& page, std::string text, std::string* val_ref, std::uint32_t label_color):
+Text::Text (int16_t x, int16_t y, Style rect_type, text_format_e_t size, Page& page, std::string text, std::string& val_ref, std::uint32_t label_color):
 val_type(typeid(std::string*)){
-  construct(x, y, rect_type, size, &page, text, val_ref, label_color);
+  construct(x, y, rect_type, size, &page, text, &val_ref, label_color);
 }
 
 Button::Button(int16_t x1, int16_t y1, int16_t x2, int16_t y2, Style type, press_type form, Page& page, std::string text, std::uint32_t background_color, std::uint32_t label_color){
@@ -466,6 +466,7 @@ void Text::draw(){
   else if (val_type == typeid(std::string*)){
     length = sprintf(buffer, label.c_str(), (*std::get<std::string*>(val_ptr)).c_str());
     prev_val = *std::get<std::string*>(val_ptr);
+    if (*std::get<string*>(val_ptr) == "~") return;
   }
 
   else if (val_type == typeid(std::monostate)){
@@ -599,12 +600,11 @@ void Button::update(){
   //Loops through the list of buttons on the current page to check for presses
   for (std::vector <Button*>::iterator it = (Page::current_page->buttons).begin(); it != (Page::current_page->buttons).end(); it++){
     Button* btn_id = *it;
-    if (!btn_id->active) return;
+    if (!btn_id->active) continue;
 
     switch(btn_id->form){
       case Button::SINGLE:
         if (btn_id->new_press()){
-          // btn_id->last_pressed = true;
           btn_id->draw_pressed();
           btn_id->run_func();
 
@@ -612,7 +612,6 @@ void Button::update(){
         }
 
         else if (btn_id->new_release()){
-          // btn_id->last_pressed = false;
           btn_id->draw();
           btn_id->run_off_func();
         }
@@ -621,7 +620,6 @@ void Button::update(){
 
       case Button::LATCH:
         if (btn_id->new_press()){
-          // btn_id->last_pressed = true;
           btn_id->on = !btn_id->on; //Toggles the latch
 
           //Draws button's new state
@@ -637,7 +635,6 @@ void Button::update(){
         }
 
         else if (btn_id->new_release()){
-          // btn_id->last_pressed = false;
           btn_id->draw();
         }
 
@@ -648,13 +645,11 @@ void Button::update(){
 
       case Button::REPEAT:
         if (btn_id->new_press()){
-          // btn_id->last_pressed = true;
           btn_id->draw_pressed();
           btn_id->run_func();
         }
 
         else if (btn_id->new_release()){
-          // btn_id->last_pressed = false;
           btn_id->draw();
           btn_id->run_off_func();
         }
@@ -665,7 +660,6 @@ void Button::update(){
 
       case Button::TOGGLE:
         if (btn_id->new_press()){
-          // btn_id->last_pressed = true;
           btn_id->on = !btn_id->on;
 
           //Draws button's new state
@@ -684,7 +678,6 @@ void Button::update(){
         }
 
         else if (btn_id->new_release()){
-          // btn_id->last_pressed = false;
           btn_id->draw();
         }
         break;
