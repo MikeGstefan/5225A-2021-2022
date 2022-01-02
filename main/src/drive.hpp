@@ -43,7 +43,7 @@ class Drivebase {
   void update_screen();
 
 public:
-    Timer screen_timer = {"screen_timer"};
+  Timer screen_timer = {"screen_timer"};
   int cur_driver = 0;  // driver to defaults to Nikhil
   static constexpr int num_of_drivers = 5;
   FILE* curve_file;
@@ -56,6 +56,8 @@ public:
   void update_lookup_table_util();  // utility to alter expo curves for any driver
   void handle_input();  // move the drivebase according to lookup tables from a joystick input
   void driver_practice(); // method to let drivers drive and change driver profiles
+  void next_driver(); //Goes to next driver. Called on drivebase object.
+  void prev_driver(); //Goes to previous driver. Called on drivebase object.
 };
 
 extern Drivebase drivebase;

@@ -1,6 +1,6 @@
 #include "drive.hpp"
 #include "controller.hpp"
-#include "gui/gui_main.hpp"
+#include "gui/gui.hpp"
 
 // using namespace std;
 #include "task.hpp"
@@ -20,10 +20,10 @@ void initialize() {
 	drivebase.download_curve_data();
 	Data::init();
 	_Controller::init();
+	GUI::init();
 	delay(150);
 	tracking.x_coord = 0.0, tracking.y_coord = 0.0, tracking.global_angle = 0.0;
 	update_t.start();
-	GUI::setup();
 	master.print(2, 0, "Driver: %s", drivebase.drivers[drivebase.cur_driver].name);
 }
 
@@ -73,24 +73,13 @@ void autonomous() {}
  */
 
 //Get rid of these once merged
-void prev_driver(){
-	if (drivebase.cur_driver == 0) drivebase.cur_driver = drivebase.num_of_drivers - 1;
-	else drivebase.cur_driver--;
-	WAIT_FOR_SCREEN_REFRESH();
-	master.print(2, 0, "Driver: %s          ", drivebase.drivers[drivebase.cur_driver].name);
-}
-void next_driver(){
-	drivebase.cur_driver++;
-	drivebase.cur_driver %= drivebase.num_of_drivers;
-	WAIT_FOR_SCREEN_REFRESH();
-	master.print(2, 0, "Driver: %s          ", drivebase.drivers[drivebase.cur_driver].name);
-}
-
 int ring_count = 0, cur_auton = 1;
 
 void opcontrol() {
 	/*Gui:
+	have util set up devices using c:: to avoid object creation
 	Reset tracking by task
+	convert some printfs to logs
 	/**/
 
 	while(true){
@@ -101,7 +90,8 @@ void opcontrol() {
 			drivebase.update_lookup_table_util();
 			master.clear();
 		}
-		else if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_UP)) next_driver();
-		else if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_DOWN)) prev_driver();
+		else if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_UP)) drivebase.next_driver();
+		else if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_DOWN)) drivebase.prev_driver();
+		delay(10);
 	}
 }
