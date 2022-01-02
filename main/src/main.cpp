@@ -1,6 +1,11 @@
+#include "Subsystems/lift.hpp"
+#include "Subsystems/hitch.hpp"
 #include "drive.hpp"
 #include "controller.hpp"
 #include "gui/gui.hpp"
+#include "pid.hpp"
+#include "Tracking.hpp"
+#include "task.hpp"
 
 // using namespace std;
 #include "task.hpp"
@@ -14,7 +19,7 @@ using namespace std;
  * All other competition modes are blocked by initialize; it is recommended
  * to keep execution time for this mode under a few seconds.
  */
-
+ pros::Task *updt = nullptr;
 
 void initialize() {
 	drivebase.download_curve_data();
@@ -22,7 +27,9 @@ void initialize() {
 	_Controller::init();
 	GUI::init();
 	delay(150);
-	tracking.x_coord = 0.0, tracking.y_coord = 0.0, tracking.global_angle = 0.0;
+	tracking.x_coord = 144.0 - 10.25, tracking.y_coord = 14.75, tracking.global_angle = -M_PI_2;
+	// tracking.x_coord = 0.0, tracking.y_coord = 0.0, tracking.global_angle = 0.0;
+
 	update_t.start();
 	master.print(2, 0, "Driver: %s", drivebase.drivers[drivebase.cur_driver].name);
 }
@@ -56,7 +63,45 @@ void competition_initialize() {}
  * will be stopped. Re-enabling the robot will restart the task, not re-start it
  * from where it left off.
  */
-void autonomous() {}
+void autonomous() {
+	// lift.reset();
+	// lift_piston.set_value(LOW);
+	// lift.motor.move_absolute(lift.bottom_position, 100);
+
+	// Timer move_timer{"move"};
+	// move_to_point({112.5, 14.75, -90.0});
+	// move_timer.print();
+	// // tank_move_on_arc({110.0, 14.75}, {132.0, 24.0, -180.0}, 127.0);
+	// // move_on_line(polar_to_vector(110.0, 14.75, 10.0, 45.0, -135.0));
+	// move_to_point(polar_to_vector_point(110.0, 14.75, 17.5, 45.0, -135.0), 127.0, false, 1.0, false);	// grabs alliance goal
+	// lift_piston.set_value(HIGH);
+
+	// tank_turn_to_target({108.0, 60.0});
+	// // tank_move_to_target({110.0, 40.0, 0.0}, true, 127.0, 0.0, false);
+	// move_to_point({110.0, 60.0, 0.0}, 127.0, false, 0.0, false);	// in front of small netural goal
+	// move_to_point({110.0, 80.0, 0.0}, 127.0, false, 0.0, false);	// drives through small neutral goal
+	// tank_move_on_arc({110.0, 84.0},{80.0, 96.0, -90.0}, 127.0);
+	// move_to_point({60.0, 96.0, -90.0}, 80.0, false, 0.0, true);	// drives over rings
+	// move_to_point({60.0, 108.0, -90.0}, 80.0, false, 0.0, true);	// drives to drop off small neutral
+	// lift.motor.move_absolute(lift.platform_position, 100);
+	// move_to_point({60.0, 108.0, -180.0}, 80.0, false, 0.0, true);	// drives to drop off small neutral
+	// lift_piston.set_value(LOW);
+
+
+
+	// move_timer.print();
+	/*
+	move_to_point({108.0, 60.0, 0.0}, 127.0, false, 0.0, false);
+	move_timer.print();
+	delay(1000);
+	move_to_point({108.0, 84.0, 0.0}, 127.0, false, 0.0, false);
+	move_timer.print();
+	*/
+
+	// move_on_arc({108.0, 0.0}, {132.0, 24.0, -180.0}, 24.0, true, 127.0, true, 1.0);
+	// move_timer.print();
+
+}
 
 /**
  * Runs the operator control code. This function will be started in its own task
@@ -83,6 +128,7 @@ void opcontrol() {
 	Reset tracking by task
 	convert some printfs to logs
 	/**/
+	move_start(move_types::line, line_params({0.0, 0.0}, {0.0, 24.0, 00.0}, 127.0, false, 0.0, false), true);
 
 	while(true){
 		GUI::background();

@@ -74,3 +74,6 @@ extern Data tracking_data;
 extern Data tracking_imp;
 extern Data misc;
 extern Data drivers_data;
+extern Data motion_d;
+extern Data motion_i;
+

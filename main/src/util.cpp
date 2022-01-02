@@ -1,21 +1,6 @@
 #include "util.hpp"
 
-// void set_claw_state(claw_state state){
-//   switch(state){
-//     case claw_state::in:
-//       claw_out.set_value(0);
-//       claw_in.set_value(1);
-//     break;
-//     case claw_state::out:
-//       claw_out.set_value(1);
-//       claw_in.set_value(0);
-//     break;
-//     case claw_state::neut:
-//       claw_out.set_value(0);
-//       claw_in.set_value(0);
-//     break;
-//   }
-// }
+Timer screen_timer{"Screen Timer"};
 
 int sgn(int n){
   if (n > 0)return 1;
@@ -43,6 +28,6 @@ double rad_to_deg(double rad){
   return rad / M_PI * 180;
 }
 
-// Coord constructor definition
-Coord::Coord(double x, double y, double angle): x(x), y(y), angle(angle){}
-Coord::Coord(): x(0.0), y(0.0), angle(0.0){}
+double near_angle(double angle, double reference){
+	return round((reference - angle) / (2 * M_PI)) * (2 * M_PI) + angle - reference;
+}

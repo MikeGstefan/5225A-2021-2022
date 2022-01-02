@@ -70,6 +70,17 @@ void Drivebase::move(double x, double y, double a){
   back_r.move(x + y - a);
 }
 
+void Drivebase::move_tank(double y, double a){
+  move(0.0, y, a);
+}
+
+void Drivebase::move_side(double l, double r){
+  front_l.move(l);
+  front_r.move(r);
+  back_l.move(l);
+  back_r.move(r);
+}
+
 void Drivebase::brake(){
   front_l.move_relative(0, 200);
   front_r.move_relative(0, 200);
@@ -178,6 +189,17 @@ void Drivebase::handle_input(){
   if(fabs(tracking.power_y) < deadzone) tracking.power_y = 0.0;
   if(fabs(tracking.power_a) < deadzone) tracking.power_a = 0.0;
 
+  if(master.get_digital_new_press(reverse_drive_button)){
+    master.rumble("-");
+    reversed = !reversed;
+    if(reversed) master.print(1, 0, "Reversed");
+    else master.print(1, 0, "Direct");
+  }
+  if (reversed){
+    tracking.power_y *= -1;
+    tracking.power_x *= -1;
+  }
+
   move(tracking.power_x, tracking.power_y, tracking.power_a);
 }
 
@@ -193,7 +215,12 @@ void Drivebase::driver_practice(){
       else if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_DOWN)){  // goes to previous driver
         prev_driver();
       }
+
+      // actual drive code
       drivebase.handle_input();
+      lift.handle();
+
+      // takes away control from driver when motors overheat
       if(front_l.get_temperature() >= 55 || front_r.get_temperature() >= 55 || back_r.get_temperature() >= 55 || back_l.get_temperature() >= 55){
         move(0, 0, 0);  // stops movement
         delay(50);
@@ -202,8 +229,8 @@ void Drivebase::driver_practice(){
         master.print(0, 0, "fl%.0f r%.0f bl%.0f r%.0f\n", front_l.get_temperature(), front_r.get_temperature(), back_l.get_temperature(), back_r.get_temperature());
         return;
       }
-      // prints motor temps every 50 ms
-      if(screen_timer.get_time() > 50){
+      // prints motor temps every second
+      if(screen_timer.get_time() > 1000){
         drivers_data.print("fl%.0f r%.0f bl%.0f r%.0f\n", front_l.get_temperature(), front_r.get_temperature(), back_l.get_temperature(), back_r.get_temperature());
         master.print(0, 0, "fl%.0f r%.0f bl%.0f r%.0f\n", front_l.get_temperature(), front_r.get_temperature(), back_l.get_temperature(), back_r.get_temperature());
         // rumbles controllers if motors are hot
