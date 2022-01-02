@@ -590,6 +590,7 @@ void GUI::update(){
   Button::update();
   Slider::update();
   Text::update();
+  GUI::end_flash();
 }
 
 void Page::update(){
@@ -718,7 +719,7 @@ void Text::update(){
   }
 }
 
-void GUI::general_setup(){
+void GUI::setup(){
     prev_page.set_func([&](){
       if (Page::current_page == Page::pages[1]) Page::go_to(PAGE_COUNT-1);
       else Page::go_to((Page::current_page->page_num)-1);
@@ -732,9 +733,4 @@ void GUI::general_setup(){
     go_button_text.set_background(ORANGE);
 
     Page::go_to(0);
-}
-
-void GUI::general_background(){
-  GUI::update();
-  end_flash();
 }

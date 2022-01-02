@@ -75,6 +75,8 @@ void autonomous() {}
 //Get rid of these once merged
 int ring_count = 0, cur_auton = 1;
 
+extern Slider mot_speed;
+
 void opcontrol() {
 	/*Gui:
 	have util set up devices using c:: to avoid object creation
@@ -92,6 +94,9 @@ void opcontrol() {
 		}
 		else if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_UP)) drivebase.next_driver();
 		else if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_DOWN)) drivebase.prev_driver();
+		else if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_X)) break;
 		delay(10);
 	}
+
+	// mot_speed.get_val();
 }

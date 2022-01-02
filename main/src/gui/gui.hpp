@@ -68,8 +68,8 @@ class GUI{ //Do not make a GUI object ever. To make different GUI's, create a ne
     static last_touch_e_t touch_status;
     static int16_t x, y;
 
-    static void update_screen_status(), update();
-    static void general_setup(), general_background();
+    static void update_screen_status();
+    static void setup(), update();
     static void end_flash();
   public:
     static void init(), background();

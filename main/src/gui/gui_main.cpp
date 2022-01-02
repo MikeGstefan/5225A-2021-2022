@@ -23,7 +23,7 @@ void resetA(){
 }
 
 void GUI::init(){ //Call once at start in initialize()
-  GUI::general_setup();
+  GUI::setup();
 
   run_elastic.set_func(&elasticUtil);
 
@@ -189,7 +189,7 @@ void GUI::background(){ //To be called continously
       else text->set_background(COLOR_RED); //50, 55, ...
     }
   }
-  GUI::general_background();
+  GUI::update();
 }
 
 #endif

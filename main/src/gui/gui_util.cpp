@@ -4,7 +4,7 @@
 #include "gui_util.hpp"
 
 void GUI::init(){ //Call once at start in initialize()
-  GUI::general_setup();
+  GUI::setup();
 
   motor_ports = {
     std::make_tuple(std::numeric_limits<int>::max(), &mot_update_1, &mot_stop_1, 0, "~"),
@@ -82,7 +82,7 @@ void GUI::background(){ //To be called continously
     }
   }
 
-  GUI::general_background();
+  GUI::update();
 }
 
 #endif
