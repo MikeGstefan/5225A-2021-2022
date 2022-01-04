@@ -60,10 +60,14 @@ void GUI::init(){ //Call once at start in initialize()
     char coord_c[20];
     sprintf(coord_c, " (%d, %d, %d)", (int)x, (int)y, (int)a);
     std::string coord = coord_c;
-    if (GUI::go("GO TO" + coord, "Press to move to target selected by sliders" + coord, 1000)) move_to_target_sync(x, y, a, false);
+    if (GUI::go("GO TO" + coord, "Press to move to target selected by sliders" + coord, 1000)) move_start(move_types::point, point_params({double(x), double(y), double(a)}));
   });
-  go_home.set_func([](){if (GUI::go("GO TO (0, 0, 0)", "Press to go to starting point (0, 0, 0)", 1000)) move_to_target_sync(0, 0, 0, false);});
-  go_centre.set_func([](){if (GUI::go("GO TO (72, 72, 0)", "Press to go to centre field (72, 72, 0)", 1000)) move_to_target_sync(72, 72, 0, false);});
+  go_home.set_func([](){
+    if (GUI::go("GO TO (0, 0, 0)", "Press to go to starting point (0, 0, 0)", 1000)) move_start(move_types::point, point_params({0.0, 0.0, 0.0}));
+  });
+  go_centre.set_func([](){
+    if (GUI::go("GO TO (72, 72, 0)", "Press to go to centre field (72, 72, 0)", 1000)) move_start(move_types::point, point_params({72.0, 72.0, 72.0}));
+  });
 
   Button::create_options({&route1, &route2, &route3}); //Makes them exclusive, only one can be selected at a time
 
@@ -125,13 +129,11 @@ void GUI::init(){ //Call once at start in initialize()
     }
   });
 
-  pneum_text_1.set_background(50, 15);
-  pneum_btn_1.set_func([](){claw_in.set_value(1);});
-  pneum_btn_1.set_off_func([](){claw_in.set_value(0);});
+  pneum_btn_1.set_func([](){lift_piston.set_value(1);});
+  pneum_btn_1.set_off_func([](){lift_piston.set_value(0);});
 
-  pneum_text_2.set_background(50, 15);
-  pneum_btn_2.set_func([](){claw_out.set_value(1);});
-  pneum_btn_2.set_off_func([](){claw_out.set_value(0);});
+  pneum_btn_2.set_func([](){lift_piston.set_value(1);});
+  pneum_btn_2.set_off_func([](){lift_piston.set_value(0);});
 
   std::get<4>(motors[0]) = (std::get<0>(motors[0])) ? &mot_temp_1 : nullptr;
   std::get<4>(motors[1]) = (std::get<0>(motors[1])) ? &mot_temp_2 : nullptr;

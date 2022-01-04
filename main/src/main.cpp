@@ -2,7 +2,7 @@
 #include "Subsystems/hitch.hpp"
 #include "drive.hpp"
 #include "controller.hpp"
-#include "gui/gui.hpp"
+#include "Libraries/gui/gui.hpp"
 #include "pid.hpp"
 #include "Tracking.hpp"
 #include "task.hpp"
@@ -124,11 +124,10 @@ extern Slider mot_speed;
 
 void opcontrol() {
 	/*Gui:
-	have util set up devices using c:: to avoid object creation
+	add functionality for text to show text array element via const char** and int index.
 	Reset tracking by task
 	convert some printfs to logs
 	/**/
-	move_start(move_types::line, line_params({0.0, 0.0}, {0.0, 24.0, 00.0}, 127.0, false, 0.0, false), true);
 
 	while(true){
 		GUI::background();
@@ -144,5 +143,11 @@ void opcontrol() {
 		delay(10);
 	}
 
-	// mot_speed.get_val();
+	move_start(move_types::line, line_params({0.0, 0.0}, {0.0, 24.0, 0.0}));
+  move_start(move_types::turn_angle, turn_angle_params(45.0));
+  move_start(move_types::line, line_params({0.0, 0.0}, {0.0, 24.0, 0.0}));
+
+  // move_start(move_types::line, line_params({0.0, 0.0}, {0.0, 24.0, 0.0}, mot_speed.get_val()));
+  // move_start(move_types::turn_angle, turn_angle_params(45.0, mot_speed.get_val()));
+  // move_start(move_types::line, line_params({0.0, 0.0}, {0.0, 24.0, 0.0}, mot_speed.get_val()));
 }

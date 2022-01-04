@@ -86,7 +86,7 @@ Button spin360 (245, 155, 225, 70, Style::SIZE, Button::SINGLE, tuning, "360 Spi
 
 Page pneumatic (11, "Pneumatics"); //Pneumatic testing page
 Text pneum_text_1 (125, 50, Style::CENTRE, TEXT_SMALL, pneumatic, "PORT G");
-Text pneum_text_2 (350, 50, Style::CENTRE, TEXT_SMALL, pneumatic, "PORT H");
+Text pneum_text_2 (350, 50, Style::CENTRE, TEXT_SMALL, pneumatic, "PORT G - not configured for 2");
 Button pneum_btn_1 (25, 70, 200, 80, Style::SIZE, Button::TOGGLE, pneumatic, "PNEUMATIC 1");
 Button pneum_btn_2 (250, 70, 200, 80, Style::SIZE, Button::TOGGLE, pneumatic, "PNEUMATIC 2");
 
