@@ -23,7 +23,7 @@ extern controller_digital_e_t hitch_button;
 extern controller_digital_e_t cancel_button;
 extern controller_digital_e_t fill_top_goal_button;
 extern controller_digital_e_t climb_platform_button;
-extern controller_digital_e_t intake_on_button;
+extern controller_digital_e_t intake_button;
 extern controller_digital_e_t reverse_drive_button;
 
 

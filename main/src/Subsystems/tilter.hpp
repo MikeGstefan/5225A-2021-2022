@@ -21,7 +21,7 @@ class Tilter: public Motorized_subsystem<tilter_states, NUM_OF_TILTER_STATES, TI
   int bad_count = 0; // cycle check for safeties
   int tilter_encoder_position; // position of left tracking wheel when searching
   bool held = false;
-  
+
 public:
   Tilter(Motorized_subsystem<tilter_states, NUM_OF_TILTER_STATES, TILTER_MAX_VELOCITY> motorized_subsystem);  // constructor
   void handle();  // contains state machine code
