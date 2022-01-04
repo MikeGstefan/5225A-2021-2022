@@ -5,9 +5,7 @@
 #define TILTER_MAX_VELOCITY 100
 
 enum class tilter_states {
-  lowered,  // at bottom position, waiting for sensor or button to grab goal
-  climb,
-  searching,  // waiting to drive a certain distance before grabbing goal
+  lowered,  // at bottom position, waiting for button to grab goal
   raised, // has goal and raised
   lowering,  // going from raised to lowered state_type
   manual // controlled by joystick
@@ -15,7 +13,6 @@ enum class tilter_states {
 
 class Tilter: public Motorized_subsystem<tilter_states, NUM_OF_TILTER_STATES, TILTER_MAX_VELOCITY> {
   double bottom_position = 500.0, raised_position = 50.0, top_position = 50.0;
-  double climb_position;
   Timer lifting_timer{"tilter_lifting_timer"};
   int tilter_power;
   int bad_count = 0; // cycle check for safeties

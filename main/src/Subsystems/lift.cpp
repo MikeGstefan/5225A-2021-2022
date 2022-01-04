@@ -22,6 +22,7 @@ Lift::Lift(Motorized_subsystem<lift_states, NUM_OF_LIFT_STATES, LIFT_MAX_VELOCIT
   released_cycle_check = 0;
   target = bottom_position;
   last_target = target;
+  intake_on = false;
 }
 
 void Lift::handle(){
@@ -34,6 +35,9 @@ void Lift::handle(){
     delay(50);
     printf("LIFT SAFETY TRIGGERED\n");
     set_state(lift_states::manual);
+    intake.move(0); // disables intake lift safety is triggered
+    intake_on = false;
+
   }
 
   switch(state){
@@ -53,6 +57,16 @@ void Lift::handle(){
         // master.rumble("-");
         set_state(lift_states::lowered);
       }
+      if(master.get_digital_new_press(intake_button)){  // toggles intake
+        if(intake_on){
+          intake.move(0);
+          intake_on = false;
+        }
+        else{
+          intake.move(100);
+          intake_on = true;
+        }
+      }
       break;
 
     case lift_states::lowered:
@@ -67,12 +81,27 @@ void Lift::handle(){
         // master.rumble("-");
         set_state(lift_states::searching);
       }
+      if(master.get_digital_new_press(intake_button)){  // toggles intake
+        if(intake_on){
+          intake.move(0);
+          intake_on = false;
+        }
+        else{
+          intake.move(100);
+          intake_on = true;
+        }
+      }
       break;
 
     case lift_states::grabbed:
       if(master.get_digital_new_press(lift_up_button)){ // lifts goal to platform height if up button is pressed
         move_absolute(raised_position, 100);
         set_state(lift_states::raised);
+
+        intake.move(0);
+        intake_on = false;
+        intake_piston.set_value(HIGH); // raises intake when lift is lifting
+
       }
       // releases goal if down button is pressed
       if(master.get_digital_new_press(lift_down_button) && fabs(bottom_position - motor.get_position()) < end_error){
@@ -83,6 +112,16 @@ void Lift::handle(){
       if(master.get_digital_new_press(level_platform_button)){  // moves to top position if level platform button is pressed
         move_absolute(top_position);
         set_state(lift_states::level_platform_prep);
+      }
+      if(master.get_digital_new_press(intake_button)){  // toggles intake
+        if(intake_on){
+          intake.move(0);
+          intake_on = false;
+        }
+        else{
+          intake.move(100);
+          intake_on = true;
+        }
       }
       break;
 
@@ -98,6 +137,8 @@ void Lift::handle(){
       if(master.get_digital_new_press(lift_down_button)){ // lowers goal if down button is pressed
         move_absolute(bottom_position);
         set_state(lift_states::grabbed);
+
+        intake_piston.set_value(LOW); // lowers intake once lift is down
       }
       break;
 
@@ -140,6 +181,7 @@ void Lift::handle(){
       if(master.get_digital_new_press(lift_up_button) || master.get_digital_new_press(lift_down_button)){
         move_absolute(bottom_position);
         set_state(lift_states::searching);
+        intake_piston.set_value(LOW); // lowers intake
       }
       break;
 
@@ -154,6 +196,7 @@ void Lift::handle(){
         lift_piston.set_value(LOW);
         move_absolute(bottom_position);
         set_state(lift_states::searching);
+
       }
       break;
 

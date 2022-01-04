@@ -19,11 +19,13 @@ Tilter::Tilter(Motorized_subsystem<tilter_states, NUM_OF_TILTER_STATES, TILTER_M
   last_target = target;
 
   raised_position = 50.0;
-  climb_position = 200.0;
   held = false;
 }
 
 void Tilter::handle(){
+
+// analog control
+/*
   if(master.get_digital_new_press(tilter_button)){
     if(held){
       tilter_bottom_piston.set_value(LOW);
@@ -41,9 +43,9 @@ void Tilter::handle(){
   // if (fabs(tilter_power) < 10) motor.move_relative(0, 100); // holds position
   if (fabs(tilter_power) < 10) motor.move(-10); // holds position
   else motor.move(tilter_power);
+*/
 
 
-  /*
   if (fabs(target - motor.get_position()) > end_error && fabs(motor.get_actual_velocity()) < 5.0) bad_count++;
   else bad_count = 0;
   if(bad_count > 25 && state != tilter_states::manual){
@@ -67,41 +69,9 @@ void Tilter::handle(){
         tilter_bottom_piston.set_value(HIGH);
         tilter_top_piston.set_value(HIGH);
         delay(100);
-        move_absolute(climb_position);
-        set_state(tilter_states::climb);
       }
       break;
 
-    case tilter_states::climb:
-      if(master.get_digital_new_press(tilter_button)){  // grabs goal and raises tilter when tilter_button is pressed
-        move_absolute(raised_position);
-        set_state(tilter_states::raised);
-      }
-
-      break;
-
-    case tilter_states::searching:
-      // waits until robot thinks it hits the branch to grab the goal
-      // if(LeftEncoder.get_value()/360.0 *(2.75*M_PI) - tilter_encoder_position > 2.0){
-      //   move_absolute(raised_position);
-      //   tilter_bottom_piston.set_value(HIGH);
-      //   tilter_top_piston.set_value(HIGH);
-      //   set_state(tilter_states::raised);
-      // }
-      // if(master.get_digital_new_press(tilter_button)){  // cancels search when tilter_button is pressed
-      //   set_state(tilter_states::lowered);
-      // }
-      if(master.get_digital_new_press(tilter_button)){  // grabs goal and raises tilter when tilter_button is pressed
-        lifting_timer.reset();
-        tilter_bottom_piston.set_value(HIGH);
-        tilter_top_piston.set_value(HIGH);
-      }
-      if(lifting_timer.get_time() > 100){
-        lifting_timer.reset(false); // pauses timer
-        move_absolute(climb_position);
-        set_state(tilter_states::climb);
-      }
-      break;
 
     case tilter_states::raised:
       if(master.get_digital_new_press(tilter_button)){  // lowers tilter to bottom when tilter_button is pressed
@@ -118,7 +88,7 @@ void Tilter::handle(){
       if(fabs(tilter_motor.get_position() - bottom_position) < end_error){  // releases goal once tilter reaches bottom
         tilter_bottom_piston.set_value(LOW);
         tilter_top_piston.set_value(LOW);
-        set_state(tilter_states::searching);
+        set_state(tilter_states::lowered);
       }
       break;
     case tilter_states::manual:
@@ -133,5 +103,5 @@ void Tilter::handle(){
       }
       break;
   }
-  */
+
 }

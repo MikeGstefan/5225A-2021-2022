@@ -27,6 +27,7 @@ class Lift: public Motorized_subsystem<lift_states, NUM_OF_LIFT_STATES, LIFT_MAX
   double offset_a = 365.0, offset_h = 9.75;
   double arm_len = 8.0;
   double gear_ratio = 5.0;
+  bool intake_on = false;
 
 public:
   const double bottom_position = 35.0, raised_position = 250.0, platform_position = 560.0, top_position = 675.0;
