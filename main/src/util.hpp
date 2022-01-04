@@ -12,6 +12,8 @@
 
 using namespace pros;
 using namespace std;
+//forward declarations
+class Timer;
 
 extern Timer screen_timer;  // timer to measure how long it's been since last screen update
 
