@@ -32,6 +32,7 @@ void initialize() {
 	// tracking.x_coord = 0.0, tracking.y_coord = 0.0, tracking.global_angle = 0.0;
 
 	update_t.start();
+  auton_file_read();
 	master.print(2, 0, "Driver: %s", drivebase.drivers[drivebase.cur_driver].name);
 }
 
@@ -84,13 +85,12 @@ void autonomous() {
  */
 
 //Get rid of these once merged
-int ring_count = 0, cur_auton = 1;
-
-extern Slider mot_speed;
+int ring_count = 0;
 
 void opcontrol() {
 	/*Gui:
 	add functionality for text to show text array element via const char** and int index.
+  use map template on sliders
 	Reset tracking by task
 	convert some printfs to logs
 	/**/
@@ -109,11 +109,14 @@ void opcontrol() {
 		delay(10);
 	}
 
-	move_start(move_types::line, line_params({0.0, 0.0}, {0.0, 24.0, 0.0}));
-  move_start(move_types::turn_angle, turn_angle_params(45.0));
-  move_start(move_types::line, line_params({0.0, 0.0}, {0.0, 24.0, 0.0}));
+  #ifdef GUI_UTIL
+  extern Slider mot_speed;
+  int speed = mot_speed.get_val();
+  #else
+  int speed = 127;
+  #endif
 
-  // move_start(move_types::line, line_params({0.0, 0.0}, {0.0, 24.0, 0.0}, mot_speed.get_val()));
-  // move_start(move_types::turn_angle, turn_angle_params(45.0, mot_speed.get_val()));
-  // move_start(move_types::line, line_params({0.0, 0.0}, {0.0, 24.0, 0.0}, mot_speed.get_val()));
+  move_start(move_types::line, line_params({0.0, 0.0}, {0.0, 24.0, 0.0}, speed));
+  move_start(move_types::turn_angle, turn_angle_params(45.0, speed));
+  move_start(move_types::line, line_params({0.0, 0.0}, {0.0, 24.0, 0.0}, speed));
 }

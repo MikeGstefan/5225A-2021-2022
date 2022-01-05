@@ -7,7 +7,7 @@ std::vector<std::bitset<200>> field (200, std::bitset<200>{}); //Initializes to 
 
 //Var init for text monitoring
 int angle, left_enc, right_enc, back_enc, elastic_up_time, elastic_down_time;
-std::string driver_text;
+std::string driver_text, auton_name, alliance_name; //Try to get rid of this with char**
 
 Page driver_curve (1, "Drivers"); //Select a driver and their exp curve
 Button prev_drivr(20, 70, 110, 120, Style::SIZE, Button::SINGLE, driver_curve, "Prev Driver");
@@ -25,10 +25,11 @@ Text mot_temp_7(295, 175, Style::CENTRE, TEXT_SMALL, temps, std::get<3>(motors[6
 Text mot_temp_8(405, 175, Style::CENTRE, TEXT_SMALL, temps, std::get<3>(motors[7]) + std::string(": %dC"), std::get<1>(motors[7]), COLOR_BLACK);
 
 Page auto_selection (3, "Auton"); //Select auton routes
-Text route (MID_X, 60, Style::CENTRE, TEXT_LARGE, auto_selection, "Auton %d", cur_auton);
-Button route1 (45, 90, 100, 80, Style::SIZE, Button::TOGGLE, auto_selection, "Route 1");
-Button route2 (190, 90, 100, 80, Style::SIZE, Button::TOGGLE, auto_selection, "Route 2");
-Button route3 (335, 90, 100, 80, Style::SIZE, Button::TOGGLE, auto_selection, "Route 3");
+Button prev_auto(20, 70, 110, 120, Style::SIZE, Button::SINGLE, auto_selection, "Prev Auton");
+Text auto_name(MID_X, MID_Y, Style::CENTRE, TEXT_LARGE, auto_selection, "%s", auton_name);
+Button next_auto(350, 70, 110, 120, Style::SIZE, Button::SINGLE, auto_selection, "Next Auton");
+Button alliance(MID_X, 215, 200, 20, Style::CENTRE, Button::SINGLE, auto_selection);
+Text ally_name(MID_X, 215, Style::CENTRE, TEXT_MEDIUM, auto_selection, "Alliance: %s", alliance_name, COLOR_WHITE);
 
 Page track (4, "Tracking"); //Display tracking vals and reset btns
 Text trackX(50, 45, Style::CENTRE, TEXT_SMALL, track, "X:%.1f", tracking.x_coord);
@@ -86,7 +87,7 @@ Button spin360 (245, 155, 225, 70, Style::SIZE, Button::SINGLE, tuning, "360 Spi
 
 Page pneumatic (11, "Pneumatics"); //Pneumatic testing page
 Text pneum_text_1 (125, 50, Style::CENTRE, TEXT_SMALL, pneumatic, "PORT G");
-Text pneum_text_2 (350, 50, Style::CENTRE, TEXT_SMALL, pneumatic, "PORT G - not configured for 2");
+Text pneum_text_2 (350, 50, Style::CENTRE, TEXT_SMALL, pneumatic, "PORT G - no config for 2");
 Button pneum_btn_1 (25, 70, 200, 80, Style::SIZE, Button::TOGGLE, pneumatic, "PNEUMATIC 1");
 Button pneum_btn_2 (250, 70, 200, 80, Style::SIZE, Button::TOGGLE, pneumatic, "PNEUMATIC 2");
 

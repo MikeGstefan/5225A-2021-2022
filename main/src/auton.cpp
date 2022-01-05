@@ -60,3 +60,53 @@ void skills(){
 	// move_to_point({60.0, 108.0, -180.0}, 80.0, false, 0.0, true);	// drives to drop off small neutral
 	// lift_piston.set_value(LOW);
 }
+
+std::ofstream wfile;
+std::ifstream rfile;
+autons cur_auton = static_cast<autons>(0);
+alliances cur_alliance = static_cast<alliances>(0);
+
+void switch_alliance(){
+
+  switch(cur_alliance){
+    case alliances::RED:
+      cur_alliance = alliances::BLUE;
+      alliance.set_background(COLOR_BLUE);
+      ally_name.set_background(COLOR_BLUE);
+      break;
+
+    case alliances::BLUE:
+      cur_alliance = alliances::RED;
+      alliance.set_background(COLOR_RED);
+      ally_name.set_background(COLOR_RED);
+      break;
+  }
+
+  auton_file_update();
+}
+
+void auton_file_update(){
+  wfile.open("/usd/auton.txt");
+  wfile << auton_names[static_cast<int>(cur_auton)] << std::endl;
+  wfile << alliance_names[static_cast<int>(cur_alliance)];
+  wfile.close();
+}
+
+void auton_file_read(){
+  std::string auton, ally;
+  rfile.open("/usd/auton.txt");
+
+  if (!rfile){//File doesn't exist
+    rfile.close();
+    GUI::flash(COLOR_RED, 1000, "Auton File not found!\n");
+    printf("Creating new Auton File.\n");
+    auton_file_update();
+    rfile.open("/usd/auton.txt");
+  }
+  getline(rfile, auton);
+  getline(rfile, ally);
+  rfile.close();
+
+  cur_auton = static_cast<autons>(std::find(auton_names, auton_names+static_cast<int>(autons::NUM_OF_ELEMENTS), auton)-auton_names);
+  cur_alliance = static_cast<alliances>(std::find(alliance_names, alliance_names+2, ally)-alliance_names);
+}

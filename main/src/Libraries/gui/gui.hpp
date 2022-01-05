@@ -1,11 +1,12 @@
 #pragma once
+#include "../../auton.hpp"
 #include "../../drive.hpp"
 #include "../../Tracking.hpp"
 #include "../../util.hpp"
 #include <variant>
 #include <typeinfo>
 
-#define GUI_UTIL
+// #define GUI_UTIL
 
 #if defined(GUI_MAIN)
 #define PAGE_COUNT 12 //The number for testing if not included. Otherwise +1
@@ -47,8 +48,12 @@ class Button;
 class Slider;
 class Text;
 
+//For auton.hpp
+extern Button alliance;
+extern Text ally_name;
+
 //For other gui hpp files
-extern int ring_count, cur_auton; //For gui_objects to use
+extern int ring_count; //For gui_objects to use
 extern void prev_driver(), next_driver(); //For gui_main to use
 extern Timer Flash;
 
@@ -159,6 +164,7 @@ class Button{
     static void create_options(std::vector<Button*>);
     void set_func(std::function <void()>), set_off_func(std::function <void()>);
     void set_active(bool=true);
+    void set_background (std::uint32_t);
     bool pressed();
     bool new_press();
     bool new_release();

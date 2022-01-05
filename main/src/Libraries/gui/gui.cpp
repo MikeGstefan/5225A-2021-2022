@@ -358,6 +358,14 @@ void Button::create_options(std::vector<Button*> buttons){
   }
 }
 
+void Button::set_background (std::uint32_t colour){
+  if (b_col != colour){
+    b_col = colour;
+    b_col_dark = RGB2COLOR(int(COLOR2R(b_col)*0.8), int(COLOR2G(b_col)*0.8), int(COLOR2B(b_col)*0.8));
+    if (page == Page::current_page) draw();
+  }
+}
+
 void Text::set_background (int16_t x1, int16_t y1, std::uint32_t colour){
   if (colour == 0xFFFFFFFF) colour = b_col;
   set_background(x-x1, y-y1, x+x1, y+y1, Style::CORNER, colour);

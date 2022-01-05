@@ -27,10 +27,6 @@ void GUI::init(){ //Call once at start in initialize()
 
   run_elastic.set_func(&elasticUtil);
 
-  route1.set_func([&](){cur_auton = 1;});
-  route2.set_func([&](){cur_auton = 2;});
-  route3.set_func([&](){cur_auton = 3;});
-
   resX.set_func(&resetX);
   resY.set_func(&resetY);
   resA.set_func(&resetA);
@@ -69,11 +65,14 @@ void GUI::init(){ //Call once at start in initialize()
     if (GUI::go("GO TO (72, 72, 0)", "Press to go to centre field (72, 72, 0)", 1000)) move_start(move_types::point, point_params({72.0, 72.0, 72.0}));
   });
 
-  Button::create_options({&route1, &route2, &route3}); //Makes them exclusive, only one can be selected at a time
-
   prev_drivr.set_func([](){drivebase.prev_driver();});
   next_drivr.set_func([](){drivebase.next_driver();});
   drivr_name.set_background(130, 70, 350, 190, Style::CORNER);
+
+  prev_auto.set_func([&](){cur_auton = previous_enum_value(cur_auton); auton_file_update();});
+  next_auto.set_func([&](){cur_auton = next_enum_value(cur_auton); auton_file_update();});
+  alliance.set_func(&switch_alliance);
+  ally_name.set_background(130, 70, 350, 190, Style::CORNER);
 
   turn_encoder.set_func([](){ //Turn the encoder
     if (GUI::go("START, THEN SPIN THE ENCODER", "Please spin the encoder any number of rotations.")){
@@ -164,6 +163,7 @@ void GUI::background(){ //To be called continously
   right_enc = RightEncoder.get_value();
   back_enc = BackEncoder.get_value();
   driver_text = drivebase.drivers[drivebase.cur_driver].name;
+  auton_name = auton_names[static_cast<int>(cur_auton)];
 
   std::array<std::tuple<pros::Motor*, int, std::string, const char*, Text*>, 8>::iterator it;
   for (it = motors.begin(); it != motors.end(); it++){
