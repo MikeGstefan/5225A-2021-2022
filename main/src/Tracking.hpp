@@ -48,6 +48,7 @@ extern Tracking tracking;
 
 
 struct arc_params{
+  const int fuck_you = 11;
   const Point start; 
   Position target;
   const double radius, max_power, min_angle_percent, decel_speed, decel_dist;
@@ -56,6 +57,7 @@ struct arc_params{
 };
 
 struct line_params{
+  const int fuck_you = 11;
   const Point start;
   Position target;
   const double max_power = 127.0; 
@@ -67,24 +69,27 @@ struct line_params{
 };
 
 struct point_params{ 
-  Position target;
+  const int fuck_you = 11;
+  const Position target;
   const double max_power;
   const bool overshoot;
   const double min_angle_percent;
   const bool brake;
   const double decel_dist, decel_speed;
-  point_params(Position target, const double max_power = 127.0, const bool overshoot = false, const double min_angle_percent = 0.0, const bool brake = true, const double decel_dist = 0.0, const double decel_speed = 0.0);
+  point_params(const Position target, const double max_power = 127.0, const bool overshoot = false, const double min_angle_percent = 0.0, const bool brake = true, const double decel_dist = 0.0, const double decel_speed = 0.0);
 };
 
 struct tank_arc_params{ 
+  const int fuck_you = 11;
   const Point start_pos;
   Position target;
   const double power, max_power = 127.0;
   const bool brake = false;
-  tank_arc_params(const Point start_pos, Position target, const double power, const double max_power = 127.0, const bool brake = false);
+  tank_arc_params(const Point start_pos, Position target, const double power = 127.0, const double max_power = 127.0, const bool brake = false);
 };
 
 struct tank_point_params{ 
+  const int fuck_you = 11;
   const Position target;
   const bool turn_dir_if_0;
   const double max_power, min_angle_percent;
@@ -93,12 +98,14 @@ struct tank_point_params{
 };
 
 struct turn_angle_params{ 
+  const int fuck_you = 11;
   const double target_a;
   const bool brake;
   turn_angle_params(const double target_a, const bool brake = true);
 };
 
 struct turn_point_params{ 
+  const int fuck_you = 11;
   const Point target;
   const bool brake;
   turn_point_params(const Point target, const bool brake = true);

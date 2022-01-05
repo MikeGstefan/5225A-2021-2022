@@ -18,20 +18,20 @@ Tilter::Tilter(Motorized_subsystem<tilter_states, NUM_OF_TILTER_STATES, TILTER_M
   target = bottom_position;
   last_target = target;
 
-  raised_position = 50.0;
-  climb_position = 200.0;
+  // raised_position = 50.0;
+  // climb_position = 200.0;
   held = false;
 }
 
 void Tilter::handle(){
   if(master.get_digital_new_press(tilter_button)){
     if(held){
-      tilter_bottom_piston.set_value(LOW);
+      tilter_bottom_piston.set_value(HIGH);
       tilter_top_piston.set_value(LOW);
       held = false;
     }
     else{
-      tilter_bottom_piston.set_value(HIGH);
+      tilter_bottom_piston.set_value(LOW);
       tilter_top_piston.set_value(HIGH);
       held = true;
     }

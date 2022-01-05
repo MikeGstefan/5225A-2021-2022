@@ -27,8 +27,8 @@ void initialize() {
 	Data::init();
 	_Controller::init();
 	delay(150);
-	tracking.x_coord = 144.0 - 10.25, tracking.y_coord = 14.75, tracking.global_angle = -M_PI_2;
-	// tracking.x_coord = 0.0, tracking.y_coord = 0.0, tracking.global_angle = 0.0;
+	// tracking.x_coord = 144.0 - 10.25, tracking.y_coord = 14.75, tracking.global_angle = -M_PI_2;
+	tracking.x_coord = 0.0, tracking.y_coord = 0.0, tracking.global_angle = 0.0;
 
 	update_t.start();
 	GUI::setup();
@@ -102,16 +102,27 @@ void next_driver(){
 // int ring_count = 0, cur_auton = 1;
 
 void opcontrol() {
-	// driver setup
-
-	lift_piston.set_value(LOW);	// in searching state
+	intk_pnue.set_value(0);
+	lift_piston.set_value(0);
 	lift.reset();
 	tilter.reset();
-	lift.motor.move_absolute(35, 100);
-	tilter.move_absolute(500, 100);
-	tilter_bottom_piston.set_value(LOW);
-	tilter_top_piston.set_value(LOW);
+	tilter.move_absolute(tilter.bottom_position);
+	while(!master.get_digital_new_press(E_CONTROLLER_DIGITAL_A))delay(10);
+	lift_piston.set_value(1);
+	move_start(move_types::line, line_params({0.0, 0.0}, {0.0, 40.0, 0.0}),true);
+	//
+	// driver setup
+	// move_start(move_types::point, point_params{{0.0,40.0,0.0}},true);
+	// move_start(move_types::point, point_params{{0.0,0.0,90.0}},true);
+	// move_start(move_types::tank_arc, tank_arc_params({0.0, 0.0},{24.0, 24.0, 90.0}, 127.0, 1.0,true), true);  // arcs to first patch of rings
+	// lift_piston.set_value(LOW);	// in searching state
+	// lift.reset();
+	// tilter.reset();
+	// lift.motor.move_absolute(35, 100);
+	// tilter.move_absolute(500, 100);
+	// tilter_bottom_piston.set_value(1);
+	// tilter_top_piston.set_value(LOW);
 
 
-	drivebase.driver_practice();
+	// drivebase.driver_practice();
 }

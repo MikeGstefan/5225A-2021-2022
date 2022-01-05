@@ -1,5 +1,6 @@
 #pragma once
 #include "main.h"
+// #include "timer.hpp"
 #include "config.hpp"
 #include "util.hpp"
 #include "Tracking.hpp"
@@ -9,9 +10,12 @@
 #include <vector>
 #include <array>
 
+
+
 using namespace pros;
 
 class PID{
+public:
     Timer last_update_timer{"last_update_timer"};
     bool integral_sgn_reset; // if the integral should when the sgn fo the error flips
     uint8_t last_error_sgn;   // used if user wants to reset the integral after the sgn changes

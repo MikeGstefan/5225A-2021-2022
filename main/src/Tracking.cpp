@@ -110,7 +110,7 @@ void update(void* params){
     // printf("%d pow_a: %.1f, pow_x: %.1f, pow_y: %.1f, total_pow: %.1f\n",millis(),  tracking.power_a, tracking.power_x, tracking.power_y, fabs(tracking.power_a) + fabs(tracking.power_x) + fabs(tracking.power_y));
 
     if(ptr->notify_handle())return;
-    delay(10);
+    // delay(10);
     // printf("GLOBAL VELOCITY| x: %.2f, y: %.2f a: %.2f\n", tracking.g_velocity.x, tracking.g_velocity.y, rad_to_deg(tracking.g_velocity.angle));
     // printf("power| x: %.2f, y: % 2.f a: %.2f\n", tracking.power_x, tracking.power_y, tracking.power_a);
 
@@ -236,7 +236,7 @@ arc_params::arc_params(const Point start, Position target, const double radius, 
 line_params::line_params(const Point start, Position target, const double max_power, const bool overshoot, const double min_angle_percent, const bool brake, const double decel_dist, const double decel_speed):
   start{start}, target{target}, max_power{max_power}, overshoot{overshoot}, min_angle_percent{min_angle_percent}, brake{brake}, decel_dist{decel_dist}, decel_speed{decel_speed}{}
 
-point_params::point_params( Position target, const double max_power, const bool overshoot, const double min_angle_percent, const bool brake, const double decel_dist, const double decel_speed):
+point_params::point_params(const Position target, const double max_power, const bool overshoot, const double min_angle_percent, const bool brake, const double decel_dist, const double decel_speed):
   target{target}, max_power{max_power}, overshoot{overshoot}, min_angle_percent{min_angle_percent}, brake{brake}, decel_dist{decel_dist}, decel_speed{decel_speed}{}
 
 tank_arc_params::tank_arc_params(const Point start_pos, Position target, const double power, const double max_power, const bool brake):
@@ -251,6 +251,7 @@ turn_angle_params::turn_angle_params(const double target_a, const bool brake):
 turn_point_params::turn_point_params(const Point target, const bool brake):
   target{target}, brake{brake}{}
 
+// std::variant<arc_params, line_params, tank_arc_params, point_params, tank_point_params, turn_angle_params, turn_point_params> params
 void move_start(move_types type, std::variant<arc_params, line_params, tank_arc_params, point_params, tank_point_params, turn_angle_params, turn_point_params> params, bool wait_for_comp){
   switch(type){
     case move_types::arc:
@@ -260,6 +261,7 @@ void move_start(move_types type, std::variant<arc_params, line_params, tank_arc_
       move_t.rebind(move_on_line, (void*)&std::get<line_params>(params));
     break;
     case move_types::point:
+      printf("in switch: x: %f\n",std::get<point_params>(params).target.x);
       move_t.rebind(move_to_point, (void*)&std::get<point_params>(params));
     break;
     case move_types::tank_arc:
@@ -294,7 +296,9 @@ void move_stop(bool brake){
 void move_to_point(void* params){
     _Task* ptr = _Task::get_obj(params);
     point_params* param_ptr = static_cast<point_params*>(_Task::get_params(params));
+    printf("before copy: %f\n", param_ptr->target.x);
     Position target = param_ptr->target;
+    printf("in function: %f\n", target.x);
     const double max_power = param_ptr->max_power;
     const bool overshoot = param_ptr->overshoot;
     const double min_angle_percent = param_ptr->min_angle_percent;
@@ -324,9 +328,9 @@ void move_to_point(void* params){
     double min_power_a = max_power * min_angle_percent;
     // PID'S
 
-    PID x_pid(25, 0.0001, 0.0, 0.0, true, 0.2, 3.0);
-    PID y_pid(10.0, 0.0001, 1.0, 0.0, true, 0.2, 3.0);
-    PID angle_pid(160.0, 0.0, 0.0, 0.0, true, 0.0, 360.0);
+    PID x_pid(23, 0.000, 0.0, 0.0, true, 0.2, 3.0);
+    PID y_pid(9.5, 0.000, 1000.0, 0.0, true, 0.2, 3.0);
+    PID angle_pid(125.0, 0.0, 100.0, 0.0, true, 0.0, 360.0);
 
     // decel variables
     double h; // magnitude of power vector
@@ -402,6 +406,8 @@ void move_to_point(void* params){
             // printf("****power_a: %lf, x:%lf, y: %lf, pre_scaled: %lf, min: %lf\n", tracking.power_a, tracking.power_x , tracking.power_y, pre_scaled_power_a, min_power_a);
         }
         drivebase.move(tracking.power_x, tracking.power_y, tracking.power_a);
+
+        motion_d.print("%d || x : %f, y : %f, a: %f, px: %f, py: %f, pa: %f, ex: %f, dx: %f, ey: %f, dy: %f\n",millis(),tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle), tracking.power_x, tracking.power_y, tracking.power_a, x_pid.error, x_pid.derivative, y_pid.error, y_pid.derivative);
 
         if (overshoot && sgn(target_line.get_y()) != orig_sgn_line_y){
           if(brake) drivebase.brake();
@@ -625,7 +631,7 @@ void move_on_line(void* params){
     // decel variables
     double h; // magnitude of power vector
     double decel_power, decel_power_scale;
-    motion_i.print("%d | Starting move on line to: (x: %.2f, y: %.2f, a: %.2f)  from: (x: %.2f, y: %.2f, a: %.2f)\n", millis(), target.x, target.y, rad_to_deg(target.angle), tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle));
+    motion_i.print("%d | Starting move on line to: (x: %.2f, y: %.2f, a: %.2f)  from: (x: %.2f, y: %.2f, a: %.2f) with start: (%.2f, %.2f)  fuck_you: %d\n", millis(), target.x, target.y, rad_to_deg(target.angle), tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle), start.x, start.y, param_ptr->fuck_you);
     // motion_i.print("%d | ")
     while(true){
         // gets line displacements
@@ -935,10 +941,10 @@ void tank_move_on_arc(void* params){
   // from velocity to power / 1.6 or * 0.625
   // const double pwm_to_vel = 1.6;
   const double pwm_to_vel = 0.02792526803;
-  const double kR = 30.0; // for ratio
+  const double kR = 22.0; // for ratio
   // const double kR = 0.75; // for difference
 
-  const double kA = pwm_to_vel * 150.0, kB = 1 / pwm_to_vel, kP = 100.0, kD = 80.0;
+  const double kA = pwm_to_vel * 150.0, kB = 1 / pwm_to_vel, kP = 85.0, kD = 20.0;
   const double final_angle = atan2(target.y - centre.y, target.x - centre.x); // angle of final position to centre at end of move
 
   uint32_t last_d_update_time = millis();  // for derivative
