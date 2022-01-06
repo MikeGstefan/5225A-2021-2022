@@ -32,7 +32,6 @@ void initialize() {
 
 	update_t.start();
 	GUI::setup();
-	master.print(2, 0, "Driver: %s", drivebase.drivers[drivebase.cur_driver].name);
 }
 
 /**
@@ -102,16 +101,39 @@ void next_driver(){
 // int ring_count = 0, cur_auton = 1;
 
 void opcontrol() {
-	// driver setup
 
-	lift_piston.set_value(LOW);	// in searching state
-	lift.reset();
-	tilter.reset();
-	lift.motor.move_absolute(35, 100);
-	tilter.move_absolute(500, 100);
-	tilter_bottom_piston.set_value(LOW);
-	tilter_top_piston.set_value(LOW);
+	// drivebase.driver_practice();
+
+  master.print(0, 0, "Press A to switch");
+  master.print(1, 0, "Together");
+  bool together = true;
+
+  while(true){
+    tracking.power_y = master.get_analog(E_CONTROLLER_ANALOG_RIGHT_Y);
+    tracking.power_a = master.get_analog(E_CONTROLLER_ANALOG_RIGHT_X);
+
+    if(together){
+      front_l.move(tracking.power_y + tracking.power_a);
+      back_l.move(tracking.power_y + tracking.power_a);
+      front_r.move(tracking.power_y - tracking.power_a);
+      back_r.move(tracking.power_y - tracking.power_a);
+    }
+    else{
+      front_l.move(-tracking.power_y - tracking.power_a);
+      back_l.move(tracking.power_y + tracking.power_a);
+      front_r.move(-tracking.power_y + tracking.power_a);
+      back_r.move(tracking.power_y - tracking.power_a);
+    }
+    if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_A)){
+      together = !together;
+      if (together) master.print(1, 0, "Together");
+      else master.print(1, 0, "Reversed");
+    };
+
+    delay(10);
+  }
 
 
-	drivebase.driver_practice();
+
+
 }

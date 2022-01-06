@@ -207,7 +207,22 @@ void Drivebase::handle_input(){
 
 void Drivebase::driver_practice(){
   master.clear();
+  master.print(1, 0, "Driver: %s", drivebase.drivers[drivebase.cur_driver].name);
   master.print(2, 0, "searching     ");
+
+  // initializes pneumatics in appropriate state
+  intake_piston.set_value(LOW);
+  lift_piston.set_value(LOW);
+
+  // resets subsystems
+  lift.reset();
+  tilter.reset();
+
+  // moves motors to necessary positions
+  lift.motor.move_absolute(35, 100);
+  tilter.move_absolute(500, 100);
+  tilter_bottom_piston.set_value(LOW);
+  tilter_top_piston.set_value(LOW);
   cur_driver = 0; // defaults driver to Nikhil
   // master.print(2, 0, "Driver: %s", drivers[cur_driver].name);
   while(true){
@@ -234,10 +249,7 @@ void Drivebase::driver_practice(){
       // takes away control from driver when motors overheat
       if(front_l.get_temperature() >= 55 || front_r.get_temperature() >= 55 || back_r.get_temperature() >= 55 || back_l.get_temperature() >= 55){
         move(0, 0, 0);  // stops movement
-        delay(50);
-        // rumbles controllers if motors are hot
-        master.rumble("- - - ");
-        delay(50);
+        master.rumble("- - - "); // rumbles controllers if motors are hot
         master.print(0, 0, "fl%.0f r%.0f bl%.0f r%.0f\n", front_l.get_temperature(), front_r.get_temperature(), back_l.get_temperature(), back_r.get_temperature());
         return;
       }

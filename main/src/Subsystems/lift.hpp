@@ -1,6 +1,8 @@
 #pragma once
 #include "../Libraries/subsystem.hpp"
 
+#define LIFT_STATE_LINE 2 // line on controller which "searching" and "lowered" lift states are printed on
+
 #define NUM_OF_LIFT_STATES 9
 #define LIFT_MAX_VELOCITY 100
 
@@ -11,7 +13,7 @@ enum class lift_states{
   grabbed, // has goal
   raised, // at height to keep mogo away from opponent
   platform, // at platform height
-  level_platform_prep, // going to to top position
+  level_platform_prep, // going to top position
   level_platform, // at top position, about to smash platform to level it
   dropoff, // mogo released at platform height
   manual  // controlled by joystick

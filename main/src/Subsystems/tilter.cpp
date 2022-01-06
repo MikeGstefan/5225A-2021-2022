@@ -60,18 +60,14 @@ void Tilter::handle(){
   switch(state){
     case tilter_states::lowered:
 
-      // if(tilter_dist.get() < 100){  // throws into searching state when distance sensor get triggered
-      //   tilter_encoder_position = LeftEncoder.get_value()/360.0 *(2.75*M_PI);
-      //   set_state(tilter_states::searching);
-      // }
       if(master.get_digital_new_press(tilter_button)){  // grabs goal and raises tilter when tilter_button is pressed
-        // lifting_timer
-        tilter_bottom_piston.set_value(HIGH);
         tilter_top_piston.set_value(HIGH);
-        delay(100);
+        delay(100); // waits for top piston to fully close
+        tilter_bottom_piston.set_value(LOW);
+        move_absolute(raised_position);
+        set_state(tilter_states::raised);
       }
       break;
-
 
     case tilter_states::raised:
       if(master.get_digital_new_press(tilter_button)){  // lowers tilter to bottom when tilter_button is pressed
@@ -86,11 +82,12 @@ void Tilter::handle(){
         set_state(tilter_states::raised);
       }
       if(fabs(tilter_motor.get_position() - bottom_position) < end_error){  // releases goal once tilter reaches bottom
-        tilter_bottom_piston.set_value(LOW);
+        tilter_bottom_piston.set_value(HIGH);
         tilter_top_piston.set_value(LOW);
         set_state(tilter_states::lowered);
       }
       break;
+      
     case tilter_states::manual:
       tilter_power = master.get_analog(E_CONTROLLER_ANALOG_LEFT_Y);
       if (tilter_power < 0 && motor.get_position() >= bottom_position) tilter_power = 0;

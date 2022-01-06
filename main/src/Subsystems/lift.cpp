@@ -22,7 +22,7 @@ Lift::Lift(Motorized_subsystem<lift_states, NUM_OF_LIFT_STATES, LIFT_MAX_VELOCIT
   released_cycle_check = 0;
   target = bottom_position;
   last_target = target;
-  intake_on = false;
+  intake_on = true;
 }
 
 void Lift::handle(){
@@ -35,7 +35,7 @@ void Lift::handle(){
     delay(50);
     printf("LIFT SAFETY TRIGGERED\n");
     set_state(lift_states::manual);
-    intake.move(0); // disables intake lift safety is triggered
+    intake.move(0); // disables intake if lift safety is triggered
     intake_on = false;
 
   }
@@ -44,84 +44,73 @@ void Lift::handle(){
     case lift_states::searching:
       // grabs goal if limit switch is triggered or if up button is pressed
       if(lift_trigger.get_value() || master.get_digital_new_press(lift_up_button)){
-        delay(50);
         master.rumble("-");
-        delay(50);
         printf("*******************triggered\n");
         lift_piston.set_value(HIGH);
+        master.clear_line(LIFT_STATE_LINE);
         set_state(lift_states::grabbed);
       }
       // switches state to lowered if down button is pressed
       if(master.get_digital_new_press(lift_down_button)){
-        master.print(2, 0, "lowered     ");
-        // master.rumble("-");
+        master.rumble("-");
+        master.print(LIFT_STATE_LINE, 0, "lowered     ");
         set_state(lift_states::lowered);
       }
-      if(master.get_digital_new_press(intake_button)){  // toggles intake
-        if(intake_on){
-          intake.move(0);
-          intake_on = false;
-        }
-        else{
-          intake.move(100);
-          intake_on = true;
-        }
+      if(master.get_digital_new_press(intake_button)){  // toggles intake state if intake button is pressed
+        intake_on = !intake_on;
+        intake.move(intake_on? 100 : 0);
       }
       break;
 
     case lift_states::lowered:
       // grabs goal if up button is pressed
       if(master.get_digital_new_press(lift_up_button)){
+        master.rumble("-");
         lift_piston.set_value(HIGH);
+        master.clear_line(LIFT_STATE_LINE);
         set_state(lift_states::grabbed);
       }
       // switches state to searching if down button is pressed
       if(master.get_digital_new_press(lift_down_button)){
-        master.print(2, 0, "searching     ");
-        // master.rumble("-");
+        master.rumble("-");
+        master.print(LIFT_STATE_LINE, 0, "searching     ");
         set_state(lift_states::searching);
       }
-      if(master.get_digital_new_press(intake_button)){  // toggles intake
-        if(intake_on){
-          intake.move(0);
-          intake_on = false;
-        }
-        else{
-          intake.move(100);
-          intake_on = true;
-        }
+      if(master.get_digital_new_press(intake_button)){  // toggles intake state if intake button is pressed
+        intake_on = !intake_on;
+        intake.move(intake_on? 100 : 0);
       }
       break;
 
     case lift_states::grabbed:
       if(master.get_digital_new_press(lift_up_button)){ // lifts goal to platform height if up button is pressed
-        move_absolute(raised_position, 100);
+        move_absolute(raised_position);
         set_state(lift_states::raised);
 
+        // raises and disables intake
         intake.move(0);
         intake_on = false;
-        intake_piston.set_value(HIGH); // raises intake when lift is lifting
+        intake_piston.set_value(HIGH);
 
       }
       // releases goal if down button is pressed
       if(master.get_digital_new_press(lift_down_button) && fabs(bottom_position - motor.get_position()) < end_error){
         lift_piston.set_value(LOW);
-        master.print(2, 0, "lowered     ");
+        master.print(LIFT_STATE_LINE, 0, "lowered     ");
         set_state(lift_states::lowered);
       }
       if(master.get_digital_new_press(level_platform_button)){  // moves to top position if level platform button is pressed
+        // raises and disables intake
+        intake.move(0);
+        intake_on = false;
+        intake_piston.set_value(HIGH);
+
         move_absolute(top_position);
         set_state(lift_states::level_platform_prep);
       }
-      if(master.get_digital_new_press(intake_button)){  // toggles intake
-        if(intake_on){
-          intake.move(0);
-          intake_on = false;
-        }
-        else{
-          intake.move(100);
-          intake_on = true;
-        }
+      if(master.get_digital_new_press(intake_button)){  // toggles intake state if intake button is pressed
+        intake_on = !intake_on;
+        intake.move(intake_on? 100 : 0);
       }
       break;
 
@@ -136,9 +125,12 @@ void Lift::handle(){
       }
       if(master.get_digital_new_press(lift_down_button)){ // lowers goal if down button is pressed
         move_absolute(bottom_position);
-        set_state(lift_states::grabbed);
 
-        intake_piston.set_value(LOW); // lowers intake once lift is down
+        intake_piston.set_value(LOW); // lowers intake and turn it on once lift is down
+        intake_on = true;
+        intake.move(100);
+
+        set_state(lift_states::grabbed);
       }
       break;
 
@@ -180,8 +172,14 @@ void Lift::handle(){
       // releases goal if up or down button is pressed
       if(master.get_digital_new_press(lift_up_button) || master.get_digital_new_press(lift_down_button)){
         move_absolute(bottom_position);
+
+        intake_piston.set_value(LOW); // lowers intake and turn it on once lift is down
+        intake_on = true;
+        intake.move(100);
+
+        master.print(LIFT_STATE_LINE, 0, "searching     ");
         set_state(lift_states::searching);
-        intake_piston.set_value(LOW); // lowers intake
+
       }
       break;
 
@@ -194,9 +192,10 @@ void Lift::handle(){
       if(master.get_digital_new_press(lift_up_button) || master.get_digital_new_press(lift_down_button)){
         bad_count = 0;  // resets the safety
         lift_piston.set_value(LOW);
+        intake_piston.set_value(LOW); // lowers the intake back
         move_absolute(bottom_position);
+        master.print(LIFT_STATE_LINE, 0, "searching     ");
         set_state(lift_states::searching);
-
       }
       break;
 

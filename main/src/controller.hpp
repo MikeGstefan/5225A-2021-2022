@@ -26,6 +26,9 @@ extern controller_digital_e_t climb_platform_button;
 extern controller_digital_e_t intake_button;
 extern controller_digital_e_t reverse_drive_button;
 
+// manual control buttons
+extern controller_digital_e_t lift_manual_button;
+extern controller_digital_e_t tilter_manual_button;
 
 #define num_controller 1
 

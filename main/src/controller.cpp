@@ -18,6 +18,9 @@ controller_digital_e_t climb_platform_button = DIGITAL_UP;
 controller_digital_e_t intake_button = DIGITAL_LEFT;
 controller_digital_e_t reverse_drive_button = DIGITAL_RIGHT;
 
+// manual control buttons
+controller_digital_e_t lift_manual_button = DIGITAL_A;
+controller_digital_e_t tilter_manual_button = DIGITAL_Y;
 
 
 std::array<_Controller*, num_controller> _Controller::objs; //= {nullptr};
