@@ -1,5 +1,6 @@
 #pragma once
 #include "../Libraries/subsystem.hpp"
+#include "intake.hpp" // because lift controls intake
 
 #define LIFT_STATE_LINE 2 // line on controller which "searching" and "lowered" lift states are printed on
 
@@ -8,8 +9,8 @@
 
 
 enum class lift_states{
-  searching,  // released but waiting for goal
-  lowered,  // does not have goal but not searching for goal
+  idle,  // at bottom_position, waiting for button to search for mogo
+  searching,  // at bottom_position and waiting for goal or button to grab mogo
   grabbed, // has goal
   raised, // at height to keep mogo away from opponent
   platform, // at platform height
@@ -29,7 +30,6 @@ class Lift: public Motorized_subsystem<lift_states, NUM_OF_LIFT_STATES, LIFT_MAX
   double offset_a = 365.0, offset_h = 9.75;
   double arm_len = 8.0;
   double gear_ratio = 5.0;
-  bool intake_on = false;
 
 public:
   const double bottom_position = 35.0, raised_position = 250.0, platform_position = 560.0, top_position = 675.0;

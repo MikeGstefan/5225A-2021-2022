@@ -4,7 +4,6 @@
 Tilter tilter({{"Tilter",
 {
   "lowered",
-  "searching",
   "raised",
   "lowering",
   "manual"
@@ -18,53 +17,34 @@ Tilter::Tilter(Motorized_subsystem<tilter_states, NUM_OF_TILTER_STATES, TILTER_M
   target = bottom_position;
   last_target = target;
 
-  raised_position = 50.0;
-  held = false;
+  held = false; // for manual control testing
 }
 
 void Tilter::handle(){
-
-// analog control
-/*
-  if(master.get_digital_new_press(tilter_button)){
-    if(held){
-      tilter_bottom_piston.set_value(LOW);
-      tilter_top_piston.set_value(LOW);
-      held = false;
-    }
-    else{
-      tilter_bottom_piston.set_value(HIGH);
-      tilter_top_piston.set_value(HIGH);
-      held = true;
-    }
-
-  }
-  int tilter_power = -master.get_analog(E_CONTROLLER_ANALOG_LEFT_Y);
-  // if (fabs(tilter_power) < 10) motor.move_relative(0, 100); // holds position
-  if (fabs(tilter_power) < 10) motor.move(-10); // holds position
-  else motor.move(tilter_power);
-*/
-
 
   if (fabs(target - motor.get_position()) > end_error && fabs(motor.get_actual_velocity()) < 5.0) bad_count++;
   else bad_count = 0;
   if(bad_count > 25 && state != tilter_states::manual){
     motor.move(0);
-    delay(50);
     master.rumble("---");
-    delay(50);
     printf("TILTER SAFETY TRIGGERED\n");
     set_state(tilter_states::manual);
   }
 
-  switch(state){
-    case tilter_states::lowered:
+  // switches to manual control if tilter manual button is pressed
+  if(master.get_digital_new_press(tilter_manual_button))  set_state(tilter_states::manual);
 
+  switch(state){
+
+    case tilter_states::lowered:
       if(master.get_digital_new_press(tilter_button)){  // grabs goal and raises tilter when tilter_button is pressed
         tilter_top_piston.set_value(HIGH);
         delay(100); // waits for top piston to fully close
-        tilter_bottom_piston.set_value(LOW);
+        tilter_bottom_piston.set_value(HIGH);
+
+        held = true;
         move_absolute(raised_position);
+
         set_state(tilter_states::raised);
       }
       break;
@@ -72,6 +52,7 @@ void Tilter::handle(){
     case tilter_states::raised:
       if(master.get_digital_new_press(tilter_button)){  // lowers tilter to bottom when tilter_button is pressed
         move_absolute(bottom_position);
+
         set_state(tilter_states::lowering);
       }
       break;
@@ -79,26 +60,47 @@ void Tilter::handle(){
     case tilter_states::lowering:
       if(master.get_digital_new_press(tilter_button)){  // raises tilter when tilter_button is pressed
         move_absolute(raised_position);
+
         set_state(tilter_states::raised);
       }
       if(fabs(tilter_motor.get_position() - bottom_position) < end_error){  // releases goal once tilter reaches bottom
-        tilter_bottom_piston.set_value(HIGH);
+        tilter_bottom_piston.set_value(LOW);
         tilter_top_piston.set_value(LOW);
+
+        held = false;
+
         set_state(tilter_states::lowered);
       }
       break;
-      
+
     case tilter_states::manual:
       tilter_power = master.get_analog(E_CONTROLLER_ANALOG_LEFT_Y);
-      if (tilter_power < 0 && motor.get_position() >= bottom_position) tilter_power = 0;
-      if (tilter_power > 0 && motor.get_position() <= top_position) tilter_power = 0;
+      // gives holding power if joystick is within deadzone or tilter is out of range
+      if (fabs(tilter_power) < 10 || (tilter_power < 0 && motor.get_position() >= bottom_position) || (tilter_power > 0 && motor.get_position() <= top_position)) tilter_power = -10;
+
       motor.move(tilter_power);
-      if(master.get_digital_new_press(tilter_button)){
+
+      if(master.get_digital_new_press(tilter_button)){ // toggles holding state if tilter button is pressed
+        if(held){
+          tilter_bottom_piston.set_value(LOW);
+          tilter_top_piston.set_value(LOW);
+          held = false;
+        }
+        else{
+          tilter_bottom_piston.set_value(HIGH);
+          tilter_top_piston.set_value(HIGH);
+          held = true;
+        }
+      }
+
+      if(master.get_digital_new_press(tilter_manual_button)){ // escapes manual control if manual button is pressed again
         bad_count = 0;  // resets the safety
-        motor.move_absolute(bottom_position, 100);
-        set_state(tilter_states::lowered);
+        move_absolute(bottom_position);
+
+        set_state(tilter_states::lowering);
       }
       break;
+
   }
 
 }

@@ -12,7 +12,6 @@ enum class tilter_states {
 };
 
 class Tilter: public Motorized_subsystem<tilter_states, NUM_OF_TILTER_STATES, TILTER_MAX_VELOCITY> {
-  double bottom_position = 500.0, raised_position = 50.0, top_position = 50.0;
   Timer lifting_timer{"tilter_lifting_timer"};
   int tilter_power;
   int bad_count = 0; // cycle check for safeties
@@ -20,6 +19,7 @@ class Tilter: public Motorized_subsystem<tilter_states, NUM_OF_TILTER_STATES, TI
   bool held = false;
 
 public:
+  const double bottom_position = 500.0, raised_position = 150.0, top_position = 50.0;
   Tilter(Motorized_subsystem<tilter_states, NUM_OF_TILTER_STATES, TILTER_MAX_VELOCITY> motorized_subsystem);  // constructor
   void handle();  // contains state machine code
 

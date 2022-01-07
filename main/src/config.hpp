@@ -7,7 +7,7 @@ class _Controller;
 class Text;
 
 extern _Controller master;
-extern pros::Motor front_l, front_r, back_l, back_r, intake, lift_motor, tilter_motor;
+extern pros::Motor front_l, front_r, back_l, back_r, intake_motor, lift_motor, tilter_motor;
 extern pros::ADIEncoder LeftEncoder, RightEncoder, BackEncoder;
 extern pros::ADIDigitalOut claw, claw_out;
 extern pros::ADIDigitalIn claw_touch;
