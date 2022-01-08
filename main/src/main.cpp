@@ -89,8 +89,16 @@ int ring_count = 0;
 
 void opcontrol() {
 	/*Gui:
-	add functionality for text to show text array element via const char** and int index.
-  use map template on sliders
+  -GUI::pressed()
+	-fix text templating
+  -use map template on sliders
+  -GUI::update change to loops calling non-static updates
+  -implement set_active for text
+  -make button and use text for label, and make slider use for title, max, min
+  enums for CHAR_HEIGHT_SMALL
+  if text for other classes goes well, make page title a text
+  have text background auto update for the biggest text it's seen;
+
 	Reset tracking by task
 	convert some printfs to logs
 	/**/
@@ -109,6 +117,7 @@ void opcontrol() {
 		delay(10);
 	}
 
+  //temp test, will take out later
   #ifdef GUI_UTIL
   extern Slider mot_speed;
   int speed = mot_speed.get_val();

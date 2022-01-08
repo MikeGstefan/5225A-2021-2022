@@ -163,7 +163,8 @@ void GUI::background(){ //To be called continously
   right_enc = RightEncoder.get_value();
   back_enc = BackEncoder.get_value();
   driver_text = drivebase.drivers[drivebase.cur_driver].name;
-  auton_name = auton_names[static_cast<int>(cur_auton)];
+  // auton_name = auton_names[static_cast<int>(cur_auton)];
+  // alliance_name = auton_names[static_cast<int>(cur_alliance)];
 
   std::array<std::tuple<pros::Motor*, int, std::string, const char*, Text*>, 8>::iterator it;
   for (it = motors.begin(); it != motors.end(); it++){
