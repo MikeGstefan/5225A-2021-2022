@@ -31,12 +31,6 @@ void GUI::init(){ //Call once at start in initialize()
   resY.set_func(&resetY);
   resA.set_func(&resetA);
   resAll.set_func([](){resetX();resetY();resetA();});
-  trackX.set_background(35, 10);
-  trackY.set_background(35, 10);
-  trackA.set_background(35, 10);
-  encL.set_background(35, 10);
-  encR.set_background(35, 10);
-  encB.set_background(35, 10);
   for (int x = 0; x<200; x++) field[x].reset();
   track.set_setup_func([](){
     screen::set_pen(COLOR_WHITE);
@@ -67,12 +61,13 @@ void GUI::init(){ //Call once at start in initialize()
 
   prev_drivr.set_func([](){drivebase.prev_driver();});
   next_drivr.set_func([](){drivebase.next_driver();});
-  drivr_name.set_background(130, 70, 350, 190, Style::CORNER);
 
   prev_auto.set_func([&](){cur_auton = previous_enum_value(cur_auton); auton_file_update();});
   next_auto.set_func([&](){cur_auton = next_enum_value(cur_auton); auton_file_update();});
-  alliance.set_func(&switch_alliance);
-  ally_name.set_background(130, 70, 350, 190, Style::CORNER);
+  prev_auto.set_func(&prev_auton);
+  next_auto.set_func(&next_auton);
+  alliance.set_func([&](){switch_alliance();});
+  alliance.add_text(ally_name);
 
   turn_encoder.set_func([](){ //Turn the encoder
     if (GUI::go("START, THEN SPIN THE ENCODER", "Please spin the encoder any number of rotations.")){
@@ -134,14 +129,14 @@ void GUI::init(){ //Call once at start in initialize()
   pneum_btn_2.set_func([](){lift_piston.set_value(1);});
   pneum_btn_2.set_off_func([](){lift_piston.set_value(0);});
 
-  std::get<4>(motors[0]) = (std::get<0>(motors[0])) ? &mot_temp_1 : nullptr;
-  std::get<4>(motors[1]) = (std::get<0>(motors[1])) ? &mot_temp_2 : nullptr;
-  std::get<4>(motors[2]) = (std::get<0>(motors[2])) ? &mot_temp_3 : nullptr;
-  std::get<4>(motors[3]) = (std::get<0>(motors[3])) ? &mot_temp_4 : nullptr;
-  std::get<4>(motors[4]) = (std::get<0>(motors[4])) ? &mot_temp_5 : nullptr;
-  std::get<4>(motors[5]) = (std::get<0>(motors[5])) ? &mot_temp_6 : nullptr;
-  std::get<4>(motors[6]) = (std::get<0>(motors[6])) ? &mot_temp_7 : nullptr;
-  std::get<4>(motors[7]) = (std::get<0>(motors[7])) ? &mot_temp_8 : nullptr;
+  std::get<4>(motors[0]) = &mot_temp_1;
+  std::get<4>(motors[1]) = &mot_temp_2;
+  std::get<4>(motors[2]) = &mot_temp_3;
+  std::get<4>(motors[3]) = &mot_temp_4;
+  std::get<4>(motors[4]) = &mot_temp_5;
+  std::get<4>(motors[5]) = &mot_temp_6;
+  std::get<4>(motors[6]) = &mot_temp_7;
+  std::get<4>(motors[7]) = &mot_temp_8;
 
   for (int i = 0; i<4; i++){
     if (std::get<4>(motors[i])) std::get<4>(motors[i])->set_background(110*i+40, 60, 70, 50, Style::SIZE);
@@ -163,8 +158,6 @@ void GUI::background(){ //To be called continously
   right_enc = RightEncoder.get_value();
   back_enc = BackEncoder.get_value();
   driver_text = drivebase.drivers[drivebase.cur_driver].name;
-  // auton_name = auton_names[static_cast<int>(cur_auton)];
-  // alliance_name = auton_names[static_cast<int>(cur_alliance)];
 
   std::array<std::tuple<pros::Motor*, int, std::string, const char*, Text*>, 8>::iterator it;
   for (it = motors.begin(); it != motors.end(); it++){
@@ -177,12 +170,13 @@ void GUI::background(){ //To be called continously
     if (temp >= 55 && temp != std::numeric_limits<int>::max() && !Flash.playing() && !temp_flashed){ //Overheating
       temp_flashed = true;
       Page::go_to(&temps);
-      Text::update();
       char buffer[50];
       sprintf(buffer, "%s motor is at %dC\n", std::get<2>(mot_tup).c_str(), temp);
       GUI::flash(COLOR_RED, 15000, buffer);
       break;
     }
+
+    if (text && temp == std::numeric_limits<int>::max()) text->set_active(false);
 
     if (text != nullptr){ //Background Colors (temperature based)
       if (temp == 0) text->set_background(COLOR_WHITE); //0

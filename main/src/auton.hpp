@@ -12,29 +12,27 @@
 #include <fstream>
 
 enum class autons{
-  Auto1,
+  Skills,
   Auto2,
   Auto3,
   NUM_OF_ELEMENTS,
-
-  Skills=Auto1,
 };
-
-const std::string auton_names[static_cast<int>(autons::NUM_OF_ELEMENTS)] = {"Skills"};
 
 enum class alliances{
   RED,
   BLUE
 };
 
-const std::string alliance_names[2] = {"Red", "Blue"};
+extern const char* alliance_names[];
+extern const char* auton_names[];
+extern autons cur_auton;
+extern alliances cur_alliance;
 
-void switch_alliance();
+void switch_alliance(alliances = !cur_alliance);
+void next_auton();
+void prev_auton();
 void auton_file_update();
 void auton_file_read();
 
 void red_tall_rush();
 void skills();
-
-extern autons cur_auton;
-extern alliances cur_alliance;

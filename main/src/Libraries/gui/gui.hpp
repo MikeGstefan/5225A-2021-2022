@@ -52,13 +52,8 @@ class Button;
 class Slider;
 template <typename V=int, typename I=int> class _Text;
 
-//For auton.hpp
-extern Button alliance;
-extern _Text<std::string, int> ally_name;
-
 //For other gui hpp files
 extern int ring_count; //For gui_objects to use
-extern void prev_driver(), next_driver(); //For gui_main to use
 extern Timer Flash;
 
 enum class Style{ //how the rect coords get evaluated
@@ -125,10 +120,11 @@ class Page{
 class Text{
   friend class GUI;
   friend class Page;
+  friend class Button;
 
   protected:
     //Vars
-    int x, y, x1, y1, x2, y2;
+    int x, y, x1=USER_RIGHT, y1=USER_DOWN, x2=USER_LEFT, y2=USER_UP;
     text_format_e_t txt_fmt;
     std::string label;
     Color l_col, b_col=GREY;
@@ -173,13 +169,14 @@ class _Text: public Text{
       this->index_ptr = index_ptr;
       this->l_col = l_col;
       this->b_col = page->b_col;
-      this->page->texts.push_back(this);
+      page->texts.push_back(this);
     }
     void update(){
       if(value_ptr && active && prev_value != *value_ptr) draw();
     }
     void draw(){
       if (!active) return;
+      std::cout << label << typeid(V).name() << std::endl;
       char buffer [100];
       int length;
 
@@ -213,9 +210,9 @@ class _Text: public Text{
                 y_coord -= CHAR_HEIGHT_SMALL/2;
               }
               x1 = min(x1, x_coord);
-              x2 = max(x2, x_coord + length*CHAR_WIDTH_SMALL);
-              y1 = min(x1, y_coord);
-              y2 = max(x2, y_coord + CHAR_HEIGHT_SMALL);
+              x2 = max(x2, x_coord + length*(CHAR_WIDTH_SMALL+1));
+              y1 = min(y1, y_coord);
+              y2 = max(y2, y_coord + CHAR_HEIGHT_SMALL);
               break;
 
             case TEXT_MEDIUM:
@@ -224,18 +221,18 @@ class _Text: public Text{
               y_coord -= CHAR_HEIGHT_MEDIUM/2;
             }
               x1 = min(x1, x_coord);
-              x2 = max(x2, x_coord + length*CHAR_WIDTH_MEDIUM);
-              y1 = min(x1, y_coord);
-              y2 = max(x2, y_coord + CHAR_HEIGHT_MEDIUM);
+              x2 = max(x2, x_coord + length*(CHAR_WIDTH_MEDIUM+1));
+              y1 = min(y1, y_coord);
+              y2 = max(y2, y_coord + CHAR_HEIGHT_MEDIUM);
               break;
 
             case TEXT_LARGE:
               x_coord -= (length*CHAR_WIDTH_LARGE)/2;
               y_coord -= CHAR_HEIGHT_LARGE/2;
               x1 = min(x1, x_coord);
-              x2 = max(x2, x_coord + length*CHAR_WIDTH_LARGE);
-              y1 = min(x1, y_coord);
-              y2 = max(x2, y_coord + CHAR_HEIGHT_LARGE);
+              x2 = max(x2, x_coord + length*(CHAR_WIDTH_LARGE+1));
+              y1 = min(y1, y_coord);
+              y2 = max(y2, y_coord + CHAR_HEIGHT_LARGE);
               break;
           }
 
@@ -252,8 +249,8 @@ class _Text: public Text{
     _Text (int x, int y, Style rect_type, text_format_e_t size, Page& page, std::string text, const V& value_ref, Color label_color = COLOR_WHITE){
       construct (x, y, rect_type, size, &page, text, &value_ref, &zero, label_color);
     }
-    _Text (int x, int y, Style rect_type, text_format_e_t size, Page& page, std::string text, const V* value_ref, const I& index_ref, Color label_color = COLOR_WHITE){
-      construct (x, y, rect_type, size, &page, text, value_ref, &index_ref, label_color);
+    _Text (int x, int y, Style rect_type, text_format_e_t size, Page& page, std::string text, const V& value_ref, const I& index_ref, Color label_color = COLOR_WHITE){
+      construct (x, y, rect_type, size, &page, text, &value_ref, &index_ref, label_color);
     }
 };
 
@@ -278,7 +275,7 @@ class Button{
     bool last_pressed=0;
     press_type form; //What type of button
     std::function <void()> func, off_func; //toggle is only for toggle type buttons
-    _Text<int, int> title;
+    Text* title = nullptr;
     bool active=true;
 
     //For latch buttons
@@ -304,6 +301,7 @@ class Button{
     void set_func(std::function <void()>), set_off_func(std::function <void()>);
     void set_active(bool=true);
     void set_background (Color);
+    void add_text (Text&);
     bool pressed();
     bool new_press();
     bool new_release();
@@ -320,7 +318,6 @@ class Slider{
   private:
     //Vars
     Color l_col, b_col;
-    std::string label;
     int x1, y1, x2, y2, text_x, text_y;
     int min, max;
     int val=0, prev_val;
@@ -332,8 +329,6 @@ class Slider{
     //Functions
     void update();
     void draw();
-    void draw_bar();
-    void update_val();
 
   public:
     //Points, Format, Min, Max, Page, Label, Bcolor, Lcolor
@@ -342,3 +337,7 @@ class Slider{
     //Functions
     int get_val();
 };
+
+//For auton.hpp
+extern Button alliance;
+// extern _Text<std::string, alliances> ally_name;

@@ -34,7 +34,7 @@ void GUI::init(){ //Call once at start in initialize()
   }
 
   for (int i = 0; i < 8; i++){
-    if (std::get<0>(motor_ports[i]) != std::numeric_limits<int>::max()) port_nums.append(std::to_string(std::get<0>(motor_ports[i])) + ",");
+    if (std::get<0>(motor_ports[i]) != std::numeric_limits<int>::max()) sprintf(port_nums, "%s%d,", port_nums, std::get<0>(motor_ports[i]));
     else{
       std::get<1>(motor_ports[i])->set_active(false);
       std::get<2>(motor_ports[i])->set_active(false);
@@ -42,7 +42,7 @@ void GUI::init(){ //Call once at start in initialize()
     std::get<1>(motor_ports[i])->set_func([i](){c::motor_move(std::get<0>(motor_ports[i]), mot_speed.val);});
     std::get<2>(motor_ports[i])->set_func([i](){c::motor_move(std::get<0>(motor_ports[i]), 0);});
   }
-  if (port_nums.back() == ',') port_nums.pop_back();
+  // if (port_nums.back() == ',') port_nums.pop_back();
 
   encAB.set_background(90, 15);
   encCD.set_background(90, 15);
@@ -56,7 +56,7 @@ void GUI::init(){ //Call once at start in initialize()
   pneum_btn_1.set_off_func([](){c::adi_digital_write(7, false);});
 
   pneum_btn_2.set_func([](){c::adi_digital_write(8, true);});
-  pneum_btn_2.set_off_func([](){c::adi_digital_write(8, false);});
+  pneum_btn_2.set_off_func([](){c::adi_digital_write(8, false);}); //Won't always work if port is not configured as out
 
   Page::go_to(1); //Sets it to page 1 for program start. Don't delete this. If you want to change the starting page, re-call this in initialize()
 }
@@ -71,7 +71,7 @@ void GUI::background(){ //To be called continously
   for (int i = 0; i < 8; i++){
     if (std::get<0>(motor_ports[i]) != std::numeric_limits<int>::max()){
       Motor motor(std::get<0>(motor_ports[i]));
-      std::get<4>(motor_ports[i]) = std::to_string(std::get<0>(motor_ports[i])) + ": " + std::to_string(int(c::motor_get_actual_velocity(std::get<0>(motor_ports[i]))));
+      std::get<4>(motor_ports[i]) = (std::to_string(std::get<0>(motor_ports[i])) + ": " + std::to_string((int)c::motor_get_actual_velocity(std::get<0>(motor_ports[i])))).c_str();
       if (fabs(motor.get_actual_velocity()) < fabs(motor.get_target_velocity())/4) std::get<3>(motor_ports[i]) += 1;
       else std::get<3>(motor_ports[i]) = 0;
       if (std::get<3>(motor_ports[i]) > 10){

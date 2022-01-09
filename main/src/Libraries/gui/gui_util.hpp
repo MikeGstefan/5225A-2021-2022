@@ -7,17 +7,17 @@ ADIEncoder encoderAB(1, 2, false), encoderCD(3, 4, true), encoderEF(5, 6, false)
 
 //Var init for text monitoring
 int left_enc, right_enc, back_enc;
-std::string port_nums = "";
-std::array <std::tuple<int, Button*, Button*, int, std::string>, 8> motor_ports;
+char* port_nums;
+std::array <std::tuple<int, Button*, Button*, int, const char*>, 8> motor_ports;
 
 Page ports (1, "Ports");
-_Text mot (10, 50, Style::CORNER, TEXT_LARGE, ports, "Motors: %s", port_nums);
+// _Text mot (10, 50, Style::CORNER, TEXT_LARGE, ports, "Motors: %s", port_nums);
 _Text enc (10, 100, Style::CORNER, TEXT_LARGE, ports, "Encoders: AB, CD, EF");
 _Text pne (10, 150, Style::CORNER, TEXT_LARGE, ports, "Pneumatics: G, H");
 
 Page encoders (2, "Encoders"); //Display tracking vals and reset btns
 _Text encAB (85, 50, Style::CENTRE, TEXT_SMALL, encoders, "AB Encoder:%d", left_enc);
-_Text encCD (240, 50, Style::CENTRE, TEXT_SMALL, encoders, "CD Encsoder:%d", right_enc);
+_Text encCD (240, 50, Style::CENTRE, TEXT_SMALL, encoders, "CD Encoder:%d", right_enc);
 _Text encEF (395, 50, Style::CENTRE, TEXT_SMALL, encoders, "EF Encoder:%d", back_enc);
 Button resAB (35, 75, 100, 50, Style::SIZE, Button::SINGLE, encoders, "Reset AB");
 Button resCD (190, 75, 100, 50, Style::SIZE, Button::SINGLE, encoders, "Reset CD");

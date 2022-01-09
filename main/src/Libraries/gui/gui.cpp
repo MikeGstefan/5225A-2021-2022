@@ -1,7 +1,7 @@
 #include "gui.hpp"
 
 //Text Vars
-std::string go_string;
+const char* go_string;
 
 //Timer stuff
 Timer Flash("Flash Timer", false);
@@ -28,7 +28,7 @@ _Text go_button_text (300, 140, Style::CENTRE, TEXT_SMALL, go_sequence, "%s", go
 bool GUI::go(std::string name, std::string message, std::uint32_t delay_time){ //Start
   printf("\n\n%s\n", message.c_str());
   printf("Press \"Continue\" when ready.\n");
-  go_string = name;
+  go_string = name.c_str();
 
   bool pressed = false, interrupted = false;
   Page* page = Page::current_page;
@@ -62,7 +62,7 @@ bool GUI::go(std::string name, std::string message, std::uint32_t delay_time){ /
 
 bool GUI::go(std::string name, std::uint32_t delay_time){ //End
   printf("Press Again when done.\n");
-  go_string = "END " + name;
+  go_string = ("END " + name).c_str();
 
   bool pressed = false, interrupted = false;
   Page* page = Page::current_page;
@@ -256,7 +256,7 @@ Slider::Slider (int x1, int y1, int x2, int y2, Style type, direction dir, int m
   switch(this->dir){
     case HORIZONTAL:
       text_x = (this->x1+this->x2-(label.length()*CHAR_WIDTH_SMALL))/2;
-      text_y = this->y1-CHAR_HEIGHT_SMALL-2;
+      text_y = this->y1-CHAR_HEIGHT_SMALL/2-2;
       inc.construct(this->x2+5, this->y1, this->x2+25, this->y2, Style::CORNER, Button::SINGLE, this->page, ">", l_col, b_col);
       dec.construct(this->x1-25, this->y1, this->x1-5, this->y2, Style::CORNER, Button::SINGLE, this->page, "<", l_col, b_col);
       title.construct(text_x, text_y, Style::CENTRE, TEXT_SMALL, this->page, label + ":%d", &val, &zero, l_col);
@@ -337,6 +337,7 @@ void Button::create_options(std::vector<Button*> buttons){
 }
 
 void Button::set_background (Color colour){
+  title->set_background(colour);
   if (b_col != colour){
     b_col = colour;
     b_col_dark = RGB2COLOR(int(COLOR2R(b_col)*0.8), int(COLOR2G(b_col)*0.8), int(COLOR2B(b_col)*0.8));
@@ -363,12 +364,12 @@ void Text::set_background (Color colour){
 }
 
 void Button::draw(){
+  if (!active) return;
   if (on) { //on buttons must be drawn in a pressed state
     draw_pressed();
     return;
   }
 
-  if (!active) return;
   screen::set_pen(b_col);
   screen::set_eraser(Page::current_page->b_col); //at some point figure out why this isn't (page->b_col)
   screen::fill_rect(x1, y1, x2, y2);
@@ -378,6 +379,7 @@ void Button::draw(){
   screen::set_eraser(b_col);
   screen::print(TEXT_SMALL, text_x, text_y, label.c_str());
   screen::print(TEXT_SMALL, text_x1, text_y1, label1.c_str());
+  if(title) title->draw();
 }
 
 void Button::draw_pressed(){
@@ -393,44 +395,18 @@ void Button::draw_pressed(){
   screen::set_eraser(b_col_dark);
   screen::print(TEXT_SMALL, text_x, text_y, label.c_str());
   screen::print(TEXT_SMALL, text_x1, text_y1, label1.c_str());
+  if(title) title->draw();
 }
 
 void Slider::draw(){
   screen::set_pen(b_col);
-  screen::set_eraser(page->b_col);
-  screen::erase_rect(x1, text_y, x2, y2);
   screen::fill_rect(x1, y1, x2, y2);
   screen::set_pen(l_col);
   if(dir == HORIZONTAL){
     screen::fill_rect(x1+1, y1+1, map(val, min, max, x1, x2), y2-1); //Draws Bar
-    // screen::print(TEXT_SMALL, x1, text_y, "%d", min); //Writes min
-    // screen::print(TEXT_SMALL, x2-CHAR_WIDTH_SMALL*std::to_string(max).length(), text_y, "%d", max); //Writes max
-    // screen::print(TEXT_SMALL, text_x, text_y, "%s:%d", label.c_str(), val); //Writes current value
-    //Should be able to take this out entirely, as text will update it in the next cycle
   }
   else{ //Vertical
     screen::fill_rect(x1+1, map(val, min, max, y2, y1), x2-1, y2-1);
-    // screen::print(TEXT_SMALL, x1-25, y2, "%d", min);
-    // screen::print(TEXT_SMALL, x1-25, y1, "%d", max);
-    // screen::print(TEXT_SMALL, text_x, y1-27-CHAR_HEIGHT_SMALL, "%s:%d", label.c_str(), val);
-  }
-}
-
-void Slider::draw_bar(){
-  screen::set_eraser(b_col);
-  screen::erase_rect(x1, y1, x2, y2);
-  screen::set_pen(l_col);
-
-  switch(dir){
-    case HORIZONTAL:
-      screen::fill_rect(x1+1, y1+1, map(val, min, max, x1, x2), y2-1);
-      // screen::print(TEXT_SMALL, text_x, text_y, "%s:%d", label.c_str(), val);
-      break;
-
-    case VERTICAL:
-      screen::fill_rect(x1+1, map(val, min, max, y2, y1), x2-1, y2-1);
-      // screen::print(TEXT_SMALL, text_x, y1-27-CHAR_HEIGHT_SMALL, "%s:%d", label.c_str(), val);
-      break;
   }
 }
 
@@ -453,6 +429,7 @@ int Slider::get_val() {return val;}
 
 void Button::set_active(bool active) {
   this->active = active;
+  if (title) title->set_active(active);
   if (active) draw();
   else{
     screen::set_pen(page->b_col);
@@ -464,9 +441,14 @@ void Text::set_active(bool active) {
   this->active = active;
   if (active) draw();
   else if (page == Page::current_page){
-    Page::clear_screen();
-    Page::go_to(Page::current_page);
+    // Page::clear_screen();
+    // Page::go_to(Page::current_page);
   }
+}
+
+void Button::add_text(Text& text_ref) {
+  title = &text_ref;
+  title->set_background(b_col);
 }
 
 //Updating data and presses
@@ -487,7 +469,7 @@ bool Page::pressed(){
 
 bool Button::pressed(){
   // returns true if the button is currently being pressed
-  return (page->pressed() && active && inRange(GUI::x, x1, x2) && inRange(GUI::y, y1, y2));
+  return (Page::current_page->pressed() && active && inRange(GUI::x, x1, x2) && inRange(GUI::y, y1, y2)); //its curpage and not page because of perm btns
 }
 
 bool Button::new_press(){
@@ -506,21 +488,6 @@ bool Button::new_release(){
   return false;
 }
 
-void Slider::update_val(){
-  // changes value if being touched
-  if (page->pressed() && inRange(GUI::x, x1, x2) && inRange(GUI::y, y1, y2)){
-    switch (dir){
-      case HORIZONTAL:
-        val = map(GUI::x, x1, x2, min, max); //Gets val based on press location
-        break;
-
-      case VERTICAL:
-        val = map(GUI::y, y2, y1, min, max);
-        break;
-    }
-  }
-}
-
 void GUI::update(){
   GUI::update_screen_status();
   Page* cur_p = Page::current_page;
@@ -532,7 +499,6 @@ void GUI::update(){
 }
 
 void Button::update(){
-  //Loops through the list of buttons on the current page to check for presses
   if (!active) return;
 
   switch(form){
@@ -541,7 +507,6 @@ void Button::update(){
         draw_pressed();
         run_func();
 
-        if (this == &prev_page || this == &next_page) return;
       }
 
       else if (new_release()){
@@ -594,20 +559,20 @@ void Button::update(){
     case Button::TOGGLE:
       if (new_press()){
         on = !on;
-
         //Draws button's new state
         if(on){
           //Deselects connected buttons
-          for (std::vector <Button*>::iterator option_it = (options).begin(); option_it != (options).end(); option_it++){
+          for (std::vector <Button*>::iterator option_it = options.begin(); option_it != options.end(); option_it++){
             (*option_it)->on = false;
             (*option_it)->draw();
           }
+          draw_pressed();
           run_func();
         }
-
-        else run_off_func(); //Just turned off
-
-        draw_pressed();
+        else{ //Just turned off
+          run_off_func();
+          draw();
+        }
       }
 
       else if (new_release()){
@@ -618,7 +583,17 @@ void Button::update(){
 }
 
 void Slider::update(){
-  update_val();
+  if (page->pressed() && inRange(GUI::x, x1, x2) && inRange(GUI::y, y1, y2)){
+    switch (dir){
+      case HORIZONTAL:
+        val = map(GUI::x, x1, x2, min, max); //Gets val based on press location
+        break;
+
+      case VERTICAL:
+        val = map(GUI::y, y2, y1, min, max);
+        break;
+    }
+  }
   if (val != prev_val){
     draw();
     prev_val = val;
@@ -638,7 +613,7 @@ void GUI::setup(){
     });
 
     go_sequence.buttons.erase(go_sequence.buttons.begin(), go_sequence.buttons.begin()+2);
-    go_button_text.set_background(ORANGE);
+    // go_button_text.set_background(ORANGE);
 
     Page::go_to(0);
 }

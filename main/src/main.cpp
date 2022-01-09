@@ -27,12 +27,13 @@ void initialize() {
 	Data::init();
 	_Controller::init();
 	GUI::init();
+  GUI::background(); //Call once here
 	delay(150);
 	tracking.x_coord = 144.0 - 10.25, tracking.y_coord = 14.75, tracking.global_angle = -M_PI_2;
 	// tracking.x_coord = 0.0, tracking.y_coord = 0.0, tracking.global_angle = 0.0;
 
 	update_t.start();
-  auton_file_read();
+  // auton_file_read(); //File is not being created (someone please fix this)
 	master.print(2, 0, "Driver: %s", drivebase.drivers[drivebase.cur_driver].name);
 }
 
@@ -89,15 +90,15 @@ int ring_count = 0;
 
 void opcontrol() {
 	/*Gui:
-  -GUI::pressed()
-	-fix text templating
-  -use map template on sliders
-  -GUI::update change to loops calling non-static updates
-  -implement set_active for text
-  -make button and use text for label, and make slider use for title, max, min
+	auton file isn't being created
+  port_nums in util
+  alliance text persists on blue
   enums for CHAR_HEIGHT_SMALL
-  if text for other classes goes well, make page title a text
-  have text background auto update for the biggest text it's seen;
+  make a non-blocking driver practice
+
+  allow button add_text to offset by 1 line
+  force convert it to centre, and move it to be on the button
+  change its color to btn lcol
 
 	Reset tracking by task
 	convert some printfs to logs

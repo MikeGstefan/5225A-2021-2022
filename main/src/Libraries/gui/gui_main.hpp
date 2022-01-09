@@ -7,35 +7,34 @@ std::vector<std::bitset<200>> field (200, std::bitset<200>{}); //Initializes to 
 
 //Var init for text monitoring
 int angle, left_enc, right_enc, back_enc, elastic_up_time, elastic_down_time;
-std::string driver_text;
-// std::string auton_name, alliance_name;
+const char* driver_text;
 
 Page driver_curve (1, "Drivers"); //Select a driver and their exp curve
 Button prev_drivr(20, 70, 110, 120, Style::SIZE, Button::SINGLE, driver_curve, "Prev Driver");
 _Text drivr_name(MID_X, MID_Y, Style::CENTRE, TEXT_LARGE, driver_curve, "%s", driver_text);
 Button next_drivr(350, 70, 110, 120, Style::SIZE, Button::SINGLE, driver_curve, "Next Driver");
 
-Page temps (2, "Temperature"); //Motor temps
-_Text mot_temp_1(75, 85, Style::CENTRE, TEXT_SMALL, temps, std::get<3>(motors[0]) + std::string(": %dC"), std::get<1>(motors[0]), 0, COLOR(BLACK));
-_Text mot_temp_2(185, 85, Style::CENTRE, TEXT_SMALL, temps, std::get<3>(motors[1]) + std::string(": %dC"), std::get<1>(motors[1]), 0, COLOR(BLACK));
-_Text mot_temp_3(295, 85, Style::CENTRE, TEXT_SMALL, temps, std::get<3>(motors[2]) + std::string(": %dC"), std::get<1>(motors[2]), 0, COLOR(BLACK));
-_Text mot_temp_4(405, 85, Style::CENTRE, TEXT_SMALL, temps, std::get<3>(motors[3]) + std::string(": %dC"), std::get<1>(motors[3]), 0, COLOR(BLACK));
-_Text mot_temp_5(75, 175, Style::CENTRE, TEXT_SMALL, temps, std::get<3>(motors[4]) + std::string(": %dC"), std::get<1>(motors[4]), 0, COLOR(BLACK));
-_Text mot_temp_6(185, 175, Style::CENTRE, TEXT_SMALL, temps, std::get<3>(motors[5]) + std::string(": %dC"), std::get<1>(motors[5]), 0, COLOR(BLACK));
-_Text mot_temp_7(295, 175, Style::CENTRE, TEXT_SMALL, temps, std::get<3>(motors[6]) + std::string(": %dC"), std::get<1>(motors[6]), 0, COLOR(BLACK));
-_Text mot_temp_8(405, 175, Style::CENTRE, TEXT_SMALL, temps, std::get<3>(motors[7]) + std::string(": %dC"), std::get<1>(motors[7]), 0, COLOR(BLACK));
+Page temps (2, "Temperature"); //Motor temps //change string("") to ""s
+_Text mot_temp_1(75, 85, Style::CENTRE, TEXT_SMALL, temps, "1: %dC", std::get<1>(motors[0]), COLOR(BLACK));
+_Text mot_temp_2(185, 85, Style::CENTRE, TEXT_SMALL, temps, "2: %dC", std::get<1>(motors[1]), COLOR(BLACK));
+_Text mot_temp_3(295, 85, Style::CENTRE, TEXT_SMALL, temps, "3: %dC", std::get<1>(motors[2]), COLOR(BLACK));
+_Text mot_temp_4(405, 85, Style::CENTRE, TEXT_SMALL, temps, "4: %dC", std::get<1>(motors[3]), COLOR(BLACK));
+_Text mot_temp_5(75, 175, Style::CENTRE, TEXT_SMALL, temps, "5: %dC", std::get<1>(motors[4]), COLOR(BLACK));
+_Text mot_temp_6(185, 175, Style::CENTRE, TEXT_SMALL, temps, "6: %dC", std::get<1>(motors[5]), COLOR(BLACK));
+_Text mot_temp_7(295, 175, Style::CENTRE, TEXT_SMALL, temps, "7: %dC", std::get<1>(motors[6]), COLOR(BLACK));
+_Text mot_temp_8(405, 175, Style::CENTRE, TEXT_SMALL, temps, "8: %dC", std::get<1>(motors[7]), COLOR(BLACK));
 
 Page auto_selection (3, "Auton"); //Select auton routes
-Button prev_auto(20, 70, 110, 120, Style::SIZE, Button::SINGLE, auto_selection, "Prev Auton");
-_Text auto_name(MID_X, MID_Y, Style::CENTRE, TEXT_LARGE, auto_selection, "%s", auton_names, cur_auton);
-Button next_auto(350, 70, 110, 120, Style::SIZE, Button::SINGLE, auto_selection, "Next Auton");
-Button alliance(MID_X, 215, 200, 20, Style::CENTRE, Button::SINGLE, auto_selection);
-_Text ally_name(MID_X, 215, Style::CENTRE, TEXT_MEDIUM, auto_selection, "Alliance: %s", alliance_names, cur_alliance);
+Button prev_auto(20, 50, 120, 100, Style::SIZE, Button::SINGLE, auto_selection, "Prev Auton");
+Button next_auto(350, 50, 120, 100, Style::SIZE, Button::SINGLE, auto_selection, "Next Auton");
+Button alliance(MID_X, 200, 150, 20, Style::CENTRE, Button::SINGLE, auto_selection);
+_Text auto_name(MID_X, 100, Style::CENTRE, TEXT_LARGE, auto_selection, "%s", *auton_names, cur_auton);
+_Text ally_name(MID_X, 200, Style::CENTRE, TEXT_MEDIUM, auto_selection, "Alliance: %s", *alliance_names, cur_alliance);
 
 Page track (4, "Tracking"); //Display tracking vals and reset btns
 _Text trackX(50, 45, Style::CENTRE, TEXT_SMALL, track, "X:%.1f", tracking.x_coord);
 _Text trackY(135, 45, Style::CENTRE, TEXT_SMALL, track, "Y:%.1f", tracking.y_coord);
-_Text trackA(220, 45, Style::CENTRE, TEXT_SMALL, track, "A:%d", angle);
+_Text<int, int> trackA(220, 45, Style::CENTRE, TEXT_SMALL, track, "A:%d", angle);
 _Text encL(50, 130, Style::CENTRE, TEXT_SMALL, track, "L:%.1f", left_enc);
 _Text encR(135, 130, Style::CENTRE, TEXT_SMALL, track, "R:%.1f", right_enc);
 _Text encB(220, 130, Style::CENTRE, TEXT_SMALL, track, "B:%d", back_enc);
