@@ -104,31 +104,34 @@ void opcontrol() {
 
 	// drivebase.driver_practice();
 
-  master.print(0, 0, "Press A to switch");
-  master.print(1, 0, "Together");
+//   master.print(0, 0, "Press A to switch");
+//   master.print(1, 0, "Together");
   bool together = true;
+  master.print(0,0,"fl: 19, fr: 20");
+  master.print(1,0,"bl: 17, br: 18");
+  master.print(2,0,"right stick to drive");
 
   while(true){
     tracking.power_y = master.get_analog(E_CONTROLLER_ANALOG_RIGHT_Y);
     tracking.power_a = master.get_analog(E_CONTROLLER_ANALOG_RIGHT_X);
 
-    if(together){
+    // if(together){
       front_l.move(tracking.power_y + tracking.power_a);
       back_l.move(tracking.power_y + tracking.power_a);
       front_r.move(tracking.power_y - tracking.power_a);
       back_r.move(tracking.power_y - tracking.power_a);
-    }
-    else{
-      front_l.move(-tracking.power_y - tracking.power_a);
-      back_l.move(tracking.power_y + tracking.power_a);
-      front_r.move(-tracking.power_y + tracking.power_a);
-      back_r.move(tracking.power_y - tracking.power_a);
-    }
-    if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_A)){
-      together = !together;
-      if (together) master.print(1, 0, "Together");
-      else master.print(1, 0, "Reversed");
-    };
+    // }
+    // else{
+    //   front_l.move(-tracking.power_y - tracking.power_a);
+    //   back_l.move(tracking.power_y + tracking.power_a);
+    //   front_r.move(-tracking.power_y + tracking.power_a);
+    //   back_r.move(tracking.power_y - tracking.power_a);
+    // }
+    // if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_A)){
+    //   together = !together;
+    //   if (together) master.print(1, 0, "Together");
+    //   else master.print(1, 0, "Reversed");
+    // };
 
     delay(10);
   }
