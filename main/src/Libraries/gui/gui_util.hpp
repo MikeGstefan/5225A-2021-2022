@@ -7,11 +7,11 @@ ADIEncoder encoderAB(1, 2, false), encoderCD(3, 4, true), encoderEF(5, 6, false)
 
 //Var init for text monitoring
 int left_enc, right_enc, back_enc;
-char* port_nums;
+const char* port_nums;
 std::array <std::tuple<int, Button*, Button*, int, const char*>, 8> motor_ports;
 
 Page ports (1, "Ports");
-// _Text mot (10, 50, Style::CORNER, TEXT_LARGE, ports, "Motors: %s", port_nums);
+_Text mot (10, 50, Style::CORNER, TEXT_LARGE, ports, "Motors: %s", port_nums);
 _Text enc (10, 100, Style::CORNER, TEXT_LARGE, ports, "Encoders: AB, CD, EF");
 _Text pne (10, 150, Style::CORNER, TEXT_LARGE, ports, "Pneumatics: G, H");
 

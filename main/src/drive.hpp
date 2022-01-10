@@ -12,10 +12,10 @@ using namespace pros;
 // enum class drivers{Nikhil = 0, Emily = 1, Sarah = 2};
 
 // wait until at least 50 ms since the last reset
-#define WAIT_FOR_SCREEN_REFRESH() {\
-  delay(drivebase.screen_timer.get_time() < 50 ? 50 - drivebase.screen_timer.get_time() : 0);\
-  drivebase.screen_timer.reset();\
-}
+// #define WAIT_FOR_SCREEN_REFRESH() {\
+//   delay(drivebase.screen_timer.get_time() < 50 ? 50 - drivebase.screen_timer.get_time() : 0);\
+//   drivebase.screen_timer.reset();\
+// }
 
 class custom_drive{
   int lookup_table[255];
@@ -62,13 +62,12 @@ public:
   void move_tank(double y, double a);
   void move_side(double l, double r);
 
-
-
   void brake();
   void download_curve_data(); // grabs data from SD card and copies to driver arrays
   void update_lookup_table_util();  // utility to alter expo curves for any driver
   void handle_input();  // move the drivebase according to lookup tables from a joystick input
   void driver_practice(); // method to let drivers drive and change driver profiles
+  void non_blocking_driver_practice(); // method to let drivers drive and change driver profiles to be called in loop
   void next_driver(); //Goes to next driver. Called on drivebase object.
   void prev_driver(); //Goes to previous driver. Called on drivebase object.
 };

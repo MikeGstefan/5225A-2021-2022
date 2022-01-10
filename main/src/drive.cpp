@@ -250,7 +250,36 @@ void Drivebase::driver_practice(){
   }
 }
 
-//Sadly these are static functions. But they'll only be called with drivebase object, so...
+void Drivebase::non_blocking_driver_practice(){
+  if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_B)){
+    update_lookup_table_util();
+    master.clear();
+    master.print(2, 0, "Driver: %s", drivers[cur_driver].name);
+  }
+  else if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_UP)) next_driver();
+  else if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_DOWN)) prev_driver();
+
+  // actual drive code
+  drivebase.handle_input();
+  lift.handle();
+  tilter.handle();
+
+  // takes away control from driver when motors overheat
+  if(front_l.get_temperature() >= 55 || front_r.get_temperature() >= 55 || back_r.get_temperature() >= 55 || back_l.get_temperature() >= 55){
+    move(0, 0, 0);  // stops movement
+    //took out rumble, because gui handles that
+    master.print(0, 0, "fl%.0f r%.0f bl%.0f r%.0f\n", front_l.get_temperature(), front_r.get_temperature(), back_l.get_temperature(), back_r.get_temperature());
+    return;
+  }
+  // prints motor temps every second
+  if(screen_timer.get_time() > 1000){
+    drivers_data.print("fl%.0f r%.0f bl%.0f r%.0f\n", front_l.get_temperature(), front_r.get_temperature(), back_l.get_temperature(), back_r.get_temperature());
+    master.print(0, 0, "fl%.0f r%.0f bl%.0f r%.0f\n", front_l.get_temperature(), front_r.get_temperature(), back_l.get_temperature(), back_r.get_temperature());
+    screen_timer.reset();
+  }
+  delay(10);
+}
+
 void Drivebase::next_driver(){
   cur_driver++;
   cur_driver %= num_of_drivers; // rollover

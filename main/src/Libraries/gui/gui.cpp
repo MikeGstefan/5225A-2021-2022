@@ -21,7 +21,7 @@ Button next_page(480, 0, -75, 20, Style::SIZE, Button::SINGLE, perm, "->");
 
 //Go sequence
 Page go_sequence (PAGE_COUNT+1, "GO SEQUENCE");
-Button go_button (300, MID_Y, 160, 90, Style::CENTRE, Button::SINGLE, go_sequence, "PRESS TO 👨🏻‍🚀👨🏻‍🚀👨🏻‍🚀👨🏻‍🚀👨🏻‍🚀👨🏻‍🚀👨🏻‍🚀👨🏻‍🚀👨🏻‍🚀👨🏻‍🚀👨🏻‍🚀👨🏻‍🚀👨🏻‍🚀👨🏻‍🚀👨🏻‍🚀👨🏻‍🚀👨🏻‍🚀👨🏻‍🚀👨🏻‍🚀👨🏻‍🚀👨🏻‍🚀👨🏻‍🚀👨🏻‍🚀👨🏻‍🚀👨🏻‍🚀👨🏻‍🚀👨🏻‍🚀👨🏻‍🚀👨🏻‍🚀👨🏻‍🚀");// Hack that works for some reason. Note that all emoji's don't work
+Button go_button (300, MID_Y, 160, 90, Style::CENTRE, Button::SINGLE, go_sequence, "PRESS TO");// Hack that works for some reason. Note that all emoji's don't work
 Button go_back_button (20, USER_UP, 100, 50, Style::SIZE, Button::SINGLE, go_sequence, "BACK");
 _Text go_button_text (300, 140, Style::CENTRE, TEXT_SMALL, go_sequence, "%s", go_string, COLOR(BLACK));
 
@@ -148,6 +148,24 @@ void GUI::end_flash (){
   Flash.reset(false);
   Page::go_to(Page::current_page);
   std::uint32_t flash_end = std::numeric_limits<std::uint32_t>::max(); //Sets it to max val so it'll never flash at weird times like 0
+}
+
+int GUI::get_size(text_format_e_t size, std::string type){
+  switch(size){
+    case TEXT_SMALL:
+      if(type == "height") return CHAR_HEIGHT_SMALL;
+      else if(type == "width") return CHAR_WIDTH_SMALL;
+      break;
+    case TEXT_MEDIUM:
+      if(type == "height") return CHAR_HEIGHT_MEDIUM;
+      else if(type == "width") return CHAR_WIDTH_MEDIUM;
+      break;
+    case TEXT_LARGE:
+      if(type == "height") return CHAR_HEIGHT_LARGE;
+      else if(type == "width") return CHAR_WIDTH_LARGE;
+      break;
+  }
+  return 0;
 }
 
 //Formats coordinates based on a style (always in x1, y1, x2, y2)
@@ -441,14 +459,41 @@ void Text::set_active(bool active) {
   this->active = active;
   if (active) draw();
   else if (page == Page::current_page){
+    //Find a good way to "erase" the text;
     // Page::clear_screen();
     // Page::go_to(Page::current_page);
   }
 }
 
-void Button::add_text(Text& text_ref) {
+void Button::add_text(Text& text_ref, bool overwrite) {
+  if(page != text_ref.page){
+    char error [120];
+    sprintf(error, "Text can only be linked to a button on the same page! Failed on \"%s\" button and \"%s\" text.\n", label.c_str(), text_ref.label.c_str());
+    throw std::invalid_argument(error);
+    return;
+  }
   title = &text_ref;
-  title->set_background(b_col);
+  text_ref.l_col = l_col;
+  text_ref.b_col = b_col;
+  text_ref.active = active;
+  text_ref.type = Style::CENTRE;
+  text_ref.x = (x1+x2)/2;
+  if (overwrite){
+    text_ref.y = (y1+y2)/2;
+    label = "";
+    label1 = "";
+  }
+  else{
+    text_ref.y = (y1+y2+GUI::get_size(text_ref.txt_fmt, "height"))/2;
+    text_y -= GUI::get_size(text_ref.txt_fmt, "height");
+  }
+  text_ref.y = (y1+y2)/2;
+  text_ref.x1=USER_RIGHT;
+  text_ref.y1=USER_DOWN;
+  text_ref.x2=USER_LEFT;
+  text_ref.y2=USER_UP;
+  Page::clear_screen();
+  Page::go_to(Page::current_page);
 }
 
 //Updating data and presses
@@ -613,7 +658,7 @@ void GUI::setup(){
     });
 
     go_sequence.buttons.erase(go_sequence.buttons.begin(), go_sequence.buttons.begin()+2);
-    // go_button_text.set_background(ORANGE);
+    go_button.add_text(go_button_text);
 
     Page::go_to(0);
 }

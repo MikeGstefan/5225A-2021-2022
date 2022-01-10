@@ -20,7 +20,7 @@ using namespace std;
  * All other competition modes are blocked by initialize; it is recommended
  * to keep execution time for this mode under a few seconds.
  */
- pros::Task *updt = nullptr;
+pros::Task *updt = nullptr;
 
 void initialize() {
 	drivebase.download_curve_data();
@@ -89,16 +89,18 @@ void autonomous() {
 int ring_count = 0;
 
 void opcontrol() {
-	/*Gui:
+	/*Nathan:
 	auton file isn't being created
   port_nums in util
   alliance text persists on blue
-  enums for CHAR_HEIGHT_SMALL
-  make a non-blocking driver practice
 
-  allow button add_text to offset by 1 line
-  force convert it to centre, and move it to be on the button
-  change its color to btn lcol
+  -enums for CHAR_HEIGHT_SMALL
+  -allow button add_text to offset by 1 line
+  -force convert it to centre, and move it to be on the button
+  -change its color to btn lcol
+  -add text to go button
+
+  Try "wireless" upload via controller, but plug to V5 using tether cable
 
 	Reset tracking by task
 	convert some printfs to logs
@@ -106,15 +108,8 @@ void opcontrol() {
 
 	while(true){
 		GUI::background();
-		drivebase.handle_input();
-
-		if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_B)){ //Update expo util
-			drivebase.update_lookup_table_util();
-			master.clear();
-		}
-		else if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_UP)) drivebase.next_driver();
-		else if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_DOWN)) drivebase.prev_driver();
-		else if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_X)) break;
+		drivebase.non_blocking_driver_practice();
+		if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_X)) break;
 		delay(10);
 	}
 

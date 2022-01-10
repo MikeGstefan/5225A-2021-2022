@@ -76,6 +76,7 @@ class GUI{ //Do not make a GUI object ever. To make different GUI's, create a ne
     static void setup(), update();
     static void end_flash();
     static void draw_oblong(int, int, int, int, double, double);
+    static int get_size(text_format_e_t, std::string);
   public:
     static void init(), background();
     static void aligned_coords (int, int, int, int, int = 480, int = 220);
@@ -158,6 +159,7 @@ class _Text: public Text{
 
     //Functions
     void construct (int x, int y, Style type, text_format_e_t txt_fmt, Page* page, std::string label, const V* value_ptr, const I* index_ptr, Color l_col){
+      static_assert(!std::is_same_v<V, std::string>, "Text variable cannot be std::string, it causes unkown failures");
       static_assert(std::is_scalar_v<I>, "Text Index type must be int-convertible");
       this->x = x;
       this->y = y;
@@ -203,40 +205,13 @@ class _Text: public Text{
 
       int x_coord = x, y_coord = y;
       if (type == Style::CENTRE){
-          switch(txt_fmt){
-            case TEXT_SMALL:
-              if (type == Style::CENTRE){
-                x_coord -= (length*CHAR_WIDTH_SMALL)/2;
-                y_coord -= CHAR_HEIGHT_SMALL/2;
-              }
-              x1 = min(x1, x_coord);
-              x2 = max(x2, x_coord + length*(CHAR_WIDTH_SMALL+1));
-              y1 = min(y1, y_coord);
-              y2 = max(y2, y_coord + CHAR_HEIGHT_SMALL);
-              break;
-
-            case TEXT_MEDIUM:
-            if (type == Style::CENTRE){
-              x_coord -= (length*CHAR_WIDTH_MEDIUM)/2;
-              y_coord -= CHAR_HEIGHT_MEDIUM/2;
-            }
-              x1 = min(x1, x_coord);
-              x2 = max(x2, x_coord + length*(CHAR_WIDTH_MEDIUM+1));
-              y1 = min(y1, y_coord);
-              y2 = max(y2, y_coord + CHAR_HEIGHT_MEDIUM);
-              break;
-
-            case TEXT_LARGE:
-              x_coord -= (length*CHAR_WIDTH_LARGE)/2;
-              y_coord -= CHAR_HEIGHT_LARGE/2;
-              x1 = min(x1, x_coord);
-              x2 = max(x2, x_coord + length*(CHAR_WIDTH_LARGE+1));
-              y1 = min(y1, y_coord);
-              y2 = max(y2, y_coord + CHAR_HEIGHT_LARGE);
-              break;
-          }
-
-        }
+        x_coord -= (length*GUI::get_size(txt_fmt, "width"))/2;
+        y_coord -= GUI::get_size(txt_fmt, "height")/2;
+      }
+      x1 = min(x1, x_coord); //Resizes the background so it won't have overwriting issues
+      x2 = max(x2, x_coord + length*(GUI::get_size(txt_fmt, "width")+1));
+      y1 = min(y1, y_coord);
+      y2 = max(y2, y_coord + GUI::get_size(txt_fmt, "height"));
 
       screen::print(txt_fmt, x_coord, y_coord, "%s", buffer);
     }
@@ -301,7 +276,7 @@ class Button{
     void set_func(std::function <void()>), set_off_func(std::function <void()>);
     void set_active(bool=true);
     void set_background (Color);
-    void add_text (Text&);
+    void add_text (Text&, bool=true);
     bool pressed();
     bool new_press();
     bool new_release();
@@ -324,7 +299,7 @@ class Slider{
     direction dir;
     Page* page;
     Button dec, inc;
-    _Text<int, int> title, min_title, max_title; //If this works, do it for min and max too.
+    _Text<int, int> title, min_title, max_title;
 
     //Functions
     void update();

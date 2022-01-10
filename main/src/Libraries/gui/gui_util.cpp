@@ -33,8 +33,9 @@ void GUI::init(){ //Call once at start in initialize()
     }
   }
 
+  std::string port_num_string;
   for (int i = 0; i < 8; i++){
-    if (std::get<0>(motor_ports[i]) != std::numeric_limits<int>::max()) sprintf(port_nums, "%s%d,", port_nums, std::get<0>(motor_ports[i]));
+    if (std::get<0>(motor_ports[i]) != std::numeric_limits<int>::max()) port_num_string.append(std::to_string(std::get<0>(motor_ports[i])) + ",");
     else{
       std::get<1>(motor_ports[i])->set_active(false);
       std::get<2>(motor_ports[i])->set_active(false);
@@ -42,7 +43,8 @@ void GUI::init(){ //Call once at start in initialize()
     std::get<1>(motor_ports[i])->set_func([i](){c::motor_move(std::get<0>(motor_ports[i]), mot_speed.val);});
     std::get<2>(motor_ports[i])->set_func([i](){c::motor_move(std::get<0>(motor_ports[i]), 0);});
   }
-  // if (port_nums.back() == ',') port_nums.pop_back();
+  if (port_num_string.back() == ',') port_num_string.pop_back();
+  port_nums = port_num_string.c_str();
 
   encAB.set_background(90, 15);
   encCD.set_background(90, 15);
