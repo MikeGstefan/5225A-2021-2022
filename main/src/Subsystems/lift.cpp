@@ -8,7 +8,6 @@ Lift lift({{"Lift",
   "grabbed",
   "raised",
   "platform",
-  "level_platform_prep",
   "level_platform",
   "dropoff",
   "manual",
@@ -43,8 +42,8 @@ void Lift::handle(){
   switch(state){
 
     case lift_states::idle:
-      // switches state to searching if up or down button is pressed
-      if(master.get_digital_new_press(lift_up_button) || master.get_digital_new_press(lift_down_button)){
+      // switches state to searching if up button is pressed
+      if(master.get_digital_new_press(lift_up_button)){
         master.rumble("-");
         master.print(LIFT_STATE_LINE, 0, "Lift: Searching    ");
 
@@ -83,10 +82,12 @@ void Lift::handle(){
 
         set_state(lift_states::raised);
       }
-      // releases goal if down button is pressed
+      // releases goal and turns off intake if down button is pressed
       if(master.get_digital_new_press(lift_down_button) && fabs(bottom_position - motor.get_position()) < end_error){
         lift_piston.set_value(LOW);
         master.print(LIFT_STATE_LINE, 0, "Lift: Idle         ");
+
+        intake.motor.move(0); // turns off intake
 
         set_state(lift_states::idle);
       }
@@ -94,7 +95,7 @@ void Lift::handle(){
         move_absolute(top_position);
         intake.raise_and_disable();
 
-        set_state(lift_states::level_platform_prep);
+        set_state(lift_states::level_platform);
       }
       intake.toggle();
       break;
@@ -103,7 +104,7 @@ void Lift::handle(){
       if(master.get_digital_new_press(level_platform_button)){  // moves to top position if level platform button is pressed
         move_absolute(top_position);
 
-        set_state(lift_states::level_platform_prep);
+        set_state(lift_states::level_platform);
       }
       if(master.get_digital_new_press(lift_up_button)){ // lifts goal to platform height if up button is pressed
         move_absolute(platform_position);
@@ -112,8 +113,9 @@ void Lift::handle(){
       }
       if(master.get_digital_new_press(lift_down_button)){ // lowers goal if down button is pressed
         move_absolute(bottom_position);
-        intake_piston.set_value(LOW); // lowers the intake again
-        intake.set_state(intake_states::off);
+        intake_piston.set_value(LOW); // lowers the intake again and turns it on
+        intake.motor.move(INTAKE_POWER);
+        intake.set_state(intake_states::on);
 
         set_state(lift_states::grabbed);
       }
@@ -123,7 +125,7 @@ void Lift::handle(){
       if(master.get_digital_new_press(level_platform_button)){  // moves to top position if level platform button is pressed
         move_absolute(top_position);
 
-        set_state(lift_states::level_platform_prep);
+        set_state(lift_states::level_platform);
       }
       // drops off goal if up button is pressed
       if(master.get_digital_new_press(lift_up_button) && fabs(motor.get_position() - platform_position) < end_error){
@@ -136,17 +138,6 @@ void Lift::handle(){
 
         set_state(lift_states::raised);
       }
-      break;
-
-    case lift_states::level_platform_prep:
-      // goes to platform height if up or down buttons are pressed
-      if(master.get_digital_new_press(lift_up_button) || master.get_digital_new_press(lift_down_button)){
-        move_absolute(platform_position);
-
-        set_state(lift_states::platform);
-      }
-      // sets state to level platform once lift reaches top position
-      if(fabs(motor.get_position() - top_position) < end_error) set_state(lift_states::level_platform);
       break;
 
     case lift_states::level_platform:

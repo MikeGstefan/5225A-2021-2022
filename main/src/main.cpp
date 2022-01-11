@@ -102,36 +102,36 @@ void next_driver(){
 
 void opcontrol() {
 
-	// drivebase.driver_practice();
+	drivebase.driver_practice();
 
-  master.print(0, 0, "Press A to switch");
-  master.print(1, 0, "Together");
-  bool together = true;
-
-  while(true){
-    tracking.power_y = master.get_analog(E_CONTROLLER_ANALOG_RIGHT_Y);
-    tracking.power_a = master.get_analog(E_CONTROLLER_ANALOG_RIGHT_X);
-
-    if(together){
-      front_l.move(tracking.power_y + tracking.power_a);
-      back_l.move(tracking.power_y + tracking.power_a);
-      front_r.move(tracking.power_y - tracking.power_a);
-      back_r.move(tracking.power_y - tracking.power_a);
-    }
-    else{
-      front_l.move(-tracking.power_y - tracking.power_a);
-      back_l.move(tracking.power_y + tracking.power_a);
-      front_r.move(-tracking.power_y + tracking.power_a);
-      back_r.move(tracking.power_y - tracking.power_a);
-    }
-    if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_A)){
-      together = !together;
-      if (together) master.print(1, 0, "Together");
-      else master.print(1, 0, "Reversed");
-    };
-
-    delay(10);
-  }
+  // master.print(0, 0, "Press A to switch");
+  // master.print(1, 0, "Together");
+  // bool together = true;
+  //
+  // while(true){
+  //   tracking.power_y = master.get_analog(E_CONTROLLER_ANALOG_RIGHT_Y);
+  //   tracking.power_a = master.get_analog(E_CONTROLLER_ANALOG_RIGHT_X);
+  //
+  //   if(together){
+  //     front_l.move(tracking.power_y + tracking.power_a);
+  //     back_l.move(tracking.power_y + tracking.power_a);
+  //     front_r.move(tracking.power_y - tracking.power_a);
+  //     back_r.move(tracking.power_y - tracking.power_a);
+  //   }
+  //   else{
+  //     front_l.move(-tracking.power_y - tracking.power_a);
+  //     back_l.move(tracking.power_y + tracking.power_a);
+  //     front_r.move(-tracking.power_y + tracking.power_a);
+  //     back_r.move(tracking.power_y - tracking.power_a);
+  //   }
+  //   if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_A)){
+  //     together = !together;
+  //     if (together) master.print(1, 0, "Together");
+  //     else master.print(1, 0, "Reversed");
+  //   };
+  //
+  //   delay(10);
+  // }
 
 
 
