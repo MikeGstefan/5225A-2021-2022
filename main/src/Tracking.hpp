@@ -46,6 +46,12 @@ public:
 
 extern Tracking tracking;
 
+struct pid_const{
+  double p;
+  double i;
+  double d;
+};
+
 
 struct arc_params{
   const int fuck_you = 11;
@@ -65,7 +71,27 @@ struct line_params{
   const double min_angle_percent = 0.0; 
   const bool brake = true;
   const double decel_dist = 0.0, decel_speed = 0.0;
+  
   line_params(const Point start, Position target, const double max_power = 127.0, const bool overshoot = false, const double min_angle_percent = 0.0, const bool brake = true, const double decel_dist = 0.0, const double decel_speed = 0.0);
+};
+
+struct line_old_params{
+  const int fuck_you = 11;
+  double start_x;
+  double start_y;
+  double target_x;
+  double target_y;
+  double target_a;
+  bool Brake;
+  bool debug;
+  int max_power;
+  bool Overshoot;
+  double end_error;
+  double end_error_a;
+  double p;
+  double lpercent;
+  double apercent;
+  line_old_params(double start_x, double start_y, double target_x, double target_y, double target_a, bool Brake = true, bool debug = false, int max_power = 127, bool Overshoot = false, double end_error = 0.5, double end_error_a = 5.0, double p = 15.0, double lpercent = 0.0, double apercent = 0.0);
 };
 
 struct point_params{ 
@@ -76,7 +102,10 @@ struct point_params{
   const double min_angle_percent;
   const bool brake;
   const double decel_dist, decel_speed;
-  point_params(const Position target, const double max_power = 127.0, const bool overshoot = false, const double min_angle_percent = 0.0, const bool brake = true, const double decel_dist = 0.0, const double decel_speed = 0.0);
+  pid_const x_pid_const = { 23.0,0.0,0.0};
+  pid_const y_pid_const = { 9.5,0.0,1000.0};
+  pid_const a_pid_const = { 125.0,0.0,1000.0};
+  point_params(const Position target, const double max_power = 127.0, const bool overshoot = false, const double min_angle_percent = 0.0, const bool brake = true, const double decel_dist = 0.0, const double decel_speed = 0.0, pid_const x_pid_const = { 23.0,0.0,0.0}, pid_const y_pid_const = { 9.5,0.0,1000.0}, pid_const a_pid_const = { 125.0,0.0,1000.0});
 };
 
 struct tank_arc_params{ 
@@ -120,11 +149,12 @@ enum class move_types{
   tank_arc,
   tank_point,
   turn_angle,
-  turn_point
+  turn_point,
+  line_old
 };
 
 
-void move_start(move_types type, std::variant<arc_params, line_params, tank_arc_params, point_params, tank_point_params, turn_angle_params, turn_point_params> params, bool wait_for_comp = true);
+void move_start(move_types type, std::variant<arc_params, line_params, tank_arc_params, point_params, tank_point_params, turn_angle_params, turn_point_params, line_old_params> params, bool wait_for_comp = true);
 bool move_wait_for_complete();
 void move_stop(bool brake = false);
 
@@ -136,6 +166,7 @@ void rush_goal2(double target_x, double target_y, double target_a);
 void move_to_point(void* params);
 void move_on_arc(void* params);
 void move_on_line(void* params);
+void move_on_line_old(void* params);
 
 // tank drive move algorithms
 void tank_move_to_target(void* params);

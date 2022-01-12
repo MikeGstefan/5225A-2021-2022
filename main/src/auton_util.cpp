@@ -53,3 +53,14 @@ double get_filtered_output(ADIUltrasonic sensor, int check_count, uint16_t lower
 //
 //
 // }
+
+
+void find_goal_lift(){
+  while(!lift_trigger.get_value()){//NEED TO ADD SAFETY
+  
+    delay(10);
+
+  }
+	lift_piston.set_value(HIGH);
+  move_stop();
+}

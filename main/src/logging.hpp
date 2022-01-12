@@ -79,4 +79,5 @@ extern Data drivers_data;
 extern Data term;
 extern Data motion_d;
 extern Data motion_i;
+extern Data log_d;
 
