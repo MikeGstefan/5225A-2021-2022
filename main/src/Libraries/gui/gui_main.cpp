@@ -33,7 +33,7 @@ void GUI::init(){ //Call once at start in initialize()
   resAll.set_func([](){resetX();resetY();resetA();});
   for (int x = 0; x<200; x++) field[x].reset();
   track.set_setup_func([](){
-    screen::set_pen(COLOR_WHITE);
+    screen::set_pen(COLOR(WHITE));
     screen::draw_rect(270, 30, 470, 230);
     screen::draw_line(370, 30, 370, 230);
     screen::draw_line(270, 130, 470, 130);
@@ -42,7 +42,7 @@ void GUI::init(){ //Call once at start in initialize()
     }
   });
   track.set_loop_func([](){
-    screen::set_pen(COLOR_RED);
+    screen::set_pen(COLOR(RED));
     screen::draw_pixel(270+(200*tracking.x_coord/144), 230-(200*tracking.y_coord/144)); //Scales to screen
   });
 
@@ -144,6 +144,7 @@ void GUI::init(){ //Call once at start in initialize()
   }
 
   Page::go_to(1); //Sets it to page 1 for program start. Don't delete this. If you want to change the starting page, re-call this in initialize()
+  GUI::background();
 }
 
 bool temp_flashed = false; //Is never set back to false. Once it warns the driver, it won't again until program restarted
@@ -159,9 +160,9 @@ void GUI::background(){ //To be called continously
   back_enc = BackEncoder.get_value();
   driver_text = drivebase.drivers[drivebase.cur_driver].name;
 
-  std::array<std::tuple<pros::Motor*, int, std::string, const char*, Text*>, 8>::iterator it;
+  std::array<std::tuple<pros::Motor*, int, const char*, const char*, Text*>, 8>::iterator it;
   for (it = motors.begin(); it != motors.end(); it++){
-    std::tuple<pros::Motor*, int, std::string, const char*, Text*>& mot_tup = *it;
+    std::tuple<pros::Motor*, int, const char*, const char*, Text*>& mot_tup = *it;
     Motor* motor= std::get<0>(mot_tup);
     Text* text = std::get<4>(mot_tup);
     std::get<1>(mot_tup) = motor != nullptr ? motor->get_temperature() : std::numeric_limits<int>::max();
@@ -171,19 +172,19 @@ void GUI::background(){ //To be called continously
       temp_flashed = true;
       Page::go_to(&temps);
       char buffer[50];
-      sprintf(buffer, "%s motor is at %dC\n", std::get<2>(mot_tup).c_str(), temp);
-      GUI::flash(COLOR_RED, 15000, buffer);
+      sprintf(buffer, "%s motor is at %dC\n", std::get<2>(mot_tup), temp);
+      GUI::flash(COLOR(RED), 15000, buffer);
       break;
     }
 
-    if (text && temp == std::numeric_limits<int>::max()) text->set_active(false);
+    if (text && temp == std::numeric_limits<int>::max()) text->set_active(false); //If performance is bad, move this to the page setup func
 
     if (text != nullptr){ //Background Colors (temperature based)
-      if (temp == 0) text->set_background(COLOR_WHITE); //0
-      else if (temp <= 25) text->set_background(COLOR_DODGER_BLUE); //...20, 25
-      else if (temp <= 35) text->set_background(COLOR_LAWN_GREEN); //30, 35
-      else if (temp <= 45) text->set_background(COLOR_YELLOW); //40, 45
-      else text->set_background(COLOR_RED); //50, 55, ...
+      if (temp == 0) text->set_background(COLOR(WHITE)); //0
+      else if (temp <= 25) text->set_background(COLOR(DODGER_BLUE)); //...20, 25
+      else if (temp <= 35) text->set_background(COLOR(LAWN_GREEN)); //30, 35
+      else if (temp <= 45) text->set_background(COLOR(YELLOW)); //40, 45
+      else text->set_background(COLOR(RED)); //50, 55, ...
     }
   }
   GUI::update();

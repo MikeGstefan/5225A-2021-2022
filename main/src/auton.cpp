@@ -108,25 +108,23 @@ void auton_file_update(){
 
 void auton_file_read(){
   Data::log_t.data_update();
-  auton_file.open("/usd/auton.txt", fstream::in | fstream::out);
+  auton_file.open("/usd/auton.txt", fstream::in);
 
   if (!auton_file){//File doesn't exist
     auton_file.close();
     GUI::flash(COLOR_RED, 1000, "Auton File not found!\n");
     printf("\033[92mCreating new Auton File.\033[0m\n");
     auton_file_update();
-    auton_file.open("/usd/auton.txt", fstream::in | fstream::out);
+    auton_file.open("/usd/auton.txt", fstream::in);
   }
-  char* auton;
-  char* ally;
-  auton_file >> auton;
-  auton_file >> ally;
+  char auton[10];
+  char ally[5];
+  auton_file.getline(auton, 10);
+  auton_file.getline(ally, 5);
   auton_file.close();
   Data::log_t.done_update();
-  GUI::flash(COLOR_RED, 1000, "IF you get an abort exception, it's cuz the auton file isn't being created\nCheck auton.cpp:127");
 
   cur_auton = static_cast<autons>(std::find(auton_names, auton_names+static_cast<int>(autons::NUM_OF_ELEMENTS), auton)-auton_names);
   cur_alliance = static_cast<alliances>(std::find(alliance_names, alliance_names+2, ally)-alliance_names);
   switch_alliance(cur_alliance);
-
 }

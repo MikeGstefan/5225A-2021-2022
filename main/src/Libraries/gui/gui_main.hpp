@@ -15,7 +15,7 @@ _Text drivr_name(MID_X, MID_Y, Style::CENTRE, TEXT_LARGE, driver_curve, "%s", dr
 Button next_drivr(350, 70, 110, 120, Style::SIZE, Button::SINGLE, driver_curve, "Next Driver");
 
 Page temps (2, "Temperature"); //Motor temps //change string("") to ""s
-_Text mot_temp_1(75, 85, Style::CENTRE, TEXT_SMALL, temps, "1: %dC", std::get<1>(motors[0]), COLOR(BLACK));
+_Text mot_temp_1(75, 85, Style::CENTRE, TEXT_SMALL, temps, std::get<2>(motors[0]) + ": %dC"s, std::get<1>(motors[0]), COLOR(BLACK));
 _Text mot_temp_2(185, 85, Style::CENTRE, TEXT_SMALL, temps, "2: %dC", std::get<1>(motors[1]), COLOR(BLACK));
 _Text mot_temp_3(295, 85, Style::CENTRE, TEXT_SMALL, temps, "3: %dC", std::get<1>(motors[2]), COLOR(BLACK));
 _Text mot_temp_4(405, 85, Style::CENTRE, TEXT_SMALL, temps, "4: %dC", std::get<1>(motors[3]), COLOR(BLACK));

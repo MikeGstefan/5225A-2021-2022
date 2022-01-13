@@ -61,6 +61,7 @@ void GUI::init(){ //Call once at start in initialize()
   pneum_btn_2.set_off_func([](){c::adi_digital_write(8, false);}); //Won't always work if port is not configured as out
 
   Page::go_to(1); //Sets it to page 1 for program start. Don't delete this. If you want to change the starting page, re-call this in initialize()
+  GUI::background();
 }
 
 void GUI::background(){ //To be called continously

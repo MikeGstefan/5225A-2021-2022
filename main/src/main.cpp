@@ -27,13 +27,12 @@ void initialize() {
 	Data::init();
 	_Controller::init();
 	GUI::init();
-  GUI::background(); //Call once here
 	delay(150);
 	tracking.x_coord = 144.0 - 10.25, tracking.y_coord = 14.75, tracking.global_angle = -M_PI_2;
 	// tracking.x_coord = 0.0, tracking.y_coord = 0.0, tracking.global_angle = 0.0;
 
 	update_t.start();
-  // auton_file_read(); //File is not being created (someone please fix this)
+  auton_file_read(); //Hopefully works now
 	master.print(2, 0, "Driver: %s", drivebase.drivers[drivebase.cur_driver].name);
 }
 
@@ -90,8 +89,8 @@ int ring_count = 0;
 
 void opcontrol() {
 	/*Nathan:
-	auton file isn't being created
-  port_nums in util
+	-auton file isn't being created
+  -port_nums in util
   alliance text persists on blue
 
   -enums for CHAR_HEIGHT_SMALL

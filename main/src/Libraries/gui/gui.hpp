@@ -6,7 +6,7 @@
 #include <variant>
 #include <typeinfo>
 
-#define GUI_UTIL
+// #define GUI_UTIL
 
 #if defined(GUI_MAIN)
 #define PAGE_COUNT 12 //The number for testing if not included. Otherwise +1
@@ -315,4 +315,3 @@ class Slider{
 
 //For auton.hpp
 extern Button alliance;
-// extern _Text<std::string, alliances> ally_name;

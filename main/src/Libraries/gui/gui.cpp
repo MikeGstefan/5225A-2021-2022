@@ -262,7 +262,6 @@ Slider::Slider (int x1, int y1, int x2, int y2, Style type, direction dir, int m
   this->min = min;
   this->b_col = b_col;
   this->l_col = l_col;
-  // this->label = label;
   this->dir = dir;
 
   //Saves the buttons owning page
@@ -355,7 +354,7 @@ void Button::create_options(std::vector<Button*> buttons){
 }
 
 void Button::set_background (Color colour){
-  title->set_background(colour);
+  if (title) title->set_background(colour);
   if (b_col != colour){
     b_col = colour;
     b_col_dark = RGB2COLOR(int(COLOR2R(b_col)*0.8), int(COLOR2G(b_col)*0.8), int(COLOR2B(b_col)*0.8));

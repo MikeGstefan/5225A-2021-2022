@@ -17,4 +17,4 @@ extern pros::Distance tilter_dist;
 extern pros::ADIDigitalOut tilter_bottom_piston;
 extern pros::ADIDigitalOut tilter_top_piston;
 
-extern std::array<std::tuple<pros::Motor*, int, std::string, const char*, Text*>, 8> motors;
+extern std::array<std::tuple<pros::Motor*, int, const char*, const char*, Text*>, 8> motors;

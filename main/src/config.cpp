@@ -22,7 +22,7 @@ pros::ADIEncoder LeftEncoder(3, 4, false), RightEncoder(1, 2, true), BackEncoder
 pros::ADIDigitalOut tilter_top_piston({{1, 8}});
 pros::ADIDigitalOut tilter_bottom_piston({{1, 7}});
 
-std::array<std::tuple<pros::Motor*, int, std::string, const char*, Text*>, 8> motors = {
+std::array<std::tuple<pros::Motor*, int, const char*, const char*, Text*>, 8> motors = {
   std::make_tuple(&front_l, 1, "Front Left", "FL", nullptr),
   std::make_tuple(&front_r, 1, "Front Right", "FR", nullptr),
   std::make_tuple(&back_l, 1, "Back Left", "BL", nullptr),
