@@ -16,7 +16,7 @@ Lift lift({{"Lift",
 
 Lift::Lift(Motorized_subsystem<lift_states, NUM_OF_LIFT_STATES, LIFT_MAX_VELOCITY> motorized_subsystem): Motorized_subsystem(motorized_subsystem){ // constructor
 
-  state = lift_states::idle;
+  state = lift_states::searching;
   last_state = state;
   released_cycle_check = 0;
   target = bottom_position;
@@ -162,6 +162,10 @@ void Lift::handle(){
         set_state(lift_states::searching);
 
       }
+      break;
+
+    case lift_states::tall_goal:
+
       break;
 
     case lift_states::manual:

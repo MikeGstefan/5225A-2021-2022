@@ -43,11 +43,12 @@ void flatten_against_wall(bool right){
 
   // while(!(front_done && back_done)){
   while(true){
-    angular_component = tracking.g_velocity.angle * dist_b * radial_scalar;
-    linear_component = tracking.b_velo - angular_component;
+    drivebase.handle_input();
+    angular_component = tracking.g_velocity.angle * dist_b;
+    linear_component = tracking.b_velo + angular_component;
 
-    back_velocity = linear_component + angular_component;
-    front_velocity = linear_component - angular_component;
+    back_velocity = linear_component - angular_component * radial_scalar;
+    front_velocity = linear_component + angular_component * radial_scalar;
 
     printf("Velocities | back: %lf, front: %lf\n", back_velocity, front_velocity);
 
@@ -76,3 +77,16 @@ void flatten_against_wall(bool right){
     delay(10);
   }
 }
+
+void score_on_top(void* params){  // scores on tall goal
+  delay(8000);
+  // delay(1000);
+  // spinner.move(127);
+  // delay(3000);
+  // spinner.move(127);
+  // delay(3000);
+  // spinner.move(0);
+  // delay(1000);
+
+}
+

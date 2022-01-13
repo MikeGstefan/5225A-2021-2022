@@ -8,3 +8,5 @@ double get_filtered_output(ADIUltrasonic sensor, int check_count, uint16_t lower
 
 
 void flatten_against_wall(bool right);
+
+void score_on_top(void* params);  // scores on tall goal

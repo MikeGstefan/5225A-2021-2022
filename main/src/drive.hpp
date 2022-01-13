@@ -5,6 +5,7 @@
 #include "Subsystems/lift.hpp"
 #include "Subsystems/tilter.hpp"
 #include "Subsystems/hitch.hpp"
+#include "auton_util.hpp"
 
 using namespace pros;
 

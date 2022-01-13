@@ -25,10 +25,10 @@ void Intake::handle(){
       break;
 
     case intake_states::on:
-      if(motor.get_actual_velocity() < 5.0 && bad_count <= 20) bad_count++;
+      if(motor.get_actual_velocity() < 1.0 && bad_count <= 30) bad_count++;
       else bad_count = 0;
 
-      if(bad_count > 20){ // if intake isn't moving for 20 cycles it reverses slowly
+      if(bad_count > 30){ // if intake isn't moving for 30 cycles it reverses slowly
         motor.move(-30);
         set_state(intake_states::jammed);
       }

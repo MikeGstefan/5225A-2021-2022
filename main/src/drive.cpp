@@ -208,7 +208,7 @@ void Drivebase::handle_input(){
 void Drivebase::driver_practice(){
   master.clear();
   master.print(1, 0, "Driver: %s", drivebase.drivers[drivebase.cur_driver].name);
-  master.print(2, 0, "searching     ");
+  master.print(2, 0, "Lift: Searching     ");
 
   // initializes pneumatics in appropriate state
   intake_piston.set_value(LOW);
@@ -224,7 +224,7 @@ void Drivebase::driver_practice(){
   intake.motor.move(100);
 
   tilter_bottom_piston.set_value(LOW);
-  tilter_top_piston.set_value(LOW);
+  tilter_top_piston.set_value(HIGH);
   cur_driver = 0; // defaults driver to Nikhil
   // master.print(2, 0, "Driver: %s", drivers[cur_driver].name);
   while(true){
@@ -248,6 +248,14 @@ void Drivebase::driver_practice(){
       lift.handle();
       tilter.handle();
       intake.handle();
+
+      if(master.get_digital_new_press(fill_top_goal_button)){
+        lift.set_state(lift_states::tall_goal);
+        tilter.set_state(tilter_states::tall_goal);
+        score_on_top(nullptr);
+        // _Task fill_tall_goal(score_on_top, "tall_goal");
+        // fill_tall_goal.start();
+      }
 
 
       // prints motor temps every second
