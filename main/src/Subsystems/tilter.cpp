@@ -43,11 +43,11 @@ void Tilter::handle(){
         printf("pressed\n");
         Timer cur{"auto-pickup"};
         drivebase.move(0.0, 80.0, 0.0);
-        waitUntil(tilter_dist.get() < 120 || tracking.y_coord > 45.0 || cur.get_time() > 1000);
+        waitUntil(tilter_dist.get() < 100 || tracking.y_coord > 45.0 || cur.get_time() > 1000);
         tilter_top_piston.set_value(LOW);
         delay(100); // waits for top piston to fully close
         tilter_bottom_piston.set_value(HIGH);
-        delay(100); // waits for bottom piston to fully close
+        delay(200); // waits for bottom piston to fully close
 
         held = true;
         move_absolute(raised_position);
@@ -61,6 +61,15 @@ void Tilter::handle(){
         move_absolute(bottom_position);
 
         set_state(tilter_states::lowering);
+      }
+      if(master.get_digital_new_press(fill_top_goal_button)){ // throws all subsystems into managed states except spinner
+        lift.move_absolute(top_position);
+        lift.set_state(lift_states::tall_goal);
+        intake.raise_and_disable();
+        spinner.set_state(spinner_states::prep);
+
+        move_absolute(top_position);
+        set_state(tilter_states::tall_goal);
       }
       break;
 

@@ -249,15 +249,6 @@ void Drivebase::driver_practice(){
       tilter.handle();
       intake.handle();
 
-      if(master.get_digital_new_press(fill_top_goal_button)){
-        // lift.set_state(lift_states::tall_goal);
-        // tilter.set_state(tilter_states::tall_goal);
-        score_on_top(nullptr);
-        // _Task fill_tall_goal(score_on_top, "tall_goal");
-        // fill_tall_goal.start();
-      }
-
-
       // prints motor temps every second
       if(screen_timer.get_time() > 1000){
         drivers_data.print("fl%.0f r%.0f bl%.0f r%.0f\n", front_l.get_temperature(), front_r.get_temperature(), back_l.get_temperature(), back_r.get_temperature());

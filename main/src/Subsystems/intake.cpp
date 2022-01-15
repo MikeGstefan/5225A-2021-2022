@@ -57,6 +57,7 @@ void Intake::toggle(){
     }
     else{
       state = intake_states::on;
+      intake_piston.set_value(LOW); // lowers intake if not already lowered
       motor.move(INTAKE_POWER);
     }
   }

@@ -19,7 +19,7 @@ pros::Motor tilter_motor(14, pros::E_MOTOR_GEARSET_36, true, pros::E_MOTOR_ENCOD
 
 // pros::Motor c_bar(10, pros::E_MOTOR_GEARSET_36, true, pros::E_MOTOR_ENCODER_DEGREES);
 pros::Motor intake_motor(9, pros::E_MOTOR_GEARSET_36, true, pros::E_MOTOR_ENCODER_DEGREES);
-pros::Motor spinner(8, pros::E_MOTOR_GEARSET_36, true, pros::E_MOTOR_ENCODER_DEGREES);
+pros::Motor spinner_motor(8, pros::E_MOTOR_GEARSET_36, true, pros::E_MOTOR_ENCODER_DEGREES);
 
 // pros::Motor uptk(11);
 pros::Distance tilter_dist(10);
@@ -31,6 +31,9 @@ pros::ADIDigitalOut tilter_top_piston({{1, 8}});
 pros::ADIDigitalOut tilter_bottom_piston({{1, 7}});
 
 pros::ADIDigitalOut intake_piston({{1, 6}});
+
+pros::ADIDigitalIn spinner_trigger({{1, 5}});
+pros::ADIDigitalOut ring_piston({{1, 4}});
 
 
 std::array<std::tuple<pros::Motor*, int, std::string, const char*, Text*>, 8> motors = {

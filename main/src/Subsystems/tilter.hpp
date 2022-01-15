@@ -1,6 +1,7 @@
 #pragma once
 #include "../Libraries/subsystem.hpp"
 #include "../Tracking.hpp"
+#include "spinner.hpp"
 
 #define NUM_OF_TILTER_STATES 5
 #define TILTER_MAX_VELOCITY 100
@@ -17,7 +18,6 @@ class Tilter: public Motorized_subsystem<tilter_states, NUM_OF_TILTER_STATES, TI
   Timer lifting_timer{"tilter_lifting_timer"};
   int tilter_power;
   int bad_count = 0; // cycle check for safeties
-  int tilter_encoder_position; // position of left tracking wheel when searching
   bool held = false;
 
 public:
