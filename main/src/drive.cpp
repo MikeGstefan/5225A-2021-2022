@@ -250,8 +250,8 @@ void Drivebase::driver_practice(){
       intake.handle();
 
       if(master.get_digital_new_press(fill_top_goal_button)){
-        lift.set_state(lift_states::tall_goal);
-        tilter.set_state(tilter_states::tall_goal);
+        // lift.set_state(lift_states::tall_goal);
+        // tilter.set_state(tilter_states::tall_goal);
         score_on_top(nullptr);
         // _Task fill_tall_goal(score_on_top, "tall_goal");
         // fill_tall_goal.start();

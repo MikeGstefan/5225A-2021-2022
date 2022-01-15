@@ -41,10 +41,9 @@ void Tilter::handle(){
       if(master.get_digital(tilter_button)){  // grabs goal and raises tilter when tilter_button is pressed
         tracking.reset(0.0, 0.0, 0.0);
         printf("pressed\n");
-        double cur_y = tracking.y_coord;
         Timer cur{"auto-pickup"};
         drivebase.move(0.0, 80.0, 0.0);
-        waitUntil(tilter_dist.get() < 120 || tracking.y_coord - cur_y > 45.0 || cur.get_time() > 1000);
+        waitUntil(tilter_dist.get() < 120 || tracking.y_coord > 45.0 || cur.get_time() > 1000);
         tilter_top_piston.set_value(LOW);
         delay(100); // waits for top piston to fully close
         tilter_bottom_piston.set_value(HIGH);

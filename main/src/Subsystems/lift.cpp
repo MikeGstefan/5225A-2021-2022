@@ -37,7 +37,11 @@ void Lift::handle(){
   }
 
   // switches to manual control if lift manual button is pressed
-  if(master.get_digital_new_press(lift_manual_button))  set_state(lift_states::manual);
+  if(master.get_digital_new_press(lift_manual_button)){
+    master.rumble("-");
+    master.print(LIFT_STATE_LINE, 0, "Lift: Manual      ");
+    set_state(lift_states::manual);
+  }
 
   switch(state){
 
@@ -153,14 +157,13 @@ void Lift::handle(){
       // releases goal if up or down button is pressed
       if(master.get_digital_new_press(lift_up_button) || master.get_digital_new_press(lift_down_button)){
         move_absolute(bottom_position);
-
+      }
+      if(motor.get_position() < top_position / 2){ // waits for lift to lower past halfway to lower intake
         intake_piston.set_value(LOW); // lowers intake
         intake.set_state(intake_states::off);
-
         master.print(LIFT_STATE_LINE, 0, "Lift: Searching    ");
 
         set_state(lift_states::searching);
-
       }
       break;
 
