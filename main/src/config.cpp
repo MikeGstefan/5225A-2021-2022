@@ -22,10 +22,11 @@ pros::Motor intake_motor(9, pros::E_MOTOR_GEARSET_36, true, pros::E_MOTOR_ENCODE
 pros::Motor spinner_motor(8, pros::E_MOTOR_GEARSET_36, true, pros::E_MOTOR_ENCODER_DEGREES);
 
 // pros::Motor uptk(11);
-pros::Distance tilter_dist(10);
+pros::Distance tilter_dist(8);
 pros::ADIDigitalOut lift_piston(7);
 pros::ADIDigitalIn lift_trigger(8);
-pros::ADIEncoder LeftEncoder(3, 4, false), RightEncoder(1, 2, true), BackEncoder(6, 5, true);
+pros::ADIEncoder LeftEncoder(7, 8, false), RightEncoder(5, 6, true);
+pros::ADIEncoder BackEncoder(1, 2, true);
 
 pros::ADIDigitalOut tilter_top_piston({{1, 8}});
 pros::ADIDigitalOut tilter_bottom_piston({{1, 7}});

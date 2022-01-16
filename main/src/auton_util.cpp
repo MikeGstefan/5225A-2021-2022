@@ -35,8 +35,8 @@ void flatten_against_wall(bool right){
   const double velocity_threshold = 0.5;  // in inches/sec
   int flatten_power, power_diff;
 
-  if(right) flatten_power = 60, power_diff = 20;
-  else  flatten_power = -60, power_diff = -20;
+  if(right) flatten_power = 80, power_diff = 30;
+  else  flatten_power = -80, power_diff = -30;
 
   delay(100); // waits for robots velocity to rise
   drivebase.move(flatten_power, 0.0, 0.0);
@@ -70,12 +70,14 @@ void flatten_against_wall(bool right){
       back_done = false;
     }
 
-    if(front_done) drivebase.move(flatten_power, 0.0, -power_diff); // turn back end to align with wall if front is aligned
-    else if(back_done) drivebase.move(flatten_power, 0.0, power_diff); //  turn front end to align with wall if back is aligned
-    else drivebase.move(flatten_power, 0.0, 0.0); // otherwise continune towards wall
+    // if(front_done) drivebase.move(flatten_power, 0.0, -power_diff); // turn back end to align with wall if front is aligned
+    // else if(back_done) drivebase.move(flatten_power, 0.0, power_diff); //  turn front end to align with wall if back is aligned
+    // else drivebase.move(flatten_power, 0.0, 0.0); // otherwise continune towards wall
 
     delay(10);
   }
+  printf("DONE move");
+  master.rumble("---");
 }
 
 void score_on_top(void* params){  // scores on tall goal
@@ -89,4 +91,3 @@ void score_on_top(void* params){  // scores on tall goal
   // delay(1000);
 
 }
-

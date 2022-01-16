@@ -27,8 +27,8 @@ void initialize() {
 	Data::init();
 	_Controller::init();
 	delay(150);
-	tracking.x_coord = 144.0 - 10.25, tracking.y_coord = 14.75, tracking.global_angle = -M_PI_2;
-	// tracking.x_coord = 0.0, tracking.y_coord = 0.0, tracking.global_angle = 0.0;
+	// tracking.x_coord = 144.0 - 10.25, tracking.y_coord = 14.75, tracking.global_angle = -M_PI_2;
+	tracking.x_coord = 0.0, tracking.y_coord = 0.0, tracking.global_angle = 0.0;
 
 	update_t.start();
 	GUI::setup();
@@ -65,7 +65,7 @@ void competition_initialize() {}
  */
 void autonomous() {
 	// skills();
-
+  flatten_against_wall(false);
 
 }
 
@@ -102,6 +102,17 @@ void next_driver(){
 // int ring_count = 0, cur_auton = 1;
 
 void opcontrol() {
+  // flatten_against_wall(false);
+  /*
+  Timer rush_timer{"rush_timer"};
+  drivebase.move(0.0, 127.0, 0.0);
+  waitUntil(tracking.y_coord > 35.0);
+  master.print(0, 0, "time: %d", rush_timer.get_time());
+  rush_timer.print();
+  drivebase.move(0.0, -10.0, 0.0);
+  delay(500);
+  */
+
   // tilter.reset();
   // tilter.move_absolute(tilter.bottom_position);
   // while(true){
@@ -109,5 +120,9 @@ void opcontrol() {
   //   delay(10);
   // }
 
-	drivebase.driver_practice();
+	// drivebase.driver_practice();
+  while(true){
+    drivebase.handle_input();
+    delay(10);
+  }
 }

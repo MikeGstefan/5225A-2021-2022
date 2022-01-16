@@ -43,7 +43,7 @@ void Tilter::handle(){
         printf("pressed\n");
         Timer cur{"auto-pickup"};
         drivebase.move(0.0, 80.0, 0.0);
-        waitUntil(tilter_dist.get() < 100 || tracking.y_coord > 45.0 || cur.get_time() > 1000);
+        waitUntil(tilter_dist.get() < 120 || tracking.y_coord > 45.0 || cur.get_time() > 1000);
         tilter_top_piston.set_value(LOW);
         delay(100); // waits for top piston to fully close
         tilter_bottom_piston.set_value(HIGH);
