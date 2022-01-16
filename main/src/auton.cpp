@@ -31,7 +31,7 @@ void skills(){
 	lift_piston.set_value(LOW);
 	lift.motor.move_absolute(lift.bottom_position, 100);
   intake.move(100);
-  
+  Timer skills_tmr {"time"}; 
 
 // move_start(move_types::tank_point, tank_point_params({112.5, 14.75, -90.0},true,50.0), false);
 	Timer move_timer{"move"};
@@ -56,7 +56,8 @@ void skills(){
   }
 	lift_piston.set_value(HIGH);
   move_stop();
-  Timer skills_tmr {"time"};
+ 
+  intake.move(0);
   tilter.move_absolute(tilter.bottom_position);
   tilter_top_piston.set_value(1);
   tilter_bottom_piston.set_value(0);
@@ -64,16 +65,20 @@ void skills(){
   move_start(move_types::point, point_params({109.5,45.5,0.0}), true);
   delay(100);//makes sure allignment motion settles, it not setting causes chance of missing yellow goal
   move_start(move_types::line_old, line_old_params(109.5,42.5,  109.5, 78.0, 0.0,false,true,127, false,0.5,5.0,15.0,0.8,0.2), false);
-  while(tilter_dist.get() > 70)delay(10);
+  while(tilter_dist.get() > 70){
+    log_d.print("tilter d: %f\n", tilter_dist.get());
+    delay(33);
+  }
   log_d.print("%d | grabbing goal 2 at: (%.2f, %.2f, %.2f)\n",millis(),tracking.x_coord, tracking.y_coord,rad_to_deg(tracking.global_angle));
   tilter_top_piston.set_value(0);
   delay(50);
   tilter_bottom_piston.set_value(1);
   delay(100);
   tilter.move_absolute(150);
+  
   master.print(0,0,"%d", skills_tmr.get_time());
   move_wait_for_complete();
-  
+  intake.move(100);
   // move_start(move_types::tank_arc, tank_arc_params({110.0, 75.0},{72.0,108.0,-90.0},127.0,127.0,false),true);
   // move_start(move_types::point, point_params({72.0,108.0,-90.0}),true);
   // move_start(move_types::arc, arc_params({110.0, 78.0},{90.0,92.0,0.0}, 18.0,true, 127.0, true,1.0,false),true);
@@ -92,8 +97,8 @@ void skills(){
 	while(tilter.motor.get_position() > 300)delay(10);
 
   // move_start(move_types::turn_angle, turn_angle_params(-180.0),true);
-  move_start(move_types::point,point_params({70.0,96.0, -180.0}));
-  move_start(move_types::point, point_params({70.0,110.5, -180.0}),true);
+  move_start(move_types::point,point_params({68.0,96.0, -180.0}));
+  move_start(move_types::point, point_params({68.0,109.5, -180.0}),true);
   lift.move_absolute(lift.platform_position);
   while(lift.motor.get_position() > lift.platform_position +10)delay(10);//first goal on platform position
   delay(100);
@@ -113,7 +118,7 @@ void skills(){
   lift.move_absolute(lift.platform_position);
   move_start(move_types::point, point_params({79.0, 97.0, -270.0}));
   move_start(move_types::turn_angle, turn_angle_params(-180.0));
-  move_start(move_types::point, point_params({79.0, 110.5, -180.0}));
+  move_start(move_types::point, point_params({79.0, 109.5, -180.0}));
   lift_piston.set_value(0);
   delay(200);
   //second goal dropped off
@@ -124,5 +129,11 @@ void skills(){
   // move_start(move_types::tank_arc, tank_arc_params({79.0, 106.0},{130.0,132.0,-300.0}));
   move_start(move_types::point, point_params({100.0,108.0,-270.0},127.0,true,0.0,false));
   move_start(move_types::tank_arc, tank_arc_params({79.0, 106.0},{125.0,127.0,-285.0},127.0,127.0,false));
-	move_start(move_types::point, point_params({125.0,133.0,-270.0}));
+	move_start(move_types::point, point_params({125.0,131.0,-270.0}));
+  flatten_against_wall(false);
+  delay(100);
+  tracking.reset(tracking.x_coord, 144.0- 9.0, -90.0);
+  master.print(0,0,"%.2f, %.2f, %.2f",tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle));
+  master.print(1,1,"time: %d", skills_tmr.get_time());
+
 }

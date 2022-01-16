@@ -14,3 +14,4 @@ void flatten_against_wall(bool right);
 void claw_set_state(bool state);
 
 void find_goal_lift();
+

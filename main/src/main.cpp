@@ -123,24 +123,36 @@ void tilter_reset2(){
 // int ring_count = 0, cur_auton = 1;
 bool claw_state = false, intk_state = false;
 void opcontrol() {
-	lift.reset();
-	lift.move_absolute(5);
-	while(true){ 
-		if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_A)){
-			claw_state = !claw_state;
-			lift_piston.set_value(claw_state);
-		}
-		if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_B)){
-			intk_state = !intk_state;
-			if(intk_state)intake.move(100);
-			else intake.move(0);
-		}
-		delay(10);
-	}
-	drivebase.move(-30, 0, -45);
+
+	// while(true){ 
+	// 	if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_A)){
+	// 		claw_state = !claw_state;
+	// 		tilter_bottom_piston.set_value(claw_state);
+	// 	}
+	// 	delay(10);
+	// }
+
+	delay(1000);
+
+	drivebase.move(-70, 0, -10);
 	// cycleCheck(fabs(rad_to_deg(tracking.g_velocity.angle)) >  0.01, 15,10);
 	int bad_count = 0;
 	int good_count = 0;
+	while(good_count < 15 && bad_count < 30){ 
+		if(fabs(rad_to_deg(tracking.g_velocity.angle)) >  0.01)good_count++;
+		else{
+			good_count = 0;
+			bad_count++;
+		}
+		printf("good: %d bad: %d, v: %f\n", good_count, bad_count, fabs(rad_to_deg(tracking.g_velocity.angle)));
+		delay(10);
+	}
+	cycleCheck(fabs(rad_to_deg(tracking.g_velocity.angle)) <  0.0001, 10,10);
+
+	drivebase.move(-40, 0, -40);
+	// cycleCheck(fabs(rad_to_deg(tracking.g_velocity.angle)) >  0.01, 15,10);
+	bad_count = 0;
+	good_count = 0;
 	while(good_count < 10 && bad_count < 30){ 
 		if(fabs(rad_to_deg(tracking.g_velocity.angle)) >  0.01)good_count++;
 		else{

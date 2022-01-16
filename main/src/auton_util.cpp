@@ -23,36 +23,62 @@ double get_filtered_output(ADIUltrasonic sensor, int check_count, uint16_t lower
   return filtered_output;
 }
 
-// void flatten_against_wall(bool right){
-//   bool front_done, back_done;
-//   int flatten_power = 50, less_power = 30, greater_power = 70;
-//
-//
-//   if(right){
-//     drivebase.move(flatten_power, 0.0, 0.0);
-//     while(!(front_done && back_done)){
-//
-//
-//
-//       if(front_done){
-//
-//       }
-//       if (back_done){
-//
-//
-//       }
-//
-//
-//     }
-//   }
-//   else{
-//
-//
-//   }
-//
-//
-//
-// }
+void flatten_against_wall(bool right){
+
+
+
+  if(right){
+
+  }
+  else{
+    drivebase.move(-70, 0, -10);
+	// cycleCheck(fabs(rad_to_deg(tracking.g_velocity.angle)) >  0.01, 15,10);
+	  int bad_count = 0;
+    int good_count = 0;
+    while(good_count < 15 && bad_count < 30){ 
+      if(fabs(rad_to_deg(tracking.g_velocity.angle)) >  0.01)good_count++;
+      else{
+        good_count = 0;
+        bad_count++;
+      }
+      printf("good: %d bad: %d, v: %f\n", good_count, bad_count, fabs(rad_to_deg(tracking.g_velocity.angle)));
+      delay(10);
+    }
+    cycleCheck(fabs(rad_to_deg(tracking.g_velocity.angle)) <  0.0001, 10,10);
+
+    drivebase.move(-40, 0, -40);
+    // cycleCheck(fabs(rad_to_deg(tracking.g_velocity.angle)) >  0.01, 15,10);
+    bad_count = 0;
+    good_count = 0;
+    while(good_count < 10 && bad_count < 30){ 
+      if(fabs(rad_to_deg(tracking.g_velocity.angle)) >  0.01)good_count++;
+      else{
+        good_count = 0;
+        bad_count++;
+      }
+      printf("good: %d bad: %d, v: %f\n", good_count, bad_count, fabs(rad_to_deg(tracking.g_velocity.angle)));
+      delay(10);
+    }
+    cycleCheck(fabs(rad_to_deg(tracking.g_velocity.angle)) <  0.0001, 10,10);
+    drivebase.move(-60, 0, 30);
+    bad_count = 0;
+    good_count = 0;
+    while(good_count < 10 && bad_count < 30){ 
+      if(fabs(rad_to_deg(tracking.g_velocity.angle)) >  0.01)good_count++;
+      else{
+        good_count = 0;
+        bad_count++;
+      }
+      delay(10);
+    }
+    cycleCheck(fabs(rad_to_deg(tracking.g_velocity.angle)) <   0.0001, 10,10);
+	  drivebase.move(0,0,0);
+
+  }
+
+
+
+}
 
 
 void find_goal_lift(){

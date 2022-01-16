@@ -15,13 +15,13 @@ pros::Motor intake(9, pros::E_MOTOR_GEARSET_36, true, pros::E_MOTOR_ENCODER_DEGR
 // pros::Motor c_bar(10, pros::E_MOTOR_GEARSET_36, true, pros::E_MOTOR_ENCODER_DEGREES);
 // pros::Motor intk(12, pros::E_MOTOR_GEARSET_36, true, pros::E_MOTOR_ENCODER_DEGREES);
 // pros::Motor uptk(11);
-pros::Distance tilter_dist(10);
+pros::Distance tilter_dist(8);
 pros::ADIDigitalOut lift_piston(7);
 pros::ADIDigitalIn lift_trigger(8);
 pros::ADIEncoder LeftEncoder(3, 4, false), RightEncoder(1, 2, true), BackEncoder(6, 5, true);
 
-pros::ADIDigitalOut tilter_top_piston({{1, 8}});
-pros::ADIDigitalOut tilter_bottom_piston({{1, 7}}), intk_pnue({{1,6}});
+pros::ADIDigitalOut tilter_top_piston({{1, 2}});
+pros::ADIDigitalOut tilter_bottom_piston({{1, 1}}), intk_pnue({{1,6}});
 
 std::array<std::tuple<pros::Motor*, int, std::string, const char*, Text*>, 8> motors = {
   std::make_tuple(&front_l, 1, "Front Left", "FL", nullptr),
