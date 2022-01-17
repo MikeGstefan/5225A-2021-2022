@@ -3,8 +3,6 @@
 #include "../../drive.hpp"
 #include "../../Tracking.hpp"
 #include "../../util.hpp"
-#include <variant>
-#include <typeinfo>
 
 // #define GUI_UTIL
 

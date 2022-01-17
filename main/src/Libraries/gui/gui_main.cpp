@@ -62,11 +62,9 @@ void GUI::init(){ //Call once at start in initialize()
   prev_drivr.set_func([](){drivebase.prev_driver();});
   next_drivr.set_func([](){drivebase.next_driver();});
 
-  prev_auto.set_func([&](){cur_auton = previous_enum_value(cur_auton); auton_file_update();});
-  next_auto.set_func([&](){cur_auton = next_enum_value(cur_auton); auton_file_update();});
   prev_auto.set_func(&prev_auton);
   next_auto.set_func(&next_auton);
-  alliance.set_func([&](){switch_alliance();});
+  alliance.set_func([&](){switch_alliance();}); //Has to be in a lambda since param type is alliances not void
   alliance.add_text(ally_name);
 
   turn_encoder.set_func([](){ //Turn the encoder

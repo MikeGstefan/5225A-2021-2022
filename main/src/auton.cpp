@@ -68,35 +68,6 @@ alliances cur_alliance = static_cast<alliances>(0);
 const char* auton_names[static_cast<int>(autons::NUM_OF_ELEMENTS)] = {"Skills", "Auto1", "Auto2"};
 const char* alliance_names[2] = {"Red", "Blue"};
 
-void prev_auton(){
-  cur_auton--;
-  auton_file_update();
-}
-
-void next_auton(){
-  cur_auton++;
-  auton_file_update();
-}
-
-void switch_alliance(alliances new_ally){
-
-  switch(new_ally){
-    case alliances::BLUE:
-      cur_alliance = alliances::BLUE;
-      alliance.set_background(COLOR_BLUE);
-      printf("\033[34mSwitched to Blue Alliance\033[0m\n");
-      break;
-
-    case alliances::RED:
-      cur_alliance = alliances::RED;
-      alliance.set_background(COLOR_RED);
-      printf("\033[31mSwitched to Red Alliance\033[0m\n");
-      break;
-  }
-
-  auton_file_update();
-}
-
 void auton_file_update(){
   Data::log_t.data_update();
   auton_file.open("/usd/auton.txt", fstream::out | fstream::trunc);
@@ -104,6 +75,8 @@ void auton_file_update(){
   auton_file << alliance_names[static_cast<int>(cur_alliance)];
   auton_file.close();
   Data::log_t.done_update();
+  master.print(0, 0, "Auton: %s          ", auton_names[static_cast<int>(cur_auton)]);
+  master.print(1, 0, "Alliance: %s       ", alliance_names[static_cast<int>(cur_alliance)]);
 }
 
 void auton_file_read(){
@@ -127,4 +100,36 @@ void auton_file_read(){
   cur_auton = static_cast<autons>(std::find(auton_names, auton_names+static_cast<int>(autons::NUM_OF_ELEMENTS), auton)-auton_names);
   cur_alliance = static_cast<alliances>(std::find(alliance_names, alliance_names+2, ally)-alliance_names);
   switch_alliance(cur_alliance);
+}
+
+void prev_auton(){
+  previous_enum_value(cur_auton);
+  auton_file_update();
+}
+
+void next_auton(){
+  next_enum_value(cur_auton);
+  auton_file_update();
+}
+
+void switch_alliance(alliances new_ally){
+  switch(new_ally){
+    case alliances::BLUE:
+      cur_alliance = alliances::BLUE;
+      #ifdef GUI_MAIN
+      alliance.set_background(COLOR_BLUE);
+      #endif
+      printf("\033[34mSwitched to Blue Alliance\033[0m\n");
+      break;
+
+    case alliances::RED:
+      cur_alliance = alliances::RED;
+      #ifdef GUI_MAIN
+      alliance.set_background(COLOR_RED);
+      #endif
+      printf("\033[31mSwitched to Red Alliance\033[0m\n");
+      break;
+  }
+
+  auton_file_update();
 }
