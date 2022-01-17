@@ -1,16 +1,16 @@
 #include "auton_util.hpp"
 
-Gyro gyro(&imu_sensor);
+Gyro gyro(imu_sensor);
 
-Gyro::Gyro(Imu* imu): inertial(imu){}
+Gyro::Gyro(Imu& imu): inertial(imu){}
 
 double Gyro::get_angle() {
-  angle = GYRO_SIDE*inertial->GYRO_AXIS();
+  angle = GYRO_SIDE*inertial.GYRO_AXIS();
   return angle;
 }
 
 void Gyro::calibrate(){
-  inertial->reset();
+  inertial.reset();
 }
 
 void Gyro::finish_calibrating(){
@@ -23,16 +23,15 @@ void Gyro::finish_calibrating(){
 
 void Gyro::climb_ramp(){
   finish_calibrating(); //Makes sure it's calibrated before starting (should already be)
+	inertial.tare_roll();
+  inertial.tare_pitch();
 
-	inertial->tare_roll();
-  inertial->tare_pitch();
 	drivebase.move(127, 0);
 	waitUntil(fabs(get_angle()) > 22)
 	printf("ON RAMP\n");
 
-  //Change to tracking encoder
-  double start_position = l1.get_position();
-  waitUntil(l1.get_position()-start_position > 400)
+  double start_position = l1.get_position(); //Change to tracking
+  waitUntil(l1.get_position() > start_position+400)
 }
 
 void Gyro::level(double kP, double kD){
@@ -45,8 +44,9 @@ void Gyro::level(double kP, double kD){
     get_angle();
     speed = gyro_pid.compute(-angle, 0);
 		drivebase.move(speed, 0);
-		printf("Angle: %f   Speed: %d  \n", angle, speed);
+		printf("Angle: %f   Speed: %d  \n", angle, speed); //Get rid of speed var
 
+    //Use timer class
 		if (fabs(angle-last_angle) > 0.6) last_steady_time = millis(); //Unsteady, Resets the last known steady time
 		else if (fabs(angle) < 6 && steady_time > 450) break; //If within range to be level and steady on ramp
 
@@ -61,6 +61,7 @@ void Gyro::level(double kP, double kD){
 	drivebase.brake();
 }
 
+//make a method of _Controller
 bool controller_interrupt(bool analog, bool digital){
   if (analog){
     if (fabs(master.get_analog(ANALOG_LEFT_X)) > 15) return true;

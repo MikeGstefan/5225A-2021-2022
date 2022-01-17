@@ -19,11 +19,11 @@ bool controller_interrupt(bool analog=true, bool digital=true);
 
 class Gyro{
   private:
-    Imu* inertial;
+    Imu& inertial;
     double angle;
 
   public:
-    Gyro(Imu* imu);
+    Gyro(Imu& imu);
 
     void calibrate();
     void finish_calibrating();
