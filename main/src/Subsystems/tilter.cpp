@@ -43,11 +43,11 @@ void Tilter::handle(){
         printf("pressed\n");
         Timer cur{"auto-pickup"};
         drivebase.move(0.0, 80.0, 0.0);
-        waitUntil(tilter_dist.get() < 100 || tracking.y_coord > 45.0 || cur.get_time() > 1000);
+        waitUntil(tilter_dist.get() < 120 || tracking.y_coord > 45.0 || cur.get_time() > 1000);
         tilter_top_piston.set_value(LOW);
         delay(100); // waits for top piston to fully close
         tilter_bottom_piston.set_value(HIGH);
-        delay(200); // waits for bottom piston to fully close
+        delay(200); // waits for bottom piston to fully close before raising lift
 
         held = true;
         move_absolute(raised_position);
@@ -96,9 +96,9 @@ void Tilter::handle(){
     case tilter_states::manual:
       tilter_power = master.get_analog(E_CONTROLLER_ANALOG_LEFT_Y);
       // gives holding power if joystick is within deadzone or tilter is out of range
-      if (fabs(tilter_power) < 10 || (tilter_power < 0 && motor.get_position() >= bottom_position) || (tilter_power > 0 && motor.get_position() <= top_position)) tilter_power = -10;
+      // if (fabs(tilter_power) < 10 || (tilter_power < 0 && motor.get_position() >= bottom_position) || (tilter_power > 0 && motor.get_position() <= top_position)) tilter_power = -10;
 
-      motor.move(tilter_power);
+      move_absolute(map(tilter_power, -127, 127, (int)top_position, (int)bottom_position));
 
       if(master.get_digital_new_press(tilter_button)){ // toggles holding state if tilter button is pressed
         if(held){

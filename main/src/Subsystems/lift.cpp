@@ -175,9 +175,11 @@ void Lift::handle(){
       lift_power = master.get_analog(E_CONTROLLER_ANALOG_LEFT_Y);
 
       // gives holding power if joystick is within deadzone or lift is out of range
-      if (fabs(lift_power) < 10 || (lift_power < 0 && motor.get_position() <= bottom_position) || (lift_power > 0 && motor.get_position() >= top_position)) lift_power = 10;
+      // if (fabs(lift_power) < 10 || (lift_power < 0 && motor.get_position() <= bottom_position) || (lift_power > 0 && motor.get_position() >= top_position)) lift_power = 10;
 
-      motor.move(lift_power);
+      // motor.move(lift_power);
+      move_absolute(map(lift_power, -127, 127, (int)top_position, (int)bottom_position));
+
       if(master.get_digital_new_press(lift_up_button) || master.get_digital_new_press(lift_down_button) || master.get_digital_new_press(lift_manual_button)){
         bad_count = 0;  // resets the safety
         lift_piston.set_value(LOW);
