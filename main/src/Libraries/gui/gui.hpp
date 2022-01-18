@@ -1,23 +1,17 @@
 #pragma once
-#include "../../auton.hpp"
 #include "../../drive.hpp"
-#include "../../Tracking.hpp"
 #include "../../util.hpp"
+// #include <iostream>
+// #include <vector>
 
-// #define GUI_UTIL
+// Forward-Declaration
+class GUI;
+class Page;
+class Button;
+class Slider;
+template <typename V=int, typename I=int> class _Text;
 
-#if defined(GUI_MAIN)
-#define PAGE_COUNT 12 //The number for testing if not included. Otherwise +1
-
-#elif defined(GUI_UTIL)
-#undef GUI_MAIN
-#define PAGE_COUNT 5
-
-#else
-#define GUI_MAIN
-#define PAGE_COUNT 12
-
-#endif //MAIN
+extern GUI g_main, g_util;
 
 #define ORANGE 0x00F36421
 #define GREY 0x00202020
@@ -43,16 +37,8 @@ static const int zero = 0;
 typedef std::uint32_t Color;
 #define COLOR(NAME) (Color)COLOR_##NAME
 
-// Forward-Declaration
-class GUI;
-class Page;
-class Button;
-class Slider;
-template <typename V=int, typename I=int> class _Text;
-
-//For other gui hpp files
-extern int ring_count; //For gui_objects to use
-extern Timer Flash;
+//For gui to use
+extern int ring_count;
 
 enum class Style{ //how the rect coords get evaluated
     CENTRE,
@@ -60,26 +46,40 @@ enum class Style{ //how the rect coords get evaluated
     SIZE
 };
 
-class GUI{ //Do not make a GUI object ever. To make different GUI's, create a new .hpp file
+class GUI{
   friend class Page;
   friend class Button;
   friend class Slider;
+  friend class Text;
   template <typename V, typename I> friend class _Text;
 
   private:
+    //Vars
     static last_touch_e_t touch_status;
     static int x, y;
+    static Page* current_page;
+    static const GUI* current_gui;
+    std::vector<Page*> pages;
+    std::function <void()> init, background;
 
+    //Functions
     static void update_screen_status();
-    static void setup(), update();
     static void end_flash();
     static void draw_oblong(int, int, int, int, double, double);
     static int get_size(text_format_e_t, std::string);
+
   public:
-    static void init(), background();
+    //Constructor
+    GUI(std::vector<Page*>, std::function <void()>, std::function <void()>);
+
+    //Functions
     static void aligned_coords (int, int, int, int, int = 480, int = 220);
     static void flash (Color, std::uint32_t, std::string = "");
     static bool go(std::string, std::string, std::uint32_t=0), go(std::string, std::uint32_t=0);
+    static void go_to(Page*);
+    static void go_to(int);
+    static void clear_screen(Color=GREY);
+    static void setup(), update();
     static bool pressed();
 };
 
@@ -95,25 +95,17 @@ class Page{
     std::function <void()> setup_func, loop_func;
     Color b_col;
     std::string title;
-
-  public:
-    //Page num, Title, Bcolor
-    Page(int, std::string, Color = GREY);
-
-    //Vars
-    static Page* current_page;
-    static std::array<Page*, PAGE_COUNT> pages;
     std::vector<Button*> buttons;
     std::vector<Slider*> sliders;
     std::vector<Text*> texts;
-    int page_num;
+
+  public:
+    //Page Title, Bcolor
+    Page(std::string, Color = GREY);
 
     //Functions
-    static void go_to(Page*);
-    static void go_to(int);
-    static void clear_screen(Color=GREY);
+    const bool pressed();
     void set_setup_func(std::function <void()>), set_loop_func(std::function <void()>);
-    bool pressed();
 };
 
 class Text{
@@ -132,7 +124,7 @@ class Text{
     bool active = true;
 
     //Functions
-    virtual void update() = 0;
+    const virtual void update() = 0;
     virtual void draw() = 0;
 
   public:
@@ -143,8 +135,7 @@ class Text{
     void set_active(bool=true);
 };
 
-template <typename V, typename I>
-class _Text: public Text{
+template <typename V, typename I> class _Text: public Text{
   friend class Button;
   friend class Slider;
   private:
@@ -156,8 +147,11 @@ class _Text: public Text{
     const I* index_ptr;
 
     //Functions
+    const void update(){
+      if(value_ptr && active && prev_value != *value_ptr) draw();
+    }
     void construct (int x, int y, Style type, text_format_e_t txt_fmt, Page* page, std::string label, const V* value_ptr, const I* index_ptr, Color l_col){
-      static_assert(!std::is_same_v<V, std::string>, "Text variable cannot be std::string, it causes unkown failures");
+      static_assert(!std::is_same_v<V, std::string>, "Text variable cannot be std::string, it causes unknown failures");
       static_assert(std::is_scalar_v<I>, "Text Index type must be int-convertible");
       this->x = x;
       this->y = y;
@@ -170,9 +164,6 @@ class _Text: public Text{
       this->l_col = l_col;
       this->b_col = page->b_col;
       page->texts.push_back(this);
-    }
-    void update(){
-      if(value_ptr && active && prev_value != *value_ptr) draw();
     }
     void draw(){
       if (!active) return;
@@ -218,13 +209,13 @@ class _Text: public Text{
     //Points, Format, Page, Label, [var info], Lcolor
     _Text (int x, int y, Style rect_type, text_format_e_t size, Page& page, std::string text, Color label_color = COLOR_WHITE){
       construct (x, y, rect_type, size, &page, text, nullptr, &zero, label_color);
-    }
+    } //No var
     _Text (int x, int y, Style rect_type, text_format_e_t size, Page& page, std::string text, const V& value_ref, Color label_color = COLOR_WHITE){
       construct (x, y, rect_type, size, &page, text, &value_ref, &zero, label_color);
-    }
+    } //Var
     _Text (int x, int y, Style rect_type, text_format_e_t size, Page& page, std::string text, const V& value_ref, const I& index_ref, Color label_color = COLOR_WHITE){
       construct (x, y, rect_type, size, &page, text, &value_ref, &index_ref, label_color);
-    }
+    } //Array
 };
 
 class Button{
@@ -250,6 +241,7 @@ class Button{
     std::function <void()> func, off_func; //toggle is only for toggle type buttons
     Text* title = nullptr;
     bool active=true;
+    Page* page;
 
     //For latch buttons
     bool on=0; //on is for toggle
@@ -258,24 +250,21 @@ class Button{
     //Functions
     void update();
     void construct (int, int, int, int, Style, press_type, Page*, std::string, Color, Color);
-    void run_func(), run_off_func();
-    void draw();
-    void draw_pressed();
+    const void run_func(), run_off_func();
+    const void draw();
+    const void draw_pressed();
 
   public:
     //Points, Format, Page, Label, Bcolor, Lcolor
     Button (int, int, int, int, Style, press_type, Page&, std::string = "", Color = ORANGE, Color = COLOR(BLACK));
 
-    //Vars
-    Page* page;
-
     //Functions
     static void create_options(std::vector<Button*>);
+    const bool pressed();
     void set_func(std::function <void()>), set_off_func(std::function <void()>);
     void set_active(bool=true);
     void set_background (Color);
     void add_text (Text&, bool=true);
-    bool pressed();
     bool new_press();
     bool new_release();
 };
@@ -301,14 +290,14 @@ class Slider{
 
     //Functions
     void update();
-    void draw();
+    const void draw();
 
   public:
     //Points, Format, Min, Max, Page, Label, Bcolor, Lcolor
     Slider (int, int, int, int, Style, direction, int, int, Page&, std::string = "Value", Color = COLOR_WHITE, Color = ORANGE);
 
     //Functions
-    int get_val();
+    const int get_value();
 };
 
 //For auton.hpp

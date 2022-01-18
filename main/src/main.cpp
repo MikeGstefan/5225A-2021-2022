@@ -7,11 +7,12 @@
 #include "Tracking.hpp"
 #include "task.hpp"
 #include "auton.hpp"
-
-// using namespace std;
 #include "task.hpp"
+
 using namespace std;
-// using namespace pros;
+
+pros::Task *updt = nullptr;
+const GUI* GUI::current_gui = &g_main;
 
 
 /**
@@ -20,13 +21,11 @@ using namespace std;
  * All other competition modes are blocked by initialize; it is recommended
  * to keep execution time for this mode under a few seconds.
  */
-pros::Task *updt = nullptr;
-
 void initialize() {
 	drivebase.download_curve_data();
 	Data::init();
 	_Controller::init();
-	GUI::init();
+	GUI::setup();
 	delay(150);
 	tracking.x_coord = 144.0 - 10.25, tracking.y_coord = 14.75, tracking.global_angle = -M_PI_2;
 	// tracking.x_coord = 0.0, tracking.y_coord = 0.0, tracking.global_angle = 0.0;
@@ -97,18 +96,20 @@ void opcontrol() {
 	-force convert it to centre, and move it to be on the button
 	-change its color to btn lcol
 	-add text to go button
-  alliance text persists on blue
+	-Make the different gui's (main and util) objects of GUI and get rid of the header include system
 
+	Make it possible to include testing page. Possibly using a constexpr bool
+
+  alliance text persists on blue
   Try "wireless" upload via controller, but plug to V5 using tether cable
-	
+
 	Fill in lift movements and states
 	Reset tracking by task
 	convert some printfs to logs
-	Make the different gui's (main and util) objects of GUI and get rid of the header include system
 	/**/
 
 	while(true){
-		GUI::background();
+		GUI::update();
 		drivebase.non_blocking_driver_practice();
 
 		if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_UP)) prev_auton();
@@ -117,16 +118,4 @@ void opcontrol() {
 		if (master.get_digital_new_press(cancel_button)) break;
 		delay(10);
 	}
-
-  //temp test, will take out later
-  #ifdef GUI_UTIL
-  extern Slider mot_speed;
-  int speed = mot_speed.get_val();
-  #else
-  int speed = 127;
-  #endif
-
-  move_start(move_types::line, line_params({0.0, 0.0}, {0.0, 24.0, 0.0}, speed));
-  move_start(move_types::turn_angle, turn_angle_params(45.0, speed));
-  move_start(move_types::line, line_params({0.0, 0.0}, {0.0, 24.0, 0.0}, speed));
 }
