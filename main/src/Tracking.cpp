@@ -22,9 +22,8 @@ void update(void* params){
   _Task* ptr = _Task::get_obj(params);
   Timer data_timer{"tracking logs"};
   // LeftEncoder.reset(); RightEncoder.reset(); BackEncoder.reset();
-  double DistanceLR = 10.05, DistanceB = 3.0;
-  double Left, Right, Back, NewLeft, NewRight, NewBack, LastLeft = LeftEncoder.get_value()/360.0 *(2.75*M_PI), LastRight =  RightEncoder.get_value()/360.0 *(2.75*M_PI);
-  // , LastBack = BackEncoder.get_value()/360.0 *(2.77*M_PI);
+  double DistanceLR = 15.18, DistanceB = 3.0;
+  double Left, Right, Back, NewLeft, NewRight, NewBack, LastLeft = LeftEncoder.get_value()/360.0 *(2.75*M_PI), LastRight =  RightEncoder.get_value()/360.0 *(2.75*M_PI), LastBack = BackEncoder.get_value()/360.0 *(2.77*M_PI);
   double Theta = 0.0, Beta = 0.0, Alpha = 0.0;
   double RadiusR, RadiusB, h, h2;
   double Xx, Xy, Yy, Yx;
@@ -39,17 +38,17 @@ void update(void* params){
   while(true){
     NewLeft = LeftEncoder.get_value()/360.0 *(2.75*M_PI);
     NewRight = RightEncoder.get_value()/360.0 *(2.75*M_PI);
-    // NewBack = BackEncoder.get_value()/360.0 *(2.75*M_PI);
+    NewBack = BackEncoder.get_value()/360.0 *(2.75*M_PI);
 
     // printf("l: %d, r: %d \n", NewLeft, NewRight);
     // printf("l: %d, r: %d \n", LeftEncoder.get_value(), RightEncoder.get_value());
     // printf("x: %.2lf, y: %.2lf, a: %.2lf\n", millis(), tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle));
-    
+
 
 
     Left = NewLeft - LastLeft;
     Right = NewRight - LastRight;
-    // Back = NewBack - LastBack;
+    Back = NewBack - LastBack;
 
 
     velocity_update_time = millis() - last_velocity_time;
@@ -60,7 +59,7 @@ void update(void* params){
 
         last_vel_l = NewLeft;
         last_vel_r = NewRight;
-        // last_vel_b = NewBack;
+        last_vel_b = NewBack;
 
         // gives us linear velocity in inches per second, and angular velocity in radians per second
         tracking.g_velocity.x = (tracking.x_coord - last_position.x) / velocity_update_time * 1000;
@@ -74,25 +73,25 @@ void update(void* params){
 
     LastLeft = NewLeft;
     LastRight = NewRight;
-    // LastBack = NewBack;
+    LastBack = NewBack;
 
     Theta = (Left-Right)/DistanceLR;
     if (Theta != 0){
       RadiusR = Right/Theta;
-      // RadiusB = Back/Theta;
+      RadiusB = Back/Theta;
       Beta = Theta/2.0;
       h = (RadiusR + DistanceLR/2) *2 *sin(Beta);
-      // h2 = (RadiusB + DistanceB) *2 *sin(Beta);
+      h2 = (RadiusB + DistanceB) *2 *sin(Beta);
     }
     else{
       h = Right;
-      // h2 = Back;
+      h2 = Back;
       Beta =0.0;
     }
     Alpha = tracking.global_angle + Beta;
 
-    // Xx = h2 * cos(Alpha);
-    // Xy = h2 * -sin(Alpha);
+    Xx = h2 * cos(Alpha);
+    Xy = h2 * -sin(Alpha);
     Yx = h * sin(Alpha);
     Yy = h * cos(Alpha);
 
@@ -763,7 +762,7 @@ void tank_move_to_target(void* params){
     double difference_a;
     double hypotenuse;
 
-    double kp_y = 9.0, kp_a = 90.0;
+    double kp_y = 9.0, kp_a = 150.0;
     // printf("Local errors | x: %lf, y: %lf \n", local_error.x, local_error.y);
     double min_power_a = max_power * min_angle_percent;
     double pre_scaled_power_a;
@@ -773,7 +772,7 @@ void tank_move_to_target(void* params){
     Vector follow_line(target.y - tracking.y_coord, target.x - tracking.x_coord); // used to keep track of angle of follow_line relative to the vertical
     Vector line_disp(target.x - tracking.x_coord, target.y - tracking.y_coord);  // displacements relative to line
     line_disp.rotate(follow_line.get_angle());  // rotates vector by line angle
-    orig_sgn_line_y = sgn(line_disp.y);
+    orig_sgn_line_y = sgn(line_disp.get_y());
     double local_y;
 
 
@@ -862,7 +861,7 @@ void turn_to_angle(void* params){
   bool brake = param_ptr->brake;
   tracking.move_complete = false;
 
-  PID angle_pid(90.0, 0.0, 0.0, 0.0, true, 0.0, 360.0);
+  PID angle_pid(175.0, 0.0, 0.0, 0.0, true, 0.0, 360.0);
   target_a = deg_to_rad(target_a);
 
   while(true){

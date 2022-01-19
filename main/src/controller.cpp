@@ -5,7 +5,7 @@
 // lift buttons
 controller_digital_e_t lift_up_button = DIGITAL_R1;
 controller_digital_e_t lift_down_button = DIGITAL_R2;
-controller_digital_e_t level_platform_button = DIGITAL_DOWN;
+controller_digital_e_t tip_mogo_button = DIGITAL_DOWN;
 
 
 controller_digital_e_t tilter_button = DIGITAL_L1;

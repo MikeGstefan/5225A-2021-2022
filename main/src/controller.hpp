@@ -13,8 +13,7 @@ using namespace pros;
 // lift buttons
 extern controller_digital_e_t lift_up_button;
 extern controller_digital_e_t lift_down_button;
-extern controller_digital_e_t level_platform_button;
-
+extern controller_digital_e_t tip_mogo_button;
 
 extern controller_digital_e_t tilter_button;
 extern controller_digital_e_t hitch_button;
