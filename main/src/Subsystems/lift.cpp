@@ -140,7 +140,7 @@ void Lift::handle(){
         move_absolute(bottom_position);
       }
       if(motor.get_position() < top_position / 2){ // waits for lift to lower past halfway to lower intake
-        intake_piston.set_value(LOW); // lowers intake
+        intake_piston.set_value(LOW);
         intake.set_state(intake_states::off);
         master.print(LIFT_STATE_LINE, 0, "Lift: Searching    ");
 
