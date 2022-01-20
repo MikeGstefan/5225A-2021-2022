@@ -97,7 +97,7 @@ void update(void* params){
 
 
     tracking_data.print(&data_timer, 10, {
-      // [=](){return Data::to_char("%d || x: %.2lf, y: %.2lf, a: %.2lf\n", millis(), tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle));},
+      [=](){return Data::to_char("%d || x: %.2lf, y: %.2lf, a: %.2lf\n", millis(), tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle));},
       // [=](){return Data::to_char("%d || GLOBAL VELOCITY| x: %.2f, y: %.2f a: %.2f\n", millis(), tracking.g_velocity.x, tracking.g_velocity.y, rad_to_deg(tracking.g_velocity.angle));},
       [=](){return Data::to_char("%d || ENCODER L: %d, R: %d, B:%d \n", millis(), LeftEncoder.get_value(), RightEncoder.get_value(), BackEncoder.get_value());},
       // [=](){return Data::to_char("%d || ENCODER VELO| l: %.2f, r: %.2f, b: %.2f\n", millis(), tracking.l_velo, tracking.r_velo, tracking.b_velo);}
@@ -239,8 +239,8 @@ line_params::line_params(const Point start, Position target, const double max_po
 line_old_params::line_old_params(double start_x, double start_y,double target_x, double target_y, double target_a, bool Brake, bool debug, int max_power, bool Overshoot, double end_error, double end_error_a, double p, double lpercent , double apercent):
   start_x{start_x}, start_y{start_x},target_x{target_x}, target_y{target_y}, target_a{target_a}, Brake{Brake}, debug{debug}, max_power{max_power}, Overshoot{Overshoot}, end_error{end_error}, end_error_a{end_error_a}, p{p}, lpercent{lpercent}, apercent{apercent}{}
 
-point_params::point_params(const Position target, const double max_power, const bool overshoot, const double min_angle_percent, const bool brake, const double decel_dist, const double decel_speed, pid_const x_pid_const, pid_const y_pid_const, pid_const a_pid_const):
-  target{target}, max_power{max_power}, overshoot{overshoot}, min_angle_percent{min_angle_percent}, brake{brake}, decel_dist{decel_dist}, decel_speed{decel_speed}, x_pid_const{x_pid_const}, y_pid_const{y_pid_const}, a_pid_const{a_pid_const}{}
+point_params::point_params(const Position target, const double max_power, const bool overshoot, const double min_angle_percent, const bool brake, const double decel_dist, const double decel_speed, pid_const x_pid_const, pid_const y_pid_const, pid_const a_pid_const, const uint32_t time_out):
+  target{target}, max_power{max_power}, overshoot{overshoot}, min_angle_percent{min_angle_percent}, brake{brake}, decel_dist{decel_dist}, decel_speed{decel_speed}, x_pid_const{x_pid_const}, y_pid_const{y_pid_const}, a_pid_const{a_pid_const}, time_out{time_out}{}
 
 tank_arc_params::tank_arc_params(const Point start_pos, Position target, const double power, const double max_power, const bool brake):
   start_pos{start_pos}, target{target}, power{power}, max_power{max_power}, brake{brake}{}
@@ -264,7 +264,6 @@ void move_start(move_types type, std::variant<arc_params, line_params, tank_arc_
       move_t.rebind(move_on_line, (void*)&std::get<line_params>(params));
     break;
     case move_types::point:
-      printf("in switch: x: %f\n",std::get<point_params>(params).target.x);
       move_t.rebind(move_to_point, (void*)&std::get<point_params>(params));
     break;
     case move_types::tank_arc:
@@ -311,6 +310,7 @@ void move_to_point(void* params){
     const bool brake= param_ptr->brake;
     const double decel_dist = param_ptr->decel_dist, decel_speed = param_ptr->decel_speed;
     pid_const x_pid_const = param_ptr->x_pid_const, y_pid_const = param_ptr->y_pid_const, a_pid_const = param_ptr->a_pid_const;
+    const uint32_t time_out = param_ptr->time_out;
 
     tracking.move_complete= false;
     target.angle = deg_to_rad(target.angle);
@@ -343,6 +343,8 @@ void move_to_point(void* params){
     double h; // magnitude of power vector
     double decel_power, decel_power_scale;
     double decel_start = sqrt(pow(x_pid.get_proportional(), 2) + pow(y_pid.get_proportional(), 2));  // theoretically when the deceleration starts
+    Timer move_timer{"move_timer"};
+    master.print(1,1,"y: %.3f",target.y);
     motion_i.print("%d | Move to point: (x: %.2f, y: %.2f, a: %.2f)  from: (x: %.2f, y: %.2f, a: %.2f)\n",millis(), target.x, target.y, rad_to_deg(target.angle), tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle));
     while(true){
         // gets line displacements
@@ -414,7 +416,7 @@ void move_to_point(void* params){
         }
         drivebase.move(tracking.power_x, tracking.power_y, tracking.power_a);
 
-        motion_d.print("%d || x : %f, y : %f, a: %f, px: %f, py: %f, pa: %f, ex: %f, dx: %f, ey: %f, dy: %f\n",millis(),tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle), tracking.power_x, tracking.power_y, tracking.power_a, x_pid.error, x_pid.derivative, y_pid.error, y_pid.derivative);
+        motion_d.print("%d || x : %f, y : %f, a: %f, err: (%f, %f), px: %f, py: %f, pa: %f, ex: %f, dx: %f, ey: %f, dy: %f\n",millis(),tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle), target.x - tracking.x_coord, target.y - tracking.y_coord, tracking.power_x, tracking.power_y, tracking.power_a, x_pid.error, x_pid.derivative, y_pid.error, y_pid.derivative);
 
         if (overshoot && sgn(target_line.get_y()) != orig_sgn_line_y){
           if(brake) drivebase.brake();
@@ -429,6 +431,13 @@ void move_to_point(void* params){
             tracking.move_complete = true;
             motion_i.print("%d | Ending move to point: (X: %.2f Y: %.2f A: %.2f) at (X: %.2f Y: %.2f A: %.2f) \n", millis(), target.x, target.y, rad_to_deg(target.angle), tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle));
             return;
+        }
+        else if(move_timer.get_time() > time_out && time_out > 0){
+          if(brake) drivebase.brake();
+          else drivebase.move(0.0, 0.0, 0.0);
+          tracking.move_complete = true;
+          motion_i.print("%d | TIMED OUT move to point: (X: %.2f Y: %.2f A: %.2f) at (X: %.2f Y: %.2f A: %.2f) \n", millis(), target.x, target.y, rad_to_deg(target.angle), tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle));
+          return;
         }
 
         if(ptr->notify_handle())return;

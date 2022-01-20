@@ -15,7 +15,7 @@ pros::Motor intake(9, pros::E_MOTOR_GEARSET_36, true, pros::E_MOTOR_ENCODER_DEGR
 // pros::Motor c_bar(10, pros::E_MOTOR_GEARSET_36, true, pros::E_MOTOR_ENCODER_DEGREES);
 // pros::Motor intk(12, pros::E_MOTOR_GEARSET_36, true, pros::E_MOTOR_ENCODER_DEGREES);
 // pros::Motor uptk(11);
-pros::Distance tilter_dist(8);
+pros::Distance tilter_dist(8), front_dist(5);
 pros::ADIDigitalOut lift_piston(7);
 pros::ADIDigitalIn lift_trigger(8);
 pros::ADIEncoder LeftEncoder(3, 4, false), RightEncoder(1, 2, true), BackEncoder(6, 5, true);

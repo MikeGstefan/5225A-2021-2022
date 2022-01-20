@@ -12,3 +12,4 @@
 
 void red_tall_rush();
 void skills();
+void skills_pt2();

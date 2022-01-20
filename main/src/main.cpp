@@ -7,6 +7,7 @@
 #include "Tracking.hpp"
 #include "task.hpp"
 #include "auton.hpp"
+#include "auton_util.hpp"
 
 // using namespace std;
 #include "task.hpp"
@@ -65,7 +66,8 @@ void competition_initialize() {}
  * from where it left off.
  */
 void autonomous() {
-	skills();
+	// skills();
+	skills_pt2();
 
 }
 
@@ -123,6 +125,15 @@ void tilter_reset2(){
 // int ring_count = 0, cur_auton = 1;
 bool claw_state = false, intk_state = false;
 void opcontrol() {
+	while(true){
+		printf("%f\n", get_front_dist());
+		delay(2000);
+	}
+	while(true){
+		drivebase.handle_input();
+		if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_A))master.print(0,0,"%.2f, %.2f, %.2f",tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle));
+		delay(10);
+	}
 
 	// while(true){ 
 	// 	if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_A)){

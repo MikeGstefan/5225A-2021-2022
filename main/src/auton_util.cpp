@@ -81,12 +81,32 @@ void flatten_against_wall(bool right){
 }
 
 
-void find_goal_lift(){
+void find_goal_lift(bool move_stop_b){
   while(!lift_trigger.get_value()){//NEED TO ADD SAFETY
   
     delay(10);
 
   }
 	lift_piston.set_value(HIGH);
-  move_stop();
+  if(move_stop_b)move_stop();
+}
+
+
+double get_front_dist(){
+  double avg = 0.0;
+  int count = 0;
+  while(true){ 
+    // for(int i = 0; i < 3; i++){
+    if(front_dist.get() > 10){
+      avg+= front_dist.get();
+      count++;
+    }
+    if(count > 2){
+      avg/=count;
+      break;
+    }
+    delay(34);
+  }
+  return ((avg/25.4) +front_dist_dist);
+  
 }

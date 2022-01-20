@@ -71,20 +71,22 @@ void skills(){
   }
   log_d.print("%d | grabbing goal 2 at: (%.2f, %.2f, %.2f)\n",millis(),tracking.x_coord, tracking.y_coord,rad_to_deg(tracking.global_angle));
   tilter_top_piston.set_value(0);
-  delay(50);
-  tilter_bottom_piston.set_value(1);
   delay(100);
-  tilter.move_absolute(150);
+  tilter_bottom_piston.set_value(1);
+  delay(200);
+  tilter.move_absolute(300);
   
   master.print(0,0,"%d", skills_tmr.get_time());
   move_wait_for_complete();
   intake.move(100);
+
+
   // move_start(move_types::tank_arc, tank_arc_params({110.0, 75.0},{72.0,108.0,-90.0},127.0,127.0,false),true);
   // move_start(move_types::point, point_params({72.0,108.0,-90.0}),true);
   // move_start(move_types::arc, arc_params({110.0, 78.0},{90.0,92.0,0.0}, 18.0,true, 127.0, true,1.0,false),true);
   move_start(move_types::arc, arc_params({92.0, 49.0},{92.0,89,0.0}, 20.0,true, 127.0, true,1.0,false),true);
-  move_start(move_types::point, point_params({52.0,96,-90.0}),true);//x pos was 66 made further to allow for  rings 
-  move_start(move_types::point, point_params({68.0,96,-90.0},127.0,false, 0.0, true, 0.0, 0.0,{23.0,0.0001,0.0},{9.5,0.0001,1000.0}),true);
+  move_start(move_types::point, point_params({50.0,96,-90.0}),true);//x pos was 66 made further to allow for  rings 
+  move_start(move_types::point, point_params({66.0,96,-90.0},127.0,false, 0.0, true, 0.0, 0.0,{23.0,0.0001,0.0},{9.5,0.0001,1000.0},{ 120.0,0.0,1500.0}),true);
 
   intake.move(0);
   intk_pnue.set_value(1);
@@ -93,7 +95,7 @@ void skills(){
   while(tilter.motor.get_position() < tilter.bottom_position - 30)delay(10);
   tilter_top_piston.set_value(1);
   tilter_bottom_piston.set_value(0);
-	tilter.move_absolute(150);
+	tilter.move_absolute(300);
 	while(tilter.motor.get_position() > 300)delay(10);
 
   // move_start(move_types::turn_angle, turn_angle_params(-180.0),true);
@@ -129,11 +131,51 @@ void skills(){
   // move_start(move_types::tank_arc, tank_arc_params({79.0, 106.0},{130.0,132.0,-300.0}));
   move_start(move_types::point, point_params({100.0,108.0,-270.0},127.0,true,0.0,false));
   move_start(move_types::tank_arc, tank_arc_params({79.0, 106.0},{125.0,127.0,-285.0},127.0,127.0,false));
-	move_start(move_types::point, point_params({125.0,131.0,-270.0}));
-  flatten_against_wall(false);
-  delay(100);
-  tracking.reset(tracking.x_coord, 144.0- 9.0, -90.0);
-  master.print(0,0,"%.2f, %.2f, %.2f",tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle));
+	move_start(move_types::point, point_params({125.0,131.0,-270.0},127.0,false, 0.0, true, 0.0, 0.0,{23.0,0.000,0.0},{9.5,0.000,1000.0},{ 125.0,0.0,1000.0},3000));
+  // flatten_against_wall(false);
+  // delay(100);
+  // tracking.reset(144.0 - get_front_dist(), 144.0- 9.0, 90.0);
+  // master.print(0,0,"%.2f, %.2f, %.2f",tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle));
   master.print(1,1,"time: %d", skills_tmr.get_time());
 
+}
+
+
+void skills_pt2(){
+  // tilter_reset();
+  intk_pnue.set_value(0);
+  lift.reset();
+  tilter_reset();
+	lift_piston.set_value(LOW);
+	lift.motor.move_absolute(lift.bottom_position, 100);
+  tilter.move_absolute(tilter.bottom_position);
+  tilter_top_piston.set_value(1);
+  tilter_bottom_piston.set_value(0);
+
+
+  flatten_against_wall(false);
+  delay(100);
+  double dist = get_front_dist();
+  tracking.reset(144.0 - dist, 144.0- 9.0, 90.0);
+  master.print(0,0,"%.2f, %.2f", tracking.x_coord, tracking.y_coord);
+  // move_start(move_types::point, point_params({118.0, 134.0, 80.0}),true);
+  // move_start(move_types::point, point_params({111.0, 133.0, 80.0}),false);
+  // find_goal_lift(false);
+  // // move_start(move_types::point, point_params({114.0, 114.0, 225.0}));
+  // move_start(move_types::tank_arc, tank_arc_params({111.0, 133.0}, {115.0, 115.0, 225.0},127.0, 127, false));
+  // move_start(move_types::point, point_params({110.0,110.0,225.0}, 127, false, 0.0, false));
+  // delay(1000);
+  move_start(move_types::point, point_params({48.0,48.0,225.0}),false);
+  while(tilter_dist.get() > 70){
+    log_d.print("tilter d: %f\n", tilter_dist.get());
+    delay(33);
+  }
+  log_d.print("%d | grabbing goal 4 at: (%.2f, %.2f, %.2f)\n",millis(),tracking.x_coord, tracking.y_coord,rad_to_deg(tracking.global_angle));
+  tilter_top_piston.set_value(0);
+  delay(100);
+  tilter_bottom_piston.set_value(1);
+  delay(200);
+  tilter.move_absolute(300);
+  move_wait_for_complete();
+  // move_start(move_types::line_old, line_old_params(115.0,115,  48.0, 48.0, 225.0,false,true,127, false,0.5,5.0,15.0,0.8,0.2), false);
 }
