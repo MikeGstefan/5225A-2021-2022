@@ -4,7 +4,7 @@
 
 #define LIFT_STATE_LINE 2 // line on controller which "searching" and "lowered" lift states are printed on
 
-#define NUM_OF_LIFT_STATES 10
+#define NUM_OF_LIFT_STATES 8
 #define LIFT_MAX_VELOCITY 100
 
 
@@ -12,9 +12,8 @@ enum class lift_states{
   idle,  // at bottom_position, waiting for button to search for mogo
   searching,  // at bottom_position and waiting for goal or button to grab mogo
   grabbed, // has goal
-  raised, // at height to keep mogo away from opponent
+  tip, // at height to keep mogo away from opponent/ tip mogos
   platform, // at platform height
-  level_platform, // at top position, about to smash platform to level it
   dropoff, // mogo released at platform height
   tall_goal,  // filling up rings on tall goal
   manual  // controlled by joystick

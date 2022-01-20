@@ -1,5 +1,7 @@
 #include "tilter.hpp"
 
+// high closes top, opens bottom
+
 // Tilter object
 Tilter tilter({{"Tilter",
 {
@@ -103,7 +105,7 @@ void Tilter::handle(){
       if(master.get_digital_new_press(tilter_button)){ // toggles holding state if tilter button is pressed
         if(held){
           tilter_bottom_piston.set_value(LOW);
-          tilter_top_piston.set_value(LOW);
+          tilter_top_piston.set_value(HIGH);
           held = false;
         }
         else{

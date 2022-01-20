@@ -108,6 +108,9 @@ void opcontrol() {
   //   printf("dist: %d\n", tilter_dist.get());
   //   delay(10);
   // }
-
+  // waitUntil(master.get_digital_new_press(DIGITAL_A));
+  // tilter_top_piston.set_value(HIGH);
+  // tilter_bottom_piston.set_value(HIGH);
+  // delay(1000000);
 	drivebase.driver_practice();
 }
