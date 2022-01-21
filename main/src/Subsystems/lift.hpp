@@ -37,6 +37,7 @@ public:
   void handle();  // contains state machine code
   double pos_to_height(const double position);
   double height_to_pos(const double height);
+  void elastic_util(); // up time should be about 1100mms, down time should be slightly slower than that
 };
 
 extern Lift lift;

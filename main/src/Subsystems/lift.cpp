@@ -183,3 +183,24 @@ double Lift::pos_to_height(double pos){
 double Lift::height_to_pos(double height){
   return gear_ratio * (rad_to_deg(asin((height - offset_h) / (arm_len)))) + offset_a;
 }
+
+void Lift::elastic_util(){
+  master.clear();
+  lift.reset();
+  lift.motor.move(-10);
+  master.print(0, 0, "press a to start");
+  waitUntil(master.get_digital_new_press(DIGITAL_A));
+  lift_piston.set_value(HIGH);
+  Timer move_timer{"move"};
+  lift.move_absolute(lift.top_position);
+  intake_piston.set_value(HIGH);  // raises intake
+  waitUntil(fabs(lift.motor.get_position() - lift.top_position) < lift.end_error);
+  move_timer.print();
+  master.print(1, 0, "up time: %d", move_timer.get_time());
+
+  move_timer.reset();
+  lift.move_absolute(lift.bottom_position);
+  waitUntil(fabs(lift.motor.get_position() - lift.bottom_position) < lift.end_error);
+  move_timer.print();
+  master.print(2, 0, "down time: %d", move_timer.get_time());
+}
