@@ -6,7 +6,6 @@
 Tilter tilter({{"Tilter",
 {
   "lowered",
-  "searching",
   "raised",
   "lowering",
   "tall_goal",
@@ -41,30 +40,19 @@ void Tilter::handle(){
   switch(state){
 
     case tilter_states::lowered:
-      if(master.get_digital_new_press(tilter_button)){  // throws into searching state
-        master.rumble("-"); // lets driver know we've entered searching state
-        pickup_timer.reset();
-
-        set_state(tilter_states::searching);
-      }
-      break;
-
-    case tilter_states::searching:
-
-      if(master.get_digital_new_press(tilter_button)){  // grabs goal and raises tilter when tilter_button is pressed
-        master.rumble("-"); // lets driver know we've entered searching state
-
-        set_state(tilter_states::lowered);
-      }
-      // temps, driver, lift state
-
-      if(tilter_dist.get() < 100 || pickup_timer.get_time() > 1000){ // grabs goal once sensor detects it timer times out
+      if(master.get_digital(tilter_button)){  // grabs goal and raises tilter when tilter_button is pressed
+        tracking.reset(0.0, 0.0, 0.0);
+        printf("pressed\n");
+        Timer cur{"auto-pickup"};
+        drivebase.move(0.0, 80.0, 0.0);
+        waitUntil(tilter_dist.get() < 100 || tracking.y_coord > 45.0 || cur.get_time() > 1000);
         tilter_top_piston.set_value(LOW);
         delay(100); // waits for top piston to fully close
         tilter_bottom_piston.set_value(HIGH);
         delay(200); // waits for bottom piston to fully close
+
         held = true;
-        move_absolute(raised_position); // lifts goal
+        move_absolute(raised_position);
 
         set_state(tilter_states::raised);
       }
