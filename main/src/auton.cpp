@@ -75,6 +75,7 @@ void auton_file_update(){
   auton_file << alliance_names[static_cast<int>(cur_alliance)];
   auton_file.close();
   Data::log_t.done_update();
+  master.clear();
   master.print(0, 0, "Auton: %s          ", auton_names[static_cast<int>(cur_auton)]);
   master.print(1, 0, "Alliance: %s       ", alliance_names[static_cast<int>(cur_alliance)]);
 }
@@ -85,11 +86,22 @@ void auton_file_read(){
 
   if (!auton_file){//File doesn't exist
     auton_file.close();
-    GUI::flash(COLOR_RED, 1000, "Auton File not found!\n");
+    GUI::flash(COLOR_RED, 1000, "Auton File not found!");
     printf("\033[92mCreating new Auton File.\033[0m\n");
     auton_file_update();
     auton_file.open("/usd/auton.txt", fstream::in);
+
+    if (!auton_file){
+      auton_file.close();
+      Data::log_t.done_update();
+      printf("\033[31mAborting auton file read. It's not getting created. Using default values.\033[0m\n");
+      cur_auton = autons::Skills;
+      cur_alliance = alliances::BLUE;
+      switch_alliance(cur_alliance);
+      return;
+    }
   }
+
   char auton[10];
   char ally[5];
   auton_file.getline(auton, 10);
@@ -97,18 +109,24 @@ void auton_file_read(){
   auton_file.close();
   Data::log_t.done_update();
 
-  cur_auton = static_cast<autons>(std::find(auton_names, auton_names+static_cast<int>(autons::NUM_OF_ELEMENTS), auton)-auton_names);
-  cur_alliance = static_cast<alliances>(std::find(alliance_names, alliance_names+2, ally)-alliance_names);
+  auto autonIt = std::find(auton_names, auton_names+static_cast<int>(autons::NUM_OF_ELEMENTS), auton);
+  auto allianceIt = std::find(alliance_names, alliance_names+2, ally);
+
+  if (autonIt != std::end(auton_names)) cur_auton = static_cast<autons>(std::distance(auton_names, autonIt));
+  else cur_auton = autons::Skills;
+
+  if (allianceIt != std::end(alliance_names)) cur_alliance = static_cast<alliances>(std::distance(alliance_names, allianceIt));
+  else cur_alliance = alliances::BLUE;
   switch_alliance(cur_alliance);
 }
 
 void prev_auton(){
-  previous_enum_value(cur_auton);
+  cur_auton = previous_enum_value(cur_auton);
   auton_file_update();
 }
 
 void next_auton(){
-  next_enum_value(cur_auton);
+  cur_auton = next_enum_value(cur_auton);
   auton_file_update();
 }
 
@@ -116,18 +134,14 @@ void switch_alliance(alliances new_ally){
   switch(new_ally){
     case alliances::BLUE:
       cur_alliance = alliances::BLUE;
-      #ifdef GUI_MAIN
       alliance.set_background(COLOR_BLUE);
-      #endif
-      printf("\033[34mSwitched to Blue Alliance\033[0m\n");
+      printf("\033[34mSwitched to Blue Alliance\033[0m\n"); //Convert to log
       break;
 
     case alliances::RED:
       cur_alliance = alliances::RED;
-      #ifdef GUI_MAIN
       alliance.set_background(COLOR_RED);
-      #endif
-      printf("\033[31mSwitched to Red Alliance\033[0m\n");
+      printf("\033[31mSwitched to Red Alliance\033[0m\n"); //Convert to log
       break;
   }
 

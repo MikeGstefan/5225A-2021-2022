@@ -12,7 +12,7 @@
 using namespace std;
 
 pros::Task *updt = nullptr;
-const GUI* GUI::current_gui = &g_main;
+const GUI* GUI::current_gui = &g_util;
 
 
 /**
@@ -31,7 +31,7 @@ void initialize() {
 	// tracking.x_coord = 0.0, tracking.y_coord = 0.0, tracking.global_angle = 0.0;
 
 	update_t.start();
-  auton_file_read(); //Hopefully works now
+  // auton_file_read();
 	master.print(2, 0, "Driver: %s", drivebase.drivers[drivebase.cur_driver].name);
 }
 
@@ -85,23 +85,11 @@ void autonomous() {
 
 //Get rid of these once merged
 int ring_count = 0;
-
+extern const char* port_nums;
 void opcontrol() {
 	/*Nathan:
-	-auton file isn't being created
-  -port_nums in util
-	-controller btns for auton
-	-enums for CHAR_HEIGHT_SMALL
-	-allow button add_text to offset by 1 line
-	-force convert it to centre, and move it to be on the button
-	-change its color to btn lcol
-	-add text to go button
-	-Make the different gui's (main and util) objects of GUI and get rid of the header include system
-
-	Make it possible to include testing page. Possibly using a constexpr bool
-
-  alliance text persists on blue
-  Try "wireless" upload via controller, but plug to V5 using tether cable
+	test auton file creation with sd
+  util motor rpm str issues
 
 	Fill in lift movements and states
 	Reset tracking by task
@@ -110,12 +98,12 @@ void opcontrol() {
 
 	while(true){
 		GUI::update();
-		drivebase.non_blocking_driver_practice();
+		// drivebase.non_blocking_driver_practice();
 
 		if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_UP)) prev_auton();
 		else if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_DOWN)) next_auton();
 		if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_X)) switch_alliance();
 		if (master.get_digital_new_press(cancel_button)) break;
-		delay(10);
+		delay(30);
 	}
 }

@@ -13,25 +13,81 @@ last_touch_e_t GUI::touch_status = E_TOUCH_RELEASED;
 int GUI::x = 0, GUI::y = 0;
 
 //Default pages
-Page perm ("PERM BTNS", COLOR_PINK); //Page perm only exists because its a problem if permanent buttons think they belong to every page.
-//So they think they belong to page perm, but every page knows they own these buttons.
-Button prev_page(PAGE_LEFT, PAGE_UP, 75, 20, Style::SIZE, Button::SINGLE, perm, "<-");
-Button next_page(480, 0, -75, 20, Style::SIZE, Button::SINGLE, perm, "->");
+Page perm ("PERM BTNS", COLOUR(PINK));
+Button prev_page(PAGE_LEFT, PAGE_UP, 75, 20, GUI::Style::SIZE, Button::SINGLE, perm, "<-");
+Button next_page(480, 0, -75, 20, GUI::Style::SIZE, Button::SINGLE, perm, "->");
 
 Page testing ("Testing"); //Blank page made so it already exists when quick tests are created
-_Text testing_text_1 (125, 50, Style::CENTRE, TEXT_SMALL, testing, "BLANK TEXT 1");
-_Text testing_text_2 (350, 50, Style::CENTRE, TEXT_SMALL, testing, "BLANK TEXT 2");
-Button testing_button_1 (25, 70, 200, 80, Style::SIZE, Button::SINGLE, testing, "BLANK BUTTON 1");
-Button testing_button_2 (250, 70, 200, 80, Style::SIZE, Button::SINGLE, testing, "BLANK BUTTON 2");
-Slider testing_slider (MID_X, 200, 200 , 20, Style::CENTRE, Slider::HORIZONTAL, -100, 100, testing, "BLANK SLIDER");
+_Text testing_text_1 (125, 50, GUI::Style::CENTRE, TEXT_SMALL, testing, "BLANK TEXT 1");
+_Text testing_text_2 (350, 50, GUI::Style::CENTRE, TEXT_SMALL, testing, "BLANK TEXT 2");
+Button testing_button_1 (25, 70, 200, 80, GUI::Style::SIZE, Button::SINGLE, testing, "BLANK BUTTON 1");
+Button testing_button_2 (250, 70, 200, 80, GUI::Style::SIZE, Button::SINGLE, testing, "BLANK BUTTON 2");
+Slider testing_slider (MID_X, 200, 200 , 20, GUI::Style::CENTRE, Slider::HORIZONTAL, -100, 100, testing, "BLANK SLIDER");
 
 //Go sequence
 Page go_sequence ("GO SEQUENCE");
-Button go_button (300, MID_Y, 160, 90, Style::CENTRE, Button::SINGLE, go_sequence, "PRESS TO");// Hack that works for some reason. Note that all emoji's don't work
-Button go_back_button (20, USER_UP, 100, 50, Style::SIZE, Button::SINGLE, go_sequence, "BACK");
-_Text go_button_text (300, 140, Style::CENTRE, TEXT_SMALL, go_sequence, "%s", go_string, COLOR(BLACK));
+Button go_button (300, MID_Y, 160, 90, GUI::Style::CENTRE, Button::SINGLE, go_sequence, "PRESS TO");// Hack that works for some reason. Note that all emoji's don't work
+Button go_back_button (20, USER_UP, 100, 50, GUI::Style::SIZE, Button::SINGLE, go_sequence, "BACK");
+_Text go_button_text (300, 140, GUI::Style::CENTRE, TEXT_SMALL, go_sequence, "%s", go_string, COLOUR(BLACK));
 
-bool GUI::go(std::string name, std::string message, std::uint32_t delay_time){ //Start
+
+//Utilities
+
+//To get coordinates for aligned objects, (buttons, sliders...) of same size
+//Put in how many of buttons/sliders you want, and get properly spaced coords
+void GUI::aligned_coords (const int x_objects, const int y_objects, const int x_btn, const int y_btn, int x_range, int y_range){
+  double x_space = (x_range-x_objects*x_btn)/(x_objects+1.0);
+  double y_space = (y_range-y_objects*y_btn)/(y_objects+1.0);
+
+  //Recalculates until it gets a nice multiple of 5
+  while (fmod(x_space, 5)) x_space = ((--x_range)-x_objects*x_btn)/(x_objects+1.0);
+  while (fmod(y_space, 5)) y_space = ((--y_range)-y_objects*y_btn)/(y_objects+1.0);
+
+  printf("\n\n");
+  for (int y = 0; y < y_objects; y++){
+    for (int x = 0; x < x_objects; x++){
+      printf("(%d, %d, %d, %d, GUI::Style::SIZE)\n", int(x_space)*(x+1) + x_btn*x, int(y_space)*(y+1) + y_btn*y + 20, x_btn, y_btn);
+    }
+    printf("\n");
+  }
+  printf("\nScreen Size: [%d, %d]\n", x_range, y_range);
+  if ((x_space+x_btn)*(x_objects) > 480) printf("X out of bounds\n");
+  if ((y_space+y_btn)*(y_objects) > 220) printf("Y out of bounds\n");
+  printf("\n\n");
+}
+
+//Flashing
+void GUI::flash(const Colour colour, const std::uint32_t time, const std::string text){
+  clear_screen(colour);
+  screen::set_pen(~colour&0xFFFFFF); //Makes text inverted colour of background so it is always visible
+  screen::set_eraser(colour);
+
+  printf("\n\n\033[31mWARNING: %s\033[0m\n\n", text.c_str()); //Mike, Convert to log
+
+  int spaces = int(CHAR_WIDTH_LARGE*text.length()/460)+1;
+  std::size_t space, last_space=0;
+  std::string sub;
+
+  master.rumble(".-");
+
+  for(int i=1; i <= spaces; i++){
+    space = text.find(' ', text.length()*i/spaces);
+    sub = text.substr(last_space, space-last_space);
+    screen::print(TEXT_LARGE, (480-sub.length()*CHAR_WIDTH_LARGE)/2, (CHAR_HEIGHT_LARGE+5)*i, sub.c_str());
+    last_space = space+1;
+  }
+
+  Flash.reset(); //Starts counting
+  flash_end = time;
+}
+
+void GUI::end_flash (){
+  Flash.reset(false);
+  go_to(GUI::current_page);
+  std::uint32_t flash_end = std::numeric_limits<std::uint32_t>::max(); //Sets it to max val so it'll never flash at weird times like 0
+}
+
+bool GUI::go(const std::string name, const std::string message, std::uint32_t delay_time){
   printf("\n\n%s\n", message.c_str());
   printf("Press \"Continue\" when ready.\n");
   go_string = name.c_str();
@@ -66,7 +122,7 @@ bool GUI::go(std::string name, std::string message, std::uint32_t delay_time){ /
   return !interrupted;
 }
 
-bool GUI::go(std::string name, std::uint32_t delay_time){ //End
+bool GUI::go_end(const std::string name, const std::uint32_t delay_time){
   printf("Press Again when done.\n");
   go_string = ("END " + name).c_str();
 
@@ -100,63 +156,22 @@ bool GUI::go(std::string name, std::uint32_t delay_time){ //End
   return !interrupted;
 }
 
-//Utility to get coordinates for aligned objects, (buttons, sliders...) of same size
-//Put in how many of buttons/sliders you want, and get properly spaced coords
-void GUI::aligned_coords (int x_objects, int y_objects, int x_btn, int y_btn, int x_range, int y_range){
+void GUI::draw_oblong(const int x1, const int y1, const int x2, const int y2, const double kS, const double kR){ //ks and kr and scale values for shrink and radius
+  int s = std::min(x2-x1, y2-y1)*kS; //Scale for shrinking button (pressed look)
+  int r = std::min(x2-x1, y2-y1)*kR; //Scale for how rounded the button edges should be
 
-  double x_space = (x_range-x_objects*x_btn)/(x_objects+1.0);
-  double y_space = (y_range-y_objects*y_btn)/(y_objects+1.0);
-
-  while (fmod(x_space, 5)) //Recalculates until it gets a nice multiple of 5
-    x_space = ((--x_range)-x_objects*x_btn)/(x_objects+1.0);
-
-  while (fmod(y_space, 5))
-    y_space = ((--y_range)-y_objects*y_btn)/(y_objects+1.0);
-
-  for (int y = 0; y < y_objects; y++){
-    for (int x = 0; x < x_objects; x++){
-      printf("(%d, %d, %d, %d, Style::SIZE)\n", int(x_space)*(x+1) + x_btn*x, int(y_space)*(y+1) + y_btn*y + 20, x_btn, y_btn);
-    }
-    printf("\n");
-  }
-  printf("\nScreen Size: [%d, %d]\n", x_range, y_range);
-  if ((x_space+x_btn)*(x_objects) > 480) printf("X out of bounds\n");
-  if ((y_space+y_btn)*(y_objects) > 220) printf("Y out of bounds\n");
-  printf("\n\n");
+  screen::fill_rect(x1+s, y1+s, x2-s, y2-s);
+  screen::erase_rect(x1+s, y1+s, x1+s+r, y1+s+r);
+  screen::erase_rect(x2-s, y1+s, x2-s-r, y1+s+r);
+  screen::erase_rect(x1+s, y2-s, x1+s+r, y2-s-r);
+  screen::erase_rect(x2-s, y2-s, x2-s-r, y2-s-r);
+  screen::fill_circle(x1+s+r, y1+s+r, r);
+  screen::fill_circle(x2-s-r, y1+s+r, r);
+  screen::fill_circle(x1+s+r, y2-s-r, r);
+  screen::fill_circle(x2-s-r, y2-s-r, r);
 }
 
-//Flashing
-void GUI::flash(Color color, std::uint32_t time, std::string text){
-  clear_screen(color);
-  screen::set_pen(~color&0xFFFFFF); //Makes text inverted color of background so it is always visible
-  screen::set_eraser(color);
-
-  printf("\n\n\033[31mWARNING: %s\033[0m\n\n", text.c_str()); //Mike if you see this, convert it to a log.
-
-  int spaces = int(CHAR_WIDTH_LARGE*text.length()/460)+1;
-  std::size_t space, last_space=0;
-  std::string sub;
-
-  master.rumble("-.-.-.-.");
-
-  for(int i=1; i <= spaces; i++){
-    space = text.find(' ', text.length()*i/spaces);
-    sub = text.substr(last_space, space-last_space);
-    screen::print(TEXT_LARGE, (480-sub.length()*CHAR_WIDTH_LARGE)/2, (CHAR_HEIGHT_LARGE+5)*i, sub.c_str());
-    last_space = space+1;
-  }
-
-  Flash.reset(); //Starts counting
-  flash_end = time;
-}
-
-void GUI::end_flash (){
-  Flash.reset(false);
-  go_to(GUI::current_page);
-  std::uint32_t flash_end = std::numeric_limits<std::uint32_t>::max(); //Sets it to max val so it'll never flash at weird times like 0
-}
-
-int GUI::get_size(text_format_e_t size, std::string type){
+int GUI::get_size(const text_format_e_t size, const std::string type){
   switch(size){
     case TEXT_SMALL:
       if(type == "height") return CHAR_HEIGHT_SMALL;
@@ -174,17 +189,17 @@ int GUI::get_size(text_format_e_t size, std::string type){
   return 0;
 }
 
-//Formats coordinates based on a style (always in x1, y1, x2, y2)
-std::tuple<int, int, int, int> fixPoints (int x1, int y1,int x2, int y2, Style type){
+//Formats coordinates based on a GUI::Style (always in x1, y1, x2, y2)
+std::tuple<int, int, int, int> GUI::fix_points (int x1, int y1,int x2, int y2, const Style type){
   switch(type){
-    case Style::CENTRE:
+    case GUI::Style::CENTRE:
       x1 -= x2;
       y1 -= y2;
       x2 += x1+x2;
       y2 += y1+y2;
       break;
 
-    case Style::SIZE:
+    case GUI::Style::SIZE:
       x2 += x1;
       y2 += y1;
       break;
@@ -202,25 +217,10 @@ std::tuple<int, int, int, int> fixPoints (int x1, int y1,int x2, int y2, Style t
   return {x1,y1,x2,y2}; //Gives back the fixed points as a tuple
 }
 
-void GUI::draw_oblong(int x1, int y1, int x2, int y2, double kS, double kR){ //ks and kr and scale values for shrink and radius
-  int s = std::min(x2-x1, y2-y1)*kS; //Scale for shrinking button (pressed look)
-  int r = std::min(x2-x1, y2-y1)*kR; //Scale for how rounded the button edges should be
-
-  screen::fill_rect(x1+s, y1+s, x2-s, y2-s);
-  screen::erase_rect(x1+s, y1+s, x1+s+r, y1+s+r);
-  screen::erase_rect(x2-s, y1+s, x2-s-r, y1+s+r);
-  screen::erase_rect(x1+s, y2-s, x1+s+r, y2-s-r);
-  screen::erase_rect(x2-s, y2-s, x2-s-r, y2-s-r);
-  screen::fill_circle(x1+s+r, y1+s+r, r);
-  screen::fill_circle(x2-s-r, y1+s+r, r);
-  screen::fill_circle(x1+s+r, y2-s-r, r);
-  screen::fill_circle(x2-s-r, y2-s-r, r);
-}
 
 //Constructors
 
-
-void Button::construct(int x1, int y1, int x2, int y2, Style type, press_type form, Page* page, std::string text, Color b_col, Color l_col){
+void Button::construct(int x1, int y1, int x2, int y2, GUI::Style type, press_type form, Page* page, std::string text, Colour b_col, Colour l_col){
 
     //Saves params to class private vars
     this->b_col = b_col;
@@ -231,7 +231,7 @@ void Button::construct(int x1, int y1, int x2, int y2, Style type, press_type fo
     //Saves the buttons owning page
     this->page = page;
     (this->page->buttons).push_back(this);
-    std::tie(this->x1, this->y1, this->x2, this->y2) = fixPoints(x1, y1, x2, y2, type);
+    std::tie(this->x1, this->y1, this->x2, this->y2) = GUI::fix_points(x1, y1, x2, y2, type);
 
 
     std::size_t next_space = text.find(' ', text.length()/2);
@@ -259,7 +259,7 @@ GUI::GUI(std::vector<Page*> pages, std::function <void()> init, std::function <v
   int index = 0;
   for (std::vector<Page*>::iterator it = pages.begin(); it != pages.end(); it++){
     this->pages.push_back(*it);
-    (*it)->title += " - " + std::to_string(++index);
+    // (*it)->title += " - " + std::to_string(++index);
   }
   this->pages.push_back(&testing);
   this->pages.push_back(&go_sequence);
@@ -268,74 +268,67 @@ GUI::GUI(std::vector<Page*> pages, std::function <void()> init, std::function <v
   this->background = background;
 }
 
-
-
-
-
-Button::Button(int x1, int y1, int x2, int y2, Style type, press_type form, Page& page, std::string text, Color background_color, Color label_color){
-  construct(x1, y1, x2, y2, type, form, &page, text, background_color, label_color);
+Button::Button(int x1, int y1, int x2, int y2, GUI::Style type, press_type form, Page& page, std::string text, Colour background_colour, Colour label_colour){
+  construct(x1, y1, x2, y2, type, form, &page, text, background_colour, label_colour);
 }
 
-Slider::Slider (int x1, int y1, int x2, int y2, Style type, direction dir, int min, int max, Page& page, std::string label, Color b_col, Color l_col){
+Slider::Slider (int x1, int y1, int x2, int y2, GUI::Style type, direction dir, int min, int max, Page& page, std::string label, Colour background_colour, Colour label_colour){
   //Saves params to class private vars
   this->max = max;
   this->min = min;
-  this->b_col = b_col;
-  this->l_col = l_col;
+  this->b_col = background_colour;
+  this->l_col = label_colour;
   this->dir = dir;
-
-  //Saves the buttons owning page
   this->page = &page;
-  (this->page->sliders).push_back(this);
+  this->page->sliders.push_back(this);
 
-  std::tie(this->x1, this->y1, this->x2, this->y2) = fixPoints(x1, y1, x2, y2, type);
+  std::tie(this->x1, this->y1, this->x2, this->y2) = GUI::fix_points(x1, y1, x2, y2, type);
 
   switch(this->dir){
     case HORIZONTAL:
       text_x = (this->x1+this->x2-(label.length()*CHAR_WIDTH_SMALL))/2;
       text_y = this->y1-CHAR_HEIGHT_SMALL/2-2;
-      inc.construct(this->x2+5, this->y1, this->x2+25, this->y2, Style::CORNER, Button::SINGLE, this->page, ">", l_col, b_col);
-      dec.construct(this->x1-25, this->y1, this->x1-5, this->y2, Style::CORNER, Button::SINGLE, this->page, "<", l_col, b_col);
-      title.construct(text_x, text_y, Style::CENTRE, TEXT_SMALL, this->page, label + ":%d", &val, &zero, l_col);
-      min_title.construct(this->x1, text_y, Style::CENTRE, TEXT_SMALL, this->page, std::to_string(min), nullptr, &zero, l_col);
-      max_title.construct(this->x2, text_y, Style::CENTRE, TEXT_SMALL, this->page, std::to_string(max), nullptr, &zero, l_col);
+      inc.construct(this->x2+5, this->y1, this->x2+25, this->y2, GUI::Style::CORNER, Button::SINGLE, this->page, ">", l_col, b_col);
+      dec.construct(this->x1-25, this->y1, this->x1-5, this->y2, GUI::Style::CORNER, Button::SINGLE, this->page, "<", l_col, b_col);
+      title.construct(text_x, text_y, GUI::Style::CENTRE, TEXT_SMALL, this->page, label + ":%d", &val, &zero, l_col);
+      min_title.construct(this->x1, text_y, GUI::Style::CENTRE, TEXT_SMALL, this->page, std::to_string(min), nullptr, &zero, l_col);
+      max_title.construct(this->x2, text_y, GUI::Style::CENTRE, TEXT_SMALL, this->page, std::to_string(max), nullptr, &zero, l_col);
       break;
 
     case VERTICAL:
       text_x = (this->x1+this->x2-(label.length()*CHAR_WIDTH_SMALL))/2;
       text_y = (this->y1+this->y2)/2;
-      inc.construct(this->x1, this->y1-25, this->x2, this->y1-5, Style::CORNER, Button::SINGLE, this->page, "▲", l_col, b_col);
-      dec.construct(this->x1, this->y2+5, this->x2, this->y2+25, Style::CORNER, Button::SINGLE, this->page, "▼", l_col, b_col);
-      title.construct(text_x, this->y1-27-CHAR_HEIGHT_SMALL, Style::CENTRE, TEXT_SMALL, this->page, label + ":%d", &val, &zero, l_col);
-      min_title.construct(this->x1-25, this->y2, Style::CENTRE, TEXT_SMALL, this->page, std::to_string(min), nullptr, &zero, l_col);
-      max_title.construct(this->x1-25, this->y1, Style::CENTRE, TEXT_SMALL, this->page, std::to_string(max), nullptr, &zero, l_col);
+      inc.construct(this->x1, this->y1-25, this->x2, this->y1-5, GUI::Style::CORNER, Button::SINGLE, this->page, "▲", l_col, b_col);
+      dec.construct(this->x1, this->y2+5, this->x2, this->y2+25, GUI::Style::CORNER, Button::SINGLE, this->page, "▼", l_col, b_col);
+      title.construct(text_x, this->y1-27-CHAR_HEIGHT_SMALL, GUI::Style::CENTRE, TEXT_SMALL, this->page, label + ":%d", &val, &zero, l_col);
+      min_title.construct(this->x1-25, this->y2, GUI::Style::CENTRE, TEXT_SMALL, this->page, std::to_string(min), nullptr, &zero, l_col);
+      max_title.construct(this->x1-25, this->y1, GUI::Style::CENTRE, TEXT_SMALL, this->page, std::to_string(max), nullptr, &zero, l_col);
       break;
   }
 
   //Buttons
-  dec.set_func([&value=this->val, &mini=this->min](){if(value != mini) value--;});
-  inc.set_func([&value=this->val, &maxi=this->max](){if (value != maxi) value++;});
+  dec.set_func([&](){if(this->val != this->min) this->val--;});
+  inc.set_func([&](){if (this->val != this->max) this->val++;});
 }
 
-Page::Page(std::string title, Color b_col){
-  //Page Constructor
-  //Should call GUI::go_to() to actually show the page
-  this->b_col = b_col;
-
+Page::Page(std::string title, Colour background_colour){
+  this->b_col = background_colour;
+  this->title = title;
   buttons.push_back(&prev_page);
   buttons.push_back(&next_page);
 }
 
+
 //Methods
+
 void GUI::go_to(Page* page){
-  //Checks if page exists
-  if (std::find(current_gui->pages.begin(), current_gui->pages.end(), page) == current_gui->pages.end()) return;
+  if (std::find(current_gui->pages.begin(), current_gui->pages.end(), page) == current_gui->pages.end()) return; //Checks if page exists
   current_page = page; //Saves new page then draws all the buttons on the page
   clear_screen(page->b_col);
   screen::set_pen(page->b_col);
   screen::set_eraser(page->b_col);
   screen::fill_rect(75, 0, 405, 20);
-  screen::set_pen(COLOR_WHITE);
+  screen::set_pen(COLOUR(WHITE));
   screen::print(TEXT_SMALL, MID_X-(page->title.length()*CHAR_WIDTH_SMALL)/2, 5, "%s", page->title);
   for (std::vector <Button*>::iterator it = page->buttons.begin(); it != page->buttons.end(); it++) (*it)->draw();
   for (std::vector <Slider*>::iterator it = page->sliders.begin(); it != page->sliders.end(); it++) (*it)->draw();
@@ -343,10 +336,10 @@ void GUI::go_to(Page* page){
   if(page->setup_func) page->setup_func();
 }
 
-void GUI::go_to(int page) {go_to(current_gui->pages[page]);}
+void GUI::go_to(const int page) {go_to(current_gui->pages[page]);}
 
-void GUI::clear_screen(Color color){
-  screen::set_pen(color);
+void GUI::clear_screen(Colour colour){
+  screen::set_pen(colour);
   screen::fill_rect(PAGE_LEFT, PAGE_UP, PAGE_RIGHT, PAGE_DOWN);
 }
 
@@ -370,7 +363,38 @@ void Button::create_options(std::vector<Button*> buttons){
   }
 }
 
-void Button::set_background (Color colour){
+void Button::add_text(Text& text_ref, bool overwrite) {
+  if(page != text_ref.page){
+    char error [120];
+    sprintf(error, "Text can only be linked to a button on the same page! Failed on \"%s\" button and \"%s\" text.\n", label.c_str(), text_ref.label.c_str());
+    throw std::invalid_argument(error);
+    return;
+  }
+  title = &text_ref;
+  text_ref.l_col = l_col;
+  text_ref.b_col = b_col;
+  text_ref.active = active;
+  text_ref.type = GUI::Style::CENTRE;
+  text_ref.x = (x1+x2)/2;
+  if (overwrite){
+    text_ref.y = (y1+y2)/2;
+    label = "";
+    label1 = "";
+  }
+  else{
+    text_ref.y = (y1+y2+GUI::get_size(text_ref.txt_fmt, "height"))/2;
+    text_y -= GUI::get_size(text_ref.txt_fmt, "height");
+  }
+  text_ref.y = (y1+y2)/2;
+  text_ref.x1=USER_RIGHT;
+  text_ref.y1=USER_DOWN;
+  text_ref.x2=USER_LEFT;
+  text_ref.y2=USER_UP;
+  GUI::clear_screen();
+  GUI::go_to(GUI::current_page);
+}
+
+void Button::set_background (Colour colour){
   if (title) title->set_background(colour);
   if (b_col != colour){
     b_col = colour;
@@ -379,23 +403,42 @@ void Button::set_background (Color colour){
   }
 }
 
-void Text::set_background (int x1, int y1, Color colour){
+void Text::set_background (int x1, int y1, Colour colour){
   if (colour == 0xFFFFFFFF) colour = b_col;
-  set_background(x-x1, y-y1, x+x1, y+y1, Style::CORNER, colour);
+  set_background(x-x1, y-y1, x+x1, y+y1, GUI::Style::CORNER, colour);
 }
 
-void Text::set_background (int x1, int y1, int x2, int y2, Style type, Color colour){
+void Text::set_background (int x1, int y1, int x2, int y2, GUI::Style type, Colour colour){
     if (colour == 0xFFFFFFFF) colour = b_col;
-    std::tie(this->x1, this->y1, this->x2, this->y2) = fixPoints(x1, y1, x2, y2, type);
+    std::tie(this->x1, this->y1, this->x2, this->y2) = GUI::fix_points(x1, y1, x2, y2, type);
     set_background(colour);
 }
 
-void Text::set_background (Color colour){
+void Text::set_background (Colour colour){
   if (b_col != colour){
     b_col = colour;
     if (page == GUI::current_page) draw();
   }
 }
+
+void Button::set_active(bool active) {
+  this->active = active;
+  if (title) title->set_active(active);
+  if (active) draw();
+  else{
+    screen::set_pen(page->b_col);
+    screen::fill_rect(x1, y1, x2, y2);
+  }
+}
+
+void Text::set_active(bool active) {
+  this->active = active;
+  if (active) draw();
+  // else if (page == GUI::current_pge) //Find a good way to "erase" the text;
+}
+
+
+//Drawing
 
 const void Button::draw(){
   if (!active) return;
@@ -445,8 +488,8 @@ const void Slider::draw(){
 }
 
 
-
 //Function Handling
+
 void Page::set_setup_func(std::function <void()> function) {setup_func = function;}
 
 void Page::set_loop_func(std::function <void()> function) {loop_func = function;}
@@ -461,54 +504,7 @@ const void Button::run_off_func() {if (off_func) off_func();}
 
 const int Slider::get_value() {return val;}
 
-void Button::set_active(bool active) {
-  this->active = active;
-  if (title) title->set_active(active);
-  if (active) draw();
-  else{
-    screen::set_pen(page->b_col);
-    screen::fill_rect(x1, y1, x2, y2);
-  }
-}
-
-void Text::set_active(bool active) {
-  this->active = active;
-  if (active) draw();
-  // else if (page == GUI::current_pge) //Find a good way to "erase" the text;
-}
-
-void Button::add_text(Text& text_ref, bool overwrite) {
-  if(page != text_ref.page){
-    char error [120];
-    sprintf(error, "Text can only be linked to a button on the same page! Failed on \"%s\" button and \"%s\" text.\n", label.c_str(), text_ref.label.c_str());
-    throw std::invalid_argument(error);
-    return;
-  }
-  title = &text_ref;
-  text_ref.l_col = l_col;
-  text_ref.b_col = b_col;
-  text_ref.active = active;
-  text_ref.type = Style::CENTRE;
-  text_ref.x = (x1+x2)/2;
-  if (overwrite){
-    text_ref.y = (y1+y2)/2;
-    label = "";
-    label1 = "";
-  }
-  else{
-    text_ref.y = (y1+y2+GUI::get_size(text_ref.txt_fmt, "height"))/2;
-    text_y -= GUI::get_size(text_ref.txt_fmt, "height");
-  }
-  text_ref.y = (y1+y2)/2;
-  text_ref.x1=USER_RIGHT;
-  text_ref.y1=USER_DOWN;
-  text_ref.x2=USER_LEFT;
-  text_ref.y2=USER_UP;
-  GUI::clear_screen();
-  GUI::go_to(GUI::current_page);
-}
-
-//Updating data and presses
+//Data Updates
 void GUI::update_screen_status(){
   screen_touch_status_s_t status = screen::touch_status();
   touch_status = status.touch_status;
@@ -530,30 +526,19 @@ const bool Button::pressed(){
 }
 
 bool Button::new_press(){
-   if (pressed() && !last_pressed){
-     last_pressed = true;
-     return true;
-   }
-   return false;
-}
-
-bool Button::new_release(){
-  if (!pressed() && last_pressed){
-    last_pressed = false;
-    return true;
+  if(!last_pressed){
+    last_pressed = pressed();
+    return last_pressed;
   }
   return false;
 }
 
-void GUI::update(){
-  current_gui->background();
-  GUI::update_screen_status();
-  Page* cur_p = GUI::current_page;
-  /*Page*/if (cur_p->loop_func) cur_p->loop_func();
-  /*Button*/for (std::vector <Button*>::iterator it = cur_p->buttons.begin(); it != cur_p->buttons.end(); it++) (*it)->update();
-  /*Slider*/for (std::vector <Slider*>::iterator it = cur_p->sliders.begin(); it != cur_p->sliders.end(); it++) (*it)->update();
-  /*_Text*/for (std::vector<Text*>::iterator it = cur_p->texts.begin(); it != cur_p->texts.end(); it++) (*it)->update();
-  /*Flash*/if (Flash.get_time() >= flash_end) GUI::end_flash();
+bool Button::new_release(){
+  if(last_pressed){
+    last_pressed = pressed();
+    return !last_pressed;
+  }
+  return false;
 }
 
 void Button::update(){
@@ -658,21 +643,32 @@ void Slider::update(){
   }
 }
 
+void GUI::update(){
+  current_gui->background();
+  GUI::update_screen_status();
+  Page* cur_p = GUI::current_page;
+  /*Page*/if (cur_p->loop_func) cur_p->loop_func();
+  /*Button*/for (std::vector <Button*>::iterator it = cur_p->buttons.begin(); it != cur_p->buttons.end(); it++) (*it)->update();
+  /*Slider*/for (std::vector <Slider*>::iterator it = cur_p->sliders.begin(); it != cur_p->sliders.end(); it++) (*it)->update();
+  /*_Text*/for (std::vector<Text*>::iterator it = cur_p->texts.begin(); it != cur_p->texts.end(); it++) (*it)->update();
+  /*Flash*/if (Flash.get_time() >= flash_end) GUI::end_flash();
+}
+
 void GUI::setup(){
-    prev_page.set_func([&](){
-      if (current_page == current_gui->pages[1]) go_to(current_gui->pages.size()-3);
-      else go_to(*std::find(current_gui->pages.begin(), current_gui->pages.end(), current_page)-1);
-    });
-    next_page.set_func([&](){
-      if (current_page == current_gui->pages[current_gui->pages.size()-3]) go_to(1);
-      else go_to(*std::find(current_gui->pages.begin(), current_gui->pages.end(), current_page)+1);
-    });
+  prev_page.set_func([&](){
+    if (current_page == current_gui->pages[1]) go_to(current_gui->pages.size()-(test_page ? 2 : 3));
+    else go_to(*std::prev(std::find(current_gui->pages.begin(), current_gui->pages.end(), current_page)));
+  });
+  next_page.set_func([&](){
+    if (current_page == current_gui->pages[current_gui->pages.size()-(test_page ? 2 : 3)]) go_to(1);
+    else go_to(*std::next(std::find(current_gui->pages.begin(), current_gui->pages.end(), current_page)));
+  });
 
-    go_sequence.buttons.erase(go_sequence.buttons.begin(), go_sequence.buttons.begin()+2); //Get rid of prev_page and next_page btns
-    go_button.add_text(go_button_text);
+  go_sequence.buttons.erase(go_sequence.buttons.begin(), go_sequence.buttons.begin()+2); //Get rid of prev_page and next_page btns
+  go_button.add_text(go_button_text);
 
-    go_to(0);
-    current_gui->init();
-    go_to(1); //Sets it to page 1 for program start. Don't delete this. If you want to change the starting page, re-call this in initialize()
-    update();
+  go_to(0);
+  current_gui->init();
+  go_to(1); //Sets it to page 1 for program start. Don't delete this. If you want to change the starting page, re-call this in initialize()
+  update();
 }

@@ -212,15 +212,6 @@ void Drivebase::driver_practice(){
   // master.print(2, 0, "Driver: %s", drivers[cur_driver].name);
   while(true){
     while(!master.get_digital_new_press(E_CONTROLLER_DIGITAL_B)){
-      /*
-      if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_UP)){ // goes to next driver
-        next_driver();
-      }
-      else if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_DOWN)){  // goes to previous driver
-        prev_driver();
-      }
-      */
-
       // actual drive code
       drivebase.handle_input();
       lift.handle();
@@ -265,19 +256,17 @@ void Drivebase::non_blocking_driver_practice(){
   tilter.handle();
 
   // takes away control from driver when motors overheat
-  if(front_l.get_temperature() >= 55 || front_r.get_temperature() >= 55 || back_r.get_temperature() >= 55 || back_l.get_temperature() >= 55){
-    move(0, 0, 0);  // stops movement
-    //took out rumble, because gui handles that
+  if(inRange(front_l.get_temperature(), 55, std::numeric_limits<double>::max()-1) || inRange(front_r.get_temperature(), 55, std::numeric_limits<double>::max()-1) || inRange(back_l.get_temperature(), 55, std::numeric_limits<double>::max()-1) || inRange(back_r.get_temperature(), 55, std::numeric_limits<double>::max()-1)){
+    move(0, 0, 0);
     master.print(0, 0, "fl%.0f r%.0f bl%.0f r%.0f\n", front_l.get_temperature(), front_r.get_temperature(), back_l.get_temperature(), back_r.get_temperature());
     return;
   }
-  // prints motor temps every second
-  if(screen_timer.get_time() > 1000){
-    drivers_data.print("fl%.0f r%.0f bl%.0f r%.0f\n", front_l.get_temperature(), front_r.get_temperature(), back_l.get_temperature(), back_r.get_temperature());
-    master.print(0, 0, "fl%.0f r%.0f bl%.0f r%.0f\n", front_l.get_temperature(), front_r.get_temperature(), back_l.get_temperature(), back_r.get_temperature());
-    screen_timer.reset();
-  }
-  delay(10);
+  // // prints motor temps every second
+  // if(screen_timer.get_time() > 1000){
+  //   drivers_data.print("fl%.0f r%.0f bl%.0f r%.0f\n", front_l.get_temperature(), front_r.get_temperature(), back_l.get_temperature(), back_r.get_temperature());
+  //   master.print(0, 0, "fl%.0f r%.0f bl%.0f r%.0f\n", front_l.get_temperature(), front_r.get_temperature(), back_l.get_temperature(), back_r.get_temperature());
+  //   screen_timer.reset();
+  // }
 }
 
 void Drivebase::next_driver(){
