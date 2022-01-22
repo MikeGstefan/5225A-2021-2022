@@ -217,6 +217,7 @@ void Drivebase::driver_practice(){
   // resets subsystems
   lift.reset();
   tilter.reset();
+  bool tilter_held = false;
 
   // moves motors to necessary positions / speeds
   lift.move_absolute(lift.bottom_position);
@@ -246,7 +247,26 @@ void Drivebase::driver_practice(){
       // actual drive code
       drivebase.handle_input();
       lift.handle();
-      tilter.handle();
+      // tilter.handle();
+      if(master.get_digital_new_press(tilter_button)){
+        if(tilter_held){
+          tilter.motor.move_absolute(tilter.bottom_position, 100); // lifts goal
+          waitUntil(fabs(tilter.motor.get_position() - tilter.bottom_position) <  25 );
+          tilter_top_piston.set_value(HIGH);
+          tilter_bottom_piston.set_value(LOW);
+
+          tilter_held = false;
+        }
+        else{
+          tilter_top_piston.set_value(LOW);
+          delay(100); // waits for top piston to fully close
+          tilter_bottom_piston.set_value(HIGH);
+          delay(200); // waits for bottom piston to fully close
+          tilter.motor.move_absolute(tilter.raised_position, 100); // lifts goal
+
+          tilter_held = true;
+        }
+      }
       intake.handle();
 
       // prints motor temps every second

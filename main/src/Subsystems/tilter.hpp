@@ -3,11 +3,14 @@
 #include "../Tracking.hpp"
 #include "spinner.hpp"
 
-#define NUM_OF_TILTER_STATES 5
+#define TILTER_STATE_LINE 2 // line on controller which "idle" and "searching" tilter states are printed on
+
+#define NUM_OF_TILTER_STATES 6
 #define TILTER_MAX_VELOCITY 100
 
 enum class tilter_states {
   lowered,  // at bottom position, waiting for button to grab goal
+  searching, // waiting for ultrasonic to detect goal and grab it
   raised, // has goal and raised
   lowering,  // going from raised to lowered state_type
   tall_goal,  // filling up rings on tall goal
@@ -15,7 +18,8 @@ enum class tilter_states {
 };
 
 class Tilter: public Motorized_subsystem<tilter_states, NUM_OF_TILTER_STATES, TILTER_MAX_VELOCITY> {
-  Timer lifting_timer{"tilter_lifting_timer"};
+  Timer pickup_timer{"auto-pickup"}; // times how long searching procedure takes
+  Timer lifting_timer{"tilter_lifting_timer"};  // time how long lifting mogo takes
   int tilter_power;
   int bad_count = 0; // cycle check for safeties
   bool held = false;

@@ -2,7 +2,7 @@
 #include "../Libraries/subsystem.hpp"
 #include "intake.hpp" // because lift controls intake
 
-#define LIFT_STATE_LINE 2 // line on controller which "searching" and "lowered" lift states are printed on
+#define LIFT_STATE_LINE 2 // line on controller which "idle" and "searh=ching" lift states are printed on
 
 #define NUM_OF_LIFT_STATES 8
 #define LIFT_MAX_VELOCITY 100
