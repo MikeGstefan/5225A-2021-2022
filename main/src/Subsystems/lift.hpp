@@ -1,19 +1,21 @@
 #pragma once
 #include "../Libraries/subsystem.hpp"
+#include "intake.hpp" // because lift controls intake
 
-#define NUM_OF_LIFT_STATES 9
+#define LIFT_STATE_LINE 2 // line on controller which "idle" and "searh=ching" lift states are printed on
+
+#define NUM_OF_LIFT_STATES 8
 #define LIFT_MAX_VELOCITY 100
 
 
 enum class lift_states{
-  searching,  // released but waiting for goal
-  lowered,  // does not have goal but not searching for goal
+  idle,  // at bottom_position, waiting for button to search for mogo
+  searching,  // at bottom_position and waiting for goal or button to grab mogo
   grabbed, // has goal
-  raised, // at height to keep mogo away from opponent
+  tip, // at height to keep mogo away from opponent/ tip mogos
   platform, // at platform height
-  level_platform_prep, // going to to top position
-  level_platform, // at top position, about to smash platform to level it
   dropoff, // mogo released at platform height
+  tall_goal,  // filling up rings on tall goal
   manual  // controlled by joystick
 };
 
@@ -35,6 +37,7 @@ public:
   void handle();  // contains state machine code
   double pos_to_height(const double position);
   double height_to_pos(const double height);
+  void elastic_util(); // up time should be about 1100mms, down time should be slightly slower than that
 };
 
 extern Lift lift;
