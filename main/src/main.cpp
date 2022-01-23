@@ -12,7 +12,7 @@
 using namespace std;
 
 pros::Task *updt = nullptr;
-const GUI* GUI::current_gui = &g_util;
+GUI* const GUI::current_gui = &g_util;
 
 
 /**
@@ -31,8 +31,9 @@ void initialize() {
 	// tracking.x_coord = 0.0, tracking.y_coord = 0.0, tracking.global_angle = 0.0;
 
 	update_t.start();
-  // auton_file_read();
+  auton_file_read();
 	master.print(2, 0, "Driver: %s", drivebase.drivers[drivebase.cur_driver].name);
+	GUI::go_to(3);
 }
 
 /**
@@ -85,25 +86,38 @@ void autonomous() {
 
 //Get rid of these once merged
 int ring_count = 0;
-extern const char* port_nums;
+
 void opcontrol() {
 	/*Nathan:
+  -util motor rpm str issues
 	test auton file creation with sd
-  util motor rpm str issues
+	make some background stuff into page loop funcs
+	talk to nikhil about controller buttons. autons and driver practice interfere
+	look at //make for other things to do
+	make everythhing c::
+	convert string title/label to const char* or at least const std::string
+
+	make _Text index nullptr instead of int and actually check if(index_ptr)
+	have _Text explicitly specify type
+	array text overload
+	make text, flash, and go variadic
 
 	Fill in lift movements and states
 	Reset tracking by task
 	convert some printfs to logs
 	/**/
 
+	extern std::array <std::tuple<int, Button*, Button*, Text*, int, char*>, 8> motor_ports;
+
 	while(true){
 		GUI::update();
+		printf("MAIN- %s\n\n", std::get<5>(motor_ports[0]));
 		// drivebase.non_blocking_driver_practice();
 
 		if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_UP)) prev_auton();
 		else if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_DOWN)) next_auton();
 		if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_X)) switch_alliance();
 		if (master.get_digital_new_press(cancel_button)) break;
-		delay(30);
+		delay(10);
 	}
 }

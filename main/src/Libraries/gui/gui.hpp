@@ -51,15 +51,16 @@ class GUI{
     enum class Style{ //how the rect coords get evaluated
         CENTRE,
         CORNER,
-        SIZE
+        SIZE,
+        CENTER=CENTRE
     };
 
   private:
     //Vars
-    static last_touch_e_t touch_status;
+    static bool touched;
     static int x, y;
     static Page* current_page;
-    static const GUI* current_gui;
+    static GUI* const current_gui;
     static constexpr bool test_page=false;
     std::vector<Page*> pages;
     std::function <void()> init, background;
@@ -67,9 +68,9 @@ class GUI{
     //Functions
     static void update_screen_status();
     static void end_flash();
-    static void draw_oblong(const int, const int, const int, const int, const double, const double);
-    static int get_size(const text_format_e_t, const std::string);
-    static std::tuple<int, int, int, int> fix_points (int, int, int, int, const Style);
+    static void draw_oblong(int, int, int, int, double, double);
+    static int get_size(text_format_e_t, std::string);
+    static std::tuple<int, int, int, int> fix_points (int, int, int, int, Style);
 
   public:
 
@@ -77,14 +78,13 @@ class GUI{
     GUI(std::vector<Page*>, std::function <void()>, std::function <void()>);
 
     //Functions
-    static void aligned_coords (const int, const int, const int, const int, int = 480, int = 220);
-    static void flash (const Colour, const std::uint32_t, std::string = "");
-    static bool go(const std::string, const std::string, const std::uint32_t=0), go_end(std::string, std::uint32_t=0);
-    static void go_to(Page*);
-    static void go_to(const int);
+    static void aligned_coords (int, int, int, int, int = 480, int = 220);
+    static void flash (Colour, std::uint32_t, std::string = "");
+    static bool go(std::string, std::string, std::uint32_t=0), go_end(std::string, std::uint32_t=0);
     static void clear_screen(Colour=GREY);
     static void setup(), update();
-    static bool pressed();
+    static void go_to(int);
+    const bool pressed();
 };
 
 //All constructor args are in the format points, format, page, Text, Colour
@@ -99,9 +99,10 @@ class Page{
     std::function <void()> setup_func, loop_func;
     Colour b_col;
     std::string title;
-    std::vector<Button*> buttons;
-    std::vector<Slider*> sliders;
-    std::vector<Text*> texts;
+    std::vector<GUI*> guis; //Parents
+    std::vector<Button*> buttons; //Children
+    std::vector<Slider*> sliders; //Children
+    std::vector<Text*> texts; //Children
 
   public:
     //Page Title, Bcolour
@@ -109,6 +110,7 @@ class Page{
 
     //Functions
     const bool pressed();
+    void go_to();
     void set_setup_func(std::function <void()>), set_loop_func(std::function <void()>);
 };
 
@@ -152,6 +154,7 @@ template <typename V, typename I> class _Text: public Text{
 
     //Functions
     const void update(){
+      if(value_ptr && active && prev_value != value_ptr[static_cast<int>(*index_ptr)]) printf("DRAWING");
       if(value_ptr && active && prev_value != value_ptr[static_cast<int>(*index_ptr)]) draw();
     }
     void draw(){

@@ -4,8 +4,8 @@
 #include <bitset>
 // #include <cstdio>
 
-/*Port Configs */ ADIEncoder encoderAB(1, 2, false), encoderCD(3, 4, true), encoderEF(5, 6, false);
-/*Field array*/ std::vector<std::bitset<200>> field (200, std::bitset<200>{}); //Initializes to 200 blank bitsets
+/*Port Configs */ ADIEncoder encoderAB(1, 2, false), encoderCD(3, 4, true), encoderEF(5, 6, false);//make c::
+/*Field array*/ static std::vector<std::bitset<200>> field (200, std::bitset<200>{}); //Initializes to 200 blank bitsets
 /*Temperature Alert Flag*/ static bool temp_flashed;
 /*Current Flashing Timer*/ extern Timer Flash;
 
@@ -13,7 +13,7 @@
 int angle, left_enc, right_enc, back_enc, elastic_up_time, elastic_down_time;
 const char* port_nums;
 const char* driver_text;
-std::array <std::tuple<int, Button*, Button*, int, char*>, 8> motor_ports;
+std::array <std::tuple<int, Button*, Button*, Text*, int, char*>, 8> motor_ports;
 //port, run, stop, stall counter, port and rpm
 
 Page driver_curve ("Drivers"); //Select a driver and their exp curve
@@ -21,8 +21,8 @@ Button prev_drivr(20, 70, 110, 120, GUI::Style::SIZE, Button::SINGLE, driver_cur
 _Text drivr_name(MID_X, MID_Y, GUI::Style::CENTRE, TEXT_LARGE, driver_curve, "%s", driver_text);
 Button next_drivr(350, 70, 110, 120, GUI::Style::SIZE, Button::SINGLE, driver_curve, "Next Driver");
 
-Page temps ("Temperature"); //Motor temps //change string("") to ""s
-_Text mot_temp_1(75, 85, GUI::Style::CENTRE, TEXT_SMALL, temps, std::get<2>(motors[0]) + ": %dC"s, std::get<1>(motors[0]), COLOUR(BLACK));
+Page temps ("Temperature"); //Motor temps //make actual motor names
+_Text mot_temp_1(75, 85, GUI::Style::CENTRE, TEXT_SMALL, temps, std::get<3>(motors[0]) + ": %dC"s, std::get<1>(motors[0]), COLOUR(BLACK));
 _Text mot_temp_2(185, 85, GUI::Style::CENTRE, TEXT_SMALL, temps, "2: %dC", std::get<1>(motors[1]), COLOUR(BLACK));
 _Text mot_temp_3(295, 85, GUI::Style::CENTRE, TEXT_SMALL, temps, "3: %dC", std::get<1>(motors[2]), COLOUR(BLACK));
 _Text mot_temp_4(405, 85, GUI::Style::CENTRE, TEXT_SMALL, temps, "4: %dC", std::get<1>(motors[3]), COLOUR(BLACK));
@@ -114,14 +114,14 @@ Button resAllEnc (240, 180, 200, 30, GUI::Style::CENTRE, Button::SINGLE, encoder
 
 Page motor ("Motor Control");
 Slider mot_speed (MID_X, 60, 180 , 15, GUI::Style::CENTRE, Slider::HORIZONTAL, -127, 127, motor, "Speed");
-_Text mot_text_1 (65, 115, GUI::Style::CENTRE, TEXT_SMALL, motor, "Port %s", std::get<4>(motor_ports[0]));
-_Text mot_text_2 (180, 115, GUI::Style::CENTRE, TEXT_SMALL, motor, "Port %s", std::get<4>(motor_ports[1]));
-_Text mot_text_3 (295, 115, GUI::Style::CENTRE, TEXT_SMALL, motor, "Port %s", std::get<4>(motor_ports[2]));
-_Text mot_text_4 (410, 115, GUI::Style::CENTRE, TEXT_SMALL, motor, "Port %s", std::get<4>(motor_ports[3]));
-_Text mot_text_5 (65, 180, GUI::Style::CENTRE, TEXT_SMALL, motor, "Port %s", std::get<4>(motor_ports[4]));
-_Text mot_text_6 (180, 180, GUI::Style::CENTRE, TEXT_SMALL, motor, "Port %s", std::get<4>(motor_ports[5]));
-_Text mot_text_7 (295, 180, GUI::Style::CENTRE, TEXT_SMALL, motor, "Port %s", std::get<4>(motor_ports[6]));
-_Text mot_text_8 (410, 180, GUI::Style::CENTRE, TEXT_SMALL, motor, "Port %s", std::get<4>(motor_ports[7]));
+_Text mot_text_1 (65, 115, GUI::Style::CENTRE, TEXT_SMALL, motor, "Port %s", std::get<5>(motor_ports[0]));
+_Text mot_text_2 (180, 115, GUI::Style::CENTRE, TEXT_SMALL, motor, "Port %s", std::get<5>(motor_ports[1]));
+_Text mot_text_3 (295, 115, GUI::Style::CENTRE, TEXT_SMALL, motor, "Port %s", std::get<5>(motor_ports[2]));
+_Text mot_text_4 (410, 115, GUI::Style::CENTRE, TEXT_SMALL, motor, "Port %s", std::get<5>(motor_ports[3]));
+_Text mot_text_5 (65, 180, GUI::Style::CENTRE, TEXT_SMALL, motor, "Port %s", std::get<5>(motor_ports[4]));
+_Text mot_text_6 (180, 180, GUI::Style::CENTRE, TEXT_SMALL, motor, "Port %s", std::get<5>(motor_ports[5]));
+_Text mot_text_7 (295, 180, GUI::Style::CENTRE, TEXT_SMALL, motor, "Port %s", std::get<5>(motor_ports[6]));
+_Text mot_text_8 (410, 180, GUI::Style::CENTRE, TEXT_SMALL, motor, "Port %s", std::get<5>(motor_ports[7]));
 Button mot_update_1 (15, 125, 45, 30, GUI::Style::SIZE, Button::SINGLE, motor, "Run");
 Button mot_update_2 (130, 125, 45, 30, GUI::Style::SIZE, Button::SINGLE, motor, "Run");
 Button mot_update_3 (245, 125, 45, 30, GUI::Style::SIZE, Button::SINGLE, motor, "Run");
@@ -159,13 +159,23 @@ void resetA(){
 }
 
 void main_init(){
+  for (int x = 0; x < 200; x++) field[x].reset(); //Should be able to get rid of this
+
+  driver_curve.set_loop_func([](){driver_text = drivebase.drivers[drivebase.cur_driver].name;});
+  prev_drivr.set_func([](){drivebase.prev_driver();});
+  next_drivr.set_func([](){drivebase.next_driver();});
+
+  prev_auto.set_func(&prev_auton);
+  next_auto.set_func(&next_auton);
+  alliance.set_func([&](){switch_alliance();}); //Has to be in a lambda since param type is alliances not void
+  alliance.add_text(ally_name);
+
   run_elastic.set_func(&elasticUtil);
 
   resX.set_func(&resetX);
   resY.set_func(&resetY);
   resA.set_func(&resetA);
   resAll.set_func([](){resetX();resetY();resetA();});
-  for (int x = 0; x < 200; x++) field[x].reset();
   track.set_setup_func([](){
     screen::set_pen(COLOUR(WHITE));
     screen::draw_rect(270, 30, 470, 230);
@@ -178,6 +188,11 @@ void main_init(){
   track.set_loop_func([](){
     screen::set_pen(COLOUR(RED));
     screen::draw_pixel(270+(200*tracking.x_coord/144), 230-(200*tracking.y_coord/144)); //Scales to screen
+    //Saving vars for text display
+    angle = fmod(rad_to_deg(tracking.global_angle), 360);
+    left_enc = LeftEncoder.get_value();
+    right_enc = RightEncoder.get_value();
+    back_enc = BackEncoder.get_value();
   });
 
   go_to_xya.set_func([&](){
@@ -192,14 +207,6 @@ void main_init(){
   go_centre.set_func([](){
     if (GUI::go("GO TO (72, 72, 0)", "Press to go to centre field (72, 72, 0)", 1000)) move_start(move_types::point, point_params({72.0, 72.0, 72.0}));
   });
-
-  prev_drivr.set_func([](){drivebase.prev_driver();});
-  next_drivr.set_func([](){drivebase.next_driver();});
-
-  prev_auto.set_func(&prev_auton);
-  next_auto.set_func(&next_auton);
-  alliance.set_func([&](){switch_alliance();}); //Has to be in a lambda since param type is alliances not void
-  alliance.add_text(ally_name);
 
   turn_encoder.set_func([](){ //Turn the encoder
     if (GUI::go("START, THEN SPIN THE ENCODER", "Please spin the encoder any number of rotations.")){
@@ -257,7 +264,6 @@ void main_init(){
 
   pneum_btn_1.set_func([](){lift_piston.set_value(1);});
   pneum_btn_1.set_off_func([](){lift_piston.set_value(0);});
-
   pneum_btn_2.set_func([](){lift_piston.set_value(1);});
   pneum_btn_2.set_off_func([](){lift_piston.set_value(0);});
 
@@ -281,31 +287,24 @@ void main_background(){
   int x = 200*tracking.x_coord/144, y = 200*tracking.y_coord/144;
   if(inRange(x, 0, 199) && inRange(y, 0, 199)) field[x].set(y); //Saves position (x,y) to as tracked
 
-  //Saving vars for text display
-  angle = fmod(rad_to_deg(tracking.global_angle), 360);
-  left_enc = LeftEncoder.get_value();
-  right_enc = RightEncoder.get_value();
-  back_enc = BackEncoder.get_value();
-  driver_text = drivebase.drivers[drivebase.cur_driver].name;
-
-  std::array<std::tuple<pros::Motor*, int, const char*, const char*, Text*>, 8>::iterator it;
-  for (it = motors.begin(); it != motors.end(); it++){
+  for (std::array<std::tuple<pros::Motor*, int, const char*, const char*, Text*>, 8>::iterator it = motors.begin(); it != motors.end(); it++){
     std::tuple<pros::Motor*, int, const char*, const char*, Text*>& mot_tup = *it;
-    Motor* motor= std::get<0>(mot_tup);
+    Motor* motor = std::get<0>(mot_tup);
     Text* text = std::get<4>(mot_tup);
-    std::get<1>(mot_tup) = motor != nullptr ? motor->get_temperature() : std::numeric_limits<int>::max();
+    std::get<1>(mot_tup) = motor == nullptr ? std::numeric_limits<int>::max() : std::get<0>(*it)->get_temperature();
     int temp = std::get<1>(mot_tup);
+    printf("%s is %d\n", std::get<3>(mot_tup), temp);
 
     if (temp >= 55 && temp != std::numeric_limits<int>::max() && !Flash.playing() && !temp_flashed){ //Overheating
       temp_flashed = true;
-      GUI::go_to(&temps);
+      temps.go_to();
       char buffer[50];
       sprintf(buffer, "%s motor is at %dC\n", std::get<2>(mot_tup), temp);
       GUI::flash(COLOUR(RED), 15000, buffer);
       break;
     }
 
-    if (text && temp == std::numeric_limits<int>::max()) text->set_active(false); //If performance is bad, move this to the page setup func
+    // if (text && temp == std::numeric_limits<int>::max()) text->set_active(false); //If performance is bad, move this to the page setup func
 
     if (text != nullptr){ //Background Colours (temperature based)
       if (temp == 0) text->set_background(COLOUR(WHITE)); //0
@@ -321,14 +320,14 @@ void util_init(){
   ; //Don't know why, but the {} don't match up without this
 
   motor_ports = {
-    std::make_tuple(std::numeric_limits<int>::max(), &mot_update_1, &mot_stop_1, 0, "378"),
-    std::make_tuple(std::numeric_limits<int>::max(), &mot_update_2, &mot_stop_2, 0, ""),
-    std::make_tuple(std::numeric_limits<int>::max(), &mot_update_3, &mot_stop_3, 0, ""),
-    std::make_tuple(std::numeric_limits<int>::max(), &mot_update_4, &mot_stop_4, 0, ""),
-    std::make_tuple(std::numeric_limits<int>::max(), &mot_update_5, &mot_stop_5, 0, ""),
-    std::make_tuple(std::numeric_limits<int>::max(), &mot_update_6, &mot_stop_6, 0, ""),
-    std::make_tuple(std::numeric_limits<int>::max(), &mot_update_7, &mot_stop_7, 0, ""),
-    std::make_tuple(std::numeric_limits<int>::max(), &mot_update_8, &mot_stop_8, 0, ""),
+    std::make_tuple(std::numeric_limits<int>::max(), &mot_update_1, &mot_stop_1, &mot_text_1, 0, (char*)malloc(10*sizeof(char))),
+    std::make_tuple(std::numeric_limits<int>::max(), &mot_update_2, &mot_stop_2, &mot_text_2, 0, (char*)malloc(10*sizeof(char))),
+    std::make_tuple(std::numeric_limits<int>::max(), &mot_update_3, &mot_stop_3, &mot_text_3, 0, (char*)malloc(10*sizeof(char))),
+    std::make_tuple(std::numeric_limits<int>::max(), &mot_update_4, &mot_stop_4, &mot_text_4, 0, (char*)malloc(10*sizeof(char))),
+    std::make_tuple(std::numeric_limits<int>::max(), &mot_update_5, &mot_stop_5, &mot_text_5, 0, (char*)malloc(10*sizeof(char))),
+    std::make_tuple(std::numeric_limits<int>::max(), &mot_update_6, &mot_stop_6, &mot_text_6, 0, (char*)malloc(10*sizeof(char))),
+    std::make_tuple(std::numeric_limits<int>::max(), &mot_update_7, &mot_stop_7, &mot_text_7, 0, (char*)malloc(10*sizeof(char))),
+    std::make_tuple(std::numeric_limits<int>::max(), &mot_update_8, &mot_stop_8, &mot_text_8, 0, (char*)malloc(10*sizeof(char))),
   };
 
   for (int port=0, i=0; port<=20; port++){
@@ -339,15 +338,17 @@ void util_init(){
   }
 
   std::string port_num_string;
-  for (int i = 0; i < 8; i++){
-    std::get<4>(motor_ports[i]) = (char*)malloc(8*sizeof(char));
-    if (std::get<0>(motor_ports[i]) != std::numeric_limits<int>::max()) port_num_string.append(std::to_string(std::get<0>(motor_ports[i])) + ",");
+  for (std::array<std::tuple<int, Button*, Button*, Text*, int, char*>, 8>::iterator it = motor_ports.begin(); it != motor_ports.end(); it++){
+    std::tuple<int, Button*, Button*, Text*, int, char*>& mot_arr = *it;
+
+    if (std::get<0>(mot_arr) != std::numeric_limits<int>::max()) port_num_string.append(std::to_string(std::get<0>(mot_arr)) + ",");
     else{
-      std::get<1>(motor_ports[i])->set_active(false);
-      std::get<2>(motor_ports[i])->set_active(false);
+      std::get<1>(mot_arr)->set_active(false);
+      std::get<2>(mot_arr)->set_active(false);
+      std::get<3>(mot_arr)->set_active(false);
     }
-    std::get<1>(motor_ports[i])->set_func([i](){c::motor_move(std::get<0>(motor_ports[i]), mot_speed.get_value());});
-    std::get<2>(motor_ports[i])->set_func([i](){c::motor_move(std::get<0>(motor_ports[i]), 0);});
+    std::get<1>(mot_arr)->set_func([&](){c::motor_move(std::get<0>(mot_arr), mot_speed.get_value());});
+    std::get<2>(mot_arr)->set_func([&](){c::motor_move(std::get<0>(mot_arr), 0);});
   }
   if (port_num_string.back() == ',') port_num_string.pop_back();
   port_nums = strdup(port_num_string.c_str());
@@ -370,18 +371,20 @@ void util_background(){
   right_enc = encoderCD.get_value();
   back_enc = encoderEF.get_value();
 
-//Motor Stalled
-  for (int i = 0; i < 8; i++){
-    if (std::get<0>(motor_ports[i]) != std::numeric_limits<int>::max()){
-      Motor motor(std::get<0>(motor_ports[i]));
-      strcpy(std::get<4>(motor_ports[i]), (std::to_string(std::get<0>(motor_ports[i])) + ": " + std::to_string((int)c::motor_get_actual_velocity(std::get<0>(motor_ports[i])))).c_str());
-      if (fabs(motor.get_actual_velocity()) < fabs(motor.get_target_velocity())/4) std::get<3>(motor_ports[i]) += 1;
-      else std::get<3>(motor_ports[i]) = 0;
-      if (std::get<3>(motor_ports[i]) > 10){
-        std::get<3>(motor_ports[i]) = 0;
-        printf("Stopping Motor %d\n", std::get<0>(motor_ports[i]));
-        motor.move(0);
+  //Motor Stalled
+  for (std::array<std::tuple<int, Button*, Button*, Text*, int, char*>, 8>::iterator it = motor_ports.begin(); it != motor_ports.end(); it++){
+    std::tuple<int, Button*, Button*, Text*, int, char*>& mot_arr = *it;
+    int port = std::get<0>(mot_arr);
+    if (port != std::numeric_limits<int>::max()){
+      sprintf(std::get<5>(mot_arr), "%d: %d", port, (int)c::motor_get_actual_velocity(port));
+      if (fabs(c::motor_get_actual_velocity(port)) < fabs(c::motor_get_target_velocity(port))/4) std::get<4>(mot_arr) += 1;
+      else std::get<4>(mot_arr) = 0;
+      if (std::get<4>(mot_arr) > 10){
+        std::get<4>(mot_arr) = 0;
+        printf("Stopping Motor %d\n", port);
+        c::motor_move(port, 0);
       }
+      printf("%s\n", std::get<5>(mot_arr));
     }
   }
 }

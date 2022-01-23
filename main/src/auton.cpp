@@ -87,14 +87,14 @@ void auton_file_read(){
   if (!auton_file){//File doesn't exist
     auton_file.close();
     GUI::flash(COLOR_RED, 1000, "Auton File not found!");
-    printf("\033[92mCreating new Auton File.\033[0m\n");
+    printf("\033[92mTrying to create new Auton File.\033[0m\n");
     auton_file_update();
     auton_file.open("/usd/auton.txt", fstream::in);
 
     if (!auton_file){
       auton_file.close();
       Data::log_t.done_update();
-      printf("\033[31mAborting auton file read. It's not getting created. Using default values.\033[0m\n");
+      printf("\033[31mAborting auton file read. It's not getting created.\033[0m Using default values.\n");
       cur_auton = autons::Skills;
       cur_alliance = alliances::BLUE;
       switch_alliance(cur_alliance);
