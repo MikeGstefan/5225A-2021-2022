@@ -28,8 +28,8 @@ void initialize() {
 	Data::init();
 	_Controller::init();
 	delay(150);
-	tracking.x_coord = 144.0 - 10.25, tracking.y_coord = 14.75, tracking.global_angle = -M_PI_2;
-	// tracking.x_coord = 0.0, tracking.y_coord = 0.0, tracking.global_angle = 0.0;
+	// tracking.x_coord = 144.0 - 10.25, tracking.y_coord = 14.75, tracking.global_angle = -M_PI_2;
+	tracking.x_coord = 0.0, tracking.y_coord = 0.0, tracking.global_angle = 0.0;
 	// tracking.x_coord = 79.0, tracking.y_coord = 106.0, tracking.global_angle = deg_to_rad(-270.0);
 	update_t.start();
 	GUI::setup();
@@ -125,124 +125,45 @@ void tilter_reset2(){
 // int ring_count = 0, cur_auton = 1;
 bool claw_state = false, intk_state = false;
 void opcontrol() {
-	while(true){
-		printf("%f\n", get_front_dist());
-		delay(2000);
-	}
-	while(true){
-		drivebase.handle_input();
-		if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_A))master.print(0,0,"%.2f, %.2f, %.2f",tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle));
-		delay(10);
-	}
-
-	// while(true){ 
-	// 	if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_A)){
-	// 		claw_state = !claw_state;
-	// 		tilter_bottom_piston.set_value(claw_state);
-	// 	}
-	// 	delay(10);
-	// }
-
-	delay(1000);
-
-	drivebase.move(-70, 0, -10);
-	// cycleCheck(fabs(rad_to_deg(tracking.g_velocity.angle)) >  0.01, 15,10);
-	int bad_count = 0;
-	int good_count = 0;
-	while(good_count < 15 && bad_count < 30){ 
-		if(fabs(rad_to_deg(tracking.g_velocity.angle)) >  0.01)good_count++;
-		else{
-			good_count = 0;
-			bad_count++;
-		}
-		printf("good: %d bad: %d, v: %f\n", good_count, bad_count, fabs(rad_to_deg(tracking.g_velocity.angle)));
-		delay(10);
-	}
-	cycleCheck(fabs(rad_to_deg(tracking.g_velocity.angle)) <  0.0001, 10,10);
-
-	drivebase.move(-40, 0, -40);
-	// cycleCheck(fabs(rad_to_deg(tracking.g_velocity.angle)) >  0.01, 15,10);
-	bad_count = 0;
-	good_count = 0;
-	while(good_count < 10 && bad_count < 30){ 
-		if(fabs(rad_to_deg(tracking.g_velocity.angle)) >  0.01)good_count++;
-		else{
-			good_count = 0;
-			bad_count++;
-		}
-		printf("good: %d bad: %d, v: %f\n", good_count, bad_count, fabs(rad_to_deg(tracking.g_velocity.angle)));
-		delay(10);
-	}
-	cycleCheck(fabs(rad_to_deg(tracking.g_velocity.angle)) <  0.0001, 10,10);
-	drivebase.move(-60, 0, 30);
-	bad_count = 0;
-	good_count = 0;
-	while(good_count < 10 && bad_count < 30){ 
-		if(fabs(rad_to_deg(tracking.g_velocity.angle)) >  0.01)good_count++;
-		else{
-			good_count = 0;
-			bad_count++;
-		}
-		delay(10);
-	}
-	cycleCheck(fabs(rad_to_deg(tracking.g_velocity.angle)) <   0.0001, 10,10);
-	drivebase.move(0,0,0);
-	while(true){ 
-		
-		printf("%f\n", rad_to_deg(tracking.g_velocity.angle));
-		delay(10);
-	}
-	// intk_pnue.set_value(0);
-  	// lift.reset();
-  	// tilter_reset2();
-	// tilter.move_absolute(150);
-	// // move_start(move_types::point, point_params({79.0, 106.0, -270.0}));
-  	// // lift.move_absolute(lift.bottom_position);
-  	// move_start(move_types::point, point_params({100.0,108.0,-270.0},127.0,true,0.0,false));
-	// // move_start(move_types::point, point_params({130.0,127.0,-285.0}));
-  	// move_start(move_types::tank_arc, tank_arc_params({79.0, 106.0},{125.0,127.0,-285.0},127.0,127.0,false));
-	// move_start(move_types::point, point_params({125.0,133.0,-270.0}));
-
-	while(true){
-		// drivebase.handle_input();
-		if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_A)){
-			claw_state = !claw_state;
-			intk_pnue.set_value(claw_state);
-			master.print(0,0,"state: %d",claw_state);
-			// master.print(0,0,"%.2f, %.2f, %.2f",tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle));
-		}
-		delay(10);
-	}
-
-	// while(true){ 
-	// 	if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_A)){
-	// 		claw_state = !claw_state;
-	// 		tilter_top_piston.set_value(claw_state);
-	// 	}
-	// 	delay(10);
-	// }
-	// intk_pnue.set_value(0);
-	// lift_piston.set_value(0);
-	// lift.reset();
-	// tilter.reset();
-	// tilter.move_absolute(tilter.bottom_position);
-	// while(!master.get_digital_new_press(E_CONTROLLER_DIGITAL_A))delay(10);
-	// lift_piston.set_value(1);
-	// move_start(move_types::line_old, line_old_params(0.0,0.0,0.0,40.0,0.0,true,true,127, false,0.5,5.0,15.0,1.0,0.0));
-	// move_start(move_types::line, line_params({0.0, 0.0}, {0.0, 40.0, 0.0}),true);
-	//
-	// driver setup
-	// move_start(move_types::point, point_params{{0.0,40.0,0.0}},true);
-	// move_start(move_types::point, point_params{{0.0,0.0,90.0}},true);
-	// move_start(move_types::tank_arc, tank_arc_params({0.0, 0.0},{24.0, 24.0, 90.0}, 127.0, 1.0,true), true);  // arcs to first patch of rings
-	lift_piston.set_value(LOW);	// in searching state
-	lift.reset();
-	tilter.reset();
-	lift.motor.move_absolute(35, 100);
-	tilter.move_absolute(500, 100);
+	intk_pnue.set_value(0);
+	tilter_top_piston.set_value(1);
 	tilter_bottom_piston.set_value(1);
-	tilter_top_piston.set_value(LOW);
+	while(!master.get_digital(E_CONTROLLER_DIGITAL_A))delay(10);
+	tilter_reset2();
+	// tilter_top_piston.set_value(0);
+	// tilter_bottom_piston.
+	// tilter_reset2();
+	Timer timer{"timer"};
+	move_start(move_types::point, point_params({5.0,8.0, 45.0}));
+	
+	move_start(move_types::point, point_params(polar_to_vector_point(5.0,8.0,17.5,45.0,45.0),127.0,false,0.0,true,0.0,0.0,{18.0,0.0,20.0},{12.0,0.0001,1000.0},{125.0,0.0,1000.0}),false);
+	// move_wait_for_error(2.0);
+	
+	move_wait_for_complete();
+	move_start(move_types::point, point_params(polar_to_vector_point(5.0,8.0,13.0,45.0,45.0),127.0,false,0.0,true,0.0,0.0,{18.0,0.0,100.0},{12.0,0.0001,1000.0},{125.0,0.0,1000.0}),false);
+	tilter.move_absolute(tilter.bottom_position);
+	while(tilter.motor.get_position() < tilter.bottom_position - 10)delay(10);
+	// move_wait_for_complete();
+	// move_wait_for_error(2.0);
+	delay(100);
+	tilter_bottom_piston.set_value(0);
+	delay(100);
+	move_wait_for_complete();
+	move_start(move_types::point, point_params(polar_to_vector_point(5.0,8.0,11.0,45.0,45.0),127.0,false,0.0,true,0.0,0.0,{18.0,0.0,100.0},{12.0,0.0001,1000.0},{125.0,0.0,1000.0}),true);
+	// move_start(move_types::point, point_params({-3.0, 18.0,0.0}));
+	move_start(move_types::turn_point, turn_point_params({-5.5, 92.5}));
+	move_start(move_types::line_old, line_old_params(12.75, 15.75, -5.5, 92.5,-20.0,false,true,127, false,1.5,7.0,15.0,0.6,0.2),false); // drives through 1st small neutral mogo
+	find_goal_tilter();
+	move_wait_for_complete();
+	move_start(move_types::point, point_params(polar_to_vector_point(-3.5, 92.5, -12.0, -20,-20))); // backs up from goal
+	tilter.move_absolute(tilter.bottom_position);
+  	while(tilter.motor.get_position() < tilter.bottom_position - 30)delay(10);
+  	tilter_top_piston.set_value(1);
+  	tilter_bottom_piston.set_value(0);
+	tilter.move_absolute(300);
+	while(tilter.motor.get_position() > 310)delay(10);
+	master.print(0,0,"%d",timer.get_time());
+	// const double max_power = 127.0, const bool overshoot = false, const double min_angle_percent = 0.0, const bool brake = true, const double decel_dist = 0.0, const double decel_speed = 0.0);
 
 
-	drivebase.driver_practice();
 }

@@ -165,6 +165,7 @@ enum class move_types{
 
 void move_start(move_types type, std::variant<arc_params, line_params, tank_arc_params, point_params, tank_point_params, turn_angle_params, turn_point_params, line_old_params> params, bool wait_for_comp = true);
 bool move_wait_for_complete();
+void move_wait_for_error(double error);
 void move_stop(bool brake = false);
 
 

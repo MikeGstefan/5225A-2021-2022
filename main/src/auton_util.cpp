@@ -91,6 +91,20 @@ void find_goal_lift(bool move_stop_b){
   if(move_stop_b)move_stop();
 }
 
+void find_goal_tilter(){
+    while(tilter_dist.get() > 70){
+    log_d.print("tilter d: %f\n", tilter_dist.get());
+    delay(33);
+  }
+  log_d.print("%d | grabbing goal 2 at: (%.2f, %.2f, %.2f)\n",millis(),tracking.x_coord, tracking.y_coord,rad_to_deg(tracking.global_angle));
+  tilter_top_piston.set_value(0);
+  delay(100);
+  tilter_bottom_piston.set_value(1);
+  delay(200);
+  tilter.move_absolute(300);
+  
+}
+
 
 double get_front_dist(){
   double avg = 0.0;

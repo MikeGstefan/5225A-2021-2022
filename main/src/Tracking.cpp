@@ -308,6 +308,10 @@ bool move_wait_for_complete(){
   return tracking.move_complete;
 }
 
+void move_wait_for_error(double error){ 
+  while(fabs(tracking.drive_error) >error)delay(10);
+}
+
 void move_stop(bool brake){
   move_t.kill();
   if(brake)drivebase.brake();
@@ -378,6 +382,7 @@ void move_to_point(void* params){
         target_line.set_cartesian(target.x - tracking.x_coord, target.y - tracking.y_coord);
         target_line.rotate(tracking.global_angle);  // now represents local vectors to target
         d = target_line.get_magnitude();
+        tracking.drive_error = d;
 
         tracking.power_x = x_pid.compute(-target_line.get_x(), 0.0);
         tracking.power_y = y_pid.compute(-target_line.get_y(), 0.0);
