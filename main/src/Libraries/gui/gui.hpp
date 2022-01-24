@@ -62,6 +62,7 @@ class GUI{
     static Page* current_page;
     static GUI* const current_gui;
     static constexpr bool test_page=false;
+    static constexpr bool go_enabled=false;
     std::vector<Page*> pages;
     std::function <void()> init, background;
 
@@ -106,7 +107,7 @@ class Page{
 
   public:
     //Page Title, Bcolour
-    Page(std::string, Colour = GREY);
+    explicit Page(std::string, Colour = GREY);
 
     //Functions
     const bool pressed();
@@ -154,7 +155,7 @@ template <typename V, typename I> class _Text: public Text{
 
     //Functions
     const void update(){
-      if(value_ptr && active && prev_value != value_ptr[static_cast<int>(*index_ptr)]) printf("DRAWING");
+      // if(value_ptr && active && prev_value != value_ptr[static_cast<int>(*index_ptr)]) printf("DRAWING\n");
       if(value_ptr && active && prev_value != value_ptr[static_cast<int>(*index_ptr)]) draw();
     }
     void draw(){
@@ -287,7 +288,7 @@ class Slider{
     Colour l_col, b_col;
     int x1, y1, x2, y2, text_x, text_y;
     int min, max;
-    int val=0, prev_val;
+    int val, prev_val;
     direction dir;
     Page* page;
     Button dec, inc;
@@ -299,7 +300,7 @@ class Slider{
 
   public:
     //Points, Format, Min, Max, Page, Label, Bcolour, Lcolour
-    Slider (int, int, int, int, GUI::Style, direction, int, int, Page&, std::string = "Value", Colour = COLOUR(WHITE), Colour = ORANGE);
+    Slider (int, int, int, int, GUI::Style, direction, int, int, Page&, std::string = "Value", int = 1, Colour = COLOUR(WHITE), Colour = ORANGE);
 
     //Functions
     const int get_value();

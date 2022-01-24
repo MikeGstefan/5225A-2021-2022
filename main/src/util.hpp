@@ -36,6 +36,7 @@ extern Timer screen_timer;  // timer to measure how long it's been since last sc
 
 // void set_claw_state(claw_state state);
 
+//Get rid of these now that there's a template
 int sgn(int n);
 int sgn(double n);
 

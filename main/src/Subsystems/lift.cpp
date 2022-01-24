@@ -184,6 +184,8 @@ double Lift::height_to_pos(double height){
   return gear_ratio * (rad_to_deg(asin((height - offset_h) / (arm_len)))) + offset_a;
 }
 
+extern int elastic_up_time, elastic_down_time; //From gui
+
 void Lift::elastic_util(){
   master.clear();
   lift.reset();
@@ -196,11 +198,13 @@ void Lift::elastic_util(){
   intake_piston.set_value(HIGH);  // raises intake
   waitUntil(fabs(lift.motor.get_position() - lift.top_position) < lift.end_error);
   move_timer.print();
-  master.print(1, 0, "up time: %d", move_timer.get_time());
+  elastic_up_time = move_timer.get_time();
+  master.print(1, 0, "up time: %d", elastic_up_time);
 
   move_timer.reset();
   lift.move_absolute(lift.bottom_position);
   waitUntil(fabs(lift.motor.get_position() - lift.bottom_position) < lift.end_error);
   move_timer.print();
-  master.print(2, 0, "down time: %d", move_timer.get_time());
+  elastic_down_time = move_timer.get_time();
+  master.print(2, 0, "down time: %d", elastic_down_time);
 }

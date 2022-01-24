@@ -29,6 +29,7 @@ public:
     state = next_state;
   }
 
+  //shouldn't handle be a virtual function
   void handle();  // has a switch containing the state machine for a given subsystem
 
   state_type get_state() const{

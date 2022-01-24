@@ -1,10 +1,10 @@
 #include "gui.hpp"
+// #include "../../Subsystems/lift.hpp"
 #include "../include/pros/apix.h"
 #include "../../auton.hpp"
 #include <bitset>
 // #include <cstdio>
 
-/*Port Configs */ ADIEncoder encoderAB(1, 2, false), encoderCD(3, 4, true), encoderEF(5, 6, false);//make c::
 /*Field array*/ static std::vector<std::bitset<200>> field (200, std::bitset<200>{}); //Initializes to 200 blank bitsets
 /*Temperature Alert Flag*/ static bool temp_flashed;
 /*Current Flashing Timer*/ extern Timer Flash;
@@ -15,6 +15,10 @@ const char* port_nums;
 const char* driver_text;
 std::array <std::tuple<int, Button*, Button*, Text*, int, char*>, 8> motor_ports;
 //port, run, stop, stall counter, port and rpm
+
+extern Page testing;
+extern Button testing_button_1, testing_button_2;
+extern Slider testing_slider;
 
 Page driver_curve ("Drivers"); //Select a driver and their exp curve
 Button prev_drivr(20, 70, 110, 120, GUI::Style::SIZE, Button::SINGLE, driver_curve, "Prev Driver");
@@ -42,8 +46,8 @@ Page track ("Tracking"); //Display tracking vals and reset btns
 _Text trackX(50, 45, GUI::Style::CENTRE, TEXT_SMALL, track, "X:%.1f", tracking.x_coord);
 _Text trackY(135, 45, GUI::Style::CENTRE, TEXT_SMALL, track, "Y:%.1f", tracking.y_coord);
 _Text trackA(220, 45, GUI::Style::CENTRE, TEXT_SMALL, track, "A:%d", angle);
-_Text encL(50, 130, GUI::Style::CENTRE, TEXT_SMALL, track, "L:%.1f", left_enc);
-_Text encR(135, 130, GUI::Style::CENTRE, TEXT_SMALL, track, "R:%.1f", right_enc);
+_Text encL(50, 130, GUI::Style::CENTRE, TEXT_SMALL, track, "L:%d", left_enc);
+_Text encR(135, 130, GUI::Style::CENTRE, TEXT_SMALL, track, "R:%d", right_enc);
 _Text encB(220, 130, GUI::Style::CENTRE, TEXT_SMALL, track, "B:%d", back_enc);
 Button resX(15, 60, 70, 55, GUI::Style::SIZE, Button::SINGLE, track, "Reset X");
 Button resY(100, 60, 70, 55, GUI::Style::SIZE, Button::SINGLE, track, "Reset Y");
@@ -69,20 +73,23 @@ Button run_elastic(165, 60, 150, 55, GUI::Style::SIZE, Button::SINGLE, elastic, 
 _Text elastic_up (MID_X, 160, GUI::Style::CENTRE, TEXT_SMALL, elastic, "Up Time: %d", elastic_up_time);
 _Text elastic_down(MID_X, 180, GUI::Style::CENTRE, TEXT_SMALL, elastic, "Down Time: %d", elastic_down_time);
 
-Page liftMove ("Lift"); //Moving the lift to an xyz position
-Slider lift_x_val(35, 65, 250, 40, GUI::Style::SIZE, Slider::HORIZONTAL, 0, 144, liftMove, "X");
-Slider lift_y_val(35, 150, 250, 40, GUI::Style::SIZE, Slider::HORIZONTAL, 0, 144, liftMove, "Y");
-Button go_to_lift_xy(400, 128, 70, 50, GUI::Style::CENTRE, Button::SINGLE, liftMove, "Move Lift To Target");
+Page motor_subsys ("Motorized Subsystems"); //Moving the lift
+Slider lift_val(30, 45, 300, 35, GUI::Style::SIZE, Slider::HORIZONTAL, 35, 675, motor_subsys, "Lift", 10);
+Slider tilter_val(30, 110, 300, 40, GUI::Style::SIZE, Slider::HORIZONTAL, 50, 500, motor_subsys, "Tilter", 10);
+Button lift_move(470, 45, -100, 40, GUI::Style::SIZE, Button::SINGLE, motor_subsys, "Move Lift");
+Button tilter_move(470, 95, -100, 40, GUI::Style::SIZE, Button::SINGLE, motor_subsys, "Move Tilter");
+Button claw_switch(470, 145, -100, 40, GUI::Style::SIZE, Button::TOGGLE, motor_subsys, "Claw");
+Button end_effector_switch(470, 195, -100, 40, GUI::Style::SIZE, Button::TOGGLE, motor_subsys, "End Effector");
 
 Page liftStates ("Lift States"); //Moving to various lift states
-Button Neutral (15, 45, 100, 75, GUI::Style::SIZE, Button::SINGLE, liftStates, "Neutral"); //Names are caps to avoid conflicts
-Button RingPickup (130, 45, 100, 75, GUI::Style::SIZE, Button::SINGLE, liftStates, "Ring Pickup");
-Button Tip (245, 45, 100, 80, GUI::Style::SIZE, Button::SINGLE, liftStates, "Tip");
-Button Lowering (360, 45, 100, 75, GUI::Style::SIZE, Button::SINGLE, liftStates, "Lowering");
-Button Down (15, 140, 100, 75, GUI::Style::SIZE, Button::SINGLE, liftStates, "Down");
-Button Raised (130, 140, 100, 75, GUI::Style::SIZE, Button::SINGLE, liftStates, "Raised");
-Button Platform (245, 140, 100, 75, GUI::Style::SIZE, Button::SINGLE, liftStates, "Platform");
-Button ReleaseMogo(360, 140, 100, 75, GUI::Style::SIZE, Button::SINGLE, liftStates, "Release Mogo");
+Button idle (15, 45, 100, 75, GUI::Style::SIZE, Button::SINGLE, liftStates, "Idle"); //Names are caps to avoid conflicts
+Button searching (130, 45, 100, 75, GUI::Style::SIZE, Button::SINGLE, liftStates, "Searching");
+Button grabbed (245, 45, 100, 80, GUI::Style::SIZE, Button::SINGLE, liftStates, "Grabbed");
+Button tip (360, 45, 100, 75, GUI::Style::SIZE, Button::SINGLE, liftStates, "Tip");
+Button platform (15, 140, 100, 75, GUI::Style::SIZE, Button::SINGLE, liftStates, "Platform");
+Button dropoff (130, 140, 100, 75, GUI::Style::SIZE, Button::SINGLE, liftStates, "Drop Off");
+Button tall_goal (245, 140, 100, 75, GUI::Style::SIZE, Button::SINGLE, liftStates, "Tall Goal");
+Button manual(360, 140, 100, 75, GUI::Style::SIZE, Button::SINGLE, liftStates, "Manual");
 
 Page tuning ("Tuning Tracking"); //Tests to tune tracking when on new base
 _Text tuning_instructions_1(MID_X, 35, GUI::Style::CENTRE, TEXT_SMALL, tuning, "Press your desired tracking test");
@@ -140,11 +147,6 @@ Button mot_stop_7 (300, 190, 45, 30, GUI::Style::SIZE, Button::SINGLE, motor, "S
 Button mot_stop_8 (415, 190, 45, 30, GUI::Style::SIZE, Button::SINGLE, motor, "Stop");
 
 //Functions
-std::pair <int, int> elasticUtil(){ //Placeholder until func is actually written
-  elastic_up_time = 800;
-  elastic_down_time = 800;
-  return std::make_pair(elastic_up_time, elastic_down_time); //No need to return pair
-}
 void resetX(){
   tracking.x_coord = 0;
   printf("Change to mike's task way of resetting x\n");
@@ -159,6 +161,7 @@ void resetA(){
 }
 
 void main_init(){
+
   for (int x = 0; x < 200; x++) field[x].reset(); //Should be able to get rid of this
 
   driver_curve.set_loop_func([](){driver_text = drivebase.drivers[drivebase.cur_driver].name;});
@@ -170,7 +173,7 @@ void main_init(){
   alliance.set_func([&](){switch_alliance();}); //Has to be in a lambda since param type is alliances not void
   alliance.add_text(ally_name);
 
-  run_elastic.set_func(&elasticUtil);
+  run_elastic.set_func([](){lift.elastic_util();});
 
   resX.set_func(&resetX);
   resY.set_func(&resetY);
@@ -197,7 +200,7 @@ void main_init(){
 
   go_to_xya.set_func([&](){
     char coord_c[20];
-    sprintf(coord_c, " (%d, %d, %d)", (int)xVal.get_value(), (int)yVal.get_value(), (int)aVal.get_value());
+    sprintf(coord_c, " (%d, %d, %d)", xVal.get_value(), yVal.get_value(), aVal.get_value());
     std::string coord = coord_c;
     if (GUI::go("GO TO" + coord, "Press to move to target selected by sliders" + coord, 1000)) move_start(move_types::point, point_params({double(xVal.get_value()), double(yVal.get_value()), double(aVal.get_value())}));
   });
@@ -207,6 +210,32 @@ void main_init(){
   go_centre.set_func([](){
     if (GUI::go("GO TO (72, 72, 0)", "Press to go to centre field (72, 72, 0)", 1000)) move_start(move_types::point, point_params({72.0, 72.0, 72.0}));
   });
+
+  lift_move.set_func([&](){
+    char coord_c[20];
+    sprintf(coord_c, " %d", lift_val.get_value());
+    std::string coord = coord_c;
+    if (GUI::go("Move lift to" + coord, "Press to move lift to" + coord, 1000)) lift.move_absolute(lift_val.get_value());
+  });
+  tilter_move.set_func([&](){
+    char coord_c[20];
+    sprintf(coord_c, " %d", tilter_val.get_value());
+    std::string coord = coord_c;
+    if (GUI::go("Move tilter to" + coord, "Press to move tilter to" + coord, 1000)) tilter.move_absolute(tilter_val.get_value());
+  });
+  claw_switch.set_func([](){tilter_top_piston.set_value(1);});
+  claw_switch.set_off_func([](){tilter_top_piston.set_value(0);});
+  end_effector_switch.set_func([](){ring_piston.set_value(1);});
+  end_effector_switch.set_off_func([](){ring_piston.set_value(0);});
+
+  idle.set_func([](){lift.set_state(lift_states::idle);});
+  searching.set_func([](){lift.set_state(lift_states::searching);});
+  grabbed.set_func([](){lift.set_state(lift_states::grabbed);});
+  tip.set_func([](){lift.set_state(lift_states::tip);});
+  platform.set_func([](){lift.set_state(lift_states::platform);});
+  dropoff.set_func([](){lift.set_state(lift_states::dropoff);});
+  tall_goal.set_func([](){lift.set_state(lift_states::tall_goal);});
+  manual.set_func([](){lift.set_state(lift_states::manual);});
 
   turn_encoder.set_func([](){ //Turn the encoder
     if (GUI::go("START, THEN SPIN THE ENCODER", "Please spin the encoder any number of rotations.")){
@@ -287,13 +316,13 @@ void main_background(){
   int x = 200*tracking.x_coord/144, y = 200*tracking.y_coord/144;
   if(inRange(x, 0, 199) && inRange(y, 0, 199)) field[x].set(y); //Saves position (x,y) to as tracked
 
-  for (std::array<std::tuple<pros::Motor*, int, const char*, const char*, Text*>, 8>::iterator it = motors.begin(); it != motors.end(); it++){
-    std::tuple<pros::Motor*, int, const char*, const char*, Text*>& mot_tup = *it;
+  for (std::array<std::tuple<Motor*, int, const char*, const char*, Text*>, 8>::iterator it = motors.begin(); it != motors.end(); it++){
+    std::tuple<Motor*, int, const char*, const char*, Text*>& mot_tup = *it;
     Motor* motor = std::get<0>(mot_tup);
     Text* text = std::get<4>(mot_tup);
     std::get<1>(mot_tup) = motor == nullptr ? std::numeric_limits<int>::max() : std::get<0>(*it)->get_temperature();
     int temp = std::get<1>(mot_tup);
-    printf("%s is %d\n", std::get<3>(mot_tup), temp);
+    // printf("%s is %d\n", std::get<3>(mot_tup), temp);
 
     if (temp >= 55 && temp != std::numeric_limits<int>::max() && !Flash.playing() && !temp_flashed){ //Overheating
       temp_flashed = true;
@@ -304,7 +333,7 @@ void main_background(){
       break;
     }
 
-    // if (text && temp == std::numeric_limits<int>::max()) text->set_active(false); //If performance is bad, move this to the page setup func
+    if (text && temp == std::numeric_limits<int>::max()) text->set_active(false); //If performance is bad, move this to the page setup func
 
     if (text != nullptr){ //Background Colours (temperature based)
       if (temp == 0) text->set_background(COLOUR(WHITE)); //0
@@ -318,7 +347,6 @@ void main_background(){
 
 void util_init(){
   ; //Don't know why, but the {} don't match up without this
-
   motor_ports = {
     std::make_tuple(std::numeric_limits<int>::max(), &mot_update_1, &mot_stop_1, &mot_text_1, 0, (char*)malloc(10*sizeof(char))),
     std::make_tuple(std::numeric_limits<int>::max(), &mot_update_2, &mot_stop_2, &mot_text_2, 0, (char*)malloc(10*sizeof(char))),
@@ -353,10 +381,15 @@ void util_init(){
   if (port_num_string.back() == ',') port_num_string.pop_back();
   port_nums = strdup(port_num_string.c_str());
 
-  resAB.set_func([&](){encoderAB.reset();});
-  resCD.set_func([&](){encoderCD.reset();});
-  resEF.set_func([&](){encoderEF.reset();});
-  resAll.set_func([&](){encoderAB.reset(); encoderCD.reset(); encoderEF.reset();});
+  encoders.set_loop_func([](){
+    left_enc = LeftEncoder.get_value();
+    right_enc = RightEncoder.get_value();
+    back_enc = BackEncoder.get_value();
+  });
+  resAB.set_func([&](){LeftEncoder.reset();});
+  resCD.set_func([&](){RightEncoder.reset();});
+  resEF.set_func([&](){BackEncoder.reset();});
+  resAll.set_func([&](){LeftEncoder.reset(); RightEncoder.reset(); BackEncoder.reset();});
 
   pneum_btn_1.set_func([](){c::adi_digital_write(7, true);});
   pneum_btn_1.set_off_func([](){c::adi_digital_write(7, false);});
@@ -366,11 +399,6 @@ void util_init(){
 }
 
 void util_background(){
-  //Saving vars for text display
-  left_enc = encoderAB.get_value();
-  right_enc = encoderCD.get_value();
-  back_enc = encoderEF.get_value();
-
   //Motor Stalled
   for (std::array<std::tuple<int, Button*, Button*, Text*, int, char*>, 8>::iterator it = motor_ports.begin(); it != motor_ports.end(); it++){
     std::tuple<int, Button*, Button*, Text*, int, char*>& mot_arr = *it;
@@ -389,6 +417,6 @@ void util_background(){
   }
 }
 
-GUI g_main ({&driver_curve, &temps, &auto_selection, &track, &moving, &intake_test, &elastic, &liftMove, &liftStates, &tuning, &pneumatic}, &main_init, &main_background);
+GUI g_main ({&driver_curve, &temps, &auto_selection, &track, &moving, &intake_test, &elastic, &motor_subsys, &liftStates, &tuning, &pneumatic}, &main_init, &main_background);
 
 GUI g_util ({&ports, &encoders, &motor, &pneumatic}, &util_init, &util_background);

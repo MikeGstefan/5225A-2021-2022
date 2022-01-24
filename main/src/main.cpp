@@ -12,7 +12,7 @@
 using namespace std;
 
 pros::Task *updt = nullptr;
-GUI* const GUI::current_gui = &g_util;
+GUI* const GUI::current_gui = &g_main;
 
 
 /**
@@ -33,7 +33,6 @@ void initialize() {
 	update_t.start();
   auton_file_read();
 	master.print(2, 0, "Driver: %s", drivebase.drivers[drivebase.cur_driver].name);
-	GUI::go_to(3);
 }
 
 /**
@@ -90,29 +89,29 @@ int ring_count = 0;
 
 void opcontrol() {
 	/*Nathan:
-  -util motor rpm str issues
-	test auton file creation with sd
-	make some background stuff into page loop funcs
-	talk to nikhil about controller buttons. autons and driver practice interfere
-	look at //make for other things to do
-	make everythhing c::
-	convert string title/label to const char* or at least const std::string
 
 	make _Text index nullptr instead of int and actually check if(index_ptr)
 	have _Text explicitly specify type
 	array text overload
 	make text, flash, and go variadic
+	add the ability to make the variable a function pointer. Then call the function when variable checking. No index for this
 
-	Fill in lift movements and states
+	make slider work for both directions
+
+	make unsigned the values that need to be unsigned
+
 	Reset tracking by task
 	convert some printfs to logs
 	/**/
-
-	extern std::array <std::tuple<int, Button*, Button*, Text*, int, char*>, 8> motor_ports;
+	//
+	intake_piston.set_value(1);
+	lift.reset();
+	tilter.reset();
+	lift.move_absolute(135);
+	tilter_bottom_piston.set_value(0);
 
 	while(true){
 		GUI::update();
-		printf("MAIN- %s\n\n", std::get<5>(motor_ports[0]));
 		// drivebase.non_blocking_driver_practice();
 
 		if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_UP)) prev_auton();

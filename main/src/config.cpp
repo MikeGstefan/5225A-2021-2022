@@ -35,7 +35,6 @@ pros::ADIDigitalOut intake_piston({{1, 6}});
 pros::ADIDigitalIn spinner_trigger({{1, 5}});
 pros::ADIDigitalOut ring_piston({{1, 4}});
 
-
 //1:temp(leave as 0), 2:long name, 3:short name
 std::array<std::tuple<pros::Motor*, int, const char*, const char*, Text*>, 8> motors = {
   std::make_tuple(&front_l, 1, "Front Left", "FL", nullptr),
