@@ -10,6 +10,8 @@
 #include "auton_util.hpp"
 #include "config.hpp"
 
+
+void lrt_auton();
 void red_tall_rush();
 void skills();
 void skills_pt2();

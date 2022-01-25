@@ -129,41 +129,59 @@ void opcontrol() {
 	tilter_top_piston.set_value(1);
 	tilter_bottom_piston.set_value(1);
 	while(!master.get_digital(E_CONTROLLER_DIGITAL_A))delay(10);
-	tilter_reset2();
-	// tilter_top_piston.set_value(0);
-	// tilter_bottom_piston.
+
+	lrt_auton();
 	// tilter_reset2();
-	Timer timer{"timer"};
-	move_start(move_types::point, point_params({5.0,8.0, 45.0}));
+	// // tilter_top_piston.set_value(0);
+	// // tilter_bottom_piston.
+	// // tilter_reset2();
+	// Timer timer{"timer"};
+	// move_start(move_types::point, point_params({5.0,8.0, 45.0}));
+	// intake.move(100);
+	// move_start(move_types::point, point_params(polar_to_vector_point(5.0,8.0,17.5,45.0,45.0),127.0,false,0.0,true,0.0,0.0,{18.0,0.0,20.0},{12.0,0.0001,1000.0},{125.0,0.0,1000.0}),false);
+	// // move_wait_for_error(2.0);
 	
-	move_start(move_types::point, point_params(polar_to_vector_point(5.0,8.0,17.5,45.0,45.0),127.0,false,0.0,true,0.0,0.0,{18.0,0.0,20.0},{12.0,0.0001,1000.0},{125.0,0.0,1000.0}),false);
-	// move_wait_for_error(2.0);
-	
-	move_wait_for_complete();
-	move_start(move_types::point, point_params(polar_to_vector_point(5.0,8.0,13.0,45.0,45.0),127.0,false,0.0,true,0.0,0.0,{18.0,0.0,100.0},{12.0,0.0001,1000.0},{125.0,0.0,1000.0}),false);
-	tilter.move_absolute(tilter.bottom_position);
-	while(tilter.motor.get_position() < tilter.bottom_position - 10)delay(10);
 	// move_wait_for_complete();
+	// move_start(move_types::point, point_params(polar_to_vector_point(5.0,8.0,13.0,45.0,45.0),127.0,false,0.0,true,0.0,0.0,{18.0,0.0,100.0},{12.0,0.0001,1000.0},{125.0,0.0,1000.0}),false);
+	// tilter.move_absolute(tilter.bottom_position);
+	// while(tilter.motor.get_position() < tilter.bottom_position - 10)delay(10);
+	// // move_wait_for_complete();
+	// // move_wait_for_error(2.0);
+	// delay(100);
+	// tilter_bottom_piston.set_value(0);
+	// delay(100);
+	// move_wait_for_complete();
+	// move_start(move_types::point, point_params(polar_to_vector_point(5.0,8.0,10.0,45.0,45.0),127.0,false,0.0,true,0.0,0.0,{18.0,0.0,100.0},{12.0,0.0001,1000.0},{125.0,0.0,1000.0}),true);
+	// // move_start(move_types::point, point_params({-3.0, 18.0,0.0}));
+	// // move_start(move_types::turn_point, turn_point_params({-2.5, 92.5}));
+	// move_start(move_types::turn_angle, turn_angle_params(-15.0));
+	// move_start(move_types::line_old, line_old_params(12.75, 15.75, -5.5, 92.5,-15.0,false,true,127, false,2.5,10.0,15.0,0.6,0.2),false); // drives through 1st small neutral mogo
+	// // move_start(move_types::point, point_params({-2.5, 92.5, rad_to_deg(atan2(-2.5 - tracking.x_coord, 92.5 - tracking.y_coord))}),false);
+	// find_goal_tilter(75);
+	// move_wait_for_complete();
+	// move_start(move_types::point, point_params(polar_to_vector_point(-3.5, 92.5, -14.0, -20,-20))); // backs up from goal
 	// move_wait_for_error(2.0);
-	delay(100);
-	tilter_bottom_piston.set_value(0);
-	delay(100);
-	move_wait_for_complete();
-	move_start(move_types::point, point_params(polar_to_vector_point(5.0,8.0,11.0,45.0,45.0),127.0,false,0.0,true,0.0,0.0,{18.0,0.0,100.0},{12.0,0.0001,1000.0},{125.0,0.0,1000.0}),true);
-	// move_start(move_types::point, point_params({-3.0, 18.0,0.0}));
-	move_start(move_types::turn_point, turn_point_params({-5.5, 92.5}));
-	move_start(move_types::line_old, line_old_params(12.75, 15.75, -5.5, 92.5,-20.0,false,true,127, false,1.5,7.0,15.0,0.6,0.2),false); // drives through 1st small neutral mogo
-	find_goal_tilter();
-	move_wait_for_complete();
-	move_start(move_types::point, point_params(polar_to_vector_point(-3.5, 92.5, -12.0, -20,-20))); // backs up from goal
-	tilter.move_absolute(tilter.bottom_position);
-  	while(tilter.motor.get_position() < tilter.bottom_position - 30)delay(10);
-  	tilter_top_piston.set_value(1);
-  	tilter_bottom_piston.set_value(0);
-	tilter.move_absolute(300);
-	while(tilter.motor.get_position() > 310)delay(10);
-	master.print(0,0,"%d",timer.get_time());
-	// const double max_power = 127.0, const bool overshoot = false, const double min_angle_percent = 0.0, const bool brake = true, const double decel_dist = 0.0, const double decel_speed = 0.0);
+	// tilter.move_absolute(tilter.bottom_position);
+  	// while(tilter.motor.get_position() < tilter.bottom_position - 30)delay(10);
+  	// tilter_top_piston.set_value(1);
+  	// tilter_bottom_piston.set_value(0);
+	// tilter.move_absolute(300);
+	// while(tilter.motor.get_position() > 310)delay(10);
+	// move_wait_for_complete();
+	// move_start(move_types::point, point_params({3.0,75.0,-105.0}));
+
+
+	// //going for center goal now 
+	// tilter.move_absolute(tilter.bottom_position);
+	// // move_start(move_types::point, point_params(polar_to_vector_point(3.0,75.0,32.0,-110.0,-110.0)),false);
+	// move_start(move_types::line_old, line_old_params(3.0, 75.0, -27.0, 64.5, -105, false,true,127, false,2.5,10.0,15.0,0.6,0.2), false);
+	// find_goal_tilter();
+	// move_stop();
+	// // drivebase.move(0,0,0);
+	// move_start(move_types::tank_arc, tank_arc_params({-27.0, 64.0}, {-55.0, 41.0, -135.0}, 127.0, 127.0, false));
+	// move_start(move_types::point, point_params({-59.0, 36.0, -135.0}));
+	// master.print(0,0,"%d",timer.get_time());
+	// // const double max_power = 127.0, const bool overshoot = false, const double min_angle_percent = 0.0, const bool brake = true, const double decel_dist = 0.0, const double decel_speed = 0.0);
 
 
 }
