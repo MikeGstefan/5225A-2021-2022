@@ -1,5 +1,4 @@
 #include "Subsystems/lift.hpp"
-#include "Subsystems/hitch.hpp"
 #include "drive.hpp"
 #include "controller.hpp"
 #include "gui/gui_main.hpp"

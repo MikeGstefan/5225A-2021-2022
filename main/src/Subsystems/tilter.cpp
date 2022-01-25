@@ -40,26 +40,43 @@ void Tilter::handle(){
   switch(state){
 
     case tilter_states::lowered:
-      if(master.get_digital(tilter_button)){  // grabs goal and raises tilter when tilter_button is pressed
-        tracking.reset(0.0, 0.0, 0.0);
-        printf("pressed\n");
-        Timer cur{"auto-pickup"};
-        drivebase.move(0.0, 80.0, 0.0);
-        waitUntil(tilter_dist.get() < 100 || tracking.y_coord > 45.0 || cur.get_time() > 1000);
-        tilter_top_piston.set_value(LOW);
-        delay(100); // waits for top piston to fully close
-        tilter_bottom_piston.set_value(HIGH);
-        delay(200); // waits for bottom piston to fully close
-
-        held = true;
+      if(master.get_digital(tilter_raise_button)){  // lifts tilter out of the way (not holding a mogo)
         move_absolute(raised_position);
 
         set_state(tilter_states::raised);
       }
+      else if(master.get_digital(tilter_search_button)){  // grabs goal and raises tilter when tilter_button is pressed
+        printf("pressed\n");
+        Timer cur{"auto-pickup"};
+        drivebase.move(0.0, 127.0, 0.0);
+        while(true){ // waits until distance sensor detects mogo
+          // cancels search if button is pressed or times out
+          if(master.get_digital_new_press(tilter_search_button) || cur.get_time() > 1000){
+            break;  // cancels search
+          }
+
+          if(tilter_dist.get() > 100){
+            tilter_top_piston.set_value(LOW);
+            delay(100); // waits for top piston to fully close
+            tilter_bottom_piston.set_value(HIGH);
+            delay(200); // waits for bottom piston to fully close
+
+            held = true;
+            move_absolute(raised_position); // raises mogo
+
+            set_state(tilter_states::raised);
+            break;
+          }
+
+          delay(10);
+        }
+
+      }
       break;
 
     case tilter_states::raised:
-      if(master.get_digital_new_press(tilter_button)){  // lowers tilter to bottom when tilter_button is pressed
+      // lowers tilter to bottom when either tilter button is pressed
+      if(master.get_digital_new_press(tilter_raise_button) || master.get_digital_new_press(tilter_search_button)){
         move_absolute(bottom_position);
 
         set_state(tilter_states::lowering);
@@ -76,7 +93,7 @@ void Tilter::handle(){
       break;
 
     case tilter_states::lowering:
-      if(master.get_digital_new_press(tilter_button)){  // raises tilter when tilter_button is pressed
+      if(master.get_digital_new_press(tilter_search_button)){  // raises tilter when tilter_button is pressed
         move_absolute(raised_position);
 
         set_state(tilter_states::raised);
@@ -102,7 +119,7 @@ void Tilter::handle(){
 
       motor.move(tilter_power);
 
-      if(master.get_digital_new_press(tilter_button)){ // toggles holding state if tilter button is pressed
+      if(master.get_digital_new_press(tilter_search_button)){ // toggles holding state if tilter button is pressed
         if(held){
           tilter_bottom_piston.set_value(LOW);
           tilter_top_piston.set_value(HIGH);
