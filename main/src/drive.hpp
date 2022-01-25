@@ -71,6 +71,7 @@ public:
   void non_blocking_driver_practice(); // method to let drivers drive and change driver profiles to be called in loop
   void next_driver(); //Goes to next driver. Called on drivebase object.
   void prev_driver(); //Goes to previous driver. Called on drivebase object.
+  const char* driver_name(); //Returns the current driver's name
 };
 
 extern Drivebase drivebase;

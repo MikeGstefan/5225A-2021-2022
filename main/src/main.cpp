@@ -96,10 +96,7 @@ void opcontrol() {
 	make text, flash, and go variadic
 	add the ability to make the variable a function pointer. Then call the function when variable checking. No index for this
 
-	make slider work for both directions
-
-	make unsigned the values that need to be unsigned
-
+	-make slider work for both directions
 	Reset tracking by task
 	convert some printfs to logs
 	/**/

@@ -1,9 +1,4 @@
 #include "gui.hpp"
-// #include "../../Subsystems/lift.hpp"
-#include "../include/pros/apix.h"
-#include "../../auton.hpp"
-#include <bitset>
-// #include <cstdio>
 
 /*Field array*/ static std::vector<std::bitset<200>> field (200, std::bitset<200>{}); //Initializes to 200 blank bitsets
 /*Temperature Alert Flag*/ static bool temp_flashed;
@@ -164,7 +159,7 @@ void main_init(){
 
   for (int x = 0; x < 200; x++) field[x].reset(); //Should be able to get rid of this
 
-  driver_curve.set_loop_func([](){driver_text = drivebase.drivers[drivebase.cur_driver].name;});
+  driver_curve.set_loop_func([](){driver_text = drivebase.driver_name();});
   prev_drivr.set_func([](){drivebase.prev_driver();});
   next_drivr.set_func([](){drivebase.next_driver();});
 

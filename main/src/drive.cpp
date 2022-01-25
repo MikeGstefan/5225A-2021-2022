@@ -89,7 +89,7 @@ void Drivebase::brake(){
 }
 
 void Drivebase::update_screen(){
-  master.print(0, 0, "Driver: %s          ", drivers[cur_driver].name); // updates driver
+  master.print(0, 0, "Driver: %s          ", driver_name()); // updates driver
   master.print(1, 0, screen_text[cur_screen]);  // updates text
   master.print(2, 0, "Curvature: %lf", drivers[cur_driver].custom_drives[cur_screen].curvature);  // updates curvature
 }
@@ -227,7 +227,7 @@ void Drivebase::driver_practice(){
   tilter_bottom_piston.set_value(LOW);
   tilter_top_piston.set_value(HIGH);
   cur_driver = 0; // defaults driver to Nikhil
-  // master.print(2, 0, "Driver: %s", drivers[cur_driver].name);
+  // master.print(2, 0, "Driver: %s", driver_name());
   while(true){
     while(!master.get_digital_new_press(E_CONTROLLER_DIGITAL_B)){
       // actual drive code
@@ -272,7 +272,7 @@ void Drivebase::driver_practice(){
     }
     update_lookup_table_util();
     master.clear();
-    master.print(2, 0, "Driver: %s", drivers[cur_driver].name);
+    master.print(2, 0, "Driver: %s", driver_name());
   }
 }
 
@@ -280,7 +280,7 @@ void Drivebase::non_blocking_driver_practice(){
   if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_B)){
     update_lookup_table_util();
     master.clear();
-    master.print(2, 0, "Driver: %s", drivers[cur_driver].name);
+    master.print(2, 0, "Driver: %s", driver_name());
   }
   else if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_UP)) next_driver();
   else if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_DOWN)) prev_driver();
@@ -308,11 +308,15 @@ void Drivebase::next_driver(){
   cur_driver++;
   cur_driver %= num_of_drivers; // rollover
   // spaces in the controller print are to overwrite names
-  master.print(2, 0, "Driver: %s          ", drivers[cur_driver].name);
+  master.print(2, 0, "Driver: %s          ", driver_name());
 }
 
 void Drivebase::prev_driver(){
   if (cur_driver == 0)  cur_driver = num_of_drivers - 1;
   else cur_driver--;
-  master.print(2, 0, "Driver: %s          ", drivers[cur_driver].name);
+  master.print(2, 0, "Driver: %s          ", driver_name());
+}
+
+const char* Drivebase::driver_name(){
+  return drivers[cur_driver].name;
 }

@@ -1,6 +1,11 @@
 #pragma once
+#include "../../Subsystems/lift.hpp"
+#include "../../auton.hpp"
 #include "../../drive.hpp"
 #include "../../util.hpp"
+#include "../include/pros/apix.h"
+#include <bitset>
+// #include <cstdio>
 // #include <iostream>
 // #include <vector>
 
@@ -69,7 +74,7 @@ class GUI{
     //Functions
     static void update_screen_status();
     static void end_flash();
-    static void draw_oblong(int, int, int, int, double, double);
+    static void draw_oblong(int, int, int, int, const double, const double);
     static int get_size(text_format_e_t, std::string);
     static std::tuple<int, int, int, int> fix_points (int, int, int, int, Style);
 
@@ -155,7 +160,6 @@ template <typename V, typename I> class _Text: public Text{
 
     //Functions
     const void update(){
-      // if(value_ptr && active && prev_value != value_ptr[static_cast<int>(*index_ptr)]) printf("DRAWING\n");
       if(value_ptr && active && prev_value != value_ptr[static_cast<int>(*index_ptr)]) draw();
     }
     void draw(){
