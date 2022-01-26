@@ -30,15 +30,25 @@ public:
   }
 
   void handle();  // has a switch containing the state machine for a given subsystem
+
+  state_type get_state() const{
+    return state;
+  }
+
+  state_type get_last_state() const{
+    return last_state;
+  }
+
 };
 
 template <typename state_type, int num_of_states, int default_velocity>
 class Motorized_subsystem: public Subsystem<state_type, num_of_states>{
-protected:
+// protected:
+
+public:
   const int end_error;
   double target, last_target;
 
-public:
   Motor& motor;
   Motorized_subsystem(Subsystem<state_type, num_of_states> subsystem, Motor& motor, int end_error = 10):
     Subsystem<state_type, num_of_states>(subsystem), motor(motor), end_error(end_error){}
@@ -88,6 +98,10 @@ public:
     last_target = target;
     target = position;
     motor.move_absolute(position, velocity);
+  }
+
+  void move(double speed){
+    motor.move(speed);
   }
 
 };

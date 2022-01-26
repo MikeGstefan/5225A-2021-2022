@@ -24,63 +24,59 @@ double get_filtered_output(ADIUltrasonic sensor, int check_count, uint16_t lower
 }
 
 void flatten_against_wall(bool right){
+  bool front_done, back_done;
+  int front_count = 0, back_count = 0;
+  double front_velocity, back_velocity;
+  const double dist_b = 3.0;  // make sure to keep this same as in tracking
+  const double simulated_radius = 8.0;
+  const double radial_scalar = simulated_radius / dist_b; // how much to multiples the actual radius by to get the simulated radius
+  double angular_component, linear_component;
+  const int cycle_threshold = 20;
+  const double velocity_threshold = 0.5;  // in inches/sec
+  int flatten_power, power_diff;
 
+  if(right) flatten_power = 60, power_diff = 20;
+  else  flatten_power = -60, power_diff = -20;
 
+  delay(100); // waits for robots velocity to rise
+  drivebase.move(flatten_power, 0.0, 0.0);
 
-  if(right){
+  // while(!(front_done && back_done)){
+  while(true){
+    drivebase.handle_input();
+    angular_component = tracking.g_velocity.angle * dist_b;
+    linear_component = tracking.b_velo + angular_component;
+
+    back_velocity = linear_component - angular_component * radial_scalar;
+    front_velocity = linear_component + angular_component * radial_scalar;
+
+    printf("Velocities | back: %lf, front: %lf\n", back_velocity, front_velocity);
+
+    if (fabs(front_velocity) < velocity_threshold){
+      front_done = front_count > cycle_threshold;
+      if(!front_done) front_count++;
+    }
+    else{ // resets front counter if robot is moving
+      front_done = false;
+      front_count = 0;
+    }
+
+      back_done = back_count > cycle_threshold;
+    if (fabs(back_velocity) < velocity_threshold){
+      if(!back_done) back_count++;
+    }
+    else{ // resets back counter if robot is moving
+      back_done = false;
+      back_count = 0;
+    }
+
+    if(front_done) drivebase.move(flatten_power, 0.0, -power_diff); // turn back end to align with wall if front is aligned
+    else if(back_done) drivebase.move(flatten_power, 0.0, power_diff); //  turn front end to align with wall if back is aligned
+    else drivebase.move(flatten_power, 0.0, 0.0); // otherwise continune towards wall
 
   }
-  else{
-    drivebase.move(-70, 0, -10);
-	// cycleCheck(fabs(rad_to_deg(tracking.g_velocity.angle)) >  0.01, 15,10);
-	  int bad_count = 0;
-    int good_count = 0;
-    while(good_count < 15 && bad_count < 30){ 
-      if(fabs(rad_to_deg(tracking.g_velocity.angle)) >  0.01)good_count++;
-      else{
-        good_count = 0;
-        bad_count++;
-      }
-      printf("good: %d bad: %d, v: %f\n", good_count, bad_count, fabs(rad_to_deg(tracking.g_velocity.angle)));
-      delay(10);
-    }
-    cycleCheck(fabs(rad_to_deg(tracking.g_velocity.angle)) <  0.0001, 10,10);
-
-    drivebase.move(-40, 0, -40);
-    // cycleCheck(fabs(rad_to_deg(tracking.g_velocity.angle)) >  0.01, 15,10);
-    bad_count = 0;
-    good_count = 0;
-    while(good_count < 10 && bad_count < 30){ 
-      if(fabs(rad_to_deg(tracking.g_velocity.angle)) >  0.01)good_count++;
-      else{
-        good_count = 0;
-        bad_count++;
-      }
-      printf("good: %d bad: %d, v: %f\n", good_count, bad_count, fabs(rad_to_deg(tracking.g_velocity.angle)));
-      delay(10);
-    }
-    cycleCheck(fabs(rad_to_deg(tracking.g_velocity.angle)) <  0.0001, 10,10);
-    drivebase.move(-60, 0, 30);
-    bad_count = 0;
-    good_count = 0;
-    while(good_count < 10 && bad_count < 30){ 
-      if(fabs(rad_to_deg(tracking.g_velocity.angle)) >  0.01)good_count++;
-      else{
-        good_count = 0;
-        bad_count++;
-      }
-      delay(10);
-    }
-    cycleCheck(fabs(rad_to_deg(tracking.g_velocity.angle)) <   0.0001, 10,10);
-	  drivebase.move(0,0,0);
-
-  }
-
-
-
+    delay(10);
 }
-
-
 void find_goal_lift(bool move_stop_b){
   while(!lift_trigger.get_value()){//NEED TO ADD SAFETY
   
@@ -105,8 +101,6 @@ void find_goal_tilter(int delay_t){
   tilter.move_absolute(300);
   
 }
-
-
 double get_front_dist(){
   double avg = 0.0;
   int count = 0;

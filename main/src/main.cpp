@@ -1,5 +1,4 @@
 #include "Subsystems/lift.hpp"
-#include "Subsystems/hitch.hpp"
 #include "drive.hpp"
 #include "controller.hpp"
 #include "gui/gui_main.hpp"
@@ -33,7 +32,6 @@ void initialize() {
 	// tracking.x_coord = 79.0, tracking.y_coord = 106.0, tracking.global_angle = deg_to_rad(-270.0);
 	update_t.start();
 	GUI::setup();
-	master.print(2, 0, "Driver: %s", drivebase.drivers[drivebase.cur_driver].name);
 }
 
 /**
@@ -68,6 +66,7 @@ void competition_initialize() {}
 void autonomous() {
 	// skills();
 	skills_pt2();
+
 
 }
 
@@ -125,7 +124,7 @@ void tilter_reset2(){
 // int ring_count = 0, cur_auton = 1;
 bool claw_state = false, intk_state = false;
 void opcontrol() {
-	intk_pnue.set_value(0);
+	intake_piston.set_value(0);
 	tilter_top_piston.set_value(1);
 	tilter_bottom_piston.set_value(1);
 	while(!master.get_digital(E_CONTROLLER_DIGITAL_A))delay(10);
@@ -140,7 +139,7 @@ void opcontrol() {
 	// intake.move(100);
 	// move_start(move_types::point, point_params(polar_to_vector_point(5.0,8.0,17.5,45.0,45.0),127.0,false,0.0,true,0.0,0.0,{18.0,0.0,20.0},{12.0,0.0001,1000.0},{125.0,0.0,1000.0}),false);
 	// // move_wait_for_error(2.0);
-	
+
 	// move_wait_for_complete();
 	// move_start(move_types::point, point_params(polar_to_vector_point(5.0,8.0,13.0,45.0,45.0),127.0,false,0.0,true,0.0,0.0,{18.0,0.0,100.0},{12.0,0.0001,1000.0},{125.0,0.0,1000.0}),false);
 	// tilter.move_absolute(tilter.bottom_position);
@@ -171,7 +170,7 @@ void opcontrol() {
 	// move_start(move_types::point, point_params({3.0,75.0,-105.0}));
 
 
-	// //going for center goal now 
+	// //going for center goal now
 	// tilter.move_absolute(tilter.bottom_position);
 	// // move_start(move_types::point, point_params(polar_to_vector_point(3.0,75.0,32.0,-110.0,-110.0)),false);
 	// move_start(move_types::line_old, line_old_params(3.0, 75.0, -27.0, 64.5, -105, false,true,127, false,2.5,10.0,15.0,0.6,0.2), false);
