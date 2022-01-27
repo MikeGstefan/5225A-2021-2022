@@ -109,8 +109,10 @@ struct point_params{
   pid_const y_pid_const = { 9.5,0.0,1000.0};
   pid_const a_pid_const = { 125.0,0.0,1000.0};
   uint32_t time_out = 0;
+  double end_error =0.5;
+  double end_error_a = 5.0;
   point_params() = default;
-  point_params(const Position target, const double max_power = 127.0, const bool overshoot = false, const double min_angle_percent = 0.0, const bool brake = true, const double decel_dist = 0.0, const double decel_speed = 0.0, pid_const x_pid_const = { 23.0,0.0,0.0}, pid_const y_pid_const = { 9.5,0.0,1000.0}, pid_const a_pid_const = { 125.0,0.0,1000.0}, const uint32_t time_out = 0);
+  point_params(const Position target, const double max_power = 127.0, const bool overshoot = false, const double min_angle_percent = 0.0, const bool brake = true, const double decel_dist = 0.0, const double decel_speed = 0.0, pid_const x_pid_const = { 23.0,0.0,0.0}, pid_const y_pid_const = { 9.5,0.0,1000.0}, pid_const a_pid_const = { 125.0,0.0,1000.0}, const uint32_t time_out = 0, double end_error = 0.5, double end_error_a = 5.0);
 };
 
 struct tank_arc_params{ 

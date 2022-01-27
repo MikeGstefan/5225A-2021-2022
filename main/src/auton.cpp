@@ -27,7 +27,9 @@ void lrt_auton(){
 	move_start(move_types::line_old, line_old_params(12.75, 15.75, -5.5, 92.5,-15.0,false,true,127, false,2.5,10.0,15.0,0.6,0.2),false); // drives through 1st small neutral mogo
 	// move_start(move_types::point, point_params({-2.5, 92.5, rad_to_deg(atan2(-2.5 - tracking.x_coord, 92.5 - tracking.y_coord))}),false);
 	find_goal_tilter(75);
-	move_wait_for_complete();
+  move_stop();
+  move_start(move_types::point, point_params({-9.5, 92.5,-15.0},127.0,true, 0.0,true, 0.0,0.0,{23.0,0.0,0.0},{9.5,0.0,1000.0},{125.0,0.0,1000.0},0,2.0,10.0));
+	// move_wait_for_complete();
 	move_start(move_types::point, point_params(polar_to_vector_point(-3.5, 92.5, -14.0, -20,-20))); // backs up from goal
 	move_wait_for_error(2.0);
 	tilter.move_absolute(tilter.bottom_position);
@@ -48,7 +50,7 @@ void lrt_auton(){
 	move_stop();
 	// drivebase.move(0,0,0);
 	move_start(move_types::tank_arc, tank_arc_params({-27.0, 64.0}, {-55.0, 41.0, -135.0}, 127.0, 127.0, false));
-	move_start(move_types::point, point_params({-59.0, 36.0, -135.0}));
+	move_start(move_types::point, point_params({-59.0, 36.0, -135.0},127.0,true, 0.0,true, 0.0,0.0,{23.0,0.0,0.0},{9.5,0.0,1000.0},{125.0,0.0,1000.0},0,2.0,10.0));
 	master.print(0,0,"%d",timer.get_time());
 }
 
