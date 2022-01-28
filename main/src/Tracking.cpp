@@ -16,7 +16,9 @@ void Tracking::reset(double x, double y, double a){
   update_t.done_update();
 }
 
-
+double Tracking::get_angle_in_deg(){
+  return fmod(rad_to_deg(global_angle), 360);
+}
 
 void update(void* params){
   _Task* ptr = _Task::get_obj(params);
@@ -279,7 +281,7 @@ void move_start(move_types type, std::variant<arc_params, line_params, tank_arc_
 }
 
 bool move_wait_for_complete(){
-  while(move_t.get_task_ptr()->get_state()!= 4)delay(10);
+  while(move_t.get_task_ptr()->get_state()!= 4)delay(10); //change to waitUntil(move_t.get_task_ptr()->get_state() == 4);
   return tracking.move_complete;
 }
 

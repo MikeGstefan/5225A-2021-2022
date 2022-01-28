@@ -1,7 +1,7 @@
 #pragma once
 #include "Subsystems/lift.hpp"
 #include "Subsystems/hitch.hpp"
-#include "Libraries/gui/gui.hpp"
+#include "Libraries/gui.hpp"
 #include "drive.hpp"
 #include "controller.hpp"
 #include "pid.hpp"

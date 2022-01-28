@@ -30,7 +30,7 @@ extern Timer screen_timer;  // timer to measure how long it's been since last sc
     }\
 }
 
-#define inRange(value, min, max) (min <= value && value <= max)
+#define inRange(value, min, max) ((min <= value && value <= max) || (max <= value && value <= min))
 
 // enum class claw_state{in,out,neut};
 

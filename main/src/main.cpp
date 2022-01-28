@@ -2,7 +2,7 @@
 #include "Subsystems/hitch.hpp"
 #include "drive.hpp"
 #include "controller.hpp"
-#include "Libraries/gui/gui.hpp"
+#include "Libraries/gui.hpp"
 #include "pid.hpp"
 #include "Tracking.hpp"
 #include "task.hpp"
@@ -25,7 +25,7 @@ void initialize() {
 	drivebase.download_curve_data();
 	Data::init();
 	_Controller::init();
-	GUI::setup();
+	GUI::init();
 	delay(150);
 	tracking.x_coord = 144.0 - 10.25, tracking.y_coord = 14.75, tracking.global_angle = -M_PI_2;
 	// tracking.x_coord = 0.0, tracking.y_coord = 0.0, tracking.global_angle = 0.0;
@@ -89,23 +89,29 @@ int ring_count = 0;
 
 void opcontrol() {
 	/*Nathan:
-
-	make _Text index nullptr instead of int and actually check if(index_ptr)
-	have _Text explicitly specify type
-	array text overload
-	make text, flash, and go variadic
-	add the ability to make the variable a function pointer. Then call the function when variable checking. No index for this
-
-	-make slider work for both directions
-	Reset tracking by task
+	make text and go variadic
 	convert some printfs to logs
+
+	check if ring count exists
+
+	create some distinction between compile-time and runtime functions, at least in the docs
+
+	make rollover for if out of bounds, not just if at end: perm should also send to end
+
+	make classes similar, give them all:
+	active,
+	pressed,
+	draw,
+	update...
+
 	/**/
 	//
-	intake_piston.set_value(1);
-	lift.reset();
-	tilter.reset();
-	lift.move_absolute(135);
-	tilter_bottom_piston.set_value(0);
+	// intake_piston.set_value(1);
+	// lift.reset();
+	// tilter.reset();
+	// lift.move_absolute(135);
+	// tilter_bottom_piston.set_value(0);
+
 
 	while(true){
 		GUI::update();

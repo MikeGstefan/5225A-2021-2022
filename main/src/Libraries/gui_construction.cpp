@@ -5,54 +5,54 @@
 /*Current Flashing Timer*/ extern Timer Flash;
 
 //Var init for text monitoring
-int angle, left_enc, right_enc, back_enc, elastic_up_time, elastic_down_time;
+int elastic_up_time, elastic_down_time;
 const char* port_nums;
-const char* driver_text;
-std::array <std::tuple<int, Button*, Button*, Text*, int, char*>, 8> motor_ports;
-//port, run, stop, stall counter, port and rpm
+std::array <std::tuple<int, Button*, Button*, Text*, int, char*>, 8> motor_ports; //port, run, stop, stall counter, port and rpm
+extern std::array<std::tuple<pros::Motor*, int, const char*, const char*, Text*>, 8> motors;
 
 extern Page testing;
 extern Button testing_button_1, testing_button_2;
+extern _Text testing_text_1, testing_text_2;
 extern Slider testing_slider;
 
 Page driver_curve ("Drivers"); //Select a driver and their exp curve
 Button prev_drivr(20, 70, 110, 120, GUI::Style::SIZE, Button::SINGLE, driver_curve, "Prev Driver");
-_Text drivr_name(MID_X, MID_Y, GUI::Style::CENTRE, TEXT_LARGE, driver_curve, "%s", driver_text);
+// _Text drivr_name(MID_X, MID_Y, GUI::Style::CENTRE, TEXT_LARGE, driver_curve, "%s", &Drivebase::driver_name, drivebase);
 Button next_drivr(350, 70, 110, 120, GUI::Style::SIZE, Button::SINGLE, driver_curve, "Next Driver");
 
 Page temps ("Temperature"); //Motor temps //make actual motor names
 _Text mot_temp_1(75, 85, GUI::Style::CENTRE, TEXT_SMALL, temps, std::get<3>(motors[0]) + ": %dC"s, std::get<1>(motors[0]), COLOUR(BLACK));
-_Text mot_temp_2(185, 85, GUI::Style::CENTRE, TEXT_SMALL, temps, "2: %dC", std::get<1>(motors[1]), COLOUR(BLACK));
-_Text mot_temp_3(295, 85, GUI::Style::CENTRE, TEXT_SMALL, temps, "3: %dC", std::get<1>(motors[2]), COLOUR(BLACK));
-_Text mot_temp_4(405, 85, GUI::Style::CENTRE, TEXT_SMALL, temps, "4: %dC", std::get<1>(motors[3]), COLOUR(BLACK));
-_Text mot_temp_5(75, 175, GUI::Style::CENTRE, TEXT_SMALL, temps, "5: %dC", std::get<1>(motors[4]), COLOUR(BLACK));
-_Text mot_temp_6(185, 175, GUI::Style::CENTRE, TEXT_SMALL, temps, "6: %dC", std::get<1>(motors[5]), COLOUR(BLACK));
-_Text mot_temp_7(295, 175, GUI::Style::CENTRE, TEXT_SMALL, temps, "7: %dC", std::get<1>(motors[6]), COLOUR(BLACK));
-_Text mot_temp_8(405, 175, GUI::Style::CENTRE, TEXT_SMALL, temps, "8: %dC", std::get<1>(motors[7]), COLOUR(BLACK));
+_Text mot_temp_2(185, 85, GUI::Style::CENTRE, TEXT_SMALL, temps, std::get<3>(motors[1]) + ": %dC"s, std::get<1>(motors[1]), COLOUR(BLACK));
+_Text mot_temp_3(295, 85, GUI::Style::CENTRE, TEXT_SMALL, temps, std::get<3>(motors[2]) + ": %dC"s, std::get<1>(motors[2]), COLOUR(BLACK));
+_Text mot_temp_4(405, 85, GUI::Style::CENTRE, TEXT_SMALL, temps, std::get<3>(motors[3]) + ": %dC"s, std::get<1>(motors[3]), COLOUR(BLACK));
+_Text mot_temp_5(75, 175, GUI::Style::CENTRE, TEXT_SMALL, temps, std::get<3>(motors[4]) + ": %dC"s, std::get<1>(motors[4]), COLOUR(BLACK));
+_Text mot_temp_6(185, 175, GUI::Style::CENTRE, TEXT_SMALL, temps, std::get<3>(motors[5]) + ": %dC"s, std::get<1>(motors[5]), COLOUR(BLACK));
+_Text mot_temp_7(295, 175, GUI::Style::CENTRE, TEXT_SMALL, temps, std::get<3>(motors[6]) + ": %dC"s, std::get<1>(motors[6]), COLOUR(BLACK));
+_Text mot_temp_8(405, 175, GUI::Style::CENTRE, TEXT_SMALL, temps, std::get<3>(motors[7]) + ": %dC"s, std::get<1>(motors[7]), COLOUR(BLACK));
 
 Page auto_selection ("Auton"); //Select auton routes
 Button prev_auto(20, 50, 120, 100, GUI::Style::SIZE, Button::SINGLE, auto_selection, "Prev Auton");
 Button next_auto(350, 50, 120, 100, GUI::Style::SIZE, Button::SINGLE, auto_selection, "Next Auton");
 Button alliance(MID_X, 200, 150, 20, GUI::Style::CENTRE, Button::SINGLE, auto_selection);
-_Text auto_name(MID_X, 100, GUI::Style::CENTRE, TEXT_LARGE, auto_selection, "%s", *auton_names, cur_auton);
-_Text ally_name(MID_X, 200, GUI::Style::CENTRE, TEXT_MEDIUM, auto_selection, "Alliance: %s", *alliance_names, cur_alliance);
+_Text auto_name(MID_X, 100, GUI::Style::CENTRE, TEXT_LARGE, auto_selection, "%s", auton_names, cur_auton);
+_Text ally_name(MID_X, 200, GUI::Style::CENTRE, TEXT_MEDIUM, auto_selection, "Alliance: %s", alliance_names, cur_alliance);
 
 Page track ("Tracking"); //Display tracking vals and reset btns
 _Text trackX(50, 45, GUI::Style::CENTRE, TEXT_SMALL, track, "X:%.1f", tracking.x_coord);
 _Text trackY(135, 45, GUI::Style::CENTRE, TEXT_SMALL, track, "Y:%.1f", tracking.y_coord);
-_Text trackA(220, 45, GUI::Style::CENTRE, TEXT_SMALL, track, "A:%d", angle);
-_Text encL(50, 130, GUI::Style::CENTRE, TEXT_SMALL, track, "L:%d", left_enc);
-_Text encR(135, 130, GUI::Style::CENTRE, TEXT_SMALL, track, "R:%d", right_enc);
-_Text encB(220, 130, GUI::Style::CENTRE, TEXT_SMALL, track, "B:%d", back_enc);
+// _Text trackA(220, 45, GUI::Style::CENTRE, TEXT_SMALL, track, "A:%d", &Tracking::get_angle_in_deg, tracking);
+// _Text encL(50, 130, GUI::Style::CENTRE, TEXT_SMALL, track, "L:%d", &ADIEncoder::get_value, LeftEncoder);
+// _Text encR(135, 130, GUI::Style::CENTRE, TEXT_SMALL, track, "R:%d", &ADIEncoder::get_value, RightEncoder);
+// _Text encB(220, 130, GUI::Style::CENTRE, TEXT_SMALL, track, "B:%d", &ADIEncoder::get_value, RightEncoder);
 Button resX(15, 60, 70, 55, GUI::Style::SIZE, Button::SINGLE, track, "Reset X");
 Button resY(100, 60, 70, 55, GUI::Style::SIZE, Button::SINGLE, track, "Reset Y");
 Button resA(185, 60, 70, 55, GUI::Style::SIZE, Button::SINGLE, track, "Reset A");
 Button resAll(15, 160, 240, 60, GUI::Style::SIZE, Button::SINGLE, track, "Reset All");
 
 Page moving ("Moving"); //Moves to target, home, or centre
-Slider xVal(35, 45, 250, 40, GUI::Style::SIZE, Slider::HORIZONTAL, 0, 144, moving, "X");
-Slider yVal(35, 110, 250, 40, GUI::Style::SIZE, Slider::HORIZONTAL, 0, 144, moving, "Y");
-Slider aVal(35, 175, 250, 40, GUI::Style::SIZE, Slider::HORIZONTAL, 0, 360, moving, "A");
+Slider x_val(35, 45, 250, 40, GUI::Style::SIZE, Slider::HORIZONTAL, 0, 144, moving, "X");
+Slider y_val(35, 110, 250, 40, GUI::Style::SIZE, Slider::HORIZONTAL, 0, 144, moving, "Y");
+Slider a_val(35, 175, 250, 40, GUI::Style::SIZE, Slider::HORIZONTAL, 0, 360, moving, "A");
 Button go_to_xya(320, 45, 150, 40, GUI::Style::SIZE, Button::SINGLE, moving, "Target");
 Button go_home(320, 110, 150, 40, GUI::Style::SIZE, Button::SINGLE, moving, "Home");
 Button go_centre(320, 175, 150, 40, GUI::Style::SIZE, Button::SINGLE, moving, "Centre");
@@ -70,7 +70,7 @@ _Text elastic_down(MID_X, 180, GUI::Style::CENTRE, TEXT_SMALL, elastic, "Down Ti
 
 Page motor_subsys ("Motorized Subsystems"); //Moving the lift
 Slider lift_val(30, 45, 300, 35, GUI::Style::SIZE, Slider::HORIZONTAL, 35, 675, motor_subsys, "Lift", 10);
-Slider tilter_val(30, 110, 300, 40, GUI::Style::SIZE, Slider::HORIZONTAL, 50, 500, motor_subsys, "Tilter", 10);
+Slider tilter_val(30, 110, 300, 40, GUI::Style::SIZE, Slider::HORIZONTAL, 500, 50, motor_subsys, "Tilter", 10);
 Button lift_move(470, 45, -100, 40, GUI::Style::SIZE, Button::SINGLE, motor_subsys, "Move Lift");
 Button tilter_move(470, 95, -100, 40, GUI::Style::SIZE, Button::SINGLE, motor_subsys, "Move Tilter");
 Button claw_switch(470, 145, -100, 40, GUI::Style::SIZE, Button::TOGGLE, motor_subsys, "Claw");
@@ -100,15 +100,15 @@ _Text pneum_text_2 (350, 50, GUI::Style::CENTRE, TEXT_SMALL, pneumatic, "PORT G 
 Button pneum_btn_1 (25, 70, 200, 80, GUI::Style::SIZE, Button::TOGGLE, pneumatic, "PNEUMATIC 1");
 Button pneum_btn_2 (250, 70, 200, 80, GUI::Style::SIZE, Button::TOGGLE, pneumatic, "PNEUMATIC 2");
 
-Page ports ("Ports");
+Page ports ("Ports"); //Shows what ports to use on builder util
 _Text mot (10, 50, GUI::Style::CORNER, TEXT_LARGE, ports, "Motors: %s", port_nums);
 _Text enc (10, 100, GUI::Style::CORNER, TEXT_LARGE, ports, "Encoders: AB, CD, EF");
 _Text pne (10, 150, GUI::Style::CORNER, TEXT_LARGE, ports, "Pneumatics: G, H");
 
 Page encoders ("Encoders"); //Display tracking vals and reset btns
-_Text encAB (85, 50, GUI::Style::CENTRE, TEXT_SMALL, encoders, "AB Encoder:%d", left_enc);
-_Text encCD (240, 50, GUI::Style::CENTRE, TEXT_SMALL, encoders, "CD Encoder:%d", right_enc);
-_Text encEF (395, 50, GUI::Style::CENTRE, TEXT_SMALL, encoders, "EF Encoder:%d", back_enc);
+// _Text encAB (85, 50, GUI::Style::CENTRE, TEXT_SMALL, encoders, "AB Encoder:%d", &ADIEncoder::get_value, LeftEncoder);
+// _Text encCD (240, 50, GUI::Style::CENTRE, TEXT_SMALL, encoders, "CD Encoder:%d", &ADIEncoder::get_value, RightEncoder);
+// _Text encEF (395, 50, GUI::Style::CENTRE, TEXT_SMALL, encoders, "EF Encoder:%d", &ADIEncoder::get_value, BackEncoder);
 Button resAB (35, 75, 100, 50, GUI::Style::SIZE, Button::SINGLE, encoders, "Reset AB");
 Button resCD (190, 75, 100, 50, GUI::Style::SIZE, Button::SINGLE, encoders, "Reset CD");
 Button resEF (345, 75, 100, 50, GUI::Style::SIZE, Button::SINGLE, encoders, "Reset EF");
@@ -141,39 +141,25 @@ Button mot_stop_6 (185, 190, 45, 30, GUI::Style::SIZE, Button::SINGLE, motor, "S
 Button mot_stop_7 (300, 190, 45, 30, GUI::Style::SIZE, Button::SINGLE, motor, "Stop");
 Button mot_stop_8 (415, 190, 45, 30, GUI::Style::SIZE, Button::SINGLE, motor, "Stop");
 
-//Functions
-void resetX(){
-  tracking.x_coord = 0;
-  printf("Change to mike's task way of resetting x\n");
-}
-void resetY(){
-  tracking.y_coord = 0;
-  printf("Change to mike's task way of resetting y\n");
-}
-void resetA(){
-  tracking.global_angle = 0;
-  printf("Change to mike's task way of resetting a\n");
-}
-
-void main_init(){
+void main_setup(){
 
   for (int x = 0; x < 200; x++) field[x].reset(); //Should be able to get rid of this
 
-  driver_curve.set_loop_func([](){driver_text = drivebase.driver_name();});
+  // driver_curve.set_loop_func([](){driver_text = drivebase.driver_name();});
   prev_drivr.set_func([](){drivebase.prev_driver();});
   next_drivr.set_func([](){drivebase.next_driver();});
 
   prev_auto.set_func(&prev_auton);
   next_auto.set_func(&next_auton);
-  alliance.set_func([&](){switch_alliance();}); //Has to be in a lambda since param type is alliances not void
+  alliance.set_func([](){switch_alliance();}); //Has to be in a lambda since param type is alliances not void
   alliance.add_text(ally_name);
 
   run_elastic.set_func([](){lift.elastic_util();});
 
-  resX.set_func(&resetX);
-  resY.set_func(&resetY);
-  resA.set_func(&resetA);
-  resAll.set_func([](){resetX();resetY();resetA();});
+  resX.set_func([](){tracking.reset(0.0, tracking.y_coord, rad_to_deg(tracking.global_angle));});
+  resY.set_func([](){tracking.reset(tracking.x_coord, 0.0, rad_to_deg(tracking.global_angle));});
+  resA.set_func([](){tracking.reset(tracking.x_coord, tracking.y_coord);});
+  resAll.set_func([](){tracking.reset();});
   track.set_setup_func([](){
     screen::set_pen(COLOUR(WHITE));
     screen::draw_rect(270, 30, 470, 230);
@@ -186,18 +172,14 @@ void main_init(){
   track.set_loop_func([](){
     screen::set_pen(COLOUR(RED));
     screen::draw_pixel(270+(200*tracking.x_coord/144), 230-(200*tracking.y_coord/144)); //Scales to screen
-    //Saving vars for text display
-    angle = fmod(rad_to_deg(tracking.global_angle), 360);
-    left_enc = LeftEncoder.get_value();
-    right_enc = RightEncoder.get_value();
-    back_enc = BackEncoder.get_value();
   });
 
   go_to_xya.set_func([&](){
+    int x = x_val.get_value(), y = y_val.get_value(), a = a_val.get_value();
     char coord_c[20];
-    sprintf(coord_c, " (%d, %d, %d)", xVal.get_value(), yVal.get_value(), aVal.get_value());
+    sprintf(coord_c, " (%d, %d, %d)", x, y, a);
     std::string coord = coord_c;
-    if (GUI::go("GO TO" + coord, "Press to move to target selected by sliders" + coord, 1000)) move_start(move_types::point, point_params({double(xVal.get_value()), double(yVal.get_value()), double(aVal.get_value())}));
+    if (GUI::go("GO TO" + coord, "Press to move to target selected by sliders" + coord, 1000)) move_start(move_types::point, point_params({double(x), double(y), double(a)}));
   });
   go_home.set_func([](){
     if (GUI::go("GO TO (0, 0, 0)", "Press to go to starting point (0, 0, 0)", 1000)) move_start(move_types::point, point_params({0.0, 0.0, 0.0}));
@@ -234,9 +216,7 @@ void main_init(){
 
   turn_encoder.set_func([](){ //Turn the encoder
     if (GUI::go("START, THEN SPIN THE ENCODER", "Please spin the encoder any number of rotations.")){
-      resetX();
-      resetY();
-      resetA();
+      tracking.reset();
       if (GUI::go_end("WHEN STOPPED")){
         printf("The left encoder found %d ticks\n", LeftEncoder.get_value() % 360);
         printf("The right encoder found %d ticks\n", RightEncoder.get_value() % 360);
@@ -246,9 +226,7 @@ void main_init(){
   });
   perpendicular_error.set_func([](){ //Perpendicular Error
     if (GUI::go("START, THEN MOVE STRAIGHT ALONG Y", "Please run the robot along a known straight line in the y-axis.")){
-      resetX();
-      resetY();
-      resetA();
+      tracking.reset();
       if (GUI::go_end("WHEN STOPPED")){
         if (tracking.x_coord < 0) printf("The robot thinks it strafed %.2f inches to the left.\nConsider turning the back tracking wheel counter-clockwise\n", tracking.x_coord);
         else if (tracking.x_coord > 0) printf("The robot thinks it strafed %.2f inches to the right.\nConsider turning the back tracking wheel clockwise\n", tracking.x_coord);
@@ -258,9 +236,7 @@ void main_init(){
   });
   grid.set_func([](){ //Move in a random motion
     if (GUI::go("START, THEN MOVE RANDOMLY", "Please move the robot haphazardly around the field. Then return it back to the starting point.")){
-      resetX();
-      resetY();
-      resetA();
+      tracking.reset();
       if (GUI::go_end("WHEN STOPPED")){
         printf("The robot thinks it deviated %.2f inches to the %s\n", fabs(tracking.x_coord), (tracking.x_coord < 0 ? "left" : "right"));
         printf("The robot thinks it deviated %.2f inches %s\n", fabs(tracking.y_coord), (tracking.y_coord < 0 ? "back" : "forward"));
@@ -270,9 +246,7 @@ void main_init(){
   });
   spin360.set_func([](){ //Robot turn accuracy
     if (GUI::go("START, THEN SPIN THE ROBOT", "Please spin the robot any number of rotations. Then return it back to the starting point")){
-      resetX();
-      resetY();
-      resetA();
+      tracking.reset();
       if(GUI::go_end("WHEN STOPPED")){
         printf("The robot is %.2f inches %s and %.2f inches %s off the starting point.\n", fabs(tracking.x_coord), (tracking.x_coord < 0 ? "left" : "right"), fabs(tracking.y_coord), (tracking.y_coord < 0 ? "back" : "forward"));
 
@@ -317,10 +291,10 @@ void main_background(){
     Text* text = std::get<4>(mot_tup);
     std::get<1>(mot_tup) = motor == nullptr ? std::numeric_limits<int>::max() : std::get<0>(*it)->get_temperature();
     int temp = std::get<1>(mot_tup);
-    // printf("%s is %d\n", std::get<3>(mot_tup), temp);
 
     if (temp >= 55 && temp != std::numeric_limits<int>::max() && !Flash.playing() && !temp_flashed){ //Overheating
       temp_flashed = true;
+      printf("Moving to temps\n");
       temps.go_to();
       char buffer[50];
       sprintf(buffer, "%s motor is at %dC\n", std::get<2>(mot_tup), temp);
@@ -340,7 +314,7 @@ void main_background(){
   }
 }
 
-void util_init(){
+void util_setup(){
   ; //Don't know why, but the {} don't match up without this
   motor_ports = {
     std::make_tuple(std::numeric_limits<int>::max(), &mot_update_1, &mot_stop_1, &mot_text_1, 0, (char*)malloc(10*sizeof(char))),
@@ -376,11 +350,6 @@ void util_init(){
   if (port_num_string.back() == ',') port_num_string.pop_back();
   port_nums = strdup(port_num_string.c_str());
 
-  encoders.set_loop_func([](){
-    left_enc = LeftEncoder.get_value();
-    right_enc = RightEncoder.get_value();
-    back_enc = BackEncoder.get_value();
-  });
   resAB.set_func([&](){LeftEncoder.reset();});
   resCD.set_func([&](){RightEncoder.reset();});
   resEF.set_func([&](){BackEncoder.reset();});
@@ -412,6 +381,6 @@ void util_background(){
   }
 }
 
-GUI g_main ({&driver_curve, &temps, &auto_selection, &track, &moving, &intake_test, &elastic, &motor_subsys, &liftStates, &tuning, &pneumatic}, &main_init, &main_background);
+GUI g_main ({&driver_curve, &temps, &auto_selection, &track, &moving, &intake_test, &elastic, &motor_subsys, &liftStates, &tuning, &pneumatic}, &main_setup, &main_background);
 
-GUI g_util ({&ports, &encoders, &motor, &pneumatic}, &util_init, &util_background);
+GUI g_util ({&ports, &encoders, &motor, &pneumatic}, &util_setup, &util_background);

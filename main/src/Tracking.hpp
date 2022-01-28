@@ -38,8 +38,8 @@ public:
 
     Position g_velocity;   // global g_velocity stores x, y and angular velocities
     void wait_for_dist(double distance);
-
-    void reset(double x, double y, double a);
+    double get_angle_in_deg();
+    void reset(double x=0.0, double y=0.0, double a=0.0);
 
 };
 
