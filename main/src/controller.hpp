@@ -7,6 +7,29 @@
 #include <array>
 #include <functional>
 
+using namespace pros;
+// Buttons
+
+// lift buttons
+extern controller_digital_e_t lift_up_button;
+extern controller_digital_e_t lift_down_button;
+extern controller_digital_e_t mogo_tip_button;
+
+
+extern controller_digital_e_t tilter_button;
+extern controller_digital_e_t hitch_button;
+
+// misc buttons
+extern controller_digital_e_t cancel_button;
+extern controller_digital_e_t fill_top_goal_button;
+extern controller_digital_e_t climb_platform_button;
+extern controller_digital_e_t intake_button;
+extern controller_digital_e_t reverse_drive_button;
+
+// manual control buttons
+extern controller_digital_e_t lift_manual_button;
+extern controller_digital_e_t tilter_manual_button;
+
 #define num_controller 1
 
 class _Task;
@@ -30,5 +53,7 @@ public:
   void print(std::uint8_t line, std::uint8_t col, const char* fmt, ... );
   void clear_line (std::uint8_t line);
   void clear();
+  void rumble(const char* rumble_pattern);
+
 
 };

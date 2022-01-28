@@ -1,34 +1,48 @@
 #include "config.hpp"
 
+// NEW config
 _Controller master(pros::E_CONTROLLER_MASTER);
 
-// new robot config
-// pros::Motor front_l(1, pros::E_MOTOR_GEARSET_18, true, pros::E_MOTOR_ENCODER_DEGREES);
-// pros::Motor front_r(2, pros::E_MOTOR_GEARSET_18, false, pros::E_MOTOR_ENCODER_DEGREES);
-// pros::Motor back_l(4, pros::E_MOTOR_GEARSET_18, true, pros::E_MOTOR_ENCODER_DEGREES);
-// pros::Motor back_r(3, pros::E_MOTOR_GEARSET_18, false, pros::E_MOTOR_ENCODER_DEGREES);
-// old robot config:
-pros::Motor front_l(1, pros::E_MOTOR_GEARSET_18, true, pros::E_MOTOR_ENCODER_DEGREES);
-pros::Motor front_r(2, pros::E_MOTOR_GEARSET_18, false, pros::E_MOTOR_ENCODER_DEGREES);
-pros::Motor back_l(3, pros::E_MOTOR_GEARSET_18, true, pros::E_MOTOR_ENCODER_DEGREES);
-pros::Motor back_r(4, pros::E_MOTOR_GEARSET_18, false, pros::E_MOTOR_ENCODER_DEGREES);
-pros::Motor intk(6, pros::E_MOTOR_GEARSET_06, false, pros::E_MOTOR_ENCODER_DEGREES);
-pros::Motor f_bar(7, pros::E_MOTOR_GEARSET_18, true, pros::E_MOTOR_ENCODER_DEGREES);
-pros::Motor c_bar(10, pros::E_MOTOR_GEARSET_36, true, pros::E_MOTOR_ENCODER_DEGREES);
-pros::Motor uptk(11);
+pros::Motor front_l(19, pros::E_MOTOR_GEARSET_18, true, pros::E_MOTOR_ENCODER_DEGREES);
+pros::Motor front_r(20, pros::E_MOTOR_GEARSET_18, false, pros::E_MOTOR_ENCODER_DEGREES);
+pros::Motor back_l(17, pros::E_MOTOR_GEARSET_18, true, pros::E_MOTOR_ENCODER_DEGREES);
+pros::Motor back_r(18, pros::E_MOTOR_GEARSET_18, false, pros::E_MOTOR_ENCODER_DEGREES);
 
-pros::ADIEncoder LeftEncoder(1, 2, false), RightEncoder(3, 4, true), BackEncoder(5, 6, false);
-pros::ADIDigitalOut claw_in(7), claw_out(8);
-pros::ADIDigitalIn claw_touch({{6, 6}});
-pros::Distance dist(20);
+// tank drive config
+// pros::Motor front_l(19, pros::E_MOTOR_GEARSET_18, false, pros::E_MOTOR_ENCODER_DEGREES);
+// pros::Motor front_r(17, pros::E_MOTOR_GEARSET_18, true, pros::E_MOTOR_ENCODER_DEGREES);
+// pros::Motor back_l(20, pros::E_MOTOR_GEARSET_18, false, pros::E_MOTOR_ENCODER_DEGREES);
+// pros::Motor back_r(18, pros::E_MOTOR_GEARSET_18, true, pros::E_MOTOR_ENCODER_DEGREES);
 
-std::array<std::tuple<pros::Motor*, int, std::string, const char*, Text*>, 8> motors = {
+pros::Motor lift_motor(16, pros::E_MOTOR_GEARSET_36, false, pros::E_MOTOR_ENCODER_DEGREES);
+pros::Motor tilter_motor(14, pros::E_MOTOR_GEARSET_36, true, pros::E_MOTOR_ENCODER_DEGREES);
+
+// pros::Motor c_bar(10, pros::E_MOTOR_GEARSET_36, true, pros::E_MOTOR_ENCODER_DEGREES);
+pros::Motor intake_motor(9, pros::E_MOTOR_GEARSET_36, true, pros::E_MOTOR_ENCODER_DEGREES);
+pros::Motor spinner_motor(8, pros::E_MOTOR_GEARSET_36, true, pros::E_MOTOR_ENCODER_DEGREES);
+
+// pros::Motor uptk(11);
+pros::Distance tilter_dist(8);
+pros::ADIDigitalOut lift_piston(7);
+pros::ADIDigitalIn lift_trigger(8);
+pros::ADIEncoder LeftEncoder(3, 4, false), RightEncoder(1, 2, true), BackEncoder(6, 5, true);
+
+pros::ADIDigitalOut tilter_bottom_piston({{1, 1}});
+pros::ADIDigitalOut tilter_top_piston({{1, 2}});
+
+pros::ADIDigitalOut intake_piston({{1, 6}});
+
+pros::ADIDigitalIn spinner_trigger({{1, 5}});
+pros::ADIDigitalOut ring_piston({{1, 4}});
+
+//1:temp(leave as 0), 2:long name, 3:short name
+std::array<std::tuple<pros::Motor*, int, const char*, const char*, Text*>, 8> motors = {
   std::make_tuple(&front_l, 1, "Front Left", "FL", nullptr),
   std::make_tuple(&front_r, 1, "Front Right", "FR", nullptr),
   std::make_tuple(&back_l, 1, "Back Left", "BL", nullptr),
   std::make_tuple(&back_r, 1, "Back Right", "BR", nullptr),
-  std::make_tuple(&intk, 1, "Intake", "IN", nullptr),
-  std::make_tuple(&f_bar, 1, "Four Bar", "FB", nullptr),
-  std::make_tuple(&c_bar, 1, "Chain Bar", "CB", nullptr),
-  std::make_tuple(&uptk, 0, "Uptake", "UP", nullptr),
+  std::make_tuple(&lift_motor, 0, "Lift", "LF", nullptr),
+  std::make_tuple(&tilter_motor, 0, "Tilter", "TL", nullptr),
+  std::make_tuple(&intake_motor, 0, "Intake", "IN", nullptr),
+  std::make_tuple(&spinner_motor, 0, "Spinner", "SP", nullptr),
 };//std::make_tuple(nullptr, 0, "", "", nullptr),

@@ -1,4 +1,28 @@
 #include "controller.hpp"
+
+// Buttons
+
+// lift buttons
+controller_digital_e_t lift_up_button = DIGITAL_R1;
+controller_digital_e_t lift_down_button = DIGITAL_R2;
+controller_digital_e_t mogo_tip_button = DIGITAL_DOWN;
+
+
+controller_digital_e_t tilter_button = DIGITAL_L1;
+controller_digital_e_t hitch_button = DIGITAL_L2;
+
+// misc buttons
+controller_digital_e_t cancel_button = DIGITAL_B;
+controller_digital_e_t fill_top_goal_button = DIGITAL_X;
+controller_digital_e_t climb_platform_button = DIGITAL_UP;
+controller_digital_e_t intake_button = DIGITAL_LEFT;
+controller_digital_e_t reverse_drive_button = DIGITAL_RIGHT;
+
+// manual control buttons
+controller_digital_e_t lift_manual_button = DIGITAL_A;
+controller_digital_e_t tilter_manual_button = DIGITAL_Y;
+
+
 std::array<_Controller*, num_controller> _Controller::objs; //= {nullptr};
 _Task _Controller::controller_task = nullptr;
 
@@ -81,4 +105,14 @@ void _Controller::clear(){
   };
   this->add_to_queue(func);
   controller_queue.print("%d| adding clear to queue for controller %d\n",millis(), this->controller_num);
+}
+
+
+void _Controller::rumble(const char* rumble_pattern){
+  std::function<void()> func = [=](){
+    pros::Controller::rumble(rumble_pattern);
+    controller_queue.print("%d| rumble controller %d\n",millis(), this->controller_num);
+  };
+  this->add_to_queue(func);
+  controller_queue.print("%d| adding rumble to queue for controller %d\n",millis(), this->controller_num);
 }

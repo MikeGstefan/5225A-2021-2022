@@ -1,11 +1,18 @@
+#include "Subsystems/lift.hpp"
+#include "Subsystems/hitch.hpp"
 #include "drive.hpp"
 #include "controller.hpp"
-#include "gui/gui_util.hpp"
-
-// using namespace std;
+#include "Libraries/gui.hpp"
+#include "pid.hpp"
+#include "Tracking.hpp"
 #include "task.hpp"
+#include "auton.hpp"
+#include "task.hpp"
+
 using namespace std;
-// using namespace pros;
+
+pros::Task *updt = nullptr;
+GUI* const GUI::current_gui = &g_main;
 
 
 /**
@@ -14,16 +21,17 @@ using namespace std;
  * All other competition modes are blocked by initialize; it is recommended
  * to keep execution time for this mode under a few seconds.
  */
-
-
 void initialize() {
 	drivebase.download_curve_data();
 	Data::init();
 	_Controller::init();
+	GUI::init();
 	delay(150);
-	tracking.x_coord = 0.0, tracking.y_coord = 0.0, tracking.global_angle = 0.0;
+	tracking.x_coord = 144.0 - 10.25, tracking.y_coord = 14.75, tracking.global_angle = -M_PI_2;
+	// tracking.x_coord = 0.0, tracking.y_coord = 0.0, tracking.global_angle = 0.0;
+
 	update_t.start();
-	GUI::setup();
+  auton_file_read();
 	master.print(2, 0, "Driver: %s", drivebase.drivers[drivebase.cur_driver].name);
 }
 
@@ -56,7 +64,11 @@ void competition_initialize() {}
  * will be stopped. Re-enabling the robot will restart the task, not re-start it
  * from where it left off.
  */
-void autonomous() {}
+void autonomous() {
+	// skills();
+
+
+}
 
 /**
  * Runs the operator control code. This function will be started in its own task
@@ -73,54 +85,42 @@ void autonomous() {}
  */
 
 //Get rid of these once merged
-void prev_driver(){
-	if (drivebase.cur_driver == 0) drivebase.cur_driver = drivebase.num_of_drivers - 1;
-	else drivebase.cur_driver--;
-	WAIT_FOR_SCREEN_REFRESH();
-	master.print(2, 0, "Driver: %s          ", drivebase.drivers[drivebase.cur_driver].name);
-}
-void next_driver(){
-	drivebase.cur_driver++;
-	drivebase.cur_driver %= drivebase.num_of_drivers;
-	WAIT_FOR_SCREEN_REFRESH();
-	master.print(2, 0, "Driver: %s          ", drivebase.drivers[drivebase.cur_driver].name);
-}
-
-int ring_count = 0, cur_auton = 1;
+int ring_count = 0;
 
 void opcontrol() {
-	/*Gui:
-	Reset tracking by task
-	move abstract page methods to GUI class
+	/*Nathan:
+	make text and go variadic
+	create some distinction between compile-time and runtime functions, at least in the docs
+	check if ring count exists
+	make rollover for if out of bounds, not just if at end: perm should also send to end
+
+	make classes similar, give them all:
+	active,
+	pressed,
+	draw,
+	update...
+
+	convert some printfs to logs
+	make gui a task
+
+	maybe use decay on the arrays
+
 	/**/
-
-	// while(true){
-	// 	printf("%d\n", dist.get());
-	// 	delay(10);
-	// }
-
-	// claw_in.set_value(1); //Open
-	// rush_goal2(0, 100, 0);
-
+	//
+	// intake.raise_and_disable();
+	// lift.reset();
+	// tilter.reset();
+	// lift.move_absolute(135);
+	// tilter_bottom_piston.set_value(0);
 
 	while(true){
-		GUI::background();
-		// drivebase.handle_input();
+		GUI::update();
+		// drivebase.non_blocking_driver_practice();
 
-		if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_B)){ //Update expo util
-			drivebase.update_lookup_table_util();
-			master.clear();
-		}
-		else if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_UP)) next_driver();
-		else if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_DOWN)) prev_driver();
-		else if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_X)) claw_in.set_value(1); //Open
-		else if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_Y)){
-			claw_in.set_value(1); //Open
-			drivebase.move(0, 127, 0);
-			waitUntil(dist.get() <= 100);
-			claw_in.set_value(0); //Close
-			drivebase.brake();
-		}
+		if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_UP)) prev_auton();
+		else if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_DOWN)) next_auton();
+		if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_X)) switch_alliance();
+		if (master.get_digital_new_press(cancel_button)) break;
 		delay(10);
 	}
 }
