@@ -68,6 +68,8 @@ alliances cur_alliance = static_cast<alliances>(0);
 const char* auton_names[static_cast<int>(autons::NUM_OF_ELEMENTS)] = {"Skills", "Auto1", "Auto2"};
 const char* alliance_names[2] = {"Red", "Blue"};
 
+extern Button alliance;
+
 void auton_file_update(){
   Data::log_t.data_update();
   auton_file.open("/usd/auton.txt", fstream::out | fstream::trunc);
@@ -95,6 +97,7 @@ void auton_file_read(){
       auton_file.close();
       Data::log_t.done_update();
       printf("\033[31mAborting auton file read. It's not getting created.\033[0m Using default values.\n");
+      
       cur_auton = autons::Skills;
       cur_alliance = alliances::BLUE;
       switch_alliance(cur_alliance);
@@ -111,12 +114,10 @@ void auton_file_read(){
 
   auto autonIt = std::find(auton_names, auton_names+static_cast<int>(autons::NUM_OF_ELEMENTS), auton);
   auto allianceIt = std::find(alliance_names, alliance_names+2, ally);
+  
+  cur_auton = (autonIt != std::end(auton_names)) ? static_cast<autons>(std::distance(auton_names, autonIt)) : autons::Skills;
+  cur_alliance = (allianceIt != std::end(alliance_names)) ? static_cast<alliances>(std::distance(alliance_names, allianceIt)) : alliances::BLUE;
 
-  if (autonIt != std::end(auton_names)) cur_auton = static_cast<autons>(std::distance(auton_names, autonIt));
-  else cur_auton = autons::Skills;
-
-  if (allianceIt != std::end(alliance_names)) cur_alliance = static_cast<alliances>(std::distance(alliance_names, allianceIt));
-  else cur_alliance = alliances::BLUE;
   switch_alliance(cur_alliance);
 }
 

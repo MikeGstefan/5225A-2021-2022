@@ -49,11 +49,9 @@ public:
   static _Task controller_task;
   static void init();
 
-
   void print(std::uint8_t line, std::uint8_t col, const char* fmt, ... );
   void clear_line (std::uint8_t line);
   void clear();
   void rumble(const char* rumble_pattern);
-
-
+  bool interrupt(bool analog=true, bool digital=true);
 };
