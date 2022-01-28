@@ -67,13 +67,14 @@ void GUI::flash(Colour colour, std::uint32_t time, std::string text){
   screen::set_pen(~colour&0xFFFFFF); //Makes text inverted colour of background so it is always visible
   screen::set_eraser(colour);
 
-  printf("\n\n\033[31mWARNING: %s\033[0m\n\n", text.c_str()); //Mike, Convert to log
+  printf("\n\n\033[31mWARNING: %s\033[0m\n\n", text.c_str());
+  misc.print("%s", text.c_str());
 
   int spaces = int(CHAR_WIDTH_LARGE*text.length()/460)+1;
   std::size_t space, last_space=0;
   std::string sub;
 
-  // master.rumble(".-");
+  master.rumble(".-");
 
   for(int i=1; i <= spaces; i++){ //make the printing actually look good
     space = text.find(' ', text.length()*i/spaces);
@@ -123,7 +124,7 @@ bool GUI::go(std::string short_msg, std::string long_msg, std::uint32_t delay_ti
 
   if (!interrupted){
     if(delay_time){
-      printf("Waiting for %s before running.\n", millis_to_str(delay_time).c_str());
+      printf("Waiting for %s before running.\n", millis_to_str(delay_time));
       delay(delay_time);
     }
     printf("Running\n");
@@ -161,7 +162,7 @@ bool GUI::go_end(std::string msg, std::uint32_t delay_time){
 
   if (!interrupted){
     if(delay_time){
-      printf("Waiting for %s before running.\n", millis_to_str(delay_time).c_str());
+      printf("Waiting for %s before running.\n", millis_to_str(delay_time));
       delay(delay_time);
     }
     printf("Running\n");

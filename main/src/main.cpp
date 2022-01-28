@@ -93,7 +93,6 @@ void opcontrol() {
 	create some distinction between compile-time and runtime functions, at least in the docs
 	check if ring count exists
 
-	convert some printfs to logs
 	make gui a task
 
 	maybe use decay on the arrays
