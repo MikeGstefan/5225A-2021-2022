@@ -330,7 +330,6 @@ class Button{
     void add_text (Text&, bool=true);
     bool new_press();
     bool new_release();
-    void wait_for_press(); //Blocking
 };
 
 class Slider{

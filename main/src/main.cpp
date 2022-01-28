@@ -12,7 +12,7 @@
 using namespace std;
 
 pros::Task *updt = nullptr;
-GUI* const GUI::current_gui = &g_main;
+GUI* const GUI::current_gui = &g_util;
 
 
 /**
@@ -31,7 +31,7 @@ void initialize() {
 	// tracking.x_coord = 0.0, tracking.y_coord = 0.0, tracking.global_angle = 0.0;
 
 	update_t.start();
-  auton_file_read();
+  // auton_file_read();
 	master.print(2, 0, "Driver: %s", drivebase.drivers[drivebase.cur_driver].name);
 }
 
@@ -88,30 +88,6 @@ void autonomous() {
 int ring_count = 0;
 
 void opcontrol() {
-	/*Nathan:
-	make text and go variadic
-	create some distinction between compile-time and runtime functions, at least in the docs
-	check if ring count exists
-	make rollover for if out of bounds, not just if at end: perm should also send to end
-
-	make classes similar, give them all:
-	active,
-	pressed,
-	draw,
-	update...
-
-	convert some printfs to logs
-	make gui a task
-
-	maybe use decay on the arrays
-
-	/**/
-	//
-	// intake.raise_and_disable();
-	// lift.reset();
-	// tilter.reset();
-	// lift.move_absolute(135);
-	// tilter_bottom_piston.set_value(0);
 
 	while(true){
 		GUI::update();
