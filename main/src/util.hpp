@@ -46,7 +46,7 @@ double near_angle(double angle, double reference);
 
 std::string printf_to_string(const char* fmt, va_list arg);
 
-std::string millis_to_str(std::uint32_t milliseconds);
+char* const millis_to_str(std::uint32_t milliseconds);
 
 // restricts a value to a range
 template <typename T> T constrain(T value, T min, T max){

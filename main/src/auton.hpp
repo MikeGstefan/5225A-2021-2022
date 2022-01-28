@@ -23,8 +23,6 @@ enum class alliances{
   BLUE
 };
 
-extern const char* alliance_names[];
-extern const char* auton_names[];
 extern autons cur_auton;
 extern alliances cur_alliance;
 

@@ -16,6 +16,7 @@ class Button;
 class Slider;
 template <typename V=std::nullptr_t> class _Text;
 
+//For main.cpp to switch between
 extern GUI g_main, g_util;
 
 typedef std::uint32_t Colour;
@@ -43,6 +44,8 @@ typedef std::uint32_t Colour;
 
 //For gui to use
 extern int ring_count;
+extern const char* alliance_names[];
+extern const char* auton_names[];
 
 class GUI{
   friend class Page;
@@ -53,10 +56,10 @@ class GUI{
 
   public:
     enum class Style{ //how the rect coords get evaluated
-        CENTRE,
-        CORNER,
-        SIZE,
-        CENTER=CENTRE
+      CENTRE,
+      CORNER,
+      SIZE,
+      CENTER=CENTRE
     };
 
   private:
@@ -65,13 +68,13 @@ class GUI{
     static int x, y;
     static Page* current_page;
     static GUI* const current_gui;
-    static constexpr bool test_page=false;
     static constexpr bool go_enabled=true;
     std::vector<Page*> pages;
     std::function <void()> setup, background;
 
     //Functions
     static void update_screen_status();
+    static void go_next(), go_prev();
     static void end_flash();
     static void draw_oblong(int, int, int, int, const double, const double);
     static int get_size(text_format_e_t, std::string);
@@ -98,6 +101,7 @@ class Page{
   friend class GUI;
   friend class Button;
   friend class Slider;
+  friend class Text;
   template <typename V> friend class _Text;
   private:
 
@@ -105,19 +109,27 @@ class Page{
     std::function <void()> setup_func, loop_func;
     Colour b_col;
     std::string title;
+    bool active=true;
     std::vector<GUI*> guis; //Parents
     std::vector<Button*> buttons; //Children
     std::vector<Slider*> sliders; //Children
     std::vector<Text*> texts; //Children
 
+    //Functions
+    static Page* const page_id(int);
+    static const int page_num(Page*);
+    const void draw();
+    const void update();
+
   public:
-    //Page Title, Bcolour
+    //Title, Bcolour
     explicit Page(std::string, Colour = GREY);
 
     //Functions
     const bool pressed();
-    void go_to();
+    const void go_to();
     void set_setup_func(std::function <void()>), set_loop_func(std::function <void()>);
+    void set_active(bool=true);
 };
 
 class Text{
@@ -347,6 +359,7 @@ class Slider{
     int min, max;
     int val, prev_val;
     direction dir;
+    bool active=true;
     Page* page;
     Button dec, inc;
     _Text<int> title;
@@ -361,8 +374,8 @@ class Slider{
     Slider (int, int, int, int, GUI::Style, direction, int, int, Page&, std::string = "Value", int = 1, Colour = COLOUR(WHITE), Colour = ORANGE);
 
     //Functions
+    void set_active(bool=true);
     const int get_value();
-};
+    const bool pressed();
 
-//For auton.hpp
-extern Button alliance;
+};

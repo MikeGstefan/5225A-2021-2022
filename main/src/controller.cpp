@@ -116,3 +116,28 @@ void _Controller::rumble(const char* rumble_pattern){
   this->add_to_queue(func);
   controller_queue.print("%d| adding rumble to queue for controller %d\n",millis(), this->controller_num);
 }
+
+bool _Controller::interrupt(bool analog, bool digital){
+  if (analog){
+    if (fabs(get_analog(ANALOG_LEFT_X)) > 15) return true;
+    if (fabs(get_analog(ANALOG_LEFT_Y)) > 15) return true;
+    if (fabs(get_analog(ANALOG_RIGHT_X)) > 15) return true;
+    if (fabs(get_analog(ANALOG_RIGHT_Y)) > 15) return true;
+  }
+  if(digital){
+    if (get_digital(DIGITAL_RIGHT)) return true;
+    if (get_digital(DIGITAL_DOWN)) return true;
+    if (get_digital(DIGITAL_LEFT)) return true;
+    if (get_digital(DIGITAL_UP)) return true;
+    if (get_digital(DIGITAL_A)) return true;
+    if (get_digital(DIGITAL_B)) return true;
+    if (get_digital(DIGITAL_Y)) return true;
+    if (get_digital(DIGITAL_X)) return true;
+    if (get_digital(DIGITAL_R1)) return true;
+    if (get_digital(DIGITAL_R2)) return true;
+    if (get_digital(DIGITAL_L1)) return true;
+    if (get_digital(DIGITAL_L2)) return true;
+  }
+
+  return false;
+}

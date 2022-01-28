@@ -13,7 +13,7 @@ extern std::array<std::tuple<pros::Motor*, int, const char*, const char*, Text*>
 
 extern Page testing;
 extern Button testing_button_1, testing_button_2;
-extern _Text testing_text_1, testing_text_2;
+extern _Text<std::nullptr_t> testing_text_1, testing_text_2;
 extern Slider testing_slider;
 
 Page driver_curve ("Drivers"); //Select a driver and their exp curve
@@ -330,7 +330,6 @@ void main_background(){
 }
 
 void util_setup(){
-  ; //Don't know why, but the {} don't match up without this
   motor_ports = {
     std::make_tuple(std::numeric_limits<int>::max(), &mot_update_1, &mot_stop_1, &mot_text_1, 0, (char*)malloc(10*sizeof(char))),
     std::make_tuple(std::numeric_limits<int>::max(), &mot_update_2, &mot_stop_2, &mot_text_2, 0, (char*)malloc(10*sizeof(char))),
