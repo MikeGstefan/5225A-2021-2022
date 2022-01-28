@@ -40,15 +40,15 @@ void Tilter::handle(){
   switch(state){
 
     case tilter_states::lowered:
-      if(master.get_digital(tilter_raise_button)){  // lifts tilter out of the way (not holding a mogo)
+      if(master.get_digital_new_press(tilter_raise_button)){  // lifts tilter out of the way (not holding a mogo)
         move_absolute(raised_position);
 
         set_state(tilter_states::raised);
       }
-      else if(master.get_digital(tilter_search_button)){  // grabs goal and raises tilter when tilter_button is pressed
+      else if(master.get_digital_new_press(tilter_search_button)){  // grabs goal and raises tilter when tilter_button is pressed
         printf("pressed\n");
         Timer cur{"auto-pickup"};
-        drivebase.move(0.0, 127.0, 0.0);
+        drivebase.move(0.0, 80.0, 0.0);
         while(true){ // waits until distance sensor detects mogo
           // cancels search if button is pressed or times out
           if(master.get_digital_new_press(tilter_search_button) || cur.get_time() > 1000){
@@ -56,7 +56,7 @@ void Tilter::handle(){
           }
 
           // lifts goal when distance sensor detects it
-          if(tilter_dist.get() > 100){
+          if(tilter_dist.get() < 100){
             tilter_top_piston.set_value(LOW);
             delay(100); // waits for top piston to fully close
             tilter_bottom_piston.set_value(HIGH);

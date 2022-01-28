@@ -30,16 +30,19 @@ void Lift::handle(){
     motor.move(0);
     master.rumble("---");
     printf("LIFT SAFETY TRIGGERED\n");
-    intake_motor.move(0); // disables intake if lift safety is triggered
-    intake.set_state(intake_states::off);
+    intake.raise_and_disable();
+    intake.set_state(intake_states::raised);
 
     set_state(lift_states::manual);
   }
 
   // switches to manual control if lift manual button is pressed
   if(master.get_digital_new_press(lift_manual_button)){
+    intake.raise_and_disable();
+    intake.set_state(intake_states::raised);
     master.rumble("-");
     master.print(LIFT_STATE_LINE, 0, "Lift: Manual      ");
+
     set_state(lift_states::manual);
   }
 

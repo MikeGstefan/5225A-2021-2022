@@ -125,8 +125,11 @@ void tilter_reset2(){
 // int ring_count = 0, cur_auton = 1;
 bool claw_state = false, intk_state = false;
 void opcontrol() {
+  drivebase.driver_practice();
+
+  /*
 	master.clear();
-	// while(true){ 
+	// while(true){
 	// 	if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_A)){
 	// 		master.print(0,0,"%.2f, %.2f, %.2f",tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle));
 	// 	}
@@ -139,6 +142,9 @@ void opcontrol() {
 	while(!master.get_digital(E_CONTROLLER_DIGITAL_A))delay(10);
 
 	lrt_auton();
+
+
+  */
 	// tilter_reset2();
 	// // tilter_top_piston.set_value(0);
 	// // tilter_bottom_piston.
