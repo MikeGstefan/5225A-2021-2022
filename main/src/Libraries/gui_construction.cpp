@@ -5,8 +5,9 @@
 /*Current Flashing Timer*/ extern Timer Flash;
 
 //Var init for text monitoring
-int elastic_up_time, elastic_down_time;
+int left_enc, right_enc, back_enc, angle, elastic_up_time, elastic_down_time;
 const char* port_nums;
+const char* driver_text;
 std::array <std::tuple<int, Button*, Button*, Text*, int, char*>, 8> motor_ports; //port, run, stop, stall counter, port and rpm
 extern std::array<std::tuple<pros::Motor*, int, const char*, const char*, Text*>, 8> motors;
 
@@ -18,6 +19,7 @@ extern Slider testing_slider;
 Page driver_curve ("Drivers"); //Select a driver and their exp curve
 Button prev_drivr(20, 70, 110, 120, GUI::Style::SIZE, Button::SINGLE, driver_curve, "Prev Driver");
 // _Text drivr_name(MID_X, MID_Y, GUI::Style::CENTRE, TEXT_LARGE, driver_curve, "%s", &Drivebase::driver_name, drivebase);
+_Text drivr_name(MID_X, MID_Y, GUI::Style::CENTRE, TEXT_LARGE, driver_curve, "%s", driver_text);
 Button next_drivr(350, 70, 110, 120, GUI::Style::SIZE, Button::SINGLE, driver_curve, "Next Driver");
 
 Page temps ("Temperature"); //Motor temps //make actual motor names
@@ -44,6 +46,10 @@ _Text trackY(135, 45, GUI::Style::CENTRE, TEXT_SMALL, track, "Y:%.1f", tracking.
 // _Text encL(50, 130, GUI::Style::CENTRE, TEXT_SMALL, track, "L:%d", &ADIEncoder::get_value, LeftEncoder);
 // _Text encR(135, 130, GUI::Style::CENTRE, TEXT_SMALL, track, "R:%d", &ADIEncoder::get_value, RightEncoder);
 // _Text encB(220, 130, GUI::Style::CENTRE, TEXT_SMALL, track, "B:%d", &ADIEncoder::get_value, RightEncoder);
+_Text trackA(220, 45, GUI::Style::CENTRE, TEXT_SMALL, track, "A:%d", angle);
+_Text encL(50, 130, GUI::Style::CENTRE, TEXT_SMALL, track, "L:%d", left_enc);
+_Text encR(135, 130, GUI::Style::CENTRE, TEXT_SMALL, track, "R:%d", right_enc);
+_Text encB(220, 130, GUI::Style::CENTRE, TEXT_SMALL, track, "B:%d", back_enc);
 Button resX(15, 60, 70, 55, GUI::Style::SIZE, Button::SINGLE, track, "Reset X");
 Button resY(100, 60, 70, 55, GUI::Style::SIZE, Button::SINGLE, track, "Reset Y");
 Button resA(185, 60, 70, 55, GUI::Style::SIZE, Button::SINGLE, track, "Reset A");
@@ -60,7 +66,7 @@ Button go_centre(320, 175, 150, 40, GUI::Style::SIZE, Button::SINGLE, moving, "C
 Page intake_test ("Intake"); //Test for intake with rings
 _Text rings(MID_X, 50, GUI::Style::CENTRE, TEXT_LARGE, intake_test, "Ring Count: %d", ring_count);
 Button reset_intake (30, 90, 120, 80, GUI::Style::SIZE, Button::SINGLE, intake_test, "Reset Motor");
-Button onOff (180, 90, 120, 80, GUI::Style::SIZE, Button::SINGLE, intake_test, "Start/Stop");
+Button intake_switch (180, 90, 120, 80, GUI::Style::SIZE, Button::TOGGLE, intake_test, "Start/Stop");
 Button reset_rings (330, 90, 120, 80, GUI::Style::SIZE, Button::SINGLE, intake_test, "Reset Ring Count");
 
 Page elastic ("Elastic Test"); //Testing the elastics on the lift
@@ -69,8 +75,8 @@ _Text elastic_up (MID_X, 160, GUI::Style::CENTRE, TEXT_SMALL, elastic, "Up Time:
 _Text elastic_down(MID_X, 180, GUI::Style::CENTRE, TEXT_SMALL, elastic, "Down Time: %d", elastic_down_time);
 
 Page motor_subsys ("Motorized Subsystems"); //Moving the lift
-Slider lift_val(30, 45, 300, 35, GUI::Style::SIZE, Slider::HORIZONTAL, 35, 675, motor_subsys, "Lift", 10);
-Slider tilter_val(30, 110, 300, 40, GUI::Style::SIZE, Slider::HORIZONTAL, 500, 50, motor_subsys, "Tilter", 10);
+Slider lift_val(30, 45, 300, 35, GUI::Style::SIZE, Slider::HORIZONTAL, lift.bottom_position, lift.top_position, motor_subsys, "Lift", 10);
+Slider tilter_val(30, 110, 300, 40, GUI::Style::SIZE, Slider::HORIZONTAL, tilter.bottom_position, tilter.top_position, motor_subsys, "Tilter", 10);
 Button lift_move(470, 45, -100, 40, GUI::Style::SIZE, Button::SINGLE, motor_subsys, "Move Lift");
 Button tilter_move(470, 95, -100, 40, GUI::Style::SIZE, Button::SINGLE, motor_subsys, "Move Tilter");
 Button claw_switch(470, 145, -100, 40, GUI::Style::SIZE, Button::TOGGLE, motor_subsys, "Claw");
@@ -109,6 +115,9 @@ Page encoders ("Encoders"); //Display tracking vals and reset btns
 // _Text encAB (85, 50, GUI::Style::CENTRE, TEXT_SMALL, encoders, "AB Encoder:%d", &ADIEncoder::get_value, LeftEncoder);
 // _Text encCD (240, 50, GUI::Style::CENTRE, TEXT_SMALL, encoders, "CD Encoder:%d", &ADIEncoder::get_value, RightEncoder);
 // _Text encEF (395, 50, GUI::Style::CENTRE, TEXT_SMALL, encoders, "EF Encoder:%d", &ADIEncoder::get_value, BackEncoder);
+_Text encAB (85, 50, GUI::Style::CENTRE, TEXT_SMALL, encoders, "AB Encoder:%d", left_enc);
+_Text encCD (240, 50, GUI::Style::CENTRE, TEXT_SMALL, encoders, "CD Encoder:%d", right_enc);
+_Text encEF (395, 50, GUI::Style::CENTRE, TEXT_SMALL, encoders, "EF Encoder:%d", back_enc);
 Button resAB (35, 75, 100, 50, GUI::Style::SIZE, Button::SINGLE, encoders, "Reset AB");
 Button resCD (190, 75, 100, 50, GUI::Style::SIZE, Button::SINGLE, encoders, "Reset CD");
 Button resEF (345, 75, 100, 50, GUI::Style::SIZE, Button::SINGLE, encoders, "Reset EF");
@@ -145,7 +154,7 @@ void main_setup(){
 
   for (int x = 0; x < 200; x++) field[x].reset(); //Should be able to get rid of this
 
-  // driver_curve.set_loop_func([](){driver_text = drivebase.driver_name();});
+  driver_curve.set_loop_func([](){driver_text = drivebase.driver_name();});
   prev_drivr.set_func([](){drivebase.prev_driver();});
   next_drivr.set_func([](){drivebase.next_driver();});
 
@@ -153,6 +162,8 @@ void main_setup(){
   next_auto.set_func(&next_auton);
   alliance.set_func([](){switch_alliance();}); //Has to be in a lambda since param type is alliances not void
   alliance.add_text(ally_name);
+
+  intake_switch.set_func([](){intake.toggle();});
 
   run_elastic.set_func([](){lift.elastic_util();});
 
@@ -172,12 +183,16 @@ void main_setup(){
   track.set_loop_func([](){
     screen::set_pen(COLOUR(RED));
     screen::draw_pixel(270+(200*tracking.x_coord/144), 230-(200*tracking.y_coord/144)); //Scales to screen
+    angle = tracking.get_angle_in_deg();
+    left_enc = LeftEncoder.get_value();
+    right_enc = RightEncoder.get_value();
+    back_enc = BackEncoder.get_value();
   });
 
   go_to_xya.set_func([&](){
     int x = x_val.get_value(), y = y_val.get_value(), a = a_val.get_value();
     char coord_c[20];
-    sprintf(coord_c, " (%d, %d, %d)", x, y, a);
+    snprintf(coord_c, 20, " (%d, %d, %d)", x, y, a);
     std::string coord = coord_c;
     if (GUI::go("GO TO" + coord, "Press to move to target selected by sliders" + coord, 1000)) move_start(move_types::point, point_params({double(x), double(y), double(a)}));
   });
@@ -190,13 +205,13 @@ void main_setup(){
 
   lift_move.set_func([&](){
     char coord_c[20];
-    sprintf(coord_c, " %d", lift_val.get_value());
+    snprintf(coord_c, 20, " %d", lift_val.get_value());
     std::string coord = coord_c;
     if (GUI::go("Move lift to" + coord, "Press to move lift to" + coord, 1000)) lift.move_absolute(lift_val.get_value());
   });
   tilter_move.set_func([&](){
     char coord_c[20];
-    sprintf(coord_c, " %d", tilter_val.get_value());
+    snprintf(coord_c, 20, " %d", tilter_val.get_value());
     std::string coord = coord_c;
     if (GUI::go("Move tilter to" + coord, "Press to move tilter to" + coord, 1000)) tilter.move_absolute(tilter_val.get_value());
   });
@@ -297,7 +312,7 @@ void main_background(){
       printf("Moving to temps\n");
       temps.go_to();
       char buffer[50];
-      sprintf(buffer, "%s motor is at %dC\n", std::get<2>(mot_tup), temp);
+      snprintf(buffer, 50, "%s motor is at %dC\n", std::get<2>(mot_tup), temp);
       GUI::flash(COLOUR(RED), 15000, buffer);
       break;
     }
@@ -350,6 +365,11 @@ void util_setup(){
   if (port_num_string.back() == ',') port_num_string.pop_back();
   port_nums = strdup(port_num_string.c_str());
 
+  encoders.set_loop_func([](){
+    left_enc = LeftEncoder.get_value();
+    right_enc = RightEncoder.get_value();
+    back_enc = BackEncoder.get_value();
+  });
   resAB.set_func([&](){LeftEncoder.reset();});
   resCD.set_func([&](){RightEncoder.reset();});
   resEF.set_func([&](){BackEncoder.reset();});
@@ -368,7 +388,7 @@ void util_background(){
     std::tuple<int, Button*, Button*, Text*, int, char*>& mot_arr = *it;
     int port = std::get<0>(mot_arr);
     if (port != std::numeric_limits<int>::max()){
-      sprintf(std::get<5>(mot_arr), "%d: %d", port, (int)c::motor_get_actual_velocity(port));
+      snprintf(std::get<5>(mot_arr), 9, "%d: %d", port, (int)c::motor_get_actual_velocity(port));
       if (fabs(c::motor_get_actual_velocity(port)) < fabs(c::motor_get_target_velocity(port))/4) std::get<4>(mot_arr) += 1;
       else std::get<4>(mot_arr) = 0;
       if (std::get<4>(mot_arr) > 10){

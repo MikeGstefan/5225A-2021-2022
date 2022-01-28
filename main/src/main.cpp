@@ -90,12 +90,8 @@ int ring_count = 0;
 void opcontrol() {
 	/*Nathan:
 	make text and go variadic
-	convert some printfs to logs
-
-	check if ring count exists
-
 	create some distinction between compile-time and runtime functions, at least in the docs
-
+	check if ring count exists
 	make rollover for if out of bounds, not just if at end: perm should also send to end
 
 	make classes similar, give them all:
@@ -104,14 +100,18 @@ void opcontrol() {
 	draw,
 	update...
 
+	convert some printfs to logs
+	make gui a task
+
+	maybe use decay on the arrays
+
 	/**/
 	//
-	// intake_piston.set_value(1);
+	// intake.raise_and_disable();
 	// lift.reset();
 	// tilter.reset();
 	// lift.move_absolute(135);
 	// tilter_bottom_piston.set_value(0);
-
 
 	while(true){
 		GUI::update();

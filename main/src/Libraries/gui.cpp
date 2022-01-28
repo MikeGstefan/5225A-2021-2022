@@ -8,8 +8,9 @@ std::uint32_t flash_end; //Sets the flash's end time to max possible val
 Page* GUI::current_page = nullptr;
 bool GUI::touched = false;
 int GUI::x = 0, GUI::y = 0;
+
 //Text Vars
-static const char* go_string;
+char* const go_string = (char*)malloc(90*sizeof(char));
 
 //Default pages
 
@@ -29,15 +30,6 @@ Page go_sequence ("Go Sequence");
 Button go_button (300, MID_Y, 160, 90, GUI::Style::CENTRE, Button::SINGLE, go_sequence, "PRESS TO");
 Button go_back_button (20, USER_UP, 100, 50, GUI::Style::SIZE, Button::SINGLE, go_sequence, "BACK");
 _Text go_button_text (300, 140, GUI::Style::CENTRE, TEXT_SMALL, go_sequence, "%s", go_string, COLOUR(BLACK));
-
-
-//Utilities
-
-std::string printf_to_string(const char* fmt, va_list arg){
-  char buffer[150];
-  vsnprintf(buffer,150,fmt,arg);
-  return std::string(buffer);
-}
 
 //To get coordinates for aligned objects, (buttons, sliders...) of same size
 //Put in how many of buttons/sliders you want, and get properly spaced coords
@@ -102,107 +94,94 @@ void GUI::end_flash (){
 }
 
 bool GUI::go(std::string short_msg, std::string long_msg, std::uint32_t delay_time){
-  if(go_enabled){
-    printf("\n\n%s\n", long_msg.c_str());
-    printf("Press the big button when ready.\n");
-    go_string = short_msg.c_str();
+ if(!go_enabled) return true;
+  printf("\n\n%s\nPress the big button when ready.\n", long_msg.c_str());
+  snprintf(go_string, 90, "%s", short_msg.c_str());
 
-    bool pressed = false, interrupted = false;
-    Page* page = GUI::current_page;
-    go_sequence.go_to();
+  bool pressed = false, interrupted = false;
+  Page* page = GUI::current_page;
+  go_sequence.go_to();
 
-    while(go_button.pressed() && !interrupted){ //Wait for Release
-      GUI::update_screen_status();
-      if (go_back_button.pressed()) interrupted = true;
-      delay(2);
-    }
-    while(!go_button.pressed() && !interrupted){ //Wait for Press
-      drivebase.handle_input();
-      GUI::update_screen_status();
-      if (go_back_button.pressed()) interrupted = true;
-      delay(2);
-    }
-    while(go_button.pressed() && !interrupted){ //Wait for Release
-      GUI::update_screen_status();
-      if (go_back_button.pressed()) interrupted = true;
-      delay(2);
-    }
-
-    if (!interrupted){
-      delay(delay_time);
-      printf("Running\n");
-    }
-    else printf("\033[31mInterrupted\033[0m\n");
-    page->go_to();
-    return !interrupted;
+  while(go_button.pressed() && !interrupted){ //Wait for Release
+    GUI::update_screen_status();
+    if (go_back_button.pressed()) interrupted = true;
+    delay(2);
   }
-  else return true;
+  while(!go_button.pressed() && !interrupted){ //Wait for Press
+    drivebase.handle_input();
+    GUI::update_screen_status();
+    if (go_back_button.pressed()) interrupted = true;
+    delay(2);
+  }
+  while(go_button.pressed() && !interrupted){ //Wait for Release
+    GUI::update_screen_status();
+    if (go_back_button.pressed()) interrupted = true;
+    delay(2);
+  }
+
+  page->go_to();
+
+  if (!interrupted){
+    if(delay_time){
+      printf("Waiting for %s before running.\n", millis_to_str(delay_time).c_str());
+      delay(delay_time);
+    }
+    printf("Running\n");
+  }
+  else printf("\033[31mInterrupted\033[0m\n");
+  return !interrupted;
 }
 
 bool GUI::go_end(std::string msg, std::uint32_t delay_time){
-  if(go_enabled){
-    printf("Press Again when done.\n");
-    go_string = ("END " + msg).c_str();
-    printf("Go STRING1: %s\n", go_string);
+  if(!go_enabled) return true;
+  printf("Press Again when done.\n");
+  snprintf(go_string, 90, "END %s", msg.c_str());
 
-    bool pressed = false, interrupted = false;
-    Page* page = GUI::current_page;
-    printf("Go STRING2: %s\n", go_string);
-    go_sequence.go_to();
-    printf("Go STRING3: %s\n", go_string);
+  bool pressed = false, interrupted = false;
+  Page* page = GUI::current_page;
+  go_sequence.go_to();
 
-    while(go_button.pressed() && !interrupted){ //Wait for Release
-      GUI::update_screen_status();
-      if (go_back_button.pressed()) interrupted = true;
-      printf("R\n");
-      delay(2);
-    }
-    while(!go_button.pressed() && !interrupted){ //Wait for Press
-      drivebase.handle_input();
-      GUI::update_screen_status();
-      if (go_back_button.pressed()) interrupted = true;
-      printf("P\n");
-      delay(2);
-    }
-    while(go_button.pressed() && !interrupted){ //Wait for Release
-      GUI::update_screen_status();
-      if (go_back_button.pressed()) interrupted = true;
-      printf("R\n");
-      delay(2);
-    }
-
-    if (!interrupted){
-      delay(delay_time);
-      printf("Running\n");
-    }
-    else printf("\033[31mInterrupted\033[0m\n");
-    page->go_to();
-    return !interrupted;
+  while(go_button.pressed() && !interrupted){ //Wait for Release
+    GUI::update_screen_status();
+    if (go_back_button.pressed()) interrupted = true;
+    delay(2);
   }
-  else return true;
+  while(!go_button.pressed() && !interrupted){ //Wait for Press
+    GUI::update_screen_status();
+    if (go_back_button.pressed()) interrupted = true;
+    delay(2);
+  }
+  while(go_button.pressed() && !interrupted){ //Wait for Release
+    GUI::update_screen_status();
+    if (go_back_button.pressed()) interrupted = true;
+    delay(2);
+  }
+
+  page->go_to();
+
+  if (!interrupted){
+    if(delay_time){
+      printf("Waiting for %s before running.\n", millis_to_str(delay_time).c_str());
+      delay(delay_time);
+    }
+    printf("Running\n");
+  }
+  else printf("\033[31mInterrupted\033[0m\n");
+  return !interrupted;
 }
 
 void GUI::draw_oblong(int x1, int y1, int x2, int y2, double kS, double kR){ //ks and kr and scale values for shrink and radius
   int s = std::min(x2-x1, y2-y1)*kS; //Scale for shrinking button (pressed look)
   int r = std::min(x2-x1, y2-y1)*kR; //Scale for how rounded the button edges should be
   screen::fill_rect(x1+s, y1+s, x2-s, y2-s);
-  // printf("Here0\n");
   screen::erase_rect(x1+s, y1+s, x1+s+r, y1+s+r);
-  // printf("Here1\n");
   screen::erase_rect(x2-s, y1+s, x2-s-r, y1+s+r);
-  // printf("Here2\n");
   screen::erase_rect(x1+s, y2-s, x1+s+r, y2-s-r);
-  // printf("Here3\n");
   screen::erase_rect(x2-s, y2-s, x2-s-r, y2-s-r);
-  // printf("Here4\n");
   screen::fill_circle(x1+s+r, y1+s+r, r);
-  // printf("Here5\n");
   screen::fill_circle(x2-s-r, y1+s+r, r);
-  // printf("Here6\n");
   screen::fill_circle(x1+s+r, y2-s-r, r);
-  // printf("Here7\n");
   screen::fill_circle(x2-s-r, y2-s-r, r);
-  // printf("Here8\n");
 }
 
 int GUI::get_size(text_format_e_t size, std::string type){
@@ -364,7 +343,7 @@ void Page::go_to(){
   std::vector<Page*>::const_iterator it = std::find(GUI::current_gui->pages.begin(), GUI::current_gui->pages.end(), this); //Makes sure this page exists
   if (it == GUI::current_gui->pages.end()){
     char error [35];
-    sprintf(error, "Page %p does not exist!\n", this);
+    snprintf(error, 35, "Page %p does not exist!\n", this);
     throw std::invalid_argument(error);
     return;
   }
@@ -394,7 +373,7 @@ void Button::create_options(std::vector<Button*> buttons){
     Button* btn_id= *it;
     if (btn_id->form != LATCH && btn_id->form != TOGGLE){
       char error [100];
-      sprintf(error, "Option Feature is only available for latch and toggle buttons! Failed on \"%s\" button.\n", btn_id->label.c_str());
+      snprintf(error, 100, "Option Feature is only available for latch and toggle buttons! Failed on \"%s\" button.\n", btn_id->label.c_str());
       throw std::invalid_argument(error);
       return;
     }
@@ -410,7 +389,7 @@ void Button::create_options(std::vector<Button*> buttons){
 void Button::add_text(Text& text_ref, bool overwrite) {
   if(page != text_ref.page){
     char error [120];
-    sprintf(error, "Text can only be linked to a button on the same page! Failed on \"%s\" button and \"%s\" text.\n", label.c_str(), text_ref.label.c_str());
+    snprintf(error, 120, "Text can only be linked to a button on the same page! Failed on \"%s\" button and \"%s\" text.\n", label.c_str(), text_ref.label.c_str());
     throw std::invalid_argument(error);
     return;
   }
@@ -493,9 +472,7 @@ const void Button::draw(){
   screen::set_pen(b_col);
   screen::set_eraser(GUI::current_page->b_col); //at some point figure out why this isn't (page->b_col)
   screen::fill_rect(x1, y1, x2, y2);
-  // printf("\n\nTrying to draw: %s\n", label.c_str());
   GUI::draw_oblong(x1, y1, x2, y2, 0, 0.15);
-  // printf("Done drawing\n");
   screen::set_pen(l_col);
   screen::set_eraser(b_col);
   screen::print(TEXT_SMALL, text_x, text_y, label.c_str());
@@ -713,7 +690,6 @@ void GUI::init(){
   home.set_func([](){go_to(1);});
   go_button.add_text(go_button_text);
   current_gui->setup();
-  printf("\n\nMoving to 1\n\n");
   go_to(1); //Sets it to page 1 for program start. Don't delete this. If you want to change the starting page, re-call this in initialize()
   update();
 }

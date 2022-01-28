@@ -44,8 +44,6 @@ typedef std::uint32_t Colour;
 //For gui to use
 extern int ring_count;
 
-std::string printf_to_string(const char*, va_list);
-
 class GUI{
   friend class Page;
   friend class Button;
@@ -170,9 +168,9 @@ template <typename V> class _Text: public Text{
 
       if(get_value){
         prev_value = get_value();
-        length = sprintf(buffer, label.c_str(), prev_value);
+        length = snprintf(buffer, 100, label.c_str(), prev_value);
       }
-      else length = sprintf(buffer, label.c_str());
+      else length = snprintf(buffer, 100, label.c_str());
 
       if (x2 != 0 && y2 != 0){
         screen::set_eraser(page->b_col); //Erases previous box
@@ -303,7 +301,7 @@ class Button{
     int x1, y1, x2, y2, text_x, text_y, text_x1, text_y1;
     bool last_pressed=0;
     press_type form; //What type of button
-    std::function <void()> func, off_func; //toggle is only for toggle type buttons
+    std::function <void()> func, off_func;
     Text* title = nullptr;
     bool active=true;
     Page* page;
@@ -332,6 +330,7 @@ class Button{
     void add_text (Text&, bool=true);
     bool new_press();
     bool new_release();
+    void wait_for_press(); //Blocking
 };
 
 class Slider{

@@ -31,3 +31,19 @@ double rad_to_deg(double rad){
 double near_angle(double angle, double reference){
 	return round((reference - angle) / (2 * M_PI)) * (2 * M_PI) + angle - reference;
 }
+
+std::string printf_to_string(const char* fmt, va_list arg){
+  char buffer[150];
+  vsnprintf(buffer,150,fmt,arg);
+  return std::string(buffer);
+}
+
+std::string millis_to_str(std::uint32_t milliseconds){
+  char buffer[20];
+  if (milliseconds == 1) sprintf(buffer, "1 millisecond");
+  else if (milliseconds < 1000) sprintf(buffer, "%d milliseconds", milliseconds);
+  else if (milliseconds == 1000) sprintf(buffer, "1 second");
+  else sprintf(buffer, "%d seconds", milliseconds/1000);
+
+  return std::string(buffer);
+}
