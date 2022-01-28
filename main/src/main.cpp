@@ -21,6 +21,7 @@ using namespace std;
  * to keep execution time for this mode under a few seconds.
  */
  pros::Task *updt = nullptr;
+ bool auton_run = false; // has auton run
 
 void initialize() {
 	drivebase.download_curve_data();
@@ -65,8 +66,10 @@ void competition_initialize() {}
  * from where it left off.
  */
 void autonomous() {
+  auton_run = true;
+  lrt_auton();
 	// skills();
-	skills_pt2();
+	// skills_pt2();
 
 
 }
@@ -125,7 +128,27 @@ void tilter_reset2(){
 // int ring_count = 0, cur_auton = 1;
 bool claw_state = false, intk_state = false;
 void opcontrol() {
-  drivebase.driver_practice();
+  if(auton_run){
+    drivebase.driver_practice();
+  }
+  else{
+    // initializes pneumatics in appropriate state
+    intake_piston.set_value(LOW);
+    lift_piston.set_value(LOW);
+
+    tilter_bottom_piston.set_value(HIGH);
+    tilter_top_piston.set_value(HIGH);
+
+    intake.motor.move(0);
+
+    // resets subsystems
+    lift.reset();
+    tilter.reset();
+
+    while(true){
+      delay(10);
+    }
+  }
 
   /*
 	master.clear();

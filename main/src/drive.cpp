@@ -214,17 +214,13 @@ void Drivebase::driver_practice(){
   intake_piston.set_value(LOW);
   lift_piston.set_value(LOW);
 
-  // resets subsystems
-  lift.reset();
-  tilter.reset();
-
   // moves motors to necessary positions / speeds
-  lift.move_absolute(lift.bottom_position);
-  tilter.move_absolute(tilter.bottom_position);
-  intake.motor.move(100);
+  // lift.move_absolute(lift.bottom_position);
+  // tilter.move_absolute(tilter.bottom_position);
 
-  tilter_bottom_piston.set_value(LOW);
-  tilter_top_piston.set_value(HIGH);
+  tilter.set_state(tilter_states::raised);
+
+
   cur_driver = 0; // defaults driver to Nikhil
   // master.print(2, 0, "Driver: %s", drivers[cur_driver].name);
   while(true){
