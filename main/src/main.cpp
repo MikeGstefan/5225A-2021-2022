@@ -10,6 +10,7 @@
 
 // using namespace std;
 #include "task.hpp"
+#include <fstream>
 using namespace std;
 // using namespace pros;
 
@@ -66,8 +67,19 @@ void competition_initialize() {}
  * from where it left off.
  */
 void autonomous() {
-  auton_run = true;
-  lrt_auton();
+	auton_run = true;
+	double x; 
+	double y;
+	double a;
+
+	// FILE * fp;
+	// fp = fopen("/usd/init.txt", "r");
+	// fscanf(fp,"%lf %lf %lf",&x,&y,&a);
+	
+	// tracking.reset(x,y,rad_to_deg(a));
+	// ring_piston.set_value(0);
+	lrt_auton();
+
 	// skills();
 	// skills_pt2();
 
@@ -152,6 +164,18 @@ void opcontrol() {
     tilter.reset();
 
     while(true){
+		if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_A)){
+			Data::log_t.data_update();
+			// file = 
+			// ofstream file;
+			// file.open("/usd/init.tx t");
+			// file.write("%f, %f, %f")
+			FILE * fp;
+			fp = fopen("/usd/init.txt", "w");
+			fprintf(fp, "%lf, %lf, %lf", tracking.x_coord, tracking.y_coord, tracking.global_angle);
+			fclose(fp);
+			Data::log_t.done_update();
+		}
       delay(10);
     }
   }

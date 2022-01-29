@@ -2,9 +2,10 @@
 
 void lrt_auton(){
   Timer timer{"timer"};
-
 	move_start(move_types::point, point_params({5.0,8.0, 45.0}),false);
   tilter.reset();
+  lift.reset();
+  lift.move_absolute(250);
   move_wait_for_complete();
 	intake.move(100);
 	move_start(move_types::point, point_params(polar_to_vector_point(5.0,8.0,17.5,45.0,45.0),127.0,false,0.0,true,0.0,0.0,{18.0,0.0,20.0},{12.0,0.0001,1000.0},{125.0,0.0,1000.0}),false);

@@ -58,8 +58,15 @@ void Spinner::handle(){
       // waits for lift and tilter to reach their respective positions
       printf("lift: %lf, tilter: %lf \n", lift.motor.get_position(), tilter.motor.get_position());
       if(fabs(lift.tall_goal_position - lift.motor.get_position()) < 10 && fabs(tilter.tall_goal_position - tilter.motor.get_position()) < 10){
-        waitUntil(false);
-        motor.move(127);
+        // waitUntil(false);
+        // motor.move(127);
+        tilter_bottom_piston.set_value(0);
+        while(true){ 
+          if(spinner_trigger.get_value())motor.move(0);
+          else motor.move(50);
+          if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_X))ring_piston.set_value(LOW);
+          delay(10);
+        }
 
         set_state(spinner_states::aligning_1);
       }
