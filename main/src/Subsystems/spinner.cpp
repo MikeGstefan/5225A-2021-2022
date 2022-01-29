@@ -48,7 +48,7 @@ void Spinner::handle(){
     set_state(spinner_states::idle);
 
   }
-
+  bool open = false;
   switch(state){
 
     case spinner_states::idle:
@@ -60,18 +60,29 @@ void Spinner::handle(){
       if(fabs(lift.tall_goal_position - lift.motor.get_position()) < 10 && fabs(tilter.tall_goal_position - tilter.motor.get_position()) < 10){
         // waitUntil(false);
         // motor.move(127);
-        tilter_bottom_piston.set_value(0);
+        // tilter_bottom_piston.set_value(0);
+        // motor.move(50);
         while(true){ 
           if(spinner_trigger.get_value())motor.move(0);
           else motor.move(50);
-          if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_X))ring_piston.set_value(LOW);
+          if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_X) && !open){
+            open = true;
+            ring_piston.set_value(LOW);
+          }
+          if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_X) && open){
+            open = false;
+            ring_piston.set_value(0);
+            motor.move(50);
+            delay(200);
+          }
           delay(10);
         }
 
         set_state(spinner_states::aligning_1);
       }
       break;
-
+    case spinner_states::next_side:
+    break;
     case spinner_states::aligning_1:
       if(spinner_trigger.get_value()){   // waits for spinner's touch sensor to trigger
         motor.move(0);

@@ -17,6 +17,7 @@ enum class spinner_states {
   aligning_2, // rotating goal for the first time
   wait_for_arms_2,  // waits for lift and tilter come back to scoring position
   release_2,  // releasing second group of rings
+  next_side,
 };
 
 class Spinner: public Motorized_subsystem<spinner_states, NUM_OF_SPINNER_STATES, SPINNER_MAX_VELOCITY> {
