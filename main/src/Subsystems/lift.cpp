@@ -24,17 +24,17 @@ Lift::Lift(Motorized_subsystem<lift_states, NUM_OF_LIFT_STATES, LIFT_MAX_VELOCIT
 }
 
 void Lift::handle(){
-  if (fabs(target - motor.get_position()) > end_error && fabs(motor.get_actual_velocity()) < 5.0) bad_count++;
-  else bad_count = 0;
-  if(bad_count > 25 && state != lift_states::manual){
-    motor.move(0);
-    master.rumble("---");
-    printf("LIFT SAFETY TRIGGERED\n");
-    intake.raise_and_disable();
-    intake.set_state(intake_states::raised);
+  // if (fabs(target - motor.get_position()) > end_error && fabs(motor.get_actual_velocity()) < 5.0) bad_count++;
+  // else bad_count = 0;
+  // if(bad_count > 25 && state != lift_states::manual){
+  //   motor.move(0);
+  //   master.rumble("---");
+  //   printf("LIFT SAFETY TRIGGERED\n");
+  //   intake.raise_and_disable();
+  //   intake.set_state(intake_states::raised);
 
-    set_state(lift_states::manual);
-  }
+  //   set_state(lift_states::manual);
+  // }
 
   // switches to manual control if lift manual button is pressed
   if(master.get_digital_new_press(lift_manual_button)){

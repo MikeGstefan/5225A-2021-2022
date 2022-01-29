@@ -62,6 +62,7 @@ void Spinner::handle(){
         // motor.move(127);
         // tilter_bottom_piston.set_value(0);
         // motor.move(50);
+        lift.motor.move(20);
         while(true){ 
           if(spinner_trigger.get_value())motor.move(0);
           else motor.move(50);
