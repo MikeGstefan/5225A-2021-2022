@@ -3,7 +3,7 @@
 _Task::_Task(pros::task_fn_t function, const char* name, void* params, std::uint32_t prio, std::uint16_t stack_depth){
   this->function = function;
   this->name = name;
-  this->params = std::make_tuple(this,params);
+  this->params = std::make_tuple(this,std::move(params));
   this->prio = prio;
   this->stack_depth = stack_depth;
 }
@@ -34,7 +34,7 @@ void _Task::start(void* params){
      task_log.print("%d| %s was already started\n", millis(), this->name);
      this->kill();
    }
-   this->params = std::make_tuple(this,params);
+   this->params = std::make_tuple(this,std::move(params));
    this->task_ptr = new pros::Task(this->function, &this->params, this->prio, this->stack_depth, this->name);
    task_log.print("%d| %s started\n", millis(), this->name);
 }
@@ -59,8 +59,9 @@ bool _Task::notify_handle(){
       return true;
     break;
     case reset:
+      task_log.print("%d| %s paused\n", millis(), this->name);
       this->task_ptr->suspend();
-      task_log.print("%d| %s paused", millis(), this->name);
+
     break;
     default:
 
@@ -70,7 +71,7 @@ bool _Task::notify_handle(){
 }
 
 bool _Task::data_update(){
-  if(this->task_ptr->get_state() >=3)return false;
+  if(this->task_ptr == NULL ||this->task_ptr->get_state() >=3)return false;
   task_log.print("%d| %s pausing for data\n", millis(), this->name);
   this->task_ptr->notify_ext((int)reset, E_NOTIFY_ACTION_OWRITE,NULL);
   while(this->task_ptr->get_state()!=3)delay(10);
@@ -78,7 +79,7 @@ bool _Task::data_update(){
 }
 
 bool _Task::done_update(){
-  if(this->task_ptr->get_state() !=3)return false;
+  if(this->task_ptr == NULL || this->task_ptr->get_state() !=3)return false;
   this->task_ptr->resume();
   task_log.print("%d| %s done data update, resuming\n", millis(), this->name);
   return true;

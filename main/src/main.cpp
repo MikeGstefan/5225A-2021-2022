@@ -1,19 +1,18 @@
-#include "main.h"
-#include "logging.hpp"
-#include "config.hpp"
-#include "util.hpp"
-#include "Tracking.hpp"
-#include "lift.hpp"
+#include "Subsystems/lift.hpp"
+#include "Subsystems/hitch.hpp"
 #include "drive.hpp"
-#include "gui.hpp"
 #include "controller.hpp"
+#include "Libraries/gui.hpp"
 #include "pid.hpp"
-#include "auton_util.hpp"
-
-// using namespace std;
+#include "Tracking.hpp"
 #include "task.hpp"
+#include "auton.hpp"
+#include "task.hpp"
+
 using namespace std;
-// using namespace pros;
+
+pros::Task *updt = nullptr;
+GUI* const GUI::current_gui = &g_main;
 
 
 /**
@@ -22,18 +21,18 @@ using namespace std;
  * All other competition modes are blocked by initialize; it is recommended
  * to keep execution time for this mode under a few seconds.
  */
-
-
 void initialize() {
 	gyro.calibrate();
 	drivebase.download_curve_data();
-	Data::log_init();
+	Data::init();
 	_Controller::init();
+	GUI::init();
 	delay(150);
-	tracking.x_coord = 0.0, tracking.y_coord = 0.0, tracking.global_angle = 0.0;
-	updateStartTask();
-	guiSetup();
-	WAIT_FOR_SCREEN_REFRESH();
+	tracking.x_coord = 144.0 - 10.25, tracking.y_coord = 14.75, tracking.global_angle = -M_PI_2;
+	// tracking.x_coord = 0.0, tracking.y_coord = 0.0, tracking.global_angle = 0.0;
+
+	update_t.start();
+	auton_file_read();
 	master.print(2, 0, "Driver: %s", drivebase.drivers[drivebase.cur_driver].name);
 	gyro.finish_calibrating(); //Finishes calibrating gyro before program starts
 }
@@ -67,7 +66,11 @@ void competition_initialize() {}
  * will be stopped. Re-enabling the robot will restart the task, not re-start it
  * from where it left off.
  */
-void autonomous() {}
+void autonomous() {
+	// skills();
+
+
+}
 
 /**
  * Runs the operator control code. This function will be started in its own task
@@ -83,28 +86,26 @@ void autonomous() {}
  * task, not resume it from where it left off.
  */
 
-int ring_count = 0; //Get rid of this once merged
-double cur_auton = 1;
+//Get rid of these once merged
+int ring_count = 0;
 
 void opcontrol() {
 	gyro.climb_ramp();
 	gyro.level(2, 250);
 
 	delay(2000); //To make sure robot is longer moving from momentum. May be taken out if non-drive commands are called.
+
 	while(true){
-		guiBackground();
-		drivebase.handle_input();
+		GUI::update();
 		printf("%f\n", fabs(gyro.get_angle()));
 		if (fabs(gyro.get_angle()) > 10) gyro.level(2.2, 250); //Strayed off balance
 
-		if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_B)){ //Update expo util
-			drivebase.update_lookup_table_util();
-			delay(50);
-			master.clear();
-			drivebase.screen_timer.reset();
-		}
-		else if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_UP)) nextDriver();
-		else if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_DOWN)) prevDriver();
+		// drivebase.non_blocking_driver_practice();
+
+		if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_UP)) prev_auton();
+		else if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_DOWN)) next_auton();
+		if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_X)) switch_alliance();
+		if (master.get_digital_new_press(cancel_button)) break;
 		delay(10);
 	}
 }

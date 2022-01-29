@@ -1,18 +1,20 @@
 #pragma once
 #include "util.hpp"
 #include "timer.hpp"
+#include "task.hpp"
 #include <iostream>
 #include <vector>
 #include <string>
 #include <cstdarg>
-#include <array>
 #include <fstream>
-#include "main.h"
+#include <functional>
 
 using namespace std;
 using namespace pros;
-
-extern Task *printing;
+//forawrd declarations
+class _Task;
+class Timer;
+extern _Task log_t;
 /*
 1 is print, if there is no sd card, print to terminal
 2 is print. if there is no sd card, ignore
@@ -21,7 +23,8 @@ extern Task *printing;
 enum log_types{
   error = 1,
   warning =1,
-  general =2,
+  general =1,
+  debug = 2,
   off = 0,
 };
 
@@ -34,23 +37,29 @@ enum class log_locations
 };
 
 
-void logging_task_start();
-void logging_task_stop();
+// void logging_task_start();
+// void logging_task_stop();
 
 class Data{
 private:
   static vector<Data*> obj_list;
+  
 public:
+  static _Task log_t;
+
+
   const char* id;
   const char* name;
   log_types log_type;
   log_locations log_location;
   static vector<Data*> get_objs();
   void print(const char* format, ...);
+  void print(Timer* tmr,int freq, vector<function<char*()>> str);
   void log_print(char* buffer, int buffer_len);
-  bool will_log();
   Data(const char* obj_name, const char* id_code, log_types log_type_param, log_locations log_location_param);
-  static void log_init();
+  static void init();
+  static char* to_char(const char* format, ...);
+
 };
 
 
@@ -63,3 +72,11 @@ const int print_max_time = 2000;
 
 extern Data task_log;
 extern Data controller_queue;
+extern Data tracking_data;
+extern Data tracking_imp;
+extern Data misc;
+extern Data drivers_data;
+extern Data term;
+extern Data motion_d;
+extern Data motion_i;
+

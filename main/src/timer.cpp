@@ -1,9 +1,20 @@
 #include "timer.hpp"
 
-Timer::Timer(const char* name, const bool& play, timing_units timing_unit):
+Timer::Timer(const char* name, const bool& play, timing_units timing_unit, Data* data_obj_ptr):
 name(name), timing_unit(timing_unit)
 {
-    printf("%s's initialize time is: %lld\n", name, get_time_in_timing_unit());
+    if(data_obj_ptr == nullptr)this->data_obj = &term;
+    else this->data_obj = data_obj_ptr;
+    data_obj->print("%s's initialize time is: %lld\n", name, get_time_in_timing_unit());
+    reset(play);
+}
+
+Timer::Timer(const char* name, Data* data_obj_ptr,const bool& play, timing_units timing_unit):
+name(name), timing_unit(timing_unit)
+{
+    if(data_obj_ptr == nullptr)this->data_obj = &term;
+    else this->data_obj = data_obj_ptr;
+    data_obj->print("%s's initialize time is: %lld\n", name, get_time_in_timing_unit());
     reset(play);
 }
 
@@ -30,7 +41,7 @@ void Timer::play(){
         last_play_time = get_time_in_timing_unit();
         paused = false;
     }
-    else    printf("Timer \"%s\" is already playing.\n", name);
+    else    data_obj->print("Timer \"%s\" is already playing.\n", name);
 }
 
 void Timer::pause(){
@@ -38,11 +49,11 @@ void Timer::pause(){
         time += get_time_in_timing_unit() - last_play_time;
         paused = true;
     }
-    else    printf("Timer \"%s\" is already paused.\n", name);
+    else    data_obj->print("Timer \"%s\" is already paused.\n", name);
 }
 
 void Timer::print(const char* str){
-    printf("%s's current time is: %lld | %s\n", name, get_time(), str);
+    data_obj->print("%s's current time is: %lld | %s\n", name, get_time(), str);
 }
 
 uint64_t Timer::get_time_in_timing_unit(){ // returns time in either millis or micros
