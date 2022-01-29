@@ -70,29 +70,11 @@ void Drivebase::move(double x, double y, double a){
   back_r.move(x + y - a);
 }
 
-void Drivebase::move(double y, double a){
-  int l = y+a;
-  int r = y-a;
-  l1.move(l);
-  l2.move(l);
-  l3.move(l);
-  r1.move(r);
-  r2.move(r);
-  r3.move(r);
-}
-
 void Drivebase::brake(){
-  l1.move_relative(0, 200);
-  l2.move_relative(0, 200);
-  l3.move_relative(0, 200);
-  r1.move_relative(0, 200);
-  r2.move_relative(0, 200);
-  r3.move_relative(0, 200);
-
-  // front_l.move_relative(0, 200);
-  // front_r.move_relative(0, 200);
-  // back_l.move_relative(0, 200);
-  // back_r.move_relative(0, 200);
+  front_l.move_relative(0, 200);
+  front_r.move_relative(0, 200);
+  back_l.move_relative(0, 200);
+  back_r.move_relative(0, 200);
 }
 
 void Drivebase::update_screen(){
@@ -208,8 +190,7 @@ void Drivebase::handle_input(){
   if(fabs(tracking.power_y) < deadzone) tracking.power_y = 0.0;
   if(fabs(tracking.power_a) < deadzone) tracking.power_a = 0.0;
 
-  // move(tracking.power_x, tracking.power_y, tracking.power_a);
-  move(tracking.power_y, tracking.power_a);
+  move(tracking.power_x, tracking.power_y, tracking.power_a);
 }
 
 void Drivebase::driver_practice(){

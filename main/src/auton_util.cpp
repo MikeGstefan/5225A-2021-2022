@@ -26,7 +26,7 @@ void Gyro::climb_ramp(){
 	inertial.tare_roll();
   inertial.tare_pitch();
 
-	drivebase.move(127, 0);
+	drivebase.move(0, 127, 0);
 	waitUntil(fabs(get_angle()) > 22)
 	printf("ON RAMP\n");
 
@@ -43,7 +43,7 @@ void Gyro::level(double kP, double kD){
 	while(true){
     get_angle();
     speed = gyro_pid.compute(-angle, 0);
-		drivebase.move(speed, 0);
+		drivebase.move(0, speed, 0);
 		printf("Angle: %f   Speed: %d  \n", angle, speed); //Get rid of speed var
 
     //Use timer class
