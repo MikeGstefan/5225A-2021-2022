@@ -65,7 +65,7 @@ void Spinner::handle(){
         lift.motor.move(20);
         while(true){ 
           if(spinner_trigger.get_value())motor.move(0);
-          else motor.move(50);
+          else motor.move(-50);
           if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_X) && !open){
             open = true;
             ring_piston.set_value(LOW);
