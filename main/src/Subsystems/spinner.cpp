@@ -27,6 +27,9 @@ Spinner::Spinner(Motorized_subsystem<spinner_states, NUM_OF_SPINNER_STATES, SPIN
 
 }
 
+
+// Timer ring_timer {"rings"};
+int time  = 0;
 void Spinner::handle(){
 
   // if (fabs(target - motor.get_position()) > 10 && fabs(motor.get_actual_velocity()) < 5.0) bad_count++;
@@ -53,7 +56,7 @@ void Spinner::handle(){
 
   }
   // bool open = false;
-  Timer ring_timer {"rings"};
+  
   switch(state){
 
     case spinner_states::idle:
@@ -92,14 +95,20 @@ void Spinner::handle(){
       if(spinner_trigger.get_value()){
         motor.move(0);
         ring_piston.set_value(0);
-        ring_timer.reset();
+        // ring_timer.reset();
+        time = millis();
         set_state(spinner_states::drop1);
       }
     break;
-    case spinner_states::drop1: 
-      if(ring_timer.get_time() > RING_DROP_TIME){
+    case spinner_states::drop1:
+      printf("drop1 ring tmre: %ld\n",millis() - time) ;
+      if(millis() - time> RING_DROP_TIME){
         ring_piston.set_value(1);
         motor.move(50);
+        
+      }
+      if(!spinner_trigger.get_value()){
+
         set_state(spinner_states::spin2);
       }
     break;
@@ -107,12 +116,14 @@ void Spinner::handle(){
       if(spinner_trigger.get_value()){
         motor.move(0);
         ring_piston.set_value(0);
-        ring_timer.reset();
+        // ring_timer.reset();
+        time = millis();
         set_state(spinner_states::drop2);
       }
+
     break;
      case spinner_states::drop2: 
-      if(ring_timer.get_time() > RING_DROP_TIME){
+      if(millis() - time > RING_DROP_TIME){
         lift.move_absolute(lift.platform_position);
         lift.set_state(lift_states::platform);
         tilter.move_absolute(tilter.raised_position);
