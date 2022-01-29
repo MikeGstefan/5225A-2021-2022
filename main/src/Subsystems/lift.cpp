@@ -37,14 +37,14 @@ void Lift::handle(){
   // }
 
   // switches to manual control if lift manual button is pressed
-  if(master.get_digital_new_press(lift_manual_button)){
-    intake.raise_and_disable();
-    intake.set_state(intake_states::raised);
-    master.rumble("-");
-    master.print(LIFT_STATE_LINE, 0, "Lift: Manual      ");
-
-    set_state(lift_states::manual);
-  }
+  // if(master.get_digital_new_press(lift_manual_button)){
+  //   intake.raise_and_disable();
+  //   intake.set_state(intake_states::raised);
+  //   master.rumble("-");
+  //   master.print(LIFT_STATE_LINE, 0, "Lift: Manual      ");
+  //
+  //   set_state(lift_states::manual);
+  // }
 
   switch(state){
 

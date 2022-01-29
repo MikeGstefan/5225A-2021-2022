@@ -224,7 +224,7 @@ void Drivebase::driver_practice(){
   cur_driver = 0; // defaults driver to Nikhil
   // master.print(2, 0, "Driver: %s", drivers[cur_driver].name);
   while(true){
-    while(!master.get_digital_new_press(E_CONTROLLER_DIGITAL_B)){
+    // while(!master.get_digital_new_press(E_CONTROLLER_DIGITAL_B)){
       /*
       if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_UP)){ // goes to next driver
         cur_driver++;
@@ -260,9 +260,9 @@ void Drivebase::driver_practice(){
       }
 
       delay(10);
-    }
-    update_lookup_table_util();
-    master.clear();
-    master.print(2, 0, "Driver: %s", drivers[cur_driver].name);
+    // }
+    // update_lookup_table_util();
+    // master.clear();
+    // master.print(2, 0, "Driver: %s", drivers[cur_driver].name);
   }
 }

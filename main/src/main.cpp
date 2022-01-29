@@ -68,14 +68,14 @@ void competition_initialize() {}
  */
 void autonomous() {
 	auton_run = true;
-	double x; 
+	double x;
 	double y;
 	double a;
 
 	// FILE * fp;
 	// fp = fopen("/usd/init.txt", "r");
 	// fscanf(fp,"%lf %lf %lf",&x,&y,&a);
-	
+
 	// tracking.reset(x,y,rad_to_deg(a));
 	// ring_piston.set_value(0);
 	lrt_auton();
@@ -151,7 +151,8 @@ void opcontrol() {
   }
   else{
     // initializes pneumatics in appropriate state
-    intake_piston.set_value(LOW);
+    intake_piston.set_value(HIGH);
+    delay(50); // wait for intake to rise
     lift_piston.set_value(LOW);
 
     tilter_bottom_piston.set_value(HIGH);
@@ -161,12 +162,14 @@ void opcontrol() {
 
     // resets subsystems
     lift.reset();
+    intake_piston.set_value(LOW);
+
     tilter.reset();
 
     while(true){
 		if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_A)){
 			Data::log_t.data_update();
-			// file = 
+			// file =
 			// ofstream file;
 			// file.open("/usd/init.tx t");
 			// file.write("%f, %f, %f")

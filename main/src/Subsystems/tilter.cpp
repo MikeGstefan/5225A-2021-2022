@@ -25,17 +25,17 @@ Tilter::Tilter(Motorized_subsystem<tilter_states, NUM_OF_TILTER_STATES, TILTER_M
 
 void Tilter::handle(){
 
-  if (fabs(target - motor.get_position()) > end_error && fabs(motor.get_actual_velocity()) < 5.0) bad_count++;
-  else bad_count = 0;
-  if(bad_count > 25 && state != tilter_states::manual){
-    motor.move(0);
-    master.rumble("---");
-    printf("TILTER SAFETY TRIGGERED\n");
-    set_state(tilter_states::manual);
-  }
+  // if (fabs(target - motor.get_position()) > end_error && fabs(motor.get_actual_velocity()) < 5.0) bad_count++;
+  // else bad_count = 0;
+  // if(bad_count > 25 && state != tilter_states::manual){
+  //   motor.move(0);
+  //   master.rumble("---");
+  //   printf("TILTER SAFETY TRIGGERED\n");
+  //   set_state(tilter_states::manual);
+  // }
 
   // switches to manual control if tilter manual button is pressed
-  if(master.get_digital_new_press(tilter_manual_button))  set_state(tilter_states::manual);
+  // if(master.get_digital_new_press(tilter_manual_button))  set_state(tilter_states::manual);
 
   switch(state){
 

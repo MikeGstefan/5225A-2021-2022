@@ -8,7 +8,7 @@ Spinner spinner({{"Spinner",
   "spin1",
   "drop1",
   "spin2",
-  "drop2", 
+  "drop2",
   "aligning_1",
   "release_1",
   "wait_for_arms",
@@ -42,7 +42,7 @@ void Spinner::handle(){
   // }
 
 
-  if(state != spinner_states::idle && master.get_digital_new_press(fill_top_goal_button)){  // cancels ring dropoff if dropoff button is pressed
+  if(state != spinner_states::idle && master.get_digital_new_press(cancel_button)){  // cancels ring dropoff if dropoff button is pressed
     // resets all subsystems to last states
     lift.move_absolute(lift.platform_position);
     lift.set_state(lift_states::platform);
@@ -56,7 +56,7 @@ void Spinner::handle(){
 
   }
   // bool open = false;
-  
+
   switch(state){
 
     case spinner_states::idle:
@@ -68,11 +68,12 @@ void Spinner::handle(){
       if(fabs(lift.tall_goal_position - lift.motor.get_position()) < 10 && fabs(tilter.tall_goal_position - tilter.motor.get_position()) < 10){
         // waitUntil(false);
         // motor.move(127);
+        delay(200); // wait for 
         tilter_bottom_piston.set_value(0);
-        motor.move(50);
+        motor.move(-127);
         lift.motor.move(20);
         set_state(spinner_states::spin1);
-        // while(true){ 
+        // while(true){
         //   if(spinner_trigger.get_value())motor.move(0);
         //   else motor.move(-50);
         //   if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_X) && !open){
@@ -101,14 +102,15 @@ void Spinner::handle(){
       }
     break;
     case spinner_states::drop1:
-      printf("drop1 ring tmre: %ld\n",millis() - time) ;
-      if(millis() - time> RING_DROP_TIME){
+      printf("drop1 ring tmre: %d\n", millis() - time);
+      if(master.get_digital_new_press(fill_top_goal_button)){
+
+      // if(millis() - time> RING_DROP_TIME){
         ring_piston.set_value(1);
-        motor.move(50);
-        
+        motor.move(-127);
+
       }
       if(!spinner_trigger.get_value()){
-
         set_state(spinner_states::spin2);
       }
     break;
@@ -122,7 +124,7 @@ void Spinner::handle(){
       }
 
     break;
-     case spinner_states::drop2: 
+     case spinner_states::drop2:
       if(millis() - time > RING_DROP_TIME){
         lift.move_absolute(lift.platform_position);
         lift.set_state(lift_states::platform);
@@ -158,7 +160,7 @@ void Spinner::handle(){
     case spinner_states::wait_for_arms:
       if(fabs(lift.motor.get_position() - (lift.tall_goal_position - 50)) < 10){
         if(fabs(tilter.motor.get_position() - (tilter.tall_goal_position + 50)) < 10){
-          motor.move(127);
+          motor.move(-127);
 
           set_state(spinner_states::aligning_2);
         }
