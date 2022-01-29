@@ -215,8 +215,8 @@ void Drivebase::driver_practice(){
   lift_piston.set_value(LOW);
 
   // moves motors to necessary positions / speeds
-  // lift.move_absolute(lift.bottom_position);
-  // tilter.move_absolute(tilter.bottom_position);
+  lift.move_absolute(lift.bottom_position);
+  tilter.move_absolute(tilter.raised_position);
 
   tilter.set_state(tilter_states::raised);
 
@@ -244,6 +244,7 @@ void Drivebase::driver_practice(){
       lift.handle();
       tilter.handle();
       intake.handle();
+      spinner.handle();
 
       // prints motor temps every second
       if(screen_timer.get_time() > 1000){

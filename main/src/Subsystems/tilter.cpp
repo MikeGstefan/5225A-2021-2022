@@ -58,9 +58,9 @@ void Tilter::handle(){
           // lifts goal when distance sensor detects it
           if(tilter_dist.get() < 100){
             tilter_top_piston.set_value(LOW);
-            delay(100); // waits for top piston to fully close
+            delay(200); // waits for top piston to fully close
             tilter_bottom_piston.set_value(HIGH);
-            delay(200); // waits for bottom piston to fully close
+            delay(300); // waits for bottom piston to fully close
 
             held = true;
             move_absolute(raised_position); // raises mogo
@@ -83,12 +83,16 @@ void Tilter::handle(){
         set_state(tilter_states::lowering);
       }
       if(master.get_digital_new_press(fill_top_goal_button)){ // throws all subsystems into managed states except spinner
-        lift.move_absolute(top_position);
-        lift.set_state(lift_states::tall_goal);
         intake.raise_and_disable();
+        delay(100);
+
         spinner.set_state(spinner_states::prep);
 
-        move_absolute(top_position);
+        lift.move_absolute(lift.tall_goal_position);
+        lift.set_state(lift_states::tall_goal);
+
+        move_absolute(tall_goal_position);
+
         set_state(tilter_states::tall_goal);
       }
       break;

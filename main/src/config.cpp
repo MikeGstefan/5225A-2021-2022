@@ -18,7 +18,7 @@ pros::Motor lift_motor(16, pros::E_MOTOR_GEARSET_36, false, pros::E_MOTOR_ENCODE
 pros::Motor tilter_motor(14, pros::E_MOTOR_GEARSET_36, true, pros::E_MOTOR_ENCODER_DEGREES);
 
 pros::Motor intake_motor(9, pros::E_MOTOR_GEARSET_36, true, pros::E_MOTOR_ENCODER_DEGREES);
-pros::Motor spinner_motor(8, pros::E_MOTOR_GEARSET_36, true, pros::E_MOTOR_ENCODER_DEGREES);
+pros::Motor spinner_motor(7, pros::E_MOTOR_GEARSET_36, true, pros::E_MOTOR_ENCODER_DEGREES);
 
 pros::Distance tilter_dist(8), front_dist(5);
 pros::ADIDigitalOut lift_piston(7);
@@ -30,7 +30,7 @@ pros::ADIDigitalOut tilter_top_piston({{1, 2}});
 
 pros::ADIDigitalOut intake_piston({{1, 6}});
 
-pros::ADIDigitalIn spinner_trigger({{1, 5}});
+pros::ADIDigitalIn spinner_trigger({{1, 3}});
 pros::ADIDigitalOut ring_piston({{1, 4}});
 
 

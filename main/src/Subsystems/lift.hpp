@@ -31,7 +31,7 @@ class Lift: public Motorized_subsystem<lift_states, NUM_OF_LIFT_STATES, LIFT_MAX
   double gear_ratio = 5.0;
 
 public:
-  const double bottom_position = 35.0, raised_position = 250.0, platform_position = 560.0, top_position = 675.0;
+  const double bottom_position = 35.0, raised_position = 250.0, platform_position = 560.0, tall_goal_position = 665.0, top_position = 675.0;
 
   Lift(Motorized_subsystem<lift_states, NUM_OF_LIFT_STATES, LIFT_MAX_VELOCITY> motorized_subsystem);  // constructor
   void handle();  // contains state machine code

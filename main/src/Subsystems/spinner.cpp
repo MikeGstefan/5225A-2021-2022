@@ -5,11 +5,16 @@ Spinner spinner({{"Spinner",
 {
   "idle",
   "prep",
+  "aligning_1",
   "release_1",
-  "lowering",
+  "wait_for_arms",
+  "aligning_2",
+  "wait_for_arms_2",
   "release_2",
 }
 }, spinner_motor});
+
+// intake position 250
 
 Spinner::Spinner(Motorized_subsystem<spinner_states, NUM_OF_SPINNER_STATES, SPINNER_MAX_VELOCITY> motorized_subsystem): Motorized_subsystem(motorized_subsystem){ // constructor
 
@@ -20,7 +25,7 @@ Spinner::Spinner(Motorized_subsystem<spinner_states, NUM_OF_SPINNER_STATES, SPIN
 
 void Spinner::handle(){
 
-  // if (fabs(target - motor.get_position()) > end_error && fabs(motor.get_actual_velocity()) < 5.0) bad_count++;
+  // if (fabs(target - motor.get_position()) > 10 && fabs(motor.get_actual_velocity()) < 5.0) bad_count++;
   // else bad_count = 0;
   // if(bad_count > 25 && state != tilter_states::manual){
   //   motor.move(0);
@@ -51,7 +56,9 @@ void Spinner::handle(){
 
     case spinner_states::prep:
       // waits for lift and tilter to reach their respective positions
-      if(fabs(lift.top_position - lift.motor.get_position()) < lift.end_error && fabs(tilter.top_position - tilter.motor.get_position()) < tilter.end_error){
+      printf("lift: %lf, tilter: %lf \n", lift.motor.get_position(), tilter.motor.get_position());
+      if(fabs(lift.tall_goal_position - lift.motor.get_position()) < 10 && fabs(tilter.tall_goal_position - tilter.motor.get_position()) < 10){
+        waitUntil(false);
         motor.move(127);
 
         set_state(spinner_states::aligning_1);
@@ -69,26 +76,48 @@ void Spinner::handle(){
       break;
 
     case spinner_states::release_1:
-      if(releasing_timer.get_time() > 200){  // waits 200 ms for rings to fall
-        motor.move(127);
+      if(releasing_timer.get_time() > 500){  // waits 200 ms for rings to fall
         ring_piston.set_value(HIGH); // holds remaining rings
+        lift.move_absolute(lift.tall_goal_position - 50);
+        tilter.move_absolute(tilter.tall_goal_position + 50);
 
-        set_state(spinner_states::aligning_2);
+        set_state(spinner_states::wait_for_arms);
+      }
+      break;
+
+    case spinner_states::wait_for_arms:
+      if(fabs(lift.motor.get_position() - (lift.tall_goal_position - 50)) < 10){
+        if(fabs(tilter.motor.get_position() - (tilter.tall_goal_position + 50)) < 10){
+          motor.move(127);
+
+          set_state(spinner_states::aligning_2);
+        }
       }
       break;
 
     case spinner_states::aligning_2:
       if(spinner_trigger.get_value()){   // waits for spinner's touch sensor to trigger
-        motor.move(0);
-        releasing_timer.reset();
-        ring_piston.set_value(LOW); // releases 2nd batch of rings
+        lift.move_absolute(lift.tall_goal_position);
+        tilter.move_absolute(tilter.tall_goal_position);
 
-        set_state(spinner_states::release_2);
+        set_state(spinner_states::wait_for_arms_2);
+      }
+      break;
+
+    case spinner_states::wait_for_arms_2:
+      if(fabs(lift.motor.get_position() - lift.tall_goal_position) < 10){
+        if(fabs(tilter.motor.get_position() - tilter.tall_goal_position) < 10){
+          motor.move(0);
+          releasing_timer.reset();
+          ring_piston.set_value(LOW); // releases 2nd batch of rings
+
+          set_state(spinner_states::release_2);
+        }
       }
       break;
 
     case spinner_states::release_2:
-      if(releasing_timer.get_time() > 200){  // waits 200 ms for rings to fall
+      if(releasing_timer.get_time() > 500){  // waits 200 ms for rings to fall
         // resets all subsystems to last states
         lift.move_absolute(lift.platform_position);
         lift.set_state(lift_states::platform);

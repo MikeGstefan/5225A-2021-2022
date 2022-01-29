@@ -128,6 +128,12 @@ void tilter_reset2(){
 // int ring_count = 0, cur_auton = 1;
 bool claw_state = false, intk_state = false;
 void opcontrol() {
+  move_stop();
+  printf("STOPPING00\n\n");
+  // while(true){
+  //   ring_piston.set_value(master.get_digital(DIGITAL_A));
+  //   delay(10);
+  // }
   if(auton_run){
     drivebase.driver_practice();
   }

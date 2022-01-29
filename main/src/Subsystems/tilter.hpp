@@ -21,7 +21,7 @@ class Tilter: public Motorized_subsystem<tilter_states, NUM_OF_TILTER_STATES, TI
   bool held = false;
 
 public:
-  const double bottom_position = 500.0, raised_position = 150.0, top_position = 50.0;
+  const double bottom_position = 500.0, raised_position = 150.0, tall_goal_position = 153.0, top_position = 50.0;
   Tilter(Motorized_subsystem<tilter_states, NUM_OF_TILTER_STATES, TILTER_MAX_VELOCITY> motorized_subsystem);  // constructor
   void handle();  // contains state machine code
 
