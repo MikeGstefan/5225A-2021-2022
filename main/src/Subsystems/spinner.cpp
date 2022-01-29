@@ -5,6 +5,10 @@ Spinner spinner({{"Spinner",
 {
   "idle",
   "prep",
+  "spin1",
+  "drop1",
+  "spin2",
+  "drop2", 
   "aligning_1",
   "release_1",
   "wait_for_arms",
@@ -48,7 +52,8 @@ void Spinner::handle(){
     set_state(spinner_states::idle);
 
   }
-  bool open = false;
+  // bool open = false;
+  Timer ring_timer {"rings"};
   switch(state){
 
     case spinner_states::idle:
@@ -60,29 +65,64 @@ void Spinner::handle(){
       if(fabs(lift.tall_goal_position - lift.motor.get_position()) < 10 && fabs(tilter.tall_goal_position - tilter.motor.get_position()) < 10){
         // waitUntil(false);
         // motor.move(127);
-        // tilter_bottom_piston.set_value(0);
-        // motor.move(50);
+        tilter_bottom_piston.set_value(0);
+        motor.move(50);
         lift.motor.move(20);
-        while(true){ 
-          if(spinner_trigger.get_value())motor.move(0);
-          else motor.move(-50);
-          if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_X) && !open){
-            open = true;
-            ring_piston.set_value(LOW);
-          }
-          if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_X) && open){
-            open = false;
-            ring_piston.set_value(0);
-            motor.move(50);
-            delay(200);
-          }
-          delay(10);
-        }
+        set_state(spinner_states::spin1);
+        // while(true){ 
+        //   if(spinner_trigger.get_value())motor.move(0);
+        //   else motor.move(-50);
+        //   if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_X) && !open){
+        //     open = true;
+        //     ring_piston.set_value(LOW);
+        //   }
+        //   if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_X) && open){
+        //     open = false;
+        //     ring_piston.set_value(0);
+        //     motor.move(50);
+        //     delay(200);
+        //   }
+        //   delay(10);
+        // }
 
-        set_state(spinner_states::aligning_1);
+        // set_state(spinner_states::drop1);
       }
       break;
-    case spinner_states::next_side:
+    case spinner_states::spin1:
+      if(spinner_trigger.get_value()){
+        motor.move(0);
+        ring_piston.set_value(0);
+        ring_timer.reset();
+        set_state(spinner_states::drop1);
+      }
+    break;
+    case spinner_states::drop1: 
+      if(ring_timer.get_time() > RING_DROP_TIME){
+        ring_piston.set_value(1);
+        motor.move(50);
+        set_state(spinner_states::spin2);
+      }
+    break;
+    case spinner_states::spin2:
+      if(spinner_trigger.get_value()){
+        motor.move(0);
+        ring_piston.set_value(0);
+        ring_timer.reset();
+        set_state(spinner_states::drop2);
+      }
+    break;
+     case spinner_states::drop2: 
+      if(ring_timer.get_time() > RING_DROP_TIME){
+        lift.move_absolute(lift.platform_position);
+        lift.set_state(lift_states::platform);
+        tilter.move_absolute(tilter.raised_position);
+        tilter.set_state(tilter_states::raised);
+        intake.set_state(intake_states::off);
+        // motor.move(0);
+        master.rumble("-");
+
+        set_state(spinner_states::idle);
+      }
     break;
     case spinner_states::aligning_1:
       if(spinner_trigger.get_value()){   // waits for spinner's touch sensor to trigger
