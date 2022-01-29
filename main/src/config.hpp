@@ -22,5 +22,6 @@ extern pros::ADIDigitalOut intake_piston;
 extern pros::ADIDigitalIn spinner_trigger;
 extern pros::ADIDigitalOut ring_piston; // "end effector"
 
+extern pros::ADIDigitalOut transmission;
 
 extern std::array<std::tuple<pros::Motor*, int, std::string, const char*, Text*>, 8> motors;

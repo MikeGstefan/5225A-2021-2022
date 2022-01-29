@@ -3,10 +3,10 @@
 // NEW config
 _Controller master(pros::E_CONTROLLER_MASTER);
 
-pros::Motor front_l(19, pros::E_MOTOR_GEARSET_18, true, pros::E_MOTOR_ENCODER_DEGREES);
-pros::Motor front_r(20, pros::E_MOTOR_GEARSET_18, false, pros::E_MOTOR_ENCODER_DEGREES);
-pros::Motor back_l(17, pros::E_MOTOR_GEARSET_18, true, pros::E_MOTOR_ENCODER_DEGREES);
-pros::Motor back_r(18, pros::E_MOTOR_GEARSET_18, false, pros::E_MOTOR_ENCODER_DEGREES);
+pros::Motor front_r(17, pros::E_MOTOR_GEARSET_18, true, pros::E_MOTOR_ENCODER_DEGREES);
+pros::Motor back_r(18, pros::E_MOTOR_GEARSET_18, true, pros::E_MOTOR_ENCODER_DEGREES);
+pros::Motor front_l(19, pros::E_MOTOR_GEARSET_18, false, pros::E_MOTOR_ENCODER_DEGREES);
+pros::Motor back_l(20, pros::E_MOTOR_GEARSET_18, false, pros::E_MOTOR_ENCODER_DEGREES);
 
 // tank drive config
 // pros::Motor front_l(19, pros::E_MOTOR_GEARSET_18, false, pros::E_MOTOR_ENCODER_DEGREES);
@@ -36,6 +36,7 @@ pros::ADIDigitalOut intake_piston({{1, 6}});
 pros::ADIDigitalIn spinner_trigger({{1, 5}});
 pros::ADIDigitalOut ring_piston({{1, 4}});
 
+pros::ADIDigitalOut transmission(8);
 
 std::array<std::tuple<pros::Motor*, int, std::string, const char*, Text*>, 8> motors = {
   std::make_tuple(&front_l, 1, "Front Left", "FL", nullptr),

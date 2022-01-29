@@ -44,7 +44,7 @@ void update(void* params){
     // printf("l: %d, r: %d \n", NewLeft, NewRight);
     // printf("l: %d, r: %d \n", LeftEncoder.get_value(), RightEncoder.get_value());
     // printf("x: %.2lf, y: %.2lf, a: %.2lf\n", millis(), tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle));
-    
+
 
 
     Left = NewLeft - LastLeft;
@@ -773,7 +773,7 @@ void tank_move_to_target(void* params){
     Vector follow_line(target.y - tracking.y_coord, target.x - tracking.x_coord); // used to keep track of angle of follow_line relative to the vertical
     Vector line_disp(target.x - tracking.x_coord, target.y - tracking.y_coord);  // displacements relative to line
     line_disp.rotate(follow_line.get_angle());  // rotates vector by line angle
-    orig_sgn_line_y = sgn(line_disp.y);
+    // orig_sgn_line_y = sgn(line_disp.y);
     double local_y;
 
 
@@ -782,7 +782,7 @@ void tank_move_to_target(void* params){
       line_disp = Vector(target.x - tracking.x_coord, target.y - tracking.y_coord);  // displacements relative to line
       // line_disp.set_polar(line_disp.get_magnitude(), line_disp.get_angle() + follow_line.get_angle());  // rotates vector by line angle
       line_disp.rotate(follow_line.get_angle());  // rotates vector by line angle
-      line_y_local_y = line_disp.get_y() * cos(tracking.global_angle - follow_line.get_angle());
+      // line_y_local_y = line_disp.get_y() * cos(tracking.global_angle - follow_line.get_angle());
       sgn_line_y = sgn(line_disp.get_y());
 
       // end of move_on_line stuff

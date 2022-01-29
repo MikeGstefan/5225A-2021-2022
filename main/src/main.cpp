@@ -24,14 +24,14 @@ using namespace std;
 
 void initialize() {
 	drivebase.download_curve_data();
-	Data::init();
-	_Controller::init();
-	delay(150);
-	// tracking.x_coord = 144.0 - 10.25, tracking.y_coord = 14.75, tracking.global_angle = -M_PI_2;
-	tracking.x_coord = 0.0, tracking.y_coord = 0.0, tracking.global_angle = 0.0;
-
-	update_t.start();
-	GUI::setup();
+	// Data::init();
+	// _Controller::init();
+	// delay(150);
+	// // tracking.x_coord = 144.0 - 10.25, tracking.y_coord = 14.75, tracking.global_angle = -M_PI_2;
+	// tracking.x_coord = 0.0, tracking.y_coord = 0.0, tracking.global_angle = 0.0;
+  //
+	// update_t.start();
+	// GUI::setup();
 }
 
 /**
@@ -100,7 +100,7 @@ void next_driver(){
 }
 
 // int ring_count = 0, cur_auton = 1;
-
+bool state = false;
 void opcontrol() {
   // flatten_against_wall(false);
   /*
@@ -122,6 +122,11 @@ void opcontrol() {
 
 	// drivebase.driver_practice();
   while(true){
+    // printf("%d %d\n",x,a);
+    if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_A)){
+      state = !state;
+      transmission.set_value(state);
+    }
     drivebase.handle_input();
     delay(10);
   }
