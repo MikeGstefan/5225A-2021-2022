@@ -112,8 +112,8 @@ void auton_file_read(){
   auton_file.close();
   Data::log_t.done_update();
 
-  auto autonIt = std::find(auton_names, auton_names+static_cast<int>(autons::NUM_OF_ELEMENTS), auton);
-  auto allianceIt = std::find(alliance_names, alliance_names+2, ally);
+  const char** autonIt = std::find(auton_names, auton_names+static_cast<int>(autons::NUM_OF_ELEMENTS), auton);
+  const char** allianceIt = std::find(alliance_names, alliance_names+2, ally);
   
   cur_auton = (autonIt != std::end(auton_names)) ? static_cast<autons>(std::distance(auton_names, autonIt)) : autons::Skills;
   cur_alliance = (allianceIt != std::end(alliance_names)) ? static_cast<alliances>(std::distance(alliance_names, allianceIt)) : alliances::BLUE;
@@ -136,13 +136,15 @@ void switch_alliance(alliances new_ally){
     case alliances::BLUE:
       cur_alliance = alliances::BLUE;
       alliance.set_background(COLOR_BLUE);
-      printf("\033[34mSwitched to Blue Alliance\033[0m\n"); //Convert to log
+      printf("\033[34mSwitched to Blue Alliance\033[0m\n");
+      misc.print("Switched to Blue Alliance\n");
       break;
 
     case alliances::RED:
       cur_alliance = alliances::RED;
       alliance.set_background(COLOR_RED);
-      printf("\033[31mSwitched to Red Alliance\033[0m\n"); //Convert to log
+      printf("\033[31mSwitched to Red Alliance\033[0m\n");
+      misc.print("Switched to Red Alliance\n");
       break;
   }
 

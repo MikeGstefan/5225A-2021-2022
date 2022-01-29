@@ -265,7 +265,7 @@ void main_setup(){
       if(GUI::go_end("WHEN STOPPED")){
         printf("The robot is %.2f inches %s and %.2f inches %s off the starting point.\n", fabs(tracking.x_coord), (tracking.x_coord < 0 ? "left" : "right"), fabs(tracking.y_coord), (tracking.y_coord < 0 ? "back" : "forward"));
 
-        int turned = fmod(rad_to_deg(tracking.global_angle), 360);
+        int turned = tracking.get_angle_in_deg();
         int lost = 360-turned;
         float rotations = round(rad_to_deg(tracking.global_angle)/180)/2.0;
         if (180 < turned && turned < 355) printf("However, the robot lost %d degrees over %.1f rotations.\n Consider increasing the DistanceLR.\n", lost, rotations);

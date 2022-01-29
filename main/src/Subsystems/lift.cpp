@@ -190,8 +190,7 @@ void Lift::elastic_util(){
   master.clear();
   lift.reset();
   lift.motor.move(-10);
-  master.print(0, 0, "press a to start");
-  waitUntil(master.get_digital_new_press(DIGITAL_A));
+  GUI::go("Start Elastic Utility", "Press to start the elastic utility.", 1000);
   lift_piston.set_value(HIGH);
   Timer move_timer{"move"};
   lift.move_absolute(lift.top_position);

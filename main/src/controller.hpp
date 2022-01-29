@@ -53,5 +53,5 @@ public:
   void clear_line (std::uint8_t line);
   void clear();
   void rumble(const char* rumble_pattern);
-  bool interrupt(bool analog=true, bool digital=true);
+  bool interrupt(bool analog=true, bool digital=true, bool A_except = true);
 };

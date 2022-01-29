@@ -68,7 +68,7 @@ void GUI::flash(Colour colour, std::uint32_t time, std::string text){
   screen::set_eraser(colour);
 
   printf("\n\n\033[31mWARNING: %s\033[0m\n\n", text.c_str());
-  misc.print("%s", text.c_str());
+  misc.print("%s\n", text.c_str());
 
   int spaces = int(CHAR_WIDTH_LARGE*text.length()/460)+1;
   std::size_t space, last_space=0;
@@ -96,7 +96,7 @@ void GUI::end_flash (){
 
 bool GUI::go(std::string short_msg, std::string long_msg, std::uint32_t delay_time){
  if(!go_enabled) return true;
-  printf("\n\n%s\nPress the big button when ready.\n", long_msg.c_str());
+  printf("\n\n%s\nPress the big button or A on the controller when ready.\n", long_msg.c_str());
   snprintf(go_string, 90, "%s", short_msg.c_str());
 
   bool pressed = false, interrupted = false;
