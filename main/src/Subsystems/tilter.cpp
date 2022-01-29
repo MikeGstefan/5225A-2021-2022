@@ -84,8 +84,8 @@ void Tilter::handle(){
       }
       if(master.get_digital_new_press(fill_top_goal_button)){ // throws all subsystems into managed states except spinner
         intake.raise_and_disable();
-        delay(100);
-        ring_piston.set_value(1);
+        delay(100); // wait for intake piston to raise before raising lift
+        ring_piston.set_value(HIGH);
         spinner.set_state(spinner_states::prep);
 
         lift.move_absolute(lift.tall_goal_position);

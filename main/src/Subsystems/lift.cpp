@@ -22,7 +22,7 @@ Lift::Lift(Motorized_subsystem<lift_states, NUM_OF_LIFT_STATES, LIFT_MAX_VELOCIT
   target = bottom_position;
   last_target = target;
 }
-
+bool intake_on = false;
 void Lift::handle(){
   // if (fabs(target - motor.get_position()) > end_error && fabs(motor.get_actual_velocity()) < 5.0) bad_count++;
   // else bad_count = 0;
@@ -83,9 +83,15 @@ void Lift::handle(){
       break;
 
     case lift_states::grabbed:
+      if(!intake_on && motor.get_position() < bottom_position + 100){
+        intake_piston.set_value(LOW); // lowers the intake again and turns it on
+        intake.motor.move(INTAKE_POWER);
+        intake_on = true;
+      }
       if(master.get_digital_new_press(lift_up_button)){ // lifts goal to platform height if up button is pressed
-        move_absolute(platform_position);
         intake.raise_and_disable();
+        delay(100);
+        move_absolute(platform_position);
 
         set_state(lift_states::platform);
       }
@@ -115,9 +121,8 @@ void Lift::handle(){
       }
       if(master.get_digital_new_press(lift_down_button)){ // lowers goal if down button is pressed
         move_absolute(bottom_position);
-        intake_piston.set_value(LOW); // lowers the intake again and turns it on
-        intake.motor.move(INTAKE_POWER);
         intake.set_state(intake_states::on);
+        intake_on = false;
 
         set_state(lift_states::grabbed);
       }
@@ -142,7 +147,7 @@ void Lift::handle(){
       if(master.get_digital_new_press(lift_up_button) || master.get_digital_new_press(lift_down_button)){
         move_absolute(bottom_position);
       }
-      if(motor.get_position() < top_position / 2){ // waits for lift to lower past halfway to lower intake
+      if(motor.get_position() < bottom_position + 100){ // waits for lift to lower past halfway to lower intake
         intake_piston.set_value(LOW);
         intake.set_state(intake_states::off);
         master.print(LIFT_STATE_LINE, 0, "Lift: Searching    ");
