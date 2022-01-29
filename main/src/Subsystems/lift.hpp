@@ -14,6 +14,7 @@ enum class lift_states{
   grabbed, // has goal
   tip, // at height to keep mogo away from opponent/ tip mogos
   platform, // at platform height
+  tall_platform, // tall goal at platform height
   dropoff, // mogo released at platform height
   tall_goal,  // filling up rings on tall goal
   manual  // controlled by joystick
@@ -31,7 +32,7 @@ class Lift: public Motorized_subsystem<lift_states, NUM_OF_LIFT_STATES, LIFT_MAX
   double gear_ratio = 5.0;
 
 public:
-  const double bottom_position = 35.0, raised_position = 250.0, platform_position = 560.0, tall_goal_position = 665.0, top_position = 675.0;
+  const double bottom_position = 35.0, raised_position = 250.0, tall_dropoff_position = 450, platform_position = 560.0, tall_goal_position = 665.0, top_position = 675.0;
 
   Lift(Motorized_subsystem<lift_states, NUM_OF_LIFT_STATES, LIFT_MAX_VELOCITY> motorized_subsystem);  // constructor
   void handle();  // contains state machine code

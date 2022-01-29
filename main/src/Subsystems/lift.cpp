@@ -8,6 +8,7 @@ Lift lift({{"Lift",
   "grabbed",
   "tip",
   "platform",
+  // "tall_platform",
   "dropoff",
   "tall_goal",
   "manual",
@@ -104,11 +105,11 @@ void Lift::handle(){
 
         set_state(lift_states::idle);
       }
-      if(master.get_digital_new_press(mogo_tip_button)){  // moves to top position if level platform button is pressed
-        move_absolute(raised_position);
+      if(master.get_digital_new_press(tall_goal_dropoff_button)){  // moves to top position if level platform button is pressed
+        move_absolute(tall_dropoff_position);
         intake.raise_and_disable();
 
-        set_state(lift_states::tip);
+        set_state(lift_states::tall_platform);
       }
       intake.toggle();
       break;
@@ -142,6 +143,20 @@ void Lift::handle(){
       }
       break;
 
+    case lift_states::tall_platform:
+      // drops off goal if up button is pressed
+      if(master.get_digital_new_press(lift_up_button) && fabs(motor.get_position() - tall_dropoff_position) < end_error){
+        lift_piston.set_value(LOW);
+
+        set_state(lift_states::dropoff);
+      }
+      if(master.get_digital_new_press(lift_down_button)){ // lowers goal if down button is pressed
+        move_absolute(raised_position);
+
+        set_state(lift_states::tip);
+      }
+
+      break;
     case lift_states::dropoff:
       // releases goal if up or down button is pressed
       if(master.get_digital_new_press(lift_up_button) || master.get_digital_new_press(lift_down_button)){

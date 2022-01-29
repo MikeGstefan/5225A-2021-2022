@@ -5,7 +5,7 @@ void lrt_auton(){
 	move_start(move_types::point, point_params({5.0,8.0, 45.0}),false);
   tilter.reset();
   lift.reset();
-  lift.move_absolute(250);
+  // lift.move_absolute(250);
   move_wait_for_complete();
 	intake.move(100);
 	move_start(move_types::point, point_params(polar_to_vector_point(5.0,8.0,17.5,45.0,45.0),127.0,false,0.0,true,0.0,0.0,{18.0,0.0,20.0},{12.0,0.0001,1000.0},{125.0,0.0,1000.0}),false);
@@ -24,10 +24,11 @@ void lrt_auton(){
 	move_start(move_types::point, point_params(polar_to_vector_point(5.0,8.0,10.0,45.0,45.0),127.0,false,0.0,true,0.0,0.0,{18.0,0.0,100.0},{12.0,0.0001,1000.0},{125.0,0.0,1000.0}),true);
 	// move_start(move_types::point, point_params({-3.0, 18.0,0.0}));
 	// move_start(move_types::turn_point, turn_point_params({-2.5, 92.5}));
+  // return;
 	move_start(move_types::turn_angle, turn_angle_params(-15.0));
 	move_start(move_types::line_old, line_old_params(12.75, 15.75, -5.5, 92.5,-15.0,false,true,127, false,2.5,10.0,15.0,0.6,0.2),false); // drives through 1st small neutral mogo
 	// move_start(move_types::point, point_params({-2.5, 92.5, rad_to_deg(atan2(-2.5 - tracking.x_coord, 92.5 - tracking.y_coord))}),false);
-	find_goal_tilter(75);
+	find_goal_tilter(0);
   move_stop();
   move_start(move_types::point, point_params({-9.5, 92.5,-15.0},127.0,true, 0.0,true, 0.0,0.0,{23.0,0.0,0.0},{9.5,0.0,1000.0},{125.0,0.0,1000.0},0,2.0,10.0));
 	// move_wait_for_complete();

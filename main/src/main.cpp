@@ -30,9 +30,9 @@ void initialize() {
 	_Controller::init();
 	delay(150);
 	// tracking.x_coord = 144.0 - 10.25, tracking.y_coord = 14.75, tracking.global_angle = -M_PI_2;
-	// tracking.x_coord = 0.0, tracking.y_coord = 0.0, tracking.global_angle = 0.0;
+	tracking.x_coord = 0.0, tracking.y_coord = 0.0, tracking.global_angle = 0.0;
 	// tracking.x_coord = 79.0, tracking.y_coord = 106.0, tracking.global_angle = deg_to_rad(-270.0);
-	tracking.x_coord = 23.5, tracking.y_coord = 5.75, tracking.global_angle = 1.0_deg;
+	// tracking.x_coord = 23.5, tracking.y_coord = 5.75, tracking.global_angle = 1.0_deg;
 	update_t.start();
 	GUI::setup();
 }
@@ -140,6 +140,12 @@ void tilter_reset2(){
 // int ring_count = 0, cur_auton = 1;
 bool claw_state = false, intk_state = false;
 void opcontrol() {
+  // while(true){
+  //   if(master.get_digital_new_press(DIGITAL_A)){
+  //     master.print(0,0,"%.2f, %.2f, %.2f",tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle));
+  //   }
+  //   delay(10);
+  // }
   move_stop();
   printf("STOPPING00\n\n");
   // while(true){
