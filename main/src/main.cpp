@@ -7,6 +7,7 @@
 #include "Tracking.hpp"
 #include "task.hpp"
 #include "auton.hpp"
+#include "vision_loop.hpp"
 
 // using namespace std;
 #include "task.hpp"
@@ -31,7 +32,7 @@ void initialize() {
 	// tracking.x_coord = 0.0, tracking.y_coord = 0.0, tracking.global_angle = 0.0;
   //
 	// update_t.start();
-	// GUI::setup();
+	GUI::setup();
 }
 
 /**
@@ -102,6 +103,7 @@ void next_driver(){
 // int ring_count = 0, cur_auton = 1;
 bool state = false;
 void opcontrol() {
+  vision_loop();
   // flatten_against_wall(false);
   /*
   Timer rush_timer{"rush_timer"};
@@ -113,7 +115,6 @@ void opcontrol() {
   delay(500);
   */
 
-  // tilter.reset();
   // tilter.move_absolute(tilter.bottom_position);
   // while(true){
   //   printf("dist: %d\n", tilter_dist.get());
@@ -121,13 +122,5 @@ void opcontrol() {
   // }
 
 	// drivebase.driver_practice();
-  while(true){
-    // printf("%d %d\n",x,a);
-    if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_A)){
-      state = !state;
-      transmission.set_value(state);
-    }
-    drivebase.handle_input();
-    delay(10);
-  }
+
 }

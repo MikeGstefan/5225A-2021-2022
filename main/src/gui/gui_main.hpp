@@ -92,8 +92,8 @@ Button pneum_btn_2 (250, 70, 200, 80, Style::SIZE, Button::TOGGLE, pneumatic, "P
 
 //The following are not normal pages and should not be accessible by scrolling through the GUI.
 Page testing (12, "Testing"); //Blank page made so it already exists when quick tests are created
-Text testing_text_1 (125, 50, Style::CENTRE, TEXT_SMALL, testing, "BLANK TEXT 1");
-Text testing_text_2 (350, 50, Style::CENTRE, TEXT_SMALL, testing, "BLANK TEXT 2");
+Text testing_text_1 (125, 50, Style::CENTRE, TEXT_SMALL, testing, "Left: %d", left_distance.get());
+Text testing_text_2 (350, 50, Style::CENTRE, TEXT_SMALL, testing, "Right: %d", right_distance.get());
 Button testing_button_1 (25, 70, 200, 80, Style::SIZE, Button::SINGLE, testing, "BLANK BUTTON 1");
 Button testing_button_2 (250, 70, 200, 80, Style::SIZE, Button::SINGLE, testing, "BLANK BUTTON 2");
 Slider testing_slider (MID_X, 200, 200 , 20, Style::CENTRE, Slider::HORIZONTAL, -100, 100, testing, "BLANK SLIDER");
@@ -252,7 +252,7 @@ void GUI::background(){ //To be called continously
   if(inRange(x, 0, 199) && inRange(y, 0, 199)) field[x].set(y); //Saves position (x,y) to as tracked
 
   //Saving vars for text display
-  angle = fmod(rad_to_deg(tracking.global_angle), 360);
+    angle = fmod(rad_to_deg(tracking.global_angle), 360);
   left_enc = LeftEncoder.get_value();
   right_enc = RightEncoder.get_value();
   back_enc = BackEncoder.get_value();
