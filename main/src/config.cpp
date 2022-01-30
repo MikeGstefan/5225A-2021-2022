@@ -23,6 +23,7 @@ pros::Motor spinner_motor(8, pros::E_MOTOR_GEARSET_36, true, pros::E_MOTOR_ENCOD
 
 // pros::Motor uptk(11);
 pros::Distance tilter_dist(8);
+pros::Imu imu_sensor(1);
 pros::ADIDigitalOut lift_piston(7);
 pros::ADIDigitalIn lift_trigger(8);
 pros::ADIEncoder LeftEncoder(3, 4, false), RightEncoder(1, 2, true), BackEncoder(6, 5, true);
