@@ -70,6 +70,13 @@ void Drivebase::move(double x, double y, double a){
   back_r.move(x + y - a);
 }
 
+void Drivebase::move(double y, double a){ 
+  front_l.move(y+a);
+  front_r.move(y-a);
+  back_l.move(y+a);
+  back_r.move(y-a);
+}
+
 void Drivebase::move_tank(double y, double a){
   move(0.0, y, a);
 }
@@ -202,7 +209,7 @@ void Drivebase::handle_input(){
     tracking.power_x *= -1;
   }
 
-  move(tracking.power_x, tracking.power_y, tracking.power_a);
+  move(tracking.power_y, tracking.power_a);
 }
 
 void Drivebase::driver_practice(){

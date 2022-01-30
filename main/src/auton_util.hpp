@@ -13,7 +13,7 @@
 // Left: get_roll, 1
 // Back: get_pitch, 1
 // Front: get_pitch, -1
-
+using namespace pros;
 #define GYRO_AXIS get_pitch
 #define GYRO_SIDE -1
 

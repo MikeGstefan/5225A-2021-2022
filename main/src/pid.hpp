@@ -1,6 +1,6 @@
 #pragma once
 #include "main.h"
-// #include "timer.hpp"
+#include "timer.hpp"
 #include "config.hpp"
 #include "util.hpp"
 #include "Tracking.hpp"
