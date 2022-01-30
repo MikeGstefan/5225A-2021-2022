@@ -38,6 +38,7 @@ double PID::compute(double input, double target){
         last_update_timer.reset();
         last_error_sgn = sgn(error);
         last_error = error;
+        // printf("calculating derivative : %f\n", derivative);
     }
     
     output = proportional + integral + derivative + bias;

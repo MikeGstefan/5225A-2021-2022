@@ -6,7 +6,6 @@
 Tilter tilter({{"Tilter",
 {
   "lowered",
-  "searching",
   "raised",
   "lowering",
   "tall_goal",
@@ -26,69 +25,80 @@ Tilter::Tilter(Motorized_subsystem<tilter_states, NUM_OF_TILTER_STATES, TILTER_M
 
 void Tilter::handle(){
 
-  if (fabs(target - motor.get_position()) > end_error && fabs(motor.get_actual_velocity()) < 5.0) bad_count++;
-  else bad_count = 0;
-  if(bad_count > 25 && state != tilter_states::manual){
-    motor.move(0);
-    master.rumble("---");
-    printf("TILTER SAFETY TRIGGERED\n");
-    set_state(tilter_states::manual);
-  }
+  // if (fabs(target - motor.get_position()) > end_error && fabs(motor.get_actual_velocity()) < 5.0) bad_count++;
+  // else bad_count = 0;
+  // if(bad_count > 25 && state != tilter_states::manual){
+  //   motor.move(0);
+  //   master.rumble("---");
+  //   printf("TILTER SAFETY TRIGGERED\n");
+  //   set_state(tilter_states::manual);
+  // }
 
   // switches to manual control if tilter manual button is pressed
-  if(master.get_digital_new_press(tilter_manual_button))  set_state(tilter_states::manual);
+  // if(master.get_digital_new_press(tilter_manual_button))  set_state(tilter_states::manual);
 
   switch(state){
 
     case tilter_states::lowered:
-      if(master.get_digital_new_press(tilter_button)){  // throws into searching state
-        master.rumble("-"); // lets driver know we've entered searching state
-        pickup_timer.reset();
-
-        set_state(tilter_states::searching);
-      }
-      break;
-
-    case tilter_states::searching:
-
-      if(master.get_digital_new_press(tilter_button)){  // grabs goal and raises tilter when tilter_button is pressed
-        master.rumble("-"); // lets driver know we've entered searching state
-
-        set_state(tilter_states::lowered);
-      }
-      // temps, driver, lift state
-
-      if(tilter_dist.get() < 100 || pickup_timer.get_time() > 1000){ // grabs goal once sensor detects it timer times out
-        tilter_top_piston.set_value(LOW);
-        delay(100); // waits for top piston to fully close
-        tilter_bottom_piston.set_value(HIGH);
-        delay(200); // waits for bottom piston to fully close
-        held = true;
-        move_absolute(raised_position); // lifts goal
+      if(master.get_digital_new_press(tilter_raise_button)){  // lifts tilter out of the way (not holding a mogo)
+        move_absolute(raised_position);
 
         set_state(tilter_states::raised);
+      }
+      else if(master.get_digital_new_press(tilter_search_button)){  // grabs goal and raises tilter when tilter_button is pressed
+        printf("pressed\n");
+        Timer cur{"auto-pickup"};
+        drivebase.move(0.0, 80.0, 0.0);
+        while(true){ // waits until distance sensor detects mogo
+          // cancels search if button is pressed or times out
+          if(master.get_digital_new_press(tilter_search_button) || cur.get_time() > 1000){
+            break;  // cancels search
+          }
+
+          // lifts goal when distance sensor detects it
+          if(tilter_dist.get() < 100){
+            tilter_top_piston.set_value(LOW);
+            delay(200); // waits for top piston to fully close
+            tilter_bottom_piston.set_value(HIGH);
+            delay(300); // waits for bottom piston to fully close
+
+            held = true;
+            move_absolute(raised_position); // raises mogo
+
+            set_state(tilter_states::raised);
+            break;
+          }
+
+          delay(10);
+        }
+
       }
       break;
 
     case tilter_states::raised:
-      if(master.get_digital_new_press(tilter_button)){  // lowers tilter to bottom when tilter_button is pressed
+      // lowers tilter to bottom when either tilter button is pressed
+      if(master.get_digital_new_press(tilter_raise_button) || master.get_digital_new_press(tilter_search_button)){
         move_absolute(bottom_position);
 
         set_state(tilter_states::lowering);
       }
       if(master.get_digital_new_press(fill_top_goal_button)){ // throws all subsystems into managed states except spinner
-        lift.move_absolute(top_position);
-        lift.set_state(lift_states::tall_goal);
         intake.raise_and_disable();
+        delay(100); // wait for intake piston to raise before raising lift
+        ring_piston.set_value(HIGH);
         spinner.set_state(spinner_states::prep);
 
-        move_absolute(top_position);
+        lift.move_absolute(lift.tall_goal_position);
+        lift.set_state(lift_states::tall_goal);
+
+        move_absolute(tall_goal_position);
+
         set_state(tilter_states::tall_goal);
       }
       break;
 
     case tilter_states::lowering:
-      if(master.get_digital_new_press(tilter_button)){  // raises tilter when tilter_button is pressed
+      if(master.get_digital_new_press(tilter_search_button)){  // raises tilter when tilter_button is pressed
         move_absolute(raised_position);
 
         set_state(tilter_states::raised);
@@ -114,7 +124,7 @@ void Tilter::handle(){
 
       motor.move(tilter_power);
 
-      if(master.get_digital_new_press(tilter_button)){ // toggles holding state if tilter button is pressed
+      if(master.get_digital_new_press(tilter_search_button)){ // toggles holding state if tilter button is pressed
         if(held){
           tilter_bottom_piston.set_value(LOW);
           tilter_top_piston.set_value(HIGH);

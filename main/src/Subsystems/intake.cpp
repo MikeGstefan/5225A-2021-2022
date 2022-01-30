@@ -12,7 +12,7 @@ Intake intake({{"Intake",
 
 Intake::Intake(Motorized_subsystem<intake_states, NUM_OF_INTAKE_STATES, INTAKE_MAX_VELOCITY> motorized_subsystem):  Motorized_subsystem(motorized_subsystem){  // constructor
   // initiliazes states
-  state = intake_states::on;
+  state = intake_states::off;
   last_state = state;
 
 }

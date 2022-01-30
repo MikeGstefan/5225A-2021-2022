@@ -63,33 +63,63 @@ void flatten_against_wall(bool right){
       front_count = 0;
     }
 
-    if (fabs(back_velocity) < velocity_threshold){
       back_done = back_count > cycle_threshold;
+    if (fabs(back_velocity) < velocity_threshold){
       if(!back_done) back_count++;
     }
     else{ // resets back counter if robot is moving
-      back_count = 0;
       back_done = false;
+      back_count = 0;
     }
 
     if(front_done) drivebase.move(flatten_power, 0.0, -power_diff); // turn back end to align with wall if front is aligned
     else if(back_done) drivebase.move(flatten_power, 0.0, power_diff); //  turn front end to align with wall if back is aligned
     else drivebase.move(flatten_power, 0.0, 0.0); // otherwise continune towards wall
 
-    delay(10);
   }
+    delay(10);
+}
+void find_goal_lift(bool move_stop_b){
+  while(!lift_trigger.get_value()){//NEED TO ADD SAFETY
+  
+    delay(10);
+
+  }
+	lift_piston.set_value(HIGH);
+  if(move_stop_b)move_stop();
 }
 
-void score_on_top(void* params){  // scores on tall goal
-  delay(8000);
-  // delay(1000);
-  // spinner.move(127);
-  // delay(3000);
-  // spinner.move(127);
-  // delay(3000);
-  // spinner.move(0);
-  // delay(1000);
-
+void find_goal_tilter(int delay_t){
+    while(tilter_dist.get() > 70){
+    log_d.print("tilter d: %f\n", tilter_dist.get());
+    delay(33);
+  }
+  log_d.print("%d | grabbing goal 2 at: (%.2f, %.2f, %.2f)\n",millis(),tracking.x_coord, tracking.y_coord,rad_to_deg(tracking.global_angle));
+  delay(delay_t);
+  tilter_top_piston.set_value(0);
+  delay(100);
+  tilter_bottom_piston.set_value(1);
+  delay(200);
+  tilter.move_absolute(300);
+  
+}
+double get_front_dist(){
+  double avg = 0.0;
+  int count = 0;
+  while(true){ 
+    // for(int i = 0; i < 3; i++){
+    if(front_dist.get() > 10){
+      avg+= front_dist.get();
+      count++;
+    }
+    if(count > 2){
+      avg/=count;
+      break;
+    }
+    delay(34);
+  }
+  return ((avg/25.4) +front_dist_dist);
+  
 }
 
 Gyro::Gyro(Imu& imu): inertial(imu){}

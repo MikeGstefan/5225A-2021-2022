@@ -16,8 +16,8 @@ extern controller_digital_e_t lift_down_button;
 extern controller_digital_e_t mogo_tip_button;
 
 
-extern controller_digital_e_t tilter_button;
-extern controller_digital_e_t hitch_button;
+extern controller_digital_e_t tilter_search_button;
+extern controller_digital_e_t tilter_raise_button;
 
 // misc buttons
 extern controller_digital_e_t cancel_button;

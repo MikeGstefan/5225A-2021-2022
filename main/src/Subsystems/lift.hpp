@@ -3,7 +3,7 @@
 #include "../Libraries/subsystem.hpp"
 #include "intake.hpp" // because lift controls intake
 
-#define LIFT_STATE_LINE 2 // line on controller which "idle" and "searh=ching" lift states are printed on
+#define LIFT_STATE_LINE 2 // line on controller which "searching" and "lowered" lift states are printed on
 
 #define NUM_OF_LIFT_STATES 8
 #define LIFT_MAX_VELOCITY 100
@@ -32,7 +32,7 @@ class Lift: public Motorized_subsystem<lift_states, NUM_OF_LIFT_STATES, LIFT_MAX
   double gear_ratio = 5.0;
 
 public:
-  static constexpr double bottom_position = 35.0, raised_position = 250.0, platform_position = 560.0, top_position = 675.0;
+  const double bottom_position = 35.0, raised_position = 250.0, platform_position = 560.0, tall_goal_position = 665.0, top_position = 675.0;
 
   Lift(Motorized_subsystem<lift_states, NUM_OF_LIFT_STATES, LIFT_MAX_VELOCITY> motorized_subsystem);  // constructor
   void handle();  // contains state machine code

@@ -5,16 +5,25 @@
 #include "intake.hpp"
 
 
-#define NUM_OF_SPINNER_STATES 6
+#define NUM_OF_SPINNER_STATES 12
 #define SPINNER_MAX_VELOCITY 100
+#define RING_DROP_TIME 300
 
 enum class spinner_states {
   idle,  // not doing anything (obviously)
   prep, // waiting for lift and tilter to reach respectice positions
+  spin1,
+  drop1, 
+  spin2, 
+  drop2,
+
   aligning_1, // rotating goal for the first time
   release_1,  // releasing first group of rings
+  wait_for_arms,  // waits for lift and tilter to leave room for rings
   aligning_2, // rotating goal for the first time
+  wait_for_arms_2,  // waits for lift and tilter come back to scoring position
   release_2,  // releasing second group of rings
+
 };
 
 class Spinner: public Motorized_subsystem<spinner_states, NUM_OF_SPINNER_STATES, SPINNER_MAX_VELOCITY> {

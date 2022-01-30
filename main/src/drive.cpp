@@ -214,46 +214,37 @@ void Drivebase::driver_practice(){
   intake_piston.set_value(LOW);
   lift_piston.set_value(LOW);
 
-  // resets subsystems
-  lift.reset();
-  tilter.reset();
-  bool tilter_held = false;
-
   // moves motors to necessary positions / speeds
   lift.move_absolute(lift.bottom_position);
-  tilter.move_absolute(tilter.bottom_position);
-  intake.motor.move(100);
+  tilter.move_absolute(tilter.raised_position);
 
-  tilter_bottom_piston.set_value(LOW);
-  tilter_top_piston.set_value(HIGH);
+  tilter.set_state(tilter_states::raised);
+
+
   cur_driver = 0; // defaults driver to Nikhil
   // master.print(2, 0, "Driver: %s", driver_name());
   while(true){
-    while(!master.get_digital_new_press(E_CONTROLLER_DIGITAL_B)){
+    // while(!master.get_digital_new_press(E_CONTROLLER_DIGITAL_B)){
+      /*
+      if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_UP)){ // goes to next driver
+        cur_driver++;
+        cur_driver %= num_of_drivers; // rollover
+        // spaces in the controller print are to overwrite names
+        master.print(2, 0, "Driver: %s          ", drivers[cur_driver].name);
+      }
+      else if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_DOWN)){  // goes to previous driver
+        if (cur_driver == 0)  cur_driver = num_of_drivers - 1;
+        else cur_driver--;
+        master.print(2, 0, "Driver: %s          ", drivers[cur_driver].name);
+      }
+      */
+
       // actual drive code
       drivebase.handle_input();
       lift.handle();
-      // tilter.handle();
-      if(master.get_digital_new_press(tilter_button)){
-        if(tilter_held){
-          tilter.motor.move_absolute(tilter.bottom_position, 100); // lifts goal
-          waitUntil(fabs(tilter.motor.get_position() - tilter.bottom_position) <  25 );
-          tilter_top_piston.set_value(HIGH);
-          tilter_bottom_piston.set_value(LOW);
-
-          tilter_held = false;
-        }
-        else{
-          tilter_top_piston.set_value(LOW);
-          delay(100); // waits for top piston to fully close
-          tilter_bottom_piston.set_value(HIGH);
-          delay(200); // waits for bottom piston to fully close
-          tilter.motor.move_absolute(tilter.raised_position, 100); // lifts goal
-
-          tilter_held = true;
-        }
-      }
+      tilter.handle();
       intake.handle();
+      spinner.handle();
 
       // prints motor temps every second
       if(screen_timer.get_time() > 1000){
@@ -269,10 +260,10 @@ void Drivebase::driver_practice(){
       }
 
       delay(10);
-    }
-    update_lookup_table_util();
-    master.clear();
-    master.print(2, 0, "Driver: %s", driver_name());
+    // }
+    // update_lookup_table_util();
+    // master.clear();
+    // master.print(2, 0, "Driver: %s", drivers[cur_driver].name);
   }
 }
 

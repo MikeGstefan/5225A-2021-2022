@@ -1,5 +1,15 @@
 #include "task.hpp"
 
+struct point_params{ 
+  Position target;
+  const double max_power;
+  const bool overshoot;
+  const double min_angle_percent;
+  const bool brake;
+  const double decel_dist, decel_speed;
+  point_params(Position target, const double max_power = 127.0, const bool overshoot = false, const double min_angle_percent = 0.0, const bool brake = true, const double decel_dist = 0.0, const double decel_speed = 0.0);
+};
+
 _Task::_Task(pros::task_fn_t function, const char* name, void* params, std::uint32_t prio, std::uint16_t stack_depth){
   this->function = function;
   this->name = name;
@@ -34,7 +44,9 @@ void _Task::start(void* params){
      task_log.print("%d| %s was already started\n", millis(), this->name);
      this->kill();
    }
+  //  printf("before move: %f\n",static_cast<point_params*>(params)->target.x);
    this->params = std::make_tuple(this,std::move(params));
+  //  printf("after move: %f\n",static_cast<point_params*>(_Task::get_params((void*)&this->params))->target.x);
    this->task_ptr = new pros::Task(this->function, &this->params, this->prio, this->stack_depth, this->name);
    task_log.print("%d| %s started\n", millis(), this->name);
 }

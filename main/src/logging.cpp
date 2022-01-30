@@ -20,16 +20,16 @@ Data::Data(const char* obj_name, const char* id_code, log_types log_type_param, 
 
 
 
-Data task_log("tasks.txt","$01", off, log_locations::both);
+Data task_log("tasks.txt","$01", general, log_locations::both);
 Data controller_queue("controller.txt","$02", off,log_locations::sd);
 Data tracking_data("tracking.txt","$03",off,log_locations::sd);
-Data tracking_imp("tracking.txt","$03",off,log_locations::both);
+Data tracking_imp("tracking.txt","$03",off,log_locations::sd);
 Data misc("misc.txt", "$04",off,log_locations::both);
 Data drivers_data("driver.txt", "$05", off,log_locations::t);
-Data motion_i("motion.txt","$06",off,log_locations::both);
-Data motion_d("motion.txt", "%06", off,log_locations::both);
-Data term("terminal.txt","$06",off,log_locations::t);
-
+Data motion_i("motion.txt","$06",general,log_locations::both);
+Data motion_d("motion.txt", "$06", general,log_locations::both);
+Data term("terminal.txt","$07",off,log_locations::t);
+Data log_d("log.txt","$08",general,log_locations::both);
 
 vector<Data*> Data::get_objs(){
   return obj_list;
