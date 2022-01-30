@@ -181,7 +181,8 @@ void Drivebase::update_lookup_table_util(){
 }
 
 void Drivebase::handle_input(){
-  tracking.power_x = drivers[cur_driver].custom_drives[0].lookup(master.get_analog(drivers[cur_driver].joy_sticks[0]));
+  // tracking.power_x = drivers[cur_driver].custom_drives[0].lookup(master.get_analog(drivers[cur_driver].joy_sticks[0]));
+  tracking.power_x = 0.0;
   tracking.power_y = drivers[cur_driver].custom_drives[1].lookup(master.get_analog(drivers[cur_driver].joy_sticks[1]));
   tracking.power_a = drivers[cur_driver].custom_drives[2].lookup(master.get_analog(drivers[cur_driver].joy_sticks[2]));
 

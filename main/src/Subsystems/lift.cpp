@@ -69,7 +69,7 @@ void Lift::handle(){
         master.clear_line(LIFT_STATE_LINE);
 
         intake.set_state(intake_states::on); // intake defaults to on when mogo is grabbed
-        intake.motor.move(INTAKE_POWER);
+        // intake.motor.move(INTAKE_POWER);
 
         set_state(lift_states::grabbed);
       }
@@ -86,7 +86,7 @@ void Lift::handle(){
     case lift_states::grabbed:
       if(!intake_on && motor.get_position() < bottom_position + 100){
         intake_piston.set_value(LOW); // lowers the intake again and turns it on
-        intake.motor.move(INTAKE_POWER);
+        // intake.motor.move(INTAKE_POWER);
         intake_on = true;
       }
       if(master.get_digital_new_press(lift_up_button)){ // lifts goal to platform height if up button is pressed
