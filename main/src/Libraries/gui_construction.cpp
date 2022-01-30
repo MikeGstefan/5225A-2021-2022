@@ -75,8 +75,8 @@ _Text elastic_up (MID_X, 160, GUI::Style::CENTRE, TEXT_SMALL, elastic, "Up Time:
 _Text elastic_down(MID_X, 180, GUI::Style::CENTRE, TEXT_SMALL, elastic, "Down Time: %d", elastic_down_time);
 
 Page motor_subsys ("Motorized Subsystems"); //Moving the lift
-Slider lift_val(30, 45, 300, 35, GUI::Style::SIZE, Slider::HORIZONTAL, lift.bottom_position, lift.top_position, motor_subsys, "Lift", 10);
-Slider tilter_val(30, 110, 300, 40, GUI::Style::SIZE, Slider::HORIZONTAL, tilter.bottom_position, tilter.top_position, motor_subsys, "Tilter", 10);
+Slider lift_val(30, 45, 300, 35, GUI::Style::SIZE, Slider::HORIZONTAL, 0, 0, motor_subsys, "Lift", 10);
+Slider tilter_val(30, 110, 300, 40, GUI::Style::SIZE, Slider::HORIZONTAL, 0, 0, motor_subsys, "Tilter", 10);
 Button lift_move(470, 45, -100, 40, GUI::Style::SIZE, Button::SINGLE, motor_subsys, "Move Lift");
 Button tilter_move(470, 95, -100, 40, GUI::Style::SIZE, Button::SINGLE, motor_subsys, "Move Tilter");
 Button claw_switch(470, 145, -100, 40, GUI::Style::SIZE, Button::TOGGLE, motor_subsys, "Claw");
@@ -163,9 +163,9 @@ void main_setup(){
   alliance.set_func([](){switch_alliance();}); //Has to be in a lambda since param type is alliances not void
   alliance.add_text(ally_name);
 
-  intake_switch.set_func([](){intake.toggle();});
+  intake_switch.set_func([](){printf("sorry nathan");});
 
-  run_elastic.set_func([](){lift.elastic_util();});
+  run_elastic.set_func([](){printf("sorry nathan");});
 
   resX.set_func([](){tracking.reset(0.0, tracking.y_coord, rad_to_deg(tracking.global_angle));});
   resY.set_func([](){tracking.reset(tracking.x_coord, 0.0, rad_to_deg(tracking.global_angle));});
@@ -207,27 +207,27 @@ void main_setup(){
     char coord_c[20];
     snprintf(coord_c, 20, " %d", lift_val.get_value());
     std::string coord = coord_c;
-    if (GUI::go("Move lift to" + coord, "Press to move lift to" + coord, 1000)) lift.move_absolute(lift_val.get_value());
+    if (GUI::go("Move lift to" + coord, "Press to move lift to" + coord, 1000)) {printf("sorry nathan");}//lift.move_absolute(lift_val.get_value());
   });
   tilter_move.set_func([&](){
     char coord_c[20];
     snprintf(coord_c, 20, " %d", tilter_val.get_value());
     std::string coord = coord_c;
-    if (GUI::go("Move tilter to" + coord, "Press to move tilter to" + coord, 1000)) tilter.move_absolute(tilter_val.get_value());
+    if (GUI::go("Move tilter to" + coord, "Press to move tilter to" + coord, 1000))printf("sorry nathan");// tilter.move_absolute(tilter_val.get_value());
   });
-  claw_switch.set_func([](){tilter_top_piston.set_value(1);});
-  claw_switch.set_off_func([](){tilter_top_piston.set_value(0);});
-  end_effector_switch.set_func([](){ring_piston.set_value(1);});
-  end_effector_switch.set_off_func([](){ring_piston.set_value(0);});
+  claw_switch.set_func([](){printf("sorry nathan");});
+  claw_switch.set_off_func([](){printf("sorry nathan");});
+  end_effector_switch.set_func([](){printf("sorry nathan");});
+  end_effector_switch.set_off_func([](){printf("sorry nathan");});
 
-  idle.set_func([](){lift.set_state(lift_states::idle);});
-  searching.set_func([](){lift.set_state(lift_states::searching);});
-  grabbed.set_func([](){lift.set_state(lift_states::grabbed);});
-  tip.set_func([](){lift.set_state(lift_states::tip);});
-  platform.set_func([](){lift.set_state(lift_states::platform);});
-  dropoff.set_func([](){lift.set_state(lift_states::dropoff);});
-  tall_goal.set_func([](){lift.set_state(lift_states::tall_goal);});
-  manual.set_func([](){lift.set_state(lift_states::manual);});
+  idle.set_func([](){printf("sorry nathan");});
+  searching.set_func([](){printf("sorry nathan");});
+  grabbed.set_func([](){printf("sorry nathan");});
+  tip.set_func([](){printf("sorry nathan");});
+  platform.set_func([](){printf("sorry nathan");});
+  dropoff.set_func([](){printf("sorry nathan");});
+  tall_goal.set_func([](){printf("sorry nathan");});
+  manual.set_func([](){printf("sorry nathan");});
 
   turn_encoder.set_func([](){ //Turn the encoder
     if (GUI::go("START, THEN SPIN THE ENCODER", "Please spin the encoder any number of rotations.")){
@@ -275,10 +275,10 @@ void main_setup(){
     }
   });
 
-  pneum_btn_1.set_func([](){lift_piston.set_value(1);});
-  pneum_btn_1.set_off_func([](){lift_piston.set_value(0);});
-  pneum_btn_2.set_func([](){lift_piston.set_value(1);});
-  pneum_btn_2.set_off_func([](){lift_piston.set_value(0);});
+  pneum_btn_1.set_func([](){printf("sorry nathan");});
+  pneum_btn_1.set_off_func([](){printf("sorry nathan");});
+  pneum_btn_2.set_func([](){printf("sorry nathan");});
+  pneum_btn_2.set_off_func([](){printf("sorry nathan");});
 
   std::get<4>(motors[0]) = &mot_temp_1;
   std::get<4>(motors[1]) = &mot_temp_2;

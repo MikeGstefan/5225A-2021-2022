@@ -1,4 +1,4 @@
-#include "Subsystems/lift.hpp"
+
 #include "drive.hpp"
 #include "controller.hpp"
 #include "Libraries/gui.hpp"
@@ -81,7 +81,7 @@ void autonomous() {
 
 	// tracking.reset(x,y,rad_to_deg(a));
 	// ring_piston.set_value(0);
-	lrt_auton();
+	// lrt_auton();
 
 	// skills();
 	// skills_pt2();

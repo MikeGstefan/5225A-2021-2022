@@ -1,5 +1,5 @@
 #pragma once
-#include "Subsystems/lift.hpp"
+// #include "Subsystems/lift.hpp"
 // #include "Subsystems/hitch.hpp"
 #include "Libraries/gui.hpp"
 #include "drive.hpp"
@@ -31,6 +31,4 @@ void next_auton();
 void prev_auton();
 void auton_file_read();
 
-void lrt_auton();
 void red_tall_rush();
-void skills();

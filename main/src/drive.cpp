@@ -218,14 +218,8 @@ void Drivebase::driver_practice(){
   master.print(2, 0, "Lift: Searching     ");
 
   // initializes pneumatics in appropriate state
-  intake_piston.set_value(LOW);
-  lift_piston.set_value(LOW);
 
   // moves motors to necessary positions / speeds
-  lift.move_absolute(lift.bottom_position);
-  tilter.move_absolute(tilter.raised_position);
-
-  tilter.set_state(tilter_states::raised);
 
 
   cur_driver = 0; // defaults driver to Nikhil
@@ -248,11 +242,6 @@ void Drivebase::driver_practice(){
 
       // actual drive code
       drivebase.handle_input();
-      lift.handle();
-      tilter.handle();
-      intake.handle();
-      spinner.handle();
-
       // prints motor temps every second
       if(screen_timer.get_time() > 1000){
         drivers_data.print("fl%.0f r%.0f bl%.0f r%.0f\n", front_l.get_temperature(), front_r.get_temperature(), back_l.get_temperature(), back_r.get_temperature());
@@ -285,8 +274,6 @@ void Drivebase::non_blocking_driver_practice(){
 
   // actual drive code
   drivebase.handle_input();
-  lift.handle();
-  tilter.handle();
 
   // takes away control from driver when motors overheat
   if(inRange(front_l.get_temperature(), 55, std::numeric_limits<double>::max()-1) || inRange(front_r.get_temperature(), 55, std::numeric_limits<double>::max()-1) || inRange(back_l.get_temperature(), 55, std::numeric_limits<double>::max()-1) || inRange(back_r.get_temperature(), 55, std::numeric_limits<double>::max()-1)){

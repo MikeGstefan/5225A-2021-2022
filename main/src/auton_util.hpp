@@ -46,10 +46,5 @@ class Gyro{
 extern Gyro gyro;
 
 //true is closed
-void claw_set_state(bool state);
 
-void find_goal_lift(bool move_stop_b = true);
-
-void find_goal_tilter(int delay_t = 0);
-
-double get_front_dist();
+// double get_front_dist();
