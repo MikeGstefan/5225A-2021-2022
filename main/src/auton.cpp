@@ -131,6 +131,26 @@ void next_auton(){
   auton_file_update();
 }
 
+void switch_alliance(){
+  switch(cur_alliance){
+    case alliances::RED: //Opposite, since switching alliances
+      cur_alliance = alliances::BLUE;
+      alliance.set_background(COLOR_BLUE);
+      printf("\033[34mSwitched to Blue Alliance\033[0m\n");
+      misc.print("Switched to Blue Alliance\n");
+      break;
+
+    case alliances::BLUE:
+      cur_alliance = alliances::RED;
+      alliance.set_background(COLOR_RED);
+      printf("\033[31mSwitched to Red Alliance\033[0m\n");
+      misc.print("Switched to Red Alliance\n");
+      break;
+  }
+
+  auton_file_update();
+}
+
 void switch_alliance(alliances new_ally){
   switch(new_ally){
     case alliances::BLUE:

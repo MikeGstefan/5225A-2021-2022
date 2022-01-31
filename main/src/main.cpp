@@ -93,16 +93,12 @@ void opcontrol() {
 	create some distinction between compile-time and runtime functions, at least in the docs
 	check if ring count exists
 
+	if implicit conversion from int to value works, let it
+
 	make gui a task
 
 	maybe use decay on the arrays
 	*/
-
-	// intake.raise_and_disable();
-	// lift.reset();
-	// tilter.reset();
-	// lift.move_absolute(135);
-	// tilter_bottom_piston.set_value(0);
 
 	while(true){
 		GUI::update();

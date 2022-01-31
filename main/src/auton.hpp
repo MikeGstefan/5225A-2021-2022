@@ -26,7 +26,8 @@ enum class alliances{
 extern autons cur_auton;
 extern alliances cur_alliance;
 
-void switch_alliance(alliances = static_cast<alliances>(!static_cast<int>(cur_alliance)));
+void switch_alliance(alliances new_ally);
+void switch_alliance();
 void next_auton();
 void prev_auton();
 void auton_file_read();

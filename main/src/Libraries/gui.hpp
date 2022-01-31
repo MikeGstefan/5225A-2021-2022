@@ -167,19 +167,19 @@ template <typename V> class _Text: public Text{
 
     //Vars
     V prev_value=0;
-    std::function<V()> get_value;
+    Value<V> value;
 
     //Functions
     const void update() override {
-      if (get_value && active && prev_value != get_value()) draw();
+      if (value && active && prev_value != value()) draw();
     }
     void draw() override {
       if (!active) return;
       char buffer [100];
       int length;
 
-      if(get_value){
-        prev_value = get_value();
+      if(value){
+        prev_value = value();
         length = snprintf(buffer, 100, label.c_str(), prev_value);
       }
       else length = snprintf(buffer, 100, label.c_str());
@@ -210,7 +210,7 @@ template <typename V> class _Text: public Text{
 
       screen::print(txt_fmt, x_coord, y_coord, "%s", buffer);
     }
-    void construct (int x, int y, GUI::Style type, text_format_e_t txt_fmt, Page* page, std::string label, const std::function<V()>& get_value, Colour l_col){
+    void construct (int x, int y, GUI::Style type, text_format_e_t txt_fmt, Page* page, std::string label, Value<V> value, Colour l_col){
       static_assert(!std::is_same_v<V, std::string>, "Text variable cannot be std::string, it causes unknown failures");
       this->x = x;
       this->y = y;
@@ -218,7 +218,7 @@ template <typename V> class _Text: public Text{
       this->txt_fmt = txt_fmt;
       this->page = page;
       this->label = label;
-      this->get_value = get_value;
+      this->value = value;
       this->l_col = l_col;
       this->b_col = page->b_col;
       page->texts.push_back(this);
@@ -234,64 +234,12 @@ template <typename V> class _Text: public Text{
     }
 
     //Variable
-    template <typename = typename std::enable_if_t<!std::is_array_v<V>, void>> //Array types not allowed here
-    _Text (int x, int y, GUI::Style rect_type, text_format_e_t size, Page& page, std::string text, const V& val, Colour label_colour = COLOUR(WHITE))
+    _Text (int x, int y, GUI::Style rect_type, text_format_e_t size, Page& page, std::string text, Value<V> value_obj, Colour label_colour = COLOUR(WHITE))
     {
-      construct (x, y, rect_type, size, &page, text, [&](){return val;}, label_colour);
-    }
-
-    //Array
-    template <typename I, typename = typename std::enable_if_t<!std::is_same_v<I, Colour>, void>> //Don't let I be a colour
-    _Text (int x, int y, GUI::Style rect_type, text_format_e_t size, Page& page, std::string text, const V* array, const I& index, Colour label_colour = COLOUR(WHITE))
-    {
-      static_assert(std::is_scalar_v<I>, "Text Index type must be int-convertible");
-      construct (x, y, rect_type, size, &page, text, [&index, array](){return array[static_cast<int>(index)];}, label_colour);
-    }
-
-    //STL random access containers {vector, array, deque...}
-    template <typename Container, typename = typename std::enable_if_t<std::is_base_of_v<typename std::random_access_iterator_tag, typename std::iterator_traits<typename Container::iterator>::iterator_category>, void>>
-    _Text (int x, int y, GUI::Style rect_type, text_format_e_t size, Page& page, std::string text, Container& c, const typename Container::size_type& index, Colour label_colour = COLOUR(WHITE))
-    {
-      static_assert(std::is_scalar_v<Container::size_type>, "Text Index type must be int-convertible");
-      construct (x, y, rect_type, size, &page, text, [&](){return c[static_cast<int>(index)];}, label_colour);
-    }
-
-    //STL random access associative containers {map, unordered_map...}
-    template <typename Container, typename = typename std::enable_if_t<std::is_base_of_v<typename std::forward_iterator_tag, typename std::iterator_traits<typename Container::iterator>::iterator_category>, void>>
-    _Text (int x, int y, GUI::Style rect_type, text_format_e_t size, Page& page, std::string text, Container& c, const typename Container::key_type& index, Colour label_colour = COLOUR(WHITE))
-    {
-      construct (x, y, rect_type, size, &page, text, [&](){return c[index];}, label_colour);
-    }
-
-    //Function
-    _Text (int x, int y, GUI::Style rect_type, text_format_e_t size, Page& page, std::string text, V (*const func)(), Colour label_colour = COLOUR(WHITE))
-    {
-      construct (x, y, rect_type, size, &page, text, func, label_colour);
-    }
-
-    //Member Functions
-    template <class Class>
-    _Text (int x, int y, GUI::Style rect_type, text_format_e_t size, Page& page, std::string text, V (Class::* const func)(), Class& object, Colour label_colour = COLOUR(WHITE))
-    {
-      construct (x, y, rect_type, size, &page, text, [&](){return (object.*func)();}, label_colour);
-    }
-
-    //Const Member Functions
-    template <class Class>
-    _Text (int x, int y, GUI::Style rect_type, text_format_e_t size, Page& page, std::string text, V (Class::* const func)() const, Class& object, Colour label_colour = COLOUR(WHITE))
-    {
-      construct (x, y, rect_type, size, &page, text, [&](){return (object.*func)();}, label_colour);
+      construct (x, y, rect_type, size, &page, text, value_obj, label_colour);
     }
 
 };
-
-//Deduction Guides
-template <typename Container>
-_Text(int x, int y, GUI::Style rect_type, text_format_e_t size, Page& page, std::string text, Container& c, const typename Container::size_type& index, Colour label_colour = COLOUR(WHITE)) -> _Text<typename Container::value_type>;
-
-template <typename Container>
-_Text(int x, int y, GUI::Style rect_type, text_format_e_t size, Page& page, std::string text, Container& c, const typename Container::key_type& index, Colour label_colour = COLOUR(WHITE)) -> _Text<typename Container::mapped_type>;
-
 
 class Button{
   friend class GUI;
@@ -313,7 +261,7 @@ class Button{
     int x1, y1, x2, y2, text_x, text_y, text_x1, text_y1;
     bool last_pressed=0;
     press_type form; //What type of button
-    std::function <void()> func, off_func;
+    Value<void> func, off_func;
     Text* title = nullptr;
     bool active=true;
     Page* page;
@@ -337,6 +285,7 @@ class Button{
     static void create_options(std::vector<Button*>);
     const bool pressed();
     void set_func(std::function <void()>), set_off_func(std::function <void()>);
+    void set_func(Value<void>), set_off_func(Value<void>);
     void set_active(bool=true);
     void set_background (Colour);
     void add_text (Text&, bool=true);

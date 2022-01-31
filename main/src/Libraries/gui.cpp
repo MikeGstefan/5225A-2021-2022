@@ -29,7 +29,7 @@ Slider testing_slider (MID_X, 200, 200, 20, GUI::Style::CENTRE, Slider::HORIZONT
 Page go_sequence ("Go Sequence");
 Button go_button (300, MID_Y, 160, 90, GUI::Style::CENTRE, Button::SINGLE, go_sequence, "PRESS TO");
 Button go_back_button (20, USER_UP, 100, 50, GUI::Style::SIZE, Button::SINGLE, go_sequence, "BACK");
-_Text go_button_text (300, 140, GUI::Style::CENTRE, TEXT_SMALL, go_sequence, "%s", go_string, COLOUR(BLACK));
+_Text go_button_text (300, 140, GUI::Style::CENTRE, TEXT_SMALL, go_sequence, "%s", Value(go_string), COLOUR(BLACK));
 
 //To get coordinates for aligned objects, (buttons, sliders...) of same size
 //Put in how many of buttons/sliders you want, and get properly spaced coords
@@ -305,7 +305,7 @@ Slider::Slider (int x1, int y1, int x2, int y2, GUI::Style type, direction dir, 
       text_y = this->y1-CHAR_HEIGHT_SMALL/2-2;
       inc.construct(this->x2+5, this->y1, this->x2+25, this->y2, GUI::Style::CORNER, Button::SINGLE, this->page, ">", l_col, b_col);
       dec.construct(this->x1-25, this->y1, this->x1-5, this->y2, GUI::Style::CORNER, Button::SINGLE, this->page, "<", l_col, b_col);
-      title.construct(text_x, text_y, GUI::Style::CENTRE, TEXT_SMALL, this->page, label + ":%d", [&](){return val;}, l_col);
+      title.construct(text_x, text_y, GUI::Style::CENTRE, TEXT_SMALL, this->page, label + ":%d", Value(val), l_col);
       min_title.construct(this->x1, text_y, GUI::Style::CENTRE, TEXT_SMALL, this->page, std::to_string(min), nullptr, l_col);
       max_title.construct(this->x2, text_y, GUI::Style::CENTRE, TEXT_SMALL, this->page, std::to_string(max), nullptr, l_col);
       break;
@@ -315,7 +315,7 @@ Slider::Slider (int x1, int y1, int x2, int y2, GUI::Style type, direction dir, 
       text_y = (this->y1+this->y2)/2;
       inc.construct(this->x1, this->y1-25, this->x2, this->y1-5, GUI::Style::CORNER, Button::SINGLE, this->page, "▲", l_col, b_col);
       dec.construct(this->x1, this->y2+5, this->x2, this->y2+25, GUI::Style::CORNER, Button::SINGLE, this->page, "▼", l_col, b_col);
-      title.construct(text_x, this->y1-27-CHAR_HEIGHT_SMALL, GUI::Style::CENTRE, TEXT_SMALL, this->page, label + ":%d", [&](){return val;}, l_col);
+      title.construct(text_x, this->y1-27-CHAR_HEIGHT_SMALL, GUI::Style::CENTRE, TEXT_SMALL, this->page, label + ":%d", Value(val), l_col);
       min_title.construct(this->x1-25, this->y2, GUI::Style::CENTRE, TEXT_SMALL, this->page, std::to_string(min), nullptr, l_col);
       max_title.construct(this->x1-25, this->y1, GUI::Style::CENTRE, TEXT_SMALL, this->page, std::to_string(max), nullptr, l_col);
       break;
@@ -559,6 +559,10 @@ const void Slider::draw(){
 void Page::set_setup_func(std::function <void()> function) {setup_func = function;}
 
 void Page::set_loop_func(std::function <void()> function) {loop_func = function;}
+
+void Button::set_func(Value<void> function) {func = function;}
+
+void Button::set_off_func(Value<void> function) {off_func = function;}
 
 void Button::set_func(std::function <void()> function) {func = function;}
 
