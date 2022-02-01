@@ -16,7 +16,7 @@ extern pros::ADIDigitalOut lift_piston, hitch_piston;
 extern pros::Distance tilter_dist;
 extern pros::ADIDigitalOut tilter_bottom_piston;
 extern pros::ADIDigitalOut tilter_top_piston;
-extern pros::Imu imu_sensor;
+extern pros::Imu ramp_imu;
 
 extern pros::ADIDigitalOut intake_piston;
 

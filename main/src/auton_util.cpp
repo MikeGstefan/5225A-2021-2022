@@ -1,6 +1,7 @@
 #include "auton_util.hpp"
+#include "logging.hpp"
 
-Gyro gyro(imu_sensor);
+Gyro gyro(ramp_imu);
 
 double get_filtered_output(ADIUltrasonic sensor, int check_count, uint16_t lower_bound, uint16_t upper_bound, int timeout){
   Timer timer{"Timer"};
@@ -104,11 +105,11 @@ void Gyro::calibrate(){
 }
 
 void Gyro::finish_calibrating(){
-	while (imu_sensor.is_calibrating()){
-		printf("Calibrating Gyro...\n");
+	while (inertial.is_calibrating()){
+		motion_d.print("Calibrating Gyro...\n");
 		delay(10);
 	}
-	printf("Done Calibrating Gyro\n");
+  motion_i.print("Done Calibrating Gyro\n");
 }
 
 void Gyro::climb_ramp(){
@@ -118,37 +119,33 @@ void Gyro::climb_ramp(){
 
 	drivebase.move_tank(127, 0);
 	waitUntil(fabs(get_angle()) > 22)
-	printf("ON RAMP\n");
+	motion_i.print("ON RAMP\n");
 
-  //Drive forward the equivalent of 400 encoder units
-
-  // double start_position = l1.get_position(); //Change to tracking
-  // waitUntil(l1.get_position() > start_position+400)
+  tracking.wait_for_dist(400); //But it's 400 encoder units. You'll have to find the equivalent in inches
 }
 
 void Gyro::level(double kP, double kD){
 	double last_angle=0;
 	std::uint32_t steady_time = 0, last_steady_time = 0;
-	PID gyro_pid(kP, 0, kD, 0);
+	PID gyro_p(kP, 0, kD, 0);
+  Timer gyro_t ("Gyro", &motion_d);
   int speed;
 
 	while(true){
     get_angle();
-    speed = gyro_pid.compute(-angle, 0);
-		drivebase.move_tank(speed, 0);
-		printf("Angle: %f   Speed: %d  \n", angle, speed); //Get rid of speed var
-
-    //Use timer class
-		if (fabs(angle-last_angle) > 0.6) last_steady_time = millis(); //Unsteady, Resets the last known steady time
-		else if (fabs(angle) < 6 && steady_time > 450) break; //If within range to be level and steady on ramp
+    gyro_p.compute(-angle, 0);
+		drivebase.move_tank(gyro_p.get_output(), 0);
+    gyro_t.print("Angle: %f  |  Speed: %d", angle, gyro_p.get_output());
+    
+		if (fabs(angle-last_angle) > 0.6) gyro_t.reset(); //Unsteady, Resets the last known steady time
+		else if (fabs(angle) < 6 && gyro_t.get_time() > 450) break; //If within range to be level and steady on ramp
 
 		if (master.interrupt(true, false)) return;
 
-		steady_time = millis()-last_steady_time;
 		last_angle = angle;
 		delay(10);
 	}
 
-	printf("\nLevelled on ramp\n\n\n");
+	motion_d.print("\nLevelled on ramp\n\n");
 	drivebase.brake();
 }

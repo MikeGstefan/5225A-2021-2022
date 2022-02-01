@@ -97,7 +97,8 @@ void opcontrol() {
 
 	while(true){
 		GUI::update();
-		printf("%f\n", fabs(gyro.get_angle()));
+
+		// printf("%f\n", fabs(gyro.get_angle()));
 		if (fabs(gyro.get_angle()) > 10) gyro.level(2.2, 250); //Strayed off balance
 
 		// drivebase.non_blocking_driver_practice();
