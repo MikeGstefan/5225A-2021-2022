@@ -20,6 +20,8 @@ pros::ADIDigitalOut lift_piston(7);
 
 
 
+pros::Imu ramp_imu(11);
+
 //1:temp(leave as 0), 2:long name, 3:short name
 std::array<std::tuple<pros::Motor*, int, const char*, const char*, Text*>, 8> motors = {
   std::make_tuple(&front_l, 1, "Front Left", "FL", nullptr),
