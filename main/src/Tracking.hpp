@@ -54,7 +54,6 @@ struct pid_const{
 
 
 struct arc_params{
-  int fuck_you = 11;
   Point start = {0.0,0.0}; 
   Position target = {0.0,0.0,0.0};
   double radius = 0.0, max_power = 0.0, min_angle_percent = 0.0, decel_speed = 0.0, decel_dist = 0.0;
@@ -65,7 +64,6 @@ struct arc_params{
 };
 
 struct line_params{
-  int fuck_you = 11;
   Point start = {0.0,0.0};
   Position target = {0.0,0.0,0.0};
   double max_power = 127.0; 
@@ -78,7 +76,6 @@ struct line_params{
 };
 
 struct line_old_params{
-  int fuck_you = 11;
   double start_x = 0.0;
   double start_y = 0.0;
   double target_x = 0.0;
@@ -98,7 +95,6 @@ struct line_old_params{
 };
 
 struct point_params{ 
-  int fuck_you = 11;
   Position target = {0.0,0.0,0.0};
   double max_power = 0.0;
   bool overshoot = false;
@@ -116,7 +112,6 @@ struct point_params{
 };
 
 struct tank_arc_params{ 
-  int fuck_you = 11;
   Point start_pos = {0.0,0.0};
   Position target = {0.0,0.0,0.0};
   double power = 127.0, max_power = 127.0;
@@ -126,7 +121,6 @@ struct tank_arc_params{
 };
 
 struct tank_point_params{ 
-  int fuck_you = 11;
   Position target = {0.0,0.0,0.0};
   bool turn_dir_if_0 = false;
   double max_power = 127.0, min_angle_percent = 1.0;
@@ -136,7 +130,6 @@ struct tank_point_params{
 };
 
 struct turn_angle_params{ 
-  int fuck_you = 11;
   double target_a = 0.0;
   bool brake = true;
   turn_angle_params() = default;
@@ -144,7 +137,6 @@ struct turn_angle_params{
 };
 
 struct turn_point_params{ 
-  int fuck_you = 11;
   Point target = {0.0,0.0};
   bool brake = true;
   turn_point_params() = default;

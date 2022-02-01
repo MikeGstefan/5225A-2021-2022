@@ -29,6 +29,15 @@ double Tracking::get_angle_in_deg(){
   return fmod(rad_to_deg(global_angle), 360);
 }
 
+void Tracking::wait_for_dist(double distance){
+  const Point start_pos = {tracking.x_coord, tracking.x_coord};
+  double delta_dist = 0.0;
+  while(distance >= delta_dist){
+    delta_dist = sqrt(pow(tracking.x_coord -start_pos.x,2) + pow(tracking.y_coord - start_pos.y,2));
+    delay(10);
+  }
+}
+
 void update(void* params){
   _Task* ptr = _Task::get_obj(params);
   Timer data_timer{"tracking logs"};
@@ -682,7 +691,7 @@ void move_on_line(void* params){
     // decel variables
     double h; // magnitude of power vector
     double decel_power, decel_power_scale;
-    motion_i.print("%d | Starting move on line to: (x: %.2f, y: %.2f, a: %.2f)  from: (x: %.2f, y: %.2f, a: %.2f) with start: (%.2f, %.2f)  fuck_you: %d\n", millis(), target.x, target.y, rad_to_deg(target.angle), tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle), start.x, start.y, line_params_g.fuck_you);
+    motion_i.print("%d | Starting move on line to: (x: %.2f, y: %.2f, a: %.2f)  from: (x: %.2f, y: %.2f, a: %.2f) with start: (%.2f, %.2f)\n", millis(), target.x, target.y, rad_to_deg(target.angle), tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle), start.x, start.y);
     // motion_i.print("%d | ")
     while(true){
         // gets line displacements
