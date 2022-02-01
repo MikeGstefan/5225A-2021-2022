@@ -1,7 +1,7 @@
 #include "auton_util.hpp"
 #include "logging.hpp"
 
-Gyro gyro(ramp_imu);
+Gyro gyro(imu_sensor);
 
 double get_filtered_output(ADIUltrasonic sensor, int check_count, uint16_t lower_bound, uint16_t upper_bound, int timeout){
   Timer timer{"Timer"};
