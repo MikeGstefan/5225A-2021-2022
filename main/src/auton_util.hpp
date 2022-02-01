@@ -9,13 +9,9 @@
 // Gyro must be placed  vertically (port facing ground)
 //These values are for it facing the outside
 
-// Right: get_roll, -1
-// Left: get_roll, 1
-// Back: get_pitch, 1
-// Front: get_pitch, -1
+
 using namespace pros;
-#define GYRO_AXIS get_pitch
-#define GYRO_SIDE -1
+
 
 
 #define front_dist_dist 3.85
@@ -27,23 +23,7 @@ double get_filtered_output(ADIUltrasonic sensor, int check_count, uint16_t lower
 void flatten_against_wall(bool right);
 
 
-class Gyro{
-  private:
-    Imu& inertial;
-    double angle;
 
-  public:
-    Gyro(Imu& imu);
-
-    void calibrate();
-    void finish_calibrating();
-    void climb_ramp();
-    void level(double kP, double kD);
-
-    double get_angle();
-};
-
-extern Gyro gyro;
 
 //true is closed
 
