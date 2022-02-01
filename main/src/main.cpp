@@ -67,6 +67,11 @@ void competition_initialize() {}
  * from where it left off.
  */
 void autonomous() {
+  drivebase.update_lookup_table_util();
+  return;
+
+
+
 	auton_run = true;
 	double x;
 	double y;
@@ -152,10 +157,16 @@ void opcontrol() {
   //   ring_piston.set_value(master.get_digital(DIGITAL_A));
   //   delay(10);
   // }
+
+  lift.reset();
+  tilter.reset();
+
+  drivebase.driver_practice();
+  /*
   if(auton_run){
-    drivebase.driver_practice();
   }
   else{
+
     // initializes pneumatics in appropriate state
     intake_piston.set_value(HIGH);
     delay(50); // wait for intake to rise
@@ -187,8 +198,9 @@ void opcontrol() {
 		}
       delay(10);
     }
-  }
 
+  }
+  */
   /*
 	master.clear();
 	// while(true){

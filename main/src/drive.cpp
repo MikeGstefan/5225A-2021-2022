@@ -120,9 +120,9 @@ void Drivebase::download_curve_data(){
 
 void Drivebase::update_lookup_table_util(){
     download_curve_data();
-
     master.clear();
 
+    master.print(0, 0, "Driver: %s", drivebase.drivers[drivebase.cur_driver].name);
     while (!master.get_digital_new_press(E_CONTROLLER_DIGITAL_B)){  // user presses b to save and exit utility
       if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_X)){  // moves to next driver
         cur_driver++;
@@ -156,7 +156,6 @@ void Drivebase::update_lookup_table_util(){
         if (drivers[cur_driver].custom_drives[cur_screen].curvature > 0.1)  drivers[cur_driver].custom_drives[cur_screen].curvature -= 0.1;
         master.print(2, 0, "Curvature: %lf", drivers[cur_driver].custom_drives[cur_screen].curvature);  // updates curvature
       }
-
       delay(10);
     }
     master.clear();
@@ -220,50 +219,49 @@ void Drivebase::driver_practice(){
   tilter.move_absolute(tilter.raised_position);
 
   tilter.set_state(tilter_states::raised);
+  lift.set_state(lift_states::searching);
 
 
   cur_driver = 0; // defaults driver to Nikhil
   // master.print(2, 0, "Driver: %s", drivers[cur_driver].name);
-  while(true){
-    // while(!master.get_digital_new_press(E_CONTROLLER_DIGITAL_B)){
-      /*
-      if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_UP)){ // goes to next driver
-        cur_driver++;
-        cur_driver %= num_of_drivers; // rollover
-        // spaces in the controller print are to overwrite names
-        master.print(2, 0, "Driver: %s          ", drivers[cur_driver].name);
-      }
-      else if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_DOWN)){  // goes to previous driver
-        if (cur_driver == 0)  cur_driver = num_of_drivers - 1;
-        else cur_driver--;
-        master.print(2, 0, "Driver: %s          ", drivers[cur_driver].name);
-      }
-      */
+  while(!master.get_digital_new_press(E_CONTROLLER_DIGITAL_B)){
+    /*
+    if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_UP)){ // goes to next driver
+      cur_driver++;
+      cur_driver %= num_of_drivers; // rollover
+      // spaces in the controller print are to overwrite names
+      master.print(2, 0, "Driver: %s          ", drivers[cur_driver].name);
+    }
+    else if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_DOWN)){  // goes to previous driver
+      if (cur_driver == 0)  cur_driver = num_of_drivers - 1;
+      else cur_driver--;
+      master.print(2, 0, "Driver: %s          ", drivers[cur_driver].name);
+    }
+    */
 
-      // actual drive code
-      drivebase.handle_input();
-      lift.handle();
-      tilter.handle();
-      intake.handle();
-      spinner.handle();
+    // actual drive code
+    drivebase.handle_input();
+    lift.handle();
+    tilter.handle();
+    intake.handle();
+    spinner.handle();
 
-      // prints motor temps every second
-      if(screen_timer.get_time() > 1000){
-        drivers_data.print("fl%.0f r%.0f bl%.0f r%.0f\n", front_l.get_temperature(), front_r.get_temperature(), back_l.get_temperature(), back_r.get_temperature());
-        master.print(0, 0, "fl%.0f r%.0f bl%.0f r%.0f\n", front_l.get_temperature(), front_r.get_temperature(), back_l.get_temperature(), back_r.get_temperature());
-        screen_timer.reset();
-      }
-      // takes away control from driver when motors overheat
-      if(front_l.get_temperature() >= 55 || front_r.get_temperature() >= 55 || back_r.get_temperature() >= 55 || back_l.get_temperature() >= 55){
-        master.rumble("- - - "); // rumbles controller if motors are hot to warn driver
-        // move(0, 0, 0);  // stops movement
-        // return;
-      }
+    // prints motor temps every second
+    if(screen_timer.get_time() > 1000){
+      drivers_data.print("fl%.0f r%.0f bl%.0f r%.0f\n", front_l.get_temperature(), front_r.get_temperature(), back_l.get_temperature(), back_r.get_temperature());
+      master.print(0, 0, "fl%.0f r%.0f bl%.0f r%.0f\n", front_l.get_temperature(), front_r.get_temperature(), back_l.get_temperature(), back_r.get_temperature());
+      screen_timer.reset();
+    }
+    // takes away control from driver when motors overheat
+    if(front_l.get_temperature() >= 55 || front_r.get_temperature() >= 55 || back_r.get_temperature() >= 55 || back_l.get_temperature() >= 55){
+      master.rumble("- - - "); // rumbles controller if motors are hot to warn driver
+      // move(0, 0, 0);  // stops movement
+      // return;
+    }
 
-      delay(10);
-    // }
-    // update_lookup_table_util();
-    // master.clear();
-    // master.print(2, 0, "Driver: %s", drivers[cur_driver].name);
+    delay(10);
   }
+  update_lookup_table_util();
+  master.clear();
+  master.print(2, 0, "Driver: %s", drivers[cur_driver].name);
 }
