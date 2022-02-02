@@ -25,27 +25,32 @@ Lift::Lift(Motorized_subsystem<lift_states, NUM_OF_LIFT_STATES, LIFT_MAX_VELOCIT
 }
 bool intake_on = false;
 void Lift::handle(){
-  // if (fabs(target - motor.get_position()) > end_error && fabs(motor.get_actual_velocity()) < 5.0) bad_count++;
-  // else bad_count = 0;
-  // if(bad_count > 25 && state != lift_states::manual){
-  //   motor.move(0);
-  //   master.rumble("---");
-  //   printf("LIFT SAFETY TRIGGERED\n");
-  //   intake.raise_and_disable();
-  //   intake.set_state(intake_states::raised);
 
-  //   set_state(lift_states::manual);
-  // }
+  // lift safety handling
+  if (fabs(target - motor.get_position()) > end_error && fabs(motor.get_actual_velocity()) < 5.0) bad_count++;
+  else bad_count = 0;
+  if(bad_count > 25 && state != lift_states::manual){
+    motor.move(0);
+    master.rumble("---");
+    master.print(LIFT_STATE_LINE, 0, "Lift: Manual      ");
+    printf("LIFT SAFETY TRIGGERED\n");
+    intake.raise_and_disable();
+    intake.set_state(intake_states::raised);
 
-  // switches to manual control if lift manual button is pressed
-  // if(master.get_digital_new_press(lift_manual_button)){
-  //   intake.raise_and_disable();
-  //   intake.set_state(intake_states::raised);
-  //   master.rumble("-");
-  //   master.print(LIFT_STATE_LINE, 0, "Lift: Manual      ");
-  //
-  //   set_state(lift_states::manual);
-  // }
+    set_state(lift_states::manual);
+  }
+
+  // switches to manual control if lift joystick exceeds threshold
+  lift_power = master.get_analog(E_CONTROLLER_ANALOG_LEFT_Y);
+
+  if(fabs(lift_power) > 80){
+    intake.raise_and_disable();
+    intake.set_state(intake_states::raised);
+    master.rumble("-");
+    master.print(LIFT_STATE_LINE, 0, "Lift: Manual      ");
+
+    set_state(lift_states::manual);
+  }
 
   switch(state){
 
@@ -64,11 +69,10 @@ void Lift::handle(){
       // grabs goal if limit switch is triggered or if up button is pressed
       if(lift_trigger.get_value() || master.get_digital_new_press(lift_up_button)){
         master.rumble("-");
-        printf("*******************triggered\n");
         lift_piston.set_value(HIGH);
         master.clear_line(LIFT_STATE_LINE);
 
-        intake.set_state(intake_states::on); // intake defaults to on when mogo is grabbed
+        // intake.set_state(intake_states::on); // intake defaults to on when mogo is grabbed
         // intake.motor.move(INTAKE_POWER);
 
         set_state(lift_states::grabbed);
@@ -130,7 +134,7 @@ void Lift::handle(){
       break;
 
     case lift_states::platform:
-      // drops off goal if up button is pressed
+      // drops off goal if up button is pressed and has reached paltform height
       if(master.get_digital_new_press(lift_up_button) && fabs(motor.get_position() - platform_position) < end_error){
         lift_piston.set_value(LOW);
 
@@ -176,7 +180,6 @@ void Lift::handle(){
       break;
 
     case lift_states::manual:
-      lift_power = master.get_analog(E_CONTROLLER_ANALOG_LEFT_Y);
 
       // gives holding power if joystick is within deadzone or lift is out of range
       if (fabs(lift_power) < 10 || (lift_power < 0 && motor.get_position() <= bottom_position) || (lift_power > 0 && motor.get_position() >= top_position)) lift_power = 10;
