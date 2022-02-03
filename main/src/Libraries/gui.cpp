@@ -20,8 +20,8 @@ Button next_page(480, 0, -75, 20, GUI::Style::SIZE, Button::SINGLE, perm, "->");
 Button home(100, 10, 18, 6, GUI::Style::CENTRE, Button::SINGLE, perm, "Home");
 
 Page testing ("Testing"); //Blank page made so it already exists when quick tests are created
-_Text testing_text_1 (125, 50, GUI::Style::CENTRE, TEXT_SMALL, testing, "BLANK TEXT 1");
-_Text testing_text_2 (350, 50, GUI::Style::CENTRE, TEXT_SMALL, testing, "BLANK TEXT 2");
+Text testing_text_1 (125, 50, GUI::Style::CENTRE, TEXT_SMALL, testing, "BLANK TEXT 1");
+Text testing_text_2 (350, 50, GUI::Style::CENTRE, TEXT_SMALL, testing, "BLANK TEXT 2");
 Button testing_button_1 (25, 70, 200, 80, GUI::Style::SIZE, Button::SINGLE, testing, "BLANK BUTTON 1");
 Button testing_button_2 (250, 70, 200, 80, GUI::Style::SIZE, Button::SINGLE, testing, "BLANK BUTTON 2");
 Slider testing_slider (MID_X, 200, 200, 20, GUI::Style::CENTRE, Slider::HORIZONTAL, -100, 100, testing, "BLANK SLIDER");
@@ -29,7 +29,7 @@ Slider testing_slider (MID_X, 200, 200, 20, GUI::Style::CENTRE, Slider::HORIZONT
 Page go_sequence ("Go Sequence");
 Button go_button (300, MID_Y, 160, 90, GUI::Style::CENTRE, Button::SINGLE, go_sequence, "PRESS TO");
 Button go_back_button (20, USER_UP, 100, 50, GUI::Style::SIZE, Button::SINGLE, go_sequence, "BACK");
-_Text go_button_text (300, 140, GUI::Style::CENTRE, TEXT_SMALL, go_sequence, "%s", Value(go_string), COLOUR(BLACK));
+Text go_button_text (300, 140, GUI::Style::CENTRE, TEXT_SMALL, go_sequence, "%s", Value(go_string), COLOUR(BLACK));
 
 //To get coordinates for aligned objects, (buttons, sliders...) of same size
 //Put in how many of buttons/sliders you want, and get properly spaced coords
@@ -103,28 +103,27 @@ bool GUI::go(std::string short_msg, std::string long_msg, std::uint32_t delay_ti
   Page* page = GUI::current_page;
   go_sequence.go_to();
 
-  while(go_button.pressed() && !interrupted){ //Wait for Release
+  waitUntil(!go_button.pressed() || interrupted){ //Wait for Release
     GUI::update_screen_status();
     if (go_back_button.pressed() || master.interrupt()) interrupted = true;
-    delay(2);
   }
-  while(!go_button.pressed() && !interrupted){ //Wait for Press
+  waitUntil(go_button.pressed() || interrupted){ //Wait for Press
     drivebase.handle_input();
     GUI::update_screen_status();
     if (go_back_button.pressed() || master.interrupt()) interrupted = true;
-    delay(2);
   }
-  while(go_button.pressed() && !interrupted){ //Wait for Release
+  waitUntil(!go_button.pressed() || interrupted){ //Wait for Release
     GUI::update_screen_status();
     if (go_back_button.pressed() || master.interrupt()) interrupted = true;
-    delay(2);
   }
 
   page->go_to();
 
   if (!interrupted){
     if(delay_time){
-      printf("Waiting for %s before running.\n", millis_to_str(delay_time));
+      const char* time = millis_to_str(delay_time);
+      printf("Waiting for %s before running.\n", time);
+      delete[] time;
       delay(delay_time);
     }
     printf("Running\n");
@@ -142,27 +141,27 @@ bool GUI::go_end(std::string msg, std::uint32_t delay_time){
   Page* page = GUI::current_page;
   go_sequence.go_to();
 
-  while(go_button.pressed() && !interrupted){ //Wait for Release
+  waitUntil(!go_button.pressed() || interrupted){ //Wait for Release
     GUI::update_screen_status();
     if (go_back_button.pressed() || master.interrupt()) interrupted = true;
-    delay(2);
   }
-  while(!go_button.pressed() && !interrupted){ //Wait for Press
+  waitUntil(go_button.pressed() || interrupted){ //Wait for Press
+    drivebase.handle_input();
     GUI::update_screen_status();
     if (go_back_button.pressed() || master.interrupt()) interrupted = true;
-    delay(2);
   }
-  while(go_button.pressed() && !interrupted){ //Wait for Release
+  waitUntil(!go_button.pressed() || interrupted){ //Wait for Release
     GUI::update_screen_status();
     if (go_back_button.pressed() || master.interrupt()) interrupted = true;
-    delay(2);
   }
 
   page->go_to();
 
   if (!interrupted){
     if(delay_time){
-      printf("Waiting for %s before running.\n", millis_to_str(delay_time));
+      const char* time = millis_to_str(delay_time);
+      printf("Waiting for %s before running.\n", time);
+      delete[] time;
       delay(delay_time);
     }
     printf("Running\n");
@@ -403,7 +402,7 @@ void Button::create_options(std::vector<Button*> buttons){
   }
 }
 
-void Button::add_text(Text& text_ref, bool overwrite) {
+void Button::add_text(Text_& text_ref, bool overwrite) {
   if(page != text_ref.page){
     char error [120];
     snprintf(error, 120, "Text can only be linked to a button on the same page! Failed on \"%s\" button and \"%s\" text.\n", label.c_str(), text_ref.label.c_str());
@@ -443,18 +442,18 @@ void Button::set_background (Colour colour){
   }
 }
 
-void Text::set_background (int x1, int y1, Colour colour){
+void Text_::set_background (int x1, int y1, Colour colour){
   if (colour == 0xFFFFFFFF) colour = b_col;
   set_background(x-x1, y-y1, x+x1, y+y1, GUI::Style::CORNER, colour);
 }
 
-void Text::set_background (int x1, int y1, int x2, int y2, GUI::Style type, Colour colour){
+void Text_::set_background (int x1, int y1, int x2, int y2, GUI::Style type, Colour colour){
     if (colour == 0xFFFFFFFF) colour = b_col;
     std::tie(this->x1, this->y1, this->x2, this->y2) = GUI::fix_points(x1, y1, x2, y2, type);
     set_background(colour);
 }
 
-void Text::set_background (Colour colour){
+void Text_::set_background (Colour colour){
   if (b_col != colour){
     b_col = colour;
     if (page == GUI::current_page) draw();
@@ -477,7 +476,7 @@ void Button::set_active(bool active) {
   }
 }
 
-void Text::set_active(bool active) {
+void Text_::set_active(bool active) {
   this->active = active;
   if (active) draw();
   else if (page == GUI::current_page){
@@ -507,7 +506,7 @@ const void Page::draw(){
   screen::print(TEXT_SMALL, MID_X-(title.length()+3+std::to_string(page_num(this)).length())*CHAR_WIDTH_SMALL/2, 5, "%s - %d", title, page_num(this));
   for (std::vector<Button*>::const_iterator it = buttons.begin(); it != buttons.end(); it++) (*it)->draw();
   for (std::vector<Slider*>::const_iterator it = sliders.begin(); it != sliders.end(); it++) (*it)->draw();
-  for (std::vector<Text*>::const_iterator it = texts.begin(); it != texts.end(); it++) (*it)->draw();
+  for (std::vector<Text_*>::const_iterator it = texts.begin(); it != texts.end(); it++) (*it)->draw();
   if(setup_func) setup_func();
 }
 
@@ -551,6 +550,34 @@ const void Slider::draw(){
   screen::set_pen(l_col);
   if(dir == HORIZONTAL) screen::fill_rect(x1+1, y1+1, map(val, min, max, x1, x2), y2-1);
   else screen::fill_rect(x1+1, map(val, min, max, y2, y1), x2-1, y2-1);
+}
+
+const void Text_::draw(){
+  if (!active) return;
+  char buffer [100];
+  int length = update_val(buffer);
+
+  if (x2 != 0 && y2 != 0){ //If background box exists. Should be able to get rid of this as now it always exists
+    screen::set_eraser(page->b_col);
+    screen::erase_rect(x1, y1, x2, y2);
+
+    screen::set_pen(b_col);
+    GUI::draw_oblong(x1, y1, x2, y2, 0, 0.15);
+  }
+  screen::set_pen(l_col);
+  screen::set_eraser(b_col);
+
+  int x_coord = x, y_coord = y;
+  if (type == GUI::Style::CENTRE){
+    x_coord -= GUI::get_size(txt_fmt, "width")/2*length;
+    y_coord -= GUI::get_size(txt_fmt, "height")/2;
+  }
+  x1 = min(x1, x_coord); //Resizes the background so it won't have overwriting issues
+  x2 = max(x2, x_coord + (GUI::get_size(txt_fmt, "width")*length+1));
+  y1 = min(y1, y_coord);
+  y2 = max(y2, y_coord + GUI::get_size(txt_fmt, "height"));
+
+  screen::print(txt_fmt, x_coord, y_coord, "%s", buffer);
 }
 
 
@@ -746,6 +773,6 @@ void GUI::update(){
   /*Page*/cur_p.update();
   /*Button*/for (std::vector<Button*>::const_iterator it = cur_p.buttons.begin(); it != cur_p.buttons.end(); it++) {(*it)->update(); if(&cur_p != current_page) return;}
   /*Slider*/for (std::vector<Slider*>::const_iterator it = cur_p.sliders.begin(); it != cur_p.sliders.end(); it++) (*it)->update();
-  /*_Text*/for (std::vector<Text*>::const_iterator it = cur_p.texts.begin(); it != cur_p.texts.end(); it++) (*it)->update();
+  /*Text*/for (std::vector<Text_*>::const_iterator it = cur_p.texts.begin(); it != cur_p.texts.end(); it++) (*it)->update();
   /*Flash*/end_flash();
 }

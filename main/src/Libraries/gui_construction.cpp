@@ -9,48 +9,48 @@
 int elastic_up_time, elastic_down_time;
 const char* port_nums;
 const char* driver_text;
-std::array <std::tuple<int, Button*, Button*, Text*, int, char*>, 8> motor_ports; //port, run, stop, stall counter, port and rpm
-extern std::array<std::tuple<pros::Motor*, int, const char*, const char*, Text*>, 8> motors;
+std::array <std::tuple<int, Button*, Button*, Text_*, int, char*>, 8> motor_ports; //port, run, stop, stall counter, port and rpm
+extern std::array<std::tuple<pros::Motor*, int, const char*, const char*, Text_*>, 8> motors;
 
 extern Page testing;
 extern Button testing_button_1, testing_button_2;
-extern _Text<std::nullptr_t> testing_text_1, testing_text_2;
+extern Text<std::nullptr_t> testing_text_1, testing_text_2;
 extern Slider testing_slider;
 
 Page driver_curve ("Drivers"); //Select a driver and their exp curve
 Button prev_drivr(20, 70, 110, 120, GUI::Style::SIZE, Button::SINGLE, driver_curve, "Prev Driver");
-// _Text drivr_name(MID_X, MID_Y, GUI::Style::CENTRE, TEXT_LARGE, driver_curve, "%s", &Drivebase::driver_name, drivebase);
-_Text drivr_name(MID_X, MID_Y, GUI::Style::CENTRE, TEXT_LARGE, driver_curve, "%s", Value(driver_text));
+// Text drivr_name(MID_X, MID_Y, GUI::Style::CENTRE, TEXT_LARGE, driver_curve, "%s", &Drivebase::driver_name, drivebase);
+Text drivr_name(MID_X, MID_Y, GUI::Style::CENTRE, TEXT_LARGE, driver_curve, "%s", Value(driver_text));
 Button next_drivr(350, 70, 110, 120, GUI::Style::SIZE, Button::SINGLE, driver_curve, "Next Driver");
 
 Page temps ("Temperature"); //Motor temps //make actual motor names
-_Text mot_temp_1(75, 85, GUI::Style::CENTRE, TEXT_SMALL, temps, std::get<3>(motors[0]) + ": %dC"s, Value(std::get<1>(motors[0])), COLOUR(BLACK));
-_Text mot_temp_2(185, 85, GUI::Style::CENTRE, TEXT_SMALL, temps, std::get<3>(motors[1]) + ": %dC"s, Value(std::get<1>(motors[1])), COLOUR(BLACK));
-_Text mot_temp_3(295, 85, GUI::Style::CENTRE, TEXT_SMALL, temps, std::get<3>(motors[2]) + ": %dC"s, Value(std::get<1>(motors[2])), COLOUR(BLACK));
-_Text mot_temp_4(405, 85, GUI::Style::CENTRE, TEXT_SMALL, temps, std::get<3>(motors[3]) + ": %dC"s, Value(std::get<1>(motors[3])), COLOUR(BLACK));
-_Text mot_temp_5(75, 175, GUI::Style::CENTRE, TEXT_SMALL, temps, std::get<3>(motors[4]) + ": %dC"s, Value(std::get<1>(motors[4])), COLOUR(BLACK));
-_Text mot_temp_6(185, 175, GUI::Style::CENTRE, TEXT_SMALL, temps, std::get<3>(motors[5]) + ": %dC"s, Value(std::get<1>(motors[5])), COLOUR(BLACK));
-_Text mot_temp_7(295, 175, GUI::Style::CENTRE, TEXT_SMALL, temps, std::get<3>(motors[6]) + ": %dC"s, Value(std::get<1>(motors[6])), COLOUR(BLACK));
-_Text mot_temp_8(405, 175, GUI::Style::CENTRE, TEXT_SMALL, temps, std::get<3>(motors[7]) + ": %dC"s, Value(std::get<1>(motors[7])), COLOUR(BLACK));
+Text mot_temp_1(75, 85, GUI::Style::CENTRE, TEXT_SMALL, temps, std::get<3>(motors[0]) + ": %dC"s, Value(std::get<1>(motors[0])), COLOUR(BLACK));
+Text mot_temp_2(185, 85, GUI::Style::CENTRE, TEXT_SMALL, temps, std::get<3>(motors[1]) + ": %dC"s, Value(std::get<1>(motors[1])), COLOUR(BLACK));
+Text mot_temp_3(295, 85, GUI::Style::CENTRE, TEXT_SMALL, temps, std::get<3>(motors[2]) + ": %dC"s, Value(std::get<1>(motors[2])), COLOUR(BLACK));
+Text mot_temp_4(405, 85, GUI::Style::CENTRE, TEXT_SMALL, temps, std::get<3>(motors[3]) + ": %dC"s, Value(std::get<1>(motors[3])), COLOUR(BLACK));
+Text mot_temp_5(75, 175, GUI::Style::CENTRE, TEXT_SMALL, temps, std::get<3>(motors[4]) + ": %dC"s, Value(std::get<1>(motors[4])), COLOUR(BLACK));
+Text mot_temp_6(185, 175, GUI::Style::CENTRE, TEXT_SMALL, temps, std::get<3>(motors[5]) + ": %dC"s, Value(std::get<1>(motors[5])), COLOUR(BLACK));
+Text mot_temp_7(295, 175, GUI::Style::CENTRE, TEXT_SMALL, temps, std::get<3>(motors[6]) + ": %dC"s, Value(std::get<1>(motors[6])), COLOUR(BLACK));
+Text mot_temp_8(405, 175, GUI::Style::CENTRE, TEXT_SMALL, temps, std::get<3>(motors[7]) + ": %dC"s, Value(std::get<1>(motors[7])), COLOUR(BLACK));
 
 Page auto_selection ("Auton"); //Select auton routes
 Button prev_auto(20, 50, 120, 100, GUI::Style::SIZE, Button::SINGLE, auto_selection, "Prev Auton");
 Button next_auto(350, 50, 120, 100, GUI::Style::SIZE, Button::SINGLE, auto_selection, "Next Auton");
 Button alliance(MID_X, 200, 150, 20, GUI::Style::CENTRE, Button::SINGLE, auto_selection);
-_Text auto_name(MID_X, 100, GUI::Style::CENTRE, TEXT_LARGE, auto_selection, "%s", Value(auton_names, cur_auton));
-_Text ally_name(MID_X, 200, GUI::Style::CENTRE, TEXT_MEDIUM, auto_selection, "Alliance: %s", Value(alliance_names, cur_alliance));
+Text auto_name(MID_X, 100, GUI::Style::CENTRE, TEXT_LARGE, auto_selection, "%s", Value(auton_names, cur_auton));
+Text ally_name(MID_X, 200, GUI::Style::CENTRE, TEXT_MEDIUM, auto_selection, "Alliance: %s", Value(alliance_names, cur_alliance));
 
 Page track ("Tracking"); //Display tracking vals and reset btns
-_Text trackX(50, 45, GUI::Style::CENTRE, TEXT_SMALL, track, "X:%.1f", tracking.x_coord);
-_Text trackY(135, 45, GUI::Style::CENTRE, TEXT_SMALL, track, "Y:%.1f", tracking.y_coord);
-_Text trackA(220, 45, GUI::Style::CENTRE, TEXT_SMALL, track, "A:%d", Value(&Tracking::get_angle_in_deg, tracking));
-_Text encL(50, 130, GUI::Style::CENTRE, TEXT_SMALL, track, "L:%d", Value(&ADIEncoder::get_value, LeftEncoder));
-_Text encR(135, 130, GUI::Style::CENTRE, TEXT_SMALL, track, "R:%d", Value(&ADIEncoder::get_value, RightEncoder));
-_Text encB(220, 130, GUI::Style::CENTRE, TEXT_SMALL, track, "B:%d", Value(&ADIEncoder::get_value, RightEncoder));
-// _Text trackA(220, 45, GUI::Style::CENTRE, TEXT_SMALL, track, "A:%d", angle);
-// _Text encL(50, 130, GUI::Style::CENTRE, TEXT_SMALL, track, "L:%d", left_enc);
-// _Text encR(135, 130, GUI::Style::CENTRE, TEXT_SMALL, track, "R:%d", right_enc);
-// _Text encB(220, 130, GUI::Style::CENTRE, TEXT_SMALL, track, "B:%d", back_enc);
+Text trackX(50, 45, GUI::Style::CENTRE, TEXT_SMALL, track, "X:%.1f", tracking.x_coord);
+Text trackY(135, 45, GUI::Style::CENTRE, TEXT_SMALL, track, "Y:%.1f", tracking.y_coord);
+Text trackA(220, 45, GUI::Style::CENTRE, TEXT_SMALL, track, "A:%d", Value(&Tracking::get_angle_in_deg, tracking));
+Text encL(50, 130, GUI::Style::CENTRE, TEXT_SMALL, track, "L:%d", Value(&ADIEncoder::get_value, LeftEncoder));
+Text encR(135, 130, GUI::Style::CENTRE, TEXT_SMALL, track, "R:%d", Value(&ADIEncoder::get_value, RightEncoder));
+Text encB(220, 130, GUI::Style::CENTRE, TEXT_SMALL, track, "B:%d", Value(&ADIEncoder::get_value, RightEncoder));
+// Text trackA(220, 45, GUI::Style::CENTRE, TEXT_SMALL, track, "A:%d", angle);
+// Text encL(50, 130, GUI::Style::CENTRE, TEXT_SMALL, track, "L:%d", left_enc);
+// Text encR(135, 130, GUI::Style::CENTRE, TEXT_SMALL, track, "R:%d", right_enc);
+// Text encB(220, 130, GUI::Style::CENTRE, TEXT_SMALL, track, "B:%d", back_enc);
 Button resX(15, 60, 70, 55, GUI::Style::SIZE, Button::SINGLE, track, "Reset X");
 Button resY(100, 60, 70, 55, GUI::Style::SIZE, Button::SINGLE, track, "Reset Y");
 Button resA(185, 60, 70, 55, GUI::Style::SIZE, Button::SINGLE, track, "Reset A");
@@ -65,15 +65,15 @@ Button go_home(320, 110, 150, 40, GUI::Style::SIZE, Button::SINGLE, moving, "Hom
 Button go_centre(320, 175, 150, 40, GUI::Style::SIZE, Button::SINGLE, moving, "Centre");
 
 Page intake_test ("Intake"); //Test for intake with rings
-_Text rings(MID_X, 50, GUI::Style::CENTRE, TEXT_LARGE, intake_test, "Ring Count: %d", Value(ring_count));
+Text rings(MID_X, 50, GUI::Style::CENTRE, TEXT_LARGE, intake_test, "Ring Count: %d", Value(ring_count));
 Button reset_intake (30, 90, 120, 80, GUI::Style::SIZE, Button::SINGLE, intake_test, "Reset Motor");
 Button intake_switch (180, 90, 120, 80, GUI::Style::SIZE, Button::TOGGLE, intake_test, "Start/Stop");
 Button reset_rings (330, 90, 120, 80, GUI::Style::SIZE, Button::SINGLE, intake_test, "Reset Ring Count");
 
 Page elastic ("Elastic Test"); //Testing the elastics on the lift
 Button run_elastic(165, 60, 150, 55, GUI::Style::SIZE, Button::SINGLE, elastic, "Run Elastic Test");
-_Text elastic_up (MID_X, 160, GUI::Style::CENTRE, TEXT_SMALL, elastic, "Up Time: %d", Value(elastic_up_time));
-_Text elastic_down(MID_X, 180, GUI::Style::CENTRE, TEXT_SMALL, elastic, "Down Time: %d", Value(elastic_down_time));
+Text elastic_up (MID_X, 160, GUI::Style::CENTRE, TEXT_SMALL, elastic, "Up Time: %d", Value(elastic_up_time));
+Text elastic_down(MID_X, 180, GUI::Style::CENTRE, TEXT_SMALL, elastic, "Down Time: %d", Value(elastic_down_time));
 
 Page motor_subsys ("Motorized Subsystems"); //Moving the lift
 Slider lift_val(30, 45, 300, 35, GUI::Style::SIZE, Slider::HORIZONTAL, lift.bottom_position, lift.top_position, motor_subsys, "Lift", 10);
@@ -94,31 +94,31 @@ Button tall_goal (245, 140, 100, 75, GUI::Style::SIZE, Button::SINGLE, liftState
 Button manual(360, 140, 100, 75, GUI::Style::SIZE, Button::SINGLE, liftStates, "Manual");
 
 Page tuning ("Tuning Tracking"); //Tests to tune tracking when on new base
-_Text tuning_instructions_1(MID_X, 35, GUI::Style::CENTRE, TEXT_SMALL, tuning, "Press your desired tracking test");
-_Text tuning_instructions_2(MID_X, 50, GUI::Style::CENTRE, TEXT_SMALL, tuning, "and follow the terminal for instructions");
+Text tuning_instructions_1(MID_X, 35, GUI::Style::CENTRE, TEXT_SMALL, tuning, "Press your desired tracking test");
+Text tuning_instructions_2(MID_X, 50, GUI::Style::CENTRE, TEXT_SMALL, tuning, "and follow the terminal for instructions");
 Button turn_encoder (10, 75, 225, 70, GUI::Style::SIZE, Button::SINGLE, tuning, "10 Turns");
 Button perpendicular_error (245, 75, 225, 70, GUI::Style::SIZE, Button::SINGLE, tuning, "Perpendicular Error");
 Button grid (10, 155, 225, 70, GUI::Style::SIZE, Button::SINGLE, tuning, "Grid");
 Button spin360 (245, 155, 225, 70, GUI::Style::SIZE, Button::SINGLE, tuning, "360 Spin");
 
 Page pneumatic ("Pneumatics"); //Pneumatic testing page
-_Text pneum_text_1 (125, 50, GUI::Style::CENTRE, TEXT_SMALL, pneumatic, "PORT G");
-_Text pneum_text_2 (350, 50, GUI::Style::CENTRE, TEXT_SMALL, pneumatic, "PORT G - no config for 2");
+Text pneum_text_1 (125, 50, GUI::Style::CENTRE, TEXT_SMALL, pneumatic, "PORT G");
+Text pneum_text_2 (350, 50, GUI::Style::CENTRE, TEXT_SMALL, pneumatic, "PORT G - no config for 2");
 Button pneum_btn_1 (25, 70, 200, 80, GUI::Style::SIZE, Button::TOGGLE, pneumatic, "PNEUMATIC 1");
 Button pneum_btn_2 (250, 70, 200, 80, GUI::Style::SIZE, Button::TOGGLE, pneumatic, "PNEUMATIC 2");
 
 Page ports ("Ports"); //Shows what ports to use on builder util
-_Text mot (10, 50, GUI::Style::CORNER, TEXT_LARGE, ports, "Motors: %s", Value(port_nums));
-_Text enc (10, 100, GUI::Style::CORNER, TEXT_LARGE, ports, "Encoders: AB, CD, EF");
-_Text pne (10, 150, GUI::Style::CORNER, TEXT_LARGE, ports, "Pneumatics: G, H");
+Text mot (10, 50, GUI::Style::CORNER, TEXT_LARGE, ports, "Motors: %s", Value(port_nums));
+Text enc (10, 100, GUI::Style::CORNER, TEXT_LARGE, ports, "Encoders: AB, CD, EF");
+Text pne (10, 150, GUI::Style::CORNER, TEXT_LARGE, ports, "Pneumatics: G, H");
 
 Page encoders ("Encoders"); //Display tracking vals and reset btns
-_Text encAB (85, 50, GUI::Style::CENTRE, TEXT_SMALL, encoders, "AB Encoder:%d", Value(&ADIEncoder::get_value, LeftEncoder));
-_Text encCD (240, 50, GUI::Style::CENTRE, TEXT_SMALL, encoders, "CD Encoder:%d", Value(&ADIEncoder::get_value, RightEncoder));
-_Text encEF (395, 50, GUI::Style::CENTRE, TEXT_SMALL, encoders, "EF Encoder:%d", Value(&ADIEncoder::get_value, BackEncoder));
-// _Text encAB (85, 50, GUI::Style::CENTRE, TEXT_SMALL, encoders, "AB Encoder:%d", left_enc);
-// _Text encCD (240, 50, GUI::Style::CENTRE, TEXT_SMALL, encoders, "CD Encoder:%d", right_enc);
-// _Text encEF (395, 50, GUI::Style::CENTRE, TEXT_SMALL, encoders, "EF Encoder:%d", back_enc);
+Text encAB (85, 50, GUI::Style::CENTRE, TEXT_SMALL, encoders, "AB Encoder:%d", Value(&ADIEncoder::get_value, LeftEncoder));
+Text encCD (240, 50, GUI::Style::CENTRE, TEXT_SMALL, encoders, "CD Encoder:%d", Value(&ADIEncoder::get_value, RightEncoder));
+Text encEF (395, 50, GUI::Style::CENTRE, TEXT_SMALL, encoders, "EF Encoder:%d", Value(&ADIEncoder::get_value, BackEncoder));
+// Text encAB (85, 50, GUI::Style::CENTRE, TEXT_SMALL, encoders, "AB Encoder:%d", left_enc);
+// Text encCD (240, 50, GUI::Style::CENTRE, TEXT_SMALL, encoders, "CD Encoder:%d", right_enc);
+// Text encEF (395, 50, GUI::Style::CENTRE, TEXT_SMALL, encoders, "EF Encoder:%d", back_enc);
 Button resAB (35, 75, 100, 50, GUI::Style::SIZE, Button::SINGLE, encoders, "Reset AB");
 Button resCD (190, 75, 100, 50, GUI::Style::SIZE, Button::SINGLE, encoders, "Reset CD");
 Button resEF (345, 75, 100, 50, GUI::Style::SIZE, Button::SINGLE, encoders, "Reset EF");
@@ -126,14 +126,14 @@ Button resAllEnc (240, 180, 200, 30, GUI::Style::CENTRE, Button::SINGLE, encoder
 
 Page motor ("Motor Control");
 Slider mot_speed (MID_X, 60, 180 , 15, GUI::Style::CENTRE, Slider::HORIZONTAL, -127, 127, motor, "Speed");
-_Text mot_text_1 (65, 115, GUI::Style::CENTRE, TEXT_SMALL, motor, "Port %s", Value(std::get<5>(motor_ports[0])));
-_Text mot_text_2 (180, 115, GUI::Style::CENTRE, TEXT_SMALL, motor, "Port %s", Value(std::get<5>(motor_ports[1])));
-_Text mot_text_3 (295, 115, GUI::Style::CENTRE, TEXT_SMALL, motor, "Port %s", Value(std::get<5>(motor_ports[2])));
-_Text mot_text_4 (410, 115, GUI::Style::CENTRE, TEXT_SMALL, motor, "Port %s", Value(std::get<5>(motor_ports[3])));
-_Text mot_text_5 (65, 180, GUI::Style::CENTRE, TEXT_SMALL, motor, "Port %s", Value(std::get<5>(motor_ports[4])));
-_Text mot_text_6 (180, 180, GUI::Style::CENTRE, TEXT_SMALL, motor, "Port %s", Value(std::get<5>(motor_ports[5])));
-_Text mot_text_7 (295, 180, GUI::Style::CENTRE, TEXT_SMALL, motor, "Port %s", Value(std::get<5>(motor_ports[6])));
-_Text mot_text_8 (410, 180, GUI::Style::CENTRE, TEXT_SMALL, motor, "Port %s", Value(std::get<5>(motor_ports[7])));
+Text mot_text_1 (65, 115, GUI::Style::CENTRE, TEXT_SMALL, motor, "Port %s", Value(std::get<5>(motor_ports[0])));
+Text mot_text_2 (180, 115, GUI::Style::CENTRE, TEXT_SMALL, motor, "Port %s", Value(std::get<5>(motor_ports[1])));
+Text mot_text_3 (295, 115, GUI::Style::CENTRE, TEXT_SMALL, motor, "Port %s", Value(std::get<5>(motor_ports[2])));
+Text mot_text_4 (410, 115, GUI::Style::CENTRE, TEXT_SMALL, motor, "Port %s", Value(std::get<5>(motor_ports[3])));
+Text mot_text_5 (65, 180, GUI::Style::CENTRE, TEXT_SMALL, motor, "Port %s", Value(std::get<5>(motor_ports[4])));
+Text mot_text_6 (180, 180, GUI::Style::CENTRE, TEXT_SMALL, motor, "Port %s", Value(std::get<5>(motor_ports[5])));
+Text mot_text_7 (295, 180, GUI::Style::CENTRE, TEXT_SMALL, motor, "Port %s", Value(std::get<5>(motor_ports[6])));
+Text mot_text_8 (410, 180, GUI::Style::CENTRE, TEXT_SMALL, motor, "Port %s", Value(std::get<5>(motor_ports[7])));
 Button mot_update_1 (15, 125, 45, 30, GUI::Style::SIZE, Button::SINGLE, motor, "Run");
 Button mot_update_2 (130, 125, 45, 30, GUI::Style::SIZE, Button::SINGLE, motor, "Run");
 Button mot_update_3 (245, 125, 45, 30, GUI::Style::SIZE, Button::SINGLE, motor, "Run");
@@ -296,10 +296,10 @@ void main_background(){
   int x = 200*tracking.x_coord/144, y = 200*tracking.y_coord/144;
   if(inRange(x, 0, 199) && inRange(y, 0, 199)) field[x].set(y); //Saves position (x,y) to as tracked
 
-  for (std::array<std::tuple<Motor*, int, const char*, const char*, Text*>, 8>::iterator it = motors.begin(); it != motors.end(); it++){
-    std::tuple<Motor*, int, const char*, const char*, Text*>& mot_tup = *it;
+  for (std::array<std::tuple<Motor*, int, const char*, const char*, Text_*>, 8>::iterator it = motors.begin(); it != motors.end(); it++){
+    std::tuple<Motor*, int, const char*, const char*, Text_*>& mot_tup = *it;
     Motor* motor = std::get<0>(mot_tup);
-    Text* text = std::get<4>(mot_tup);
+    Text_* text = std::get<4>(mot_tup);
     std::get<1>(mot_tup) = motor == nullptr ? std::numeric_limits<int>::max() : std::get<0>(*it)->get_temperature();
     int temp = std::get<1>(mot_tup);
 
@@ -345,8 +345,8 @@ void util_setup(){
   }
 
   std::string port_num_string;
-  for (std::array<std::tuple<int, Button*, Button*, Text*, int, char*>, 8>::iterator it = motor_ports.begin(); it != motor_ports.end(); it++){
-    std::tuple<int, Button*, Button*, Text*, int, char*>& mot_arr = *it;
+  for (std::array<std::tuple<int, Button*, Button*, Text_*, int, char*>, 8>::iterator it = motor_ports.begin(); it != motor_ports.end(); it++){
+    std::tuple<int, Button*, Button*, Text_*, int, char*>& mot_arr = *it;
 
     if (std::get<0>(mot_arr) != std::numeric_limits<int>::max()) port_num_string.append(std::to_string(std::get<0>(mot_arr)) + ",");
     else{
@@ -374,8 +374,8 @@ void util_setup(){
 
 void util_background(){
   //Motor Stalled
-  for (std::array<std::tuple<int, Button*, Button*, Text*, int, char*>, 8>::iterator it = motor_ports.begin(); it != motor_ports.end(); it++){
-    std::tuple<int, Button*, Button*, Text*, int, char*>& mot_arr = *it;
+  for (std::array<std::tuple<int, Button*, Button*, Text_*, int, char*>, 8>::iterator it = motor_ports.begin(); it != motor_ports.end(); it++){
+    std::tuple<int, Button*, Button*, Text_*, int, char*>& mot_arr = *it;
     int port = std::get<0>(mot_arr);
     if (port != std::numeric_limits<int>::max()){
       snprintf(std::get<5>(mot_arr), 9, "%d: %d", port, (int)c::motor_get_actual_velocity(port));

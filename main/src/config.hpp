@@ -4,7 +4,7 @@
 #include "controller.hpp"
 
 class _Controller;
-class Text;
+class Text_;
 
 extern _Controller master;
 extern pros::Motor front_l, front_r, back_l, back_r, intake_motor, lift_motor, tilter_motor, spinner_motor;

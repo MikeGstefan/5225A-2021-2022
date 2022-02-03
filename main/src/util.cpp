@@ -38,6 +38,7 @@ std::string printf_to_string(const char* fmt, va_list arg){
   return std::string(buffer);
 }
 
+//Returns a heap-allocated c-string. Call delete[] after usage
 char* const millis_to_str(std::uint32_t milliseconds){
   char* const buffer = new char[20];
   if (milliseconds == 1) sprintf(buffer, "1 millisecond");

@@ -17,7 +17,7 @@ class Timer;
 
 extern Timer screen_timer;  // timer to measure how long it's been since last screen update
 
-#define waitUntil(condition) while(!(condition)) delay(10);
+#define waitUntil(condition) while(delay(10),!(condition))
 
 // cycle check macro (checks a condition for a specified amount of cycles)
 #define cycleCheck(condition, checkCount, delayTime) \

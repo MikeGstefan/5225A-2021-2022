@@ -14,7 +14,7 @@ class GUI;
 class Page;
 class Button;
 class Slider;
-template <typename V=std::nullptr_t> class _Text;
+template <typename V=std::nullptr_t> class Text;
 
 //For main.cpp to switch between
 extern GUI g_main, g_util;
@@ -51,8 +51,8 @@ class GUI{
   friend class Page;
   friend class Button;
   friend class Slider;
-  friend class Text;
-  template <typename V> friend class _Text;
+  friend class Text_;
+  template <typename V> friend class Text;
 
   public:
     enum class Style{ //how the rect coords get evaluated
@@ -101,8 +101,8 @@ class Page{
   friend class GUI;
   friend class Button;
   friend class Slider;
-  friend class Text;
-  template <typename V> friend class _Text;
+  friend class Text_;
+  template <typename V> friend class Text;
   private:
 
     //Vars
@@ -113,7 +113,7 @@ class Page{
     std::vector<GUI*> guis; //Parents
     std::vector<Button*> buttons; //Children
     std::vector<Slider*> sliders; //Children
-    std::vector<Text*> texts; //Children
+    std::vector<Text_*> texts; //Children
 
     //Functions
     static Page* const page_id(int);
@@ -132,14 +132,17 @@ class Page{
     void set_active(bool=true);
 };
 
-class Text{
+//Text parent class
+class Text_{
   friend class GUI;
   friend class Page;
   friend class Button;
+  private:
+  int x1=USER_RIGHT, y1=USER_DOWN, x2=USER_LEFT, y2=USER_UP;
 
   protected:
     //Vars
-    int x, y, x1=USER_RIGHT, y1=USER_DOWN, x2=USER_LEFT, y2=USER_UP;
+    int x, y;
     text_format_e_t txt_fmt;
     std::string label;
     Colour l_col, b_col=GREY;
@@ -149,7 +152,8 @@ class Text{
 
     //Functions
     const virtual void update() = 0;
-    virtual void draw() = 0;
+    virtual int update_val(char* const buffer) = 0;
+    const void draw();
 
   public:
     //Functions
@@ -159,11 +163,12 @@ class Text{
     void set_active(bool=true);
 };
 
-template <typename V> class _Text: public Text{
+template <typename V>
+class Text: public Text_{
   friend class Button;
   friend class Slider;
   private:
-    _Text(){};
+    Text(){};
 
     //Vars
     V prev_value=0;
@@ -171,44 +176,14 @@ template <typename V> class _Text: public Text{
 
     //Functions
     const void update() override {
-      if (value && active && prev_value != value()) draw();
+      if (active && value && prev_value != value()) draw();
     }
-    void draw() override {
-      if (!active) return;
-      char buffer [100];
-      int length;
-
+    int update_val(char* const buffer) override {
       if(value){
         prev_value = value();
-        length = snprintf(buffer, 100, label.c_str(), prev_value);
+        return snprintf(buffer, 100, label.c_str(), prev_value);
       }
-      else length = snprintf(buffer, 100, label.c_str());
-
-      if (x2 != 0 && y2 != 0){
-        screen::set_eraser(page->b_col); //Erases previous box
-        screen::erase_rect(x1, y1, x2, y2);
-
-        screen::set_pen(b_col);
-        GUI::draw_oblong(x1, y1, x2, y2, 0, 0.15);
-        screen::set_pen(l_col);
-        screen::set_eraser(b_col);
-      }
-      else{
-        screen::set_pen(l_col);
-        screen::set_eraser(b_col);
-      }
-
-      int x_coord = x, y_coord = y;
-      if (type == GUI::Style::CENTRE){
-        x_coord -= (length*GUI::get_size(txt_fmt, "width"))/2;
-        y_coord -= GUI::get_size(txt_fmt, "height")/2;
-      }
-      x1 = min(x1, x_coord); //Resizes the background so it won't have overwriting issues
-      x2 = max(x2, x_coord + length*(GUI::get_size(txt_fmt, "width")+1));
-      y1 = min(y1, y_coord);
-      y2 = max(y2, y_coord + GUI::get_size(txt_fmt, "height"));
-
-      screen::print(txt_fmt, x_coord, y_coord, "%s", buffer);
+      return snprintf(buffer, 100, label.c_str());
     }
     void construct (int x, int y, GUI::Style type, text_format_e_t txt_fmt, Page* page, std::string label, Value<V> value, Colour l_col){
       static_assert(!std::is_same_v<V, std::string>, "Text variable cannot be std::string, it causes unknown failures");
@@ -228,14 +203,12 @@ template <typename V> class _Text: public Text{
     //Points, Format, Page, Label, [var info], Lcolour
 
     //No var
-    _Text (int x, int y, GUI::Style rect_type, text_format_e_t size, Page& page, std::string text, Colour label_colour = COLOUR(WHITE))
-    {
+    Text (int x, int y, GUI::Style rect_type, text_format_e_t size, Page& page, std::string text, Colour label_colour = COLOUR(WHITE)){
       construct (x, y, rect_type, size, &page, text, nullptr, label_colour);
     }
 
     //Variable
-    _Text (int x, int y, GUI::Style rect_type, text_format_e_t size, Page& page, std::string text, Value<V> value_obj, Colour label_colour = COLOUR(WHITE))
-    {
+    Text (int x, int y, GUI::Style rect_type, text_format_e_t size, Page& page, std::string text, Value<V> value_obj, Colour label_colour = COLOUR(WHITE)){
       construct (x, y, rect_type, size, &page, text, value_obj, label_colour);
     }
 
@@ -262,7 +235,7 @@ class Button{
     bool last_pressed=0;
     press_type form; //What type of button
     Value<void> func, off_func;
-    Text* title = nullptr;
+    Text_* title = nullptr;
     bool active=true;
     Page* page;
 
@@ -288,7 +261,7 @@ class Button{
     void set_func(Value<void>), set_off_func(Value<void>);
     void set_active(bool=true);
     void set_background (Colour);
-    void add_text (Text&, bool=true);
+    void add_text (Text_&, bool=true);
     bool new_press();
     bool new_release();
     void wait_for_press(); //Blocking
@@ -312,8 +285,8 @@ class Slider{
     bool active=true;
     Page* page;
     Button dec, inc;
-    _Text<int> title;
-    _Text<std::nullptr_t> min_title, max_title;
+    Text<int> title;
+    Text<std::nullptr_t> min_title, max_title;
 
     //Functions
     void update();

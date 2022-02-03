@@ -237,7 +237,7 @@ void Drivebase::driver_practice(){
       if(master.get_digital_new_press(tilter_button)){
         if(tilter_held){
           tilter.motor.move_absolute(tilter.bottom_position, 100); // lifts goal
-          waitUntil(fabs(tilter.motor.get_position() - tilter.bottom_position) <  25 );
+          waitUntil(fabs(tilter.motor.get_position() - tilter.bottom_position) <  25);
           tilter_top_piston.set_value(HIGH);
           tilter_bottom_piston.set_value(LOW);
 

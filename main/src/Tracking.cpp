@@ -281,7 +281,7 @@ void move_start(move_types type, std::variant<arc_params, line_params, tank_arc_
 }
 
 bool move_wait_for_complete(){
-  while(move_t.get_task_ptr()->get_state()!= 4)delay(10); //change to waitUntil(move_t.get_task_ptr()->get_state() == 4);
+  waitUntil(move_t.get_task_ptr()->get_state() == 4);
   return tracking.move_complete;
 }
 
