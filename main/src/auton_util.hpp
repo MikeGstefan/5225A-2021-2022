@@ -37,8 +37,6 @@ class Reset_dist{
     Reset_dist(pros::Distance* sensor, double dist_from_center);
 
     double get_dist();
-
-    void reset(double x_wall, double y, double a);
 };
 
 extern Reset_dist reset_dist_r;

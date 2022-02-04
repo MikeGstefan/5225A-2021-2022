@@ -18,7 +18,7 @@ pros::Motor f_lift_m(16), b_lift_m(9, pros::E_MOTOR_GEARSET_36, true,pros::E_MOT
 // pros::Motor back_r(18, pros::E_MOTOR_GEARSET_18, true, pros::E_MOTOR_ENCODER_DEGREES);
 
 pros::Imu imu_sensor(4);
-pros::Distance b_dist(6), r_dist(10);
+pros::Distance b_dist(6), r_reset_dist(10);
 pros::ADIDigitalOut trans_p(7), b_claw_p(8);
 
 

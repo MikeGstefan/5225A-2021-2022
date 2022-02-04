@@ -1,7 +1,7 @@
 #include "auton_util.hpp"
 // #include "logging.hpp"
 
-Reset_dist reset_dist_r(&r_dist, 10.0);
+Reset_dist reset_dist_r(&r_reset_dist, 10.0);
 
 double get_filtered_output(ADIUltrasonic sensor, int check_count, uint16_t lower_bound, uint16_t upper_bound, int timeout){
   Timer timer{"Timer"};
@@ -94,11 +94,4 @@ double Reset_dist::get_dist(){
   }
   //find averaeg, convert to inches
   return ((avg/count)/25.4) + this->dist_from_center;
-}
-
-void Reset_dist::reset(double x_wall, double y, double a){
-  int sgn = (x_wall < 72) ? 1 : -1;
-  double x = this->get_dist();
-  tracking.reset(x_wall + (x *sgn), y, a);
-  delay(100);
 }

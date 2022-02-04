@@ -14,6 +14,6 @@ extern pros::Distance left_distance;
 extern pros::Distance right_distance;
 
 extern pros::Imu imu_sensor;
-extern pros::Distance b_dist, r_dist;
+extern pros::Distance b_dist, r_reset_dist;
 
 extern pros::ADIDigitalOut trans_p, b_claw_p;

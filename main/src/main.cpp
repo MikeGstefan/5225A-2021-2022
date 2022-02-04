@@ -146,7 +146,7 @@ void opcontrol() {
 		if(master.get_digital_new_press(DIGITAL_R1)){ 
 			Timer timer {"timer"};
 			// printf("%f\n",reset_dist_r.get_dist());
-			reset_dist_r.reset(141.0,0.0 + DIST_BACK,0.0);
+			// reset_dist_r.reset(141.0,0.0 + DIST_BACK,0.0);
 			// skills();
 			//fits platfor to reset
 			/**
