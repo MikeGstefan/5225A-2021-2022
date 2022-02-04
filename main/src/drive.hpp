@@ -45,6 +45,7 @@ class Drivebase{
   int deadzone = 5;
   const char* screen_text[3] = {"LOCAL_X CURVE:", "LOCAL_Y CURVE:", "LOCAL_A CURVE:"};
   void update_screen();
+  bool state;//state for the transmission
 
 public:
   int cur_driver = 0;  // driver defaults to Nikhil rn
@@ -70,6 +71,12 @@ public:
   void next_driver(); //Goes to next driver. Called on drivebase object.
   void prev_driver(); //Goes to previous driver. Called on drivebase object.
   const char* driver_name(); //Returns the current driver's name
+
+  //returns the current state of the transmission
+  bool get_state(); 
+  void set_state(bool state);
+  //handles controller input for the transmission
+  void handle_trans();
 };
 
 extern Drivebase drivebase;

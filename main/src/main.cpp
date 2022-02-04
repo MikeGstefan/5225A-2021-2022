@@ -7,6 +7,8 @@
 #include "task.hpp"
 #include "auton.hpp"
 #include "auton_util.hpp"
+#include "Subsystem/f_lift.hpp"
+#include "Subsystem/b_lift.hpp"
 
 // using namespace std;
 #include "task.hpp"
@@ -35,8 +37,8 @@ void initialize() {
 	// delay(150);
 	tracking.x_coord = 0.0, tracking.y_coord = 0.0, tracking.global_angle = 0.0;
 	update_t.start();
-	auton_file_read();
-	master.print(2, 0, "Driver: %s", drivebase.drivers[drivebase.cur_driver].name);
+	// // auton_file_read();
+	// master.print(2, 0, "Driver: %s", drivebase.drivers[drivebase.cur_driver].name);
 	// gyro.finish_calibrating(); //Finishes calibrating gyro before program starts
 }
 
@@ -107,11 +109,56 @@ void autonomous() {
 
 int ring_count = 0;
 // int ring_count = 0, cur_auton = 1;
-bool claw_state = false, intk_state = false;
+bool claw_state = false, lift_state = false, drive_state = false;
+int lift_speed = 0;
 void opcontrol() {
+	
+	master.clear();
+	b_lift.reset();
+	b_lift.move(0);
+
 	while(true){
+		if(master.get_digital_new_press(DIGITAL_Y)){ 
+			master.print(0,0,"%d",BackEncoder.get_value());
+		}
+		if(master.get_digital_new_press(DIGITAL_A)){
+			printf("switching state to %d\n", !claw_state);
+			claw_state = !claw_state;
+			b_claw_p.set_value(claw_state);
+		}
+		if(master.get_digital_new_press(DIGITAL_B)){ 
+			b_lift.move_absolute(10);
+			detect_goal();
+			claw_state = 1;
+			
+		}
+		if(master.get_digital_new_press(DIGITAL_L1)){ 
+			b_lift.move_absolute(300);
+		}
+		if(master.get_digital_new_press(DIGITAL_L2)){ 
+			b_lift.move_absolute(0);
+		}
+		// printf("dist: %d\n", b_dist.get());
+		drivebase.handle_trans();
 		drivebase.handle_input();
-		delay(10);
+		if(master.get_digital_new_press(DIGITAL_R1)){ 
+			// b_lift.move_absolute(10);
+			b_lift.move(-15);
+			move_start(move_types::tank_point, tank_point_params({-2.0,-72.0,0.0}, false),true);
+			// detect_goal();
+			// move_stop();
+			// drivebase.brake();
+			move_start(move_types::tank_arc, tank_arc_params({-4.0,-72.0}, {-22.0,-69.0,45.0},127.0,127.0));
+			move_start(move_types::tank_point, tank_point_params({-32.0,-85.0,-135.0}, false));
+			move_start(move_types::turn_angle, turn_angle_params(-180.0));
+			delay(1000);
+
+		}
+
+		if(abs(master.get_analog(ANALOG_LEFT_Y))> 20)b_lift.move(master.get_analog(ANALOG_LEFT_Y));
+		else b_lift.move(10);
+		
+		delay(33);
 	}
 		
 }

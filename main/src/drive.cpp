@@ -75,6 +75,8 @@ void Drivebase::move(double y, double a){
   front_r.move(y-a);
   back_l.move(y+a);
   back_r.move(y-a);
+  // back_l.move(0);
+  // back_r.move(0);
 }
 
 void Drivebase::move_tank(double y, double a){
@@ -304,4 +306,21 @@ void Drivebase::prev_driver(){
 
 const char* Drivebase::driver_name(){
   return drivers[cur_driver].name;
+}
+
+
+bool Drivebase::get_state(){
+  return this->state;
+}
+
+void Drivebase::set_state(bool state){
+  this->state = state;
+  trans_p.set_value(state);
+}
+
+
+void Drivebase::handle_trans(){
+  if(master.get_digital_new_press(shift)){
+    this->set_state(!this->get_state());
+  }
 }

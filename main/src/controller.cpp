@@ -2,25 +2,12 @@
 
 // Buttons
 
-// lift buttons
-controller_digital_e_t lift_up_button = DIGITAL_R1;
-controller_digital_e_t lift_down_button = DIGITAL_R2;
-controller_digital_e_t mogo_tip_button = DIGITAL_DOWN;
 
-// tilter buttons
-controller_digital_e_t tilter_search_button = DIGITAL_L1;
-controller_digital_e_t tilter_raise_button = DIGITAL_L2;
 
 // misc buttons
 controller_digital_e_t cancel_button = DIGITAL_B;
-controller_digital_e_t fill_top_goal_button = DIGITAL_X;
-controller_digital_e_t climb_platform_button = DIGITAL_UP;
-controller_digital_e_t intake_button = DIGITAL_LEFT;
+controller_digital_e_t shift = DIGITAL_X;
 controller_digital_e_t reverse_drive_button = DIGITAL_RIGHT;
-
-// manual control buttons
-controller_digital_e_t lift_manual_button = DIGITAL_A;
-controller_digital_e_t tilter_manual_button = DIGITAL_Y;
 
 
 std::array<_Controller*, num_controller> _Controller::objs; //= {nullptr};

@@ -47,3 +47,19 @@ double get_filtered_output(ADIUltrasonic sensor, int check_count, uint16_t lower
   
 // }
 
+void detect_goal(){ 
+  // cycleCheck(b_dist.get() > 80 && b_dist.get() < 90, 5, 33);
+  while(b_dist.get() > 70){ 
+    misc.print("looking for edge: %d\n", b_dist.get());
+    delay(33);
+  }
+  int successCount = 0;
+    while (successCount < 2){
+        if (b_dist.get() > 75 && b_dist.get() < 90) successCount++;
+        else successCount = 0;
+        misc.print("looking: %d\n", b_dist.get());
+        delay(33);
+    }
+  misc.print("Detected %d\n", b_dist.get());
+  b_claw_p.set_value(1);
+}
