@@ -35,7 +35,8 @@ void initialize() {
 	_Controller::init();
 	GUI::init();
 	// delay(150);
-	tracking.x_coord = 0.0, tracking.y_coord = 0.0, tracking.global_angle = 0.0;
+	// tracking.x_coord = 26.0, tracking.y_coord = 11.75, tracking.global_angle = -90.0_deg;
+	tracking.x_coord = 70.0, tracking.y_coord = 39.0, tracking.global_angle = 0.0_deg;
 	update_t.start();
 	// // auton_file_read();
 	// master.print(2, 0, "Driver: %s", drivebase.drivers[drivebase.cur_driver].name);
@@ -111,6 +112,7 @@ int ring_count = 0;
 // int ring_count = 0, cur_auton = 1;
 bool claw_state = false, lift_state = false, drive_state = false;
 int lift_speed = 0;
+int safety_check = 0;
 void opcontrol() {
 	
 	master.clear();
@@ -140,23 +142,53 @@ void opcontrol() {
 		}
 		// printf("dist: %d\n", b_dist.get());
 		drivebase.handle_trans();
-		drivebase.handle_input();
+		// drivebase.handle_input();
 		if(master.get_digital_new_press(DIGITAL_R1)){ 
-			// b_lift.move_absolute(10);
-			b_lift.move(-15);
-			move_start(move_types::tank_point, tank_point_params({-2.0,-72.0,0.0}, false),true);
-			// detect_goal();
-			// move_stop();
-			// drivebase.brake();
-			move_start(move_types::tank_arc, tank_arc_params({-4.0,-72.0}, {-22.0,-69.0,45.0},127.0,127.0));
-			move_start(move_types::tank_point, tank_point_params({-32.0,-85.0,-135.0}, false));
-			move_start(move_types::turn_angle, turn_angle_params(-180.0));
-			delay(1000);
+			Timer timer {"timer"};
+			// skills();
+			//fits platfor to reset
+			/**
+			move_start(move_types::turn_angle, turn_angle_params(90.0));
+			delay(100);
+			move_start(move_types::tank_arc, tank_arc_params({70.0, 95.0}, {122.0,119.0,0.0}));
+			// move_start(move_types::turn_angle, turn_angle_params(0.0));
+			move_start(move_types::tank_point, tank_point_params({122.0,123.0,0.0},false));
+			flatten_against_wall(true);
+			*/
 
+
+			//grab goal on wall 
+
+			/**
+			move_start(move_types::turn_angle, turn_angle_params(-90.0));
+			move_start(move_types::tank_point, tank_point_params({111.0,34.0,-90.0},false,70));
+			delay(500);
+			move_start(move_types::tank_point, tank_point_params({127.0,34.0,-90.0},false, 70),false);
+			detect_goal();
+			move_stop();
+			// drivebase.brake();
+			move_start(move_types::tank_point, tank_point_params({115.0,34.0,-90.0},false));
+			b_lift.move_absolute(650);
+			while(b_lift.motor.get_position() < 630)delay(10);
+			b_lift.move(10);
+			flatten_against_wall(false);
+
+			delay(500);
+			move_start(move_types::tank_point, tank_point_params({117.0,34.0,-90.0},false));
+			b_lift.move_absolute(10);
+			move_start(move_types::turn_point, turn_point_params({70.0,70.0}));
+			delay(50);
+			master.print(0,0,"%d", timer.get_time());
+			delay(10000);
+			*/
+
+		}
+		else{
+			drivebase.handle_input();
 		}
 
 		if(abs(master.get_analog(ANALOG_LEFT_Y))> 20)b_lift.move(master.get_analog(ANALOG_LEFT_Y));
-		else b_lift.move(10);
+		// else b_lift.move(10);
 		
 		delay(33);
 	}

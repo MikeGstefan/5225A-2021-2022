@@ -117,7 +117,7 @@ void update(void* params){
     tracking.global_angle += Theta;
 
 
-    tracking_data.print(&data_timer, 20, {
+    tracking_data.print(&data_timer, 100, {
       [=](){return Data::to_char("%d || x: %.2lf, y: %.2lf, a: %.2lf\n", millis(), tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle));},
       // [=](){return Data::to_char("%d || GLOBAL VELOCITY| x: %.2f, y: %.2f a: %.2f\n", millis(), tracking.g_velocity.x, tracking.g_velocity.y, rad_to_deg(tracking.g_velocity.angle));},
       // [=](){return Data::to_char("%d || ENCODER L: %d, R: %d, B:%d \n", millis(), LeftEncoder.get_value(), RightEncoder.get_value(), BackEncoder.get_value());},
@@ -815,8 +815,8 @@ void tank_move_to_target(void* params){
     const double max_power = tank_point_params_g.max_power;
     const double min_angle_percent = tank_point_params_g.min_angle_percent;
     const bool brake = tank_point_params_g.brake;
-    // double kp_y = tank_point_params_g.kp_y;
-    // double kp_a =tank_point_params_g.kp_a;
+    double kp_y = tank_point_params_g.kp_y;
+    double kp_a =tank_point_params_g.kp_a;
     tracking.move_complete = false;
 
     Point local_error;
@@ -827,11 +827,13 @@ void tank_move_to_target(void* params){
     double difference_a;
     double hypotenuse;
 
-    double kp_y = 11.5, kp_a = 150.0;
+    // double kp_y = 11.5, kp_a = 150.0, kd_a = 0.0;
     // printf("Local errors | x: %lf, y: %lf \n", local_error.x, local_error.y);
     double min_power_a = max_power * min_angle_percent;
     double pre_scaled_power_a;
     double end_error = 0.5;
+
+    // double deriv_a = 0.0;
 
     // move on line variables
     Vector follow_line(target.y - tracking.y_coord, target.x - tracking.x_coord); // used to keep track of angle of follow_line relative to the vertical
@@ -943,14 +945,14 @@ void turn_to_angle(void* params){
 
 //overload to handle being called within another motion
 void turn_to_angle(double target_a, const bool brake, _Task* ptr){
-  PID angle_pid(175.0, 0.0, 0.0, 0.0, true, 0.0, 360.0);
+  PID angle_pid(130.0, 0.0, 130.0, 0.0, true, 0.0, 360.0);
   target_a = deg_to_rad(target_a);
   tracking.move_complete = false;
 
   while(true){
     drivebase.move_tank(0, angle_pid.compute(tracking.global_angle, near_angle(target_a, tracking.global_angle) + tracking.global_angle));
     if(fabs(rad_to_deg(angle_pid.get_error())) < 1.5){
-      printf("Ending turn to point with angle: %.2f at X: %.2f Y: %.2f A: %.2f \n", rad_to_deg(target_a), tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle));
+      motion_d.print("Ending turn to point with angle: %.2f at X: %.2f Y: %.2f A: %.2f \n", rad_to_deg(target_a), tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle));
       drivebase.move_tank(0, 0);
       if(brake) drivebase.brake();
       tracking.move_complete = true;

@@ -1,12 +1,21 @@
 #include "auton.hpp"
 
 
-void red_tall_rush(){
 
-}
 
 void skills(){
- 
+  move_start(move_types::tank_point, tank_point_params({36.0,11.75,-90.0},false),false);
+	detect_goal();
+	move_stop();
+	// drivebase.brake();
+	move_start(move_types::tank_arc, tank_arc_params({tracking.x_coord, tracking.y_coord}, {20.5, 39.0,20.0},127.0,127.0,false));//arc to face nuet goal
+	move_start(move_types::tank_point, tank_point_params({34.5,72.0,  45.0},false, 127.0,1.0,true,9.0,130.0));// drive throught nuet goal
+	
+	move_start(move_types::turn_point, turn_point_params({70.0,98.0},true));
+	delay(100);
+	move_start(move_types::tank_point, tank_point_params({70.0, 95.0, 45.0},false, 127.0, 1.0, true,9.0,130.0));
+	delay(100);
+	move_start(move_types::turn_angle, turn_angle_params(0.0));
 }
 
 

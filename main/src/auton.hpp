@@ -11,6 +11,18 @@
 #include "config.hpp"
 #include <fstream>
 
+
+
+void skills();
+
+
+
+
+
+
+
+
+
 enum class autons{
   Skills,
   Auto2,
@@ -31,4 +43,4 @@ void next_auton();
 void prev_auton();
 void auton_file_read();
 
-void red_tall_rush();
+

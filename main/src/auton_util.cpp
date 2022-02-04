@@ -26,7 +26,22 @@ double get_filtered_output(ADIUltrasonic sensor, int check_count, uint16_t lower
   return filtered_output;
 }
 
+void flatten_against_wall(bool front){ 
+  int safety_check = 0;
+  //bool to + -
+  int direction = (static_cast<int>(front)*2)-1;
+  tracking_imp.print("%d|| Start wall allign\n", millis());
 
+	drivebase.move(70.0*direction,0.0);
+
+	while((fabs(tracking.l_velo) < 2.0 ||fabs(tracking.r_velo) < 2.0) && safety_check < 12){
+		safety_check++;
+		delay(10);
+	}
+	cycleCheck(fabs(tracking.l_velo) <1.0 && fabs(tracking.r_velo) < 1.0, 4,10);
+	drivebase.move(20.0*direction,0.0);
+	printf("%d|| Done all allign\n", millis());
+}
 
 // double get_front_dist(){
 //   double avg = 0.0;
