@@ -116,8 +116,8 @@ int safety_check = 0;
 void opcontrol() {
 	
 	master.clear();
-	b_lift.reset();
-	b_lift.move(0);
+	// b_lift.reset();
+	// b_lift.move(0);
 
 	while(true){
 		if(master.get_digital_new_press(DIGITAL_Y)){ 
@@ -145,6 +145,8 @@ void opcontrol() {
 		// drivebase.handle_input();
 		if(master.get_digital_new_press(DIGITAL_R1)){ 
 			Timer timer {"timer"};
+			// printf("%f\n",reset_dist_r.get_dist());
+			reset_dist_r.reset(141.0,0.0 + DIST_BACK,0.0);
 			// skills();
 			//fits platfor to reset
 			/**
@@ -181,6 +183,7 @@ void opcontrol() {
 			master.print(0,0,"%d", timer.get_time());
 			delay(10000);
 			*/
+			delay(2000);
 
 		}
 		else{

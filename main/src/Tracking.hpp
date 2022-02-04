@@ -27,6 +27,9 @@ extern _Task move_t;
 #define GYRO_SIDE -1
 
 
+#define DIST_BACK 8.5
+#define DIST_FRONT 8.5
+
 
 void update(void* params);
 
