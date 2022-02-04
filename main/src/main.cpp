@@ -157,9 +157,13 @@ void opcontrol() {
   //   ring_piston.set_value(master.get_digital(DIGITAL_A));
   //   delay(10);
   // }
-
+  intake_piston.set_value(HIGH);
+  delay(100);
+  
   lift.reset();
-  tilter.reset();
+  intake_piston.set_value(LOW);
+
+  // tilter.reset();
 
   drivebase.driver_practice();
   /*

@@ -4,7 +4,7 @@
 
 #define LIFT_STATE_LINE 2 // line on controller which "searching" and "lowered" lift states are printed on
 
-#define NUM_OF_LIFT_STATES 8
+#define NUM_OF_LIFT_STATES 10
 #define LIFT_MAX_VELOCITY 100
 
 
@@ -16,13 +16,14 @@ enum class lift_states{
   platform, // at platform height
   tall_platform, // tall goal at platform height
   dropoff, // mogo released at platform height
+  lowering, // on the way to grabbed or searching state
   tall_goal,  // filling up rings on tall goal
   manual  // controlled by joystick
 };
 
 class Lift: public Motorized_subsystem<lift_states, NUM_OF_LIFT_STATES, LIFT_MAX_VELOCITY> {
   int released_cycle_check = 0, bad_count = 0; // cycle check for safeties
-
+  bool held; // if the lift is holding a mogo (used for joystick control)
 
   int lift_power; // for manual control
 

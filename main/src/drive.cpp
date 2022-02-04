@@ -216,10 +216,11 @@ void Drivebase::driver_practice(){
 
   // moves motors to necessary positions / speeds
   lift.move_absolute(lift.bottom_position);
-  tilter.move_absolute(tilter.raised_position);
+  // lift.move(-10); // applies holding power
+  // tilter.move_absolute(tilter.raised_position);
 
-  tilter.set_state(tilter_states::raised);
   lift.set_state(lift_states::searching);
+  tilter.set_state(tilter_states::raised);
 
 
   cur_driver = 0; // defaults driver to Nikhil

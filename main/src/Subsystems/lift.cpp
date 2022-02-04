@@ -8,8 +8,9 @@ Lift lift({{"Lift",
   "grabbed",
   "tip",
   "platform",
-  // "tall_platform",
+  "tall_platform",
   "dropoff",
+  "lowering",
   "tall_goal",
   "manual",
 }
@@ -23,33 +24,38 @@ Lift::Lift(Motorized_subsystem<lift_states, NUM_OF_LIFT_STATES, LIFT_MAX_VELOCIT
   target = bottom_position;
   last_target = target;
 }
-bool intake_on = false;
+
 void Lift::handle(){
 
-  // lift safety handling
-  if (fabs(target - motor.get_position()) > end_error && fabs(motor.get_actual_velocity()) < 5.0) bad_count++;
-  else bad_count = 0;
-  if(bad_count > 25 && state != lift_states::manual){
-    motor.move(0);
-    master.rumble("---");
-    master.print(LIFT_STATE_LINE, 0, "Lift: Manual      ");
-    printf("LIFT SAFETY TRIGGERED\n");
-    intake.raise_and_disable();
-    intake.set_state(intake_states::raised);
-
-    set_state(lift_states::manual);
-  }
-
-  // switches to manual control if lift joystick exceeds threshold
+  // joystick control
   lift_power = master.get_analog(E_CONTROLLER_ANALOG_LEFT_Y);
 
-  if(fabs(lift_power) > 80){
-    intake.raise_and_disable();
-    intake.set_state(intake_states::raised);
-    master.rumble("-");
-    master.print(LIFT_STATE_LINE, 0, "Lift: Manual      ");
+  // lift safety handling
+  if(state != lift_states::manual){
+    if (fabs(target - motor.get_position()) > end_error && fabs(motor.get_actual_velocity()) < 5.0) bad_count++;
+    else bad_count = 0;
+    if(bad_count > 25 && state != lift_states::manual){
+      motor.move(0);
+      master.rumble("---");
+      master.print(LIFT_STATE_LINE, 0, "Lift: Manual      ");
+      printf("LIFT SAFETY TRIGGERED %lf, %lf\n", target, motor.get_position());
+      intake.raise_and_disable();
+      intake.set_state(intake_states::raised);
+      held = false;
 
-    set_state(lift_states::manual);
+      set_state(lift_states::manual);
+    }
+
+    // switches to manual control if lift joystick exceeds threshold
+    if(fabs(lift_power) > 80){
+      intake.raise_and_disable();
+      intake.set_state(intake_states::raised);
+      master.rumble("-");
+      master.print(LIFT_STATE_LINE, 0, "Lift: Manual      ");
+      held = false;
+
+      set_state(lift_states::manual);
+    }
   }
 
   switch(state){
@@ -88,11 +94,6 @@ void Lift::handle(){
       break;
 
     case lift_states::grabbed:
-      if(!intake_on && motor.get_position() < bottom_position + 100){
-        intake_piston.set_value(LOW); // lowers the intake again and turns it on
-        // intake.motor.move(INTAKE_POWER);
-        intake_on = true;
-      }
       if(master.get_digital_new_press(lift_up_button)){ // lifts goal to platform height if up button is pressed
         intake.raise_and_disable();
         delay(100);
@@ -126,10 +127,8 @@ void Lift::handle(){
       }
       if(master.get_digital_new_press(lift_down_button)){ // lowers goal if down button is pressed
         move_absolute(bottom_position);
-        intake.set_state(intake_states::on);
-        intake_on = false;
 
-        set_state(lift_states::grabbed);
+        set_state(lift_states::lowering);
       }
       break;
 
@@ -159,19 +158,63 @@ void Lift::handle(){
 
         set_state(lift_states::tip);
       }
-
       break;
+
     case lift_states::dropoff:
       // releases goal if up or down button is pressed
       if(master.get_digital_new_press(lift_up_button) || master.get_digital_new_press(lift_down_button)){
         move_absolute(bottom_position);
-      }
-      if(motor.get_position() < bottom_position + 100){ // waits for lift to lower past halfway to lower intake
-        intake_piston.set_value(LOW);
-        intake.set_state(intake_states::off);
-        master.print(LIFT_STATE_LINE, 0, "Lift: Searching    ");
 
-        set_state(lift_states::searching);
+        set_state(lift_states::lowering);
+      }
+
+      break;
+
+    case lift_states::lowering:
+      // moves to last position if up button is pressed
+      if(master.get_digital_new_press(lift_up_button)){
+        switch (last_state) {
+          case lift_states::dropoff:
+            move_absolute(platform_position);
+            break;
+
+          case lift_states::tip:
+            move_absolute(raised_position);
+            break;
+
+          default:
+            move_absolute(raised_position);
+            break;
+        }
+        set_state(last_state);
+      }
+      // moves to next state if lift is at bottom position
+      if(fabs(motor.get_position() - bottom_position) < end_error){
+        switch (last_state) {
+          case lift_states::dropoff:
+            intake_piston.set_value(LOW);
+            intake.set_state(intake_states::off);
+            master.print(LIFT_STATE_LINE, 0, "Lift: Searching    ");
+
+            set_state(lift_states::searching);
+            break;
+
+          case lift_states::tip:
+            intake_piston.set_value(LOW); // lowers the intake again and turns it on
+            intake.motor.move(INTAKE_POWER);
+
+            set_state(lift_states::grabbed);
+            break;
+
+          default:
+            intake_piston.set_value(LOW);
+            intake.set_state(intake_states::off);
+            master.print(LIFT_STATE_LINE, 0, "Lift: Searching    ");
+
+            set_state(lift_states::searching);
+            break;
+        }
+        // move(-10);  // applies holding power
       }
       break;
 
@@ -182,10 +225,10 @@ void Lift::handle(){
     case lift_states::manual:
 
       // gives holding power if joystick is within deadzone or lift is out of range
-      if (fabs(lift_power) < 10 || (lift_power < 0 && motor.get_position() <= bottom_position) || (lift_power > 0 && motor.get_position() >= top_position)) lift_power = 10;
+      if (fabs(lift_power) < 10 || (lift_power < 0 && motor.get_position() <= bottom_position) || (lift_power > 0 && motor.get_position() >= top_position)) lift_power = -10;
 
       motor.move(lift_power);
-      if(master.get_digital_new_press(lift_up_button) || master.get_digital_new_press(lift_down_button) || master.get_digital_new_press(lift_manual_button)){
+      if(master.get_digital_new_press(lift_down_button) || master.get_digital_new_press(lift_manual_button)){
         bad_count = 0;  // resets the safety
         lift_piston.set_value(LOW);
         move_absolute(bottom_position);
@@ -197,6 +240,11 @@ void Lift::handle(){
 
         set_state(lift_states::searching);
       }
+
+      // toggles state of lift pneumatic if lift up button is pressed
+      if(master.get_digital_new_press(lift_up_button)) held = !held;
+      lift_piston.set_value(held);
+
       break;
 
   }
