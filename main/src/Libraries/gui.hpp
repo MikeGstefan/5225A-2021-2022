@@ -171,8 +171,8 @@ class Text: public Text_{
     Text(){};
 
     //Vars
-    V prev_value=0;
-    Value<V> value;
+    std::remove_const_t<V> prev_value;
+    std::function<V()> value;
 
     //Functions
     const void update() override {
@@ -185,7 +185,7 @@ class Text: public Text_{
       }
       return snprintf(buffer, 100, label.c_str());
     }
-    void construct (int x, int y, GUI::Style type, text_format_e_t txt_fmt, Page* page, std::string label, Value<V> value, Colour l_col){
+    void construct (int x, int y, GUI::Style type, text_format_e_t txt_fmt, Page* page, std::string label, std::function<V()> value, Colour l_col){
       static_assert(!std::is_same_v<V, std::string>, "Text variable cannot be std::string, it causes unknown failures");
       this->x = x;
       this->y = y;
@@ -197,7 +197,7 @@ class Text: public Text_{
       this->l_col = l_col;
       this->b_col = page->b_col;
       page->texts.push_back(this);
-    }
+    } 
 
   public:
     //Points, Format, Page, Label, [var info], Lcolour
@@ -208,8 +208,14 @@ class Text: public Text_{
     }
 
     //Variable
-    Text (int x, int y, GUI::Style rect_type, text_format_e_t size, Page& page, std::string text, Value<V> value_obj, Colour label_colour = COLOUR(WHITE)){
-      construct (x, y, rect_type, size, &page, text, value_obj, label_colour);
+    Text (int x, int y, GUI::Style rect_type, text_format_e_t size, Page& page, std::string text, V& value_obj, Colour label_colour = COLOUR(WHITE)){
+      construct (x, y, rect_type, size, &page, text, [&](){return value_obj;}, label_colour);
+    }
+
+    //Array
+    template <typename I>
+    Text (int x, int y, GUI::Style rect_type, text_format_e_t size, Page& page, std::string text, V* value_arr, I& index, Colour label_colour = COLOUR(WHITE)){
+      construct (x, y, rect_type, size, &page, text, [value_arr, &index](){return value_arr[static_cast<int>(index)];}, label_colour);
     }
 
 };
@@ -234,7 +240,7 @@ class Button{
     int x1, y1, x2, y2, text_x, text_y, text_x1, text_y1;
     bool last_pressed=0;
     press_type form; //What type of button
-    Value<void> func, off_func;
+    std::function<void()> func, off_func;
     Text_* title = nullptr;
     bool active=true;
     Page* page;
@@ -258,7 +264,6 @@ class Button{
     static void create_options(std::vector<Button*>);
     const bool pressed();
     void set_func(std::function <void()>), set_off_func(std::function <void()>);
-    void set_func(Value<void>), set_off_func(Value<void>);
     void set_active(bool=true);
     void set_background (Colour);
     void add_text (Text_&, bool=true);
