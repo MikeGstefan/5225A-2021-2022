@@ -9,6 +9,7 @@
 #include "auton_util.hpp"
 #include "Subsystem/f_lift.hpp"
 #include "Subsystem/b_lift.hpp"
+#include "vision_loop.hpp"
 
 // using namespace std;
 #include "task.hpp"
@@ -88,7 +89,6 @@ void autonomous() {
 
 	// skills();
 	// skills_pt2();
-
 
 }
 

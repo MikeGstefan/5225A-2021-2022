@@ -59,13 +59,17 @@ void update(void* params){
   while(true){
     NewLeft = LeftEncoder.get_value()/360.0 *(2.75*M_PI);
     NewRight = RightEncoder.get_value()/360.0 *(2.75*M_PI);
-    NewBack = BackEncoder.get_value()/360.0 *(2.75*M_PI);
+    // NewBack = BackEncoder.get_value()/360.0 *(2.75*M_PI);
+
+    // printf("l: %d, r: %d \n", NewLeft, NewRight);
+    // printf("l: %d, r: %d \n", LeftEncoder.get_value(), RightEncoder.get_value());
+    // printf("x: %.2lf, y: %.2lf, a: %.2lf\n", millis(), tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle));
 
 
 
     Left = NewLeft - LastLeft;
     Right = NewRight - LastRight;
-    Back = NewBack - LastBack;
+    // Back = NewBack - LastBack;
 
 
     velocity_update_time = millis() - last_velocity_time;
@@ -76,7 +80,7 @@ void update(void* params){
 
         last_vel_l = NewLeft;
         last_vel_r = NewRight;
-        last_vel_b = NewBack;
+        // last_vel_b = NewBack;
 
         // gives us linear velocity in inches per second, and angular velocity in radians per second
         tracking.g_velocity.x = (tracking.x_coord - last_position.x) / velocity_update_time * 1000;
@@ -90,25 +94,25 @@ void update(void* params){
 
     LastLeft = NewLeft;
     LastRight = NewRight;
-    LastBack = NewBack;
+    // LastBack = NewBack;
 
     Theta = (Left-Right)/DistanceLR;
     if (Theta != 0){
       RadiusR = Right/Theta;
-      RadiusB = Back/Theta;
+      // RadiusB = Back/Theta;
       Beta = Theta/2.0;
       h = (RadiusR + DistanceLR/2) *2 *sin(Beta);
-      h2 = (RadiusB + DistanceB) *2 *sin(Beta);
+      // h2 = (RadiusB + DistanceB) *2 *sin(Beta);
     }
     else{
       h = Right;
-      h2 = Back;
+      // h2 = Back;
       Beta =0.0;
     }
     Alpha = tracking.global_angle + Beta;
 
-    Xx = h2 * cos(Alpha);
-    Xy = h2 * -sin(Alpha);
+    // Xx = h2 * cos(Alpha);
+    // Xy = h2 * -sin(Alpha);
     Yx = h * sin(Alpha);
     Yy = h * cos(Alpha);
 
@@ -120,7 +124,7 @@ void update(void* params){
     tracking_data.print(&data_timer, 100, {
       [=](){return Data::to_char("%d || x: %.2lf, y: %.2lf, a: %.2lf\n", millis(), tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle));},
       // [=](){return Data::to_char("%d || GLOBAL VELOCITY| x: %.2f, y: %.2f a: %.2f\n", millis(), tracking.g_velocity.x, tracking.g_velocity.y, rad_to_deg(tracking.g_velocity.angle));},
-      // [=](){return Data::to_char("%d || ENCODER L: %d, R: %d, B:%d \n", millis(), LeftEncoder.get_value(), RightEncoder.get_value(), BackEncoder.get_value());},
+      [=](){return Data::to_char("%d || ENCODER L: %d, R: %d, B:%d \n", millis(), LeftEncoder.get_value(), RightEncoder.get_value(), BackEncoder.get_value());},
       // [=](){return Data::to_char("%d || ENCODER VELO| l: %.2f, r: %.2f, b: %.2f\n", millis(), tracking.l_velo, tracking.r_velo, tracking.b_velo);}
     });
 
@@ -823,7 +827,7 @@ void tank_move_to_target(void* params){
     Position error;
 
     double total_power, max_power_scale;
-    int sgn_local_error_y;
+    int sgn_local_error_y, orig_sgn_line_y, sgn_line_y;
     double difference_a;
     double hypotenuse;
 
@@ -846,7 +850,8 @@ void tank_move_to_target(void* params){
       line_disp = Vector(target.x - tracking.x_coord, target.y - tracking.y_coord);  // displacements relative to line
       // line_disp.set_polar(line_disp.get_magnitude(), line_disp.get_angle() + follow_line.get_angle());  // rotates vector by line angle
       line_disp.rotate(follow_line.get_angle());  // rotates vector by line angle
-      line_y_local_y = line_disp.get_y() * cos(tracking.global_angle - follow_line.get_angle());
+      // line_y_local_y = line_disp.get_y() * cos(tracking.global_angle - follow_line.get_angle());
+      sgn_line_y = sgn(line_disp.get_y());
 
       // end of move_on_line stuff
       difference_a = tracking.global_angle + atan2(target.y - tracking.y_coord, target.x - tracking.x_coord);
@@ -904,7 +909,7 @@ void tank_move_to_target(void* params){
       error.x = target.x - tracking.x_coord;
       error.y = target.y - tracking.y_coord;
 
-      if(fabs(line_disp.get_y()) < 0.5){
+      if(fabs(line_disp.get_y()) < 0.5 && sgn_line_y != orig_sgn_line_y){
         if (brake) drivebase.brake();
         tracking.move_complete = true;
         motion_i.print("%d || Ending move to target X: %f Y: %f A: %f at X: %f Y: %f A: %f time: %d\n", millis(), target.x, target.y, target.angle, tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle), millis()- time);
