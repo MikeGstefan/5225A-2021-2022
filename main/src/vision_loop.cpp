@@ -24,7 +24,13 @@ void vision_loop(){
     else if (abs(right_distance.get() - right_eye.last_distance) <= 300 && right_eye.spasm == 1) {right_eye.sus_spasm = 1; right_eye.spasm = 0;}
     else if (abs(right_distance.get() - right_eye.last_distance) <= 300) {right_eye.sus_spasm = 0; right_eye.spasm = 0;}
 
-    if(left_eye.spasm == 0 && right_eye.spasm == 0){setVisionState(Vision_States::stable);}
+		if(abs(right_distance.get() - left_distance.get()) <= 50){setVisionState(Vision_States::stable);} // 50 is a test value
+		else if (right_distance.get() > left_distance.get()){setVisionState(Vision_States::right_high);}
+		else if (right_distance.get() < left_distance.get()){setVisionState(Vision_States::left_high);}
+
+		if(right_distance.get() == 0){setVisionState(Vision_States::right_gone);}
+		if(left_distance.get() == 0){setVisionState(Vision_States::left_gone);}
+
     if(left_eye.spasm == 1 && right_eye.spasm == 0){setVisionState(Vision_States::left_spasm);}
     if(left_eye.spasm == 0 && right_eye.spasm == 1){setVisionState(Vision_States::right_spasm);}
     if(left_eye.spasm == 1 && right_eye.spasm == 1){setVisionState(Vision_States::spasming);}
