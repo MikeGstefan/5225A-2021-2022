@@ -36,8 +36,8 @@ void initialize() {
 	_Controller::init();
 	GUI::init();
 	delay(500);
-	// tracking.x_coord = 26.0, tracking.y_coord = 11.75, tracking.global_angle = -90.0_deg;
-	tracking.x_coord = 0.0, tracking.y_coord = 0.0, tracking.global_angle = 0.0_deg;
+	tracking.x_coord = 26.0, tracking.y_coord = 11.75, tracking.global_angle = -90.0_deg;
+	// tracking.x_coord = 0.0, tracking.y_coord = 0.0, tracking.global_angle = 0.0_deg;
 	update_t.start();
 	// auton_file_read();
 	// master.print(2, 0, "Driver: %s", drivebase.drivers[drivebase.cur_driver].name);
@@ -114,14 +114,10 @@ bool claw_state = false, lift_state = false, drive_state = false;
 int lift_speed = 0;
 int safety_check = 0;
 void opcontrol() {
-  time = millis();
-	vision_loop(15);
-  printf("Done: %f\n", (millis()-time));
-  drivebase.brake();
-  delay(2000);
+
 	// master.clear();
-	// // b_lift.reset();
-	// // b_lift.move(0);
+	b_lift.reset();
+	b_lift.move(0);
 	// while(true){
 	// 	if(master.get_digital_new_press(DIGITAL_Y)){
 	// 		master.print(0,0,"%d",BackEncoder.get_value());
@@ -227,7 +223,7 @@ void opcontrol() {
 			Timer timer {"timer"};
 			// printf("%f\n",reset_dist_r.get_dist());
 			// reset_dist_r.reset(141.0,0.0 + DIST_BACK,0.0);
-			// skills();
+			skills();
 			//fits platfor to reset
 			/**
 			move_start(move_types::turn_angle, turn_angle_params(90.0));
@@ -263,6 +259,7 @@ void opcontrol() {
 			master.print(0,0,"%d", timer.get_time());
 			delay(10000);
 			*/
+			master.print(0,0,"%d", timer.get_time());
 			delay(2000);
 
 		}

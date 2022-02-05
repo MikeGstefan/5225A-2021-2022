@@ -15,7 +15,18 @@ void skills(){
 	delay(100);
 	move_start(move_types::tank_point, tank_point_params({70.0, 95.0, 45.0},false, 127.0, 1.0, true,9.0,130.0));
 	delay(100);
-	move_start(move_types::turn_angle, turn_angle_params(0.0));
+	move_start(move_types::turn_angle, turn_angle_params(180.0));
+  b_lift.move_absolute(700);
+  while(b_lift.motor.get_position() < 680)delay(10);
+  vision_loop(10);
+  b_lift.move_absolute(500);
+  while(b_lift.motor.get_position() > 520)delay(10);
+  b_claw_p.set_value(0);
+  drivebase.move(30.0,0.0);
+  tracking.wait_for_dist(2.0);
+  drivebase.brake();
+  b_lift.move_absolute(600);
+  while(b_lift.motor.get_position() < 580)delay(10);
 }
 
 

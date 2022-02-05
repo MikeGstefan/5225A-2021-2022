@@ -9,6 +9,8 @@
 #include "task.hpp"
 #include "auton_util.hpp"
 #include "config.hpp"
+#include "vision_loop.hpp"
+#include "Subsystem/b_lift.hpp"
 #include <fstream>
 
 
