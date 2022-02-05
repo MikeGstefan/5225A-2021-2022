@@ -5,7 +5,7 @@ Timer Flash("Flash Timer", false);
 std::uint32_t flash_end; //Sets the flash's end time to max possible val
 
 //Static Variable Declarations
-Page* GUI::current_page = nullptr;
+const Page* GUI::current_page = nullptr;
 bool GUI::touched = false;
 int GUI::x = 0, GUI::y = 0;
 
@@ -100,7 +100,7 @@ bool GUI::go(std::string short_msg, std::string long_msg, std::uint32_t delay_ti
   snprintf(go_string, 90, "%s", short_msg.c_str());
 
   bool pressed = false, interrupted = false;
-  Page* page = GUI::current_page;
+  const Page* page = GUI::current_page;
   go_sequence.go_to();
 
   waitUntil(!go_button.pressed() || interrupted){ //Wait for Release
@@ -138,7 +138,7 @@ bool GUI::go_end(std::string msg, std::uint32_t delay_time){
   snprintf(go_string, 90, "END %s", msg.c_str());
 
   bool pressed = false, interrupted = false;
-  Page* page = GUI::current_page;
+  const Page* page = GUI::current_page;
   go_sequence.go_to();
 
   waitUntil(!go_button.pressed() || interrupted){ //Wait for Release
@@ -336,11 +336,11 @@ Page::Page(std::string title, Colour background_colour){
 
 
 //Methods
-Page* const Page::page_id(int page_num){
+Page* Page::page_id(int page_num){
   return GUI::current_gui->pages[page_num];
 }
 
-const int Page::page_num(Page* page_id){
+int Page::page_num(const Page* page_id){
   std::vector<Page*>::const_iterator it = std::find(GUI::current_gui->pages.begin(), GUI::current_gui->pages.end(), page_id);
     if (it == GUI::current_gui->pages.end()){
     char error [35];
@@ -371,7 +371,7 @@ void GUI::go_prev(){
 
 void GUI::go_to(int page_num) {Page::page_id(page_num)->go_to();}
 
-const void Page::go_to(){
+void Page::go_to() const{
   if(!page_num(this)) return;
   GUI::current_page = this; //Saves new page then draws all the buttons on the page
   draw();
@@ -497,7 +497,7 @@ void Slider::set_active(bool active) {
 
 //Drawing
 
-const void Page::draw(){
+void Page::draw() const{
   GUI::clear_screen(b_col);
   screen::set_pen(b_col);
   screen::set_eraser(b_col);
@@ -510,7 +510,7 @@ const void Page::draw(){
   if(setup_func) setup_func();
 }
 
-const void Button::draw(){
+void Button::draw() const{
   if (!active) return;
   if (on) { //on buttons must be drawn in a pressed state
     draw_pressed();
@@ -527,7 +527,7 @@ const void Button::draw(){
   if(title) title->draw();
 }
 
-const void Button::draw_pressed(){
+void Button::draw_pressed() const{
   if (!active) return;
   screen::set_eraser(page->b_col); //Erases button
   screen::erase_rect(x1, y1, x2, y2);
@@ -543,7 +543,7 @@ const void Button::draw_pressed(){
   if(title) title->draw();
 }
 
-const void Slider::draw(){
+void Slider::draw() const{
   if (!active) return;
   screen::set_pen(b_col);
   screen::fill_rect(x1, y1, x2, y2);
@@ -552,7 +552,7 @@ const void Slider::draw(){
   else screen::fill_rect(x1+1, map(val, min, max, y2, y1), x2-1, y2-1);
 }
 
-const void Text_::draw(){
+void Text_::draw(){
   if (!active) return;
   char buffer [100];
   int length = update_val(buffer);
@@ -591,11 +591,11 @@ void Button::set_func(std::function <void()> function) {func = function;}
 
 void Button::set_off_func(std::function <void()> function) {off_func = function;}
 
-const void Button::run_func() {if (func) func();}
+void Button::run_func() const {if (func) func();}
 
-const void Button::run_off_func() {if (off_func) off_func();}
+void Button::run_off_func() const {if (off_func) off_func();}
 
-const int Slider::get_value() {return val;}
+int Slider::get_value() const {return val;}
 
 //Data Updates
 void GUI::update_screen_status(){
@@ -605,11 +605,11 @@ void GUI::update_screen_status(){
   y = status.y;
 }
 
-const bool GUI::pressed(){
+bool GUI::pressed() const{
   return (touched && this == GUI::current_gui);
 }
 
-const bool Page::pressed(){
+bool Page::pressed() const{
   if (this == GUI::current_page || this == &perm){
     for (std::vector<GUI*>::const_iterator it = guis.begin(); it != guis.end(); it++){
       if ((*it)->pressed()) return true; //If any of it's owning gui's are pressed
@@ -618,11 +618,11 @@ const bool Page::pressed(){
   return false;
 }
 
-const bool Slider::pressed(){
+bool Slider::pressed() const{
   return (page->pressed() && active && inRange(GUI::x, x1, x2) && inRange(GUI::y, y1, y2));
 }
 
-const bool Button::pressed(){
+bool Button::pressed() const{
   return (page->pressed() && active && inRange(GUI::x, x1, x2) && inRange(GUI::y, y1, y2));
 }
 
@@ -642,7 +642,7 @@ bool Button::new_release(){
   return false;
 }
 
-const void Page::update(){
+void Page::update() const{
   if (loop_func) loop_func();
 }
 
@@ -765,7 +765,7 @@ void GUI::init(){
 void GUI::update(){
   current_gui->background();
   GUI::update_screen_status();
-  Page& cur_p = *current_page;
+  const Page& cur_p = *current_page;
   /*Page*/cur_p.update();
   /*Button*/for (std::vector<Button*>::const_iterator it = cur_p.buttons.begin(); it != cur_p.buttons.end(); it++) {(*it)->update(); if(&cur_p != current_page) return;}
   /*Slider*/for (std::vector<Slider*>::const_iterator it = cur_p.sliders.begin(); it != cur_p.sliders.end(); it++) (*it)->update();

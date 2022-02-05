@@ -10,8 +10,14 @@ int left_enc, right_enc, back_enc, angle, elastic_up_time, elastic_down_time;
 const char* port_nums;
 const char* driver_text;
 std::array <std::tuple<int, Button*, Button*, Text_*, int, char*>, 8> motor_ports; //port, run, stop, stall counter, port and rpm
-extern std::array<std::tuple<pros::Motor*, int, const char*, const char*, Text_*>, 8> motors;
 
+//For gui to use
+extern std::array<std::tuple<pros::Motor*, int, const char*, const char*, Text_*>, 8> motors;
+extern int ring_count;
+extern const char* alliance_names[];
+extern const char* auton_names[];
+
+//To create tests (from gui.cpp)
 extern Page testing;
 extern Button testing_button_1, testing_button_2;
 extern Text<std::nullptr_t> testing_text_1, testing_text_2;
@@ -108,8 +114,8 @@ Text enc (10, 100, GUI::Style::CORNER, TEXT_LARGE, ports, "Encoders: AB, CD, EF"
 Text pne (10, 150, GUI::Style::CORNER, TEXT_LARGE, ports, "Pneumatics: G, H");
 
 Page encoders ("Encoders"); //Display tracking vals and reset btns
-Text encAB (85, 50, GUI::Style::CENTRE, TEXT_SMALL, encoders, "AB Encoder:%d", left_enc);
-Text encCD (240, 50, GUI::Style::CENTRE, TEXT_SMALL, encoders, "CD Encoder:%d", right_enc);
+Text encAB (85, 50, GUI::Style::CENTRE, TEXT_SMALL, encoders, "AB Encoder:%d", right_enc);
+Text encCD (240, 50, GUI::Style::CENTRE, TEXT_SMALL, encoders, "CD Encoder:%d", left_enc);
 Text encEF (395, 50, GUI::Style::CENTRE, TEXT_SMALL, encoders, "EF Encoder:%d", back_enc);
 Button resAB (35, 75, 100, 50, GUI::Style::SIZE, Button::SINGLE, encoders, "Reset AB");
 Button resCD (190, 75, 100, 50, GUI::Style::SIZE, Button::SINGLE, encoders, "Reset CD");

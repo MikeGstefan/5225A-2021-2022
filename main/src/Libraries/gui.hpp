@@ -42,11 +42,6 @@ typedef std::uint32_t Colour;
 #define CHAR_HEIGHT_LARGE 32
 #define CHAR_WIDTH_LARGE 19
 
-//For gui to use
-extern int ring_count;
-extern const char* alliance_names[];
-extern const char* auton_names[];
-
 class GUI{
   friend class Page;
   friend class Button;
@@ -66,8 +61,8 @@ class GUI{
     //Vars
     static bool touched;
     static int x, y;
-    static Page* current_page;
-    static GUI* const current_gui;
+    static const Page* current_page;
+    static const GUI* current_gui;
     static constexpr bool go_enabled=true;
     std::vector<Page*> pages;
     std::function <void()> setup, background;
@@ -76,13 +71,12 @@ class GUI{
     static void update_screen_status();
     static void go_next(), go_prev();
     static void end_flash();
-    static void draw_oblong(int, int, int, int, const double, const double);
+    static void draw_oblong(int, int, int, int, double, double);
     static int get_size(text_format_e_t, std::string);
     static std::tuple<int, int, int, int> fix_points(int, int, int, int, Style);
 
   public:
-
-    //Constructor
+    //Pages in the gui, init function, loop function
     GUI(std::vector<Page*>, std::function <void()>, std::function <void()>);
 
     //Functions
@@ -93,7 +87,7 @@ class GUI{
     static void clear_screen(Colour=GREY);
     static void init(), update();
     static void go_to(int);
-    const bool pressed();
+    bool pressed() const;
 };
 
 //All constructor args are in the format points, format, page, Text, Colour
@@ -116,18 +110,18 @@ class Page{
     std::vector<Text_*> texts; //Children
 
     //Functions
-    static Page* const page_id(int);
-    static const int page_num(Page*);
-    const void draw();
-    const void update();
+    static Page* page_id(int);
+    static int page_num(const Page*);
+    void draw() const;
+    void update() const;
 
   public:
     //Title, Bcolour
     explicit Page(std::string, Colour = GREY);
 
     //Functions
-    const bool pressed();
-    const void go_to();
+    bool pressed() const;
+    void go_to() const;
     void set_setup_func(std::function <void()>), set_loop_func(std::function <void()>);
     void set_active(bool=true);
 };
@@ -151,9 +145,9 @@ class Text_{
     bool active = true;
 
     //Functions
-    const virtual void update() = 0;
+    virtual void update() = 0;
     virtual int update_val(char* const buffer) = 0;
-    const void draw();
+    void draw();
 
   public:
     //Functions
@@ -175,7 +169,7 @@ class Text: public Text_{
     std::function<V()> value;
 
     //Functions
-    const void update() override {
+    void update() override {
       if (active && value && prev_value != value()) draw();
     }
     int update_val(char* const buffer) override {
@@ -252,9 +246,10 @@ class Button{
     //Functions
     void update();
     void construct (int, int, int, int, GUI::Style, press_type, Page*, std::string, Colour, Colour);
-    const void run_func(), run_off_func();
-    const void draw();
-    const void draw_pressed();
+    void run_func() const;
+    void run_off_func() const;
+    void draw() const;
+    void draw_pressed()  const;
 
   public:
     //Points, Format, Page, Label, Bcolour, Lcolour
@@ -262,7 +257,7 @@ class Button{
 
     //Functions
     static void create_options(std::vector<Button*>);
-    const bool pressed();
+    bool pressed() const;
     void set_func(std::function <void()>), set_off_func(std::function <void()>);
     void set_active(bool=true);
     void set_background (Colour);
@@ -295,7 +290,7 @@ class Slider{
 
     //Functions
     void update();
-    const void draw();
+    void draw() const;
 
   public:
     //Points, Format, Min, Max, Page, Label, Bcolour, Lcolour
@@ -303,7 +298,7 @@ class Slider{
 
     //Functions
     void set_active(bool=true);
-    const int get_value();
-    const bool pressed();
+    int get_value() const;
+    bool pressed() const;
 
 };
