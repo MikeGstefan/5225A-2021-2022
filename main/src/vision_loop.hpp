@@ -3,17 +3,13 @@
 #include "config.hpp"
 #include <iostream>
 #include <cmath>
+#include "drive.hpp"
 using namespace pros;
 
 enum class Vision_States{
     stable,
-    left_high,
-    right_high,
-    left_spasm,
-    right_spasm,
-    left_gone,
-    right_gone,
-    spasming
+    turn_left,
+    turn_right,
 };
 
 class vision{
@@ -25,4 +21,4 @@ class vision{
       void spasm_check();
 };
 
-void vision_loop();
+void vision_loop(double distance);

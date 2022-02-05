@@ -31,7 +31,7 @@ double Tracking::get_angle_in_deg(){
 }
 
 void Tracking::wait_for_dist(double distance){
-  const Point start_pos = {tracking.x_coord, tracking.x_coord};
+  const Point start_pos = {tracking.x_coord, tracking.y_coord};
   double delta_dist = 0.0;
   while(distance >= delta_dist){
     delta_dist = sqrt(pow(tracking.x_coord -start_pos.x,2) + pow(tracking.y_coord - start_pos.y,2));

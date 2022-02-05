@@ -22,8 +22,8 @@ pros::Distance b_dist(6), r_dist(10);
 pros::ADIDigitalOut trans_p(7), b_claw_p(8);
 
 
-pros::Distance left_distance(2);
-pros::Distance right_distance(3);
+pros::Distance l_dis(10);
+pros::Distance r_dis(8);
 
 pros::Imu ramp_imu(11);
 
