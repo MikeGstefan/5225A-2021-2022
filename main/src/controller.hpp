@@ -11,11 +11,19 @@ using namespace pros;
 // Buttons
 
 // lift buttons
+extern controller_digital_e_t lift_up_button;
+extern controller_digital_e_t lift_down_button;
+extern controller_digital_e_t tall_goal_dropoff_button;
 
+
+extern controller_digital_e_t tilter_search_button;
+extern controller_digital_e_t tilter_raise_button;
 
 // misc buttons
 extern controller_digital_e_t cancel_button;
-extern controller_digital_e_t shift;
+extern controller_digital_e_t shift_button;
+extern controller_digital_e_t climb_platform_button;
+extern controller_digital_e_t intake_button;
 extern controller_digital_e_t reverse_drive_button;
 
 

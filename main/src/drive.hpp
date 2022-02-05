@@ -4,6 +4,8 @@
 #include "logging.hpp"
 #include "auton_util.hpp"
 
+#include "Subsystems/lift.hpp"
+
 using namespace pros;
 
 // aliases to make code more readable, used to encode vales of drive.cur_driver
@@ -73,7 +75,7 @@ public:
   const char* driver_name(); //Returns the current driver's name
 
   //returns the current state of the transmission
-  bool get_state(); 
+  bool get_state();
   void set_state(bool state);
   //handles controller input for the transmission
   void handle_trans();

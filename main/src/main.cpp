@@ -7,8 +7,8 @@
 #include "task.hpp"
 #include "auton.hpp"
 #include "auton_util.hpp"
-#include "Subsystem/f_lift.hpp"
-#include "Subsystem/b_lift.hpp"
+#include "Subsystems/f_lift.hpp"
+#include "Subsystems/b_lift.hpp"
 #include "vision_loop.hpp"
 
 // using namespace std;
@@ -114,13 +114,16 @@ bool claw_state = false, lift_state = false, drive_state = false;
 int lift_speed = 0;
 int safety_check = 0;
 void opcontrol() {
-	
+  drivebase.driver_practice();
+
+  printf("URMOM\n");
+  
 	master.clear();
 	// b_lift.reset();
 	// b_lift.move(0);
 
 	while(true){
-		if(master.get_digital_new_press(DIGITAL_Y)){ 
+		if(master.get_digital_new_press(DIGITAL_Y)){
 			master.print(0,0,"%d",BackEncoder.get_value());
 		}
 		if(master.get_digital_new_press(DIGITAL_A)){
@@ -128,22 +131,22 @@ void opcontrol() {
 			claw_state = !claw_state;
 			b_claw_p.set_value(claw_state);
 		}
-		if(master.get_digital_new_press(DIGITAL_B)){ 
+		if(master.get_digital_new_press(DIGITAL_B)){
 			b_lift.move_absolute(10);
 			detect_goal();
 			claw_state = 1;
-			
+
 		}
-		if(master.get_digital_new_press(DIGITAL_L1)){ 
+		if(master.get_digital_new_press(DIGITAL_L1)){
 			b_lift.move_absolute(300);
 		}
-		if(master.get_digital_new_press(DIGITAL_L2)){ 
+		if(master.get_digital_new_press(DIGITAL_L2)){
 			b_lift.move_absolute(0);
 		}
 		// printf("dist: %d\n", b_dist.get());
 		drivebase.handle_trans();
 		// drivebase.handle_input();
-		if(master.get_digital_new_press(DIGITAL_R1)){ 
+		if(master.get_digital_new_press(DIGITAL_R1)){
 			Timer timer {"timer"};
 			// printf("%f\n",reset_dist_r.get_dist());
 			reset_dist_r.reset(141.0,0.0 + DIST_BACK,0.0);
@@ -159,7 +162,7 @@ void opcontrol() {
 			*/
 
 
-			//grab goal on wall 
+			//grab goal on wall
 
 			/**
 			move_start(move_types::turn_angle, turn_angle_params(-90.0));
@@ -192,8 +195,8 @@ void opcontrol() {
 
 		if(abs(master.get_analog(ANALOG_LEFT_Y))> 20)b_lift.move(master.get_analog(ANALOG_LEFT_Y));
 		// else b_lift.move(10);
-		
+
 		delay(33);
 	}
-		
+
 }

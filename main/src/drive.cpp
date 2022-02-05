@@ -70,7 +70,7 @@ void Drivebase::move(double x, double y, double a){
   back_r.move(x + y - a);
 }
 
-void Drivebase::move(double y, double a){ 
+void Drivebase::move(double y, double a){
   front_l.move(y+a);
   front_r.move(y-a);
   back_l.move(y+a);
@@ -131,9 +131,10 @@ void Drivebase::update_lookup_table_util(){
     download_curve_data();
 
     master.clear();
+    update_screen();
 
     while (!master.get_digital_new_press(E_CONTROLLER_DIGITAL_B)){  // user presses b to save and exit utility
-      if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_X)){  // moves to next driver
+      if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_A)){  // moves to next driver
         cur_driver++;
         cur_driver %= num_of_drivers;
         update_screen();
@@ -222,12 +223,14 @@ void Drivebase::driver_practice(){
   // initializes pneumatics in appropriate state
 
   // moves motors to necessary positions / speeds
-
+  lift.reset();
+  lift.move_absolute(lift.bottom_position);
+  // lift.move(-10); // gives holding power
 
   cur_driver = 0; // defaults driver to Nikhil
   // master.print(2, 0, "Driver: %s", driver_name());
   while(true){
-    // while(!master.get_digital_new_press(E_CONTROLLER_DIGITAL_B)){
+    while(!master.get_digital_new_press(E_CONTROLLER_DIGITAL_B)){
       /*
       if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_UP)){ // goes to next driver
         cur_driver++;
@@ -244,6 +247,9 @@ void Drivebase::driver_practice(){
 
       // actual drive code
       drivebase.handle_input();
+      lift.handle();
+      handle_trans();
+
       // prints motor temps every second
       if(screen_timer.get_time() > 1000){
         drivers_data.print("fl%.0f r%.0f bl%.0f r%.0f\n", front_l.get_temperature(), front_r.get_temperature(), back_l.get_temperature(), back_r.get_temperature());
@@ -258,8 +264,8 @@ void Drivebase::driver_practice(){
       }
 
       delay(10);
-    // }
-    // update_lookup_table_util();
+    }
+    update_lookup_table_util();
     // master.clear();
     // master.print(2, 0, "Driver: %s", drivers[cur_driver].name);
   }
@@ -320,7 +326,7 @@ void Drivebase::set_state(bool state){
 
 
 void Drivebase::handle_trans(){
-  if(master.get_digital_new_press(shift)){
+  if(master.get_digital_new_press(shift_button)){
     this->set_state(!this->get_state());
   }
 }
