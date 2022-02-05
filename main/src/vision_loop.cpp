@@ -1,5 +1,5 @@
 #include "vision_loop.hpp"
-
+bool dis_end = false;
 Vision_States Vision_State = Vision_States::stable;
 Vision_States Last_Vision_State;
 vision left_eye;
@@ -12,45 +12,52 @@ void setVisionState(Vision_States state) {
 
 
 
-void vision_loop(){
-  while (true) {
-    if (abs(left_distance.get() - left_eye.last_distance) > 300 && left_eye.sus_spasm == 0){left_eye.sus_spasm = 1;}
-    else if (abs(left_distance.get() - left_eye.last_distance) > 300 && left_eye.sus_spasm == 1){left_eye.spasm = 1;}
-    else if (abs(left_distance.get() - left_eye.last_distance) <= 300 && left_eye.spasm == 1) {left_eye.sus_spasm = 1; left_eye.spasm = 0;}
-    else if (abs(left_distance.get() - left_eye.last_distance) <= 300) {left_eye.sus_spasm = 0; left_eye.spasm = 0;}
+void vision_loop(double distance){
 
-    if (abs(right_distance.get() - right_eye.last_distance) > 300 && right_eye.sus_spasm == 0){right_eye.sus_spasm = 1;}
-    else if (abs(right_distance.get() - right_eye.last_distance) > 300 && right_eye.sus_spasm == 1){right_eye.spasm = 1;}
-    else if (abs(right_distance.get() - right_eye.last_distance) <= 300 && right_eye.spasm == 1) {right_eye.sus_spasm = 1; right_eye.spasm = 0;}
-    else if (abs(right_distance.get() - right_eye.last_distance) <= 300) {right_eye.sus_spasm = 0; right_eye.spasm = 0;}
+	const Point start_pos = {tracking.x_coord, tracking.y_coord};
+	double delta_dist = 0.0;
+	while(distance >= delta_dist){
+		delta_dist = sqrt(pow(tracking.x_coord -start_pos.x,2) + pow(tracking.y_coord - start_pos.y,2));
+		printf("Delta Dist: %f\n", delta_dist);
 
-		if(abs(right_distance.get() - left_distance.get()) <= 50){setVisionState(Vision_States::stable);} // 50 is a test value
-		else if (right_distance.get() > left_distance.get()){setVisionState(Vision_States::right_high);}
-		else if (right_distance.get() < left_distance.get()){setVisionState(Vision_States::left_high);}
+    // if (abs(l_dis.get() - left_eye.last_distance) > 300 && left_eye.sus_spasm == 0){left_eye.sus_spasm = 1;}
+    // else if (abs(l_dis.get() - left_eye.last_distance) > 300 && left_eye.sus_spasm == 1){left_eye.spasm = 1;}
+    // else if (abs(l_dis.get() - left_eye.last_distance) <= 300 && left_eye.spasm == 1) {left_eye.sus_spasm = 1; left_eye.spasm = 0;}
+    // else if (abs(l_dis.get() - left_eye.last_distance) <= 300) {left_eye.sus_spasm = 0; left_eye.spasm = 0;}
+		//
+    // if (abs(r_dis.get() - right_eye.last_distance) > 300 && right_eye.sus_spasm == 0){right_eye.sus_spasm = 1;}
+    // else if (abs(r_dis.get() - right_eye.last_distance) > 300 && right_eye.sus_spasm == 1){right_eye.spasm = 1;}
+    // else if (abs(r_dis.get() - right_eye.last_distance) <= 300 && right_eye.spasm == 1) {right_eye.sus_spasm = 1; right_eye.spasm = 0;}
+    // else if (abs(r_dis.get() - right_eye.last_distance) <= 300) {right_eye.sus_spasm = 0; right_eye.spasm = 0;}
 
-		if(right_distance.get() == 0){setVisionState(Vision_States::right_gone);}
-		if(left_distance.get() == 0){setVisionState(Vision_States::left_gone);}
+		if(abs(r_dis.get() - l_dis.get()) <= 50){setVisionState(Vision_States::stable);} // 50 is a test value
+		else if (r_dis.get() > l_dis.get()){setVisionState(Vision_States::turn_left);}
+		else if (r_dis.get() < l_dis.get()){setVisionState(Vision_States::turn_right);}
 
-    if(left_eye.spasm == 1 && right_eye.spasm == 0){setVisionState(Vision_States::left_spasm);}
-    if(left_eye.spasm == 0 && right_eye.spasm == 1){setVisionState(Vision_States::right_spasm);}
-    if(left_eye.spasm == 1 && right_eye.spasm == 1){setVisionState(Vision_States::spasming);}
-    printf("Left:%d Right: %d\n",left_distance.get(), right_distance.get());
+		if(r_dis.get() == 0){setVisionState(Vision_States::turn_left);}
+		if(l_dis.get() == 0){setVisionState(Vision_States::turn_right);}
+		if(r_dis.get() == 0 && l_dis.get() == 0){setVisionState(Vision_States::stable);}
+
+    printf("Left:%d Right: %d\n",l_dis.get(), r_dis.get());
     switch (Vision_State) {
       case Vision_States::stable:
         printf("stable\n");
+				drivebase.move_tank(-40,0);
+				if(left_eye.last_distance == l_dis.get() && dis_end == true){break;}
+				else if(left_eye.last_distance == l_dis.get()){dis_end = true;}
+				else{dis_end = false;}
         break;
-      case Vision_States::left_spasm:
-        printf("left eye is having a spasm\n");
-        break;
-      case Vision_States::right_spasm:
-        printf("right eye is having a spasm\n");
-        break;
-      case Vision_States::spasming:
-        printf("Both are spasming\n");
-        break;
+			case Vision_States::turn_left:
+				printf("Turn left\n");
+				drivebase.move_tank(-103, -30);
+				break;
+			case Vision_States::turn_right:
+				drivebase.move_tank(-103, 30);
+				printf("Turn right\n");
+				break;
     }
-    left_eye.last_distance = left_distance.get();
-    right_eye.last_distance = right_distance.get();
+    left_eye.last_distance = l_dis.get();
+    right_eye.last_distance = r_dis.get();
     delay(33);
   }
 }
