@@ -20,9 +20,6 @@ void skills();
 
 
 
-
-
-
 enum class autons{
   Skills,
   Auto2,
