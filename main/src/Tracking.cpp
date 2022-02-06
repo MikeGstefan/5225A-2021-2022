@@ -821,6 +821,8 @@ void tank_move_to_target(void* params){
     const bool brake = tank_point_params_g.brake;
     double kp_y = tank_point_params_g.kp_y;
     double kp_a =tank_point_params_g.kp_a;
+    // Pid angle(kp.a);
+    
     tracking.move_complete = false;
 
     Point local_error;
@@ -871,7 +873,7 @@ void tank_move_to_target(void* params){
 
       tracking.power_y = kp_y * local_error.y;
       // tracking.power_y = kp_y * line_y_local_y;
-      tracking.power_a = kp_a * error.angle;
+      tracking.power_a = angle.compute(error.angle, 0.0);
 
       // gives min power to local y if that is not satisfied
       if (fabs(tracking.power_y) < min_move_power_y && fabs(local_error.y) > 0.5) tracking.power_y = min_move_power_y * sgn(local_error.y);
