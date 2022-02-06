@@ -14,6 +14,7 @@
 // using namespace std;
 #include "task.hpp"
 #include <fstream>
+#include <sys/wait.h>
 using namespace std;
 
 pros::Task *updt = nullptr;
@@ -30,7 +31,7 @@ GUI* const GUI::current_gui = &g_main;
  bool auton_run = false; // has auton run
 
 void initialize() {
-	// gyro.calibrate();
+	gyro.calibrate();
 	drivebase.download_curve_data();
 	Data::init();
 	_Controller::init();
@@ -41,7 +42,7 @@ void initialize() {
 	update_t.start();
 	// // auton_file_read();
 	// master.print(2, 0, "Driver: %s", drivebase.drivers[drivebase.cur_driver].name);
-	// gyro.finish_calibrating(); //Finishes calibrating gyro before program starts
+	gyro.finish_calibrating(); //Finishes calibrating gyro before program starts
 }
 
 /**
@@ -116,8 +117,9 @@ int safety_check = 0;
 void opcontrol() {
 	
 	master.clear();
-	// b_lift.reset();
+	b_lift.reset();
 	// b_lift.move(0);
+	drivebase.set_state(HIGH);
 
 	while(true){
 		if(master.get_digital_new_press(DIGITAL_Y)){ 
@@ -146,7 +148,7 @@ void opcontrol() {
 		if(master.get_digital_new_press(DIGITAL_R1)){ 
 			Timer timer {"timer"};
 			// printf("%f\n",reset_dist_r.get_dist());
-			reset_dist_r.reset(141.0,0.0 + DIST_BACK,0.0);
+			// reset_dist_r.reset(141.0,0.0 + DIST_BACK,0.0);
 			// skills();
 			//fits platfor to reset
 			/**
@@ -157,7 +159,23 @@ void opcontrol() {
 			move_start(move_types::tank_point, tank_point_params({122.0,123.0,0.0},false));
 			flatten_against_wall(true);
 			*/
+			f_claw_p.set_value(HIGH);
+			b_claw_p.set_value(HIGH);
+			f_lift.move_absolute(610);
+			b_lift.move_absolute(150);
+			waitUntil(f_lift_m.get_position() > 590);
+			f_lift.move(15);
 
+			waitUntil(master.get_digital_new_press(DIGITAL_R1));
+			int t = millis();
+
+			gyro.climb_ramp();
+			// gyro.level(2.2, 0);
+
+			drivebase.brake();
+			printf("ds:%d\n", millis()-t);
+			delay(5000);
+			waitUntil(false);
 
 			//grab goal on wall 
 
