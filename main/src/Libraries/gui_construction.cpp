@@ -7,13 +7,15 @@
 
 //Var init for text monitoring
 int left_enc, right_enc, back_enc, angle, elastic_up_time, elastic_down_time;
-const char* port_nums;
+const char* motor_port_nums;
+const char* expander_port_nums;
 const char* driver_text;
-std::array <std::tuple<int, Button*, Button*, Text_*, int, char*>, 8> motor_ports; //port, run, stop, stall counter, port and rpm
+std::array<std::tuple<int, Button*, Button*, Text_*, int, char*>, 8> motor_ports; //port, run, stop, stall counter, port and rpm
+std::array<int, 21> expander_ports;
+std::array<Button*, 8> expander_btns;
 
 //For gui to use
 extern std::array<std::tuple<pros::Motor*, int, const char*, const char*, Text_*>, 8> motors;
-extern int ring_count;
 extern const char* alliance_names[];
 extern const char* auton_names[];
 
@@ -48,7 +50,7 @@ Text ally_name(MID_X, 200, GUI::Style::CENTRE, TEXT_MEDIUM, auto_selection, "All
 Page track ("Tracking"); //Display tracking vals and reset btns
 Text trackX(50, 45, GUI::Style::CENTRE, TEXT_SMALL, track, "X:%.1f", tracking.x_coord);
 Text trackY(135, 45, GUI::Style::CENTRE, TEXT_SMALL, track, "Y:%.1f", tracking.y_coord);
-Text trackA(220, 45, GUI::Style::CENTRE, TEXT_SMALL, track, "A:%d", angle);
+Text trackA(220, 45, GUI::Style::CENTRE, TEXT_SMALL, track, "A:%d", function([](){return tracking.get_angle_in_deg();}));
 Text encL(50, 130, GUI::Style::CENTRE, TEXT_SMALL, track, "L:%d", left_enc);
 Text encR(135, 130, GUI::Style::CENTRE, TEXT_SMALL, track, "R:%d", right_enc);
 Text encB(220, 130, GUI::Style::CENTRE, TEXT_SMALL, track, "B:%d", back_enc);
@@ -66,7 +68,7 @@ Button go_home(320, 110, 150, 40, GUI::Style::SIZE, Button::SINGLE, moving, "Hom
 Button go_centre(320, 175, 150, 40, GUI::Style::SIZE, Button::SINGLE, moving, "Centre");
 
 Page intake_test ("Intake"); //Test for intake with rings
-Text rings(MID_X, 50, GUI::Style::CENTRE, TEXT_LARGE, intake_test, "Ring Count: %d", ring_count);
+Text rings(MID_X, 50, GUI::Style::CENTRE, TEXT_LARGE, intake_test, "Ring Count: N/A");
 Button reset_intake (30, 90, 120, 80, GUI::Style::SIZE, Button::SINGLE, intake_test, "Reset Motor");
 Button intake_switch (180, 90, 120, 80, GUI::Style::SIZE, Button::TOGGLE, intake_test, "Start/Stop");
 Button reset_rings (330, 90, 120, 80, GUI::Style::SIZE, Button::SINGLE, intake_test, "Reset Ring Count");
@@ -103,24 +105,46 @@ Button grid (10, 155, 225, 70, GUI::Style::SIZE, Button::SINGLE, tuning, "Grid")
 Button spin360 (245, 155, 225, 70, GUI::Style::SIZE, Button::SINGLE, tuning, "360 Spin");
 
 Page pneumatic ("Pneumatics"); //Pneumatic testing page
-Text pneum_text_1 (125, 50, GUI::Style::CENTRE, TEXT_SMALL, pneumatic, "PORT G");
-Text pneum_text_2 (350, 50, GUI::Style::CENTRE, TEXT_SMALL, pneumatic, "PORT G - no config for 2");
-Button pneum_btn_1 (25, 70, 200, 80, GUI::Style::SIZE, Button::TOGGLE, pneumatic, "PNEUMATIC 1");
-Button pneum_btn_2 (250, 70, 200, 80, GUI::Style::SIZE, Button::TOGGLE, pneumatic, "PNEUMATIC 2");
+Slider expander (MID_X, 60, 180 , 15, GUI::Style::CENTRE, Slider::HORIZONTAL, 0, 21, pneumatic, "Expander");
+Text ADI_a_text (65, 115, GUI::Style::CENTRE, TEXT_SMALL, pneumatic, "A");
+Text ADI_b_text (180, 115, GUI::Style::CENTRE, TEXT_SMALL, pneumatic, "B");
+Text ADI_c_text (295, 115, GUI::Style::CENTRE, TEXT_SMALL, pneumatic, "C");
+Text ADI_d_text (410, 115, GUI::Style::CENTRE, TEXT_SMALL, pneumatic, "D");
+Text ADI_e_text (65, 180, GUI::Style::CENTRE, TEXT_SMALL, pneumatic, "E");
+Text ADI_f_text (180, 180, GUI::Style::CENTRE, TEXT_SMALL, pneumatic, "F");
+Text ADI_g_text (295, 180, GUI::Style::CENTRE, TEXT_SMALL, pneumatic, "G");
+Text ADI_h_text (410, 180, GUI::Style::CENTRE, TEXT_SMALL, pneumatic, "H");
+Button ADI_a (15, 125, 100, 30, GUI::Style::SIZE, Button::TOGGLE, pneumatic, "On/Off");
+Button ADI_b (130, 125, 100, 30, GUI::Style::SIZE, Button::TOGGLE, pneumatic, "On/Off");
+Button ADI_c (245, 125, 100, 30, GUI::Style::SIZE, Button::TOGGLE, pneumatic, "On/Off");
+Button ADI_d (360, 125, 100, 30, GUI::Style::SIZE, Button::TOGGLE, pneumatic, "On/Off");
+Button ADI_e (15, 190, 100, 30, GUI::Style::SIZE, Button::TOGGLE, pneumatic, "On/Off");
+Button ADI_f (130, 190, 100, 30, GUI::Style::SIZE, Button::TOGGLE, pneumatic, "On/Off");
+Button ADI_g (245, 190, 100, 30, GUI::Style::SIZE, Button::TOGGLE, pneumatic, "On/Off");
+Button ADI_h (360, 190, 100, 30, GUI::Style::SIZE, Button::TOGGLE, pneumatic, "On/Off");
 
 Page ports ("Ports"); //Shows what ports to use on builder util
-Text mot (10, 50, GUI::Style::CORNER, TEXT_LARGE, ports, "Motors: %s", port_nums);
-Text enc (10, 100, GUI::Style::CORNER, TEXT_LARGE, ports, "Encoders: AB, CD, EF");
+Text mot (10, 50, GUI::Style::CORNER, TEXT_LARGE, ports, "Motors: %s", motor_port_nums);
+Text expanders (10, 100, GUI::Style::CORNER, TEXT_LARGE, ports, "Expanders: %s", expander_port_nums);
 Text pne (10, 150, GUI::Style::CORNER, TEXT_LARGE, ports, "Pneumatics: G, H");
 
 Page encoders ("Encoders"); //Display tracking vals and reset btns
-Text encAB (85, 50, GUI::Style::CENTRE, TEXT_SMALL, encoders, "AB Encoder:%d", right_enc);
-Text encCD (240, 50, GUI::Style::CENTRE, TEXT_SMALL, encoders, "CD Encoder:%d", left_enc);
-Text encEF (395, 50, GUI::Style::CENTRE, TEXT_SMALL, encoders, "EF Encoder:%d", back_enc);
-Button resAB (35, 75, 100, 50, GUI::Style::SIZE, Button::SINGLE, encoders, "Reset AB");
-Button resCD (190, 75, 100, 50, GUI::Style::SIZE, Button::SINGLE, encoders, "Reset CD");
-Button resEF (345, 75, 100, 50, GUI::Style::SIZE, Button::SINGLE, encoders, "Reset EF");
-Button resAllEnc (240, 180, 200, 30, GUI::Style::CENTRE, Button::SINGLE, encoders, "Reset All");
+Text AB (85, 35, GUI::Style::CENTRE, TEXT_SMALL, encoders, "AB");
+Text CD (240, 35, GUI::Style::CENTRE, TEXT_SMALL, encoders, "CD");
+Text EF (395, 35, GUI::Style::CENTRE, TEXT_SMALL, encoders, "EF");
+Text AB_degs (85, 50, GUI::Style::CENTRE, TEXT_SMALL, encoders, "Degs: %d", right_enc);
+Text CD_degs (240, 50, GUI::Style::CENTRE, TEXT_SMALL, encoders, "Degs: %d", left_enc);
+Text EF_degs (395, 50, GUI::Style::CENTRE, TEXT_SMALL, encoders, "Degs: %d", back_enc);
+Text AB_rots (85, 65, GUI::Style::CENTRE, TEXT_SMALL, encoders, "Rots: %d", function([](){return int(right_enc/360);}));
+Text CD_rots (240, 65, GUI::Style::CENTRE, TEXT_SMALL, encoders, "Rots: %d", function([](){return int(left_enc/360);}));
+Text EF_rots (395, 65, GUI::Style::CENTRE, TEXT_SMALL, encoders, "Rots: %d", function([](){return int(back_enc/360);}));
+Text AB_remain (85, 80, GUI::Style::CENTRE, TEXT_SMALL, encoders, "Remaining: %d", function([](){return abs(right_enc-360*int(round((right_enc+sgn(right_enc)*180)/360)));}));
+Text CD_remain (240, 80, GUI::Style::CENTRE, TEXT_SMALL, encoders, "Remaining: %d", function([](){return abs(left_enc-360*int(round((left_enc+sgn(right_enc)*180)/360)));}));
+Text EF_remain (395, 80, GUI::Style::CENTRE, TEXT_SMALL, encoders, "Remaining: %d", function([](){return abs(back_enc-360*int(round((back_enc+sgn(right_enc)*180)/360)));}));
+Button AB_res (35, 100, 100, 50, GUI::Style::SIZE, Button::SINGLE, encoders, "Reset AB");
+Button CD_res (190, 100, 100, 50, GUI::Style::SIZE, Button::SINGLE, encoders, "Reset CD");
+Button EF_res (345, 100, 100, 50, GUI::Style::SIZE, Button::SINGLE, encoders, "Reset EF");
+Button res_all_enc (240, 200, 200, 30, GUI::Style::CENTRE, Button::SINGLE, encoders, "Reset All");
 
 Page motor ("Motor Control");
 Slider mot_speed (MID_X, 60, 180 , 15, GUI::Style::CENTRE, Slider::HORIZONTAL, -127, 127, motor, "Speed");
@@ -272,10 +296,36 @@ void main_setup(){
     }
   });
 
-  pneum_btn_1.set_func([](){lift_piston.set_value(1);});
-  pneum_btn_1.set_off_func([](){lift_piston.set_value(0);});
-  pneum_btn_2.set_func([](){lift_piston.set_value(1);});
-  pneum_btn_2.set_off_func([](){lift_piston.set_value(0);});
+  for (int i = 1; i <= 8; i++){
+    expander_btns[i]->set_func([i](){
+      int expander_port = expander.get_value();
+      if (expander_port){
+        if(c::registry_get_plugged_type(expander_port-1) != c::E_DEVICE_ADI){
+          GUI::flash(COLOUR(RED), 1000, "No Expander in port %d", expander_port);
+        }
+        c::ext_adi_port_set_config(expander_port, i, E_ADI_DIGITAL_OUT);
+        c::ext_adi_port_set_value(expander_port, i, HIGH);
+      }
+      else{
+        c::adi_port_set_config(i, E_ADI_DIGITAL_OUT);
+        c::adi_port_set_value(i, HIGH);
+      }
+    });
+    expander_btns[i]->set_off_func([i](){
+      int expander_port = expander.get_value();
+      if (expander_port){
+        if(c::registry_get_plugged_type(expander_port-1) != c::E_DEVICE_ADI){
+          GUI::flash(COLOUR(RED), 1000, "No Expander in port %d", expander_port);
+        }
+        c::ext_adi_port_set_config(expander_port, i, E_ADI_DIGITAL_OUT);
+        c::ext_adi_port_set_value(expander_port, i, LOW);
+      }
+      else{
+        c::adi_port_set_config(i, E_ADI_DIGITAL_OUT);
+        c::adi_port_set_value(i, LOW);
+      }
+    });
+  }
 
   std::get<4>(motors[0]) = &mot_temp_1;
   std::get<4>(motors[1]) = &mot_temp_2;
@@ -338,18 +388,19 @@ void util_setup(){
     std::make_tuple(std::numeric_limits<int>::max(), &mot_update_8, &mot_stop_8, &mot_text_8, 0, (char*)malloc(10*sizeof(char))),
   };
 
-  for (int port=0, i=0; port<=20; port++){
+  //Motor Port Detection
+  for (int port=0, i=0; port<21; port++){
     if (c::registry_get_plugged_type(port) == c::E_DEVICE_MOTOR && i < 8){
       std::get<0>(motor_ports[i]) = port+1;
       i++;
     }
   }
 
-  std::string port_num_string;
+  std::string motor_port_string;
   for (std::array<std::tuple<int, Button*, Button*, Text_*, int, char*>, 8>::iterator it = motor_ports.begin(); it != motor_ports.end(); it++){
     std::tuple<int, Button*, Button*, Text_*, int, char*>& mot_arr = *it;
 
-    if (std::get<0>(mot_arr) != std::numeric_limits<int>::max()) port_num_string.append(std::to_string(std::get<0>(mot_arr)) + ",");
+    if (std::get<0>(mot_arr) != std::numeric_limits<int>::max()) motor_port_string.append(std::to_string(std::get<0>(mot_arr)) + ",");
     else{
       std::get<1>(mot_arr)->set_active(false);
       std::get<2>(mot_arr)->set_active(false);
@@ -358,24 +409,68 @@ void util_setup(){
     std::get<1>(mot_arr)->set_func([&](){c::motor_move(std::get<0>(mot_arr), mot_speed.get_value());});
     std::get<2>(mot_arr)->set_func([&](){c::motor_move(std::get<0>(mot_arr), 0);});
   }
-  if (port_num_string.back() == ',') port_num_string.pop_back();
-  port_nums = strdup(port_num_string.c_str());
+  if (motor_port_string.back() == ',') motor_port_string.pop_back();
+  motor_port_nums = strdup(motor_port_string.c_str());
+
+
+  //Expander Port Detection
+    for (int port=0; port<21; port++){
+    if (c::registry_get_plugged_type(port) == c::E_DEVICE_ADI){
+      expander_ports[port] = port+1;
+    }
+    else expander_ports[port] = std::numeric_limits<int>::max();
+  }
+
+  std::string expander_port_string;
+  for (std::array<int, 21>::iterator it = expander_ports.begin(); it != expander_ports.end(); it++){
+    if (*it != std::numeric_limits<int>::max()) expander_port_string.append(std::to_string(*it) + ",");
+  }
+  if (expander_port_string.back() == ',') expander_port_string.pop_back();
+  expander_port_nums = strdup(expander_port_string.c_str());
+
+  expander_btns = {&ADI_a, &ADI_b, &ADI_c, &ADI_d, &ADI_e, &ADI_f, &ADI_g, &ADI_h};
+
+  for (int i = 1; i <= 8; i++){
+    expander_btns[i-1]->set_func([i](){
+      int expander_port = expander.get_value();
+      if (expander_port){
+        if(c::registry_get_plugged_type(expander_port-1) != c::E_DEVICE_ADI){
+          GUI::flash(COLOUR(RED), 1000, "No Expander in port %d", expander_port);
+        }
+        c::ext_adi_port_set_config(expander_port, i, E_ADI_DIGITAL_OUT);
+        c::ext_adi_port_set_value(expander_port, i, HIGH);
+      }
+      else{
+        c::adi_port_set_config(i, E_ADI_DIGITAL_OUT);
+        c::adi_port_set_value(i, HIGH);
+      }
+    });
+    expander_btns[i-1]->set_off_func([i](){
+      int expander_port = expander.get_value();
+      if (expander_port){
+        if(c::registry_get_plugged_type(expander_port-1) != c::E_DEVICE_ADI){
+          GUI::flash(COLOUR(RED), 1000, "No Expander in port %d", expander_port);
+        }
+        c::ext_adi_port_set_config(expander_port, i, E_ADI_DIGITAL_OUT);
+        c::ext_adi_port_set_value(expander_port, i, LOW);
+      }
+      else{
+        c::adi_port_set_config(i, E_ADI_DIGITAL_OUT);
+        c::adi_port_set_value(i, LOW);
+      }
+    });
+  }
+
 
   encoders.set_loop_func([](){
     left_enc = LeftEncoder.get_value();
     right_enc = RightEncoder.get_value();
     back_enc = BackEncoder.get_value();
   });
-  resAB.set_func([&](){LeftEncoder.reset();});
-  resCD.set_func([&](){RightEncoder.reset();});
-  resEF.set_func([&](){BackEncoder.reset();});
-  resAll.set_func([&](){LeftEncoder.reset(); RightEncoder.reset(); BackEncoder.reset();});
-
-  pneum_btn_1.set_func([](){c::adi_digital_write(7, true);});
-  pneum_btn_1.set_off_func([](){c::adi_digital_write(7, false);});
-
-  pneum_btn_2.set_func([](){c::adi_digital_write(7, true);});
-  pneum_btn_2.set_off_func([](){c::adi_digital_write(7, false);}); //Won't always work if port is not configured as out
+  AB_res.set_func([&](){RightEncoder.reset();});
+  CD_res.set_func([&](){LeftEncoder.reset();});
+  EF_res.set_func([&](){BackEncoder.reset();});
+  res_all_enc.set_func([&](){LeftEncoder.reset(); RightEncoder.reset(); BackEncoder.reset();});
 }
 
 void util_background(){
@@ -392,11 +487,10 @@ void util_background(){
         printf("Stopping Motor %d\n", port);
         c::motor_move(port, 0);
       }
-      printf("%s\n", std::get<5>(mot_arr));
     }
   }
 }
 
-GUI g_main ({&driver_curve, &temps, &auto_selection, &track, &moving, &intake_test, &elastic, &motor_subsys, &liftStates, &tuning, &pneumatic}, &main_setup, &main_background);
+GUI g_main ({&temps, &driver_curve, &auto_selection, &track, &moving, &intake_test, &elastic, &motor_subsys, &liftStates, &tuning, &pneumatic}, &main_setup, &main_background);
 
 GUI g_util ({&ports, &encoders, &motor, &pneumatic}, &util_setup, &util_background);

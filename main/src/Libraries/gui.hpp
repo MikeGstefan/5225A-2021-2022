@@ -5,6 +5,7 @@
 #include "../util.hpp"
 #include "../include/pros/apix.h"
 #include <bitset>
+#include <type_traits>
 // #include <cstdio>
 // #include <iostream>
 // #include <vector>
@@ -212,8 +213,12 @@ class Text: public Text_{
       construct (x, y, rect_type, size, &page, text, [value_arr, &index](){return value_arr[static_cast<int>(index)];}, label_colour);
     }
 
-};
+    //Function
+    Text (int x, int y, GUI::Style rect_type, text_format_e_t size, Page& page, std::string text, const std::function<V()>& func, Colour label_colour = COLOUR(WHITE)){
+      construct (x, y, rect_type, size, &page, text, func, label_colour);
+    }
 
+};
 class Button{
   friend class GUI;
   friend class Page;

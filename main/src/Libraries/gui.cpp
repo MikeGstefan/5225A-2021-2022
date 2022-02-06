@@ -3,6 +3,7 @@
 //Timer stuff
 Timer Flash("Flash Timer", false);
 std::uint32_t flash_end; //Sets the flash's end time to max possible val
+bool touched_when_flashed;
 
 //Static Variable Declarations
 const Page* GUI::current_page = nullptr;
@@ -63,6 +64,7 @@ void GUI::flash(Colour colour, std::uint32_t time, const char* fmt, ...){
 }
 
 void GUI::flash(Colour colour, std::uint32_t time, std::string text){
+  touched_when_flashed = touched;
   clear_screen(colour);
   screen::set_pen(~colour&0xFFFFFF); //Makes text inverted colour of background so it is always visible
   screen::set_eraser(colour);
@@ -88,7 +90,7 @@ void GUI::flash(Colour colour, std::uint32_t time, std::string text){
 }
 
 void GUI::end_flash (){
-  if (Flash.playing() && (Flash.get_time() >= flash_end || touched)){
+  if (Flash.playing() && (Flash.get_time() >= flash_end || (!touched_when_flashed && touched))){
     Flash.reset(false);
     GUI::current_page->go_to();
   }
