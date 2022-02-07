@@ -114,10 +114,15 @@ bool claw_state = false, lift_state = false, drive_state = false;
 int lift_speed = 0;
 int safety_check = 0;
 void opcontrol() {
+	// f_lift.reset();
+	// while(true)delay(10);
 
 	// master.clear();
 	b_lift.reset();
 	b_lift.move(0);
+	f_lift.reset();
+	f_lift.move(0);
+	f_claw_p.set_value(0); 
 	// while(true){
 	// 	if(master.get_digital_new_press(DIGITAL_Y)){
 	// 		master.print(0,0,"%d",BackEncoder.get_value());
@@ -154,7 +159,7 @@ void opcontrol() {
 	// 		move_start(move_types::tank_arc, tank_arc_params({70.0, 95.0}, {122.0,119.0,0.0}));
 	// 		// move_start(move_types::turn_angle, turn_angle_params(0.0));
 	// 		move_start(move_types::tank_point, tank_point_params({122.0,123.0,0.0},false));
-	// 		flatten_against_wall(true);
+			// flatten_against_wall(true);
 	// 		*/
   //
   //
@@ -202,11 +207,15 @@ void opcontrol() {
 		if(master.get_digital_new_press(DIGITAL_A)){
 			printf("switching state to %d\n", !claw_state);
 			claw_state = !claw_state;
-			b_claw_p.set_value(claw_state);
+			f_claw_p.set_value(claw_state);
 		}
 		if(master.get_digital_new_press(DIGITAL_B)){ 
-			b_lift.move_absolute(10);
-			detect_goal();
+			// b_lift.move_absolute(10);
+			// b_detect_goal();
+			f_lift.move_absolute(10);
+			f_detect_goal();
+			
+
 			claw_state = 1;
 			
 		}
@@ -267,8 +276,8 @@ void opcontrol() {
 			drivebase.handle_input();
 		}
 
-		if(abs(master.get_analog(ANALOG_LEFT_Y))> 20)b_lift.move(master.get_analog(ANALOG_LEFT_Y));
-		// else b_lift.move(10);
+		if(abs(master.get_analog(ANALOG_LEFT_Y))> 20)f_lift.move(master.get_analog(ANALOG_LEFT_Y));
+		else f_lift.move(0);
 		
 		delay(33);
 	}

@@ -22,7 +22,8 @@ double get_filtered_output(ADIUltrasonic sensor, int check_count, uint16_t lower
 
 void flatten_against_wall(bool front = true);
 
-void detect_goal();
+void b_detect_goal();
+void f_detect_goal();
 
 
 

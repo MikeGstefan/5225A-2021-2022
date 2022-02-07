@@ -42,17 +42,17 @@ void vision_loop(double distance){
     switch (Vision_State) {
       case Vision_States::stable:
         printf("stable\n");
-				drivebase.move_tank(-40,0);
+				drivebase.move(-40,0);
 				if(left_eye.last_distance == l_dis.get() && dis_end == true){break;}
 				else if(left_eye.last_distance == l_dis.get()){dis_end = true;}
 				else{dis_end = false;}
         break;
 			case Vision_States::turn_left:
 				printf("Turn left\n");
-				drivebase.move_tank(-103, -30);
+				drivebase.move(-40, -30);
 				break;
 			case Vision_States::turn_right:
-				drivebase.move_tank(-103, 30);
+				drivebase.move(-40, 30);
 				printf("Turn right\n");
 				break;
     }

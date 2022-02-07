@@ -154,15 +154,18 @@ struct tank_point_params{
   bool brake= true;
   double kp_y = 9.0;
   double kp_a = 150.0;
+  double kd_a = 0.0;
   tank_point_params() = default;
-  tank_point_params(const Position target, const bool turn_dir_if_0, const double max_power = 127.0, const double min_angle_percent = 1.0, const bool brake = true, double kp_y = 9.0, double kp_a =150.0);
+  tank_point_params(const Position target, const bool turn_dir_if_0, const double max_power = 127.0, const double min_angle_percent = 1.0, const bool brake = true, double kp_y = 9.0, double kp_a =150.0, double kd_a = 0.0);
 };
 
 struct turn_angle_params{ 
   double target_a = 0.0;
   bool brake = true;
+  bool near = true;
+  double kp = 160.0, kd = 0.0;
   turn_angle_params() = default;
-  turn_angle_params(const double target_a, const bool brake = true);
+  turn_angle_params(const double target_a, const bool brake = true, bool near = true, double kp = 160.0, double kd = 0.0);
 };
 
 struct turn_point_params{ 
