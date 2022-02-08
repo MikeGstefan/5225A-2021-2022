@@ -122,7 +122,7 @@ void update(void* params){
 
 
     tracking_data.print(&data_timer, 100, {
-      [=](){return Data::to_char("%d || x: %.2lf, y: %.2lf, a: %.2lf\n", millis(), tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle));},
+      // [=](){return Data::to_char("%d || x: %.2lf, y: %.2lf, a: %.2lf\n", millis(), tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle));},
       // [=](){return Data::to_char("%d || GLOBAL VELOCITY| x: %.2f, y: %.2f a: %.2f\n", millis(), tracking.g_velocity.x, tracking.g_velocity.y, rad_to_deg(tracking.g_velocity.angle));},
       // [=](){return Data::to_char("%d || ENCODER L: %d, R: %d, B:%d \n", millis(), LeftEncoder.get_value(), RightEncoder.get_value(), BackEncoder.get_value());},
       // [=](){return Data::to_char("%d || ENCODER VELO| l: %.2f, r: %.2f, b: %.2f\n", millis(), tracking.l_velo, tracking.r_velo, tracking.b_velo);}
@@ -999,7 +999,7 @@ void tank_move_on_arc(void* params){
   // tank_arc_params* param_ptr = static_cast<tank_arc_params*>(_Task::get_params(params));
   const Point start_pos = tank_arc_params_g.start_pos;
   Position target = tank_arc_params_g.target;
-  const double power = tank_arc_params_g.power, max_power = tank_arc_params_g.power;
+  const double power = tank_arc_params_g.power, max_power = tank_arc_params_g.max_power;
   const bool brake = tank_arc_params_g.brake;
   tracking.move_complete = false;
 
@@ -1011,10 +1011,9 @@ void tank_move_on_arc(void* params){
   disp.rotate(target.angle);  // rotates displacement by target's angle to obtain right triangles from isosceles triangle forming the arc
   double theta = 2.0 * atan2(disp.get_x(), disp.get_y());
   double radius = disp.get_magnitude() / 2.0 / sin(theta / 2.0);
-  // printf("radius: %lf\n", radius);
   // printf("theta: %lf\n", rad_to_deg(theta));
   Point centre = {p1.get_x() + cos(target.angle) * radius, p1.get_y() - sin(target.angle) * radius};
-  // printf("centre | x: %lf, y: %lf\n", centre.x, centre.y);
+  motion_d.print("centre | x: %.2lf, y: %.2lf\n", centre.x, centre.y);
   // finished calculating centre coord
 
   // init variables
@@ -1039,12 +1038,16 @@ void tank_move_on_arc(void* params){
   double angle_diff;
   double radial_diff;
   radius = fabs(radius);
+  motion_d.print("radius: %.2lf\n", radius);
+
   // positive turn_dir means cw movement about the arc
   int turn_dir = -sgn(rad_to_deg(near_angle(atan2(target.y - centre.y, target.x - centre.x), atan2(tracking.y_coord - centre.y, tracking.x_coord - centre.x))));
-  // printf("turn_dir: %d\n", turn_dir);
-  motion_d.print("Starting tank move on arc from (%.2f, %.2f, %.2f) to (%.2f, %.2f, %.2f) on arc with r: %.2f and centre: (%.2f, %.2f)\n",tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle), target.x, target.y,target.angle, radius, centre.x, centre.y);
+  motion_d.print("turn_dir: %d\n", turn_dir);
+  motion_d.print("Starting tank move on arc from (%.2f, %.2f, %.2f) to (%.2f, %.2f, %.2f) on arc with r: %.2f and centre: (%.2f, %.2f)\n",tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle), target.x, target.y, rad_to_deg(target.angle), radius, centre.x, centre.y);
   while(true){
     g_position = {tracking.x_coord, tracking.y_coord};
+    motion_d.print("TRACKING: x: %.2lf, y: %.2lf a: %.2lf\n", tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle));
+
     disp = g_position - centre;
     // printf("local_a: %lf\n", rad_to_deg(disp.get_angle()));
 
@@ -1053,14 +1056,17 @@ void tank_move_on_arc(void* params){
 
     // difference between target angle and current angle taking into account direction of movement and sign of power
     angle_diff = near_angle(-disp.get_angle() + (turn_dir == -1 ? 0 : M_PI), tracking.global_angle + (power < 0.0 ? M_PI : 0));
-
+    motion_d.print("disp angle: %.2lf, angle_diff: %.2lf\n", rad_to_deg(-disp.get_angle()), rad_to_deg(angle_diff));
     linear_velocity = arc_velocity.get_y();
 
     // linear version of radial correction calcalution (instead of logarithmic or difference)
     radial_diff = disp.get_magnitude() / radius;
+    motion_d.print("orig_radial_diff: %.2lf, cur_radius: %.2lf, target_radius: %.2lf\n", radial_diff, disp.get_magnitude(), radius);
     // signs radial diff
     if (radial_diff < 1) radial_diff = -1/radial_diff + 1;
     else radial_diff = radial_diff -1;
+    motion_d.print("radial_diff: %.2lf\n", radial_diff);
+
     angular_velocity_target = turn_dir * (linear_velocity / disp.get_magnitude() + kR * radial_diff) + kA * angle_diff;
     // printf("radius:%lf, angular_vel: %lf, radial_error: %lf, radial_correction: %lf, angle_diff: %lf, angle_correction: %lf\n", radius, kB * turn_dir * linear_velocity / disp.get_magnitude(), radius - disp.get_magnitude(), kB * turn_dir * kR * log(disp.get_magnitude() / radius), rad_to_deg(angle_diff), kB * kA * angle_diff);
 #ifndef xy_enable
@@ -1072,6 +1078,7 @@ void tank_move_on_arc(void* params){
 #endif
 
     tracking.power_a = kB * angular_velocity_target + kP * (angular_velocity_target - tracking.g_velocity.angle) + kD * (tracking.g_velocity.angle - last_angular_velocity) / (millis() - last_d_update_time);
+    motion_d.print("BEFORE | powers y: %.2lf, power_a: %.2lf\n", tracking.power_y, tracking.power_a);
 
     // printf("p:%lf, d:%lf\n",  kP * (angular_velocity_target - tracking.g_velocity.angle), kD * (tracking.g_velocity.angle - last_angular_velocity));
     last_d_update_time = millis();
@@ -1098,12 +1105,13 @@ void tank_move_on_arc(void* params){
       motion_d.print("Ending move on arc to target X: %.2f Y: %.2f A: %.2f at X: %.2f Y: %.2f A: %.2f \n", target.x, target.y, target.angle, tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle));
       return;
     }
-    printf("%lf,%lf\n", tracking.x_coord, tracking.y_coord);
 #ifdef xy_enable
-    printf("%lf,%lf\n", tracking.x_coord, tracking.y_coord);
+    // printf("%lf,%lf\n", tracking.x_coord, tracking.y_coord);
 #else
     printf("power_y:%lf, power_a: %lf\n",tracking.power_y, tracking.power_a);
 #endif
+    motion_d.print("AFTER | powers y: %.2lf, power_a: %.2lf\n", tracking.power_y, tracking.power_a);
+
     drivebase.move_tank(tracking.power_y, tracking.power_a);
     if(ptr->notify_handle())return;
     delay(10);

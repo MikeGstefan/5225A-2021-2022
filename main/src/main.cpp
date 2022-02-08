@@ -34,7 +34,7 @@ void initialize() {
 	drivebase.download_curve_data();
 	Data::init();
 	_Controller::init();
-	GUI::init();
+	// GUI::init();
 	delay(500);
 	tracking.x_coord = 26.0, tracking.y_coord = 11.75, tracking.global_angle = -90.0_deg;
 	// tracking.x_coord = 0.0, tracking.y_coord = 0.0, tracking.global_angle = 0.0_deg;
