@@ -16,6 +16,8 @@ void vision_loop(double distance){
 
 	const Point start_pos = {tracking.x_coord, tracking.y_coord};
 	double delta_dist = 0.0;
+	int count = 0;
+	motion_d.print("%d| starting goal allign \n", millis());
 	while(distance >= delta_dist){
 		delta_dist = sqrt(pow(tracking.x_coord -start_pos.x,2) + pow(tracking.y_coord - start_pos.y,2));
 		printf("Delta Dist: %f\n", delta_dist);
@@ -46,6 +48,9 @@ void vision_loop(double distance){
 				if(left_eye.last_distance == l_dis.get() && dis_end == true){break;}
 				else if(left_eye.last_distance == l_dis.get()){dis_end = true;}
 				else{dis_end = false;}
+				// if(left_eye.last_distance == l_dis.get())count++;
+				// else count = 0;
+				// if(count >= 4)break;
         break;
 			case Vision_States::turn_left:
 				printf("Turn left\n");
@@ -60,4 +65,5 @@ void vision_loop(double distance){
     right_eye.last_distance = r_dis.get();
     delay(33);
   }
+  motion_d.print("%d|| Done goal allign\n", millis());
 }

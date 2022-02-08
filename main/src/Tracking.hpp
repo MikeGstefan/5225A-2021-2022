@@ -164,8 +164,9 @@ struct turn_angle_params{
   bool brake = true;
   bool near = true;
   double kp = 160.0, kd = 0.0;
+  double max_speed = 127;
   turn_angle_params() = default;
-  turn_angle_params(const double target_a, const bool brake = true, bool near = true, double kp = 160.0, double kd = 0.0);
+  turn_angle_params(const double target_a, const bool brake = true, bool near = true, double kp = 160.0, double kd = 0.0, double max_speed = 127.0);
 };
 
 struct turn_point_params{ 

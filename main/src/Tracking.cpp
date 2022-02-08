@@ -273,8 +273,8 @@ tank_arc_params::tank_arc_params(const Point start_pos, Position target, const d
 tank_point_params::tank_point_params(const Position target, const bool turn_dir_if_0, const double max_power, const double min_angle_percent, const bool brake, double kp_y, double kp_a, double kd_a):
   target{target}, turn_dir_if_0{turn_dir_if_0}, max_power{max_power}, min_angle_percent{min_angle_percent}, brake{brake}, kp_y{kp_y}, kp_a{kp_a}, kd_a{kd_a}{}
 
-turn_angle_params::turn_angle_params(const double target_a, const bool brake, bool near, double kp, double kd):
-  target_a{target_a},brake{brake}, near{near}, kp{kp}, kd{kd}{}
+turn_angle_params::turn_angle_params(const double target_a, const bool brake, bool near, double kp, double kd, double max_speed):
+  target_a{target_a},brake{brake}, near{near}, kp{kp}, kd{kd}, max_speed{max_speed}{}
 
 turn_point_params::turn_point_params(const Point target, const bool brake):
   target{target}, brake{brake}{}
@@ -935,12 +935,14 @@ void turn_to_angle(void* params){
   bool near = turn_angle_params_g.near;
   double kp = turn_angle_params_g.kp;
   double kd = turn_angle_params_g.kd;
+  double max_speed = turn_angle_params_g.max_speed;
   tracking.move_complete = false;
 
   PID angle_pid(kp, 0.0, kd, 0.0, true, 0.0, 360.0);
   motion_d.print("Starting turn to angle %.2f from %.2f\n", target_a, rad_to_deg(tracking.global_angle));
   target_a = deg_to_rad(target_a);
   double new_target_a;
+  double power;
   if(near){
     new_target_a = near_angle(target_a, tracking.global_angle) + tracking.global_angle;
   }
@@ -948,8 +950,9 @@ void turn_to_angle(void* params){
     new_target_a = target_a;
   }
   while(true){
-
-    drivebase.move_tank(0, angle_pid.compute(tracking.global_angle, new_target_a));
+    power =  angle_pid.compute(tracking.global_angle, new_target_a);
+    if(fabs(power) > max_speed)power = max_speed*sgn(power);
+    drivebase.move_tank(0,power);
     if(fabs(rad_to_deg(angle_pid.get_error())) < 5.0){
       motion_d.print("Ending turn to angle : %.2f at X: %.2f Y: %.2f A: %.2f \n", rad_to_deg(target_a), tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle));
       drivebase.move_tank(0, 0);
@@ -991,6 +994,7 @@ void turn_to_point(void* params){
   const bool brake = turn_point_params_g.brake;
   motion_d.print("starting turn to point (%.2f, %.2f) from (%.2f, %.2f, %.2f) target angle: %.2f\n", target.x, target.y, tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle),rad_to_deg(atan2(target.x - tracking.x_coord, target.y - tracking.y_coord)));
   turn_to_angle(rad_to_deg(atan2(target.x - tracking.x_coord, target.y - tracking.y_coord)), brake, ptr);
+  motion_d.print("Ending turn to point function ending\n");
 }
 
 
@@ -999,7 +1003,7 @@ void tank_move_on_arc(void* params){
   // tank_arc_params* param_ptr = static_cast<tank_arc_params*>(_Task::get_params(params));
   const Point start_pos = tank_arc_params_g.start_pos;
   Position target = tank_arc_params_g.target;
-  const double power = tank_arc_params_g.power, max_power = tank_arc_params_g.power;
+  const double power = tank_arc_params_g.power, max_power = tank_arc_params_g.max_power;
   const bool brake = tank_arc_params_g.brake;
   tracking.move_complete = false;
 
