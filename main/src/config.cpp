@@ -1,4 +1,5 @@
 #include "config.hpp"
+#include "pros/adi.hpp"
 
 // NEW config
 _Controller master(pros::E_CONTROLLER_MASTER);
@@ -17,7 +18,7 @@ pros::Motor f_lift_m(20, pros::E_MOTOR_GEARSET_36, false,pros::E_MOTOR_ENCODER_D
 // pros::Motor back_l(20, pros::E_MOTOR_GEARSET_18, false, pros::E_MOTOR_ENCODER_DEGREES);
 // pros::Motor back_r(18, pros::E_MOTOR_GEARSET_18, true, pros::E_MOTOR_ENCODER_DEGREES);
 
-pros::Imu imu_sensor(4);
+// pros::Imu imu_sensor(4);
 pros::Distance b_dist(6), f_dist(12), r_reset_dist(11), l_reset_dist(13);
 pros::ADIDigitalOut trans_p(7), b_claw_p(8), f_claw_p({{14,1}});
 
@@ -25,7 +26,9 @@ pros::ADIDigitalOut trans_p(7), b_claw_p(8), f_claw_p({{14,1}});
 pros::Distance l_dis(10);
 pros::Distance r_dis(8);
 
-pros::Imu ramp_imu(11);
+pros::Imu ramp_imu(4);
+
+// ADIDigitalOut f_claw_p({{14,1}});
 
 //1:temp(leave as 0), 2:long name, 3:short name
 std::array<std::tuple<pros::Motor*, int, const char*, const char*, Text*>, 8> motors = {

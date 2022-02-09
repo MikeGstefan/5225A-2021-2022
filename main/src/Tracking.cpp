@@ -4,7 +4,7 @@ Tracking tracking;
 
 _Task update_t(update, "Tracking");
 _Task move_t(move_on_arc, "Movement");
-Gyro gyro(imu_sensor);
+Gyro gyro(ramp_imu);
 // std::variant<arc_params, line_params, tank_arc_params, point_params, tank_point_params, turn_angle_params, turn_point_params, line_old_params> params_g;
 arc_params arc_params_g;
 line_params line_params_g;
@@ -1328,12 +1328,14 @@ void move_on_line_old(void* params){
 
 
 
-//gyro balance class
+//Gyro balance class
+
+//Constructor
 Gyro::Gyro(Imu& imu): inertial(imu){}
 
 double Gyro::get_angle() {
   angle = GYRO_SIDE*inertial.GYRO_AXIS();
-  return angle;
+  return fabs(angle);
 }
 
 void Gyro::calibrate(){
@@ -1354,27 +1356,27 @@ void Gyro::climb_ramp(){
   inertial.tare_pitch();
 
 	drivebase.move_tank(127, 0);
-	waitUntil(fabs(get_angle()) > 22)
-	motion_i.print("ON RAMP\n");
+	waitUntil(get_angle() > 22)
+  double ramp_angle = get_angle();
+	motion_i.print("ON RAMP: %f\n", ramp_angle);
 
-  tracking.wait_for_dist(400); //But it's 400 encoder units. You'll have to find the equivalent in inches
+  tracking.wait_for_dist(18.7);
 }
 
 void Gyro::level(double kP, double kD){
 	double last_angle=0;
-	std::uint32_t steady_time = 0, last_steady_time = 0;
 	PID gyro_p(kP, 0, kD, 0);
-  Timer gyro_t ("Gyro", &motion_d);
+  Timer gyro_steady ("Gyro", &motion_d);
   int speed;
 
 	while(true){
     get_angle();
-    gyro_p.compute(-angle, 0);
-		drivebase.move_tank(gyro_p.get_output(), 0);
-    gyro_t.print("Angle: %f  |  Speed: %d", angle, gyro_p.get_output());
+    speed = gyro_p.compute(-angle, 0);
+		drivebase.move_tank(speed, 0);
+    gyro_steady.print("Angle: %f | Speed: %d\n", angle, speed);
     
-		if (fabs(angle-last_angle) > 0.6) gyro_t.reset(); //Unsteady, Resets the last known steady time
-		else if (fabs(angle) < 6 && gyro_t.get_time() > 450) break; //If within range to be level and steady on ramp
+		if (fabs(angle-last_angle) > 0.6) gyro_steady.reset(); //Unsteady, Resets the steady timer
+		else if (fabs(angle) < 6 && gyro_steady.get_time() > 450) break; //If within range to be level and steady on ramp
 
 		if (master.interrupt(true, false)) return;
 

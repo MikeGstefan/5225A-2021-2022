@@ -13,7 +13,7 @@ extern pros::ADIEncoder LeftEncoder, RightEncoder, BackEncoder;
 extern pros::Distance l_dis;
 extern pros::Distance r_dis;
 
-extern pros::Imu imu_sensor;
+extern pros::Imu ramp_imu;
 extern pros::Distance b_dist, f_dist, r_reset_dist, l_reset_dist;
 
 extern pros::ADIDigitalOut trans_p, b_claw_p, f_claw_p;
