@@ -12,11 +12,12 @@ void setVisionState(Vision_States state) {
 
 
 
-void vision_loop(double distance){
+void vision_loop(double distance, int timeout){
 
 	const Point start_pos = {tracking.x_coord, tracking.y_coord};
 	double delta_dist = 0.0;
 	int count = 0;
+	int start_time = millis();
 	motion_d.print("%d| starting goal allign \n", millis());
 	while(distance >= delta_dist){
 		delta_dist = sqrt(pow(tracking.x_coord -start_pos.x,2) + pow(tracking.y_coord - start_pos.y,2));
@@ -40,14 +41,14 @@ void vision_loop(double distance){
 		if(l_dis.get() == 0){setVisionState(Vision_States::turn_right);}
 		if(r_dis.get() == 0 && l_dis.get() == 0){setVisionState(Vision_States::stable);}
 
-    printf("Left:%d Right: %d\n",l_dis.get(), r_dis.get());
+    misc.print("Left:%d Right: %d\n",l_dis.get(), r_dis.get());
     switch (Vision_State) {
       case Vision_States::stable:
         printf("stable\n");
 				drivebase.move(-40,0);
-				if(left_eye.last_distance == l_dis.get() && dis_end == true){break;}
-				else if(left_eye.last_distance == l_dis.get()){dis_end = true;}
-				else{dis_end = false;}
+				// if(left_eye.last_distance == l_dis.get() && dis_end == true){break;}
+				// else if(left_eye.last_distance == l_dis.get()){dis_end = true;}
+				// else{dis_end = false;}
 				// if(left_eye.last_distance == l_dis.get())count++;
 				// else count = 0;
 				// if(count >= 4)break;
@@ -61,6 +62,8 @@ void vision_loop(double distance){
 				printf("Turn right\n");
 				break;
     }
+
+	if(timeout != 0 && millis() - start_time > timeout)break;
     left_eye.last_distance = l_dis.get();
     right_eye.last_distance = r_dis.get();
     delay(33);

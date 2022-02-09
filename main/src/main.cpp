@@ -207,7 +207,7 @@ void opcontrol() {
 		if(master.get_digital_new_press(DIGITAL_A)){
 			printf("switching state to %d\n", !claw_state);
 			claw_state = !claw_state;
-			f_claw_p.set_value(claw_state);
+			b_claw_p.set_value(claw_state);
 		}
 		if(master.get_digital_new_press(DIGITAL_B)){ 
 			// b_lift.move_absolute(10);
@@ -230,9 +230,15 @@ void opcontrol() {
 		// drivebase.handle_input();
 		if(master.get_digital_new_press(DIGITAL_R1)){ 
 			Timer timer {"timer"};
-			// printf("%f\n",reset_dist_r.get_dist());
+			// master.clear();
+			// delay(50);
+			// master.print(0,0,"%f",reset_dist_l.get_dist());
 			// reset_dist_r.reset(141.0,0.0 + DIST_BACK,0.0);
-			skills();
+			// skills();
+			// skills2();
+
+			// skills3();
+			skills4();
 			//fits platfor to reset
 			/**
 			move_start(move_types::turn_angle, turn_angle_params(90.0));
@@ -268,7 +274,7 @@ void opcontrol() {
 			master.print(0,0,"%d", timer.get_time());
 			delay(10000);
 			*/
-			master.print(0,0,"%d", timer.get_time());
+			// master.print(0,0,"%d", timer.get_time());
 			delay(2000);
 
 		}
@@ -276,8 +282,8 @@ void opcontrol() {
 			drivebase.handle_input();
 		}
 
-		if(abs(master.get_analog(ANALOG_LEFT_Y))> 20)f_lift.move(master.get_analog(ANALOG_LEFT_Y));
-		else f_lift.move(0);
+		// if(abs(master.get_analog(ANALOG_LEFT_Y))> 20)b_lift.move(master.get_analog(ANALOG_LEFT_Y));
+		// else b_lift.motor.move_relative(0, 40);
 		
 		delay(33);
 	}

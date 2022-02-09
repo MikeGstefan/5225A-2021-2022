@@ -47,7 +47,7 @@ public:
 
 
     Position g_velocity;   // global g_velocity stores x, y and angular velocities
-    void wait_for_dist(double distance);
+    void wait_for_dist(double distance, int timeout = 0);
     double get_angle_in_deg();
     void reset(double x=0.0, double y=0.0, double a=0.0);
 
@@ -165,8 +165,9 @@ struct turn_angle_params{
   bool near = true;
   double kp = 160.0, kd = 0.0;
   double max_speed = 127;
+  int timeout = 0;
   turn_angle_params() = default;
-  turn_angle_params(const double target_a, const bool brake = true, bool near = true, double kp = 160.0, double kd = 0.0, double max_speed = 127.0);
+  turn_angle_params(const double target_a, const bool brake = true, bool near = true, double kp = 160.0, double kd = 0.0, double max_speed = 127.0, int timeout = 0);
 };
 
 struct turn_point_params{ 
@@ -217,7 +218,7 @@ void turn_to_point(void* params);
 
 const int min_move_power_a = 23;
 const int min_move_power_x = 40;
-const int min_move_power_y = 17;
+const int min_move_power_y = 25;
 
 #define xy_enable a
 

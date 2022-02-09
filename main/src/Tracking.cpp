@@ -30,12 +30,14 @@ double Tracking::get_angle_in_deg(){
   return fmod(rad_to_deg(global_angle), 360);
 }
 
-void Tracking::wait_for_dist(double distance){
+void Tracking::wait_for_dist(double distance, int timeout){
   const Point start_pos = {tracking.x_coord, tracking.y_coord};
   double delta_dist = 0.0;
+  int start_time = millis();
   while(distance >= delta_dist){
     delta_dist = sqrt(pow(tracking.x_coord -start_pos.x,2) + pow(tracking.y_coord - start_pos.y,2));
     delay(10);
+    if(timeout != 0 && millis() - start_time > timeout)break;
   }
 }
 
@@ -273,8 +275,8 @@ tank_arc_params::tank_arc_params(const Point start_pos, Position target, const d
 tank_point_params::tank_point_params(const Position target, const bool turn_dir_if_0, const double max_power, const double min_angle_percent, const bool brake, double kp_y, double kp_a, double kd_a):
   target{target}, turn_dir_if_0{turn_dir_if_0}, max_power{max_power}, min_angle_percent{min_angle_percent}, brake{brake}, kp_y{kp_y}, kp_a{kp_a}, kd_a{kd_a}{}
 
-turn_angle_params::turn_angle_params(const double target_a, const bool brake, bool near, double kp, double kd, double max_speed):
-  target_a{target_a},brake{brake}, near{near}, kp{kp}, kd{kd}, max_speed{max_speed}{}
+turn_angle_params::turn_angle_params(const double target_a, const bool brake, bool near, double kp, double kd, double max_speed, int timeout):
+  target_a{target_a},brake{brake}, near{near}, kp{kp}, kd{kd}, max_speed{max_speed}, timeout{timeout}{}
 
 turn_point_params::turn_point_params(const Point target, const bool brake):
   target{target}, brake{brake}{}
@@ -936,10 +938,11 @@ void turn_to_angle(void* params){
   double kp = turn_angle_params_g.kp;
   double kd = turn_angle_params_g.kd;
   double max_speed = turn_angle_params_g.max_speed;
+  int timeout = turn_angle_params_g.timeout;
   tracking.move_complete = false;
 
   PID angle_pid(kp, 0.0, kd, 0.0, true, 0.0, 360.0);
-  motion_d.print("Starting turn to angle %.2f from %.2f\n", target_a, rad_to_deg(tracking.global_angle));
+  motion_d.print("%d || Starting turn to angle %.2f from %.2f\n", millis(), target_a, rad_to_deg(tracking.global_angle));
   target_a = deg_to_rad(target_a);
   double new_target_a;
   double power;
@@ -949,12 +952,21 @@ void turn_to_angle(void* params){
   else {
     new_target_a = target_a;
   }
+  int start_time = millis();
   while(true){
     power =  angle_pid.compute(tracking.global_angle, new_target_a);
     if(fabs(power) > max_speed)power = max_speed*sgn(power);
+    if(fabs(power) <min_move_power_a) power = sgn(power)*min_move_power_a;
     drivebase.move_tank(0,power);
     if(fabs(rad_to_deg(angle_pid.get_error())) < 5.0){
-      motion_d.print("Ending turn to angle : %.2f at X: %.2f Y: %.2f A: %.2f \n", rad_to_deg(target_a), tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle));
+      motion_d.print("%d || Ending turn to angle : %.2f at X: %.2f Y: %.2f A: %.2f, time: %d\n", millis(), rad_to_deg(target_a), tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle), millis() - start_time);
+      drivebase.move_tank(0, 0);
+      if(brake) drivebase.brake();
+      tracking.move_complete = true;
+      return;
+    }
+    if(timeout != 0 && millis() - start_time > timeout){ 
+      motion_d.print("%d|| TIMED OUT Ending turn to angle : %.2f at X: %.2f Y: %.2f A: %.2f, time: %d\n", millis(), rad_to_deg(target_a), tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle), millis() - start_time);
       drivebase.move_tank(0, 0);
       if(brake) drivebase.brake();
       tracking.move_complete = true;

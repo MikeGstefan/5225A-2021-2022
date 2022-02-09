@@ -21,4 +21,4 @@ class vision{
       void spasm_check();
 };
 
-void vision_loop(double distance);
+void vision_loop(double distance, int timeout = 0);

@@ -41,4 +41,5 @@ class Reset_dist{
 };
 
 extern Reset_dist reset_dist_r;
+extern Reset_dist reset_dist_l;
 

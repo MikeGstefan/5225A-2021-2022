@@ -1,7 +1,8 @@
 #include "auton_util.hpp"
 // #include "logging.hpp"
 
-Reset_dist reset_dist_r(&r_reset_dist, 10.0);
+Reset_dist reset_dist_r(&r_reset_dist, 8.5);
+Reset_dist reset_dist_l(&l_reset_dist, 8.0);
 
 double get_filtered_output(ADIUltrasonic sensor, int check_count, uint16_t lower_bound, uint16_t upper_bound, int timeout){
   Timer timer{"Timer"};
@@ -70,7 +71,10 @@ void b_detect_goal(){
   }
   int successCount = 0;
     while (successCount < 2){
-        if (b_dist.get() > 75 && b_dist.get() < 90) successCount++;
+        if (b_dist.get() > 75 && b_dist.get() < 90) {
+          successCount++;
+          misc.print("found: %d count: %d\n", b_dist.get(), successCount);
+        }
         else successCount = 0;
         misc.print("looking: %d\n", b_dist.get());
         delay(33);
