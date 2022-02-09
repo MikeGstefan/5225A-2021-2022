@@ -9,7 +9,7 @@
 #include "auton_util.hpp"
 #include "Subsystem/f_lift.hpp"
 #include "Subsystem/b_lift.hpp"
-#include "vision_loop.hpp"
+#include "distance.hpp"
 
 // using namespace std;
 #include "task.hpp"
