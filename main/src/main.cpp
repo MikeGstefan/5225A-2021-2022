@@ -236,10 +236,11 @@ void opcontrol() {
 			// master.print(0,0,"%f",reset_dist_l.get_dist());
 			// reset_dist_r.reset(141.0,0.0 + DIST_BACK,0.0);
 			// skills();
-			// skills2();
+			skills2();
 
 			// skills3();
-			skills4();
+			// skills4();
+			// skillsPark();
 			//fits platfor to reset
 			/**
 			move_start(move_types::turn_angle, turn_angle_params(90.0));
@@ -249,23 +250,23 @@ void opcontrol() {
 			move_start(move_types::tank_point, tank_point_params({122.0,123.0,0.0},false));
 			flatten_against_wall(true);
 			*/
-			f_claw_p.set_value(HIGH);
-			b_claw_p.set_value(HIGH);
-			f_lift.move_absolute(610);
-			b_lift.move_absolute(150);
-			waitUntil(f_lift_m.get_position() > 590);
-			f_lift.move(15);
+			// f_claw_p.set_value(HIGH);
+			// b_claw_p.set_value(HIGH);
+			// f_lift.move_absolute(610);
+			// b_lift.move_absolute(150);
+			// waitUntil(f_lift_m.get_position() > 590);
+			// f_lift.move(15);
 
-			waitUntil(master.get_digital_new_press(DIGITAL_R1));
-			int t = millis();
+			// waitUntil(master.get_digital_new_press(DIGITAL_R1));
+			// int t = millis();
 
-			gyro.climb_ramp();
-			// gyro.level(2.2, 0);
+			// gyro.climb_ramp();
+			// // gyro.level(2.2, 0);
 
-			drivebase.brake();
-			printf("ds:%d\n", millis()-t);
-			delay(5000);
-			waitUntil(false);
+			// drivebase.brake();
+			// printf("ds:%d\n", millis()-t);
+			// delay(5000);
+			// waitUntil(false);
 
 			//grab goal on wall 
 
@@ -291,7 +292,7 @@ void opcontrol() {
 			master.print(0,0,"%d", timer.get_time());
 			delay(10000);
 			*/
-			// master.print(0,0,"%d", timer.get_time());
+			master.print(0,0,"%d", timer.get_time());
 			delay(2000);
 
 		}

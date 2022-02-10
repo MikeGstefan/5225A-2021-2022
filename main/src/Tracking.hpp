@@ -31,6 +31,11 @@ extern _Task move_t;
 #define DIST_FRONT 8.5
 
 
+const int min_move_power_a = 23;
+const int min_move_power_x = 40;
+const int min_move_power_y = 25;
+
+
 void update(void* params);
 
 
@@ -166,8 +171,10 @@ struct turn_angle_params{
   double kp = 160.0, kd = 0.0;
   double max_speed = 127;
   int timeout = 0;
+  double min_power_a = min_move_power_a;
+  double end_error = 5.0;
   turn_angle_params() = default;
-  turn_angle_params(const double target_a, const bool brake = true, bool near = true, double kp = 160.0, double kd = 0.0, double max_speed = 127.0, int timeout = 0);
+  turn_angle_params(const double target_a, const bool brake = true, bool near = true, double kp = 160.0, double kd = 0.0, double max_speed = 127.0, int timeout = 0, double min_power_a = min_move_power_a, double end_error = 5.0);
 };
 
 struct turn_point_params{ 
@@ -216,9 +223,7 @@ void turn_to_angle(double target_a, const bool brake, _Task* ptr);
 void turn_to_point(void* params);
 
 
-const int min_move_power_a = 23;
-const int min_move_power_x = 40;
-const int min_move_power_y = 25;
+
 
 #define xy_enable a
 

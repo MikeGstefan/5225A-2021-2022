@@ -275,8 +275,8 @@ tank_arc_params::tank_arc_params(const Point start_pos, Position target, const d
 tank_point_params::tank_point_params(const Position target, const bool turn_dir_if_0, const double max_power, const double min_angle_percent, const bool brake, double kp_y, double kp_a, double kd_a):
   target{target}, turn_dir_if_0{turn_dir_if_0}, max_power{max_power}, min_angle_percent{min_angle_percent}, brake{brake}, kp_y{kp_y}, kp_a{kp_a}, kd_a{kd_a}{}
 
-turn_angle_params::turn_angle_params(const double target_a, const bool brake, bool near, double kp, double kd, double max_speed, int timeout):
-  target_a{target_a},brake{brake}, near{near}, kp{kp}, kd{kd}, max_speed{max_speed}, timeout{timeout}{}
+turn_angle_params::turn_angle_params(const double target_a, const bool brake, bool near, double kp, double kd, double max_speed, int timeout, double min_power_a, double end_error):
+  target_a{target_a},brake{brake}, near{near}, kp{kp}, kd{kd}, max_speed{max_speed}, timeout{timeout}, min_power_a{min_power_a}, end_error{end_error}{}
 
 turn_point_params::turn_point_params(const Point target, const bool brake):
   target{target}, brake{brake}{}
@@ -939,6 +939,8 @@ void turn_to_angle(void* params){
   double kd = turn_angle_params_g.kd;
   double max_speed = turn_angle_params_g.max_speed;
   int timeout = turn_angle_params_g.timeout;
+  double min_power_a = turn_angle_params_g.min_power_a;
+  double end_error = turn_angle_params_g.end_error;
   tracking.move_complete = false;
 
   PID angle_pid(kp, 0.0, kd, 0.0, true, 0.0, 360.0);
@@ -956,9 +958,9 @@ void turn_to_angle(void* params){
   while(true){
     power =  angle_pid.compute(tracking.global_angle, new_target_a);
     if(fabs(power) > max_speed)power = max_speed*sgn(power);
-    if(fabs(power) <min_move_power_a) power = sgn(power)*min_move_power_a;
+    if(fabs(power) <min_power_a) power = sgn(power)*min_power_a;
     drivebase.move_tank(0,power);
-    if(fabs(rad_to_deg(angle_pid.get_error())) < 5.0){
+    if(fabs(rad_to_deg(angle_pid.get_error())) < end_error){
       motion_d.print("%d || Ending turn to angle : %.2f at X: %.2f Y: %.2f A: %.2f, time: %d\n", millis(), rad_to_deg(target_a), tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle), millis() - start_time);
       drivebase.move_tank(0, 0);
       if(brake) drivebase.brake();
@@ -1360,7 +1362,7 @@ void Gyro::climb_ramp(){
   double ramp_angle = get_angle();
 	motion_i.print("ON RAMP: %f\n", ramp_angle);
 
-  tracking.wait_for_dist(18.7);
+  tracking.wait_for_dist(18.8);
 }
 
 void Gyro::level(double kP, double kD){
