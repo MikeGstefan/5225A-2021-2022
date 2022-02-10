@@ -13,7 +13,7 @@
 using namespace std;
 
 pros::Task *updt = nullptr;
-const GUI* GUI::current_gui = &g_util;
+const GUI* GUI::current_gui = &g_main;
 
 
 /**
@@ -86,18 +86,10 @@ void autonomous() {
  */
 
 void opcontrol() {
-	/*Nathan:
-	make text and go variadic
-	create some distinction between compile-time and runtime functions, at least in the docs
-	check if ring count exists
-
-	if implicit conversion from int to value works, let it
-
+	/*
 	make gui a task
-
-	maybe use decay on the arrays
 	*/
-
+	
 	while(true){
 		GUI::update();
 		// drivebase.non_blocking_driver_practice();

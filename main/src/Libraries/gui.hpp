@@ -5,10 +5,6 @@
 #include "../util.hpp"
 #include "../include/pros/apix.h"
 #include <bitset>
-#include <type_traits>
-// #include <cstdio>
-// #include <iostream>
-// #include <vector>
 
 // Forward-Declaration
 class GUI;
@@ -65,6 +61,7 @@ class GUI{
     static const Page* current_page;
     static const GUI* current_gui;
     static constexpr bool go_enabled=true;
+    static constexpr bool testing_page_active=false;
     std::vector<Page*> pages;
     std::function <void()> setup, background;
 
@@ -83,7 +80,7 @@ class GUI{
     //Functions
     static void aligned_coords (int, int, int, int, int = 480, int = 220);
     static void flash(Colour, std::uint32_t, const char*, ...);
-    static void flash(Colour, std::uint32_t, std::string = "");
+    static void flash(std::string = "", std::uint32_t = 1000, Colour = COLOUR(RED));
     static bool go(std::string, std::string, std::uint32_t=0), go_end(std::string, std::uint32_t=0);
     static void clear_screen(Colour=GREY);
     static void init(), update();
@@ -152,7 +149,7 @@ class Text_{
 
   public:
     //Functions
-    void set_background(int, int, Colour = 0xFFFFFFFF);
+    void set_background(int, int, Colour = 0xFFFFFFFF); //Centre
     void set_background(int, int, int, int, GUI::Style, Colour = 0xFFFFFFFF);
     void set_background(Colour);
     void set_active(bool=true);

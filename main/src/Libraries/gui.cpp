@@ -59,11 +59,11 @@ void GUI::aligned_coords (int x_objects, int y_objects, int x_size, int y_size, 
 void GUI::flash(Colour colour, std::uint32_t time, const char* fmt, ...){
   std::va_list args;
   va_start(args, fmt);
-  GUI::flash(colour, time, printf_to_string(fmt, args));
+  GUI::flash(printf_to_string(fmt, args), time, colour);
   va_end(args);
 }
 
-void GUI::flash(Colour colour, std::uint32_t time, std::string text){
+void GUI::flash(std::string text, std::uint32_t time, Colour colour){
   touched_when_flashed = touched;
   clear_screen(colour);
   screen::set_pen(~colour&0xFFFFFF); //Makes text inverted colour of background so it is always visible
@@ -446,7 +446,7 @@ void Button::set_background (Colour colour){
 
 void Text_::set_background (int x1, int y1, Colour colour){
   if (colour == 0xFFFFFFFF) colour = b_col;
-  set_background(x-x1, y-y1, x+x1, y+y1, GUI::Style::CORNER, colour);
+  set_background(x, y, x1, y1, GUI::Style::CENTRE, colour);
 }
 
 void Text_::set_background (int x1, int y1, int x2, int y2, GUI::Style type, Colour colour){
@@ -574,7 +574,9 @@ void Text_::draw(){
     x_coord -= GUI::get_size(txt_fmt, "width")/2*length;
     y_coord -= GUI::get_size(txt_fmt, "height")/2;
   }
-  x1 = min(x1, x_coord); //Resizes the background so it won't have overwriting issues
+  
+  //Resizes the background so it won't have overwriting issues
+  x1 = min(x1, x_coord);
   x2 = max(x2, x_coord + (GUI::get_size(txt_fmt, "width")+1)*length);
   y1 = min(y1, y_coord);
   y2 = max(y2, y_coord + GUI::get_size(txt_fmt, "height"));
@@ -756,7 +758,7 @@ void GUI::init(){
 
   prev_page.set_func(&go_prev);
   next_page.set_func(&go_next);
-  testing.set_active(false);
+  testing.set_active(testing_page_active);
   home.set_func([](){go_to(1);});
   go_button.add_text(go_button_text);
   current_gui->setup();
