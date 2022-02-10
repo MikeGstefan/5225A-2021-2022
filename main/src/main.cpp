@@ -8,6 +8,7 @@
 #include "task.hpp"
 #include "auton.hpp"
 #include "task.hpp"
+#include "util.hpp"
 
 using namespace std;
 
@@ -83,9 +84,6 @@ void autonomous() {
  * operator control task will be stopped. Re-enabling the robot will restart the
  * task, not resume it from where it left off.
  */
-
-//Get rid of these once merged
-int ring_count = 0;
 
 void opcontrol() {
 

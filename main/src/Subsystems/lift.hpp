@@ -1,4 +1,5 @@
 #pragma once
+#include "../Libraries/gui.hpp"
 #include "../Libraries/subsystem.hpp"
 #include "intake.hpp" // because lift controls intake
 
