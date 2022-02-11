@@ -235,10 +235,10 @@ void opcontrol() {
 			// delay(50);
 			// master.print(0,0,"%f",reset_dist_l.get_dist());
 			// reset_dist_r.reset(141.0,0.0 + DIST_BACK,0.0);
-			// skills();
+			skills();
 			skills2();
 
-			// skills3();
+			skills3();
 			// skills4();
 			// skillsPark();
 			//fits platfor to reset
