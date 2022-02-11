@@ -112,8 +112,11 @@ double Reset_dist::get_dist(){
     if(this->sensor->get() > Reset_dist::thresh){
       count++;
       avg += this->sensor->get();
+      misc.print("%d || Dist in reset %f count %d\n", millis(), (double)this->sensor->get()/25.4, count);
     }
+    delay(33);
   }
   //find averaeg, convert to inches
+  misc.print("%d || reset %f\n",millis(), (avg/count)/25.4);
   return ((avg/count)/25.4) + this->dist_from_center;
 }

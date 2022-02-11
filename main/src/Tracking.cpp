@@ -1353,16 +1353,19 @@ void Gyro::finish_calibrating(){
 }
 
 void Gyro::climb_ramp(){
+  drivebase.set_state(HIGH);
   finish_calibrating(); //Makes sure it's calibrated before starting (should already be)
-	inertial.tare_roll();
+  inertial.tare_roll();
   inertial.tare_pitch();
 
-	drivebase.move_tank(127, 0);
-	waitUntil(get_angle() > 22)
+  drivebase.move_tank(127, 0);
+  waitUntil(get_angle() > 22)
   double ramp_angle = get_angle();
-	motion_i.print("ON RAMP: %f\n", ramp_angle);
-
-  tracking.wait_for_dist(18.8);
+  motion_i.print("ON RAMP: %f\n", ramp_angle);
+  waitUntil(!inRange(r_reset_dist.get(), 0, 200));
+  drivebase.move_tank(40, 0);
+  cycleCheck(get_angle() < 20, 3, 10);
+  drivebase.brake();
 }
 
 void Gyro::level(double kP, double kD){

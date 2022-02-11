@@ -298,53 +298,59 @@ void skills4(){
 
 
 void skillsPark(){
-  // f_claw_p.set_value(0);
-  // b_claw_p.set_value(0);
-  // b_lift.move_absolute(10);
-  // f_lift.move_absolute(10);
-  // while(!master.get_digital_new_press(DIGITAL_R1))delay(10);
+  f_claw_p.set_value(0);
+  b_claw_p.set_value(0);
+  b_lift.move_absolute(10);
+  f_lift.move_absolute(10);
+  while(!master.get_digital_new_press(DIGITAL_R1))delay(10);
 
-  // f_claw_p.set_value(1);
-  // b_claw_p.set_value(1);
-  // f_lift.move_absolute(650);
-  // // f_lift.move_absolute(200);
+  f_claw_p.set_value(1);
+  b_claw_p.set_value(1);
+  f_lift.move_absolute(600);
+  // f_lift.move_absolute(200);
   // b_lift.move_absolute(150);
-	// // while(b_lift.motor.get_position() < 930)delay(10);
+  b_lift.move_absolute(650);
+	// while(b_lift.motor.get_position() < 930)delay(10);
   // while(f_lift.motor.get_position() < 650)delay(10);
+  while(b_lift.motor.get_position() <630)delay(10);
 	// // b_lift.move(10);
 	// delay(100);
   
-  // flatten_against_wall(true);
+  flatten_against_wall(false);
+  
+  delay(100);
+  tracking.reset(141.0- reset_dist_r.get_dist(), DIST_BACK,0.0);
+  delay(200);
   int start = millis();
-  // delay(100);
-  // tracking.reset(141.0- reset_dist_r.get_dist(), DIST_BACK,180.0);
-  // delay(200);
   // master.print(1,1,"%.2f, %.2f, %.2f", tracking.x_coord, tracking.y_coord,rad_to_deg(tracking.global_angle));
   // while(!master.get_digital_new_press(DIGITAL_R1))delay(10);
 
   
 
-  move_start(move_types::tank_point, tank_point_params({tracking.x_coord, 10.0, 180.0}, false));
+  move_start(move_types::tank_point, tank_point_params({tracking.x_coord, 10.0, 0.0}, false));
   move_start(move_types::turn_angle, turn_angle_params(270.0));
   delay(100);
   move_start(move_types::turn_angle, turn_angle_params(270.0, true, true, 160.0,0.0,127.0,250,35.0,2.0));
   delay(100);
   // move_start(move_types::tank_point, tank_point_params({105.0, 10.0, 270.0}, false));
   drivebase.move(40.0,0.0);
-  while(tracking.x_coord  > 107.0)delay(10);
+  while(tracking.x_coord  > 109.0)delay(10);
   drivebase.brake();
+  b_lift.move_absolute(100);
   f_lift.move_absolute(1);
   while(f_lift.motor.get_position()  > 15)delay(10);
   f_lift.move(-15);
-  delay(500);
-  f_lift.move_absolute(800);
-			// b_lift.move_absolute(150);
-	waitUntil(f_lift_m.get_position() > 780);
   // delay(500);
-  f_lift.move_absolute(610);
+  // f_lift.move_absolute(800);
+	// 		b_lift.move_absolute(150);
+	// waitUntil(f_lift_m.get_position() > 780);
+  // delay(500);
+  // f_lift.move_absolute(610);
   Task([](){
-    waitUntil(f_lift_m.get_position() < 630);
-		f_lift.move(15);
+    delay(300);
+		f_lift.move(70);
+    waitUntil(f_lift_m.get_position() > 600);
+    f_lift.motor.move_relative(0, 100);
   });
   drivebase.set_state(1);
   gyro.climb_ramp();
