@@ -242,7 +242,7 @@ void opcontrol() {
 
 			// skills3();
 			// skills4();
-			// skillsPark();
+			skillsPark();
 			//fits platfor to reset
 			/**
 			move_start(move_types::turn_angle, turn_angle_params(90.0));
@@ -262,13 +262,13 @@ void opcontrol() {
 			// waitUntil(master.get_digital_new_press(DIGITAL_R1));
 			// int t = millis();
 
-			gyro.climb_ramp();
+			// gyro.climb_ramp();
 			// // gyro.level(2.2, 0);
 
-			drivebase.brake();
+			// drivebase.brake();
 			// printf("ds:%d\n", millis()-t);
 			// delay(5000);
-			waitUntil(false);
+			// waitUntil(false);
 
 			//grab goal on wall 
 
