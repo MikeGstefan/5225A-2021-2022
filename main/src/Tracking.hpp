@@ -7,6 +7,7 @@
 #include "drive.hpp"
 #include "geometry.hpp"
 #include "task.hpp"
+#include "Libraries/gui.hpp"
 #include <iostream>
 #include <cmath>
 #include <memory>
@@ -62,7 +63,7 @@ public:
 class Gyro{
   private:
     Imu& inertial;
-    double angle;
+    double angle, last_angle;
 
   public:
     Gyro(Imu& imu);
@@ -73,6 +74,7 @@ class Gyro{
     void level(double kP, double kD);
 
     double get_angle();
+    double get_angle_dif();
 };
 
 extern Gyro gyro;

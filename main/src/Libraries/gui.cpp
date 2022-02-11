@@ -68,7 +68,7 @@ void GUI::flash(Colour colour, std::uint32_t time, std::string text){
   screen::set_eraser(colour);
 
   printf("\n\n\033[31mWARNING: %s\033[0m\n\n", text.c_str());
-  misc.print("%s\n", text.c_str());
+  misc.print("%d || %s\n", millis(), text.c_str());
 
   int spaces = int(CHAR_WIDTH_LARGE*text.length()/460)+1;
   std::size_t space, last_space=0;

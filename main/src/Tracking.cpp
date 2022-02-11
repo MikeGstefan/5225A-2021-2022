@@ -1,4 +1,5 @@
 #include "Tracking.hpp"
+#include "config.hpp"
 
 Tracking tracking;
 
@@ -1336,8 +1337,16 @@ void move_on_line_old(void* params){
 Gyro::Gyro(Imu& imu): inertial(imu){}
 
 double Gyro::get_angle() {
+  last_angle = angle;
   angle = GYRO_SIDE*inertial.GYRO_AXIS();
   return fabs(angle);
+}
+
+double Gyro::get_angle_dif(){
+  get_angle();
+  double diff = last_angle-angle;
+  last_angle = angle;
+  return fabs(diff);
 }
 
 void Gyro::calibrate(){
@@ -1345,11 +1354,14 @@ void Gyro::calibrate(){
 }
 
 void Gyro::finish_calibrating(){
-	while (inertial.is_calibrating()){
-		motion_d.print("Calibrating Gyro...\n");
-		delay(10);
-	}
-  motion_i.print("Done Calibrating Gyro\n");
+  if(inertial.is_calibrating()){
+    while (inertial.is_calibrating()){
+      motion_d.print("Calibrating Gyro...\n");
+      delay(10);
+    }
+    motion_i.print("Done Calibrating Gyro\n");
+  }
+  motion_i.print("Already Calibrated Gyro\n");
 }
 
 void Gyro::climb_ramp(){
@@ -1357,15 +1369,33 @@ void Gyro::climb_ramp(){
   finish_calibrating(); //Makes sure it's calibrated before starting (should already be)
   inertial.tare_roll();
   inertial.tare_pitch();
+  Task([](){
+    int time = millis();
+    double last = gyro.get_angle();
+    double velo = 0.0;
+    while(true){
+      velo = (gyro.get_angle() - last)/(millis() - time);
+      time = millis();
+      last = gyro.get_angle();
+      motion_i.print("%d || Angle_v: %f, Angle: %f dist %d\n", millis(), velo, gyro.angle, r_reset_dist.get());
+      delay(10);
+    }
+    
+  });
 
+  get_angle();
   drivebase.move_tank(127, 0);
   waitUntil(get_angle() > 22)
-  double ramp_angle = get_angle();
-  motion_i.print("ON RAMP: %f\n", ramp_angle);
+  motion_i.print("ON RAMP: %f\n", get_angle());
   waitUntil(!inRange(r_reset_dist.get(), 0, 200));
-  drivebase.move_tank(40, 0);
-  cycleCheck(get_angle() < 20, 3, 10);
+  GUI::flash(COLOUR(RED), 1000, "Saw wall\n");
+  Led1.set_value(0);
+
+  tracking.wait_for_dist(5.5);
+
   drivebase.brake();
+  GUI::flash(COLOUR(RED), 1000, "Braked\n");
+  Led2.set_value(0);
 }
 
 void Gyro::level(double kP, double kD){

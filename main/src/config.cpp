@@ -21,6 +21,8 @@ pros::Motor f_lift_m(20, pros::E_MOTOR_GEARSET_36, false,pros::E_MOTOR_ENCODER_D
 // pros::Imu imu_sensor(4);
 pros::Distance b_dist(6), f_dist(12), r_reset_dist(11), l_reset_dist(13);
 pros::ADIDigitalOut trans_p(7), b_claw_p(8), f_claw_p({{14,1}});
+pros::ADIDigitalOut Led1({{14, 7}});
+pros::ADIDigitalOut Led2({{14, 8}});
 
 
 pros::Distance l_dis(10);

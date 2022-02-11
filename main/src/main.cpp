@@ -123,7 +123,9 @@ void opcontrol() {
 	b_lift.move(0);
 	f_lift.reset();
 	f_lift.move(0);
-	f_claw_p.set_value(0); 
+	f_claw_p.set_value(0);
+	Led1.set_value(1);
+	Led2.set_value(1);
 	// while(true){
 	// 	if(master.get_digital_new_press(DIGITAL_Y)){
 	// 		master.print(0,0,"%d",BackEncoder.get_value());
@@ -240,7 +242,7 @@ void opcontrol() {
 
 			// skills3();
 			// skills4();
-			skillsPark();
+			// skillsPark();
 			//fits platfor to reset
 			/**
 			move_start(move_types::turn_angle, turn_angle_params(90.0));
@@ -260,13 +262,13 @@ void opcontrol() {
 			// waitUntil(master.get_digital_new_press(DIGITAL_R1));
 			// int t = millis();
 
-			// gyro.climb_ramp();
+			gyro.climb_ramp();
 			// // gyro.level(2.2, 0);
 
-			// drivebase.brake();
+			drivebase.brake();
 			// printf("ds:%d\n", millis()-t);
 			// delay(5000);
-			// waitUntil(false);
+			waitUntil(false);
 
 			//grab goal on wall 
 
