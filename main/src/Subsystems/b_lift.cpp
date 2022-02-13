@@ -94,7 +94,7 @@ void B_Lift::handle(){
       if(master.get_digital_new_press(b_lift_down_button)){
         master.rumble("-");
         master.print(B_LIFT_STATE_LINE, 0, "B_Lift: Idle         ");
-
+        
         set_state(b_lift_states::idle);
       }
       // intake.toggle();

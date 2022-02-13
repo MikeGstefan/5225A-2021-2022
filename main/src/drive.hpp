@@ -3,6 +3,7 @@
 #include "util.hpp"
 #include "logging.hpp"
 #include "auton_util.hpp"
+#include "Libraries/gui.hpp"
 
 #include "Subsystems/b_lift.hpp"
 #include "Subsystems/f_lift.hpp"

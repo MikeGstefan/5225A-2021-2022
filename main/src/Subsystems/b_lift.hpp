@@ -33,6 +33,8 @@ class B_Lift: public Motorized_subsystem<b_lift_states, NUM_OF_LIFT_STATES, LIFT
   double arm_len = 8.0;
   double gear_ratio = 5.0;
 
+  Timer release_timer{"release_timer"};
+
 public:
   const double bottom_position = 35.0, raised_position = 400.0, tall_dropoff_position = 550, platform_position = 660.0, tall_goal_position = 665.0, top_position = 675.0;
 
