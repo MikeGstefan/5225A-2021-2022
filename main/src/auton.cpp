@@ -136,14 +136,14 @@ void switch_alliance(){
       cur_alliance = alliances::BLUE;
       alliance.set_background(COLOR_BLUE);
       printf("\033[34mSwitched to Blue Alliance\033[0m\n");
-      misc.print("Switched to Blue Alliance\n");
+      events.print("Switched to Blue Alliance\n");
       break;
 
     case alliances::BLUE:
       cur_alliance = alliances::RED;
       alliance.set_background(COLOR_RED);
       printf("\033[31mSwitched to Red Alliance\033[0m\n");
-      misc.print("Switched to Red Alliance\n");
+      events.print("Switched to Red Alliance\n");
       break;
   }
 
@@ -156,14 +156,14 @@ void switch_alliance(alliances new_ally){
       cur_alliance = alliances::BLUE;
       alliance.set_background(COLOR_BLUE);
       printf("\033[34mSwitched to Blue Alliance\033[0m\n");
-      misc.print("Switched to Blue Alliance\n");
+      events.print("Switched to Blue Alliance\n");
       break;
 
     case alliances::RED:
       cur_alliance = alliances::RED;
       alliance.set_background(COLOR_RED);
       printf("\033[31mSwitched to Red Alliance\033[0m\n");
-      misc.print("Switched to Red Alliance\n");
+      events.print("Switched to Red Alliance\n");
       break;
   }
 
