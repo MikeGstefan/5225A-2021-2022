@@ -114,9 +114,8 @@ bool claw_state = false, lift_state = false, drive_state = false;
 int lift_speed = 0;
 int safety_check = 0;
 void opcontrol() {
+	// f_lift_m.move(40);
   drivebase.driver_practice();
-
-  printf("URMOM\n");
   
 	master.clear();
 	// b_lift.reset();

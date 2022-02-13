@@ -10,22 +10,21 @@
 using namespace pros;
 // Buttons
 
-// lift buttons
-extern controller_digital_e_t lift_up_button;
-extern controller_digital_e_t lift_down_button;
-extern controller_digital_e_t tall_goal_dropoff_button;
+// back lift buttons
+extern controller_digital_e_t b_lift_up_button;
+extern controller_digital_e_t b_lift_down_button;
+extern controller_digital_e_t b_tall_goal_dropoff_button;
 
-
-extern controller_digital_e_t tilter_search_button;
-extern controller_digital_e_t tilter_raise_button;
+// front lift buttons
+extern controller_digital_e_t f_lift_up_button;
+extern controller_digital_e_t f_lift_down_button;
+extern controller_digital_e_t f_tall_goal_dropoff_button;
 
 // misc buttons
 extern controller_digital_e_t cancel_button;
 extern controller_digital_e_t shift_button;
-extern controller_digital_e_t climb_platform_button;
 extern controller_digital_e_t intake_button;
 extern controller_digital_e_t reverse_drive_button;
-
 
 #define num_controller 1
 

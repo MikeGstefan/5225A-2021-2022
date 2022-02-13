@@ -2,19 +2,19 @@
 
 // Buttons
 
-// lift buttons
-controller_digital_e_t lift_up_button = DIGITAL_L1;
-controller_digital_e_t lift_down_button = DIGITAL_L2;
-controller_digital_e_t tall_goal_dropoff_button = DIGITAL_DOWN;
+// back lift buttons
+controller_digital_e_t b_lift_up_button = DIGITAL_L1;
+controller_digital_e_t b_lift_down_button = DIGITAL_L2;
+controller_digital_e_t b_tall_goal_dropoff_button = DIGITAL_DOWN;
 
-// tilter buttons
-controller_digital_e_t tilter_search_button = DIGITAL_R1;
-controller_digital_e_t tilter_raise_button = DIGITAL_R2;
+// front lift buttons
+controller_digital_e_t f_lift_up_button = DIGITAL_R1;
+controller_digital_e_t f_lift_down_button = DIGITAL_R2;
+controller_digital_e_t f_tall_goal_dropoff_button = DIGITAL_UP;
 
 // misc buttons
 controller_digital_e_t cancel_button = DIGITAL_B;
 controller_digital_e_t shift_button = DIGITAL_X;
-controller_digital_e_t climb_platform_button = DIGITAL_UP;
 controller_digital_e_t intake_button = DIGITAL_LEFT;
 controller_digital_e_t reverse_drive_button = DIGITAL_RIGHT;
 

@@ -4,7 +4,8 @@
 #include "logging.hpp"
 #include "auton_util.hpp"
 
-#include "Subsystems/lift.hpp"
+#include "Subsystems/b_lift.hpp"
+#include "Subsystems/f_lift.hpp"
 
 using namespace pros;
 

@@ -218,13 +218,17 @@ void Drivebase::handle_input(){
 void Drivebase::driver_practice(){
   master.clear();
   master.print(1, 0, "Driver: %s", drivebase.drivers[drivebase.cur_driver].name);
-  master.print(2, 0, "Lift: Searching     ");
+  master.print(B_LIFT_STATE_LINE, 0, "B_Lift: Searching     ");
+  master.print(F_LIFT_STATE_LINE, 0, "F_Lift: Searching     ");
+
 
   // initializes pneumatics in appropriate state
 
   // moves motors to necessary positions / speeds
-  lift.reset();
-  lift.move_absolute(lift.bottom_position);
+  b_lift.reset();
+  b_lift.move_absolute(b_lift.bottom_position);
+  f_lift.reset();
+  f_lift.move_absolute(f_lift.bottom_position);
   // lift.move(-10); // gives holding power
 
   cur_driver = 0; // defaults driver to Nikhil
@@ -247,7 +251,8 @@ void Drivebase::driver_practice(){
 
       // actual drive code
       drivebase.handle_input();
-      lift.handle();
+      b_lift.handle();
+      f_lift.handle();
       handle_trans();
 
       // prints motor temps every second
