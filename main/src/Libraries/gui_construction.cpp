@@ -400,6 +400,6 @@ void util_background(){
   }
 }
 
-GUI g_main ({&driver_curve, &temps, &auto_selection, &track, &moving, &intake_test, &elastic, &motor_subsys, &liftStates, &tuning, &pneumatic}, &main_setup, &main_background);
+GUI g_main ({&temps, &driver_curve, &auto_selection, &track, &moving, &intake_test, &elastic, &motor_subsys, &liftStates, &tuning, &pneumatic}, &main_setup, &main_background);
 
 GUI g_util ({&ports, &encoders, &motor, &pneumatic}, &util_setup, &util_background);

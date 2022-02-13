@@ -31,7 +31,7 @@ GUI* const GUI::current_gui = &g_main;
  bool auton_run = false; // has auton run
 
 void initialize() {
-	gyro.calibrate();
+	// gyro.calibrate();
 	drivebase.download_curve_data();
 	Data::init();
 	_Controller::init();
@@ -42,7 +42,7 @@ void initialize() {
 	update_t.start();
 	// auton_file_read();
 	// master.print(2, 0, "Driver: %s", drivebase.drivers[drivebase.cur_driver].name);
-	gyro.finish_calibrating(); //Finishes calibrating gyro before program starts
+	// gyro.finish_calibrating(); //Finishes calibrating gyro before program starts
 }
 
 /**
@@ -75,11 +75,18 @@ void competition_initialize() {}
  * from where it left off.
  */
 void autonomous() {
-	auton_run = true;
-	double x;
-	double y;
-	double a;
+	
+	b_lift.reset();
+	Task([](){ 
+		f_lift.reset();
+	});
+	f_claw_p.set_value(0);
+	b_claw_p.set_value(0);
+	skills();
+	skills2();
 
+	skills3();
+	while(true);
 	// FILE * fp;
 	// fp = fopen("/usd/init.txt", "r");
 	// fscanf(fp,"%lf %lf %lf",&x,&y,&a);
@@ -115,13 +122,27 @@ bool claw_state = false, lift_state = false, drive_state = false;
 int lift_speed = 0;
 int safety_check = 0;
 void opcontrol() {
+	// b_lift.reset();
+	// Task([](){ 
+	// 	f_lift.reset();
+	// });
+	// f_claw_p.set_value(0);
+	// b_claw_p.set_value(0);
+	// skills();
+	// skills2();
+
+	// skills3();
+	// while(true);
+
+	// b_lift.reset();
+	
 	// f_lift.reset();
 	// while(true)delay(10);
 
 	// master.clear();
-	b_lift.reset();
+	
 	b_lift.move(0);
-	f_lift.reset();
+	
 	f_lift.move(0);
 	f_claw_p.set_value(0);
 	Led1.set_value(1);
@@ -204,6 +225,7 @@ void opcontrol() {
 	// }
 
 	while(true){
+		GUI::update();
 		if(master.get_digital_new_press(DIGITAL_Y)){ 
 			master.print(0,0,"%d",BackEncoder.get_value());
 		}
@@ -212,95 +234,95 @@ void opcontrol() {
 			claw_state = !claw_state;
 			b_claw_p.set_value(claw_state);
 		}
-		if(master.get_digital_new_press(DIGITAL_B)){ 
-			// b_lift.move_absolute(10);
-			// b_detect_goal();
-			f_lift.move_absolute(10);
-			f_detect_goal();
+		// if(master.get_digital_new_press(DIGITAL_B)){ 
+		// 	// b_lift.move_absolute(10);
+		// 	// b_detect_goal();
+		// 	f_lift.move_absolute(10);
+		// 	f_detect_goal();
 			
 
-			claw_state = 1;
+		// 	claw_state = 1;
 			
-		}
-		if(master.get_digital_new_press(DIGITAL_L1)){ 
-			b_lift.move_absolute(300);
-		}
-		if(master.get_digital_new_press(DIGITAL_L2)){ 
-			b_lift.move_absolute(0);
-		}
+		// }
+		// if(master.get_digital_new_press(DIGITAL_L1)){ 
+		// 	b_lift.move_absolute(300);
+		// }
+		// if(master.get_digital_new_press(DIGITAL_L2)){ 
+		// 	b_lift.move_absolute(0);
+		// }
 		// printf("dist: %d\n", b_dist.get());
 		drivebase.handle_trans();
 		// drivebase.handle_input();
-		if(master.get_digital_new_press(DIGITAL_R1)){ 
-			Timer timer {"timer"};
-			// master.clear();
-			// delay(50);
-			// master.print(0,0,"%f",reset_dist_l.get_dist());
-			// reset_dist_r.reset(141.0,0.0 + DIST_BACK,0.0);
-			// skills();
-			// skills2();
+		// if(master.get_digital_new_press(DIGITAL_R1)){ 
+		// 	Timer timer {"timer"};
+		// 	// master.clear();
+		// 	// delay(50);
+		// 	// master.print(0,0,"%f",reset_dist_l.get_dist());
+		// 	// reset_dist_r.reset(141.0,0.0 + DIST_BACK,0.0);
+		// 	skills();
+		// 	skills2();
 
-			// skills3();
-			// skills4();
-			skillsPark();
-			//fits platfor to reset
-			/**
-			move_start(move_types::turn_angle, turn_angle_params(90.0));
-			delay(100);
-			move_start(move_types::tank_arc, tank_arc_params({70.0, 95.0}, {122.0,119.0,0.0}));
-			// move_start(move_types::turn_angle, turn_angle_params(0.0));
-			move_start(move_types::tank_point, tank_point_params({122.0,123.0,0.0},false));
-			flatten_against_wall(true);
-			*/
-			// f_claw_p.set_value(HIGH);
-			// b_claw_p.set_value(HIGH);
-			// f_lift.move_absolute(610);
-			// b_lift.move_absolute(150);
-			// waitUntil(f_lift_m.get_position() > 590);
-			// f_lift.move(15);
+		// 	skills3();
+		// 	// skills4();
+		// 	// skillsPark();
+		// 	//fits platfor to reset
+		// 	/**
+		// 	move_start(move_types::turn_angle, turn_angle_params(90.0));
+		// 	delay(100);
+		// 	move_start(move_types::tank_arc, tank_arc_params({70.0, 95.0}, {122.0,119.0,0.0}));
+		// 	// move_start(move_types::turn_angle, turn_angle_params(0.0));
+		// 	move_start(move_types::tank_point, tank_point_params({122.0,123.0,0.0},false));
+		// 	flatten_against_wall(true);
+		// 	*/
+		// 	// f_claw_p.set_value(HIGH);
+		// 	// b_claw_p.set_value(HIGH);
+		// 	// f_lift.move_absolute(610);
+		// 	// b_lift.move_absolute(150);
+		// 	// waitUntil(f_lift_m.get_position() > 590);
+		// 	// f_lift.move(15);
 
-			// waitUntil(master.get_digital_new_press(DIGITAL_R1));
-			// int t = millis();
+		// 	// waitUntil(master.get_digital_new_press(DIGITAL_R1));
+		// 	// int t = millis();
 
-			// gyro.climb_ramp();
-			// // gyro.level(2.2, 0);
+		// 	// gyro.climb_ramp();
+		// 	// // gyro.level(2.2, 0);
 
-			// drivebase.brake();
-			// printf("ds:%d\n", millis()-t);
-			// delay(5000);
-			// waitUntil(false);
+		// 	// drivebase.brake();
+		// 	// printf("ds:%d\n", millis()-t);
+		// 	// delay(5000);
+		// 	// waitUntil(false);
 
-			//grab goal on wall 
+		// 	//grab goal on wall 
 
-			/**
-			move_start(move_types::turn_angle, turn_angle_params(-90.0));
-			move_start(move_types::tank_point, tank_point_params({111.0,34.0,-90.0},false,70));
-			delay(500);
-			move_start(move_types::tank_point, tank_point_params({127.0,34.0,-90.0},false, 70),false);
-			detect_goal();
-			move_stop();
-			// drivebase.brake();
-			move_start(move_types::tank_point, tank_point_params({115.0,34.0,-90.0},false));
-			b_lift.move_absolute(650);
-			while(b_lift.motor.get_position() < 630)delay(10);
-			b_lift.move(10);
-			flatten_against_wall(false);
+		// 	/**
+		// 	move_start(move_types::turn_angle, turn_angle_params(-90.0));
+		// 	move_start(move_types::tank_point, tank_point_params({111.0,34.0,-90.0},false,70));
+		// 	delay(500);
+		// 	move_start(move_types::tank_point, tank_point_params({127.0,34.0,-90.0},false, 70),false);
+		// 	detect_goal();
+		// 	move_stop();
+		// 	// drivebase.brake();
+		// 	move_start(move_types::tank_point, tank_point_params({115.0,34.0,-90.0},false));
+		// 	b_lift.move_absolute(650);
+		// 	while(b_lift.motor.get_position() < 630)delay(10);
+		// 	b_lift.move(10);
+		// 	flatten_against_wall(false);
 
-			delay(500);
-			move_start(move_types::tank_point, tank_point_params({117.0,34.0,-90.0},false));
-			b_lift.move_absolute(10);
-			move_start(move_types::turn_point, turn_point_params({70.0,70.0}));
-			delay(50);
-			master.print(0,0,"%d", timer.get_time());
-			delay(10000);
-			*/
-			master.print(0,0,"%d", timer.get_time());
-			delay(2000);
+		// 	delay(500);
+		// 	move_start(move_types::tank_point, tank_point_params({117.0,34.0,-90.0},false));
+		// 	b_lift.move_absolute(10);
+		// 	move_start(move_types::turn_point, turn_point_params({70.0,70.0}));
+		// 	delay(50);
+		// 	master.print(0,0,"%d", timer.get_time());
+		// 	delay(10000);
+		// 	*/
+		// 	master.print(0,0,"%d", timer.get_time());
+		// 	delay(2000);
 
-		}
-		else{
+		// }
+		// else{
 			drivebase.handle_input();
-		}
+		// }
 
 		// if(abs(master.get_analog(ANALOG_LEFT_Y))> 20)b_lift.move(master.get_analog(ANALOG_LEFT_Y));
 		// else b_lift.motor.move_relative(0, 40);

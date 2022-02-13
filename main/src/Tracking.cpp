@@ -915,7 +915,7 @@ void tank_move_to_target(void* params){
 
       error.x = target.x - tracking.x_coord;
       error.y = target.y - tracking.y_coord;
-
+      motion_d.print(" %d || error y : %.2f error a : %.2f pow y : %.2f, pow a : %.2f\n ", millis(), local_error.y, rad_to_deg(error.angle), tracking.power_y, tracking.power_a);
       if(fabs(line_disp.get_y()) < 0.5 && sgn_line_y != orig_sgn_line_y){
         if (brake) drivebase.brake();
         tracking.move_complete = true;
@@ -1390,12 +1390,39 @@ void Gyro::climb_ramp(){
   waitUntil(!inRange(r_reset_dist.get(), 0, 200));
   GUI::flash(COLOUR(RED), 1000, "Saw wall\n");
   Led1.set_value(0);
+  drivebase.move(60.0,0.0);
 
-  tracking.wait_for_dist(5.5);
+  int left_pos = LeftEncoder.get_value(), right_pos = RightEncoder.get_value();
+
+  // while()
+
+  // double pos = tracking.x_coord;
+  // while(tracking.x_coord > pos - 8.0)delay(10);
+  // tracking.wait_for_dist(8.5);
+  Task([&](){ 
+    while(true){ 
+      misc.print(" angle: %f\n", get_angle());
+      delay(10);
+    }
+    // Led2.set_value(0);
+  });
+
+  Task([&](){ 
+    while(get_angle() > 20)delay(10);
+    Led2.set_value(0);
+  });
+
+  cycleCheck(get_angle() < 20, 3, 10);
+  drivebase.move(-40.0,0.0);
+  tracking.wait_for_dist(0.5);
+
+  // cycleCheck(get_angle() < 18, 3, 10);
+  // drivebase.move(-40.0,0.0);
+  // tracking.wait_for_dist(1.5);
 
   drivebase.brake();
   GUI::flash(COLOUR(RED), 1000, "Braked\n");
-  Led2.set_value(0);
+  
 }
 
 void Gyro::level(double kP, double kD){

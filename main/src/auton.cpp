@@ -121,7 +121,8 @@ void skills2(){
   move_start(move_types::turn_point, turn_point_params({104.5, 72.0}));
 
   delay(50);
-	move_start(move_types::tank_point, tank_point_params({106.5,72.0,  235.0},false, 80.0,1.0,true,9.0,130.0),false);// drive throught neut goal
+	// move_start(move_types::tank_point, tank_point_params({106.5,72.0,  235.0},false, 80.0,1.0,true,9.0,130.0),false);// drive throught neut goal
+  move_start(move_types::tank_point, tank_point_params({104.5,70.0,  235.0},false, 80.0,1.0,true,9.0,130.0),false);// drive throught neut goal
   f_detect_goal();
   move_stop();
   // while(!master.get_digital(DIGITAL_L1))delay(10);
@@ -129,10 +130,10 @@ void skills2(){
 	move_start(move_types::turn_point, turn_point_params({71.0,43.0}, true));  // turns to face plus of rings
 	delay(100);
 
-  move_start(move_types::tank_point, tank_point_params({71.0, 46.0, 235.0},false, 80.0, 1.0, true,9.0,130.0),false);
+  move_start(move_types::tank_point, tank_point_params({71.0, 44.5, 235.0},false, 80.0, 1.0, true,9.0,130.0),false);
   delay(100);
-    f_lift.move_absolute(200);
-  b_lift.move_absolute(700);
+    f_lift.move_absolute(580);
+    b_lift.move_absolute(700);
   move_wait_for_complete();
 
   delay(100);
@@ -151,22 +152,56 @@ void skills2(){
   b_claw_p.set_value(0);
   delay(200);
   b_lift.move_absolute(650);
-  f_lift.move_absolute(10);
+  // f_lift.move_absolute(10);
   while(b_lift.motor.get_position() < 620)delay(10);
+  // drivebase.move(30.0,0.0);
+  // misc.print("%d || starting backup from plat\n", millis());
+  // tracking.wait_for_dist(5.0);
+  // drivebase.brake();
+
+
   drivebase.move(30.0,0.0);
   misc.print("%d || starting backup from plat\n", millis());
   tracking.wait_for_dist(5.0);
   drivebase.brake();
+  b_lift.move_absolute(800);
+  while(b_lift.motor.get_position() < 780)delay(10);
+  misc.print("%d || done backup from plat\n", millis());
+  // drivebase.move(-30.0,0.0);
+  // tracking.wait_for_dist(2.0);
+  // drivebase.brake();
+  // drivebase.brake();
+  // b_lift.move_absolute(650);
+  
+  // return;
+  move_start(move_types::turn_angle, turn_angle_params(200.0, true, false, 160.0,0.0,70.0));
+  // return;
+  delay(200);
+   misc.print("%d || starting drive towards  plat\n", millis());
+  drivebase.move(30.0,0.0);
+  tracking.wait_for_dist(2.0, 750);
+  misc.print("%d || done drive towards plat\n", millis());
+  f_claw_p.set_value(0);
+  delay(400);
+  // move_start(move_types::turn_angle, turn_angle_params(360.0,true, true, 170.0,0.0, 127.0, 500)); 
+  // return;
+  move_start(move_types::tank_point, tank_point_params({71.0, 46.0, 235.0},false, 80.0, 1.0, true,9.0,130.0),false);
+
+
+
 
   move_start(move_types::turn_angle, turn_angle_params(270.0));
+  // return;
   f_claw_p.set_value(0);
   b_lift.move_absolute(10);
 	// move_start(move_types::tank_point, tank_point_params({111.0,34.0,-90.0},false,70));
 	// delay(500);
-	move_start(move_types::tank_point, tank_point_params({127.0,34.0,270.0},false, 70),false);
+	move_start(move_types::tank_point, tank_point_params({180.0,34.0,270.0},false, 70),false);
 	b_detect_goal();
 	move_stop();
-			// drivebase.brake();
+	// drivebase.brake();
+  drivebase.move(-20,0);
+  delay(100);
 	move_start(move_types::tank_point, tank_point_params({115.0,34.0,270.0},false));
   move_start(move_types::turn_angle, turn_angle_params(270.0, true, true,160.0,0.0,127.0,500,35.0));
 	b_lift.move_absolute(820);
@@ -229,22 +264,31 @@ void skills3(){
   move_start(move_types::turn_angle, turn_angle_params(rad_to_deg(atan2(70.0 - tracking.x_coord, 66.0 - tracking.y_coord) )+180));
   delay(100);
   b_lift.move_absolute(10);
-  move_start(move_types::tank_point, tank_point_params(polar_to_vector_point(tracking.x_coord, tracking.y_coord, -72.0, rad_to_deg(tracking.global_angle), rad_to_deg(tracking.global_angle)), false, 90.0),false);
-  b_detect_goal();
-  b_lift.move_absolute(200);
+  move_start(move_types::tank_point, tank_point_params(polar_to_vector_point(tracking.x_coord, tracking.y_coord, -30.0, rad_to_deg(tracking.global_angle), rad_to_deg(tracking.global_angle)), false, 90.0),true);
+  move_start(move_types::turn_angle, turn_angle_params(rad_to_deg(atan2(70.0 - tracking.x_coord, 66.0 - tracking.y_coord) )+180));
+  drivebase.set_state(1);
+  move_start(move_types::tank_point, tank_point_params(polar_to_vector_point(tracking.x_coord, tracking.y_coord, -150.0, rad_to_deg(tracking.global_angle), rad_to_deg(tracking.global_angle)), false, 127.0),false);
+  Task([](){
+    b_detect_goal();
+    b_lift.move_absolute(200);
+  });
+  tracking.wait_for_dist(90.0);
   move_stop();
+  drivebase.brake();
+  // move_wait_for_complete();
+  // move_stop();
   // drivebase.brake();
-  move_start(move_types::tank_point, tank_point_params({110.0,30.0,45.0}, false));
-  b_lift.move_absolute(650);
-  move_start(move_types::turn_angle, turn_angle_params(0.0));
-  delay(100);
-  move_start(move_types::tank_point, tank_point_params(polar_to_vector_point(tracking.x_coord, 30.0, -18.0, 0.0,0.0), false, 60.0));
-  while(b_lift.motor.get_position() <630)delay(10);
-  flatten_against_wall(false);
-  // int start = millis();
-  delay(100);
-  tracking.reset(141.0- reset_dist_r.get_dist(), DIST_BACK,180.0);
-  delay(200);
+  // move_start(move_types::tank_point, tank_point_params({110.0,30.0,45.0}, false));
+  // b_lift.move_absolute(650);
+  // move_start(move_types::turn_angle, turn_angle_params(0.0));
+  // delay(100);
+  // move_start(move_types::tank_point, tank_point_params(polar_to_vector_point(tracking.x_coord, 30.0, -18.0, 0.0,0.0), false, 60.0));
+  // while(b_lift.motor.get_position() <630)delay(10);
+  // flatten_against_wall(false);
+  // // int start = millis();
+  // delay(100);
+  // tracking.reset(141.0- reset_dist_r.get_dist(), DIST_BACK,180.0);
+  // delay(200);
   master.print(2,2,"%d", millis() - start_time);
   // delay(1000);
   // move_start(move_types::tank_point, tank_point_params({16.0, 102.0, -90.0}, false));
@@ -317,12 +361,17 @@ void skillsPark(){
 	// delay(100);
   
   flatten_against_wall(false);
-  
+  Led1.set_value(0);
   delay(100);
-  tracking.reset(141.0- reset_dist_r.get_dist(), DIST_BACK,0.0);
+  double dist = reset_dist_l.get_dist();
+  tracking.reset(141.0- dist, DIST_BACK,0.0);
   delay(200);
+  master.print(0,0, "%f", dist);
+  master.print(1,1,"%.2f, %.2f, %.2f", tracking.x_coord, tracking.y_coord,rad_to_deg(tracking.global_angle));
+  // while(!master.get_digital_new_press(DIGITAL_R1))delay(10);
   int start = millis();
-  // master.print(1,1,"%.2f, %.2f, %.2f", tracking.x_coord, tracking.y_coord,rad_to_deg(tracking.global_angle));
+  
+  // 
   // while(!master.get_digital_new_press(DIGITAL_R1))delay(10);
 
   
@@ -334,25 +383,29 @@ void skillsPark(){
   delay(100);
   // move_start(move_types::tank_point, tank_point_params({105.0, 10.0, 270.0}, false));
   drivebase.move(40.0,0.0);
-  while(tracking.x_coord  > 109.0)delay(10);
+  while(tracking.x_coord  > 107.0)delay(10);
   drivebase.brake();
-  b_lift.move_absolute(100);
+  b_lift.move_absolute(150);
   f_lift.move_absolute(1);
   while(f_lift.motor.get_position()  > 15)delay(10);
   f_lift.move(-15);
+  // return;
   // delay(500);
   // f_lift.move_absolute(800);
 	// 		b_lift.move_absolute(150);
 	// waitUntil(f_lift_m.get_position() > 780);
   // delay(500);
   // f_lift.move_absolute(610);
-  Task([](){
-    delay(300);
-		f_lift.move(70);
-    waitUntil(f_lift_m.get_position() > 600);
-    f_lift.motor.move_relative(0, 100);
-  });
+
+
+  // Task([](){
+  //   delay(300);
+	// 	f_lift.move(70);
+  //   waitUntil(f_lift_m.get_position() > 700);
+  //   f_lift.motor.move_relative(0, 100);
+  // });
   drivebase.set_state(1);
+  Led1.set_value(1);
   gyro.climb_ramp();
   drivebase.brake();
   delay(100);
