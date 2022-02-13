@@ -7,6 +7,7 @@ F_Lift f_lift({{"F_Lift",
   "search_lip",
   "search_bowl",
   "grabbed",
+  "releasing"
   "tip",
   "platform",
   "tall_platform",
@@ -17,7 +18,7 @@ F_Lift f_lift({{"F_Lift",
 }
 }, f_lift_m});
 
-F_Lift::F_Lift(Motorized_subsystem<f_lift_states, NUM_OF_LIFT_STATES, LIFT_MAX_VELOCITY> motorized_subsystem): Motorized_subsystem(motorized_subsystem){ // constructor
+F_Lift::F_Lift(Motorized_subsystem<f_lift_states, NUM_OF_F_LIFT_STATES, LIFT_MAX_VELOCITY> motorized_subsystem): Motorized_subsystem(motorized_subsystem){ // constructor
 
   state = f_lift_states::search_lip;
   last_state = state;
@@ -136,12 +137,12 @@ void F_Lift::handle(){
       // releases goal and turns off intake if down button is pressed
       if(master.get_digital_new_press(f_lift_down_button) && fabs(bottom_position - motor.get_position()) < end_error){
         f_claw_p.set_value(LOW);
-        master.print(F_LIFT_STATE_LINE, 0, "F_Lift: Idle         ");
+        release_timer.reset();
+        // master.print(F_LIFT_STATE_LINE, 0, "F_Lift: Idle         ");
 
         // // intake.motor.move(0); // turns off intake
 
-        set_state(f_lift_states::idle);
-
+        set_state(f_lift_states::releasing);
       }
       if(master.get_digital_new_press(f_tall_goal_dropoff_button)){  // moves to top position if level platform button is pressed
         move_absolute(tall_dropoff_position);
@@ -150,6 +151,14 @@ void F_Lift::handle(){
         set_state(f_lift_states::tall_platform);
       }
       // // intake.toggle();
+      break;
+
+    case f_lift_states::releasing:
+      if(release_timer.get_time() > 2000){
+        set_state(f_lift_states::search_lip); 
+        
+        master.print(F_LIFT_STATE_LINE, 0, "F_Lift: Searching      ");
+      }
       break;
 
     case f_lift_states::tip:

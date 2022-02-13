@@ -46,7 +46,7 @@ struct driver{
 class Drivebase{
   bool reversed; // if false forwards is the intake side
   int cur_screen;
-  int deadzone = 5;
+  int deadzone = 10;
   const char* screen_text[3] = {"LOCAL_X CURVE:", "LOCAL_Y CURVE:", "LOCAL_A CURVE:"};
   void update_screen();
   bool state;//state for the transmission
