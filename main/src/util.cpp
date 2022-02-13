@@ -36,3 +36,11 @@ char* const millis_to_str(std::uint32_t milliseconds){
 
   return buffer;
 }
+
+std::function<long double (long double)> func_scale(std::function<long double(long double)> f, Point p1, Point p2, double control){
+  double denom = f(p2.x-control)-f(p1.x-control);
+  double a = (p2.y-p1.y)/(denom);
+  double b = (p1.y*f(p2.x-control)-p2.y*f(p1.x-control))/denom;
+
+  return [=](long double inp){return a*f(inp-control)+b;};
+}

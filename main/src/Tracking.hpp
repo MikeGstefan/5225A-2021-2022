@@ -5,7 +5,6 @@
 #include "geometry.hpp"
 #include "pid.hpp"
 #include "drive.hpp"
-#include "geometry.hpp"
 #include "task.hpp"
 #include "Libraries/gui.hpp"
 #include <iostream>
