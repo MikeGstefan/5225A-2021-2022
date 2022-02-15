@@ -38,7 +38,7 @@ void initialize() {
 	delay(500);
 	// tracking.x_coord = 26.0, tracking.y_coord = 11.75, tracking.global_angle = -90.0_deg;
 	tracking.x_coord = 0.0, tracking.y_coord = 0.0, tracking.global_angle = 0.0_deg;
-	update_t.start();
+	//update_t.start();
 	// auton_file_read();
 	// master.print(2, 0, "Driver: %s", drivebase.drivers[drivebase.cur_driver].name);
 	// gyro.finish_calibrating(); //Finishes calibrating gyro before program starts
@@ -74,10 +74,10 @@ void competition_initialize() {}
  * from where it left off.
  */
 void autonomous() {
-	auton_run = true;
-	double x;
-	double y;
-	double a;
+	// auton_run = true;
+	// double x;
+	// double y;
+	// double a;
 
 	// FILE * fp;
 	// fp = fopen("/usd/init.txt", "r");
@@ -114,11 +114,9 @@ bool claw_state = false, lift_state = false, drive_state = false;
 int lift_speed = 0;
 int safety_check = 0;
 void opcontrol() {
-  time = millis();
-	vision_loop(15);
-  printf("Done: %f\n", (millis()-time));
-  drivebase.brake();
-  delay(2000);
+  //move_start(move_types::turn_angle, turn_angle_params(60));
+  distance_reset(500);
+
 	// master.clear();
 	// // b_lift.reset();
 	// // b_lift.move(0);

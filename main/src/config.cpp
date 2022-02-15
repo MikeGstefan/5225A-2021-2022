@@ -9,7 +9,7 @@ pros::Motor front_r(1, pros::E_MOTOR_GEARSET_18, true, pros::E_MOTOR_ENCODER_DEG
 pros::Motor back_l(3, pros::E_MOTOR_GEARSET_18, false, pros::E_MOTOR_ENCODER_DEGREES);
 pros::Motor back_r(2, pros::E_MOTOR_GEARSET_18, true,pros::E_MOTOR_ENCODER_DEGREES);
 
-pros::Motor f_lift_m(16), b_lift_m(9, pros::E_MOTOR_GEARSET_36, true,pros::E_MOTOR_ENCODER_DEGREES);
+pros::Motor f_lift_m(16), b_lift_m(10, pros::E_MOTOR_GEARSET_36, true,pros::E_MOTOR_ENCODER_DEGREES);
 
 // tank drive config
 // pros::Motor front_l(19, pros::E_MOTOR_GEARSET_18, false, pros::E_MOTOR_ENCODER_DEGREES);
@@ -19,11 +19,11 @@ pros::Motor f_lift_m(16), b_lift_m(9, pros::E_MOTOR_GEARSET_36, true,pros::E_MOT
 
 pros::Imu imu_sensor(4);
 pros::Distance b_dist(6), r_dist(10);
-pros::ADIDigitalOut trans_p(7), b_claw_p(8);
+pros::ADIDigitalOut trans_p(7), b_claw_p(6); //b_claw was 8
 
 
-pros::Distance l_dis(10);
-pros::Distance r_dis(8);
+pros::Distance back_right_dist(9);
+pros::Distance back_left_dist(8);
 
 pros::Imu ramp_imu(11);
 
