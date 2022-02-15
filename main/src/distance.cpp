@@ -31,7 +31,7 @@ void average(int time){
 		delay(33);
 	}
 	sort(left.begin(), left.end());
-	
+	sort(right.begin(), right.end());
 	averageleft = left.at(left. size() / 2);
 	averageright = right.at(right.size() / 2);
 	printf("Average: Left:%f Right:%f\n", averageleft, averageright);
