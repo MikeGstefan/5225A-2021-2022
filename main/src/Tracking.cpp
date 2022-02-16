@@ -849,22 +849,19 @@ void tank_move_to_target(void* params){
     // move on line variables
     Vector follow_line(target.y - tracking.y_coord, target.x - tracking.x_coord); // used to keep track of angle of follow_line relative to the vertical
     Vector line_disp(target.x - tracking.x_coord, target.y - tracking.y_coord);  // displacements relative to line
-    double line_y_local_y; // local_y component of power along line
     int time = millis();
     motion_i.print("%d|| Starting tank move to point from (%.2f, %.2f, %.2f) to (%.2f, %.2f, %.2f)\n", millis(), tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle),target.x, target.y, target.angle);
     while(true){
-      // start of move_on_line stuff
-      line_disp = Vector(target.x - tracking.x_coord, target.y - tracking.y_coord);  // displacements relative to line
-      // line_disp.set_polar(line_disp.get_magnitude(), line_disp.get_angle() + follow_line.get_angle());  // rotates vector by line angle
-      line_disp.rotate(follow_line.get_angle());  // rotates vector by line angle
-      // line_y_local_y = line_disp.get_y() * cos(tracking.global_angle - follow_line.get_angle());
-      sgn_line_y = sgn(line_disp.get_y());
+      // global displacement of robot and target
+      line_disp = Vector(target.x - tracking.x_coord, target.y - tracking.y_coord);
+      hypotenuse = line_disp.get_magnitude(); // distance to target
 
-      // end of move_on_line stuff
+      // rotates vector by line angle, now the vector represents the displacement RELATIVE TO THE LINE
+      line_disp.rotate(follow_line.get_angle());
+      sgn_line_y = sgn(line_disp.get_y()); // used to calculate if the robot has overshot
+
+      // difference in angle between angle to target and robot's local y axis
       difference_a = tracking.global_angle + atan2(target.y - tracking.y_coord, target.x - tracking.x_coord);
-      hypotenuse = sqrt(pow(target.x - tracking.x_coord, 2.0) + pow(target.y - tracking.y_coord, 2.0));
-
-      // local_error.x = cos(difference_a) * hypotenuse; // unused
 
       sgn_local_error_y = sgn(local_error.y);
       // printf("sgn_y: %d\n", sgn_local_error_y);
@@ -872,7 +869,8 @@ void tank_move_to_target(void* params){
         sgn_local_error_y = turn_dir_if_0 ? 1 : -1;
         // printf("triggered\n");
       }
-      local_error.y = sin(difference_a) * hypotenuse;
+      local_error.y = sin(difference_a) * hypotenuse; // local y displacement to target
+      // chooses nearest angle to turn to face target (back or front)
       error.angle = near_angle(sgn_local_error_y * M_PI / 2, difference_a);
       // printf("Errors | y: %lf, a: %lf\n", local_error.y, rad_to_deg(error.angle));
 
@@ -886,20 +884,15 @@ void tank_move_to_target(void* params){
       // scales powers
       total_power = fabs(tracking.power_y) + fabs(tracking.power_a);
       if (total_power > max_power){
-        // init variables
 
         pre_scaled_power_a = tracking.power_a;
-
-        // end of init variables
 
         max_power_scale = max_power / total_power;
         tracking.power_y *= max_power_scale;
         tracking.power_a *= max_power_scale;
 
 
-    // start of angle power guarantee
-
-
+        // start of angle power guarantee
         if (fabs(pre_scaled_power_a) > min_power_a){
             if (fabs(tracking.power_a) < min_power_a)  tracking.power_a = min_power_a * sgn(tracking.power_a);  // power_a has been overshadowed
         }
@@ -911,12 +904,11 @@ void tank_move_to_target(void* params){
 
       }
       // printf("Powers | y: %lf, a: %lf\n",tracking.power_y, tracking.power_a);
-      // printf("time: %d, TRACKING: %f, %f, %f \n\n", millis(), tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle));
 
-      error.x = target.x - tracking.x_coord;
-      error.y = target.y - tracking.y_coord;
       motion_d.print(" %d || error y : %.2f error a : %.2f pow y : %.2f, pow a : %.2f\n ", millis(), local_error.y, rad_to_deg(error.angle), tracking.power_y, tracking.power_a);
-      if(fabs(line_disp.get_y()) < 0.5 && sgn_line_y != orig_sgn_line_y){
+      
+      // exits movement once the target has been overshot (if the sign of y error along the line has flipped)
+      if(fabs(line_disp.get_y()) < 0.5 || sgn_line_y != orig_sgn_line_y){
         if (brake) drivebase.brake();
         tracking.move_complete = true;
         motion_i.print("%d || Ending move to target X: %f Y: %f A: %f at X: %f Y: %f A: %f time: %d\n", millis(), target.x, target.y, target.angle, tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle), millis()- time);
@@ -1026,9 +1018,8 @@ void tank_move_on_arc(void* params){
 
   Vector disp = p2 - p1;
   target.angle = deg_to_rad(target.angle);
-  // disp.set_polar(disp.get_magnitude(), disp.get_angle() + target.angle);
   disp.rotate(target.angle);  // rotates displacement by target's angle to obtain right triangles from isosceles triangle forming the arc
-  double theta = 2.0 * atan2(disp.get_x(), disp.get_y());
+  double theta = 2.0 * atan2(disp.get_x(), disp.get_y()); // 'span' of the arc (in radians)
   double radius = disp.get_magnitude() / 2.0 / sin(theta / 2.0);
   // printf("radius: %lf\n", radius);
   // printf("theta: %lf\n", rad_to_deg(theta));
@@ -1046,8 +1037,7 @@ void tank_move_on_arc(void* params){
   // from velocity to power / 1.6 or * 0.625
   // const double pwm_to_vel = 1.6;
   const double pwm_to_vel = 0.0628319;
-  const double kR = 30.0; // for ratio
-  // const double kR = 0.75; // for difference
+  const double kR = 30.0; // multiplier on radial error
 
   const double kA = pwm_to_vel * 160.0, kB = 1 / pwm_to_vel, kP = 35.0, kD = 0.0;
   const double final_angle = atan2(target.y - centre.y, target.x - centre.x); // angle of final position to centre at end of move
@@ -1064,22 +1054,25 @@ void tank_move_on_arc(void* params){
   motion_d.print("Starting tank move on arc from (%.2f, %.2f, %.2f) to (%.2f, %.2f, %.2f) on arc with r: %.2f and centre: (%.2f, %.2f)\n",tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle), target.x, target.y,target.angle, radius, centre.x, centre.y);
   while(true){
     g_position = {tracking.x_coord, tracking.y_coord};
-    disp = g_position - centre;
+    disp = g_position - centre; // global displacement of robot and arc's centra
     // printf("local_a: %lf\n", rad_to_deg(disp.get_angle()));
 
+    // global velocity of the robot
     arc_velocity.set_cartesian(tracking.g_velocity.x, tracking.g_velocity.y);
+    // veloicty of the robot relative to the arc
     arc_velocity.rotate(-disp.get_angle() + (turn_dir == -1 ? 0 : M_PI));
 
     // difference between target angle and current angle taking into account direction of movement and sign of power
     angle_diff = near_angle(-disp.get_angle() + (turn_dir == -1 ? 0 : M_PI), tracking.global_angle + (power < 0.0 ? M_PI : 0));
 
+    // linear velocity along the arc is the y component of the robot's velocity relative to the arc
     linear_velocity = arc_velocity.get_y();
 
-    // linear version of radial correction calcalution (instead of logarithmic or difference)
-    radial_diff = disp.get_magnitude() / radius;
+    radial_diff = disp.get_magnitude() / radius; // ratio of actual radius to target radius
     // signs radial diff
     if (radial_diff < 1) radial_diff = -1/radial_diff + 1;
     else radial_diff = radial_diff -1;
+    // target angular velocity (for use in a cascading PID)
     angular_velocity_target = turn_dir * (linear_velocity / disp.get_magnitude() + kR * radial_diff) + kA * angle_diff;
     // printf("radius:%lf, angular_vel: %lf, radial_error: %lf, radial_correction: %lf, angle_diff: %lf, angle_correction: %lf\n", radius, kB * turn_dir * linear_velocity / disp.get_magnitude(), radius - disp.get_magnitude(), kB * turn_dir * kR * log(disp.get_magnitude() / radius), rad_to_deg(angle_diff), kB * kA * angle_diff);
 #ifndef xy_enable
@@ -1089,15 +1082,16 @@ void tank_move_on_arc(void* params){
     // printf("radius:%lf, disp_mag: %lf, angular_vel: %lf, radial_error: %lf, radial_correction: %lf, angle_diff: %lf, angle_correction: %lf\n", radius, disp.get_magnitude(), kB * turn_dir * linear_velocity / disp.get_magnitude(),  turn_dir * (disp.get_magnitude() - radius), kB * turn_dir * kR * (disp.get_magnitude() - radius), rad_to_deg(angle_diff), kB * kA * angle_diff);
 
 #endif
-
+    // output of cascading PID (the error being the difference in target velocity and actual velocity)
     tracking.power_a = kB * angular_velocity_target + kP * (angular_velocity_target - tracking.g_velocity.angle) + kD * (tracking.g_velocity.angle - last_angular_velocity) / (millis() - last_d_update_time);
 
     // printf("p:%lf, d:%lf\n",  kP * (angular_velocity_target - tracking.g_velocity.angle), kD * (tracking.g_velocity.angle - last_angular_velocity));
+    // used for derivative
     last_d_update_time = millis();
     last_angular_velocity = tracking.g_velocity.angle;
-    // finished calculating angular velocity
 
     // printf("Angular displacement velocity: %lf", rad_to_deg(tracking.global_angle + disp.get_angle()));
+    // local y power is constant, whatever the user supplied the function
     tracking.power_y = power;
     // power scaling
     total_power = fabs(tracking.power_y) + fabs(tracking.power_a);
@@ -1107,7 +1101,7 @@ void tank_move_on_arc(void* params){
       tracking.power_a *= max_power_scale;
     }
 
-    // waits for arc angle to become less than 1 degree
+    // exits movement after arc angle becomes less than 1 degree
     if (rad_to_deg(fabs(near_angle(final_angle, atan2(tracking.y_coord - centre.y, tracking.x_coord - centre.x)))) < 1.0){
 
       // printf("ang: %lf\n", atan2(tracking.y_coord - centre.y, tracking.x_coord - centre.x));
