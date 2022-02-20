@@ -1,5 +1,4 @@
 #include "gui.hpp"
-#include "pros/adi.hpp"
 
 /*Field array*/ static std::vector<std::bitset<200>> field (200, std::bitset<200>{}); //Initializes to 200 blank bitsets
 /*Temperature Alert Flag*/ static bool temp_flashed;

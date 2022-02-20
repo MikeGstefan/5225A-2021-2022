@@ -75,6 +75,7 @@ class GUI{
     //Functions
     static void update_screen_status();
     static void go_next(), go_prev();
+    static void screen_terminal_fix();
     static void end_flash();
     static void draw_oblong(int, int, int, int, double, double);
     static int get_size(text_format_e_t, std::string);

@@ -1,5 +1,4 @@
 #include "gui.hpp"
-#include <cstddef>
 
 //Timer stuff
 Timer Flash("Flash Timer", false);
@@ -358,7 +357,7 @@ int Page::page_num(const Page* page_id){
     if (it == GUI::current_gui->pages.end()){
     char error [35];
     snprintf(error, 35, "Page %p does not exist!\n", page_id);
-    throw std::invalid_argument(error);
+    throw std::domain_error(error);
     return 0;
   }
   return it-GUI::current_gui->pages.begin();
@@ -764,7 +763,53 @@ void Slider::update(){
   }
 }
 
+void GUI::screen_terminal_fix(){
+  //Will only run if things are actually being printed
+  if(terminal.texts.empty()){
+    terminal.set_active(false);
+    return;
+  }
+
+  //Sees how much space is user-requested
+  int y = USER_UP;
+  for (std::vector<Text_ *>::iterator it = terminal.texts.begin(); it != terminal.texts.end(); it++){
+    if ((*it)->txt_fmt != 4){
+      y += get_size((*it)->txt_fmt, "height") + 5;
+    }
+  }
+
+  if(y > USER_DOWN){
+    throw std::length_error("Too Many items being printed to screen\n");
+    return;
+  }
+  
+  text_format_e_t size;
+  int length = PAGE_DOWN - y;
+  y = USER_UP;
+
+  //Figures out biggest possible size
+  if(length >= (CHAR_HEIGHT_LARGE+5)*std::count_if(terminal.texts.begin(), terminal.texts.end(), [](Text_* text){return text->txt_fmt == TEXT_LARGE;})) size = TEXT_LARGE;
+  else if(length >= (CHAR_HEIGHT_MEDIUM+5)*std::count_if(terminal.texts.begin(), terminal.texts.end(), [](Text_* text){return text->txt_fmt == TEXT_MEDIUM;})) size = TEXT_MEDIUM;
+  else if(length >= (CHAR_HEIGHT_SMALL+5)*std::count_if(terminal.texts.begin(), terminal.texts.end(), [](Text_* text){return text->txt_fmt == TEXT_SMALL;})) size = TEXT_SMALL;
+  else{
+    throw std::length_error("Too Many items being printed to screen\n");
+    return;
+  }
+
+  //Saves y-pos and txt_fmt
+  for (std::vector<Text_ *>::iterator it = terminal.texts.begin(); it != terminal.texts.end(); it++){
+    (*it)->y = y;
+    if ((*it)->txt_fmt == 4){
+      (*it)->txt_fmt = size;
+      y += get_size(size, "height") + 5;
+    }
+    else y += get_size((*it)->txt_fmt, "height") + 5;
+
+  }
+}
+
 void GUI::init(){
+  screen_terminal_fix();
   go_to(0);
 
   prev_page.set_func(&go_prev);
