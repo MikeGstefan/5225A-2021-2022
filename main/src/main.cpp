@@ -37,8 +37,8 @@ void initialize() {
 	_Controller::init();
 	GUI::init();
 	delay(500);
-	tracking.x_coord = 26.0, tracking.y_coord = 11.75, tracking.global_angle = -90.0_deg;
-	// tracking.x_coord = 0.0, tracking.y_coord = 0.0, tracking.global_angle = 0.0_deg;
+	// tracking.x_coord = 26.0, tracking.y_coord = 11.75, tracking.global_angle = -90.0_deg;
+	tracking.x_coord = 0.0, tracking.y_coord = 0.0, tracking.global_angle = 0.0_deg;
 	update_t.start();
 	// auton_file_read();
 	// master.print(2, 0, "Driver: %s", drivebase.drivers[drivebase.cur_driver].name);
@@ -118,7 +118,7 @@ void autonomous() {
 double time;
 int ring_count = 0;
 // int ring_count = 0, cur_auton = 1;
-bool claw_state = false, lift_state = false, drive_state = false;
+bool claw_state = false, claw_state_2 = false, lift_state = false, drive_state = false;
 int lift_speed = 0;
 int safety_check = 0;
 void opcontrol() {
@@ -134,9 +134,9 @@ void opcontrol() {
 	// skills3();
 	// while(true);
 
-	// b_lift.reset();
+	b_lift.reset();
 	
-	// f_lift.reset();
+	f_lift.reset();
 	// while(true)delay(10);
 
 	// master.clear();
@@ -226,20 +226,42 @@ void opcontrol() {
 
 	while(true){
 		GUI::update();
+		drivebase.set_state(1);
 		if(master.get_digital_new_press(DIGITAL_Y)){ 
-			master.print(0,0,"%d",BackEncoder.get_value());
+			master.print(0,0,"%f",rad_to_deg(tracking.global_angle));
 		}
 		if(master.get_digital_new_press(DIGITAL_A)){
 			printf("switching state to %d\n", !claw_state);
 			claw_state = !claw_state;
 			b_claw_p.set_value(claw_state);
 		}
-		// if(master.get_digital_new_press(DIGITAL_B)){ 
-		// 	// b_lift.move_absolute(10);
-		// 	// b_detect_goal();
-		// 	f_lift.move_absolute(10);
-		// 	f_detect_goal();
-			
+		if(master.get_digital_new_press(DIGITAL_R1)){
+			printf("switching state to %d\n", !claw_state);
+			claw_state_2 = !claw_state_2;
+			f_claw_p.set_value(claw_state_2);
+		}
+		if(master.get_digital_new_press(DIGITAL_B)){ 
+			// b_lift.move_absolute(10);
+			// b_detect_goal();
+			f_lift.move_absolute(10);
+			Task([](){ 
+				while(!f_touch.get_value())delay(10);
+				f_claw_p.set_value(1);
+			});
+			// f_detect_goal();
+		}
+		if(master.get_digital_new_press(DIGITAL_LEFT)){ 
+			// b_lift.move_absolute(10);
+			// b_detect_goal();
+			b_lift.move_absolute(10);
+			// Task([](){ 
+			// 	while(!f_touch.get_value())delay(10);
+			// 	f_claw_p.set_value(1);
+			// });
+			Task([](){ 
+			b_detect_goal();
+			});
+		}
 
 		// 	claw_state = 1;
 			
@@ -324,8 +346,10 @@ void opcontrol() {
 			drivebase.handle_input();
 		// }
 
-		// if(abs(master.get_analog(ANALOG_LEFT_Y))> 20)b_lift.move(master.get_analog(ANALOG_LEFT_Y));
-		// else b_lift.motor.move_relative(0, 40);
+		if(abs(master.get_analog(ANALOG_LEFT_Y))> 30)b_lift.move(master.get_analog(ANALOG_LEFT_Y));
+		else b_lift.motor.move_relative(0, 40);
+		if(abs(master.get_analog(ANALOG_LEFT_X))> 30)f_lift.move(master.get_analog(ANALOG_LEFT_X));
+		else f_lift.motor.move_relative(0, 40);
 		
 		delay(33);
 	}
