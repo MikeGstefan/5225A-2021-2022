@@ -1,4 +1,5 @@
 #include "gui.hpp"
+#include <cstddef>
 
 //Timer stuff
 Timer Flash("Flash Timer", false);
@@ -21,8 +22,8 @@ Button next_page(480, 0, -75, 20, GUI::Style::SIZE, Button::SINGLE, perm, "->");
 Button home(100, 10, 18, 6, GUI::Style::CENTRE, Button::SINGLE, perm, "Home");
 
 Page testing ("Testing"); //Blank page made so it already exists when quick tests are created
-Text testing_text_1 (125, 50, GUI::Style::CENTRE, TEXT_SMALL, testing, "BLANK TEXT 1");
-Text testing_text_2 (350, 50, GUI::Style::CENTRE, TEXT_SMALL, testing, "BLANK TEXT 2");
+Text<> testing_text_1 (125, 50, GUI::Style::CENTRE, TEXT_SMALL, testing, "BLANK TEXT 1");
+Text<> testing_text_2 (350, 50, GUI::Style::CENTRE, TEXT_SMALL, testing, "BLANK TEXT 2");
 Button testing_button_1 (25, 70, 200, 80, GUI::Style::SIZE, Button::SINGLE, testing, "BLANK BUTTON 1");
 Button testing_button_2 (250, 70, 200, 80, GUI::Style::SIZE, Button::SINGLE, testing, "BLANK BUTTON 2");
 Slider testing_slider (MID_X, 200, 200, 20, GUI::Style::CENTRE, Slider::HORIZONTAL, -100, 100, testing, "BLANK SLIDER");
@@ -31,6 +32,16 @@ Page go_sequence ("Go Sequence");
 Button go_button (300, MID_Y, 160, 90, GUI::Style::CENTRE, Button::SINGLE, go_sequence, "PRESS TO");
 Button go_back_button (20, USER_UP, 100, 50, GUI::Style::SIZE, Button::SINGLE, go_sequence, "BACK");
 Text go_button_text (300, 140, GUI::Style::CENTRE, TEXT_SMALL, go_sequence, "%s", go_string, COLOUR(BLACK));
+
+Page terminal ("Screen Printing");
+// Text screen_1(75, 85, GUI::Style::CENTRE, TEXT_SMALL, terminal, "TEST", nullptr, COLOUR(BLACK));
+// Text mot_temp_2(185, 85, GUI::Style::CENTRE, TEXT_SMALL, terminal, std::get<3>(motors[1]) + ": %dC"s, std::get<1>(motors[1]), COLOUR(BLACK));
+// Text mot_temp_3(295, 85, GUI::Style::CENTRE, TEXT_SMALL, terminal, std::get<3>(motors[2]) + ": %dC"s, std::get<1>(motors[2]), COLOUR(BLACK));
+// Text mot_temp_4(405, 85, GUI::Style::CENTRE, TEXT_SMALL, terminal, std::get<3>(motors[3]) + ": %dC"s, std::get<1>(motors[3]), COLOUR(BLACK));
+// Text mot_temp_5(75, 175, GUI::Style::CENTRE, TEXT_SMALL, terminal, std::get<3>(motors[4]) + ": %dC"s, std::get<1>(motors[4]), COLOUR(BLACK));
+// Text mot_temp_6(185, 175, GUI::Style::CENTRE, TEXT_SMALL, terminal, std::get<3>(motors[5]) + ": %dC"s, std::get<1>(motors[5]), COLOUR(BLACK));
+// Text mot_temp_7(295, 175, GUI::Style::CENTRE, TEXT_SMALL, terminal, std::get<3>(motors[6]) + ": %dC"s, std::get<1>(motors[6]), COLOUR(BLACK));
+// Text mot_temp_8(405, 175, GUI::Style::CENTRE, TEXT_SMALL, terminal, std::get<3>(motors[7]) + ": %dC"s, std::get<1>(motors[7]), COLOUR(BLACK));
 
 //To get coordinates for aligned objects, (buttons, sliders...) of same size
 //Put in how many of buttons/sliders you want, and get properly spaced coords
@@ -76,7 +87,7 @@ void GUI::flash(std::string text, std::uint32_t time, Colour colour){
   std::size_t space, last_space=0;
   std::string sub;
 
-  // master.rumble(".-");
+  master.rumble(".-");
 
   for(int i=1; i <= spaces; i++){ //make the printing actually look good
     space = text.find(' ', text.length()*i/spaces);
@@ -754,21 +765,23 @@ void Slider::update(){
 }
 
 void GUI::init(){
-  GUI::go_to(0);
+  go_to(0);
 
   prev_page.set_func(&go_prev);
   next_page.set_func(&go_next);
   testing.set_active(testing_page_active);
+
   home.set_func([](){go_to(1);});
   go_button.add_text(go_button_text);
+
   current_gui->setup();
-  go_to(1); //Sets it to page 1 for program start. Don't delete this. If you want to change the starting page, call GUI::(Page Number) this in initialize()
+  go_to(1); //Sets it to page 1 for program start. Don't delete this. If you want to change the starting page, call GUI::go_to(Page Number) this in initialize()
   update();
 }
 
 void GUI::update(){
   current_gui->background();
-  GUI::update_screen_status();
+  update_screen_status();
   const Page& cur_p = *current_page;
   /*Page*/cur_p.update();
   /*Button*/for (std::vector<Button*>::const_iterator it = cur_p.buttons.begin(); it != cur_p.buttons.end(); it++) {(*it)->update(); if(&cur_p != current_page) return;}
