@@ -33,14 +33,6 @@ Button go_back_button (20, USER_UP, 100, 50, GUI::Style::SIZE, Button::SINGLE, g
 Text go_button_text (300, 140, GUI::Style::CENTRE, TEXT_SMALL, go_sequence, "%s", go_string, COLOUR(BLACK));
 
 Page terminal ("Screen Printing");
-// Text screen_1(75, 85, GUI::Style::CENTRE, TEXT_SMALL, terminal, "TEST", nullptr, COLOUR(BLACK));
-// Text mot_temp_2(185, 85, GUI::Style::CENTRE, TEXT_SMALL, terminal, std::get<3>(motors[1]) + ": %dC"s, std::get<1>(motors[1]), COLOUR(BLACK));
-// Text mot_temp_3(295, 85, GUI::Style::CENTRE, TEXT_SMALL, terminal, std::get<3>(motors[2]) + ": %dC"s, std::get<1>(motors[2]), COLOUR(BLACK));
-// Text mot_temp_4(405, 85, GUI::Style::CENTRE, TEXT_SMALL, terminal, std::get<3>(motors[3]) + ": %dC"s, std::get<1>(motors[3]), COLOUR(BLACK));
-// Text mot_temp_5(75, 175, GUI::Style::CENTRE, TEXT_SMALL, terminal, std::get<3>(motors[4]) + ": %dC"s, std::get<1>(motors[4]), COLOUR(BLACK));
-// Text mot_temp_6(185, 175, GUI::Style::CENTRE, TEXT_SMALL, terminal, std::get<3>(motors[5]) + ": %dC"s, std::get<1>(motors[5]), COLOUR(BLACK));
-// Text mot_temp_7(295, 175, GUI::Style::CENTRE, TEXT_SMALL, terminal, std::get<3>(motors[6]) + ": %dC"s, std::get<1>(motors[6]), COLOUR(BLACK));
-// Text mot_temp_8(405, 175, GUI::Style::CENTRE, TEXT_SMALL, terminal, std::get<3>(motors[7]) + ": %dC"s, std::get<1>(motors[7]), COLOUR(BLACK));
 
 //To get coordinates for aligned objects, (buttons, sliders...) of same size
 //Put in how many of buttons/sliders you want, and get properly spaced coords

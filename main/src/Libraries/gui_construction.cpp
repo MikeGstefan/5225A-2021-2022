@@ -7,15 +7,16 @@
 //Var init for text monitoring
 int left_enc, right_enc, back_enc, angle, elastic_up_time, elastic_down_time;
 const char* motor_port_nums;
+const char* no_motor_port_nums;
 const char* expander_port_nums;
 const char* driver_text;
 std::array<std::tuple<int, Button*, Button*, Text_*, int, char*>, 8> motor_ports; //port, run, stop, stall counter, port and rpm
 
 //For gui to use
-extern std::array<std::tuple<pros::Motor*, int, const char*, const char*, Text_*>, 8> motors_for_gui;
-extern std::array<std::pair<pros::ADIDigitalOut*, const char*>, 8> pneumatics_for_gui;
-extern const char* alliance_names[];
-extern const char* auton_names[];
+extern std::array<std::tuple<pros::Motor*, int, const char*, const char*, Text_*>, 8> motors_for_gui; //Declared in config.cpp
+extern std::array<std::pair<pros::ADIDigitalOut*, const char*>, 8> pneumatics_for_gui; //Declared in config.cpp
+extern const char* alliance_names[]; //Declared in auton.cpp
+extern const char* auton_names[]; //Declared in auton.cpp
 
 Page driver_curve ("Drivers"); //Select a driver and their exp curve
 Button prev_drivr(20, 70, 110, 120, GUI::Style::SIZE, Button::SINGLE, driver_curve, "Prev Driver");
@@ -99,6 +100,7 @@ Button spin360 (245, 155, 225, 70, GUI::Style::SIZE, Button::SINGLE, tuning, "36
 Page ports ("Ports"); //Shows what ports to use on builder util
 Text mot (10, 50, GUI::Style::CORNER, TEXT_LARGE, ports, "Motors: %s", motor_port_nums);
 Text expanders (10, 100, GUI::Style::CORNER, TEXT_LARGE, ports, "Expanders: %s", expander_port_nums);
+Text no_mot (10, 150, GUI::Style::CORNER, TEXT_LARGE, ports, "No Motors: %s", no_motor_port_nums);
 
 Page encoders ("Encoders"); //Display tracking vals and reset btns
 Text AB (85, 35, GUI::Style::CENTRE, TEXT_SMALL, encoders, "AB");
@@ -168,42 +170,7 @@ Button ADI_h (360, 190, 100, 30, GUI::Style::SIZE, Button::TOGGLE, pneumatic, "O
 std::array<int, 21> expander_ports;
 std::array<Button*, 8> expander_btns = {&ADI_a, &ADI_b, &ADI_c, &ADI_d, &ADI_e, &ADI_f, &ADI_g, &ADI_h};
 
-void common_setup(){
-  for (int i = 1; i <= 8; i++){
-    expander_btns[i-1]->set_func([i](){
-      int expander_port = expander.get_value();
-      if (expander_port){
-        if(c::registry_get_plugged_type(expander_port-1) != c::E_DEVICE_ADI){
-          GUI::flash(COLOUR(RED), 1000, "No Expander in port %d", expander_port);
-        }
-        c::ext_adi_port_set_config(expander_port, i, E_ADI_DIGITAL_OUT);
-        c::ext_adi_port_set_value(expander_port, i, HIGH);
-      }
-      else{
-        c::adi_port_set_config(i, E_ADI_DIGITAL_OUT);
-        c::adi_port_set_value(i, HIGH);
-      }
-    });
-    expander_btns[i-1]->set_off_func([i](){
-      int expander_port = expander.get_value();
-      if (expander_port){
-        if(c::registry_get_plugged_type(expander_port-1) != c::E_DEVICE_ADI){
-          GUI::flash(COLOUR(RED), 1000, "No Expander in port %d", expander_port);
-        }
-        c::ext_adi_port_set_config(expander_port, i, E_ADI_DIGITAL_OUT);
-        c::ext_adi_port_set_value(expander_port, i, LOW);
-      }
-      else{
-        c::adi_port_set_config(i, E_ADI_DIGITAL_OUT);
-        c::adi_port_set_value(i, LOW);
-      }
-    });
-  }
-
-}
-
 void main_setup(){
-  common_setup();
   for (int x = 0; x < 200; x++) field[x].reset(); //Should be able to get rid of this
 
   driver_curve.set_loop_func([](){driver_text = drivebase.driver_name();});
@@ -433,7 +400,6 @@ void main_background(){
 }
 
 void util_setup(){
-  common_setup();
   motor_ports = {
     std::make_tuple(std::numeric_limits<int>::max(), &mot_update_1, &mot_stop_1, &mot_text_1, 0, (char*)malloc(10*sizeof(char))),
     std::make_tuple(std::numeric_limits<int>::max(), &mot_update_2, &mot_stop_2, &mot_text_2, 0, (char*)malloc(10*sizeof(char))),
@@ -453,6 +419,7 @@ void util_setup(){
     }
   }
 
+  //Motor port numbers and motor buttons
   std::string motor_port_string;
   for (std::array<std::tuple<int, Button*, Button*, Text_*, int, char*>, 8>::iterator it = motor_ports.begin(); it != motor_ports.end(); it++){
     std::tuple<int, Button*, Button*, Text_*, int, char*>& mot_arr = *it;
@@ -469,6 +436,17 @@ void util_setup(){
   if (motor_port_string.back() == ',') motor_port_string.pop_back();
   motor_port_nums = strdup(motor_port_string.c_str());
 
+  //Motor not allowed port numbers
+  std::string no_motor_port_string;
+  for (int port=0, i=0; port<21; port++){
+    if (c::registry_get_bound_type(port) != c::E_DEVICE_MOTOR && c::registry_get_bound_type(port) != c::E_DEVICE_UNDEFINED && i < 8){
+      no_motor_port_string.append(std::to_string(port+1) + ",");
+      i++;
+    }
+  }
+  if (no_motor_port_string.back() == ',') no_motor_port_string.pop_back();
+  no_motor_port_nums = strdup(motor_port_string.c_str());
+
 
   //Expander Port Detection
   for (int port=0; port<21; port++){
@@ -484,6 +462,39 @@ void util_setup(){
   }
   if (expander_port_string.back() == ',') expander_port_string.pop_back();
   expander_port_nums = strdup(expander_port_string.c_str());
+
+
+  //Expander buttons
+  for (int i = 1; i <= 8; i++){
+    expander_btns[i-1]->set_func([i](){
+      int expander_port = expander.get_value();
+      if (expander_port){
+        if(c::registry_get_plugged_type(expander_port-1) != c::E_DEVICE_ADI){
+          GUI::flash(COLOUR(RED), 1000, "No Expander in port %d", expander_port);
+        }
+        c::ext_adi_port_set_config(expander_port, i, E_ADI_DIGITAL_OUT);
+        c::ext_adi_port_set_value(expander_port, i, HIGH);
+      }
+      else{
+        c::adi_port_set_config(i, E_ADI_DIGITAL_OUT);
+        c::adi_port_set_value(i, HIGH);
+      }
+    });
+    expander_btns[i-1]->set_off_func([i](){
+      int expander_port = expander.get_value();
+      if (expander_port){
+        if(c::registry_get_plugged_type(expander_port-1) != c::E_DEVICE_ADI){
+          GUI::flash(COLOUR(RED), 1000, "No Expander in port %d", expander_port);
+        }
+        c::ext_adi_port_set_config(expander_port, i, E_ADI_DIGITAL_OUT);
+        c::ext_adi_port_set_value(expander_port, i, LOW);
+      }
+      else{
+        c::adi_port_set_config(i, E_ADI_DIGITAL_OUT);
+        c::adi_port_set_value(i, LOW);
+      }
+    });
+  }
 
 
   encoders.set_loop_func([](){
