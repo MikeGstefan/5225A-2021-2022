@@ -2,30 +2,27 @@
 
 // NEW config
 _Controller master(pros::E_CONTROLLER_MASTER);
-pros::ADIEncoder LeftEncoder(3, 4, false), RightEncoder(5,6, false), BackEncoder(1, 2, true);
+_Controller partner(pros::E_CONTROLLER_PARTNER);
 
-pros::Motor front_l(5, pros::E_MOTOR_GEARSET_18, false, pros::E_MOTOR_ENCODER_DEGREES);
-pros::Motor front_r(1, pros::E_MOTOR_GEARSET_18, true, pros::E_MOTOR_ENCODER_DEGREES);
-pros::Motor back_l(3, pros::E_MOTOR_GEARSET_18, false, pros::E_MOTOR_ENCODER_DEGREES);
-pros::Motor back_r(2, pros::E_MOTOR_GEARSET_18, true,pros::E_MOTOR_ENCODER_DEGREES);
+pros::ADIEncoder LeftEncoder({16,5, 6}, true), RightEncoder({16,1,2}, true), BackEncoder({16,3, 4}, false);
 
-pros::Motor f_lift_m(20, pros::E_MOTOR_GEARSET_36, false, pros::E_MOTOR_ENCODER_DEGREES), b_lift_m(9, pros::E_MOTOR_GEARSET_36, true,pros::E_MOTOR_ENCODER_DEGREES);
+pros::Motor front_l(2, pros::E_MOTOR_GEARSET_18, true, pros::E_MOTOR_ENCODER_DEGREES);
+pros::Motor front_r(4, pros::E_MOTOR_GEARSET_18, false, pros::E_MOTOR_ENCODER_DEGREES);
+pros::Motor back_l(1, pros::E_MOTOR_GEARSET_18, false, pros::E_MOTOR_ENCODER_DEGREES);
+pros::Motor back_r(3, pros::E_MOTOR_GEARSET_18, true,pros::E_MOTOR_ENCODER_DEGREES);
 
-// tank drive config
-// pros::Motor front_l(19, pros::E_MOTOR_GEARSET_18, false, pros::E_MOTOR_ENCODER_DEGREES);
-// pros::Motor front_r(17, pros::E_MOTOR_GEARSET_18, true, pros::E_MOTOR_ENCODER_DEGREES);
-// pros::Motor back_l(20, pros::E_MOTOR_GEARSET_18, false, pros::E_MOTOR_ENCODER_DEGREES);
-// pros::Motor back_r(18, pros::E_MOTOR_GEARSET_18, true, pros::E_MOTOR_ENCODER_DEGREES);
+pros::Motor f_lift_m(5, pros::E_MOTOR_GEARSET_36, false, pros::E_MOTOR_ENCODER_DEGREES), b_lift_m(7, pros::E_MOTOR_GEARSET_36, true,pros::E_MOTOR_ENCODER_DEGREES);
 
 pros::Imu imu_sensor(4);
-pros::Distance b_dist(7), f_dist(16), r_dist(10);
-pros::ADIDigitalOut trans_p(7), b_claw_p(8), f_claw_p({{14,1}});
+pros::Distance b_dist(9), f_dist(12), r_dist(12);
+pros::ADIDigitalOut trans_p({{16, 8}}), b_claw_p(6), f_claw_p(8);
 
+pros::ADIDigitalIn f_touch(7);
 
-pros::Distance left_distance(2);
-pros::Distance right_distance(3);
+pros::Distance left_distance(10);
+pros::Distance right_distance(8);
 
-pros::Imu ramp_imu(11);
+pros::Imu ramp_imu(5);
 
 //1:temp(leave as 0), 2:long name, 3:short name
 std::array<std::tuple<pros::Motor*, int, const char*, const char*, Text*>, 8> motors = {

@@ -4,8 +4,7 @@
 F_Lift f_lift({{"F_Lift",
 {
   "idle",
-  "search_lip",
-  "search_bowl",
+  "searching"
   "grabbed",
   "releasing"
   "tip",
@@ -20,10 +19,11 @@ F_Lift f_lift({{"F_Lift",
 
 F_Lift::F_Lift(Motorized_subsystem<f_lift_states, NUM_OF_F_LIFT_STATES, LIFT_MAX_VELOCITY> motorized_subsystem): Motorized_subsystem(motorized_subsystem){ // constructor
 
-  state = f_lift_states::search_lip;
+  state = f_lift_states::searching;
   last_state = state;
   target = bottom_position;
   last_target = target;
+  held = false;
 }
 
 void F_Lift::handle(){
@@ -42,7 +42,6 @@ void F_Lift::handle(){
       printf("LIFT SAFETY TRIGGERED %lf, %lf\n", target, motor.get_position());
       // intake.raise_and_disable();
       // intake.set_state(intake_states::raised);
-      held = false;
 
       set_state(f_lift_states::manual);
     }
@@ -53,7 +52,6 @@ void F_Lift::handle(){
       // // intake.set_state(intake_states::raised);
       master.rumble("-");
       master.print(F_LIFT_STATE_LINE, 0, "F_Lift: Manual      ");
-      held = false;
 
       set_state(f_lift_states::manual);
     }
@@ -67,23 +65,17 @@ void F_Lift::handle(){
         master.rumble("-");
         master.print(F_LIFT_STATE_LINE, 0, "F_Lift: Searching    ");
 
-        set_state(f_lift_states::search_lip);
+        set_state(f_lift_states::searching);
       }
       // // intake.toggle();
       break;
 
-    case f_lift_states::search_lip:
-      // search for bowl of mogo once lip is detected
-      if(f_dist.get() < 70){
-        search_cycle_check_count = 0; // resets search cycle count
-
-        set_state(f_lift_states::search_bowl);
-      }
-
-      // grabs goal if up button is pressed
-      if(master.get_digital_new_press(f_lift_up_button)){
+    case f_lift_states::searching:
+      // grabs goal if front touch or up button is pressed
+      if(f_touch.get_value() || master.get_digital_new_press(f_lift_up_button)){
         master.rumble("-");
         f_claw_p.set_value(HIGH);
+        held = true;
         master.clear_line(F_LIFT_STATE_LINE);
 
         // // intake.set_state(intake_states::on); // intake defaults to on when mogo is grabbed
@@ -101,42 +93,18 @@ void F_Lift::handle(){
       // intake.toggle();
       break;
 
-    case f_lift_states::search_bowl:
-      // grabs goal if up button is pressed or bowl is detected
-
-      if (f_dist.get() > 70 && f_dist.get() < 95) search_cycle_check_count++;
-
-      if(master.get_digital_new_press(f_lift_up_button) || search_cycle_check_count > 2){
-        master.rumble("-");
-        f_claw_p.set_value(HIGH);
-        master.clear_line(F_LIFT_STATE_LINE);
-
-        // // intake.set_state(intake_states::on); // intake defaults to on when mogo is grabbed
-        // // intake.motor.move(INTAKE_POWER);
-
-        set_state(f_lift_states::grabbed);
-      }
-      // switches state to idle if down button is pressed
-      if(master.get_digital_new_press(f_lift_down_button)){
-        master.rumble("-");
-        master.print(F_LIFT_STATE_LINE, 0, "F_Lift: Idle         ");
-
-        set_state(f_lift_states::idle);
-      }
-      // // intake.toggle();
-      break;
-
     case f_lift_states::grabbed:
-      if(master.get_digital_new_press(f_lift_up_button)){ // lifts goal to platform height if up button is pressed
+      if(master.get_digital_new_press(f_lift_up_button)){ // lifts goal to tall goal platform height if up button is pressed
         // // intake.raise_and_disable();
         delay(100);
-        move_absolute(platform_position);
+        move_absolute(tall_dropoff_position);
 
-        set_state(f_lift_states::platform);
+        set_state(f_lift_states::tall_platform);
       }
       // releases goal and turns off intake if down button is pressed
-      if(master.get_digital_new_press(f_lift_down_button) && fabs(bottom_position - motor.get_position()) < end_error){
+      if((master.get_digital_new_press(f_lift_down_button) || master.get_digital_new_press(f_lift_release_button)) && fabs(bottom_position - motor.get_position()) < end_error){
         f_claw_p.set_value(LOW);
+        held = false;
         release_timer.reset();
         // master.print(F_LIFT_STATE_LINE, 0, "F_Lift: Idle         ");
 
@@ -144,18 +112,14 @@ void F_Lift::handle(){
 
         set_state(f_lift_states::releasing);
       }
-      if(master.get_digital_new_press(f_tall_goal_dropoff_button)){  // moves to top position if level platform button is pressed
-        move_absolute(tall_dropoff_position);
-        // // intake.raise_and_disable();
-
-        set_state(f_lift_states::tall_platform);
-      }
       // // intake.toggle();
       break;
 
     case f_lift_states::releasing:
-      if(release_timer.get_time() > 2000){
-        set_state(f_lift_states::search_lip); 
+      // enters searching state again only after mogo is no longer detected, or times out
+      if(!f_touch.get_value() || release_timer.get_time() > 3000){
+        set_state(f_lift_states::searching); 
+        master.rumble("-");
         
         master.print(F_LIFT_STATE_LINE, 0, "F_Lift: Searching      ");
       }
@@ -163,7 +127,7 @@ void F_Lift::handle(){
 
     case f_lift_states::tip:
       if(master.get_digital_new_press(f_lift_up_button)){ // lifts goal to platform height if up button is pressed
-        move_absolute(platform_position);
+        move_absolute(last_target);
 
         set_state(f_lift_states::platform);
       }
@@ -175,23 +139,31 @@ void F_Lift::handle(){
       break;
 
     case f_lift_states::platform:
-      // drops off goal if up button is pressed and has reached paltform height
-      if(master.get_digital_new_press(f_lift_up_button) && fabs(motor.get_position() - platform_position) < end_error){
+      // drops off goal if up button is pressed and has reached platform height
+      if((master.get_digital_new_press(f_lift_up_button) || master.get_digital_new_press(f_lift_release_button)) && fabs(motor.get_position() - platform_position) < end_error){
         f_claw_p.set_value(LOW);
+        held = false;
 
         set_state(f_lift_states::dropoff);
       }
-      if(master.get_digital_new_press(f_lift_down_button)){ // lowers goal if down button is pressed
-        move_absolute(raised_position);
+      if(master.get_digital_new_press(f_lift_down_button)){ // lowers goal to tall platform dropoff height down button is pressed
+        move_absolute(tall_dropoff_position);
 
-        set_state(f_lift_states::tip);
+        set_state(f_lift_states::tall_platform);
       }
       break;
 
     case f_lift_states::tall_platform:
       // drops off goal if up button is pressed
-      if(master.get_digital_new_press(f_lift_up_button) && fabs(motor.get_position() - tall_dropoff_position) < end_error){
+      if(master.get_digital_new_press(f_lift_up_button)){ // moves to platform height if up button is pressed
+        move_absolute(platform_position);
+
+        set_state(f_lift_states::platform);
+      }
+      // releases goal if release button is pressed
+      if(master.get_digital_new_press(f_lift_release_button) && fabs(motor.get_position() - tall_dropoff_position) < end_error){
         f_claw_p.set_value(LOW);
+        held = false;
 
         set_state(f_lift_states::dropoff);
       }
@@ -209,7 +181,6 @@ void F_Lift::handle(){
 
         set_state(f_lift_states::lowering);
       }
-
       break;
 
     case f_lift_states::lowering:
@@ -217,7 +188,7 @@ void F_Lift::handle(){
       if(master.get_digital_new_press(f_lift_up_button)){
         switch (last_state) {
           case f_lift_states::dropoff:
-            move_absolute(platform_position);
+            move_absolute(last_target);
             break;
 
           case f_lift_states::tip:
@@ -238,7 +209,7 @@ void F_Lift::handle(){
             // intake.set_state(intake_states::off);
             master.print(F_LIFT_STATE_LINE, 0, "F_Lift: Searching    ");
 
-            set_state(f_lift_states::search_lip);
+            set_state(f_lift_states::searching);
             break;
 
           case f_lift_states::tip:
@@ -253,7 +224,7 @@ void F_Lift::handle(){
             // // intake.set_state(intake_states::off);
             master.print(F_LIFT_STATE_LINE, 0, "F_Lift: Searching    ");
 
-            set_state(f_lift_states::search_lip);
+            set_state(f_lift_states::searching);
             break;
         }
         // move(-10);  // applies holding power
@@ -272,21 +243,21 @@ void F_Lift::handle(){
       motor.move(lift_power);
       if(master.get_digital_new_press(f_lift_down_button)){
         bad_count = 0;  // resets the safety
-        f_claw_p.set_value(LOW);
         move_absolute(bottom_position);
-
         // intake_piston.set_value(LOW); // lowers the intake back
         // // intake.set_state(intake_states::off);
-
-        master.print(F_LIFT_STATE_LINE, 0, "F_Lift: Searching    ");
-
-        set_state(f_lift_states::search_lip);
+        if (held) set_state(f_lift_states::grabbed);
+        else{
+          master.print(F_LIFT_STATE_LINE, 0, "F_Lift: Searching    ");
+          set_state(f_lift_states::searching);
+        }
       }
 
       // toggles state of lift pneumatic if lift up button is pressed
-      if(master.get_digital_new_press(f_lift_up_button)) held = !held;
-      f_claw_p.set_value(held);
-
+      if(master.get_digital_new_press(f_lift_up_button)){
+        held = !held;
+        f_claw_p.set_value(held);
+      }
       break;
 
   }
@@ -307,6 +278,7 @@ void F_Lift::elastic_util(){
   master.print(0, 0, "press a to start");
   waitUntil(master.get_digital_new_press(DIGITAL_A));
   f_claw_p.set_value(HIGH);
+  held = true;
   Timer move_timer{"move"};
   move_absolute(top_position);
   // // intake_piston.set_value(HIGH);  // raises intake

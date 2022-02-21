@@ -10,15 +10,19 @@
 using namespace pros;
 // Buttons
 
+// #define both.get_digital_new_press(button)\
+//  (master.get_digital_new_press(button) || partner.get_digital_new_press(button))
+
+
 // back lift buttons
 extern controller_digital_e_t b_lift_up_button;
 extern controller_digital_e_t b_lift_down_button;
-extern controller_digital_e_t b_tall_goal_dropoff_button;
+extern controller_digital_e_t b_lift_release_button;
 
 // front lift buttons
 extern controller_digital_e_t f_lift_up_button;
 extern controller_digital_e_t f_lift_down_button;
-extern controller_digital_e_t f_tall_goal_dropoff_button;
+extern controller_digital_e_t f_lift_release_button;
 
 // misc buttons
 extern controller_digital_e_t cancel_button;

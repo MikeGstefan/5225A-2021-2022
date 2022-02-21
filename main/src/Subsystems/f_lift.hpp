@@ -4,14 +4,13 @@
 
 #define F_LIFT_STATE_LINE 2 // line on controller which "searching" and "lowered" lift states are printed on
 
-#define NUM_OF_F_LIFT_STATES 12
+#define NUM_OF_F_LIFT_STATES 11
 #define LIFT_MAX_VELOCITY 100
 
 
 enum class f_lift_states{
   idle,  // at bottom_position, waiting for button to search for mogo
-  search_lip,  // at bottom_position and waiting to detect mogo's lip or button to grab mogo
-  search_bowl, // at bottom_position and waiting to detect mogo's lip or button to grab mogo
+  searching,  // at bottom_position and waiting to detect mogo lip or for button press to grab mogo
   grabbed, // has goal
   releasing, // waiting for 1 second before entering searching state again
   tip, // at height to keep mogo away from opponent/ tip mogos

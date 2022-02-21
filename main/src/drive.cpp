@@ -228,6 +228,8 @@ void Drivebase::driver_practice(){
   b_lift.move_absolute(b_lift.bottom_position);
   f_lift.reset();
   f_lift.move_absolute(f_lift.bottom_position);
+  f_claw_p.set_value(LOW);
+  b_claw_p.set_value(LOW);
   // lift.move(-10); // gives holding power
 
   cur_driver = 0; // defaults driver to Nikhil
