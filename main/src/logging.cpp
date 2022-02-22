@@ -22,8 +22,8 @@ Data::Data(const char* obj_name, const char* id_code, log_types log_type_param, 
 
 Data task_log("tasks.txt","$01", general, log_locations::both);
 Data controller_queue("controller.txt","$02", general,log_locations::none);
-Data tracking_data("tracking.txt","$03",general,log_locations::both);
-Data tracking_imp("tracking.txt","$03",general,log_locations::sd);
+Data tracking_data("tracking.txt","$03",off,log_locations::both);
+Data tracking_imp("tracking.txt","$03",off,log_locations::sd);
 Data misc("misc.txt", "$04",general,log_locations::both);
 Data drivers_data("driver.txt", "$05", general,log_locations::none);
 Data motion_i("motion.txt","$06",general,log_locations::both);

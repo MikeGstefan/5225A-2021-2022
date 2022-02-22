@@ -1,5 +1,7 @@
 #include "b_lift.hpp"
 
+// #define master partner
+
 // Back Lift object
 B_Lift b_lift({{"B_Lift",
 {
@@ -163,7 +165,7 @@ void B_Lift::handle(){
       if(master.get_digital_new_press(b_lift_up_button)){ // lifts goal to platform height if up button is pressed
         move_absolute(last_target);
 
-        set_state(b_lift_states::platform);
+        set_state(last_state);
       }
       if(master.get_digital_new_press(b_lift_down_button)){ // lowers goal if down button is pressed
         move_absolute(bottom_position);

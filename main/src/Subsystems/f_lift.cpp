@@ -1,12 +1,14 @@
 #include "f_lift.hpp"
 
+// #define master partner
+
 // Back Lift object
 F_Lift f_lift({{"F_Lift",
 {
   "idle",
-  "searching"
+  "searching",
   "grabbed",
-  "releasing"
+  "releasing",
   "tip",
   "platform",
   "tall_platform",
@@ -76,6 +78,8 @@ void F_Lift::handle(){
         master.rumble("-");
         f_claw_p.set_value(HIGH);
         held = true;
+        delay(50);
+        move_absolute(holding_position);
         master.clear_line(F_LIFT_STATE_LINE);
 
         // // intake.set_state(intake_states::on); // intake defaults to on when mogo is grabbed
@@ -102,15 +106,17 @@ void F_Lift::handle(){
         set_state(f_lift_states::tall_platform);
       }
       // releases goal and turns off intake if down button is pressed
-      if((master.get_digital_new_press(f_lift_down_button) || master.get_digital_new_press(f_lift_release_button)) && fabs(bottom_position - motor.get_position()) < end_error){
+      if((master.get_digital_new_press(f_lift_down_button) || master.get_digital_new_press(f_lift_release_button)) && fabs(holding_position - motor.get_position()) < 80){
         f_claw_p.set_value(LOW);
         held = false;
         release_timer.reset();
+        move_absolute(bottom_position);
         // master.print(F_LIFT_STATE_LINE, 0, "F_Lift: Idle         ");
 
         // // intake.motor.move(0); // turns off intake
 
-        set_state(f_lift_states::releasing);
+        set_state(f_lift_states::idle);
+        master.print(F_LIFT_STATE_LINE, 0, "F_Lift: Idle         ");
       }
       // // intake.toggle();
       break;
@@ -129,7 +135,7 @@ void F_Lift::handle(){
       if(master.get_digital_new_press(f_lift_up_button)){ // lifts goal to platform height if up button is pressed
         move_absolute(last_target);
 
-        set_state(f_lift_states::platform);
+        set_state(last_state);
       }
       if(master.get_digital_new_press(f_lift_down_button)){ // lowers goal if down button is pressed
         move_absolute(bottom_position);
@@ -154,6 +160,10 @@ void F_Lift::handle(){
       break;
 
     case f_lift_states::tall_platform:
+      if(master.get_digital_new_press(DIGITAL_Y)){
+        held = !held;
+        f_claw_p.set_value(held);
+      }
       // drops off goal if up button is pressed
       if(master.get_digital_new_press(f_lift_up_button)){ // moves to platform height if up button is pressed
         move_absolute(platform_position);
@@ -175,6 +185,10 @@ void F_Lift::handle(){
       break;
 
     case f_lift_states::dropoff:
+      if(master.get_digital_new_press(DIGITAL_Y)){
+        held = !held;
+        f_claw_p.set_value(held);
+      }
       // releases goal if up or down button is pressed
       if(master.get_digital_new_press(f_lift_up_button) || master.get_digital_new_press(f_lift_down_button)){
         move_absolute(bottom_position);

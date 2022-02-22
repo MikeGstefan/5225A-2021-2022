@@ -114,6 +114,10 @@ bool claw_state = false, lift_state = false, drive_state = false;
 int lift_speed = 0;
 int safety_check = 0;
 void opcontrol() {
+	// while(true){
+	// 	printf("%d\n", b_dist.get());
+	// 	delay(10);
+	// }
 	// f_lift_m.move(40);
   drivebase.driver_practice();
   
