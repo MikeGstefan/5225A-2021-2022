@@ -22,27 +22,27 @@ Position distance_reset(int time, string sensor){
 	vector <int> right;
 	vector <int> side;
 	ram = false;
-	int left_low = back_left_dist.get();
-	int right_low = back_right_dist.get();
+	int left_low = l_reset_dist.get();
+	int right_low = r_reset_dist.get();
 	int side_low = 0;
-	if(sensor == "left"){side_low = left_dist.get();}
-	if(sensor == "right"){side_low = right_dist.get();}
+	if(sensor == "left"){side_low = l_dist.get();}
+	if(sensor == "right"){side_low = r_dist.get();}
 
 	int error_count = 0;
 
 	misc.print("Start Time: %d\n", start_time);
 	while(start_time+time >= millis()){
-		printf("%d| Left:%d Right: %d\n", millis(), back_left_dist.get(), back_right_dist.get());
+		printf("%d| Left:%d Right: %d\n", millis(), l_reset_dist.get(), r_reset_dist.get());
 
-		if(back_left_dist.get() <= left_low) left_low = back_left_dist.get();
-		if(back_right_dist.get() <= right_low) right_low = back_right_dist.get();
-		if(sensor =="left"){if(left_dist.get() <= side_low) side_low = left_dist.get();}
-		if(sensor =="right"){if(right_dist.get() <= side_low) side_low = right_dist.get();}
+		if(l_reset_dist.get() <= left_low) left_low = l_reset_dist.get();
+		if(r_reset_dist.get() <= right_low) right_low = r_reset_dist.get();
+		if(sensor =="left"){if(l_dist.get() <= side_low) side_low = l_dist.get();}
+		if(sensor =="right"){if(r_dist.get() <= side_low) side_low = r_dist.get();}
 
-		if(back_left_dist.get() < left_low + 20) left.push_back(back_left_dist.get()); else error_count++;
-		if(back_right_dist.get() < right_low + 20) right.push_back(back_right_dist.get()); else error_count++;
-		if(sensor =="left"){if(left_dist.get() < side_low + 20) side.push_back(left_dist.get()); else error_count++;}
-		if(sensor =="right"){if(right_dist.get() < side_low + 20) side.push_back(right_dist.get()); else error_count++;}
+		if(l_reset_dist.get() < left_low + 20) left.push_back(l_reset_dist.get()); else error_count++;
+		if(r_reset_dist.get() < right_low + 20) right.push_back(r_reset_dist.get()); else error_count++;
+		if(sensor =="left"){if(l_dist.get() < side_low + 20) side.push_back(l_dist.get()); else error_count++;}
+		if(sensor =="right"){if(r_dist.get() < side_low + 20) side.push_back(r_dist.get()); else error_count++;}
 		delay(33);
 	}
 	if(error_count < 5){
@@ -95,21 +95,21 @@ void distance_loop(double distance){
 		delta_dist = sqrt(pow(tracking.x_coord -start_pos.x,2) + pow(tracking.y_coord - start_pos.y,2));
 		printf("Delta Dist: %f\n", delta_dist);
 
-		if(abs(back_left_dist.get() - back_right_dist.get()) <= 50) setVisionState(Distance_States::stable); // 50 is a test value
-		else if (back_left_dist.get() > back_right_dist.get()) setVisionState(Distance_States::turn_left);
-		else if (back_left_dist.get() < back_right_dist.get()) setVisionState(Distance_States::turn_right);
+		if(abs(l_reset_dist.get() - r_reset_dist.get()) <= 50) setVisionState(Distance_States::stable); // 50 is a test value
+		else if (l_reset_dist.get() > r_reset_dist.get()) setVisionState(Distance_States::turn_left);
+		else if (l_reset_dist.get() < r_reset_dist.get()) setVisionState(Distance_States::turn_right);
 
-		if(back_left_dist.get() == 0) setVisionState(Distance_States::turn_left);
-		if(back_right_dist.get() == 0) setVisionState(Distance_States::turn_right);
-		if(back_left_dist.get() == 0 && back_right_dist.get() == 0) setVisionState(Distance_States::stable);
+		if(l_reset_dist.get() == 0) setVisionState(Distance_States::turn_left);
+		if(r_reset_dist.get() == 0) setVisionState(Distance_States::turn_right);
+		if(l_reset_dist.get() == 0 && r_reset_dist.get() == 0) setVisionState(Distance_States::stable);
 
-		printf("Left:%d Right: %d\n",back_right_dist.get(), back_left_dist.get());
+		printf("Left:%d Right: %d\n",r_reset_dist.get(), l_reset_dist.get());
 
 		switch (Distance_State) {
 			case Distance_States::stable:
 				printf("stable\n");
 				drivebase.move_tank(-y_speed,0);
-				if(left_eye.last_distance == back_right_dist.get()) count++;
+				if(left_eye.last_distance == r_reset_dist.get()) count++;
 				if(count == 4) break;
 				else count = 0;
 				break;
@@ -123,8 +123,8 @@ void distance_loop(double distance){
 				break;
 		}
 
-		left_eye.last_distance = back_right_dist.get();
-		right_eye.last_distance = back_left_dist.get();
+		left_eye.last_distance = r_reset_dist.get();
+		right_eye.last_distance = l_reset_dist.get();
 		delay(33);
   	}
 }
