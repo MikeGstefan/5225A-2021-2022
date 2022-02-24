@@ -850,6 +850,17 @@ void tank_move_to_target(void* params){
     Vector follow_line(target.y - tracking.y_coord, target.x - tracking.x_coord); // used to keep track of angle of follow_line relative to the vertical
     Vector line_disp(target.x - tracking.x_coord, target.y - tracking.y_coord);  // displacements relative to line
     int time = millis();
+    
+    // MOTION FIX
+    // global displacement of robot and target
+    line_disp = Vector(target.x - tracking.x_coord, target.y - tracking.y_coord);
+    hypotenuse = line_disp.get_magnitude(); // distance to target
+
+    // rotates vector by line angle, now the vector represents the displacement RELATIVE TO THE LINE
+    line_disp.rotate(follow_line.get_angle());
+    orig_sgn_line_y = sgn(line_disp.get_y()); // used to calculate if the robot has overshot
+    // END OF MOTION FIX
+
     motion_i.print("%d|| Starting tank move to point from (%.2f, %.2f, %.2f) to (%.2f, %.2f, %.2f)\n", millis(), tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle),target.x, target.y, target.angle);
     while(true){
       // global displacement of robot and target
