@@ -7,6 +7,7 @@
 #include "drive.hpp"
 #include "geometry.hpp"
 #include "task.hpp"
+#include "Libraries/gui.hpp"
 #include <iostream>
 #include <cmath>
 #include <memory>
@@ -23,12 +24,17 @@ extern _Task move_t;
 // Left: get_roll, 1
 // Back: get_pitch, 1
 // Front: get_pitch, -1
-#define GYRO_AXIS get_pitch
-#define GYRO_SIDE -1
+#define GYRO_AXIS get_roll
+#define GYRO_SIDE 1
 
 
 #define DIST_BACK 8.5
 #define DIST_FRONT 8.5
+
+
+const int min_move_power_a = 23;
+const int min_move_power_x = 40;
+const int min_move_power_y = 25;
 
 
 void update(void* params);
@@ -47,7 +53,7 @@ public:
 
 
     Position g_velocity;   // global g_velocity stores x, y and angular velocities
-    void wait_for_dist(double distance);
+    void wait_for_dist(double distance, int timeout = 0);
     double get_angle_in_deg();
     void reset(double x=0.0, double y=0.0, double a=0.0);
 
@@ -57,7 +63,7 @@ public:
 class Gyro{
   private:
     Imu& inertial;
-    double angle;
+    double angle, last_angle;
 
   public:
     Gyro(Imu& imu);
@@ -68,6 +74,7 @@ class Gyro{
     void level(double kP, double kD);
 
     double get_angle();
+    double get_angle_dif();
 };
 
 extern Gyro gyro;
@@ -154,15 +161,22 @@ struct tank_point_params{
   bool brake= true;
   double kp_y = 9.0;
   double kp_a = 150.0;
+  double kd_a = 0.0;
   tank_point_params() = default;
-  tank_point_params(const Position target, const bool turn_dir_if_0, const double max_power = 127.0, const double min_angle_percent = 1.0, const bool brake = true, double kp_y = 9.0, double kp_a =150.0);
+  tank_point_params(const Position target, const bool turn_dir_if_0, const double max_power = 127.0, const double min_angle_percent = 1.0, const bool brake = true, double kp_y = 9.0, double kp_a =150.0, double kd_a = 0.0);
 };
 
 struct turn_angle_params{ 
   double target_a = 0.0;
   bool brake = true;
+  bool near = true;
+  double kp = 160.0, kd = 0.0;
+  double max_speed = 127;
+  int timeout = 0;
+  double min_power_a = min_move_power_a;
+  double end_error = 5.0;
   turn_angle_params() = default;
-  turn_angle_params(const double target_a, const bool brake = true);
+  turn_angle_params(const double target_a, const bool brake = true, bool near = true, double kp = 160.0, double kd = 0.0, double max_speed = 127.0, int timeout = 0, double min_power_a = min_move_power_a, double end_error = 5.0);
 };
 
 struct turn_point_params{ 
@@ -211,9 +225,7 @@ void turn_to_angle(double target_a, const bool brake, _Task* ptr);
 void turn_to_point(void* params);
 
 
-const int min_move_power_a = 23;
-const int min_move_power_x = 40;
-const int min_move_power_y = 17;
+
 
 #define xy_enable a
 

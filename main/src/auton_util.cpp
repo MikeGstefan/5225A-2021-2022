@@ -1,7 +1,8 @@
 #include "auton_util.hpp"
 // #include "logging.hpp"
 
-Reset_dist reset_dist_r(&r_dist, 10.0);
+Reset_dist reset_dist_r(&r_reset_dist, 8.5);
+Reset_dist reset_dist_l(&l_reset_dist, 8.0);
 
 double get_filtered_output(ADIUltrasonic sensor, int check_count, uint16_t lower_bound, uint16_t upper_bound, int timeout){
   Timer timer{"Timer"};
@@ -62,7 +63,7 @@ void flatten_against_wall(bool front){
   
 // }
 
-void detect_goal(){ 
+void b_detect_goal(){ 
   // cycleCheck(b_dist.get() > 80 && b_dist.get() < 90, 5, 33);
   while(b_dist.get() > 70){ 
     misc.print("looking for edge: %d\n", b_dist.get());
@@ -70,7 +71,10 @@ void detect_goal(){
   }
   int successCount = 0;
     while (successCount < 2){
-        if (b_dist.get() > 75 && b_dist.get() < 90) successCount++;
+        if (b_dist.get() > 75 && b_dist.get() < 90) {
+          successCount++;
+          misc.print("found: %d count: %d\n", b_dist.get(), successCount);
+        }
         else successCount = 0;
         misc.print("looking: %d\n", b_dist.get());
         delay(33);
@@ -79,6 +83,25 @@ void detect_goal(){
   b_claw_p.set_value(1);
 }
 
+
+
+void f_detect_goal(){ 
+  // cycleCheck(b_dist.get() > 80 && b_dist.get() < 90, 5, 33);
+  // while(f_dist.get() > 70){ 
+  //   misc.print("looking for edge: %d\n", f_dist.get());
+  //   delay(33);
+  // }
+  // int successCount = 0;
+  //   while (successCount < 2){
+  //       if (f_dist.get() > 70 && f_dist.get() < 90) successCount++;
+  //       else successCount = 0;
+  //       misc.print("looking: %d\n", f_dist.get());
+  //       delay(33);
+  //   }
+  // while()
+  misc.print("Detected %d\n", f_dist.get());
+  f_claw_p.set_value(1);
+}
 
 
 Reset_dist::Reset_dist(pros::Distance* sensor, double dist_from_center): sensor{sensor}, dist_from_center{dist_from_center}{}
@@ -90,15 +113,11 @@ double Reset_dist::get_dist(){
     if(this->sensor->get() > Reset_dist::thresh){
       count++;
       avg += this->sensor->get();
+      misc.print("%d || Dist in reset %f count %d\n", millis(), (double)this->sensor->get()/25.4, count);
     }
+    delay(33);
   }
   //find averaeg, convert to inches
+  misc.print("%d || reset %f\n",millis(), (avg/count)/25.4);
   return ((avg/count)/25.4) + this->dist_from_center;
-}
-
-void Reset_dist::reset(double x_wall, double y, double a){
-  int sgn = (x_wall < 72) ? 1 : -1;
-  double x = this->get_dist();
-  tracking.reset(x_wall + (x *sgn), y, a);
-  delay(100);
 }

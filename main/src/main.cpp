@@ -14,6 +14,7 @@
 // using namespace std;
 #include "task.hpp"
 #include <fstream>
+#include <sys/wait.h>
 using namespace std;
 
 pros::Task *updt = nullptr;
@@ -74,11 +75,18 @@ void competition_initialize() {}
  * from where it left off.
  */
 void autonomous() {
-	// auton_run = true;
-	// double x;
-	// double y;
-	// double a;
+	
+	b_lift.reset();
+	Task([](){ 
+		f_lift.reset();
+	});
+	f_claw_p.set_value(0);
+	b_claw_p.set_value(0);
+	skills();
+	skills2();
 
+	skills3();
+	while(true);
 	// FILE * fp;
 	// fp = fopen("/usd/init.txt", "r");
 	// fscanf(fp,"%lf %lf %lf",&x,&y,&a);
@@ -98,7 +106,7 @@ void autonomous() {
 // double time;
 int ring_count = 0;
 // int ring_count = 0, cur_auton = 1;
-bool claw_state = false, lift_state = false, drive_state = false;
+bool claw_state = false, claw_state_2 = false, lift_state = false, drive_state = false;
 int lift_speed = 0;
 int safety_check = 0;
 void opcontrol() {
@@ -107,8 +115,13 @@ void opcontrol() {
   //distance_reset(500, "left");
 
 	// master.clear();
-	// // b_lift.reset();
-	// // b_lift.move(0);
+	
+	b_lift.move(0);
+	
+	f_lift.move(0);
+	f_claw_p.set_value(0);
+	Led1.set_value(1);
+	Led2.set_value(1);
 	// while(true){
 	// 	if(master.get_digital_new_press(DIGITAL_Y)){
 	// 		master.print(0,0,"%d",BackEncoder.get_value());
@@ -145,7 +158,7 @@ void opcontrol() {
 	// 		move_start(move_types::tank_arc, tank_arc_params({70.0, 95.0}, {122.0,119.0,0.0}));
 	// 		// move_start(move_types::turn_angle, turn_angle_params(0.0));
 	// 		move_start(move_types::tank_point, tank_point_params({122.0,123.0,0.0},false));
-	// 		flatten_against_wall(true);
+			// flatten_against_wall(true);
 	// 		*/
   //
   //
@@ -186,4 +199,134 @@ void opcontrol() {
 	// 	delay(33);
 	// }
 
+	while(true){
+		GUI::update();
+		drivebase.set_state(1);
+		if(master.get_digital_new_press(DIGITAL_Y)){ 
+			master.print(0,0,"%f",rad_to_deg(tracking.global_angle));
+		}
+		if(master.get_digital_new_press(DIGITAL_A)){
+			printf("switching state to %d\n", !claw_state);
+			claw_state = !claw_state;
+			b_claw_p.set_value(claw_state);
+		}
+		if(master.get_digital_new_press(DIGITAL_R1)){
+			printf("switching state to %d\n", !claw_state);
+			claw_state_2 = !claw_state_2;
+			f_claw_p.set_value(claw_state_2);
+		}
+		if(master.get_digital_new_press(DIGITAL_B)){ 
+			// b_lift.move_absolute(10);
+			// b_detect_goal();
+			f_lift.move_absolute(10);
+			Task([](){ 
+				while(!f_touch.get_value())delay(10);
+				f_claw_p.set_value(1);
+			});
+			// f_detect_goal();
+		}
+		if(master.get_digital_new_press(DIGITAL_LEFT)){ 
+			// b_lift.move_absolute(10);
+			// b_detect_goal();
+			b_lift.move_absolute(10);
+			// Task([](){ 
+			// 	while(!f_touch.get_value())delay(10);
+			// 	f_claw_p.set_value(1);
+			// });
+			Task([](){ 
+			b_detect_goal();
+			});
+		}
+
+		// 	claw_state = 1;
+			
+		// }
+		// if(master.get_digital_new_press(DIGITAL_L1)){ 
+		// 	b_lift.move_absolute(300);
+		// }
+		// if(master.get_digital_new_press(DIGITAL_L2)){ 
+		// 	b_lift.move_absolute(0);
+		// }
+		// printf("dist: %d\n", b_dist.get());
+		drivebase.handle_trans();
+		// drivebase.handle_input();
+		// if(master.get_digital_new_press(DIGITAL_R1)){ 
+		// 	Timer timer {"timer"};
+		// 	// master.clear();
+		// 	// delay(50);
+		// 	// master.print(0,0,"%f",reset_dist_l.get_dist());
+		// 	// reset_dist_r.reset(141.0,0.0 + DIST_BACK,0.0);
+		// 	skills();
+		// 	skills2();
+
+		// 	skills3();
+		// 	// skills4();
+		// 	// skillsPark();
+		// 	//fits platfor to reset
+		// 	/**
+		// 	move_start(move_types::turn_angle, turn_angle_params(90.0));
+		// 	delay(100);
+		// 	move_start(move_types::tank_arc, tank_arc_params({70.0, 95.0}, {122.0,119.0,0.0}));
+		// 	// move_start(move_types::turn_angle, turn_angle_params(0.0));
+		// 	move_start(move_types::tank_point, tank_point_params({122.0,123.0,0.0},false));
+		// 	flatten_against_wall(true);
+		// 	*/
+		// 	// f_claw_p.set_value(HIGH);
+		// 	// b_claw_p.set_value(HIGH);
+		// 	// f_lift.move_absolute(610);
+		// 	// b_lift.move_absolute(150);
+		// 	// waitUntil(f_lift_m.get_position() > 590);
+		// 	// f_lift.move(15);
+
+		// 	// waitUntil(master.get_digital_new_press(DIGITAL_R1));
+		// 	// int t = millis();
+
+		// 	// gyro.climb_ramp();
+		// 	// // gyro.level(2.2, 0);
+
+		// 	// drivebase.brake();
+		// 	// printf("ds:%d\n", millis()-t);
+		// 	// delay(5000);
+		// 	// waitUntil(false);
+
+		// 	//grab goal on wall 
+
+		// 	/**
+		// 	move_start(move_types::turn_angle, turn_angle_params(-90.0));
+		// 	move_start(move_types::tank_point, tank_point_params({111.0,34.0,-90.0},false,70));
+		// 	delay(500);
+		// 	move_start(move_types::tank_point, tank_point_params({127.0,34.0,-90.0},false, 70),false);
+		// 	detect_goal();
+		// 	move_stop();
+		// 	// drivebase.brake();
+		// 	move_start(move_types::tank_point, tank_point_params({115.0,34.0,-90.0},false));
+		// 	b_lift.move_absolute(650);
+		// 	while(b_lift.motor.get_position() < 630)delay(10);
+		// 	b_lift.move(10);
+		// 	flatten_against_wall(false);
+
+		// 	delay(500);
+		// 	move_start(move_types::tank_point, tank_point_params({117.0,34.0,-90.0},false));
+		// 	b_lift.move_absolute(10);
+		// 	move_start(move_types::turn_point, turn_point_params({70.0,70.0}));
+		// 	delay(50);
+		// 	master.print(0,0,"%d", timer.get_time());
+		// 	delay(10000);
+		// 	*/
+		// 	master.print(0,0,"%d", timer.get_time());
+		// 	delay(2000);
+
+		// }
+		// else{
+			drivebase.handle_input();
+		// }
+
+		if(abs(master.get_analog(ANALOG_LEFT_Y))> 30)b_lift.move(master.get_analog(ANALOG_LEFT_Y));
+		else b_lift.motor.move_relative(0, 40);
+		if(abs(master.get_analog(ANALOG_LEFT_X))> 30)f_lift.move(master.get_analog(ANALOG_LEFT_X));
+		else f_lift.motor.move_relative(0, 40);
+		
+		delay(33);
+	}
+		
 }

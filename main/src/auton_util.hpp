@@ -22,7 +22,8 @@ double get_filtered_output(ADIUltrasonic sensor, int check_count, uint16_t lower
 
 void flatten_against_wall(bool front = true);
 
-void detect_goal();
+void b_detect_goal();
+void f_detect_goal();
 
 
 
@@ -37,9 +38,8 @@ class Reset_dist{
     Reset_dist(pros::Distance* sensor, double dist_from_center);
 
     double get_dist();
-
-    void reset(double x_wall, double y, double a);
 };
 
 extern Reset_dist reset_dist_r;
+extern Reset_dist reset_dist_l;
 
