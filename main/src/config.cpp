@@ -19,14 +19,14 @@ pros::Motor f_lift_m(5, pros::E_MOTOR_GEARSET_36, false,pros::E_MOTOR_ENCODER_DE
 // pros::Motor back_r(18, pros::E_MOTOR_GEARSET_18, true, pros::E_MOTOR_ENCODER_DEGREES);
 
 // pros::Imu imu_sensor(4);
-pros::Distance b_dist(9), f_dist(12), r_reset_dist(11), l_reset_dist(13);
+pros::Distance b_dist(9), f_dist(12), r_reset_dist(19), l_reset_dist(20);
 pros::ADIDigitalOut trans_p({{16,8}}), b_claw_p(6), f_claw_p(8);
 pros::ADIDigitalOut Led1({{14, 7}});
 pros::ADIDigitalOut Led2({{14, 8}});
 pros::ADIDigitalIn f_touch(7);
 
-pros::Distance l_dis(10);
-pros::Distance r_dis(8);
+pros::Distance l_dist(18);
+pros::Distance r_dist(17);
 
 pros::Imu ramp_imu(5);
 
@@ -43,5 +43,3 @@ std::array<std::tuple<pros::Motor*, int, const char*, const char*, Text*>, 8> mo
   std::make_tuple(nullptr, 0, "", "", nullptr),
   std::make_tuple(nullptr, 0, "", "", nullptr),
 };//std::make_tuple(nullptr, 0, "", "", nullptr),
-
-pros::Distance back_right_dist(19), back_left_dist(20),left_dist(18),right_dist(17);
