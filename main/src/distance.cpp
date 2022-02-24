@@ -1,50 +1,87 @@
 #include "distance.hpp"
-bool dis_end = false;
 Distance_States Distance_State = Distance_States::stable;
 Distance_States Last_Distance_State;
 cDistance left_eye;
 cDistance right_eye;
-double averageleft = 0;
-double averageright = 0;
-
+bool ram = false;
 
 void setVisionState(Distance_States state) {
 	Last_Distance_State = Distance_State;
 	Distance_State = state;
 }
 
-
-void average(int time){
-	double total_left = 0, total_right = 0;
-	int cycle_count = 0;
+Position distance_reset(int time, string sensor){
+	double dist_corner = 80; //Find this number out (Distance sensor to corner)
+	double side_length = 5; //Find this number out (Corner to side distance sensor)
+	double dist_to_center = 3; //Find this number (Side distance sensor to tracking sesnor)
+	double local_y = 0, local_x = 0, angle = 0;
+	double averageleft = 0, averageright = 0, averageside = 0;
+	double d = 315;
 	int start_time = millis();
 	vector <int> left;
 	vector <int> right;
+	vector <int> side;
+	ram = false;
+	int left_low = back_left_dist.get();
+	int right_low = back_right_dist.get();
+	int side_low = 0;
+	if(sensor == "left"){side_low = left_dist.get();}
+	if(sensor == "right"){side_low = right_dist.get();}
+
+	int error_count = 0;
+
 	misc.print("Start Time: %d\n", start_time);
 	while(start_time+time >= millis()){
 		printf("%d| Left:%d Right: %d\n", millis(), back_left_dist.get(), back_right_dist.get());
-		left.push_back(back_left_dist.get());
-		right.push_back(back_right_dist.get());
-		// total_left += back_left_dist.get();
-		// total_right += back_right_dist.get();
-		cycle_count +=1;
+
+		if(back_left_dist.get() <= left_low) left_low = back_left_dist.get();
+		if(back_right_dist.get() <= right_low) right_low = back_right_dist.get();
+		if(sensor =="left"){if(left_dist.get() <= side_low) side_low = left_dist.get();}
+		if(sensor =="right"){if(right_dist.get() <= side_low) side_low = right_dist.get();}
+
+		if(back_left_dist.get() < left_low + 20) left.push_back(back_left_dist.get()); else error_count++;
+		if(back_right_dist.get() < right_low + 20) right.push_back(back_right_dist.get()); else error_count++;
+		if(sensor =="left"){if(left_dist.get() < side_low + 20) side.push_back(left_dist.get()); else error_count++;}
+		if(sensor =="right"){if(right_dist.get() < side_low + 20) side.push_back(right_dist.get()); else error_count++;}
 		delay(33);
 	}
-	sort(left.begin(), left.end());
-	sort(right.begin(), right.end());
-	averageleft = left.at(left. size() / 2);
-	averageright = right.at(right.size() / 2);
-	printf("Average: Left:%f Right:%f\n", averageleft, averageright);
-	misc.print("End Time: %d\n", millis());
-}
+	if(error_count < 5){
+		sort(left.begin(), left.end());
+		sort(right.begin(), right.end());
+		sort(side.begin(), side.end());
 
-void distance_reset(int time){
-	double d = 315;	
-	average(time);
-	double diff = averageleft-averageright;
-	double angle = atan(diff/d);
-	angle = rad_to_deg(angle);
-	misc.print("Angle Reset to: %f\n", angle);
+		averageleft = left.at(left. size() / 2);
+		averageright = right.at(right.size() / 2);
+		averageside = right.at(right.size() / 2);
+
+		printf("Average: Left:%f Right:%f\n", averageleft, averageright);
+		misc.print("End Time: %d\n", millis());
+	}
+	else{
+		misc.print("Reset Failed Error Count is %d", error_count);
+		ram = true;
+	}
+	if(ram == 0){
+		int diff = averageleft-averageright;
+		angle = atan(diff/d);
+		angle = rad_to_deg(angle);
+		misc.print("Angle Reset to: %f\n", angle);
+		if(averageleft < averageright){
+			local_y = ((averageleft/25.4) - tan(angle) + (dist_to_center/25.4) * cos(angle) + (side_length/25.4)) * cos(angle);
+			local_x = ((averageside/25.4) + (dist_to_center/25.4)) * cos(angle);
+		}
+		if(averageleft > averageright){
+			local_y = ((averageright/25.4) - tan(angle) + (dist_to_center/25.4) * cos(angle) + (side_length/25.4)) * cos(angle);
+			local_x = ((averageside/25.4) + (dist_to_center/25.4)) * cos(angle);
+		}
+		misc.print("Front: %f, Side: %f\n", local_y, local_x);
+		Position Reset (local_x, local_y, angle);
+		return Reset;
+	}else{
+		//Make it ram into the wall or just throw a flag to another program
+		Position Reset(local_x,local_y,angle);
+		return Reset;
+	}
 }
 
 void distance_loop(double distance){
@@ -59,8 +96,8 @@ void distance_loop(double distance){
 		printf("Delta Dist: %f\n", delta_dist);
 
 		if(abs(back_left_dist.get() - back_right_dist.get()) <= 50) setVisionState(Distance_States::stable); // 50 is a test value
-		else if (back_left_dist.get() > back_right_dist.get()) setVisionState(Distance_States::turn_left); 
-		else if (back_left_dist.get() < back_right_dist.get()) setVisionState(Distance_States::turn_right); 
+		else if (back_left_dist.get() > back_right_dist.get()) setVisionState(Distance_States::turn_left);
+		else if (back_left_dist.get() < back_right_dist.get()) setVisionState(Distance_States::turn_right);
 
 		if(back_left_dist.get() == 0) setVisionState(Distance_States::turn_left);
 		if(back_right_dist.get() == 0) setVisionState(Distance_States::turn_right);

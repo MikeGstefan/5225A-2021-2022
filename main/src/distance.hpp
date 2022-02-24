@@ -4,6 +4,7 @@
 #include <iostream>
 #include <cmath>
 #include "drive.hpp"
+#include "geometry.hpp"
 using namespace pros;
 
 enum class Distance_States{
@@ -13,11 +14,9 @@ enum class Distance_States{
 };
 
 class cDistance{
-
   public:
       double last_distance = 0;
 };
 
 void distance_loop(double distance);
-void distance_reset(int time);
-void average(int time);
+Position distance_reset(int time, string sensor);
