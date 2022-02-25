@@ -33,7 +33,7 @@ extern _Task move_t;
 #define DIST_FRONT 8.5
 
 
-const int min_move_power_a = 23;
+const int min_move_power_a = 35;
 const int min_move_power_x = 40;
 const int min_move_power_y = 25;
 

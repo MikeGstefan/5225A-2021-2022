@@ -980,6 +980,7 @@ void tank_move_to_target(void* params){
 
     // double deriv_a = 0.0;
     PID angle(kp_a, 0.0, kd_a, 0.0);
+    PID y_pid(6.4,0.0,350.0,0.0);
 
     // move on line variables
     Vector follow_line(target.y - tracking.y_coord, target.x - tracking.x_coord); // used to keep track of angle of follow_line relative to the vertical
@@ -1017,6 +1018,7 @@ void tank_move_to_target(void* params){
         sgn_local_error_y = turn_dir_if_0 ? 1 : -1;
         // printf("triggered\n");
       }
+      // orig_sgn_line_y = sgn_local_error_y;
       local_error.y = sin(difference_a) * hypotenuse; // local y displacement to target
       // chooses nearest angle to turn to face target (back or front)
       error.angle = near_angle(sgn_local_error_y * M_PI / 2, difference_a);
@@ -1025,7 +1027,8 @@ void tank_move_to_target(void* params){
       end_dist = sqrt(pow(hypotenuse,2) + pow(local_error.y,2) - (2* hypotenuse * local_error.y * cos(tracking.global_angle - atan2(target.x - tracking.x_coord,target.y - tracking.y_coord))));  
       motion_d.print("%d|| end_dist: %.2f, hypotenuse: %.2f, local %.2f, angle: %.2f\n",millis(), end_dist,hypotenuse, local_error.y,rad_to_deg(tracking.global_angle - atan2(target.x - tracking.x_coord,target.y - tracking.y_coord)));
 
-      tracking.power_y = kp_y * local_error.y;
+      // tracking.power_y = kp_y * local_error.y;
+      tracking.power_y = y_pid.compute(-local_error.y,0.0);
       // tracking.power_y = kp_y * line_y_local_y;
       // tracking.power_a = angle.compute(error.angle, 0.0);
       if( end_dist > end_error.x ){

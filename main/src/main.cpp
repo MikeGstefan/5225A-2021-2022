@@ -126,7 +126,8 @@ void opcontrol() {
 	while(!master.get_digital_new_press(DIGITAL_A))delay(10);
 	f_lift.move(-10);
 	// move_start(move_types::tank_rush, tank_rush_params({0.0,40.0,0.0},false, 127.0,1.0,true,150.0,0.0,10.0));
-	move_start(move_types:: tank_point, tank_point_params({0.0,40.0,0.0}, false, 127.0,1.0,true,4.5,150.0,0.0,0));
+	move_start(move_types:: tank_point, tank_point_params({0.0,40.0,0.0}, false, 127.0,1.0,true,6.0,150.0,0.0,0));
+	// move_start(move_types::turn_angle, turn_angle_params(90.0, true, true,150.0,0.0,127.0,0));
 	while(true){ 
 		GUI::update();
 		delay(10);
@@ -235,7 +236,7 @@ void opcontrol() {
 
 	while(true){
 		GUI::update();
-		drivebase.set_state(1);
+		// drivebase.set_state(1);
 		if(master.get_digital_new_press(DIGITAL_Y)){ 
 			master.print(0,0,"%f",rad_to_deg(tracking.global_angle));
 		}
