@@ -25,7 +25,7 @@ void flatten_against_wall(bool front = true);
 void b_detect_goal();
 void f_detect_goal();
 
-
+void detect_interference();
 
 class Reset_dist{
     private: 

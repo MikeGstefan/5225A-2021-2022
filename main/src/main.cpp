@@ -122,9 +122,11 @@ bool claw_state = false, claw_state_2 = false, lift_state = false, drive_state =
 int lift_speed = 0;
 int safety_check = 0;
 void opcontrol() {
+	drivebase.set_state(0);
 	while(!master.get_digital_new_press(DIGITAL_A))delay(10);
-	move_start(move_types::tank_arc, tank_arc_params({0.0,0.0},{20.0,20.0,90.0},127.0,127.0,true,10.0,2.0,40.0));
-	// move_start(move_types:: tank_point, tank_point_params({-20.0,-20.0,0.0}));
+	f_lift.move(-10);
+	// move_start(move_types::tank_rush, tank_rush_params({0.0,40.0,0.0},false, 127.0,1.0,true,150.0,0.0,10.0));
+	move_start(move_types:: tank_point, tank_point_params({0.0,40.0,0.0}, false, 127.0,1.0,true,4.5,150.0,0.0,0));
 	while(true){ 
 		GUI::update();
 		delay(10);

@@ -170,6 +170,19 @@ struct tank_point_params{
   tank_point_params(const Position target, const bool turn_dir_if_0 = false, const double max_power = 127.0, const double min_angle_percent = 1.0, const bool brake = true, double kp_y = 9.0, double kp_a =150.0, double kd_a = 0.0, int timeout = 0, Point end_error = {0.5, 0.5});
 };
 
+struct tank_rush_params{ 
+  Position target = {0.0,0.0,0.0};
+  bool turn_dir_if_0 = false;
+  double max_power = 127.0, min_angle_percent = 1.0;
+  bool brake= true;
+  double kp_a = 150.0;
+  double kd_a = 0.0;
+  double dist_past = 10.0;
+  tank_rush_params() = default;
+  tank_rush_params(const Position target, const bool turn_dir_if_0, const double max_power = 127.0, const double min_angle_percent = 1.0, const bool brake = true, double kp_a =150.0, double kd_a = 0.0, double dist_past = 10.0);
+};
+
+
 struct turn_angle_params{ 
   double target_a = 0.0;
   bool brake = true;
@@ -202,18 +215,20 @@ enum class move_types{
   tank_point,
   turn_angle,
   turn_point,
-  line_old
+  line_old,
+  tank_rush
 };
 
 
-void move_start(move_types type, std::variant<arc_params, line_params, tank_arc_params, point_params, tank_point_params, turn_angle_params, turn_point_params, line_old_params> params, bool wait_for_comp = true);
+void move_start(move_types type, std::variant<arc_params, line_params, tank_arc_params, point_params, tank_point_params, turn_angle_params, turn_point_params, line_old_params,tank_rush_params> params, bool wait_for_comp = true);
 bool move_wait_for_complete();
 void move_wait_for_error(double error);
 void move_stop(bool brake = false);
-
+bool get_move_state();
 
 void rush_goal(double target_x, double target_y, double target_a);
 void rush_goal2(double target_x, double target_y, double target_a);
+void tank_rush_goal(void* params);
 
 
 void move_to_point(void* params);

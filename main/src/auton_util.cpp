@@ -104,6 +104,18 @@ void f_detect_goal(){
 }
 
 
+void detect_interference(){ 
+  int time = millis();
+  while(get_move_state()){
+    //numbers need funnyimh
+    if(time > 500 && tracking.g_velocity.y < 0.5){
+      drivebase.set_state(0);
+      break;
+    }
+    delay(10);
+  }
+}
+
 Reset_dist::Reset_dist(pros::Distance* sensor, double dist_from_center): sensor{sensor}, dist_from_center{dist_from_center}{}
 
 double Reset_dist::get_dist(){
