@@ -14,6 +14,7 @@
 #include <vector>
 #include <functional>
 #include <variant>
+#include <limits>
 
 using namespace pros;
 
@@ -150,8 +151,9 @@ struct tank_arc_params{
   Position target = {0.0,0.0,0.0};
   double power = 127.0, max_power = 127.0;
   bool brake = false;
+  double decel_start = 0.0, decel_end = 0.0, decel_target_speed = 0.0;
   tank_arc_params() = default;
-  tank_arc_params(const Point start_pos, Position target, const double power = 127.0, const double max_power = 127.0, const bool brake = false);
+  tank_arc_params(const Point start_pos, Position target, const double power = 127.0, const double max_power = 127.0, const bool brake = false, double decel_start = 0.0, double decel_end = 0.0, double decel_target_speed = 0.0);
 };
 
 struct tank_point_params{ 
@@ -162,8 +164,10 @@ struct tank_point_params{
   double kp_y = 9.0;
   double kp_a = 150.0;
   double kd_a = 0.0;
+  int timeout = 0;
+  Point end_error = {0.5, 0.5};
   tank_point_params() = default;
-  tank_point_params(const Position target, const bool turn_dir_if_0, const double max_power = 127.0, const double min_angle_percent = 1.0, const bool brake = true, double kp_y = 9.0, double kp_a =150.0, double kd_a = 0.0);
+  tank_point_params(const Position target, const bool turn_dir_if_0 = false, const double max_power = 127.0, const double min_angle_percent = 1.0, const bool brake = true, double kp_y = 9.0, double kp_a =150.0, double kd_a = 0.0, int timeout = 0, Point end_error = {0.5, 0.5});
 };
 
 struct turn_angle_params{ 
@@ -182,8 +186,10 @@ struct turn_angle_params{
 struct turn_point_params{ 
   Point target = {0.0,0.0};
   bool brake = true;
+  double max_power = 127;
+  int timeout = 0;
   turn_point_params() = default;
-  turn_point_params(const Point target, const bool brake = true);
+  turn_point_params(const Point target, const bool brake = true, double max_power = 127, int timeout = 0);
 };
 
 
@@ -221,7 +227,7 @@ void tank_move_on_arc(void* params);  // min speed for smooth move is 100
 
 void turn_to_angle(void* params);
 //overloaded to be called in another function DO NOT CALL ALONE
-void turn_to_angle(double target_a, const bool brake, _Task* ptr);
+void turn_to_angle(double target_a, const bool brake, double max_power, int timeout, _Task* ptr);
 void turn_to_point(void* params);
 
 
