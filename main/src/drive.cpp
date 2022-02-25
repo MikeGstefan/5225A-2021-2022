@@ -232,6 +232,10 @@ void Drivebase::driver_practice(){
   f_lift.move_absolute(f_lift.bottom_position);
   f_claw_p.set_value(LOW);
   b_claw_p.set_value(LOW);
+  
+  b_lift.set_state(b_lift_states::bottom);
+  f_lift.set_state(f_lift_states::bottom);
+
   // lift.move(-10); // gives holding power
 
   cur_driver = 0; // defaults driver to Nikhil
@@ -255,7 +259,9 @@ void Drivebase::driver_practice(){
       // actual drive code
       drivebase.handle_input();
       b_lift.handle();
+      b_claw.handle();
       f_lift.handle();
+      f_claw.handle();
       handle_trans();
 
       GUI::update();

@@ -17,14 +17,17 @@ using namespace pros;
 // back lift buttons
 extern controller_digital_e_t b_lift_up_button;
 extern controller_digital_e_t b_lift_down_button;
-extern controller_digital_e_t b_lift_release_button;
+extern controller_digital_e_t b_claw_toggle_button;
+extern controller_digital_e_t b_claw_search_button;
+
 
 // front lift buttons
 extern controller_digital_e_t f_lift_up_button;
 extern controller_digital_e_t f_lift_down_button;
-extern controller_digital_e_t f_lift_release_button;
+extern controller_digital_e_t f_claw_toggle_button;
+extern controller_digital_e_t f_claw_search_button;
 
-// misc buttons
+// misc buttons (MASTER CONTROLLER)
 extern controller_digital_e_t cancel_button;
 extern controller_digital_e_t shift_button;
 extern controller_digital_e_t intake_button;
