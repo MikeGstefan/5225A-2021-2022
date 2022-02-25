@@ -38,7 +38,7 @@ double PID::compute(double input, double target){
         last_update_timer.reset();
         last_error_sgn = sgn(error);
         last_error = error;
-        motion_d.print("calculating derivative : %f\n", derivative);
+        // motion_d.print("calculating derivative : %f\n", derivative);
     }
     
     output = proportional + integral + derivative + bias;
