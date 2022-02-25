@@ -91,6 +91,7 @@ void F_Lift::handle(){
       if(master.get_digital_new_press(f_lift_down_button)){
         master.rumble("-");
         master.print(F_LIFT_STATE_LINE, 0, "F_Lift: Idle         ");
+        f_claw_p.set_value(LOW);
 
         set_state(f_lift_states::idle);
       }
@@ -98,6 +99,8 @@ void F_Lift::handle(){
       break;
 
     case f_lift_states::grabbed:
+      master.print(F_LIFT_STATE_LINE, 0, "grabbed");
+
       if(master.get_digital_new_press(f_lift_up_button)){ // lifts goal to tall goal platform height if up button is pressed
         // // intake.raise_and_disable();
         delay(100);
@@ -138,7 +141,7 @@ void F_Lift::handle(){
         set_state(last_state);
       }
       if(master.get_digital_new_press(f_lift_down_button)){ // lowers goal if down button is pressed
-        move_absolute(bottom_position);
+        move_absolute(holding_position);
 
         set_state(f_lift_states::lowering);
       }
@@ -198,6 +201,7 @@ void F_Lift::handle(){
       break;
 
     case f_lift_states::lowering:
+      master.print(F_LIFT_STATE_LINE, 0, "lowering");
       // moves to last position if up button is pressed
       if(master.get_digital_new_press(f_lift_up_button)){
         switch (last_state) {
@@ -216,7 +220,7 @@ void F_Lift::handle(){
         set_state(last_state);
       }
       // moves to next state if lift is at bottom position
-      if(fabs(motor.get_position() - bottom_position) < end_error){
+      if(fabs(motor.get_position() - holding_position) < end_error){
         switch (last_state) {
           case f_lift_states::dropoff:
             // intake_piston.set_value(LOW);

@@ -36,7 +36,7 @@ class F_Lift: public Motorized_subsystem<f_lift_states, NUM_OF_F_LIFT_STATES, LI
   Timer release_timer{"release_timer"};
 
 public:
-  const double bottom_position = 30.0, holding_position = 150.0, raised_position = 300.0, tall_dropoff_position = 475.0, platform_position = 600.0, tall_goal_position = 665.0, top_position = 675.0;
+  const double bottom_position = 45.0, holding_position = 150.0, raised_position = 300.0, tall_dropoff_position = 475.0, platform_position = 630.0, tall_goal_position = 665.0, top_position = 675.0;
 
   F_Lift(Motorized_subsystem<f_lift_states, NUM_OF_F_LIFT_STATES, LIFT_MAX_VELOCITY> motorized_subsystem);  // constructor
   void handle();  // contains state machine code
