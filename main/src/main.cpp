@@ -38,7 +38,9 @@ void initialize() {
 	GUI::init();
 	delay(500);
 	// tracking.x_coord = 26.0, tracking.y_coord = 11.75, tracking.global_angle = -90.0_deg;
-	tracking.x_coord = 108.0, tracking.y_coord = 16.0, tracking.global_angle = 0.0_deg;
+	// tracking.x_coord = 104.0, tracking.y_coord = 12.0, tracking.global_angle = -30.0_deg;
+	// tracking.x_coord = 24.5, tracking.y_coord = 15.0, tracking.global_angle = 9.0_deg;
+	tracking.x_coord = 0.0, tracking.y_coord = 0.0, tracking.global_angle = 0.0_deg;
 	update_t.start();
 	// auton_file_read();
 	// master.print(2, 0, "Driver: %s", drivebase.drivers[drivebase.cur_driver].name);
@@ -122,9 +124,18 @@ bool claw_state = false, claw_state_2 = false, lift_state = false, drive_state =
 int lift_speed = 0;
 int safety_check = 0;
 void opcontrol() {
+	master.clear();
 	drivebase.set_state(0);
-	while(!master.get_digital_new_press(DIGITAL_A))delay(10);
-	lrt_auton();
+	while(!master.get_digital_new_press(DIGITAL_A)){
+		delay(10);
+		GUI::update();
+	}
+	// f_claw_p.set_value(1);
+	// f_lift.move_absolute(150,100);
+
+	// lrt_auton();
+	// blue_highside_tall();
+	blue_lowside();
 	// f_lift.move(-10);
 	// move_start(move_types::tank_rush, tank_rush_params({0.0,40.0,0.0},false, 127.0,1.0,true,150.0,0.0,10.0));
 	// move_start(move_types:: tank_point, tank_point_params({0.0,40.0,0.0}, false, 127.0,1.0,true,6.0,150.0,0.0,0));

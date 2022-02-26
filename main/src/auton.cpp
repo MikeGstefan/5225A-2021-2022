@@ -415,6 +415,99 @@ void skillsPark(){
 
 }
 
+void blue_highside(){
+  // tracking.x_coord = 108.0, tracking.y_coord = 16.0, tracking.global_angle = 0.0_deg;
+  
+
+
+  move_start(move_types::tank_rush, tank_rush_params({108.0,71.0,0.0}, false),false);
+  // f_lift.reset();
+  // f_lift.move(-10);
+  // f_detect_goal();
+  move_wait_for_complete();
+  // f_lift.move_absolute(150,100);
+  // intk.move(10);
+  move_stop();
+  move_start(move_types::tank_point, tank_point_params({108.0,37.0,0.0}, false,127.0,1.0,true,9.0,150.0,0.0,0,{2.0,0.5}),false);
+  detect_interference();
+  misc.print("%d||here\n",millis());
+  move_wait_for_complete();
+  move_start(move_types::turn_angle, turn_angle_params(-90.0));
+  f_lift.move_absolute(150,100);
+  delay(100);
+  move_start(move_types::tank_point, tank_point_params({128.0,37.0,-90.0}, false,127.0,1.0,true,9.0,150.0,0.0,0,{2.0,0.5}),false);
+  b_detect_goal();
+  move_stop();
+  delay(200);
+  intk.move(50);
+  delay(2000);
+}
+
+
+
+void blue_highside_tall(){
+  //tracking.x_coord = 104.0, tracking.y_coord = 12.0, tracking.global_angle = -30.0_deg;
+
+
+  // Task([](){
+    // f_lift.reset();
+    // f_lift.move(-10);
+  // });
+  // drivebase.set_state(1);
+  move_start(move_types::tank_rush, tank_rush_params({71.0,71.0,30.0},false), false);
+  // delay(200);
+  // drivebase.set_state(0);
+  f_lift.reset();
+  f_lift.move(-10);
+  move_wait_for_complete();
+  // drivebase.set_state(0);
+  move_start(move_types::tank_point, tank_point_params({91.0,35.0,30.0}, false,127.0,1.0,true,9.0,150.0,0.0,0,{2.0,0.5}),false);
+  detect_interference();
+  move_wait_for_complete();
+
+  f_lift.move_absolute(150,100);
+  move_start(move_types::turn_angle, turn_angle_params(-90.0));
+  
+  delay(100);
+  move_start(move_types::tank_point, tank_point_params({128.0,35.0,-90.0}, false,100.0,1.0,true,9.0,150.0,0.0,0,{2.0,0.5}),false);
+  b_detect_goal();
+  move_stop();
+  delay(200);
+  intk.move(50);
+  delay(2000);
+}
+
+void blue_lowside(){
+  // tracking.x_coord = 24.5, tracking.y_coord = 15.0, tracking.global_angle = 9.0_deg;
+
+
+  
+  move_start(move_types::tank_rush, tank_rush_params({35.0,71.0,9.0}, false),false);
+  f_lift.reset();
+  f_lift.move(-10);
+  b_lift.reset();
+  b_lift.move(-5);
+  // f_detect_goal();
+  move_wait_for_complete();
+  // f_lift.move_absolute(150,100);
+  // intk.move(10);
+  move_stop();
+  move_start(move_types::tank_point, tank_point_params({18.0,18.0,0.0}, false,127.0,1.0,true,9.0,150.0,0.0,0,{2.0,0.5}),false);
+  detect_interference();
+  misc.print("%d||here\n",millis());
+  move_wait_for_complete();
+  f_lift.move_absolute(60,100);
+  move_start(move_types::turn_angle, turn_angle_params(-60.0,true, true,150.0,0.0,80));
+  drivebase.brake();
+  delay(100);
+  move_start(move_types::tank_point, tank_point_params({35.0,14.0,-60.0}, false,80.0),false);
+  b_detect_goal();
+  move_stop();
+   f_lift.move_absolute(150,100);
+  drivebase.brake();
+  intk.move(50);
+  
+}
 
 void lrt_auton(){
   move_start(move_types::tank_point, tank_point_params({108.0,71.0,0.0}),false);

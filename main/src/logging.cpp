@@ -27,9 +27,10 @@ Data tracking_imp("tracking.txt","$03",general,log_locations::sd);
 Data misc("misc.txt", "$04",general,log_locations::both);
 Data drivers_data("driver.txt", "$05", debug,log_locations::none);
 Data motion_i("motion.txt","$06",general,log_locations::both);
-Data motion_d("motion.txt", "$06", general,log_locations::both);
+Data motion_d("motion.txt", "$06", general,log_locations::t);
 Data term("terminal.txt","$07",general,log_locations::t);
 Data log_d("log.txt","$08",general,log_locations::both);
+Data graph("graph.txt","$09",general,log_locations::sd);
 
 vector<Data*> Data::get_objs(){
   return obj_list;

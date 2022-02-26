@@ -24,6 +24,9 @@ void skillsPark();
 
 void lrt_auton();
 
+void blue_highside();
+void blue_highside_tall();
+void blue_lowside();
 
 
 
