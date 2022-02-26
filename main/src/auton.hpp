@@ -22,7 +22,7 @@ void skills3();
 void skills4();
 void skillsPark();
 
-
+void lrt_auton();
 
 
 

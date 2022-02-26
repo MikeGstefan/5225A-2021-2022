@@ -38,7 +38,7 @@ void initialize() {
 	GUI::init();
 	delay(500);
 	// tracking.x_coord = 26.0, tracking.y_coord = 11.75, tracking.global_angle = -90.0_deg;
-	tracking.x_coord = 0.0, tracking.y_coord = 0.0, tracking.global_angle = 0.0_deg;
+	tracking.x_coord = 108.0, tracking.y_coord = 16.0, tracking.global_angle = 0.0_deg;
 	update_t.start();
 	// auton_file_read();
 	// master.print(2, 0, "Driver: %s", drivebase.drivers[drivebase.cur_driver].name);
@@ -124,9 +124,10 @@ int safety_check = 0;
 void opcontrol() {
 	drivebase.set_state(0);
 	while(!master.get_digital_new_press(DIGITAL_A))delay(10);
-	f_lift.move(-10);
+	lrt_auton();
+	// f_lift.move(-10);
 	// move_start(move_types::tank_rush, tank_rush_params({0.0,40.0,0.0},false, 127.0,1.0,true,150.0,0.0,10.0));
-	move_start(move_types:: tank_point, tank_point_params({0.0,40.0,0.0}, false, 127.0,1.0,true,6.0,150.0,0.0,0));
+	// move_start(move_types:: tank_point, tank_point_params({0.0,40.0,0.0}, false, 127.0,1.0,true,6.0,150.0,0.0,0));
 	// move_start(move_types::turn_angle, turn_angle_params(90.0, true, true,150.0,0.0,127.0,0));
 	while(true){ 
 		GUI::update();

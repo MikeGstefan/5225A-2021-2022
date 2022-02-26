@@ -416,6 +416,29 @@ void skillsPark(){
 }
 
 
+void lrt_auton(){
+  move_start(move_types::tank_point, tank_point_params({108.0,71.0,0.0}),false);
+  f_lift.reset();
+  f_lift.move(-10);
+  f_detect_goal();
+  f_lift.move_absolute(150,100);
+  // intk.move(10);
+  move_stop();
+  // drivebase.move(0,0);
+  move_start(move_types::tank_point, tank_point_params({116.0,46.0,-45.0}),false);
+  // move_start(move_types::turn_point, turn_point_params({130.0,35.0}));
+  move_start(move_types::turn_angle, turn_angle_params(rad_to_deg(atan2(130.0 - tracking.x_coord, 35.0 - tracking.y_coord))+180.0));
+
+  drivebase.brake();
+  delay(100);
+  move_start(move_types::tank_point, tank_point_params(polar_to_vector_point(116.0,46.0,-20.0, rad_to_deg(tracking.global_angle), rad_to_deg(tracking.global_angle)), false,90.0,1.0,true,9.0,150.0,0.0,0,{0.5,1.0}),false);
+  b_detect_goal();
+  move_stop();
+  drivebase.brake();
+  intk.move(50);
+  while(true)delay(10);
+}
+
 std::fstream auton_file;
 autons cur_auton = static_cast<autons>(0);
 alliances cur_alliance = static_cast<alliances>(0);
