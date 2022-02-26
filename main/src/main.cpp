@@ -42,7 +42,8 @@ void initialize() {
 	// tracking.x_coord = 26.0, tracking.y_coord = 11.75, tracking.global_angle = -90.0_deg;
 	tracking.x_coord = 108.0, tracking.y_coord = 16.0, tracking.global_angle = 0.0_deg;
 	update_t.start();
-	// auton_file_read();
+	auton_file_read();
+	pos_auton_file_read();
 	// master.print(2, 0, "Driver: %s", drivebase.drivers[drivebase.cur_driver].name);
 	// gyro.finish_calibrating(); //Finishes calibrating gyro before program starts
 }
@@ -98,6 +99,10 @@ void autonomous() {
 
 void opcontrol() {
 	/*
+	mix/match sizing in screen printing
+	namespace for auton
+	motor control in main gui similar to pneumatics_for_gui
+	auton give up
 	make gui a task
 	create good autosizing
 	*/

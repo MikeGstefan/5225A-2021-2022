@@ -459,7 +459,7 @@ void pos_auton_file_read(){
     }
   }
   else{
-    printf("\033[31mNo SD card inserted.\033[0m Using default auton and alliance.\n");
+    printf("\033[31mNo SD card inserted.\033[0m Using default start position, goal and alliance.\n");
 
     cur_start_pos = start_pos::Default;
     cur_goal = 1;

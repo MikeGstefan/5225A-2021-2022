@@ -91,16 +91,6 @@ Button tilter_move(470, 95, -100, 40, GUI::Style::SIZE, Button::SINGLE, motor_su
 Button claw_switch(470, 145, -100, 40, GUI::Style::SIZE, Button::TOGGLE, motor_subsys, "Claw");
 Button end_effector_switch(470, 195, -100, 40, GUI::Style::SIZE, Button::TOGGLE, motor_subsys, "End Effector");
 
-Page pneumatics ("Pneumatics"); //Moving to various lift states
-Button pneum_1 (15, 45, 100, 75, GUI::Style::SIZE, Button::TOGGLE, pneumatics, pneumatics_for_gui[0].second); //Names are caps to avoid conflicts
-Button pneum_2 (130, 45, 100, 75, GUI::Style::SIZE, Button::TOGGLE, pneumatics, pneumatics_for_gui[1].second);
-Button pneum_3 (245, 45, 100, 80, GUI::Style::SIZE, Button::TOGGLE, pneumatics, pneumatics_for_gui[2].second);
-Button pneum_4 (360, 45, 100, 75, GUI::Style::SIZE, Button::TOGGLE, pneumatics, pneumatics_for_gui[3].second);
-Button pneum_5 (15, 140, 100, 75, GUI::Style::SIZE, Button::TOGGLE, pneumatics, pneumatics_for_gui[4].second);
-Button pneum_6 (130, 140, 100, 75, GUI::Style::SIZE, Button::TOGGLE, pneumatics, pneumatics_for_gui[5].second);
-Button pneum_7 (245, 140, 100, 75, GUI::Style::SIZE, Button::TOGGLE, pneumatics, pneumatics_for_gui[6].second);
-Button pneum_8 (360, 140, 100, 75, GUI::Style::SIZE, Button::TOGGLE, pneumatics, pneumatics_for_gui[7].second);
-
 Page tuning ("Tuning Tracking"); //Tests to tune tracking when on new base
 Text tuning_instructions_1(MID_X, 35, GUI::Style::CENTRE, TEXT_SMALL, tuning, "Press your desired tracking test");
 Text tuning_instructions_2(MID_X, 50, GUI::Style::CENTRE, TEXT_SMALL, tuning, "and follow the terminal for instructions");
@@ -160,7 +150,7 @@ Button mot_stop_6 (185, 190, 45, 30, GUI::Style::SIZE, Button::SINGLE, motor, "S
 Button mot_stop_7 (300, 190, 45, 30, GUI::Style::SIZE, Button::SINGLE, motor, "Stop");
 Button mot_stop_8 (415, 190, 45, 30, GUI::Style::SIZE, Button::SINGLE, motor, "Stop");
 
-Page pneumatic ("Pneumatics"); //Pneumatic testing page
+Page pneumatic ("Pneumatics"); //Pneumatic testing page for random ports
 Slider expander (MID_X, 60, 180 , 15, GUI::Style::CENTRE, Slider::HORIZONTAL, 0, 21, pneumatic, "Expander");
 Text ADI_a_text (65, 115, GUI::Style::CENTRE, TEXT_SMALL, pneumatic, "A");
 Text ADI_b_text (180, 115, GUI::Style::CENTRE, TEXT_SMALL, pneumatic, "B");
@@ -178,6 +168,43 @@ Button ADI_e (15, 190, 100, 30, GUI::Style::SIZE, Button::TOGGLE, pneumatic, "On
 Button ADI_f (130, 190, 100, 30, GUI::Style::SIZE, Button::TOGGLE, pneumatic, "On/Off");
 Button ADI_g (245, 190, 100, 30, GUI::Style::SIZE, Button::TOGGLE, pneumatic, "On/Off");
 Button ADI_h (360, 190, 100, 30, GUI::Style::SIZE, Button::TOGGLE, pneumatic, "On/Off");
+
+Page pneumatics ("Pneumatics"); //Pneumatic testing page for known ports
+Button pneum_1 (15, 45, 100, 75, GUI::Style::SIZE, Button::TOGGLE, pneumatics, pneumatics_for_gui[0].second); //Names are caps to avoid conflicts
+Button pneum_2 (130, 45, 100, 75, GUI::Style::SIZE, Button::TOGGLE, pneumatics, pneumatics_for_gui[1].second);
+Button pneum_3 (245, 45, 100, 80, GUI::Style::SIZE, Button::TOGGLE, pneumatics, pneumatics_for_gui[2].second);
+Button pneum_4 (360, 45, 100, 75, GUI::Style::SIZE, Button::TOGGLE, pneumatics, pneumatics_for_gui[3].second);
+Button pneum_5 (15, 140, 100, 75, GUI::Style::SIZE, Button::TOGGLE, pneumatics, pneumatics_for_gui[4].second);
+Button pneum_6 (130, 140, 100, 75, GUI::Style::SIZE, Button::TOGGLE, pneumatics, pneumatics_for_gui[5].second);
+Button pneum_7 (245, 140, 100, 75, GUI::Style::SIZE, Button::TOGGLE, pneumatics, pneumatics_for_gui[6].second);
+Button pneum_8 (360, 140, 100, 75, GUI::Style::SIZE, Button::TOGGLE, pneumatics, pneumatics_for_gui[7].second);
+
+Page motors ("Motor Control");
+Slider mot_speed_set (MID_X, 60, 180 , 15, GUI::Style::CENTRE, Slider::HORIZONTAL, -127, 127, motor, "Speed");
+Text mot_1_text (65, 115, GUI::Style::CENTRE, TEXT_SMALL, motors, std::get<2>(motors_for_gui[0]));
+Text mot_2_text (180, 115, GUI::Style::CENTRE, TEXT_SMALL, motors, std::get<2>(motors_for_gui[1]));
+Text mot_3_text (295, 115, GUI::Style::CENTRE, TEXT_SMALL, motors, std::get<2>(motors_for_gui[2]));
+Text mot_4_text (410, 115, GUI::Style::CENTRE, TEXT_SMALL, motors, std::get<2>(motors_for_gui[3]));
+Text mot_5_text (65, 180, GUI::Style::CENTRE, TEXT_SMALL, motors, std::get<2>(motors_for_gui[4]));
+Text mot_6_text (180, 180, GUI::Style::CENTRE, TEXT_SMALL, motors, std::get<2>(motors_for_gui[5]));
+Text mot_7_text (295, 180, GUI::Style::CENTRE, TEXT_SMALL, motors, std::get<2>(motors_for_gui[6]));
+Text mot_8_text (410, 180, GUI::Style::CENTRE, TEXT_SMALL, motors, std::get<2>(motors_for_gui[7]));
+Button mot_1_update (15, 125, 45, 30, GUI::Style::SIZE, Button::SINGLE, motors, "Run");
+Button mot_2_update (130, 125, 45, 30, GUI::Style::SIZE, Button::SINGLE, motors, "Run");
+Button mot_3_update (245, 125, 45, 30, GUI::Style::SIZE, Button::SINGLE, motors, "Run");
+Button mot_4_update (360, 125, 45, 30, GUI::Style::SIZE, Button::SINGLE, motors, "Run");
+Button mot_5_update (15, 190, 45, 30, GUI::Style::SIZE, Button::SINGLE, motors, "Run");
+Button mot_6_update (130, 190, 45, 30, GUI::Style::SIZE, Button::SINGLE, motors, "Run");
+Button mot_7_update (245, 190, 45, 30, GUI::Style::SIZE, Button::SINGLE, motors, "Run");
+Button mot_8_update (360, 190, 45, 30, GUI::Style::SIZE, Button::SINGLE, motors, "Run");
+Button mot_1_stop (70, 125, 45, 30, GUI::Style::SIZE, Button::SINGLE, motors, "Stop");
+Button mot_2_stop (185, 125, 45, 30, GUI::Style::SIZE, Button::SINGLE, motors, "Stop");
+Button mot_3_stop (300, 125, 45, 30, GUI::Style::SIZE, Button::SINGLE, motors, "Stop");
+Button mot_4_stop (415, 125, 45, 30, GUI::Style::SIZE, Button::SINGLE, motors, "Stop");
+Button mot_5_stop (70, 190, 45, 30, GUI::Style::SIZE, Button::SINGLE, motors, "Stop");
+Button mot_6_stop (185, 190, 45, 30, GUI::Style::SIZE, Button::SINGLE, motors, "Stop");
+Button mot_7_stop (300, 190, 45, 30, GUI::Style::SIZE, Button::SINGLE, motors, "Stop");
+Button mot_8_stop (415, 190, 45, 30, GUI::Style::SIZE, Button::SINGLE, motors, "Stop");
 
 //Expander vars
 std::array<int, 21> expander_ports;
@@ -204,7 +231,7 @@ void main_setup(){
   pos_alliance.set_func([](){switch_alliance();});
   pos_alliance.add_text(pos_ally_name);
 
-  // intake_switch.set_func([](){intake.toggle();});
+  intake_switch.set_func([](){printf("sorry nathan");});
   
   res_x.set_func([](){tracking.reset(0.0, tracking.y_coord, rad_to_deg(tracking.global_angle));});
   res_y.set_func([](){tracking.reset(tracking.x_coord, 0.0, rad_to_deg(tracking.global_angle));});
@@ -259,6 +286,7 @@ void main_setup(){
   end_effector_switch.set_func([](){printf("sorry nathan");});
   end_effector_switch.set_off_func([](){printf("sorry nathan");});
 
+  //Known Pneumatics Port Setup
   if(pneumatics_for_gui[0].first){
     pneum_1.set_func([](){pneumatics_for_gui[0].first->set_value(HIGH);});
     pneum_1.set_off_func([](){pneumatics_for_gui[0].first->set_value(LOW);});
@@ -299,6 +327,81 @@ void main_setup(){
     pneum_8.set_off_func([](){pneumatics_for_gui[7].first->set_value(LOW);});
   }
   else pneum_8.set_active(false);
+
+  //Known motors function setup
+  if(std::get<0>(motors_for_gui[0])){
+    mot_1_update.set_func([](){std::get<0>(motors_for_gui[0])->move(mot_speed_set.get_value());});
+    mot_1_stop.set_func([](){std::get<0>(motors_for_gui[0])->move(0);});
+  }
+  else{
+    mot_1_text.set_active(false);
+    mot_1_update.set_active(false);
+    mot_1_stop.set_active(false);
+  }
+  if(std::get<0>(motors_for_gui[1])){
+    mot_2_update.set_func([](){std::get<0>(motors_for_gui[1])->move(mot_speed_set.get_value());});
+    mot_2_stop.set_func([](){std::get<0>(motors_for_gui[1])->move(0);});
+  }
+  else{
+    mot_2_text.set_active(false);
+    mot_2_update.set_active(false);
+    mot_2_stop.set_active(false);
+  }
+  if(std::get<0>(motors_for_gui[2])){
+    mot_3_update.set_func([](){std::get<0>(motors_for_gui[2])->move(mot_speed_set.get_value());});
+    mot_3_stop.set_func([](){std::get<0>(motors_for_gui[2])->move(0);});
+  }
+  else{
+    mot_3_text.set_active(false);
+    mot_3_update.set_active(false);
+    mot_3_stop.set_active(false);
+  }
+  if(std::get<0>(motors_for_gui[3])){
+    mot_4_update.set_func([](){std::get<0>(motors_for_gui[3])->move(mot_speed_set.get_value());});
+    mot_4_stop.set_func([](){std::get<0>(motors_for_gui[3])->move(0);});
+  }
+  else{
+    mot_4_text.set_active(false);
+    mot_4_update.set_active(false);
+    mot_4_stop.set_active(false);
+  }
+  if(std::get<0>(motors_for_gui[4])){
+    mot_5_update.set_func([](){std::get<0>(motors_for_gui[4])->move(mot_speed_set.get_value());});
+    mot_5_stop.set_func([](){std::get<0>(motors_for_gui[4])->move(0);});
+  }
+  else{
+    mot_5_text.set_active(false);
+    mot_5_update.set_active(false);
+    mot_5_stop.set_active(false);
+  }
+  if(std::get<0>(motors_for_gui[5])){
+    mot_6_update.set_func([](){std::get<0>(motors_for_gui[5])->move(mot_speed_set.get_value());});
+    mot_6_stop.set_func([](){std::get<0>(motors_for_gui[5])->move(0);});
+  }
+  else{
+    mot_6_text.set_active(false);
+    mot_6_update.set_active(false);
+    mot_6_stop.set_active(false);
+  }
+  if(std::get<0>(motors_for_gui[6])){
+    mot_7_update.set_func([](){std::get<0>(motors_for_gui[6])->move(mot_speed_set.get_value());});
+    mot_7_stop.set_func([](){std::get<0>(motors_for_gui[6])->move(0);});
+  }
+  else{
+    mot_7_text.set_active(false);
+    mot_7_update.set_active(false);
+    mot_7_stop.set_active(false);
+  }
+  if(std::get<0>(motors_for_gui[7])){
+    mot_8_update.set_func([](){std::get<0>(motors_for_gui[7])->move(mot_speed_set.get_value());});
+    mot_8_stop.set_func([](){std::get<0>(motors_for_gui[7])->move(0);});
+  }
+  else{
+    mot_8_text.set_active(false);
+    mot_8_update.set_active(false);
+    mot_8_stop.set_active(false);
+  }
+
 
   turn_encoder.set_func([](){ //Turn the encoder
     if (GUI::go("START, THEN SPIN THE ENCODER", "Please spin the encoder any number of rotations.")){
@@ -445,7 +548,6 @@ void util_setup(){
   // std::string no_motor_port_string;
   // for (int port=0; port<21; port++){
   //   if (c::registry_get_bound_type(port) != c::E_DEVICE_MOTOR && c::registry_get_bound_type(port) != c::E_DEVICE_UNDEFINED){
-  //     printf("Port:%d Mot:%d, UNDEF:%d\n", port+1, c::registry_get_bound_type(port) != c::E_DEVICE_MOTOR, c::registry_get_bound_type(port) != c::E_DEVICE_UNDEFINED);
   //     no_motor_port_string.append(std::to_string(port+1) + ",");
   //   }
   // }
