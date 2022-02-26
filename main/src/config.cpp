@@ -19,15 +19,14 @@ pros::Motor intk(11, pros::E_MOTOR_GEARSET_18, true, pros::E_MOTOR_ENCODER_DEGRE
 // pros::Motor back_r(18, pros::E_MOTOR_GEARSET_18, true, pros::E_MOTOR_ENCODER_DEGREES);
 
 // pros::Imu imu_sensor(4);
-pros::Distance b_dist(9), f_dist(12), r_reset_dist(11), l_reset_dist(13);
+pros::Distance b_dist(9), f_dist(12), r_reset_dist(19), l_reset_dist(20);
 pros::ADIDigitalOut trans_p({{16,8}}), b_claw_p(6), f_claw_p(8);
 pros::ADIDigitalOut Led1({{14, 7}});
 pros::ADIDigitalOut Led2({{14, 8}});
 pros::ADIDigitalIn f_touch(7);
 
-
-pros::Distance l_dis(10);
-pros::Distance r_dis(8);
+pros::Distance l_dist(18);
+pros::Distance r_dist(17);
 
 pros::Imu ramp_imu(5);
 

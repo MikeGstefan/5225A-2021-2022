@@ -4,21 +4,19 @@
 #include <iostream>
 #include <cmath>
 #include "drive.hpp"
+#include "geometry.hpp"
 using namespace pros;
 
-enum class Vision_States{
+enum class Distance_States{
     stable,
     turn_left,
     turn_right,
 };
 
-class vision{
-
+class cDistance{
   public:
       double last_distance = 0;
-      bool sus_spasm = 0;
-      bool  spasm = 0;
-      void spasm_check();
 };
 
-void vision_loop(double distance, int timeout = 0);
+void distance_loop(double distance);
+Position distance_reset(int time, string sensor);

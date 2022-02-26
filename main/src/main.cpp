@@ -9,7 +9,7 @@
 #include "auton_util.hpp"
 #include "Subsystem/f_lift.hpp"
 #include "Subsystem/b_lift.hpp"
-#include "vision_loop.hpp"
+#include "distance.hpp"
 
 // using namespace std;
 #include "task.hpp"
@@ -41,7 +41,7 @@ void initialize() {
 	// tracking.x_coord = 104.0, tracking.y_coord = 12.0, tracking.global_angle = -30.0_deg;
 	// tracking.x_coord = 24.5, tracking.y_coord = 15.0, tracking.global_angle = 9.0_deg;
 	tracking.x_coord = 0.0, tracking.y_coord = 0.0, tracking.global_angle = 0.0_deg;
-	update_t.start();
+	//update_t.start();
 	// auton_file_read();
 	// master.print(2, 0, "Driver: %s", drivebase.drivers[drivebase.cur_driver].name);
 	// gyro.finish_calibrating(); //Finishes calibrating gyro before program starts
@@ -77,9 +77,9 @@ void competition_initialize() {}
  * from where it left off.
  */
 void autonomous() {
-	
+
 	b_lift.reset();
-	Task([](){ 
+	Task([](){
 		f_lift.reset();
 	});
 	f_claw_p.set_value(0);
@@ -102,22 +102,10 @@ void autonomous() {
 
 }
 
-/**
- * Runs the operator control code. This function will be started in its own task
- * with the default priority and stack size whenever the robot is enabled via
- * the Field Management System or the VEX Competition Switch in the operator
- * control mode.
- *
- * If no competition control is connected, this function will run immediately
- * following initialize().
- *
- * If the robot is disabled or communications is lost, the
- * operator control task will be stopped. Re-enabling the robot will restart the
- * task, not resume it from where it left off.
- */
+
 
 //Get rid of these once merged
-double time;
+// double time;
 int ring_count = 0;
 // int ring_count = 0, cur_auton = 1;
 bool claw_state = false, claw_state_2 = false, lift_state = false, drive_state = false;
@@ -153,23 +141,17 @@ void opcontrol() {
 	// skills();
 	// skills2();
 
-	// skills3();
-	// while(true);
-
-	b_lift.reset();
-	
-	f_lift.reset();
-	// while(true)delay(10);
+  distance_reset(500, "left");
 
 	// master.clear();
-	
-	b_lift.move(0);
-	
-	f_lift.move(0);
-	f_claw_p.set_value(0);
-	Led1.set_value(1);
-	Led2.set_value(1);
-	// while(true){
+
+	// b_lift.move(0);
+  //
+	// f_lift.move(0);
+	// f_claw_p.set_value(0);
+	// Led1.set_value(1);
+	// Led2.set_value(1);
+	// // while(true){
 	// 	if(master.get_digital_new_press(DIGITAL_Y)){
 	// 		master.print(0,0,"%d",BackEncoder.get_value());
 	// 	}
