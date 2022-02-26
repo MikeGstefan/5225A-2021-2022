@@ -17,7 +17,7 @@ void skills(){
   f_detect_goal();
   move_stop();
   // while(!master.get_digital(DIGITAL_L1))delay(10);
-	
+
 	move_start(move_types::turn_point, turn_point_params({70.0,98.0}, true));  // turns to face plus of rings
 	delay(100);
   // Task([](){
@@ -39,11 +39,11 @@ void skills(){
   // b_lift.move_absolute(700);
   while(b_lift.motor.get_position() < 680)delay(10);
   // delay(2000);
-  vision_loop(15, 1500);
+  //vision_loop(15, 1500);
   drivebase.brake();
   b_lift.move_absolute(600);
   while(b_lift.motor.get_position() > 620)delay(10);
-  move_start(move_types::turn_angle, turn_angle_params(180.0,true, true, 170.0,0.0, 127.0, 500)); 
+  move_start(move_types::turn_angle, turn_angle_params(180.0,true, true, 170.0,0.0, 127.0, 500));
   b_claw_p.set_value(0);
   delay(200);
   b_lift.move_absolute(600);
@@ -60,7 +60,7 @@ void skills(){
   // drivebase.brake();
   // drivebase.brake();
   // b_lift.move_absolute(650);
-  
+
   // return;
   move_start(move_types::turn_angle, turn_angle_params(20.0, true, false, 160.0,0.0,70.0));
   delay(200);
@@ -70,7 +70,7 @@ void skills(){
   misc.print("%d || done drive towards plat\n", millis());
   f_claw_p.set_value(0);
   delay(400);
-  move_start(move_types::tank_point, tank_point_params({70.0, 100.0, 90.0},false, 127.0, 1.0, true,9.0,130.0)); 
+  move_start(move_types::tank_point, tank_point_params({70.0, 100.0, 90.0},false, 127.0, 1.0, true,9.0,130.0));
 
   move_start(move_types::turn_angle, turn_angle_params(90.0));
   delay(100);
@@ -126,7 +126,7 @@ void skills2(){
   f_detect_goal();
   move_stop();
   // while(!master.get_digital(DIGITAL_L1))delay(10);
-	
+
 	move_start(move_types::turn_point, turn_point_params({71.0,43.0}, true));  // turns to face plus of rings
 	delay(100);
 
@@ -144,11 +144,11 @@ void skills2(){
   // b_lift.move_absolute(700);
   while(b_lift.motor.get_position() < 680)delay(10);
   // delay(2000);
-  vision_loop(15, 1500);
+  //vision_loop(15, 1500);
   drivebase.brake();
   b_lift.move_absolute(600);
   while(b_lift.motor.get_position() > 620)delay(10);
-  move_start(move_types::turn_angle, turn_angle_params(360.0,true, true, 170.0,0.0, 127.0, 500)); 
+  move_start(move_types::turn_angle, turn_angle_params(360.0,true, true, 170.0,0.0, 127.0, 500));
   b_claw_p.set_value(0);
   delay(200);
   b_lift.move_absolute(650);
@@ -172,7 +172,7 @@ void skills2(){
   // drivebase.brake();
   // drivebase.brake();
   // b_lift.move_absolute(650);
-  
+
   // return;
   move_start(move_types::turn_angle, turn_angle_params(200.0, true, false, 160.0,0.0,70.0));
   // return;
@@ -183,7 +183,7 @@ void skills2(){
   misc.print("%d || done drive towards plat\n", millis());
   f_claw_p.set_value(0);
   delay(400);
-  // move_start(move_types::turn_angle, turn_angle_params(360.0,true, true, 170.0,0.0, 127.0, 500)); 
+  // move_start(move_types::turn_angle, turn_angle_params(360.0,true, true, 170.0,0.0, 127.0, 500));
   // return;
   move_start(move_types::tank_point, tank_point_params({71.0, 46.0, 235.0},false, 80.0, 1.0, true,9.0,130.0),false);
 
@@ -300,7 +300,7 @@ void skills3(){
   // tracking.reset(reset_dist_l.get_dist(), 141.0 - DIST_BACK,180.0);
   // delay(200);
   // master.print(1,1,"%.2f, %.2f, %.2f", tracking.x_coord, tracking.y_coord,rad_to_deg(tracking.global_angle));
-} 
+}
 
 void skills4(){
   f_claw_p.set_value(0);
@@ -359,7 +359,7 @@ void skillsPark(){
   while(b_lift.motor.get_position() <630)delay(10);
 	// // b_lift.move(10);
 	// delay(100);
-  
+
   flatten_against_wall(false);
   Led1.set_value(0);
   delay(100);
@@ -370,11 +370,11 @@ void skillsPark(){
   master.print(1,1,"%.2f, %.2f, %.2f", tracking.x_coord, tracking.y_coord,rad_to_deg(tracking.global_angle));
   // while(!master.get_digital_new_press(DIGITAL_R1))delay(10);
   int start = millis();
-  
-  // 
+
+  //
   // while(!master.get_digital_new_press(DIGITAL_R1))delay(10);
 
-  
+
 
   move_start(move_types::tank_point, tank_point_params({tracking.x_coord, 10.0, 0.0}, false));
   move_start(move_types::turn_angle, turn_angle_params(270.0));
@@ -415,6 +415,99 @@ void skillsPark(){
 
 }
 
+void blue_highside(){
+  // tracking.x_coord = 108.0, tracking.y_coord = 16.0, tracking.global_angle = 0.0_deg;
+  
+
+
+  move_start(move_types::tank_rush, tank_rush_params({108.0,71.0,0.0}, false),false);
+  // f_lift.reset();
+  // f_lift.move(-10);
+  // f_detect_goal();
+  move_wait_for_complete();
+  // f_lift.move_absolute(150,100);
+  // intk.move(10);
+  move_stop();
+  move_start(move_types::tank_point, tank_point_params({108.0,37.0,0.0}, false,127.0,1.0,true,9.0,150.0,0.0,0,{2.0,0.5}),false);
+  detect_interference();
+  misc.print("%d||here\n",millis());
+  move_wait_for_complete();
+  move_start(move_types::turn_angle, turn_angle_params(-90.0));
+  f_lift.move_absolute(150,100);
+  delay(100);
+  move_start(move_types::tank_point, tank_point_params({128.0,37.0,-90.0}, false,127.0,1.0,true,9.0,150.0,0.0,0,{2.0,0.5}),false);
+  b_detect_goal();
+  move_stop();
+  delay(200);
+  intk.move(50);
+  delay(2000);
+}
+
+
+
+void blue_highside_tall(){
+  //tracking.x_coord = 104.0, tracking.y_coord = 12.0, tracking.global_angle = -30.0_deg;
+
+
+  // Task([](){
+    // f_lift.reset();
+    // f_lift.move(-10);
+  // });
+  // drivebase.set_state(1);
+  move_start(move_types::tank_rush, tank_rush_params({71.0,71.0,30.0},false), false);
+  // delay(200);
+  // drivebase.set_state(0);
+  f_lift.reset();
+  f_lift.move(-10);
+  move_wait_for_complete();
+  // drivebase.set_state(0);
+  move_start(move_types::tank_point, tank_point_params({91.0,35.0,30.0}, false,127.0,1.0,true,9.0,150.0,0.0,0,{2.0,0.5}),false);
+  detect_interference();
+  move_wait_for_complete();
+
+  f_lift.move_absolute(150,100);
+  move_start(move_types::turn_angle, turn_angle_params(-90.0));
+  
+  delay(100);
+  move_start(move_types::tank_point, tank_point_params({128.0,35.0,-90.0}, false,100.0,1.0,true,9.0,150.0,0.0,0,{2.0,0.5}),false);
+  b_detect_goal();
+  move_stop();
+  delay(200);
+  intk.move(50);
+  delay(2000);
+}
+
+void blue_lowside(){
+  // tracking.x_coord = 24.5, tracking.y_coord = 15.0, tracking.global_angle = 9.0_deg;
+
+
+  
+  move_start(move_types::tank_rush, tank_rush_params({35.0,71.0,9.0}, false),false);
+  f_lift.reset();
+  f_lift.move(-10);
+  b_lift.reset();
+  b_lift.move(-5);
+  // f_detect_goal();
+  move_wait_for_complete();
+  // f_lift.move_absolute(150,100);
+  // intk.move(10);
+  move_stop();
+  move_start(move_types::tank_point, tank_point_params({18.0,18.0,0.0}, false,127.0,1.0,true,9.0,150.0,0.0,0,{2.0,0.5}),false);
+  detect_interference();
+  misc.print("%d||here\n",millis());
+  move_wait_for_complete();
+  f_lift.move_absolute(60,100);
+  move_start(move_types::turn_angle, turn_angle_params(-60.0,true, true,150.0,0.0,80));
+  drivebase.brake();
+  delay(100);
+  move_start(move_types::tank_point, tank_point_params({35.0,14.0,-60.0}, false,80.0),false);
+  b_detect_goal();
+  move_stop();
+   f_lift.move_absolute(150,100);
+  drivebase.brake();
+  intk.move(50);
+  
+}
 
 void lrt_auton(){
   move_start(move_types::tank_point, tank_point_params({108.0,71.0,0.0}),false);
@@ -475,7 +568,7 @@ void auton_file_read(){
       auton_file.close();
       Data::log_t.done_update();
       printf("\033[31mAborting auton file read. It's not getting created.\033[0m Using default values.\n");
-      
+
       cur_auton = autons::Skills;
       cur_alliance = alliances::BLUE;
       switch_alliance(cur_alliance);
@@ -492,7 +585,7 @@ void auton_file_read(){
 
   const char** autonIt = std::find(auton_names, auton_names+static_cast<int>(autons::NUM_OF_ELEMENTS), auton);
   const char** allianceIt = std::find(alliance_names, alliance_names+2, ally);
-  
+
   cur_auton = (autonIt != std::end(auton_names)) ? static_cast<autons>(std::distance(auton_names, autonIt)) : autons::Skills;
   cur_alliance = (allianceIt != std::end(alliance_names)) ? static_cast<alliances>(std::distance(alliance_names, allianceIt)) : alliances::BLUE;
 

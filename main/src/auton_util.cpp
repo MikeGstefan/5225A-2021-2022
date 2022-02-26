@@ -106,10 +106,15 @@ void f_detect_goal(){
 
 void detect_interference(){ 
   int time = millis();
-  while(get_move_state()){
+  while(move_t.get_task_ptr()->get_state()!= 4){
     //numbers need funnyimh
-    if(time > 500 && tracking.g_velocity.y < 0.5){
-      drivebase.set_state(0);
+    if(millis()-time > 1500 && fabs(tracking.g_velocity.y) < 2.0){
+      drivebase.set_state(1);
+      master.print(1,1,"PULLING");
+      misc.print("%d || TUG DETECTED\n",millis());
+      break;
+    }
+    else if(millis()-time > 1500 && fabs(tracking.g_velocity.y) > 3.0){
       break;
     }
     delay(10);

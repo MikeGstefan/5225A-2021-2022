@@ -9,7 +9,6 @@
 #include "task.hpp"
 #include "auton_util.hpp"
 #include "config.hpp"
-#include "vision_loop.hpp"
 #include "Subsystems/b_lift.hpp"
 #include "Subsystems/f_lift.hpp"
 #include <fstream>
@@ -24,9 +23,9 @@ void skillsPark();
 
 void lrt_auton();
 
-
-
-
+void blue_highside();
+void blue_highside_tall();
+void blue_lowside();
 
 
 
@@ -49,5 +48,3 @@ void switch_alliance(alliances = static_cast<alliances>(!static_cast<int>(cur_al
 void next_auton();
 void prev_auton();
 void auton_file_read();
-
-
