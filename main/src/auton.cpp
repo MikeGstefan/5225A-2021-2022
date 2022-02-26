@@ -113,6 +113,7 @@ void auton_file_read(){
     cur_auton = autons::Skills;
     cur_alliance = alliances::BLUE;
     switch_alliance(cur_alliance);
+    return;
   }
 
   char auton[10];

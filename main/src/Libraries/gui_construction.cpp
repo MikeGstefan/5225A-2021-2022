@@ -9,6 +9,7 @@ int left_enc, right_enc, back_enc, angle, elastic_up_time, elastic_down_time;
 const char* motor_port_nums;
 const char* no_motor_port_nums;
 const char* expander_port_nums;
+const char* no_pneumatic_port_nums;
 const char* driver_text;
 std::array<std::tuple<int, Button*, Button*, Text_*, int, char*>, 8> motor_ports; //port, run, stop, stall counter, port and rpm
 
@@ -41,16 +42,16 @@ Text auto_name(MID_X, 100, GUI::Style::CENTRE, TEXT_LARGE, auto_selection, "%s",
 Text ally_name(MID_X, 200, GUI::Style::CENTRE, TEXT_MEDIUM, auto_selection, "Alliance: %s", alliance_names, cur_alliance);
 
 Page track ("Tracking"); //Display tracking vals and reset btns
-Text trackX(50, 45, GUI::Style::CENTRE, TEXT_SMALL, track, "X:%.1f", tracking.x_coord);
-Text trackY(135, 45, GUI::Style::CENTRE, TEXT_SMALL, track, "Y:%.1f", tracking.y_coord);
-Text trackA(220, 45, GUI::Style::CENTRE, TEXT_SMALL, track, "A:%d", function([](){return tracking.get_angle_in_deg();}));
-Text encL(50, 130, GUI::Style::CENTRE, TEXT_SMALL, track, "L:%d", left_enc);
-Text encR(135, 130, GUI::Style::CENTRE, TEXT_SMALL, track, "R:%d", right_enc);
-Text encB(220, 130, GUI::Style::CENTRE, TEXT_SMALL, track, "B:%d", back_enc);
-Button resX(15, 60, 70, 55, GUI::Style::SIZE, Button::SINGLE, track, "Reset X");
-Button resY(100, 60, 70, 55, GUI::Style::SIZE, Button::SINGLE, track, "Reset Y");
-Button resA(185, 60, 70, 55, GUI::Style::SIZE, Button::SINGLE, track, "Reset A");
-Button resAll(15, 160, 240, 60, GUI::Style::SIZE, Button::SINGLE, track, "Reset All");
+Text track_x(50, 45, GUI::Style::CENTRE, TEXT_SMALL, track, "X:%.1f", tracking.x_coord);
+Text track_y(135, 45, GUI::Style::CENTRE, TEXT_SMALL, track, "Y:%.1f", tracking.y_coord);
+Text track_a(220, 45, GUI::Style::CENTRE, TEXT_SMALL, track, "A:%d", std::function([](){return tracking.get_angle_in_deg();}));
+Text enc_l(50, 130, GUI::Style::CENTRE, TEXT_SMALL, track, "L:%d", left_enc);
+Text enc_r(135, 130, GUI::Style::CENTRE, TEXT_SMALL, track, "R:%d", right_enc);
+Text enc_b(220, 130, GUI::Style::CENTRE, TEXT_SMALL, track, "B:%d", back_enc);
+Button res_x(15, 60, 70, 55, GUI::Style::SIZE, Button::SINGLE, track, "Reset X");
+Button res_y(100, 60, 70, 55, GUI::Style::SIZE, Button::SINGLE, track, "Reset Y");
+Button res_a(185, 60, 70, 55, GUI::Style::SIZE, Button::SINGLE, track, "Reset A");
+Button res_all(15, 160, 240, 60, GUI::Style::SIZE, Button::SINGLE, track, "Reset All");
 
 Page moving ("Moving"); //Moves to target, home, or centre
 Slider x_val(35, 45, 250, 40, GUI::Style::SIZE, Slider::HORIZONTAL, 0, 144, moving, "X");
@@ -79,15 +80,15 @@ Button tilter_move(470, 95, -100, 40, GUI::Style::SIZE, Button::SINGLE, motor_su
 Button claw_switch(470, 145, -100, 40, GUI::Style::SIZE, Button::TOGGLE, motor_subsys, "Claw");
 Button end_effector_switch(470, 195, -100, 40, GUI::Style::SIZE, Button::TOGGLE, motor_subsys, "End Effector");
 
-Page pneumatics ("Lift States"); //Moving to various lift states
-Button pneum_1 (15, 45, 100, 75, GUI::Style::SIZE, Button::SINGLE, pneumatics, pneumatics_for_gui[0].second); //Names are caps to avoid conflicts
-Button pneum_2 (130, 45, 100, 75, GUI::Style::SIZE, Button::SINGLE, pneumatics, pneumatics_for_gui[1].second);
-Button pneum_3 (245, 45, 100, 80, GUI::Style::SIZE, Button::SINGLE, pneumatics, pneumatics_for_gui[2].second);
-Button pneum_4 (360, 45, 100, 75, GUI::Style::SIZE, Button::SINGLE, pneumatics, pneumatics_for_gui[3].second);
-Button pneum_5 (15, 140, 100, 75, GUI::Style::SIZE, Button::SINGLE, pneumatics, pneumatics_for_gui[4].second);
-Button pneum_6 (130, 140, 100, 75, GUI::Style::SIZE, Button::SINGLE, pneumatics, pneumatics_for_gui[5].second);
-Button pneum_7 (245, 140, 100, 75, GUI::Style::SIZE, Button::SINGLE, pneumatics, pneumatics_for_gui[6].second);
-Button pneum_8 (360, 140, 100, 75, GUI::Style::SIZE, Button::SINGLE, pneumatics, pneumatics_for_gui[7].second);
+Page pneumatics ("Pneumatics"); //Moving to various lift states
+Button pneum_1 (15, 45, 100, 75, GUI::Style::SIZE, Button::TOGGLE, pneumatics, pneumatics_for_gui[0].second); //Names are caps to avoid conflicts
+Button pneum_2 (130, 45, 100, 75, GUI::Style::SIZE, Button::TOGGLE, pneumatics, pneumatics_for_gui[1].second);
+Button pneum_3 (245, 45, 100, 80, GUI::Style::SIZE, Button::TOGGLE, pneumatics, pneumatics_for_gui[2].second);
+Button pneum_4 (360, 45, 100, 75, GUI::Style::SIZE, Button::TOGGLE, pneumatics, pneumatics_for_gui[3].second);
+Button pneum_5 (15, 140, 100, 75, GUI::Style::SIZE, Button::TOGGLE, pneumatics, pneumatics_for_gui[4].second);
+Button pneum_6 (130, 140, 100, 75, GUI::Style::SIZE, Button::TOGGLE, pneumatics, pneumatics_for_gui[5].second);
+Button pneum_7 (245, 140, 100, 75, GUI::Style::SIZE, Button::TOGGLE, pneumatics, pneumatics_for_gui[6].second);
+Button pneum_8 (360, 140, 100, 75, GUI::Style::SIZE, Button::TOGGLE, pneumatics, pneumatics_for_gui[7].second);
 
 Page tuning ("Tuning Tracking"); //Tests to tune tracking when on new base
 Text tuning_instructions_1(MID_X, 35, GUI::Style::CENTRE, TEXT_SMALL, tuning, "Press your desired tracking test");
@@ -98,9 +99,10 @@ Button grid (10, 155, 225, 70, GUI::Style::SIZE, Button::SINGLE, tuning, "Grid")
 Button spin360 (245, 155, 225, 70, GUI::Style::SIZE, Button::SINGLE, tuning, "360 Spin");
 
 Page ports ("Ports"); //Shows what ports to use on builder util
-Text mot (10, 50, GUI::Style::CORNER, TEXT_LARGE, ports, "Motors: %s", motor_port_nums);
-Text expanders (10, 100, GUI::Style::CORNER, TEXT_LARGE, ports, "Expanders: %s", expander_port_nums);
-Text no_mot (10, 150, GUI::Style::CORNER, TEXT_LARGE, ports, "No Motors: %s", no_motor_port_nums);
+Text mot (10, 50, GUI::Style::CORNER, TEXT_MEDIUM, ports, "Motors: %s", motor_port_nums);
+Text expanders (10, 100, GUI::Style::CORNER, TEXT_MEDIUM, ports, "Expanders: %s", expander_port_nums);
+Text no_mot (10, 150, GUI::Style::CORNER, TEXT_MEDIUM, ports, "No Motors: %s", no_motor_port_nums);
+Text no_pneumatic (10, 200, GUI::Style::CORNER, TEXT_MEDIUM, ports, "No Pneumatics: %s", no_pneumatic_port_nums);
 
 Page encoders ("Encoders"); //Display tracking vals and reset btns
 Text AB (85, 35, GUI::Style::CENTRE, TEXT_SMALL, encoders, "AB");
@@ -109,12 +111,12 @@ Text EF (395, 35, GUI::Style::CENTRE, TEXT_SMALL, encoders, "EF");
 Text AB_degs (85, 50, GUI::Style::CENTRE, TEXT_SMALL, encoders, "Degs: %d", right_enc);
 Text CD_degs (240, 50, GUI::Style::CENTRE, TEXT_SMALL, encoders, "Degs: %d", left_enc);
 Text EF_degs (395, 50, GUI::Style::CENTRE, TEXT_SMALL, encoders, "Degs: %d", back_enc);
-Text AB_rots (85, 65, GUI::Style::CENTRE, TEXT_SMALL, encoders, "Rots: %d", function([](){return int(right_enc/360);}));
-Text CD_rots (240, 65, GUI::Style::CENTRE, TEXT_SMALL, encoders, "Rots: %d", function([](){return int(left_enc/360);}));
-Text EF_rots (395, 65, GUI::Style::CENTRE, TEXT_SMALL, encoders, "Rots: %d", function([](){return int(back_enc/360);}));
-Text AB_remain (85, 80, GUI::Style::CENTRE, TEXT_SMALL, encoders, "Remaining: %d", function([](){return abs(right_enc-360*int(round((right_enc+sgn(right_enc)*180)/360)));}));
-Text CD_remain (240, 80, GUI::Style::CENTRE, TEXT_SMALL, encoders, "Remaining: %d", function([](){return abs(left_enc-360*int(round((left_enc+sgn(right_enc)*180)/360)));}));
-Text EF_remain (395, 80, GUI::Style::CENTRE, TEXT_SMALL, encoders, "Remaining: %d", function([](){return abs(back_enc-360*int(round((back_enc+sgn(right_enc)*180)/360)));}));
+Text AB_rots (85, 65, GUI::Style::CENTRE, TEXT_SMALL, encoders, "Rots: %d", std::function([](){return int(right_enc/360);}));
+Text CD_rots (240, 65, GUI::Style::CENTRE, TEXT_SMALL, encoders, "Rots: %d", std::function([](){return int(left_enc/360);}));
+Text EF_rots (395, 65, GUI::Style::CENTRE, TEXT_SMALL, encoders, "Rots: %d", std::function([](){return int(back_enc/360);}));
+Text AB_remain (85, 80, GUI::Style::CENTRE, TEXT_SMALL, encoders, "Remaining: %d", std::function([](){return abs(right_enc-360*int(round((right_enc+sgn(right_enc)*180)/360)));}));
+Text CD_remain (240, 80, GUI::Style::CENTRE, TEXT_SMALL, encoders, "Remaining: %d", std::function([](){return abs(left_enc-360*int(round((left_enc+sgn(right_enc)*180)/360)));}));
+Text EF_remain (395, 80, GUI::Style::CENTRE, TEXT_SMALL, encoders, "Remaining: %d", std::function([](){return abs(back_enc-360*int(round((back_enc+sgn(right_enc)*180)/360)));}));
 Button AB_res (35, 100, 100, 50, GUI::Style::SIZE, Button::SINGLE, encoders, "Reset AB");
 Button CD_res (190, 100, 100, 50, GUI::Style::SIZE, Button::SINGLE, encoders, "Reset CD");
 Button EF_res (345, 100, 100, 50, GUI::Style::SIZE, Button::SINGLE, encoders, "Reset EF");
@@ -184,10 +186,10 @@ void main_setup(){
 
   intake_switch.set_func([](){intake.toggle();});
   
-  resX.set_func([](){tracking.reset(0.0, tracking.y_coord, rad_to_deg(tracking.global_angle));});
-  resY.set_func([](){tracking.reset(tracking.x_coord, 0.0, rad_to_deg(tracking.global_angle));});
-  resA.set_func([](){tracking.reset(tracking.x_coord, tracking.y_coord);});
-  resAll.set_func([](){tracking.reset();});
+  res_x.set_func([](){tracking.reset(0.0, tracking.y_coord, rad_to_deg(tracking.global_angle));});
+  res_y.set_func([](){tracking.reset(tracking.x_coord, 0.0, rad_to_deg(tracking.global_angle));});
+  res_a.set_func([](){tracking.reset(tracking.x_coord, tracking.y_coord);});
+  res_all.set_func([](){tracking.reset();});
   track.set_setup_func([](){
     screen::set_pen(COLOUR(WHITE));
     screen::draw_rect(270, 30, 470, 230);
@@ -246,27 +248,27 @@ void main_setup(){
     pneum_2.set_func([](){pneumatics_for_gui[1].first->set_value(HIGH);});
     pneum_2.set_off_func([](){pneumatics_for_gui[1].first->set_value(LOW);});
   }
-  else pneum_1.set_active(false);
+  else pneum_2.set_active(false);
   if(pneumatics_for_gui[2].first){
     pneum_3.set_func([](){pneumatics_for_gui[2].first->set_value(HIGH);});
     pneum_3.set_off_func([](){pneumatics_for_gui[2].first->set_value(LOW);});
   }
-  else pneum_1.set_active(false);
+  else pneum_3.set_active(false);
   if(pneumatics_for_gui[3].first){
     pneum_4.set_func([](){pneumatics_for_gui[3].first->set_value(HIGH);});
     pneum_4.set_off_func([](){pneumatics_for_gui[3].first->set_value(LOW);});
   }
-  else pneum_1.set_active(false);
+  else pneum_4.set_active(false);
   if(pneumatics_for_gui[4].first){
     pneum_5.set_func([](){pneumatics_for_gui[4].first->set_value(HIGH);});
     pneum_5.set_off_func([](){pneumatics_for_gui[4].first->set_value(LOW);});
   }
-  else pneum_1.set_active(false);
+  else pneum_5.set_active(false);
   if(pneumatics_for_gui[5].first){
     pneum_6.set_func([](){pneumatics_for_gui[5].first->set_value(HIGH);});
     pneum_6.set_off_func([](){pneumatics_for_gui[5].first->set_value(LOW);});
   }
-  else pneum_1.set_active(false);
+  else pneum_6.set_active(false);
   if(pneumatics_for_gui[6].first){
     pneum_7.set_func([](){pneumatics_for_gui[6].first->set_value(HIGH);});
     pneum_7.set_off_func([](){pneumatics_for_gui[6].first->set_value(LOW);});
@@ -277,23 +279,6 @@ void main_setup(){
     pneum_8.set_off_func([](){pneumatics_for_gui[7].first->set_value(LOW);});
   }
   else pneum_8.set_active(false);
-
-  pneum_1.set_func([](){pneumatics_for_gui[0].first->set_value(HIGH);});
-  pneum_2.set_func([](){pneumatics_for_gui[1].first->set_value(HIGH);});
-  pneum_3.set_func([](){pneumatics_for_gui[2].first->set_value(HIGH);});
-  pneum_4.set_func([](){pneumatics_for_gui[3].first->set_value(HIGH);});
-  pneum_5.set_func([](){pneumatics_for_gui[4].first->set_value(HIGH);});
-  pneum_6.set_func([](){pneumatics_for_gui[5].first->set_value(HIGH);});
-  pneum_7.set_func([](){pneumatics_for_gui[6].first->set_value(HIGH);});
-  pneum_8.set_func([](){pneumatics_for_gui[7].first->set_value(HIGH);});
-  pneum_1.set_off_func([](){pneumatics_for_gui[0].first->set_value(LOW);});
-  pneum_2.set_off_func([](){pneumatics_for_gui[1].first->set_value(LOW);});
-  pneum_3.set_off_func([](){pneumatics_for_gui[2].first->set_value(LOW);});
-  pneum_4.set_off_func([](){pneumatics_for_gui[3].first->set_value(LOW);});
-  pneum_5.set_off_func([](){pneumatics_for_gui[4].first->set_value(LOW);});
-  pneum_6.set_off_func([](){pneumatics_for_gui[5].first->set_value(LOW);});
-  pneum_7.set_off_func([](){pneumatics_for_gui[6].first->set_value(LOW);});
-  pneum_8.set_off_func([](){pneumatics_for_gui[7].first->set_value(LOW);});
 
   turn_encoder.set_func([](){ //Turn the encoder
     if (GUI::go("START, THEN SPIN THE ENCODER", "Please spin the encoder any number of rotations.")){
@@ -437,22 +422,21 @@ void util_setup(){
   motor_port_nums = strdup(motor_port_string.c_str());
 
   //Motor not allowed port numbers
-  std::string no_motor_port_string;
-  for (int port=0, i=0; port<21; port++){
-    if (c::registry_get_bound_type(port) != c::E_DEVICE_MOTOR && c::registry_get_bound_type(port) != c::E_DEVICE_UNDEFINED && i < 8){
-      no_motor_port_string.append(std::to_string(port+1) + ",");
-      i++;
-    }
-  }
-  if (no_motor_port_string.back() == ',') no_motor_port_string.pop_back();
-  no_motor_port_nums = strdup(motor_port_string.c_str());
+  // std::string no_motor_port_string;
+  // for (int port=0; port<21; port++){
+  //   if (c::registry_get_bound_type(port) != c::E_DEVICE_MOTOR && c::registry_get_bound_type(port) != c::E_DEVICE_UNDEFINED){
+  //     printf("Port:%d Mot:%d, UNDEF:%d\n", port+1, c::registry_get_bound_type(port) != c::E_DEVICE_MOTOR, c::registry_get_bound_type(port) != c::E_DEVICE_UNDEFINED);
+  //     no_motor_port_string.append(std::to_string(port+1) + ",");
+  //   }
+  // }
+
+  // if (no_motor_port_string.back() == ',') no_motor_port_string.pop_back();
+  // no_motor_port_nums = strdup(no_motor_port_string.c_str());
 
 
   //Expander Port Detection
   for (int port=0; port<21; port++){
-    if (c::registry_get_plugged_type(port) == c::E_DEVICE_ADI){
-      expander_ports[port] = port+1;
-    }
+    if (c::registry_get_plugged_type(port) == c::E_DEVICE_ADI) expander_ports[port] = port+1;
     else expander_ports[port] = std::numeric_limits<int>::max();
   }
 
@@ -465,7 +449,12 @@ void util_setup(){
 
 
   //Expander buttons
+  std::string no_pneumatic_port_string;
   for (int i = 1; i <= 8; i++){
+    if(c::adi_port_get_config(i) != pros::E_ADI_DIGITAL_IN && c::adi_port_get_config(i) != E_ADI_DIGITAL_OUT){
+      no_pneumatic_port_string.push_back(char(i+64));
+      no_pneumatic_port_string.push_back(',');
+    }
     expander_btns[i-1]->set_func([i](){
       int expander_port = expander.get_value();
       if (expander_port){
@@ -495,6 +484,9 @@ void util_setup(){
       }
     });
   }
+
+  if (no_pneumatic_port_string.back() == ',') no_pneumatic_port_string.pop_back();
+  no_pneumatic_port_nums = strdup(no_pneumatic_port_string.c_str());
 
 
   encoders.set_loop_func([](){
@@ -526,6 +518,6 @@ void util_background(){
   }
 }
 
-GUI g_main ({&temps, &driver_curve, &auto_selection, &track, &moving, &intake_test, &elastic, &motor_subsys, &pneumatics, &tuning, &pneumatic}, &main_setup, &main_background);
+GUI g_main ({&temps, &driver_curve, &auto_selection, &track, &moving, &intake_test, &elastic, &motor_subsys, &tuning, &pneumatics}, &main_setup, &main_background);
 
 GUI g_util ({&ports, &encoders, &motor, &pneumatic}, &util_setup, &util_background);

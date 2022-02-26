@@ -88,8 +88,9 @@ void autonomous() {
 void opcontrol() {
 	/*
 	make gui a task
+	create good autosizing
 	*/
-	
+
 	while(true){
 		GUI::update();
 		// drivebase.non_blocking_driver_practice();

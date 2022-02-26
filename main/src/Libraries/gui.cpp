@@ -276,6 +276,7 @@ GUI::GUI(std::vector<Page*> pages, std::function <void()> setup, std::function <
   this->pages.push_back(&perm);
   for (std::vector<Page*>::const_iterator it = pages.begin(); it != pages.end(); it++) this->pages.push_back(*it);
   this->pages.push_back(&testing);
+  this->pages.push_back(&terminal);
   this->pages.push_back(&go_sequence);
 
   //Saves gui to pages
@@ -764,39 +765,28 @@ void GUI::screen_terminal_fix(){
 
   //Sees how much space is user-requested
   int y = USER_UP;
-  for (std::vector<Text_ *>::iterator it = terminal.texts.begin(); it != terminal.texts.end(); it++){
-    if ((*it)->txt_fmt != 4){
-      y += get_size((*it)->txt_fmt, "height") + 5;
-    }
+  for (std::vector<Text_*>::iterator it = terminal.texts.begin(); it != terminal.texts.end(); it++){
+    if ((*it)->txt_fmt != 4) y += get_size((*it)->txt_fmt, "height") + 5;
   }
 
-  if(y > USER_DOWN){
-    throw std::length_error("Too Many items being printed to screen\n");
-    return;
-  }
-  
-  text_format_e_t size;
-  int length = PAGE_DOWN - y;
-  y = USER_UP;
+  int size = (PAGE_DOWN - y)/(std::count_if(terminal.texts.begin(), terminal.texts.end(), [](Text_* text){return text->txt_fmt == 4;})) - 5;
+  text_format_e_t fmt;
 
-  //Figures out biggest possible size
-  if(length >= (CHAR_HEIGHT_LARGE+5)*std::count_if(terminal.texts.begin(), terminal.texts.end(), [](Text_* text){return text->txt_fmt == TEXT_LARGE;})) size = TEXT_LARGE;
-  else if(length >= (CHAR_HEIGHT_MEDIUM+5)*std::count_if(terminal.texts.begin(), terminal.texts.end(), [](Text_* text){return text->txt_fmt == TEXT_MEDIUM;})) size = TEXT_MEDIUM;
-  else if(length >= (CHAR_HEIGHT_SMALL+5)*std::count_if(terminal.texts.begin(), terminal.texts.end(), [](Text_* text){return text->txt_fmt == TEXT_SMALL;})) size = TEXT_SMALL;
+  if(CHAR_HEIGHT_LARGE <= size) fmt = TEXT_LARGE;
+  else if(CHAR_HEIGHT_MEDIUM <= size) fmt = TEXT_MEDIUM;
+  else if(CHAR_HEIGHT_SMALL <= size) fmt = TEXT_SMALL;
   else{
     throw std::length_error("Too Many items being printed to screen\n");
     return;
   }
 
-  //Saves y-pos and txt_fmt
-  for (std::vector<Text_ *>::iterator it = terminal.texts.begin(); it != terminal.texts.end(); it++){
-    (*it)->y = y;
-    if ((*it)->txt_fmt == 4){
-      (*it)->txt_fmt = size;
-      y += get_size(size, "height") + 5;
-    }
-    else y += get_size((*it)->txt_fmt, "height") + 5;
+  y = USER_UP;
 
+  //Saves y-pos and txt_fmt
+  for (std::vector<Text_*>::iterator it = terminal.texts.begin(); it != terminal.texts.end(); it++){
+    (*it)->y = y;
+    if ((*it)->txt_fmt == 4) (*it)->txt_fmt = fmt;
+    y += get_size((*it)->txt_fmt, "height") + 5;
   }
 }
 
@@ -812,7 +802,8 @@ void GUI::init(){
   go_button.add_text(go_button_text);
 
   current_gui->setup();
-  go_to(1); //Sets it to page 1 for program start. Don't delete this. If you want to change the starting page, call GUI::go_to(Page Number) this in initialize()
+  if(terminal.active) terminal.go_to();
+  else go_to(1); //Sets it to page 1 for program start. Don't delete this. If you want to change the starting page, call GUI::go_to(Page Number) this in initialize()
   update();
 }
 
