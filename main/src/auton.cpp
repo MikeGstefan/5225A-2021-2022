@@ -428,18 +428,19 @@ void blue_highside(){
   // f_lift.move_absolute(150,100);
   // intk.move(10);
   move_stop();
-  move_start(move_types::tank_point, tank_point_params({108.0,37.0,0.0}, false,127.0,1.0,true,9.0,150.0,0.0,0,{2.0,0.5}),false);
+  move_start(move_types::tank_point, tank_point_params({108.0,35.0,0.0}, false,127.0,1.0,true,9.0,150.0,0.0,0,{2.0,0.5}),false);
   detect_interference();
   misc.print("%d||here\n",millis());
   move_wait_for_complete();
-  move_start(move_types::turn_angle, turn_angle_params(-90.0));
   f_lift.move_absolute(150,100);
+  move_start(move_types::turn_angle, turn_angle_params(-90.0));
+  drivebase.brake();
   delay(100);
-  move_start(move_types::tank_point, tank_point_params({128.0,37.0,-90.0}, false,127.0,1.0,true,9.0,150.0,0.0,0,{2.0,0.5}),false);
+  move_start(move_types::tank_point, tank_point_params({128.0,35.0,-90.0}, false,127.0,1.0,true,9.0,150.0,0.0,0,{1.0,0.5}),false);
   b_detect_goal();
   move_stop();
   delay(200);
-  intk.move(50);
+  intk.move(127);
   delay(2000);
 }
 
