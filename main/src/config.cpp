@@ -12,6 +12,8 @@ pros::Motor back_l(1, pros::E_MOTOR_GEARSET_18, false, pros::E_MOTOR_ENCODER_DEG
 pros::Motor back_r(3, pros::E_MOTOR_GEARSET_18, true,pros::E_MOTOR_ENCODER_DEGREES);
 
 pros::Motor f_lift_m(5, pros::E_MOTOR_GEARSET_36, false, pros::E_MOTOR_ENCODER_DEGREES), b_lift_m(7, pros::E_MOTOR_GEARSET_36, true,pros::E_MOTOR_ENCODER_DEGREES);
+pros::Motor intake_m(11, pros::E_MOTOR_GEARSET_36, true, pros::E_MOTOR_ENCODER_DEGREES);
+
 
 pros::Imu imu_sensor(4);
 pros::Distance b_dist(9), f_dist(12), r_dist(12);

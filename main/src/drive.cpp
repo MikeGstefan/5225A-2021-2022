@@ -233,7 +233,7 @@ void Drivebase::driver_practice(){
   f_claw_p.set_value(LOW);
   b_claw_p.set_value(LOW);
   // lift.move(-10); // gives holding power
-
+  bool intake_on = false;
   cur_driver = 0; // defaults driver to Nikhil
   // master.print(2, 0, "Driver: %s", driver_name());
   while(true){
@@ -253,6 +253,13 @@ void Drivebase::driver_practice(){
       */
 
       // actual drive code
+      if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_LEFT)){
+        intake_on = !intake_on;
+      }
+      if(intake_on) intake_m.move(127);
+      else intake_m.move(0);
+
+
       drivebase.handle_input();
       b_lift.handle();
       f_lift.handle();
