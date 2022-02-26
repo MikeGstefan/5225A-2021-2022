@@ -16,6 +16,13 @@ template <typename V=std::nullptr_t> class Text;
 //For main.cpp to switch between
 extern GUI g_main, g_util;
 
+
+//From gui.cpp
+extern Page terminal, testing;
+extern Button testing_button_1, testing_button_2;
+extern Text<> testing_text_1, testing_text_2;
+extern Slider testing_slider;
+
 typedef std::uint32_t Colour;
 #define COLOUR(NAME) (Colour)COLOR_##NAME
 
@@ -68,6 +75,7 @@ class GUI{
     //Functions
     static void update_screen_status();
     static void go_next(), go_prev();
+    static void screen_terminal_fix();
     static void end_flash();
     static void draw_oblong(int, int, int, int, double, double);
     static int get_size(text_format_e_t, std::string);
@@ -194,6 +202,16 @@ class Text: public Text_{
   public:
     //Points, Format, Page, Label, [var info], Lcolour
 
+    // Terminal - no format
+    Text (std::string text, V& value_obj, Colour label_colour = COLOUR(WHITE)){
+      construct (5, 0, GUI::Style::CORNER, E_TEXT_LARGE_CENTER, &terminal, text, [&](){return value_obj;}, label_colour);
+    }
+
+    // Terminal - format
+    Text (std::string text, V& value_obj, text_format_e_t size, Colour label_colour = COLOUR(WHITE)){
+      construct (5, 0, GUI::Style::CORNER, size, &terminal, text, [&](){return value_obj;}, label_colour);
+    }
+
     //No var
     Text (int x, int y, GUI::Style rect_type, text_format_e_t size, Page& page, std::string text, Colour label_colour = COLOUR(WHITE)){
       construct (x, y, rect_type, size, &page, text, nullptr, label_colour);
@@ -252,6 +270,8 @@ class Button{
     void run_off_func() const;
     void draw() const;
     void draw_pressed()  const;
+    bool new_press();
+    bool new_release();
 
   public:
     //Points, Format, Page, Label, Bcolour, Lcolour
@@ -264,8 +284,7 @@ class Button{
     void set_active(bool=true);
     void set_background (Colour);
     void add_text (Text_&, bool=true);
-    bool new_press();
-    bool new_release();
+    void wait_for_press(); //Blocking
 };
 
 class Slider{

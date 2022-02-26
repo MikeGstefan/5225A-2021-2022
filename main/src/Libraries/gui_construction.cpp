@@ -1,5 +1,4 @@
 #include "gui.hpp"
-#include "pros/adi.hpp"
 
 /*Field array*/ static std::vector<std::bitset<200>> field (200, std::bitset<200>{}); //Initializes to 200 blank bitsets
 /*Temperature Alert Flag*/ static bool temp_flashed;
@@ -8,20 +7,17 @@
 //Var init for text monitoring
 int left_enc, right_enc, back_enc, angle, elastic_up_time, elastic_down_time;
 const char* motor_port_nums;
+const char* no_motor_port_nums;
 const char* expander_port_nums;
+const char* no_pneumatic_port_nums;
 const char* driver_text;
 std::array<std::tuple<int, Button*, Button*, Text_*, int, char*>, 8> motor_ports; //port, run, stop, stall counter, port and rpm
 
 //For gui to use
-extern std::array<std::tuple<pros::Motor*, int, const char*, const char*, Text_*>, 8> motors;
-extern const char* alliance_names[];
-extern const char* auton_names[];
-
-//To create tests (from gui.cpp)
-extern Page testing;
-extern Button testing_button_1, testing_button_2;
-extern Text<std::nullptr_t> testing_text_1, testing_text_2;
-extern Slider testing_slider;
+extern std::array<std::tuple<pros::Motor*, int, const char*, const char*, Text_*>, 8> motors_for_gui; //Declared in config.cpp
+extern std::array<std::pair<pros::ADIDigitalOut*, const char*>, 8> pneumatics_for_gui; //Declared in config.cpp
+extern const char* alliance_names[]; //Declared in auton.cpp
+extern const char* auton_names[]; //Declared in auton.cpp
 
 Page driver_curve ("Drivers"); //Select a driver and their exp curve
 Button prev_drivr(20, 70, 110, 120, GUI::Style::SIZE, Button::SINGLE, driver_curve, "Prev Driver");
@@ -29,14 +25,14 @@ Text drivr_name(MID_X, MID_Y, GUI::Style::CENTRE, TEXT_LARGE, driver_curve, "%s"
 Button next_drivr(350, 70, 110, 120, GUI::Style::SIZE, Button::SINGLE, driver_curve, "Next Driver");
 
 Page temps ("Temperature"); //Motor temps //make actual motor names
-Text mot_temp_1(75, 85, GUI::Style::CENTRE, TEXT_SMALL, temps, "FL: %dC", std::get<1>(motors[0]), COLOUR(BLACK));
-Text mot_temp_2(185, 85, GUI::Style::CENTRE, TEXT_SMALL, temps, std::get<3>(motors[1]) + ": %dC"s, std::get<1>(motors[1]), COLOUR(BLACK));
-Text mot_temp_3(295, 85, GUI::Style::CENTRE, TEXT_SMALL, temps, std::get<3>(motors[2]) + ": %dC"s, std::get<1>(motors[2]), COLOUR(BLACK));
-Text mot_temp_4(405, 85, GUI::Style::CENTRE, TEXT_SMALL, temps, std::get<3>(motors[3]) + ": %dC"s, std::get<1>(motors[3]), COLOUR(BLACK));
-Text mot_temp_5(75, 175, GUI::Style::CENTRE, TEXT_SMALL, temps, std::get<3>(motors[4]) + ": %dC"s, std::get<1>(motors[4]), COLOUR(BLACK));
-Text mot_temp_6(185, 175, GUI::Style::CENTRE, TEXT_SMALL, temps, std::get<3>(motors[5]) + ": %dC"s, std::get<1>(motors[5]), COLOUR(BLACK));
-Text mot_temp_7(295, 175, GUI::Style::CENTRE, TEXT_SMALL, temps, std::get<3>(motors[6]) + ": %dC"s, std::get<1>(motors[6]), COLOUR(BLACK));
-Text mot_temp_8(405, 175, GUI::Style::CENTRE, TEXT_SMALL, temps, std::get<3>(motors[7]) + ": %dC"s, std::get<1>(motors[7]), COLOUR(BLACK));
+Text mot_temp_1(75, 85, GUI::Style::CENTRE, TEXT_SMALL, temps, std::get<3>(motors_for_gui[0]) + ": %dC"s, std::get<1>(motors_for_gui[0]), COLOUR(BLACK));
+Text mot_temp_2(185, 85, GUI::Style::CENTRE, TEXT_SMALL, temps, std::get<3>(motors_for_gui[1]) + ": %dC"s, std::get<1>(motors_for_gui[1]), COLOUR(BLACK));
+Text mot_temp_3(295, 85, GUI::Style::CENTRE, TEXT_SMALL, temps, std::get<3>(motors_for_gui[2]) + ": %dC"s, std::get<1>(motors_for_gui[2]), COLOUR(BLACK));
+Text mot_temp_4(405, 85, GUI::Style::CENTRE, TEXT_SMALL, temps, std::get<3>(motors_for_gui[3]) + ": %dC"s, std::get<1>(motors_for_gui[3]), COLOUR(BLACK));
+Text mot_temp_5(75, 175, GUI::Style::CENTRE, TEXT_SMALL, temps, std::get<3>(motors_for_gui[4]) + ": %dC"s, std::get<1>(motors_for_gui[4]), COLOUR(BLACK));
+Text mot_temp_6(185, 175, GUI::Style::CENTRE, TEXT_SMALL, temps, std::get<3>(motors_for_gui[5]) + ": %dC"s, std::get<1>(motors_for_gui[5]), COLOUR(BLACK));
+Text mot_temp_7(295, 175, GUI::Style::CENTRE, TEXT_SMALL, temps, std::get<3>(motors_for_gui[6]) + ": %dC"s, std::get<1>(motors_for_gui[6]), COLOUR(BLACK));
+Text mot_temp_8(405, 175, GUI::Style::CENTRE, TEXT_SMALL, temps, std::get<3>(motors_for_gui[7]) + ": %dC"s, std::get<1>(motors_for_gui[7]), COLOUR(BLACK));
 
 Page auto_selection ("Auton"); //Select auton routes
 Button prev_auto(20, 50, 120, 100, GUI::Style::SIZE, Button::SINGLE, auto_selection, "Prev Auton");
@@ -46,16 +42,16 @@ Text auto_name(MID_X, 100, GUI::Style::CENTRE, TEXT_LARGE, auto_selection, "%s",
 Text ally_name(MID_X, 200, GUI::Style::CENTRE, TEXT_MEDIUM, auto_selection, "Alliance: %s", alliance_names, cur_alliance);
 
 Page track ("Tracking"); //Display tracking vals and reset btns
-Text trackX(50, 45, GUI::Style::CENTRE, TEXT_SMALL, track, "X:%.1f", tracking.x_coord);
-Text trackY(135, 45, GUI::Style::CENTRE, TEXT_SMALL, track, "Y:%.1f", tracking.y_coord);
-Text trackA(220, 45, GUI::Style::CENTRE, TEXT_SMALL, track, "A:%d", function([](){return tracking.get_angle_in_deg();}));
-Text encL(50, 130, GUI::Style::CENTRE, TEXT_SMALL, track, "L:%d", left_enc);
-Text encR(135, 130, GUI::Style::CENTRE, TEXT_SMALL, track, "R:%d", right_enc);
-Text encB(220, 130, GUI::Style::CENTRE, TEXT_SMALL, track, "B:%d", back_enc);
-Button resX(15, 60, 70, 55, GUI::Style::SIZE, Button::SINGLE, track, "Reset X");
-Button resY(100, 60, 70, 55, GUI::Style::SIZE, Button::SINGLE, track, "Reset Y");
-Button resA(185, 60, 70, 55, GUI::Style::SIZE, Button::SINGLE, track, "Reset A");
-Button resAll(15, 160, 240, 60, GUI::Style::SIZE, Button::SINGLE, track, "Reset All");
+Text track_x(50, 45, GUI::Style::CENTRE, TEXT_SMALL, track, "X:%.1f", tracking.x_coord);
+Text track_y(135, 45, GUI::Style::CENTRE, TEXT_SMALL, track, "Y:%.1f", tracking.y_coord);
+Text track_a(220, 45, GUI::Style::CENTRE, TEXT_SMALL, track, "A:%d", std::function([](){return tracking.get_angle_in_deg();}));
+Text enc_l(50, 130, GUI::Style::CENTRE, TEXT_SMALL, track, "L:%d", left_enc);
+Text enc_r(135, 130, GUI::Style::CENTRE, TEXT_SMALL, track, "R:%d", right_enc);
+Text enc_b(220, 130, GUI::Style::CENTRE, TEXT_SMALL, track, "B:%d", back_enc);
+Button res_x(15, 60, 70, 55, GUI::Style::SIZE, Button::SINGLE, track, "Reset X");
+Button res_y(100, 60, 70, 55, GUI::Style::SIZE, Button::SINGLE, track, "Reset Y");
+Button res_a(185, 60, 70, 55, GUI::Style::SIZE, Button::SINGLE, track, "Reset A");
+Button res_all(15, 160, 240, 60, GUI::Style::SIZE, Button::SINGLE, track, "Reset All");
 
 Page moving ("Moving"); //Moves to target, home, or centre
 Slider x_val(35, 45, 250, 40, GUI::Style::SIZE, Slider::HORIZONTAL, 0, 144, moving, "X");
@@ -84,15 +80,15 @@ Button tilter_move(470, 95, -100, 40, GUI::Style::SIZE, Button::SINGLE, motor_su
 Button claw_switch(470, 145, -100, 40, GUI::Style::SIZE, Button::TOGGLE, motor_subsys, "Claw");
 Button end_effector_switch(470, 195, -100, 40, GUI::Style::SIZE, Button::TOGGLE, motor_subsys, "End Effector");
 
-Page liftStates ("Lift States"); //Moving to various lift states
-Button idle (15, 45, 100, 75, GUI::Style::SIZE, Button::SINGLE, liftStates, "Idle"); //Names are caps to avoid conflicts
-Button searching (130, 45, 100, 75, GUI::Style::SIZE, Button::SINGLE, liftStates, "Searching");
-Button grabbed (245, 45, 100, 80, GUI::Style::SIZE, Button::SINGLE, liftStates, "Grabbed");
-Button tip (360, 45, 100, 75, GUI::Style::SIZE, Button::SINGLE, liftStates, "Tip");
-Button platform (15, 140, 100, 75, GUI::Style::SIZE, Button::SINGLE, liftStates, "Platform");
-Button dropoff (130, 140, 100, 75, GUI::Style::SIZE, Button::SINGLE, liftStates, "Drop Off");
-Button tall_goal (245, 140, 100, 75, GUI::Style::SIZE, Button::SINGLE, liftStates, "Tall Goal");
-Button manual(360, 140, 100, 75, GUI::Style::SIZE, Button::SINGLE, liftStates, "Manual");
+Page pneumatics ("Pneumatics"); //Moving to various lift states
+Button pneum_1 (15, 45, 100, 75, GUI::Style::SIZE, Button::TOGGLE, pneumatics, pneumatics_for_gui[0].second); //Names are caps to avoid conflicts
+Button pneum_2 (130, 45, 100, 75, GUI::Style::SIZE, Button::TOGGLE, pneumatics, pneumatics_for_gui[1].second);
+Button pneum_3 (245, 45, 100, 80, GUI::Style::SIZE, Button::TOGGLE, pneumatics, pneumatics_for_gui[2].second);
+Button pneum_4 (360, 45, 100, 75, GUI::Style::SIZE, Button::TOGGLE, pneumatics, pneumatics_for_gui[3].second);
+Button pneum_5 (15, 140, 100, 75, GUI::Style::SIZE, Button::TOGGLE, pneumatics, pneumatics_for_gui[4].second);
+Button pneum_6 (130, 140, 100, 75, GUI::Style::SIZE, Button::TOGGLE, pneumatics, pneumatics_for_gui[5].second);
+Button pneum_7 (245, 140, 100, 75, GUI::Style::SIZE, Button::TOGGLE, pneumatics, pneumatics_for_gui[6].second);
+Button pneum_8 (360, 140, 100, 75, GUI::Style::SIZE, Button::TOGGLE, pneumatics, pneumatics_for_gui[7].second);
 
 Page tuning ("Tuning Tracking"); //Tests to tune tracking when on new base
 Text tuning_instructions_1(MID_X, 35, GUI::Style::CENTRE, TEXT_SMALL, tuning, "Press your desired tracking test");
@@ -102,29 +98,11 @@ Button perpendicular_error (245, 75, 225, 70, GUI::Style::SIZE, Button::SINGLE, 
 Button grid (10, 155, 225, 70, GUI::Style::SIZE, Button::SINGLE, tuning, "Grid");
 Button spin360 (245, 155, 225, 70, GUI::Style::SIZE, Button::SINGLE, tuning, "360 Spin");
 
-Page pneumatic ("Pneumatics"); //Pneumatic testing page
-Slider expander (MID_X, 60, 180 , 15, GUI::Style::CENTRE, Slider::HORIZONTAL, 0, 21, pneumatic, "Expander");
-Text ADI_a_text (65, 115, GUI::Style::CENTRE, TEXT_SMALL, pneumatic, "A");
-Text ADI_b_text (180, 115, GUI::Style::CENTRE, TEXT_SMALL, pneumatic, "B");
-Text ADI_c_text (295, 115, GUI::Style::CENTRE, TEXT_SMALL, pneumatic, "C");
-Text ADI_d_text (410, 115, GUI::Style::CENTRE, TEXT_SMALL, pneumatic, "D");
-Text ADI_e_text (65, 180, GUI::Style::CENTRE, TEXT_SMALL, pneumatic, "E");
-Text ADI_f_text (180, 180, GUI::Style::CENTRE, TEXT_SMALL, pneumatic, "F");
-Text ADI_g_text (295, 180, GUI::Style::CENTRE, TEXT_SMALL, pneumatic, "G");
-Text ADI_h_text (410, 180, GUI::Style::CENTRE, TEXT_SMALL, pneumatic, "H");
-Button ADI_a (15, 125, 100, 30, GUI::Style::SIZE, Button::TOGGLE, pneumatic, "On/Off");
-Button ADI_b (130, 125, 100, 30, GUI::Style::SIZE, Button::TOGGLE, pneumatic, "On/Off");
-Button ADI_c (245, 125, 100, 30, GUI::Style::SIZE, Button::TOGGLE, pneumatic, "On/Off");
-Button ADI_d (360, 125, 100, 30, GUI::Style::SIZE, Button::TOGGLE, pneumatic, "On/Off");
-Button ADI_e (15, 190, 100, 30, GUI::Style::SIZE, Button::TOGGLE, pneumatic, "On/Off");
-Button ADI_f (130, 190, 100, 30, GUI::Style::SIZE, Button::TOGGLE, pneumatic, "On/Off");
-Button ADI_g (245, 190, 100, 30, GUI::Style::SIZE, Button::TOGGLE, pneumatic, "On/Off");
-Button ADI_h (360, 190, 100, 30, GUI::Style::SIZE, Button::TOGGLE, pneumatic, "On/Off");
-
 Page ports ("Ports"); //Shows what ports to use on builder util
-Text mot (10, 50, GUI::Style::CORNER, TEXT_LARGE, ports, "Motors: %s", motor_port_nums);
-Text expanders (10, 100, GUI::Style::CORNER, TEXT_LARGE, ports, "Expanders: %s", expander_port_nums);
-Text pne (10, 150, GUI::Style::CORNER, TEXT_LARGE, ports, "Pneumatics: G, H");
+Text mot (10, 50, GUI::Style::CORNER, TEXT_MEDIUM, ports, "Motors: %s", motor_port_nums);
+Text expanders (10, 100, GUI::Style::CORNER, TEXT_MEDIUM, ports, "Expanders: %s", expander_port_nums);
+Text no_mot (10, 150, GUI::Style::CORNER, TEXT_MEDIUM, ports, "No Motors: %s", no_motor_port_nums);
+Text no_pneumatic (10, 200, GUI::Style::CORNER, TEXT_MEDIUM, ports, "No Pneumatics: %s", no_pneumatic_port_nums);
 
 Page encoders ("Encoders"); //Display tracking vals and reset btns
 Text AB (85, 35, GUI::Style::CENTRE, TEXT_SMALL, encoders, "AB");
@@ -133,12 +111,12 @@ Text EF (395, 35, GUI::Style::CENTRE, TEXT_SMALL, encoders, "EF");
 Text AB_degs (85, 50, GUI::Style::CENTRE, TEXT_SMALL, encoders, "Degs: %d", right_enc);
 Text CD_degs (240, 50, GUI::Style::CENTRE, TEXT_SMALL, encoders, "Degs: %d", left_enc);
 Text EF_degs (395, 50, GUI::Style::CENTRE, TEXT_SMALL, encoders, "Degs: %d", back_enc);
-Text AB_rots (85, 65, GUI::Style::CENTRE, TEXT_SMALL, encoders, "Rots: %d", function([](){return int(right_enc/360);}));
-Text CD_rots (240, 65, GUI::Style::CENTRE, TEXT_SMALL, encoders, "Rots: %d", function([](){return int(left_enc/360);}));
-Text EF_rots (395, 65, GUI::Style::CENTRE, TEXT_SMALL, encoders, "Rots: %d", function([](){return int(back_enc/360);}));
-Text AB_remain (85, 80, GUI::Style::CENTRE, TEXT_SMALL, encoders, "Remaining: %d", function([](){return abs(right_enc-360*int(round((right_enc+sgn(right_enc)*180)/360)));}));
-Text CD_remain (240, 80, GUI::Style::CENTRE, TEXT_SMALL, encoders, "Remaining: %d", function([](){return abs(left_enc-360*int(round((left_enc+sgn(right_enc)*180)/360)));}));
-Text EF_remain (395, 80, GUI::Style::CENTRE, TEXT_SMALL, encoders, "Remaining: %d", function([](){return abs(back_enc-360*int(round((back_enc+sgn(right_enc)*180)/360)));}));
+Text AB_rots (85, 65, GUI::Style::CENTRE, TEXT_SMALL, encoders, "Rots: %d", std::function([](){return int(right_enc/360);}));
+Text CD_rots (240, 65, GUI::Style::CENTRE, TEXT_SMALL, encoders, "Rots: %d", std::function([](){return int(left_enc/360);}));
+Text EF_rots (395, 65, GUI::Style::CENTRE, TEXT_SMALL, encoders, "Rots: %d", std::function([](){return int(back_enc/360);}));
+Text AB_remain (85, 80, GUI::Style::CENTRE, TEXT_SMALL, encoders, "Remaining: %d", std::function([](){return abs(right_enc-360*int(round((right_enc+sgn(right_enc)*180)/360)));}));
+Text CD_remain (240, 80, GUI::Style::CENTRE, TEXT_SMALL, encoders, "Remaining: %d", std::function([](){return abs(left_enc-360*int(round((left_enc+sgn(right_enc)*180)/360)));}));
+Text EF_remain (395, 80, GUI::Style::CENTRE, TEXT_SMALL, encoders, "Remaining: %d", std::function([](){return abs(back_enc-360*int(round((back_enc+sgn(right_enc)*180)/360)));}));
 Button AB_res (35, 100, 100, 50, GUI::Style::SIZE, Button::SINGLE, encoders, "Reset AB");
 Button CD_res (190, 100, 100, 50, GUI::Style::SIZE, Button::SINGLE, encoders, "Reset CD");
 Button EF_res (345, 100, 100, 50, GUI::Style::SIZE, Button::SINGLE, encoders, "Reset EF");
@@ -171,46 +149,30 @@ Button mot_stop_6 (185, 190, 45, 30, GUI::Style::SIZE, Button::SINGLE, motor, "S
 Button mot_stop_7 (300, 190, 45, 30, GUI::Style::SIZE, Button::SINGLE, motor, "Stop");
 Button mot_stop_8 (415, 190, 45, 30, GUI::Style::SIZE, Button::SINGLE, motor, "Stop");
 
+Page pneumatic ("Pneumatics"); //Pneumatic testing page
+Slider expander (MID_X, 60, 180 , 15, GUI::Style::CENTRE, Slider::HORIZONTAL, 0, 21, pneumatic, "Expander");
+Text ADI_a_text (65, 115, GUI::Style::CENTRE, TEXT_SMALL, pneumatic, "A");
+Text ADI_b_text (180, 115, GUI::Style::CENTRE, TEXT_SMALL, pneumatic, "B");
+Text ADI_c_text (295, 115, GUI::Style::CENTRE, TEXT_SMALL, pneumatic, "C");
+Text ADI_d_text (410, 115, GUI::Style::CENTRE, TEXT_SMALL, pneumatic, "D");
+Text ADI_e_text (65, 180, GUI::Style::CENTRE, TEXT_SMALL, pneumatic, "E");
+Text ADI_f_text (180, 180, GUI::Style::CENTRE, TEXT_SMALL, pneumatic, "F");
+Text ADI_g_text (295, 180, GUI::Style::CENTRE, TEXT_SMALL, pneumatic, "G");
+Text ADI_h_text (410, 180, GUI::Style::CENTRE, TEXT_SMALL, pneumatic, "H");
+Button ADI_a (15, 125, 100, 30, GUI::Style::SIZE, Button::TOGGLE, pneumatic, "On/Off");
+Button ADI_b (130, 125, 100, 30, GUI::Style::SIZE, Button::TOGGLE, pneumatic, "On/Off");
+Button ADI_c (245, 125, 100, 30, GUI::Style::SIZE, Button::TOGGLE, pneumatic, "On/Off");
+Button ADI_d (360, 125, 100, 30, GUI::Style::SIZE, Button::TOGGLE, pneumatic, "On/Off");
+Button ADI_e (15, 190, 100, 30, GUI::Style::SIZE, Button::TOGGLE, pneumatic, "On/Off");
+Button ADI_f (130, 190, 100, 30, GUI::Style::SIZE, Button::TOGGLE, pneumatic, "On/Off");
+Button ADI_g (245, 190, 100, 30, GUI::Style::SIZE, Button::TOGGLE, pneumatic, "On/Off");
+Button ADI_h (360, 190, 100, 30, GUI::Style::SIZE, Button::TOGGLE, pneumatic, "On/Off");
+
 //Expander vars
 std::array<int, 21> expander_ports;
 std::array<Button*, 8> expander_btns = {&ADI_a, &ADI_b, &ADI_c, &ADI_d, &ADI_e, &ADI_f, &ADI_g, &ADI_h};
 
-void common_setup(){
-  for (int i = 1; i <= 8; i++){
-    expander_btns[i-1]->set_func([i](){
-      int expander_port = expander.get_value();
-      if (expander_port){
-        if(c::registry_get_plugged_type(expander_port-1) != c::E_DEVICE_ADI){
-          GUI::flash(COLOUR(RED), 1000, "No Expander in port %d", expander_port);
-        }
-        c::ext_adi_port_set_config(expander_port, i, E_ADI_DIGITAL_OUT);
-        c::ext_adi_port_set_value(expander_port, i, HIGH);
-      }
-      else{
-        c::adi_port_set_config(i, E_ADI_DIGITAL_OUT);
-        c::adi_port_set_value(i, HIGH);
-      }
-    });
-    expander_btns[i-1]->set_off_func([i](){
-      int expander_port = expander.get_value();
-      if (expander_port){
-        if(c::registry_get_plugged_type(expander_port-1) != c::E_DEVICE_ADI){
-          GUI::flash(COLOUR(RED), 1000, "No Expander in port %d", expander_port);
-        }
-        c::ext_adi_port_set_config(expander_port, i, E_ADI_DIGITAL_OUT);
-        c::ext_adi_port_set_value(expander_port, i, LOW);
-      }
-      else{
-        c::adi_port_set_config(i, E_ADI_DIGITAL_OUT);
-        c::adi_port_set_value(i, LOW);
-      }
-    });
-  }
-
-}
-
 void main_setup(){
-  common_setup();
   for (int x = 0; x < 200; x++) field[x].reset(); //Should be able to get rid of this
 
   driver_curve.set_loop_func([](){driver_text = drivebase.driver_name();});
@@ -224,10 +186,10 @@ void main_setup(){
 
   intake_switch.set_func([](){intake.toggle();});
   
-  resX.set_func([](){tracking.reset(0.0, tracking.y_coord, rad_to_deg(tracking.global_angle));});
-  resY.set_func([](){tracking.reset(tracking.x_coord, 0.0, rad_to_deg(tracking.global_angle));});
-  resA.set_func([](){tracking.reset(tracking.x_coord, tracking.y_coord);});
-  resAll.set_func([](){tracking.reset();});
+  res_x.set_func([](){tracking.reset(0.0, tracking.y_coord, rad_to_deg(tracking.global_angle));});
+  res_y.set_func([](){tracking.reset(tracking.x_coord, 0.0, rad_to_deg(tracking.global_angle));});
+  res_a.set_func([](){tracking.reset(tracking.x_coord, tracking.y_coord);});
+  res_all.set_func([](){tracking.reset();});
   track.set_setup_func([](){
     screen::set_pen(COLOUR(WHITE));
     screen::draw_rect(270, 30, 470, 230);
@@ -277,17 +239,52 @@ void main_setup(){
   end_effector_switch.set_func([](){ring_piston.set_value(1);});
   end_effector_switch.set_off_func([](){ring_piston.set_value(0);});
 
-  idle.set_func([](){lift.set_state(lift_states::idle);});
-  searching.set_func([](){lift.set_state(lift_states::searching);});
-  grabbed.set_func([](){lift.set_state(lift_states::grabbed);});
-  tip.set_func([](){lift.set_state(lift_states::tip);});
-  platform.set_func([](){lift.set_state(lift_states::platform);});
-  dropoff.set_func([](){lift.set_state(lift_states::dropoff);});
-  tall_goal.set_func([](){lift.set_state(lift_states::tall_goal);});
-  manual.set_func([](){lift.set_state(lift_states::manual);});
+  if(pneumatics_for_gui[0].first){
+    pneum_1.set_func([](){pneumatics_for_gui[0].first->set_value(HIGH);});
+    pneum_1.set_off_func([](){pneumatics_for_gui[0].first->set_value(LOW);});
+  }
+  else pneum_1.set_active(false);
+  if(pneumatics_for_gui[1].first){
+    pneum_2.set_func([](){pneumatics_for_gui[1].first->set_value(HIGH);});
+    pneum_2.set_off_func([](){pneumatics_for_gui[1].first->set_value(LOW);});
+  }
+  else pneum_2.set_active(false);
+  if(pneumatics_for_gui[2].first){
+    pneum_3.set_func([](){pneumatics_for_gui[2].first->set_value(HIGH);});
+    pneum_3.set_off_func([](){pneumatics_for_gui[2].first->set_value(LOW);});
+  }
+  else pneum_3.set_active(false);
+  if(pneumatics_for_gui[3].first){
+    pneum_4.set_func([](){pneumatics_for_gui[3].first->set_value(HIGH);});
+    pneum_4.set_off_func([](){pneumatics_for_gui[3].first->set_value(LOW);});
+  }
+  else pneum_4.set_active(false);
+  if(pneumatics_for_gui[4].first){
+    pneum_5.set_func([](){pneumatics_for_gui[4].first->set_value(HIGH);});
+    pneum_5.set_off_func([](){pneumatics_for_gui[4].first->set_value(LOW);});
+  }
+  else pneum_5.set_active(false);
+  if(pneumatics_for_gui[5].first){
+    pneum_6.set_func([](){pneumatics_for_gui[5].first->set_value(HIGH);});
+    pneum_6.set_off_func([](){pneumatics_for_gui[5].first->set_value(LOW);});
+  }
+  else pneum_6.set_active(false);
+  if(pneumatics_for_gui[6].first){
+    pneum_7.set_func([](){pneumatics_for_gui[6].first->set_value(HIGH);});
+    pneum_7.set_off_func([](){pneumatics_for_gui[6].first->set_value(LOW);});
+  }
+  else pneum_7.set_active(false);
+  if(pneumatics_for_gui[7].first){
+    pneum_8.set_func([](){pneumatics_for_gui[7].first->set_value(HIGH);});
+    pneum_8.set_off_func([](){pneumatics_for_gui[7].first->set_value(LOW);});
+  }
+  else pneum_8.set_active(false);
 
   turn_encoder.set_func([](){ //Turn the encoder
     if (GUI::go("START, THEN SPIN THE ENCODER", "Please spin the encoder any number of rotations.")){
+      RightEncoder.reset();
+      LeftEncoder.reset();
+      BackEncoder.reset();
       tracking.reset();
       if (GUI::go_end("WHEN STOPPED")){
         printf("The left encoder found %d ticks\n", LeftEncoder.get_value() % 360);
@@ -297,7 +294,10 @@ void main_setup(){
     }
   });
   perpendicular_error.set_func([](){ //Perpendicular Error
-    if (GUI::go("START, THEN MOVE STRAIGHT ALONG Y", "Please run the robot along a known straight line in the y-axis.")){
+    if (GUI::go("START, THEN MOVE FORWARD ALONG Y", "Please run the robot along a known straight line in the y-axis.")){
+      RightEncoder.reset();
+      LeftEncoder.reset();
+      BackEncoder.reset();
       tracking.reset();
       if (GUI::go_end("WHEN STOPPED")){
         if (tracking.x_coord < 0) printf("The robot thinks it strafed %.2f inches to the left.\nConsider turning the back tracking wheel counter-clockwise\n", tracking.x_coord);
@@ -308,6 +308,9 @@ void main_setup(){
   });
   grid.set_func([](){ //Move in a random motion
     if (GUI::go("START, THEN MOVE RANDOMLY", "Please move the robot haphazardly around the field. Then return it back to the starting point.")){
+      RightEncoder.reset();
+      LeftEncoder.reset();
+      BackEncoder.reset();
       tracking.reset();
       if (GUI::go_end("WHEN STOPPED")){
         printf("The robot thinks it deviated %.2f inches to the %s\n", fabs(tracking.x_coord), (tracking.x_coord < 0 ? "left" : "right"));
@@ -318,6 +321,9 @@ void main_setup(){
   });
   spin360.set_func([](){ //Robot turn accuracy
     if (GUI::go("START, THEN SPIN THE ROBOT", "Please spin the robot any number of rotations. Then return it back to the starting point")){
+      RightEncoder.reset();
+      LeftEncoder.reset();
+      BackEncoder.reset();
       tracking.reset();
       if(GUI::go_end("WHEN STOPPED")){
         printf("The robot is %.2f inches %s and %.2f inches %s off the starting point.\n", fabs(tracking.x_coord), (tracking.x_coord < 0 ? "left" : "right"), fabs(tracking.y_coord), (tracking.y_coord < 0 ? "back" : "forward"));
@@ -332,16 +338,16 @@ void main_setup(){
     }
   });
 
-  std::get<4>(motors[0]) = &mot_temp_1;
-  std::get<4>(motors[1]) = &mot_temp_2;
-  std::get<4>(motors[2]) = &mot_temp_3;
-  std::get<4>(motors[3]) = &mot_temp_4;
-  std::get<4>(motors[4]) = &mot_temp_5;
-  std::get<4>(motors[5]) = &mot_temp_6;
-  std::get<4>(motors[6]) = &mot_temp_7;
-  std::get<4>(motors[7]) = &mot_temp_8;
+  std::get<4>(motors_for_gui[0]) = &mot_temp_1;
+  std::get<4>(motors_for_gui[1]) = &mot_temp_2;
+  std::get<4>(motors_for_gui[2]) = &mot_temp_3;
+  std::get<4>(motors_for_gui[3]) = &mot_temp_4;
+  std::get<4>(motors_for_gui[4]) = &mot_temp_5;
+  std::get<4>(motors_for_gui[5]) = &mot_temp_6;
+  std::get<4>(motors_for_gui[6]) = &mot_temp_7;
+  std::get<4>(motors_for_gui[7]) = &mot_temp_8;
 
-  for (int i = 0; i < 7; i++) std::get<4>(motors[i])->set_background(40, 30);
+  for (int i = 0; i < 7; i++) std::get<4>(motors_for_gui[i])->set_background(40, 30);
 }
 
 void main_background(){
@@ -349,7 +355,7 @@ void main_background(){
   int x = 200*tracking.x_coord/144, y = 200*tracking.y_coord/144;
   if(inRange(x, 0, 199) && inRange(y, 0, 199)) field[x].set(y); //Saves position (x,y) to as tracked
 
-  for (std::array<std::tuple<Motor*, int, const char*, const char*, Text_*>, 8>::iterator it = motors.begin(); it != motors.end(); it++){
+  for (std::array<std::tuple<Motor*, int, const char*, const char*, Text_*>, 8>::iterator it = motors_for_gui.begin(); it != motors_for_gui.end(); it++){
     std::tuple<Motor*, int, const char*, const char*, Text_*>& mot_tup = *it;
     Motor* motor = std::get<0>(mot_tup);
     Text_* text = std::get<4>(mot_tup);
@@ -366,7 +372,7 @@ void main_background(){
       break;
     }
 
-    if (text && temp == std::numeric_limits<int>::max()) text->set_active(false); //If performance is bad, move this to the page setup func
+    if (text && temp == std::numeric_limits<int>::max()) text->set_active(false); //If performance is bad, move this to the page setup func. Should be able to take out the if(text)
 
     if (text != nullptr){ //Background Colours (temperature based)
       if (temp == 0) text->set_background(COLOUR(WHITE)); //0
@@ -379,7 +385,6 @@ void main_background(){
 }
 
 void util_setup(){
-  common_setup();
   motor_ports = {
     std::make_tuple(std::numeric_limits<int>::max(), &mot_update_1, &mot_stop_1, &mot_text_1, 0, (char*)malloc(10*sizeof(char))),
     std::make_tuple(std::numeric_limits<int>::max(), &mot_update_2, &mot_stop_2, &mot_text_2, 0, (char*)malloc(10*sizeof(char))),
@@ -399,6 +404,7 @@ void util_setup(){
     }
   }
 
+  //Motor port numbers and motor buttons
   std::string motor_port_string;
   for (std::array<std::tuple<int, Button*, Button*, Text_*, int, char*>, 8>::iterator it = motor_ports.begin(); it != motor_ports.end(); it++){
     std::tuple<int, Button*, Button*, Text_*, int, char*>& mot_arr = *it;
@@ -415,12 +421,22 @@ void util_setup(){
   if (motor_port_string.back() == ',') motor_port_string.pop_back();
   motor_port_nums = strdup(motor_port_string.c_str());
 
+  //Motor not allowed port numbers
+  // std::string no_motor_port_string;
+  // for (int port=0; port<21; port++){
+  //   if (c::registry_get_bound_type(port) != c::E_DEVICE_MOTOR && c::registry_get_bound_type(port) != c::E_DEVICE_UNDEFINED){
+  //     printf("Port:%d Mot:%d, UNDEF:%d\n", port+1, c::registry_get_bound_type(port) != c::E_DEVICE_MOTOR, c::registry_get_bound_type(port) != c::E_DEVICE_UNDEFINED);
+  //     no_motor_port_string.append(std::to_string(port+1) + ",");
+  //   }
+  // }
+
+  // if (no_motor_port_string.back() == ',') no_motor_port_string.pop_back();
+  // no_motor_port_nums = strdup(no_motor_port_string.c_str());
+
 
   //Expander Port Detection
   for (int port=0; port<21; port++){
-    if (c::registry_get_plugged_type(port) == c::E_DEVICE_ADI){
-      expander_ports[port] = port+1;
-    }
+    if (c::registry_get_plugged_type(port) == c::E_DEVICE_ADI) expander_ports[port] = port+1;
     else expander_ports[port] = std::numeric_limits<int>::max();
   }
 
@@ -430,6 +446,47 @@ void util_setup(){
   }
   if (expander_port_string.back() == ',') expander_port_string.pop_back();
   expander_port_nums = strdup(expander_port_string.c_str());
+
+
+  //Expander buttons
+  std::string no_pneumatic_port_string;
+  for (int i = 1; i <= 8; i++){
+    if(c::adi_port_get_config(i) != pros::E_ADI_DIGITAL_IN && c::adi_port_get_config(i) != E_ADI_DIGITAL_OUT){
+      no_pneumatic_port_string.push_back(char(i+64));
+      no_pneumatic_port_string.push_back(',');
+    }
+    expander_btns[i-1]->set_func([i](){
+      int expander_port = expander.get_value();
+      if (expander_port){
+        if(c::registry_get_plugged_type(expander_port-1) != c::E_DEVICE_ADI){
+          GUI::flash(COLOUR(RED), 1000, "No Expander in port %d", expander_port);
+        }
+        c::ext_adi_port_set_config(expander_port, i, E_ADI_DIGITAL_OUT);
+        c::ext_adi_port_set_value(expander_port, i, HIGH);
+      }
+      else{
+        c::adi_port_set_config(i, E_ADI_DIGITAL_OUT);
+        c::adi_port_set_value(i, HIGH);
+      }
+    });
+    expander_btns[i-1]->set_off_func([i](){
+      int expander_port = expander.get_value();
+      if (expander_port){
+        if(c::registry_get_plugged_type(expander_port-1) != c::E_DEVICE_ADI){
+          GUI::flash(COLOUR(RED), 1000, "No Expander in port %d", expander_port);
+        }
+        c::ext_adi_port_set_config(expander_port, i, E_ADI_DIGITAL_OUT);
+        c::ext_adi_port_set_value(expander_port, i, LOW);
+      }
+      else{
+        c::adi_port_set_config(i, E_ADI_DIGITAL_OUT);
+        c::adi_port_set_value(i, LOW);
+      }
+    });
+  }
+
+  if (no_pneumatic_port_string.back() == ',') no_pneumatic_port_string.pop_back();
+  no_pneumatic_port_nums = strdup(no_pneumatic_port_string.c_str());
 
 
   encoders.set_loop_func([](){
@@ -461,6 +518,6 @@ void util_background(){
   }
 }
 
-GUI g_main ({&temps, &driver_curve, &auto_selection, &track, &moving, &intake_test, &elastic, &motor_subsys, &liftStates, &tuning, &pneumatic}, &main_setup, &main_background);
+GUI g_main ({&temps, &driver_curve, &auto_selection, &track, &moving, &intake_test, &elastic, &motor_subsys, &tuning, &pneumatics}, &main_setup, &main_background);
 
 GUI g_util ({&ports, &encoders, &motor, &pneumatic}, &util_setup, &util_background);

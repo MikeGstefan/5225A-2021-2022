@@ -21,8 +21,8 @@ Button next_page(480, 0, -75, 20, GUI::Style::SIZE, Button::SINGLE, perm, "->");
 Button home(100, 10, 18, 6, GUI::Style::CENTRE, Button::SINGLE, perm, "Home");
 
 Page testing ("Testing"); //Blank page made so it already exists when quick tests are created
-Text testing_text_1 (125, 50, GUI::Style::CENTRE, TEXT_SMALL, testing, "BLANK TEXT 1");
-Text testing_text_2 (350, 50, GUI::Style::CENTRE, TEXT_SMALL, testing, "BLANK TEXT 2");
+Text<> testing_text_1 (125, 50, GUI::Style::CENTRE, TEXT_SMALL, testing, "BLANK TEXT 1");
+Text<> testing_text_2 (350, 50, GUI::Style::CENTRE, TEXT_SMALL, testing, "BLANK TEXT 2");
 Button testing_button_1 (25, 70, 200, 80, GUI::Style::SIZE, Button::SINGLE, testing, "BLANK BUTTON 1");
 Button testing_button_2 (250, 70, 200, 80, GUI::Style::SIZE, Button::SINGLE, testing, "BLANK BUTTON 2");
 Slider testing_slider (MID_X, 200, 200, 20, GUI::Style::CENTRE, Slider::HORIZONTAL, -100, 100, testing, "BLANK SLIDER");
@@ -31,6 +31,8 @@ Page go_sequence ("Go Sequence");
 Button go_button (300, MID_Y, 160, 90, GUI::Style::CENTRE, Button::SINGLE, go_sequence, "PRESS TO");
 Button go_back_button (20, USER_UP, 100, 50, GUI::Style::SIZE, Button::SINGLE, go_sequence, "BACK");
 Text go_button_text (300, 140, GUI::Style::CENTRE, TEXT_SMALL, go_sequence, "%s", go_string, COLOUR(BLACK));
+
+Page terminal ("Screen Printing");
 
 //To get coordinates for aligned objects, (buttons, sliders...) of same size
 //Put in how many of buttons/sliders you want, and get properly spaced coords
@@ -70,13 +72,13 @@ void GUI::flash(std::string text, std::uint32_t time, Colour colour){
   screen::set_eraser(colour);
 
   printf("\n\n\033[31mWARNING: %s\033[0m\n\n", text.c_str());
-  misc.print("%s\n", text.c_str());
+  events.print("%s\n", text.c_str());
 
   int spaces = int(CHAR_WIDTH_LARGE*text.length()/460)+1;
   std::size_t space, last_space=0;
   std::string sub;
 
-  // master.rumble(".-");
+  master.rumble(".-");
 
   for(int i=1; i <= spaces; i++){ //make the printing actually look good
     space = text.find(' ', text.length()*i/spaces);
@@ -274,6 +276,7 @@ GUI::GUI(std::vector<Page*> pages, std::function <void()> setup, std::function <
   this->pages.push_back(&perm);
   for (std::vector<Page*>::const_iterator it = pages.begin(); it != pages.end(); it++) this->pages.push_back(*it);
   this->pages.push_back(&testing);
+  this->pages.push_back(&terminal);
   this->pages.push_back(&go_sequence);
 
   //Saves gui to pages
@@ -347,7 +350,7 @@ int Page::page_num(const Page* page_id){
     if (it == GUI::current_gui->pages.end()){
     char error [35];
     snprintf(error, 35, "Page %p does not exist!\n", page_id);
-    throw std::invalid_argument(error);
+    throw std::domain_error(error);
     return 0;
   }
   return it-GUI::current_gui->pages.begin();
@@ -753,22 +756,60 @@ void Slider::update(){
   }
 }
 
+void GUI::screen_terminal_fix(){
+  //Will only run if things are actually being printed
+  if(terminal.texts.empty()){
+    terminal.set_active(false);
+    return;
+  }
+
+  //Sees how much space is user-requested
+  int y = USER_UP;
+  for (std::vector<Text_*>::iterator it = terminal.texts.begin(); it != terminal.texts.end(); it++){
+    if ((*it)->txt_fmt != 4) y += get_size((*it)->txt_fmt, "height") + 5;
+  }
+
+  int size = (PAGE_DOWN - y)/(std::count_if(terminal.texts.begin(), terminal.texts.end(), [](Text_* text){return text->txt_fmt == 4;})) - 5;
+  text_format_e_t fmt;
+
+  if(CHAR_HEIGHT_LARGE <= size) fmt = TEXT_LARGE;
+  else if(CHAR_HEIGHT_MEDIUM <= size) fmt = TEXT_MEDIUM;
+  else if(CHAR_HEIGHT_SMALL <= size) fmt = TEXT_SMALL;
+  else{
+    throw std::length_error("Too Many items being printed to screen\n");
+    return;
+  }
+
+  y = USER_UP;
+
+  //Saves y-pos and txt_fmt
+  for (std::vector<Text_*>::iterator it = terminal.texts.begin(); it != terminal.texts.end(); it++){
+    (*it)->y = y;
+    if ((*it)->txt_fmt == 4) (*it)->txt_fmt = fmt;
+    y += get_size((*it)->txt_fmt, "height") + 5;
+  }
+}
+
 void GUI::init(){
-  GUI::go_to(0);
+  screen_terminal_fix();
+  go_to(0);
 
   prev_page.set_func(&go_prev);
   next_page.set_func(&go_next);
   testing.set_active(testing_page_active);
+
   home.set_func([](){go_to(1);});
   go_button.add_text(go_button_text);
+
   current_gui->setup();
-  go_to(1); //Sets it to page 1 for program start. Don't delete this. If you want to change the starting page, call GUI::(Page Number) this in initialize()
+  if(terminal.active) terminal.go_to();
+  else go_to(1); //Sets it to page 1 for program start. Don't delete this. If you want to change the starting page, call GUI::go_to(Page Number) this in initialize()
   update();
 }
 
 void GUI::update(){
   current_gui->background();
-  GUI::update_screen_status();
+  update_screen_status();
   const Page& cur_p = *current_page;
   /*Page*/cur_p.update();
   /*Button*/for (std::vector<Button*>::const_iterator it = cur_p.buttons.begin(); it != cur_p.buttons.end(); it++) {(*it)->update(); if(&cur_p != current_page) return;}

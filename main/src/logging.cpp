@@ -29,7 +29,7 @@ Data drivers_data("driver.txt", "$05", off,log_locations::t);
 Data motion_i("motion.txt","$06",off,log_locations::both);
 Data motion_d("motion.txt", "%06", off,log_locations::both);
 Data term("terminal.txt","$06",off,log_locations::t);
-
+Data events("terminal.txt","$06",off,log_locations::sd);
 
 vector<Data*> Data::get_objs(){
   return obj_list;
@@ -77,6 +77,10 @@ void Data::print(const char* format,...){
   va_start(args, format);
   int buffer_len = vsnprintf(buffer,256,format,args) + 3;
   va_end(args);
+
+  //Events log gets special formatting
+  if(this == &events) buffer_len = snprintf(buffer,256,"\n\n%s\n\n",buffer) + 3;
+
   if(int(this->log_type) !=0){
     switch(log_location){
       case log_locations::t:
