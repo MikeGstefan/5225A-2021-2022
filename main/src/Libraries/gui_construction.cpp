@@ -17,6 +17,7 @@ std::array<std::tuple<int, Button*, Button*, Text_*, int, char*>, 8> motor_ports
 extern std::array<std::tuple<pros::Motor*, int, const char*, const char*, Text_*>, 8> motors_for_gui; //Declared in config.cpp
 extern std::array<std::pair<pros::ADIDigitalOut*, const char*>, 8> pneumatics_for_gui; //Declared in config.cpp
 extern const char* alliance_names[]; //Declared in auton.cpp
+extern const char* start_pos_names[]; //Declared in auton.cpp
 extern const char* auton_names[]; //Declared in auton.cpp
 
 Page driver_curve ("Drivers"); //Select a driver and their exp curve
@@ -34,12 +35,22 @@ Text mot_temp_6(185, 175, GUI::Style::CENTRE, TEXT_SMALL, temps, std::get<3>(mot
 Text mot_temp_7(295, 175, GUI::Style::CENTRE, TEXT_SMALL, temps, std::get<3>(motors_for_gui[6]) + ": %dC"s, std::get<1>(motors_for_gui[6]), COLOUR(BLACK));
 Text mot_temp_8(405, 175, GUI::Style::CENTRE, TEXT_SMALL, temps, std::get<3>(motors_for_gui[7]) + ": %dC"s, std::get<1>(motors_for_gui[7]), COLOUR(BLACK));
 
-Page auto_selection ("Auton"); //Select auton routes
+Page auto_selection ("Auton Selector"); //Select auton routes
 Button prev_auto(20, 50, 120, 100, GUI::Style::SIZE, Button::SINGLE, auto_selection, "Prev Auton");
 Button next_auto(350, 50, 120, 100, GUI::Style::SIZE, Button::SINGLE, auto_selection, "Next Auton");
-Button alliance(MID_X, 200, 150, 20, GUI::Style::CENTRE, Button::SINGLE, auto_selection);
 Text auto_name(MID_X, 100, GUI::Style::CENTRE, TEXT_LARGE, auto_selection, "%s", auton_names, cur_auton);
+Button alliance(MID_X, 200, 150, 20, GUI::Style::CENTRE, Button::SINGLE, auto_selection);
 Text ally_name(MID_X, 200, GUI::Style::CENTRE, TEXT_MEDIUM, auto_selection, "Alliance: %s", alliance_names, cur_alliance);
+
+Page pos_auto_selection ("Fake Autons"); //Select auton routes
+Button prev_start_position(20, 110, 100, 40, GUI::Style::SIZE, Button::SINGLE, pos_auto_selection, "Prev Start");
+Button next_start_position(460, 110, -100, 40, GUI::Style::SIZE, Button::SINGLE, pos_auto_selection, "Next Start");
+Button goal_1(15, 35, 140, 55, GUI::Style::SIZE, Button::TOGGLE, pos_auto_selection, "Goal 1");
+Button goal_2(170, 35, 140, 55, GUI::Style::SIZE, Button::TOGGLE, pos_auto_selection, "Tall Goal");
+Button goal_3(325, 35, 140, 55, GUI::Style::SIZE, Button::TOGGLE, pos_auto_selection, "Goal 3");
+Text start_pos_name(MID_X, 130, GUI::Style::CENTRE, TEXT_LARGE, pos_auto_selection, "%s", start_pos_names, cur_start_pos);
+Button pos_alliance(MID_X, 200, 150, 20, GUI::Style::CENTRE, Button::SINGLE, pos_auto_selection);
+Text pos_ally_name(MID_X, 200, GUI::Style::CENTRE, TEXT_MEDIUM, pos_auto_selection, "Alliance: %s", alliance_names, cur_alliance);
 
 Page track ("Tracking"); //Display tracking vals and reset btns
 Text track_x(50, 45, GUI::Style::CENTRE, TEXT_SMALL, track, "X:%.1f", tracking.x_coord);
@@ -181,8 +192,17 @@ void main_setup(){
 
   prev_auto.set_func(prev_auton);
   next_auto.set_func(next_auton);
-  alliance.set_func([](){switch_alliance();}); //Has to be void to specify overload
+  alliance.set_func([](){switch_alliance();});
   alliance.add_text(ally_name);
+
+  Button::create_options({&goal_1, &goal_2, &goal_3});
+  prev_start_position.set_func(prev_start_pos);
+  next_start_position.set_func(next_start_pos);
+  goal_1.set_func([](){cur_goal = 1;});
+  goal_2.set_func([](){cur_goal = 2;});
+  goal_3.set_func([](){cur_goal = 3;});
+  pos_alliance.set_func([](){switch_alliance();});
+  pos_alliance.add_text(pos_ally_name);
 
   intake_switch.set_func([](){intake.toggle();});
   
@@ -518,6 +538,6 @@ void util_background(){
   }
 }
 
-GUI g_main ({&temps, &driver_curve, &auto_selection, &track, &moving, &intake_test, &elastic, &motor_subsys, &tuning, &pneumatics}, &main_setup, &main_background);
+GUI g_main ({&temps, &driver_curve, &auto_selection, &pos_auto_selection, &track, &moving, &intake_test, &elastic, &motor_subsys, &tuning, &pneumatics}, &main_setup, &main_background);
 
 GUI g_util ({&ports, &encoders, &motor, &pneumatic}, &util_setup, &util_background);
