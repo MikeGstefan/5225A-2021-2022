@@ -104,7 +104,7 @@ void autonomous() {
 
 //Get rid of these once merged
 // double time;
-int ring_count = 0;
+//int ring_count = 0;
 // int ring_count = 0, cur_auton = 1;
 bool claw_state = false, claw_state_2 = false, lift_state = false, drive_state = false;
 int lift_speed = 0;
@@ -112,7 +112,7 @@ int safety_check = 0;
 void opcontrol() {
   //move_start(move_types::turn_angle, turn_angle_params(60));
 
-  distance_reset(500, "left");
+  distance_reset_left(16);
 
 	// master.clear();
 
