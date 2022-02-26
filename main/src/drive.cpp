@@ -211,6 +211,7 @@ void Drivebase::handle_input(){
   }
 
   move(tracking.power_y, tracking.power_a);
+  // move(0, tracking.power_a);
 }
 
 void Drivebase::driver_practice(){
@@ -256,8 +257,8 @@ void Drivebase::driver_practice(){
       if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_LEFT)){
         intake_on = !intake_on;
       }
-      if(intake_on) intake_m.move(127);
-      else intake_m.move(0);
+      if(intake_on) intk.move(127);
+      else intk.move(0);
 
 
       drivebase.handle_input();

@@ -7,12 +7,14 @@
 #include "drive.hpp"
 #include "geometry.hpp"
 #include "task.hpp"
+#include "Libraries/gui.hpp"
 #include <iostream>
 #include <cmath>
 #include <memory>
 #include <vector>
 #include <functional>
 #include <variant>
+#include <limits>
 
 using namespace pros;
 
@@ -23,12 +25,17 @@ extern _Task move_t;
 // Left: get_roll, 1
 // Back: get_pitch, 1
 // Front: get_pitch, -1
-#define GYRO_AXIS get_pitch
-#define GYRO_SIDE -1
+#define GYRO_AXIS get_roll
+#define GYRO_SIDE 1
 
 
 #define DIST_BACK 8.5
 #define DIST_FRONT 8.5
+
+
+const int min_move_power_a = 35;
+const int min_move_power_x = 40;
+const int min_move_power_y = 25;
 
 
 void update(void* params);
@@ -47,7 +54,7 @@ public:
 
 
     Position g_velocity;   // global g_velocity stores x, y and angular velocities
-    void wait_for_dist(double distance);
+    void wait_for_dist(double distance, int timeout = 0);
     double get_angle_in_deg();
     void reset(double x=0.0, double y=0.0, double a=0.0);
 
@@ -57,7 +64,7 @@ public:
 class Gyro{
   private:
     Imu& inertial;
-    double angle;
+    double angle, last_angle;
 
   public:
     Gyro(Imu& imu);
@@ -68,6 +75,7 @@ class Gyro{
     void level(double kP, double kD);
 
     double get_angle();
+    double get_angle_dif();
 };
 
 extern Gyro gyro;
@@ -143,8 +151,9 @@ struct tank_arc_params{
   Position target = {0.0,0.0,0.0};
   double power = 127.0, max_power = 127.0;
   bool brake = false;
+  double decel_start = 0.0, decel_end = 0.0, decel_target_speed = 0.0;
   tank_arc_params() = default;
-  tank_arc_params(const Point start_pos, Position target, const double power = 127.0, const double max_power = 127.0, const bool brake = false);
+  tank_arc_params(const Point start_pos, Position target, const double power = 127.0, const double max_power = 127.0, const bool brake = false, double decel_start = 0.0, double decel_end = 0.0, double decel_target_speed = 0.0);
 };
 
 struct tank_point_params{ 
@@ -154,22 +163,46 @@ struct tank_point_params{
   bool brake= true;
   double kp_y = 9.0;
   double kp_a = 150.0;
+  double kd_a = 0.0;
+  int timeout = 0;
+  Point end_error = {0.5, 0.5};
   tank_point_params() = default;
-  tank_point_params(const Position target, const bool turn_dir_if_0, const double max_power = 127.0, const double min_angle_percent = 1.0, const bool brake = true, double kp_y = 9.0, double kp_a =150.0);
+  tank_point_params(const Position target, const bool turn_dir_if_0 = false, const double max_power = 127.0, const double min_angle_percent = 1.0, const bool brake = true, double kp_y = 9.0, double kp_a =150.0, double kd_a = 0.0, int timeout = 0, Point end_error = {0.5, 0.5});
 };
+
+struct tank_rush_params{ 
+  Position target = {0.0,0.0,0.0};
+  bool turn_dir_if_0 = false;
+  double max_power = 127.0, min_angle_percent = 1.0;
+  bool brake= true;
+  double kp_a = 150.0;
+  double kd_a = 0.0;
+  double dist_past = 10.0;
+  tank_rush_params() = default;
+  tank_rush_params(const Position target, const bool turn_dir_if_0, const double max_power = 127.0, const double min_angle_percent = 1.0, const bool brake = true, double kp_a =150.0, double kd_a = 0.0, double dist_past = 10.0);
+};
+
 
 struct turn_angle_params{ 
   double target_a = 0.0;
   bool brake = true;
+  bool near = true;
+  double kp = 160.0, kd = 0.0;
+  double max_speed = 127;
+  int timeout = 0;
+  double min_power_a = min_move_power_a;
+  double end_error = 5.0;
   turn_angle_params() = default;
-  turn_angle_params(const double target_a, const bool brake = true);
+  turn_angle_params(const double target_a, const bool brake = true, bool near = true, double kp = 160.0, double kd = 0.0, double max_speed = 127.0, int timeout = 0, double min_power_a = min_move_power_a, double end_error = 5.0);
 };
 
 struct turn_point_params{ 
   Point target = {0.0,0.0};
   bool brake = true;
+  double max_power = 127;
+  int timeout = 0;
   turn_point_params() = default;
-  turn_point_params(const Point target, const bool brake = true);
+  turn_point_params(const Point target, const bool brake = true, double max_power = 127, int timeout = 0);
 };
 
 
@@ -182,18 +215,20 @@ enum class move_types{
   tank_point,
   turn_angle,
   turn_point,
-  line_old
+  line_old,
+  tank_rush
 };
 
 
-void move_start(move_types type, std::variant<arc_params, line_params, tank_arc_params, point_params, tank_point_params, turn_angle_params, turn_point_params, line_old_params> params, bool wait_for_comp = true);
+void move_start(move_types type, std::variant<arc_params, line_params, tank_arc_params, point_params, tank_point_params, turn_angle_params, turn_point_params, line_old_params,tank_rush_params> params, bool wait_for_comp = true);
 bool move_wait_for_complete();
 void move_wait_for_error(double error);
 void move_stop(bool brake = false);
-
+bool get_move_state();
 
 void rush_goal(double target_x, double target_y, double target_a);
 void rush_goal2(double target_x, double target_y, double target_a);
+void tank_rush_goal(void* params);
 
 
 void move_to_point(void* params);
@@ -207,13 +242,11 @@ void tank_move_on_arc(void* params);  // min speed for smooth move is 100
 
 void turn_to_angle(void* params);
 //overloaded to be called in another function DO NOT CALL ALONE
-void turn_to_angle(double target_a, const bool brake, _Task* ptr);
+void turn_to_angle(double target_a, const bool brake, double max_power, int timeout, _Task* ptr);
 void turn_to_point(void* params);
 
 
-const int min_move_power_a = 23;
-const int min_move_power_x = 40;
-const int min_move_power_y = 17;
+
 
 #define xy_enable a
 

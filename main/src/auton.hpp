@@ -9,13 +9,20 @@
 #include "task.hpp"
 #include "auton_util.hpp"
 #include "config.hpp"
+#include "vision_loop.hpp"
+#include "Subsystems/b_lift.hpp"
+#include "Subsystems/f_lift.hpp"
 #include <fstream>
 
 
 
 void skills();
+void skills2();
+void skills3();
+void skills4();
+void skillsPark();
 
-
+void lrt_auton();
 
 
 

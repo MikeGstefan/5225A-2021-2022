@@ -30,7 +30,7 @@ extern controller_digital_e_t shift_button;
 extern controller_digital_e_t intake_button;
 extern controller_digital_e_t reverse_drive_button;
 
-#define num_controller 1
+#define num_controller 2
 
 class _Task;
 
