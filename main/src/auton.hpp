@@ -59,6 +59,7 @@ extern int cur_goal;
 
 void switch_alliance(alliances new_ally);
 void switch_alliance();
+void set_target_goal(int goal = cur_goal);
 void next_auton();
 void prev_auton();
 void next_start_pos();

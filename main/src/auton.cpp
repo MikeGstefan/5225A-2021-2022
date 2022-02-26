@@ -516,6 +516,13 @@ void next_start_pos(){
   pos_auton_file_update();
 }
 
+void set_target_goal(int goal){
+  cur_goal = goal;
+  printf("Switched goal to %d\n", cur_goal);
+  events.print("Switched goal to %d\n", cur_goal);
+  pos_auton_file_update();
+}
+
 void switch_alliance(){
   switch(cur_alliance){
     case alliances::RED: //Opposite, since switching alliances

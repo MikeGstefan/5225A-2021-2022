@@ -99,13 +99,14 @@ void autonomous() {
 
 void opcontrol() {
 	/*
-	mix/match sizing in screen printing
 	namespace for auton
-	motor control in main gui similar to pneumatics_for_gui
 	auton give up
 	make gui a task
 	create good autosizing
 	*/
+
+
+  extern Slider mot_speed_set;
 
 	while(true){
 		GUI::update();
@@ -115,6 +116,12 @@ void opcontrol() {
 		else if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_DOWN)) next_auton();
 		if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_X)) switch_alliance();
 		if (master.get_digital_new_press(cancel_button)) break;
+		if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_A)){
+			int speed = mot_speed_set.get_value();
+			move_start(move_types::line, line_params({0.0, 0.0}, {0.0, 24.0, 0.0}, speed));
+			move_start(move_types::turn_angle, turn_angle_params(45.0, speed));
+			move_start(move_types::line, line_params({0.0, 0.0}, {0.0, 24.0, 0.0}, speed));
+		}
 		delay(10);
 	}
 }

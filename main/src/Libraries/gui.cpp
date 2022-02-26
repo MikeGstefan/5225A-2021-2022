@@ -817,3 +817,5 @@ void GUI::update(){
   /*Text*/for (std::vector<Text_*>::const_iterator it = cur_p.texts.begin(); it != cur_p.texts.end(); it++) (*it)->update();
   /*Flash*/end_flash();
 }
+
+// _Task gui_task(GUI::update, "GUI"); Make GUI::update a void (void*)() first

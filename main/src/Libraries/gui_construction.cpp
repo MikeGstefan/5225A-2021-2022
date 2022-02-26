@@ -180,7 +180,7 @@ Button pneum_7 (245, 140, 100, 75, GUI::Style::SIZE, Button::TOGGLE, pneumatics,
 Button pneum_8 (360, 140, 100, 75, GUI::Style::SIZE, Button::TOGGLE, pneumatics, pneumatics_for_gui[7].second);
 
 Page motors ("Motor Control");
-Slider mot_speed_set (MID_X, 60, 180 , 15, GUI::Style::CENTRE, Slider::HORIZONTAL, -127, 127, motor, "Speed");
+Slider mot_speed_set (MID_X, 60, 180 , 15, GUI::Style::CENTRE, Slider::HORIZONTAL, -127, 127, motors, "Speed");
 Text mot_1_text (65, 115, GUI::Style::CENTRE, TEXT_SMALL, motors, std::get<2>(motors_for_gui[0]));
 Text mot_2_text (180, 115, GUI::Style::CENTRE, TEXT_SMALL, motors, std::get<2>(motors_for_gui[1]));
 Text mot_3_text (295, 115, GUI::Style::CENTRE, TEXT_SMALL, motors, std::get<2>(motors_for_gui[2]));
@@ -225,9 +225,9 @@ void main_setup(){
   Button::create_options({&goal_1, &goal_2, &goal_3});
   prev_start_position.set_func(prev_start_pos);
   next_start_position.set_func(next_start_pos);
-  goal_1.set_func([](){cur_goal = 1;});
-  goal_2.set_func([](){cur_goal = 2;});
-  goal_3.set_func([](){cur_goal = 3;});
+  goal_1.set_func([](){set_target_goal(1);});
+  goal_2.set_func([](){set_target_goal(2);});
+  goal_3.set_func([](){set_target_goal(3);});
   pos_alliance.set_func([](){switch_alliance();});
   pos_alliance.add_text(pos_ally_name);
 
@@ -640,6 +640,6 @@ void util_background(){
   }
 }
 
-GUI g_main ({&temps, &driver_curve, &auto_selection, &pos_auto_selection, &track, &moving, &intake_test, &elastic, &motor_subsys, &tuning, &pneumatics}, &main_setup, &main_background);
+GUI g_main ({&temps, &driver_curve, &auto_selection, &pos_auto_selection, &track, &moving, &intake_test, &elastic, &motor_subsys, &tuning, &motors, &pneumatics}, &main_setup, &main_background);
 
 GUI g_util ({&ports, &encoders, &motor, &pneumatic}, &util_setup, &util_background);
