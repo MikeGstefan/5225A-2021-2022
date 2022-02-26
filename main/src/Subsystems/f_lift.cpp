@@ -84,7 +84,7 @@ void F_Lift::handle(){
 
         // // intake.set_state(intake_states::on); // intake defaults to on when mogo is grabbed
         // // intake.motor.move(INTAKE_POWER);
-
+        intk.move(127);
         set_state(f_lift_states::grabbed);
       }
       // switches state to idle if down button is pressed
@@ -117,6 +117,7 @@ void F_Lift::handle(){
         // master.print(F_LIFT_STATE_LINE, 0, "F_Lift: Idle         ");
 
         // // intake.motor.move(0); // turns off intake
+        intk.move(0);
 
         set_state(f_lift_states::idle);
         master.print(F_LIFT_STATE_LINE, 0, "F_Lift: Idle         ");
@@ -142,7 +143,7 @@ void F_Lift::handle(){
       }
       if(master.get_digital_new_press(f_lift_down_button)){ // lowers goal if down button is pressed
         move_absolute(holding_position);
-
+        intk.move(0);
         set_state(f_lift_states::lowering);
       }
       break;
@@ -195,7 +196,7 @@ void F_Lift::handle(){
       // releases goal if up or down button is pressed
       if(master.get_digital_new_press(f_lift_up_button) || master.get_digital_new_press(f_lift_down_button)){
         move_absolute(bottom_position);
-
+        intk.move(0);
         set_state(f_lift_states::lowering);
       }
       break;

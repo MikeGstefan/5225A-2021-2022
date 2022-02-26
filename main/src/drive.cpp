@@ -256,9 +256,9 @@ void Drivebase::driver_practice(){
       // actual drive code
       if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_LEFT)){
         intake_on = !intake_on;
+        intk.move(127*(int)intake_on);
       }
-      if(intake_on) intk.move(127);
-      else intk.move(0);
+       
 
 
       drivebase.handle_input();

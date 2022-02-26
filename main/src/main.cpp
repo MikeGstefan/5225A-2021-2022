@@ -76,16 +76,17 @@ void competition_initialize() {}
  */
 void autonomous() {
 	
-	b_lift.reset();
-	Task([](){ 
-		f_lift.reset();
-	});
-	f_claw_p.set_value(0);
-	b_claw_p.set_value(0);
-	skills();
-	skills2();
+	// b_lift.reset();
+	// Task([](){ 
+	// 	f_lift.reset();
+	// });
+	// f_claw_p.set_value(0);
+	// b_claw_p.set_value(0);
+	// skills();
+	// skills2();
 
-	skills3();
+	// skills3();
+	lrt_auton();
 	while(true);
 	// FILE * fp;
 	// fp = fopen("/usd/init.txt", "r");
@@ -122,6 +123,7 @@ bool claw_state = false, claw_state_2 = false, lift_state = false, drive_state =
 int lift_speed = 0;
 int safety_check = 0;
 void opcontrol() {
+	move_stop();
 	// while(true){
 	// 	printf("%d\n", b_dist.get());
 	// 	delay(10);
