@@ -100,4 +100,8 @@ public:
     motor.move_absolute(position, velocity);
   }
 
+  void move(double speed){
+    motor.move(speed);
+  }
+
 };

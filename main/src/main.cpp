@@ -1,5 +1,4 @@
-#include "Subsystems/lift.hpp"
-#include "Subsystems/hitch.hpp"
+
 #include "drive.hpp"
 #include "controller.hpp"
 #include "Libraries/gui.hpp"
@@ -7,9 +6,17 @@
 #include "Tracking.hpp"
 #include "task.hpp"
 #include "auton.hpp"
+#include "auton_util.hpp"
+#include "Subsystem/f_lift.hpp"
+#include "Subsystem/b_lift.hpp"
+#include "vision_loop.hpp"
+
+// using namespace std;
 #include "task.hpp"
 #include "util.hpp"
 
+#include <fstream>
+#include <sys/wait.h>
 using namespace std;
 
 pros::Task *updt = nullptr;
@@ -22,18 +29,22 @@ const GUI* GUI::current_gui = &g_main;
  * All other competition modes are blocked by initialize; it is recommended
  * to keep execution time for this mode under a few seconds.
  */
+//  pros::Task *updt = nullptr;
+ bool auton_run = false; // has auton run
+
 void initialize() {
+	// gyro.calibrate();
 	drivebase.download_curve_data();
 	Data::init();
 	_Controller::init();
 	GUI::init();
-	delay(150);
-	tracking.x_coord = 144.0 - 10.25, tracking.y_coord = 14.75, tracking.global_angle = -M_PI_2;
-	// tracking.x_coord = 0.0, tracking.y_coord = 0.0, tracking.global_angle = 0.0;
-
+	delay(500);
+	// tracking.x_coord = 26.0, tracking.y_coord = 11.75, tracking.global_angle = -90.0_deg;
+	tracking.x_coord = 108.0, tracking.y_coord = 16.0, tracking.global_angle = 0.0_deg;
 	update_t.start();
-	auton_file_read();
-	master.print(2, 0, "Driver: %s", drivebase.drivers[drivebase.cur_driver].name);
+	// auton_file_read();
+	// master.print(2, 0, "Driver: %s", drivebase.drivers[drivebase.cur_driver].name);
+	// gyro.finish_calibrating(); //Finishes calibrating gyro before program starts
 }
 
 /**

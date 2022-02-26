@@ -1,4 +1,8 @@
 #include "auton_util.hpp"
+// #include "logging.hpp"
+
+Reset_dist reset_dist_r(&r_reset_dist, 8.5);
+Reset_dist reset_dist_l(&l_reset_dist, 8.0);
 
 double get_filtered_output(ADIUltrasonic sensor, int check_count, uint16_t lower_bound, uint16_t upper_bound, int timeout){
   Timer timer{"Timer"};
@@ -22,70 +26,109 @@ double get_filtered_output(ADIUltrasonic sensor, int check_count, uint16_t lower
   return filtered_output;
 }
 
-void flatten_against_wall(bool right){
-  bool front_done, back_done;
-  int front_count = 0, back_count = 0;
-  double front_velocity, back_velocity;
-  const double dist_b = 3.0;  // make sure to keep this same as in tracking
-  const double simulated_radius = 8.0;
-  const double radial_scalar = simulated_radius / dist_b; // how much to multiples the actual radius by to get the simulated radius
-  double angular_component, linear_component;
-  const int cycle_threshold = 20;
-  const double velocity_threshold = 0.5;  // in inches/sec
-  int flatten_power, power_diff;
+void flatten_against_wall(bool front){ 
+  int safety_check = 0;
+  //bool to + -
+  int direction = (static_cast<int>(front)*2)-1;
+  tracking_imp.print("%d|| Start wall allign\n", millis());
 
-  if(right) flatten_power = 60, power_diff = 20;
-  else  flatten_power = -60, power_diff = -20;
+	drivebase.move(70.0*direction,0.0);
 
-  delay(100); // waits for robots velocity to rise
-  drivebase.move(flatten_power, 0.0, 0.0);
+	while((fabs(tracking.l_velo) < 2.0 ||fabs(tracking.r_velo) < 2.0) && safety_check < 12){
+		safety_check++;
+		delay(10);
+	}
+	cycleCheck(fabs(tracking.l_velo) <1.0 && fabs(tracking.r_velo) < 1.0, 4,10);
+	drivebase.move(20.0*direction,0.0);
+	printf("%d|| Done all allign\n", millis());
+}
 
-  // while(!(front_done && back_done)){
-  while(true){
-    drivebase.handle_input();
-    angular_component = tracking.g_velocity.angle * dist_b;
-    linear_component = tracking.b_velo + angular_component;
+// double get_front_dist(){
+//   double avg = 0.0;
+//   int count = 0;
+//   while(true){ 
+//     // for(int i = 0; i < 3; i++){
+//     if(front_dist.get() > 10){
+//       avg+= front_dist.get();
+//       count++;
+//     }
+//     if(count > 2){
+//       avg/=count;
+//       break;
+//     }
+//     delay(34);
+//   }
+//   return ((avg/25.4) +front_dist_dist);
+  
+// }
 
-    back_velocity = linear_component - angular_component * radial_scalar;
-    front_velocity = linear_component + angular_component * radial_scalar;
-
-    printf("Velocities | back: %lf, front: %lf\n", back_velocity, front_velocity);
-
-    if (fabs(front_velocity) < velocity_threshold){
-      front_done = front_count > cycle_threshold;
-      if(!front_done) front_count++;
+void b_detect_goal(){ 
+  // cycleCheck(b_dist.get() > 80 && b_dist.get() < 90, 5, 33);
+  while(b_dist.get() > 70){ 
+    misc.print("looking for edge: %d\n", b_dist.get());
+    delay(33);
+  }
+  int successCount = 0;
+    while (successCount < 2){
+        if (b_dist.get() > 75 && b_dist.get() < 90) {
+          successCount++;
+          misc.print("found: %d count: %d\n", b_dist.get(), successCount);
+        }
+        else successCount = 0;
+        misc.print("looking: %d\n", b_dist.get());
+        delay(33);
     }
-    else{ // resets front counter if robot is moving
-      front_done = false;
-      front_count = 0;
-    }
+  misc.print("Detected %d\n", b_dist.get());
+  b_claw_p.set_value(1);
+}
 
-    if (fabs(back_velocity) < velocity_threshold){
-      back_done = back_count > cycle_threshold;
-      if(!back_done) back_count++;
-    }
-    else{ // resets back counter if robot is moving
-      back_count = 0;
-      back_done = false;
-    }
 
-    if(front_done) drivebase.move(flatten_power, 0.0, -power_diff); // turn back end to align with wall if front is aligned
-    else if(back_done) drivebase.move(flatten_power, 0.0, power_diff); //  turn front end to align with wall if back is aligned
-    else drivebase.move(flatten_power, 0.0, 0.0); // otherwise continune towards wall
 
+void f_detect_goal(){ 
+  // cycleCheck(b_dist.get() > 80 && b_dist.get() < 90, 5, 33);
+  // while(f_dist.get() > 70){ 
+  //   misc.print("looking for edge: %d\n", f_dist.get());
+  //   delay(33);
+  // }
+  // int successCount = 0;
+  //   while (successCount < 2){
+  //       if (f_dist.get() > 70 && f_dist.get() < 90) successCount++;
+  //       else successCount = 0;
+  //       misc.print("looking: %d\n", f_dist.get());
+  //       delay(33);
+  //   }
+  while(!f_touch.get_value())delay(10);
+  misc.print("Detected %d\n", f_dist.get());
+  f_claw_p.set_value(1);
+}
+
+
+void detect_interference(){ 
+  int time = millis();
+  while(get_move_state()){
+    //numbers need funnyimh
+    if(time > 500 && tracking.g_velocity.y < 0.5){
+      drivebase.set_state(0);
+      break;
+    }
     delay(10);
   }
 }
 
-void score_on_top(void* params){  // scores on tall goal
-  delay(8000);
-  // delay(1000);
-  // spinner.move(127);
-  // delay(3000);
-  // spinner.move(127);
-  // delay(3000);
-  // spinner.move(0);
-  // delay(1000);
+Reset_dist::Reset_dist(pros::Distance* sensor, double dist_from_center): sensor{sensor}, dist_from_center{dist_from_center}{}
 
+double Reset_dist::get_dist(){
+  double avg = 0.0;
+  int count = 0;
+  while(count < Reset_dist::cycles){
+    if(this->sensor->get() > Reset_dist::thresh){
+      count++;
+      avg += this->sensor->get();
+      misc.print("%d || Dist in reset %f count %d\n", millis(), (double)this->sensor->get()/25.4, count);
+    }
+    delay(33);
+  }
+  //find averaeg, convert to inches
+  misc.print("%d || reset %f\n",millis(), (avg/count)/25.4);
+  return ((avg/count)/25.4) + this->dist_from_center;
 }
-

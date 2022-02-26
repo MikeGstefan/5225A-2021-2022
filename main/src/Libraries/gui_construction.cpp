@@ -84,8 +84,8 @@ Text elastic_up (MID_X, 160, GUI::Style::CENTRE, TEXT_SMALL, elastic, "Up Time: 
 Text elastic_down(MID_X, 180, GUI::Style::CENTRE, TEXT_SMALL, elastic, "Down Time: %d", elastic_down_time);
 
 Page motor_subsys ("Motorized Subsystems"); //Moving the lift
-Slider lift_val(30, 45, 300, 35, GUI::Style::SIZE, Slider::HORIZONTAL, lift.bottom_position, lift.top_position, motor_subsys, "Lift", 10);
-Slider tilter_val(30, 110, 300, 40, GUI::Style::SIZE, Slider::HORIZONTAL, tilter.bottom_position, tilter.top_position, motor_subsys, "Tilter", 10);
+Slider lift_val(30, 45, 300, 35, GUI::Style::SIZE, Slider::HORIZONTAL, 0, 0, motor_subsys, "Lift", 10);
+Slider tilter_val(30, 110, 300, 40, GUI::Style::SIZE, Slider::HORIZONTAL, 0, 0, motor_subsys, "Tilter", 10);
 Button lift_move(470, 45, -100, 40, GUI::Style::SIZE, Button::SINGLE, motor_subsys, "Move Lift");
 Button tilter_move(470, 95, -100, 40, GUI::Style::SIZE, Button::SINGLE, motor_subsys, "Move Tilter");
 Button claw_switch(470, 145, -100, 40, GUI::Style::SIZE, Button::TOGGLE, motor_subsys, "Claw");
@@ -204,7 +204,7 @@ void main_setup(){
   pos_alliance.set_func([](){switch_alliance();});
   pos_alliance.add_text(pos_ally_name);
 
-  intake_switch.set_func([](){intake.toggle();});
+  // intake_switch.set_func([](){intake.toggle();});
   
   res_x.set_func([](){tracking.reset(0.0, tracking.y_coord, rad_to_deg(tracking.global_angle));});
   res_y.set_func([](){tracking.reset(tracking.x_coord, 0.0, rad_to_deg(tracking.global_angle));});
@@ -246,18 +246,18 @@ void main_setup(){
     char coord_c[20];
     snprintf(coord_c, 20, " %d", lift_val.get_value());
     std::string coord = coord_c;
-    if (GUI::go("Move lift to" + coord, "Press to move lift to" + coord, 1000)) lift.move_absolute(lift_val.get_value());
+    if (GUI::go("Move lift to" + coord, "Press to move lift to" + coord, 1000)) {printf("sorry nathan");}//lift.move_absolute(lift_val.get_value());
   });
   tilter_move.set_func([&](){
     char coord_c[20];
     snprintf(coord_c, 20, " %d", tilter_val.get_value());
     std::string coord = coord_c;
-    if (GUI::go("Move tilter to" + coord, "Press to move tilter to" + coord, 1000)) tilter.move_absolute(tilter_val.get_value());
+    if (GUI::go("Move tilter to" + coord, "Press to move tilter to" + coord, 1000))printf("sorry nathan");// tilter.move_absolute(tilter_val.get_value());
   });
-  claw_switch.set_func([](){tilter_top_piston.set_value(1);});
-  claw_switch.set_off_func([](){tilter_top_piston.set_value(0);});
-  end_effector_switch.set_func([](){ring_piston.set_value(1);});
-  end_effector_switch.set_off_func([](){ring_piston.set_value(0);});
+  claw_switch.set_func([](){printf("sorry nathan");});
+  claw_switch.set_off_func([](){printf("sorry nathan");});
+  end_effector_switch.set_func([](){printf("sorry nathan");});
+  end_effector_switch.set_off_func([](){printf("sorry nathan");});
 
   if(pneumatics_for_gui[0].first){
     pneum_1.set_func([](){pneumatics_for_gui[0].first->set_value(HIGH);});

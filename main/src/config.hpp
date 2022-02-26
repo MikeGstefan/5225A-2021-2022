@@ -7,17 +7,14 @@ class _Controller;
 class Text_;
 
 extern _Controller master;
-extern pros::Motor front_l, front_r, back_l, back_r, intake_motor, lift_motor, tilter_motor, spinner_motor;
+extern pros::Motor front_l, front_r, back_l, back_r;
+extern pros::Motor f_lift_m, b_lift_m, intk;
 extern pros::ADIEncoder LeftEncoder, RightEncoder, BackEncoder;
-extern pros::ADIDigitalOut claw, claw_out;
-extern pros::ADIDigitalIn claw_touch;
-extern pros::ADIDigitalIn lift_trigger, tilter_trigger, hitch_trigger;
-extern pros::ADIDigitalOut lift_piston, hitch_piston;
-extern pros::Distance tilter_dist;
-extern pros::ADIDigitalOut tilter_bottom_piston;
-extern pros::ADIDigitalOut tilter_top_piston;
+extern pros::Distance l_dis;
+extern pros::Distance r_dis;
 
-extern pros::ADIDigitalOut intake_piston;
+extern pros::Imu ramp_imu;
+extern pros::Distance b_dist, f_dist, r_reset_dist, l_reset_dist;
 
-extern pros::ADIDigitalIn spinner_trigger;
-extern pros::ADIDigitalOut ring_piston; // "end effector"
+extern pros::ADIDigitalOut trans_p, b_claw_p, f_claw_p, Led1, Led2;
+extern pros::ADIDigitalIn f_touch;

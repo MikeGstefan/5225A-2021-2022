@@ -11,24 +11,13 @@ using namespace pros;
 // Buttons
 
 // lift buttons
-extern controller_digital_e_t lift_up_button;
-extern controller_digital_e_t lift_down_button;
-extern controller_digital_e_t mogo_tip_button;
 
-
-extern controller_digital_e_t tilter_button;
-extern controller_digital_e_t hitch_button;
 
 // misc buttons
 extern controller_digital_e_t cancel_button;
-extern controller_digital_e_t fill_top_goal_button;
-extern controller_digital_e_t climb_platform_button;
-extern controller_digital_e_t intake_button;
+extern controller_digital_e_t shift;
 extern controller_digital_e_t reverse_drive_button;
 
-// manual control buttons
-extern controller_digital_e_t lift_manual_button;
-extern controller_digital_e_t tilter_manual_button;
 
 #define num_controller 1
 

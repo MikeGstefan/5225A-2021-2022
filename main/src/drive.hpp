@@ -2,9 +2,6 @@
 #include "Tracking.hpp"
 #include "util.hpp"
 #include "logging.hpp"
-#include "Subsystems/lift.hpp"
-#include "Subsystems/tilter.hpp"
-#include "Subsystems/hitch.hpp"
 #include "auton_util.hpp"
 
 using namespace pros;
@@ -48,6 +45,7 @@ class Drivebase{
   int deadzone = 5;
   const char* screen_text[3] = {"LOCAL_X CURVE:", "LOCAL_Y CURVE:", "LOCAL_A CURVE:"};
   void update_screen();
+  bool state;//state for the transmission
 
 public:
   int cur_driver = 0;  // driver defaults to Nikhil rn
@@ -60,6 +58,7 @@ public:
 
   // 'set-drive' methods
   void move(double x, double y, double a);
+  void move(double y, double a);
   void move_tank(double y, double a);
   void move_side(double l, double r);
 
@@ -72,6 +71,12 @@ public:
   void next_driver(); //Goes to next driver. Called on drivebase object.
   void prev_driver(); //Goes to previous driver. Called on drivebase object.
   const char* driver_name(); //Returns the current driver's name
+
+  //returns the current state of the transmission
+  bool get_state(); 
+  void set_state(bool state);
+  //handles controller input for the transmission
+  void handle_trans();
 };
 
 extern Drivebase drivebase;

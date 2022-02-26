@@ -70,6 +70,15 @@ void Drivebase::move(double x, double y, double a){
   back_r.move(x + y - a);
 }
 
+void Drivebase::move(double y, double a){ 
+  front_l.move(y+a);
+  front_r.move(y-a);
+  back_l.move(y+a);
+  back_r.move(y-a);
+  // back_l.move(0);
+  // back_r.move(0);
+}
+
 void Drivebase::move_tank(double y, double a){
   move(0.0, y, a);
 }
@@ -181,7 +190,7 @@ void Drivebase::update_lookup_table_util(){
 }
 
 void Drivebase::handle_input(){
-  tracking.power_x = drivers[cur_driver].custom_drives[0].lookup(master.get_analog(drivers[cur_driver].joy_sticks[0]));
+  // tracking.power_x = drivers[cur_driver].custom_drives[0].lookup(master.get_analog(drivers[cur_driver].joy_sticks[0]));
   tracking.power_y = drivers[cur_driver].custom_drives[1].lookup(master.get_analog(drivers[cur_driver].joy_sticks[1]));
   tracking.power_a = drivers[cur_driver].custom_drives[2].lookup(master.get_analog(drivers[cur_driver].joy_sticks[2]));
 
@@ -202,7 +211,8 @@ void Drivebase::handle_input(){
     tracking.power_x *= -1;
   }
 
-  move(tracking.power_x, tracking.power_y, tracking.power_a);
+  move(tracking.power_y, tracking.power_a);
+  // move(0, tracking.power_a);
 }
 
 void Drivebase::driver_practice(){
@@ -211,50 +221,30 @@ void Drivebase::driver_practice(){
   master.print(2, 0, "Lift: Searching     ");
 
   // initializes pneumatics in appropriate state
-  intake_piston.set_value(LOW);
-  lift_piston.set_value(LOW);
-
-  // resets subsystems
-  lift.reset();
-  tilter.reset();
-  bool tilter_held = false;
 
   // moves motors to necessary positions / speeds
-  lift.move_absolute(lift.bottom_position);
-  tilter.move_absolute(tilter.bottom_position);
-  intake.motor.move(100);
 
-  tilter_bottom_piston.set_value(LOW);
-  tilter_top_piston.set_value(HIGH);
+
   cur_driver = 0; // defaults driver to Nikhil
   // master.print(2, 0, "Driver: %s", driver_name());
   while(true){
-    while(!master.get_digital_new_press(E_CONTROLLER_DIGITAL_B)){
+    // while(!master.get_digital_new_press(E_CONTROLLER_DIGITAL_B)){
+      /*
+      if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_UP)){ // goes to next driver
+        cur_driver++;
+        cur_driver %= num_of_drivers; // rollover
+        // spaces in the controller print are to overwrite names
+        master.print(2, 0, "Driver: %s          ", drivers[cur_driver].name);
+      }
+      else if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_DOWN)){  // goes to previous driver
+        if (cur_driver == 0)  cur_driver = num_of_drivers - 1;
+        else cur_driver--;
+        master.print(2, 0, "Driver: %s          ", drivers[cur_driver].name);
+      }
+      */
+
       // actual drive code
       drivebase.handle_input();
-      lift.handle();
-      // tilter.handle();
-      if(master.get_digital_new_press(tilter_button)){
-        if(tilter_held){
-          tilter.motor.move_absolute(tilter.bottom_position, 100); // lifts goal
-          waitUntil(fabs(tilter.motor.get_position() - tilter.bottom_position) <  25);
-          tilter_top_piston.set_value(HIGH);
-          tilter_bottom_piston.set_value(LOW);
-
-          tilter_held = false;
-        }
-        else{
-          tilter_top_piston.set_value(LOW);
-          delay(100); // waits for top piston to fully close
-          tilter_bottom_piston.set_value(HIGH);
-          delay(200); // waits for bottom piston to fully close
-          tilter.motor.move_absolute(tilter.raised_position, 100); // lifts goal
-
-          tilter_held = true;
-        }
-      }
-      intake.handle();
-
       // prints motor temps every second
       if(screen_timer.get_time() > 1000){
         drivers_data.print("fl%.0f r%.0f bl%.0f r%.0f\n", front_l.get_temperature(), front_r.get_temperature(), back_l.get_temperature(), back_r.get_temperature());
@@ -269,10 +259,10 @@ void Drivebase::driver_practice(){
       }
 
       delay(10);
-    }
-    update_lookup_table_util();
-    master.clear();
-    master.print(2, 0, "Driver: %s", driver_name());
+    // }
+    // update_lookup_table_util();
+    // master.clear();
+    // master.print(2, 0, "Driver: %s", drivers[cur_driver].name);
   }
 }
 
@@ -287,8 +277,6 @@ void Drivebase::non_blocking_driver_practice(){
 
   // actual drive code
   drivebase.handle_input();
-  lift.handle();
-  tilter.handle();
 
   // takes away control from driver when motors overheat
   if(inRange(front_l.get_temperature(), 55, std::numeric_limits<double>::max()-1) || inRange(front_r.get_temperature(), 55, std::numeric_limits<double>::max()-1) || inRange(back_l.get_temperature(), 55, std::numeric_limits<double>::max()-1) || inRange(back_r.get_temperature(), 55, std::numeric_limits<double>::max()-1)){
@@ -319,4 +307,21 @@ void Drivebase::prev_driver(){
 
 const char* Drivebase::driver_name(){
   return drivers[cur_driver].name;
+}
+
+
+bool Drivebase::get_state(){
+  return this->state;
+}
+
+void Drivebase::set_state(bool state){
+  this->state = state;
+  trans_p.set_value(state);
+}
+
+
+void Drivebase::handle_trans(){
+  if(master.get_digital_new_press(shift)){
+    this->set_state(!this->get_state());
+  }
 }

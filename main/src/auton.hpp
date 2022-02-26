@@ -1,6 +1,6 @@
 #pragma once
-#include "Subsystems/lift.hpp"
-#include "Subsystems/hitch.hpp"
+// #include "Subsystems/lift.hpp"
+// #include "Subsystems/hitch.hpp"
 #include "Libraries/gui.hpp"
 #include "drive.hpp"
 #include "controller.hpp"
@@ -9,7 +9,26 @@
 #include "task.hpp"
 #include "auton_util.hpp"
 #include "config.hpp"
+#include "vision_loop.hpp"
+#include "Subsystem/b_lift.hpp"
+#include "Subsystem/f_lift.hpp"
 #include <fstream>
+
+
+
+void skills();
+void skills2();
+void skills3();
+void skills4();
+void skillsPark();
+
+void lrt_auton();
+
+
+
+
+
+
 
 enum class autons{
   Skills,
@@ -47,5 +66,4 @@ void prev_start_pos();
 void auton_file_read();
 void pos_auton_file_read();
 
-void red_tall_rush();
-void skills();
+
