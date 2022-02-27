@@ -1,4 +1,5 @@
 
+#include "config.hpp"
 #include "drive.hpp"
 #include "controller.hpp"
 #include "Libraries/gui.hpp"
@@ -103,20 +104,36 @@ void opcontrol() {
 
   extern Slider mot_speed_set;
 
+	Timer intake_t ("intake", false);
+	intk.move(127);
+
+
 	while(true){
 		GUI::update();
 		// drivebase.non_blocking_driver_practice();
+		
+		if(intake_jam.get_new_press()){
+			intake_t.reset();
+			GUI::flash("Triggered", 200);
+		}
+		else if(!intake_jam.get_value()) intake_t.reset(false);
+		if(intake_t.get_time() > 1000){
+			GUI::flash("Jammed", 200);
+			// intk.move(-127);
+			// waitUntil(!intake_jam.get_value());
+			// intk.move(127);
+		}
 
 		if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_UP)) Autons::prev_route();
 		else if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_DOWN)) Autons::next_route();
 		if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_X)) Autons::switch_alliance();
 		if (master.get_digital_new_press(cancel_button)) break;
-		if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_A)){
-			int speed = mot_speed_set.get_value();
-			move_start(move_types::line, line_params({0.0, 0.0}, {0.0, 24.0, 0.0}, speed));
-			move_start(move_types::turn_angle, turn_angle_params(45.0, speed));
-			move_start(move_types::line, line_params({0.0, 0.0}, {0.0, 24.0, 0.0}, speed));
-		}
+		// if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_A)){
+		// 	int speed = mot_speed_set.get_value();
+		// 	move_start(move_types::line, line_params({0.0, 0.0}, {0.0, 24.0, 0.0}, speed));
+		// 	move_start(move_types::turn_angle, turn_angle_params(45.0, speed));
+		// 	move_start(move_types::line, line_params({0.0, 0.0}, {0.0, 24.0, 0.0}, speed));
+		// }
 		delay(10);
 	}
 }

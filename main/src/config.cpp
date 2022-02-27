@@ -26,6 +26,7 @@ pros::ADIDigitalOut trans_p({{16,8}}), b_claw_p(6), f_claw_p(8);
 pros::ADIDigitalOut Led1({{14, 7}});
 pros::ADIDigitalOut Led2({{14, 8}});
 pros::ADIDigitalIn f_touch(7);
+pros::ADIDigitalIn intake_jam(5);
 
 pros::Distance l_dist(18);
 pros::Distance r_dist(17);

@@ -5,7 +5,7 @@
 /*Current Flashing Timer*/ extern Timer Flash;
 
 //Var init for text monitoring
-int left_enc, right_enc, back_enc, angle, elastic_up_time, elastic_down_time;
+int left_enc, right_enc, back_enc, angle, elastic_b_up_time, elastic_b_down_time, elastic_f_up_time, elastic_f_down_time;
 const char* motor_port_nums;
 const char* no_motor_port_nums;
 const char* expander_port_nums;
@@ -76,9 +76,12 @@ Button intake_switch (180, 90, 120, 80, GUI::Style::SIZE, Button::TOGGLE, intake
 Button reset_rings (330, 90, 120, 80, GUI::Style::SIZE, Button::SINGLE, intake_test, "Reset Ring Count");
 
 Page elastic ("Elastic Test"); //Testing the elastics on the lift
-Button run_elastic(165, 60, 150, 55, GUI::Style::SIZE, Button::SINGLE, elastic, "Run Elastic Test");
-Text elastic_up (MID_X, 160, GUI::Style::CENTRE, TEXT_SMALL, elastic, "Up Time: %d", elastic_up_time);
-Text elastic_down(MID_X, 180, GUI::Style::CENTRE, TEXT_SMALL, elastic, "Down Time: %d", elastic_down_time);
+Button check_b_elastic(145, 70, 70, 30, GUI::Style::CENTRE, Button::SINGLE, elastic, "Run Back Elastic Test");
+Button check_f_elastic(335, 70, 70, 30, GUI::Style::CENTRE, Button::SINGLE, elastic, "Run Front Elastic Test");
+Text elastic_b_up (145, 160, GUI::Style::CENTRE, TEXT_SMALL, elastic, "Up Time: %d", elastic_b_up_time);
+Text elastic_b_down(145, 180, GUI::Style::CENTRE, TEXT_SMALL, elastic, "Down Time: %d", elastic_b_down_time);
+Text elastic_f_up (335, 160, GUI::Style::CENTRE, TEXT_SMALL, elastic, "Up Time: %d", elastic_f_up_time);
+Text elastic_f_down(335, 180, GUI::Style::CENTRE, TEXT_SMALL, elastic, "Down Time: %d", elastic_f_down_time);
 
 Page motor_subsys ("Motorized Subsystems"); //Moving the lift
 Slider lift_val(30, 45, 300, 35, GUI::Style::SIZE, Slider::HORIZONTAL, 0, 0, motor_subsys, "Lift", 10);
@@ -229,6 +232,9 @@ void main_setup(){
   pos_alliance.add_text(pos_ally_name);
 
   intake_switch.set_func([](){printf("sorry nathan");});
+
+  check_b_elastic.set_func([](){b_lift.elastic_util();});
+  check_f_elastic.set_func([](){f_lift.elastic_util();});
   
   res_x.set_func([](){tracking.reset(0.0, tracking.y_coord, rad_to_deg(tracking.global_angle));});
   res_y.set_func([](){tracking.reset(tracking.x_coord, 0.0, rad_to_deg(tracking.global_angle));});
