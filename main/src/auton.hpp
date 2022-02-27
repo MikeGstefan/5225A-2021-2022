@@ -24,47 +24,29 @@ void skillsPark();
 
 void lrt_auton();
 
+namespace Autons{
 
+  enum class autons;
+  enum class start_pos;
+  enum class alliances;
 
+  extern const char* alliance_names[];
+  extern const char* start_pos_names[];
+  extern const char* auton_names[];
 
+  extern autons cur_auton;
+  extern start_pos cur_start_pos;
+  extern alliances cur_alliance;
+  extern int cur_goal;
 
+  void switch_alliance(alliances new_ally);
+  void switch_alliance();
+  void set_target_goal(int goal = cur_goal);
+  void next_route();
+  void prev_route();
+  void next_start_pos();
+  void prev_start_pos();
+  void file_read();
+  void pos_file_read();
 
-
-enum class autons{
-  Skills,
-  Auto2,
-  Auto3,
-  NUM_OF_ELEMENTS,
-  Default = Skills,
-};
-
-enum class start_pos{
-  Pos1,
-  Pos2,
-  Pos3,
-  NUM_OF_ELEMENTS,
-  Default = Pos1,
-};
-
-enum class alliances{
-  RED,
-  BLUE,
-  Default = BLUE
-};
-
-extern autons cur_auton;
-extern start_pos cur_start_pos;
-extern alliances cur_alliance;
-extern int cur_goal;
-
-void switch_alliance(alliances new_ally);
-void switch_alliance();
-void set_target_goal(int goal = cur_goal);
-void next_auton();
-void prev_auton();
-void next_start_pos();
-void prev_start_pos();
-void auton_file_read();
-void pos_auton_file_read();
-
-
+}

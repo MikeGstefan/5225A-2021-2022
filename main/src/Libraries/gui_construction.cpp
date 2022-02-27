@@ -16,9 +16,6 @@ std::array<std::tuple<int, Button*, Button*, Text_*, int, char*>, 8> motor_ports
 //For gui to use
 extern std::array<std::tuple<pros::Motor*, int, const char*, const char*, Text_*>, 8> motors_for_gui; //Declared in config.cpp
 extern std::array<std::pair<pros::ADIDigitalOut*, const char*>, 8> pneumatics_for_gui; //Declared in config.cpp
-extern const char* alliance_names[]; //Declared in auton.cpp
-extern const char* start_pos_names[]; //Declared in auton.cpp
-extern const char* auton_names[]; //Declared in auton.cpp
 
 Page driver_curve ("Drivers"); //Select a driver and their exp curve
 Button prev_drivr(20, 70, 110, 120, GUI::Style::SIZE, Button::SINGLE, driver_curve, "Prev Driver");
@@ -38,9 +35,9 @@ Text mot_temp_8(405, 175, GUI::Style::CENTRE, TEXT_SMALL, temps, std::get<3>(mot
 Page auto_selection ("Auton Selector"); //Select auton routes
 Button prev_auto(20, 50, 120, 100, GUI::Style::SIZE, Button::SINGLE, auto_selection, "Prev Auton");
 Button next_auto(350, 50, 120, 100, GUI::Style::SIZE, Button::SINGLE, auto_selection, "Next Auton");
-Text auto_name(MID_X, 100, GUI::Style::CENTRE, TEXT_LARGE, auto_selection, "%s", auton_names, cur_auton);
+Text auto_name(MID_X, 100, GUI::Style::CENTRE, TEXT_LARGE, auto_selection, "%s", Autons::auton_names, Autons::cur_auton);
 Button alliance(MID_X, 200, 150, 20, GUI::Style::CENTRE, Button::SINGLE, auto_selection);
-Text ally_name(MID_X, 200, GUI::Style::CENTRE, TEXT_MEDIUM, auto_selection, "Alliance: %s", alliance_names, cur_alliance);
+Text ally_name(MID_X, 200, GUI::Style::CENTRE, TEXT_MEDIUM, auto_selection, "Alliance: %s", Autons::alliance_names, Autons::cur_alliance);
 
 Page pos_auto_selection ("Fake Autons"); //Select auton routes
 Button prev_start_position(20, 110, 100, 40, GUI::Style::SIZE, Button::SINGLE, pos_auto_selection, "Prev Start");
@@ -48,9 +45,9 @@ Button next_start_position(460, 110, -100, 40, GUI::Style::SIZE, Button::SINGLE,
 Button goal_1(15, 35, 140, 55, GUI::Style::SIZE, Button::TOGGLE, pos_auto_selection, "Goal 1");
 Button goal_2(170, 35, 140, 55, GUI::Style::SIZE, Button::TOGGLE, pos_auto_selection, "Tall Goal");
 Button goal_3(325, 35, 140, 55, GUI::Style::SIZE, Button::TOGGLE, pos_auto_selection, "Goal 3");
-Text start_pos_name(MID_X, 130, GUI::Style::CENTRE, TEXT_LARGE, pos_auto_selection, "%s", start_pos_names, cur_start_pos);
+Text start_pos_name(MID_X, 130, GUI::Style::CENTRE, TEXT_LARGE, pos_auto_selection, "%s", Autons::start_pos_names, Autons::cur_start_pos);
 Button pos_alliance(MID_X, 200, 150, 20, GUI::Style::CENTRE, Button::SINGLE, pos_auto_selection);
-Text pos_ally_name(MID_X, 200, GUI::Style::CENTRE, TEXT_MEDIUM, pos_auto_selection, "Alliance: %s", alliance_names, cur_alliance);
+Text pos_ally_name(MID_X, 200, GUI::Style::CENTRE, TEXT_MEDIUM, pos_auto_selection, "Alliance: %s", Autons::alliance_names, Autons::cur_alliance);
 
 Page track ("Tracking"); //Display tracking vals and reset btns
 Text track_x(50, 45, GUI::Style::CENTRE, TEXT_SMALL, track, "X:%.1f", tracking.x_coord);
@@ -217,18 +214,18 @@ void main_setup(){
   prev_drivr.set_func([](){drivebase.prev_driver();});
   next_drivr.set_func([](){drivebase.next_driver();});
 
-  prev_auto.set_func(prev_auton);
-  next_auto.set_func(next_auton);
-  alliance.set_func([](){switch_alliance();});
+  prev_auto.set_func(Autons::prev_route);
+  next_auto.set_func(Autons::next_route);
+  alliance.set_func([](){Autons::switch_alliance();}); //Called in lambda to specify void version
   alliance.add_text(ally_name);
 
   Button::create_options({&goal_1, &goal_2, &goal_3});
-  prev_start_position.set_func(prev_start_pos);
-  next_start_position.set_func(next_start_pos);
-  goal_1.set_func([](){set_target_goal(1);});
-  goal_2.set_func([](){set_target_goal(2);});
-  goal_3.set_func([](){set_target_goal(3);});
-  pos_alliance.set_func([](){switch_alliance();});
+  prev_start_position.set_func(Autons::prev_start_pos);
+  next_start_position.set_func(Autons::next_start_pos);
+  goal_1.set_func([](){Autons::set_target_goal(1);});
+  goal_2.set_func([](){Autons::set_target_goal(2);});
+  goal_3.set_func([](){Autons::set_target_goal(3);});
+  pos_alliance.set_func([](){Autons::switch_alliance();});
   pos_alliance.add_text(pos_ally_name);
 
   intake_switch.set_func([](){printf("sorry nathan");});
@@ -496,13 +493,32 @@ void main_background(){
     }
 
     if (text && temp == std::numeric_limits<int>::max()) text->set_active(false); //If performance is bad, move this to the page setup func. Should be able to take out the if(text)
-
+    
+    //Move this to page loop func
     if (text != nullptr){ //Background Colours (temperature based)
-      if (temp == 0) text->set_background(COLOUR(WHITE)); //0
-      else if (temp <= 25) text->set_background(COLOUR(DODGER_BLUE)); //...20, 25
-      else if (temp <= 35) text->set_background(COLOUR(LAWN_GREEN)); //30, 35
-      else if (temp <= 45) text->set_background(COLOUR(YELLOW)); //40, 45
-      else text->set_background(COLOUR(RED)); //50, 55, ...
+      switch(temp){
+        case 0:
+        case 5:
+          text->set_background(COLOUR(WHITE)); break;
+        case 10:
+        case 15:
+          text->set_background(COLOUR(BLUE)); break;
+        case 20:
+        case 25:
+          text->set_background(COLOUR(DODGER_BLUE)); break;
+        case 30:
+        case 35:
+          text->set_background(COLOUR(LAWN_GREEN)); break;
+        case 40:
+        case 45:
+          text->set_background(COLOUR(YELLOW)); break;
+        case 50:
+          text->set_background(COLOUR(ORANGE_RED)); break;
+        case 55:
+          text->set_background(COLOUR(RED)); break;
+        default:
+          text->set_background(COLOUR(BLACK)); break;
+      }
     }
   }
 }

@@ -42,8 +42,8 @@ void initialize() {
 	// tracking.x_coord = 26.0, tracking.y_coord = 11.75, tracking.global_angle = -90.0_deg;
 	tracking.x_coord = 108.0, tracking.y_coord = 16.0, tracking.global_angle = 0.0_deg;
 	update_t.start();
-	auton_file_read();
-	pos_auton_file_read();
+	Autons::file_read();
+	Autons::pos_file_read();
 	// master.print(2, 0, "Driver: %s", drivebase.drivers[drivebase.cur_driver].name);
 	// gyro.finish_calibrating(); //Finishes calibrating gyro before program starts
 }
@@ -103,6 +103,7 @@ void opcontrol() {
 	auton give up
 	make gui a task
 	create good autosizing
+	lvgl images
 	*/
 
 
@@ -112,9 +113,9 @@ void opcontrol() {
 		GUI::update();
 		// drivebase.non_blocking_driver_practice();
 
-		if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_UP)) prev_auton();
-		else if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_DOWN)) next_auton();
-		if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_X)) switch_alliance();
+		if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_UP)) Autons::prev_route();
+		else if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_DOWN)) Autons::next_route();
+		if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_X)) Autons::switch_alliance();
 		if (master.get_digital_new_press(cancel_button)) break;
 		if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_A)){
 			int speed = mot_speed_set.get_value();

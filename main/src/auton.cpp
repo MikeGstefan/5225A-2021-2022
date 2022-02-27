@@ -1,10 +1,6 @@
 #include "auton.hpp"
 #include "Tracking.hpp"
 #include "logging.hpp"
-#include "pros/misc.hpp"
-
-std::string auton_file_name = "/usd/auton.txt";
-std::string pos_auton_file_name = "/usd/pos_auton.txt";
 
 void tilter_reset(){
     // tilter_motor.move(-40);
@@ -367,204 +363,233 @@ void lrt_auton(){
   while(true)delay(10);
 }
 
-std::fstream auton_file;
-autons cur_auton = static_cast<autons>(0);
-alliances cur_alliance = static_cast<alliances>(0);
-start_pos cur_start_pos;
-int cur_goal;
 
-const char* auton_names[static_cast<int>(autons::NUM_OF_ELEMENTS)] = {"Skills", "Auto1", "Auto2"};
-const char* alliance_names[2] = {"Red", "Blue"};
-const char* start_pos_names[static_cast<int>(start_pos::NUM_OF_ELEMENTS)] = {"Pos1", "Pos2", "Pos3"};
+extern Button alliance, pos_alliance; //From gui_construction.cpp (for autons)
 
-extern Button alliance, pos_alliance;
+namespace Autons{
 
-void auton_file_update(){
-  Data::log_t.data_update();
-  auton_file.open(auton_file_name, fstream::out | fstream::trunc);
-  auton_file << auton_names[static_cast<int>(cur_auton)] << std::endl;
-  auton_file << alliance_names[static_cast<int>(cur_alliance)];
-  auton_file.close();
-  Data::log_t.done_update();
-  master.clear();
-  master.print(0, 0, "Auton: %s          ", auton_names[static_cast<int>(cur_auton)]);
-  master.print(1, 0, "Alliance: %s       ", alliance_names[static_cast<int>(cur_alliance)]);
-}
+  enum class autons{
+    Skills,
+    Auto2,
+    Auto3,
+    NUM_OF_ELEMENTS,
+    Default = Skills,
+  };
 
-void auton_file_read(){
-  Data::log_t.data_update();
-  auton_file.open(auton_file_name, fstream::in);
+  enum class start_pos{
+    Pos1,
+    Pos2,
+    Pos3,
+    NUM_OF_ELEMENTS,
+    Default = Pos1,
+  };
+
+  enum class alliances{
+    RED,
+    BLUE,
+    Default = BLUE
+  };
+
+  std::string file_name = "/usd/auton.txt";
+  std::string pos_file_name = "/usd/pos_auton.txt";
+  std::fstream file;
+  autons cur_auton = static_cast<autons>(0);
+  alliances cur_alliance = static_cast<alliances>(0);
+  start_pos cur_start_pos;
+  int cur_goal;
+
+  const char* auton_names[static_cast<int>(autons::NUM_OF_ELEMENTS)] = {"Skills", "Auto1", "Auto2"};
+  const char* alliance_names[2] = {"Red", "Blue"};
+  const char* start_pos_names[static_cast<int>(start_pos::NUM_OF_ELEMENTS)] = {"Pos1", "Pos2", "Pos3"};
+
+  void file_update(){
+    Data::log_t.data_update();
+    file.open(file_name, fstream::out | fstream::trunc);
+    file << auton_names[static_cast<int>(cur_auton)] << std::endl;
+    file << alliance_names[static_cast<int>(cur_alliance)];
+    file.close();
+    Data::log_t.done_update();
+    master.clear();
+    master.print(0, 0, "Auton: %s          ", auton_names[static_cast<int>(cur_auton)]);
+    master.print(1, 0, "Alliance: %s       ", alliance_names[static_cast<int>(cur_alliance)]);
+  }
+
+  void file_read(){
+    Data::log_t.data_update();
+    file.open(file_name, fstream::in);
 
 
-  if (pros::usd::is_installed()){
-    if (!auton_file){//File doesn't exist
-      auton_file.close();
-      GUI::flash(COLOUR(RED), 1000, "Auton File not found!");
-      printf("\033[92mTrying to create new Auton File.\033[0m\n");
-      auton_file_update();
-      auton_file.open(auton_file_name, fstream::in);
+    if (pros::usd::is_installed()){
+      if (!file){//File doesn't exist
+        file.close();
+        GUI::flash(COLOUR(RED), 1000, "Auton File not found!");
+        printf("\033[92mTrying to create new Auton File.\033[0m\n");
+        file_update();
+        file.open(file_name, fstream::in);
+      }
     }
-  }
-  else{
-    printf("\033[31mNo SD card inserted.\033[0m Using default auton and alliance.\n");
+    else{
+      printf("\033[31mNo SD card inserted.\033[0m Using default auton and alliance.\n");
 
-    cur_auton = autons::Default;
-    cur_alliance = alliances::Default;
-    switch_alliance(cur_alliance);
-    return;
-  }
-
-  char auton[10];
-  char ally[5];
-  auton_file.getline(auton, 10);
-  auton_file.getline(ally, 5);
-  auton_file.close();
-  Data::log_t.done_update();
-
-  const char** autonIt = std::find(auton_names, auton_names+static_cast<int>(autons::NUM_OF_ELEMENTS), auton);
-  const char** allianceIt = std::find(alliance_names, alliance_names+2, ally);
-  
-  cur_auton = autonIt != std::end(auton_names) ? static_cast<autons>(std::distance(auton_names, autonIt)) : autons::Default;
-  cur_alliance = allianceIt != std::end(alliance_names) ? static_cast<alliances>(std::distance(alliance_names, allianceIt)) : alliances::Default;
-
-  switch_alliance(cur_alliance);
-}
-
-void pos_auton_file_update(){
-  Data::log_t.data_update();
-  auton_file.open(pos_auton_file_name, fstream::out | fstream::trunc);
-  auton_file << start_pos_names[static_cast<int>(cur_start_pos)] << std::endl;
-  auton_file << cur_goal << std::endl;
-  auton_file << alliance_names[static_cast<int>(cur_alliance)];
-  auton_file.close();
-  Data::log_t.done_update();
-  master.clear();
-  master.print(0, 0, "Start Pos: %s          ", start_pos_names[static_cast<int>(cur_start_pos)]);
-  master.print(1, 0, "Goal: %d          ", cur_goal);
-  master.print(2, 0, "Alliance: %s       ", alliance_names[static_cast<int>(cur_alliance)]);
-}
-
-void pos_auton_file_read(){
-  Data::log_t.data_update();
-  auton_file.open(pos_auton_file_name, fstream::in);
-
-
-  if (pros::usd::is_installed()){
-    if (!auton_file){//File doesn't exist
-      auton_file.close();
-      GUI::flash(COLOUR(RED), 1000, "Pos Auton File not found!");
-      printf("\033[92mTrying to create new Pos Auton File.\033[0m\n");
-      pos_auton_file_update();
-      auton_file.open(pos_auton_file_name, fstream::in);
+      cur_auton = autons::Default;
+      cur_alliance = alliances::Default;
+      switch_alliance(cur_alliance);
+      return;
     }
-  }
-  else{
-    printf("\033[31mNo SD card inserted.\033[0m Using default start position, goal and alliance.\n");
 
-    cur_start_pos = start_pos::Default;
-    cur_goal = 1;
-    cur_alliance = alliances::Default;
+    char auton[10];
+    char ally[5];
+    file.getline(auton, 10);
+    file.getline(ally, 5);
+    file.close();
+    Data::log_t.done_update();
+
+    const char** autonIt = std::find(auton_names, auton_names+static_cast<int>(autons::NUM_OF_ELEMENTS), auton);
+    const char** allianceIt = std::find(alliance_names, alliance_names+2, ally);
+    
+    cur_auton = autonIt != std::end(auton_names) ? static_cast<autons>(std::distance(auton_names, autonIt)) : autons::Default;
+    cur_alliance = allianceIt != std::end(alliance_names) ? static_cast<alliances>(std::distance(alliance_names, allianceIt)) : alliances::Default;
+
     switch_alliance(cur_alliance);
-    return;
   }
 
-  char start[10];
-  char goal[2];
-  char ally[5];
-  auton_file.getline(start, 10);
-  auton_file.getline(goal, 2);
-  auton_file.getline(ally, 5);
-  auton_file.close();
-  Data::log_t.done_update();
-
-  const char** startIt = std::find(start_pos_names, start_pos_names+static_cast<int>(start_pos::NUM_OF_ELEMENTS), start);
-  const char** allianceIt = std::find(alliance_names, alliance_names+2, ally);
-  
-  cur_start_pos = startIt != std::end(start_pos_names) ? static_cast<start_pos>(std::distance(start_pos_names, startIt)) : start_pos::Default;
-  cur_alliance = allianceIt != std::end(alliance_names) ? static_cast<alliances>(std::distance(alliance_names, allianceIt)) : alliances::Default;
-  cur_goal = stoi(goal);
-
-  switch_alliance(cur_alliance);
-}
-
-void prev_auton(){
-  cur_auton = previous_enum_value(cur_auton);
-  printf("Switched auton to %s\n", auton_names[static_cast<int>(cur_auton)]);
-  events.print("Switched auton to %s\n", auton_names[static_cast<int>(cur_auton)]);
-  master.print(0, 0, "Auton: %s          ", auton_names[static_cast<int>(cur_auton)]);
-  auton_file_update();
-}
-
-void next_auton(){
-  cur_auton = next_enum_value(cur_auton);
-  printf("Switched auton to %s\n", auton_names[static_cast<int>(cur_auton)]);
-  events.print("Switched auton to %s\n", auton_names[static_cast<int>(cur_auton)]);
-  auton_file_update();
-}
-
-void prev_start_pos(){
-  cur_start_pos = previous_enum_value(cur_start_pos);
-  printf("Switched start pos to %s\n", start_pos_names[static_cast<int>(cur_start_pos)]);
-  events.print("Switched start pos to %s\n", start_pos_names[static_cast<int>(cur_start_pos)]);
-  pos_auton_file_update();
-}
-
-void next_start_pos(){
-  cur_start_pos = next_enum_value(cur_start_pos);
-  printf("Switched start pos to %s\n", start_pos_names[static_cast<int>(cur_start_pos)]);
-  events.print("Switched start pos to %s\n", start_pos_names[static_cast<int>(cur_start_pos)]);
-  pos_auton_file_update();
-}
-
-void set_target_goal(int goal){
-  cur_goal = goal;
-  printf("Switched goal to %d\n", cur_goal);
-  events.print("Switched goal to %d\n", cur_goal);
-  pos_auton_file_update();
-}
-
-void switch_alliance(){
-  switch(cur_alliance){
-    case alliances::RED: //Opposite, since switching alliances
-      cur_alliance = alliances::BLUE;
-      alliance.set_background(COLOUR(BLUE));
-      pos_alliance.set_background(COLOUR(BLUE));
-      printf("\033[34mSwitched to Blue Alliance\033[0m\n");
-      events.print("Switched to Blue Alliance\n");
-      break;
-
-    case alliances::BLUE:
-      cur_alliance = alliances::RED;
-      alliance.set_background(COLOUR(RED));
-      pos_alliance.set_background(COLOUR(RED));
-      printf("\033[31mSwitched to Red Alliance\033[0m\n");
-      events.print("Switched to Red Alliance\n");
-      break;
+  void pos_file_update(){
+    Data::log_t.data_update();
+    file.open(pos_file_name, fstream::out | fstream::trunc);
+    file << start_pos_names[static_cast<int>(cur_start_pos)] << std::endl;
+    file << cur_goal << std::endl;
+    file << alliance_names[static_cast<int>(cur_alliance)];
+    file.close();
+    Data::log_t.done_update();
+    master.clear();
+    master.print(0, 0, "Start Pos: %s          ", start_pos_names[static_cast<int>(cur_start_pos)]);
+    master.print(1, 0, "Goal: %d          ", cur_goal);
+    master.print(2, 0, "Alliance: %s       ", alliance_names[static_cast<int>(cur_alliance)]);
   }
 
-  auton_file_update();
-  pos_auton_file_update();
-}
+  void pos_file_read(){
+    Data::log_t.data_update();
+    file.open(pos_file_name, fstream::in);
 
-void switch_alliance(alliances new_ally){
-  switch(new_ally){
-    case alliances::BLUE:
-      cur_alliance = alliances::BLUE;
-      alliance.set_background(COLOUR(BLUE));
-      pos_alliance.set_background(COLOUR(BLUE));
-      printf("\033[34mSwitched to Blue Alliance\033[0m\n");
-      events.print("Switched to Blue Alliance\n");
-      break;
 
-    case alliances::RED:
-      cur_alliance = alliances::RED;
-      alliance.set_background(COLOUR(RED));
-      pos_alliance.set_background(COLOUR(RED));
-      printf("\033[31mSwitched to Red Alliance\033[0m\n");
-      events.print("Switched to Red Alliance\n");
-      break;
+    if (pros::usd::is_installed()){
+      if (!file){//File doesn't exist
+        file.close();
+        GUI::flash(COLOUR(RED), 1000, "Pos Auton File not found!");
+        printf("\033[92mTrying to create new Pos Auton File.\033[0m\n");
+        pos_file_update();
+        file.open(pos_file_name, fstream::in);
+      }
+    }
+    else{
+      printf("\033[31mNo SD card inserted.\033[0m Using default start position, goal and alliance.\n");
+
+      cur_start_pos = start_pos::Default;
+      cur_goal = 1;
+      cur_alliance = alliances::Default;
+      switch_alliance(cur_alliance);
+      return;
+    }
+
+    char start[10];
+    char goal[2];
+    char ally[5];
+    file.getline(start, 10);
+    file.getline(goal, 2);
+    file.getline(ally, 5);
+    file.close();
+    Data::log_t.done_update();
+
+    const char** startIt = std::find(start_pos_names, start_pos_names+static_cast<int>(start_pos::NUM_OF_ELEMENTS), start);
+    const char** allianceIt = std::find(alliance_names, alliance_names+2, ally);
+    
+    cur_start_pos = startIt != std::end(start_pos_names) ? static_cast<start_pos>(std::distance(start_pos_names, startIt)) : start_pos::Default;
+    cur_alliance = allianceIt != std::end(alliance_names) ? static_cast<alliances>(std::distance(alliance_names, allianceIt)) : alliances::Default;
+    cur_goal = stoi(goal);
+
+    switch_alliance(cur_alliance);
   }
 
-  auton_file_update();
-  pos_auton_file_update();
+  void prev_route(){
+    cur_auton = previous_enum_value(cur_auton);
+    printf("Switched auton to %s\n", auton_names[static_cast<int>(cur_auton)]);
+    events.print("Switched auton to %s\n", auton_names[static_cast<int>(cur_auton)]);
+    master.print(0, 0, "Auton: %s          ", auton_names[static_cast<int>(cur_auton)]);
+    file_update();
+  }
+
+  void next_route(){
+    cur_auton = next_enum_value(cur_auton);
+    printf("Switched auton to %s\n", auton_names[static_cast<int>(cur_auton)]);
+    events.print("Switched auton to %s\n", auton_names[static_cast<int>(cur_auton)]);
+    file_update();
+  }
+
+  void prev_start_pos(){
+    cur_start_pos = previous_enum_value(cur_start_pos);
+    printf("Switched start pos to %s\n", start_pos_names[static_cast<int>(cur_start_pos)]);
+    events.print("Switched start pos to %s\n", start_pos_names[static_cast<int>(cur_start_pos)]);
+    pos_file_update();
+  }
+
+  void next_start_pos(){
+    cur_start_pos = next_enum_value(cur_start_pos);
+    printf("Switched start pos to %s\n", start_pos_names[static_cast<int>(cur_start_pos)]);
+    events.print("Switched start pos to %s\n", start_pos_names[static_cast<int>(cur_start_pos)]);
+    pos_file_update();
+  }
+
+  void set_target_goal(int goal){
+    cur_goal = goal;
+    printf("Switched goal to %d\n", cur_goal);
+    events.print("Switched goal to %d\n", cur_goal);
+    pos_file_update();
+  }
+
+  void switch_alliance(){
+    switch(cur_alliance){
+      case alliances::RED: //Opposite, since switching alliances
+        cur_alliance = alliances::BLUE;
+        alliance.set_background(COLOUR(BLUE));
+        pos_alliance.set_background(COLOUR(BLUE));
+        printf("\033[34mSwitched to Blue Alliance\033[0m\n");
+        events.print("Switched to Blue Alliance\n");
+        break;
+
+      case alliances::BLUE:
+        cur_alliance = alliances::RED;
+        alliance.set_background(COLOUR(RED));
+        pos_alliance.set_background(COLOUR(RED));
+        printf("\033[31mSwitched to Red Alliance\033[0m\n");
+        events.print("Switched to Red Alliance\n");
+        break;
+    }
+
+    file_update();
+    pos_file_update();
+  }
+
+  void switch_alliance(alliances new_ally){
+    switch(new_ally){
+      case alliances::BLUE:
+        cur_alliance = alliances::BLUE;
+        alliance.set_background(COLOUR(BLUE));
+        pos_alliance.set_background(COLOUR(BLUE));
+        printf("\033[34mSwitched to Blue Alliance\033[0m\n");
+        events.print("Switched to Blue Alliance\n");
+        break;
+
+      case alliances::RED:
+        cur_alliance = alliances::RED;
+        alliance.set_background(COLOUR(RED));
+        pos_alliance.set_background(COLOUR(RED));
+        printf("\033[31mSwitched to Red Alliance\033[0m\n");
+        events.print("Switched to Red Alliance\n");
+        break;
+    }
+
+    file_update();
+    pos_file_update();
+  }
+
 }
