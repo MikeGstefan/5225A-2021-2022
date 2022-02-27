@@ -12,6 +12,10 @@ controller_digital_e_t f_lift_up_button = DIGITAL_RIGHT;
 controller_digital_e_t f_lift_down_button = DIGITAL_L2;
 controller_digital_e_t f_lift_release_button = DIGITAL_UP;
 
+controller_digital_e_t lift_up_button = DIGITAL_R1;
+controller_digital_e_t lift_down_button = DIGITAL_R2;
+controller_digital_e_t lift_release_button =  DIGITAL_L2;
+
 // misc buttons
 controller_digital_e_t cancel_button = DIGITAL_B;
 controller_digital_e_t shift_button = DIGITAL_X;

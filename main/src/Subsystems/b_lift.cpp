@@ -65,7 +65,7 @@ void B_Lift::handle(){
 
     case b_lift_states::idle:
       // switches state to searching if up button is pressed
-      if(master.get_digital_new_press(b_lift_up_button)){
+      if(master.get_digital_new_press(lift_up_button) && drivebase.get_lift_button(0)){
         master.rumble("-");
         master.print(B_LIFT_STATE_LINE, 0, "B_Lift: Searching    ");
 
@@ -83,7 +83,7 @@ void B_Lift::handle(){
       }
 
       // grabs goal if up button is pressed
-      if(master.get_digital_new_press(b_lift_up_button)){
+      if(master.get_digital_new_press(lift_up_button) && drivebase.get_lift_button(0)){
         master.rumble("-");
         b_claw_p.set_value(HIGH);
         held = true;
@@ -95,7 +95,7 @@ void B_Lift::handle(){
         set_state(b_lift_states::grabbed);
       }
       // switches state to idle if down button is pressed
-      if(master.get_digital_new_press(b_lift_down_button)){
+      if(master.get_digital_new_press(lift_down_button)&& drivebase.get_lift_button(0)){
         master.rumble("-");
         master.print(B_LIFT_STATE_LINE, 0, "B_Lift: Idle         ");
         
@@ -109,7 +109,7 @@ void B_Lift::handle(){
 
       if (b_dist.get() > 70 && b_dist.get() < 95) search_cycle_check_count++;
 
-      if(master.get_digital_new_press(b_lift_up_button) || search_cycle_check_count >= 2){
+      if((drivebase.get_lift_button(0) && master.get_digital_new_press(lift_up_button)) || search_cycle_check_count >= 2){
         master.rumble("-");
         b_claw_p.set_value(HIGH);
         held = true;
@@ -121,7 +121,7 @@ void B_Lift::handle(){
         set_state(b_lift_states::grabbed);
       }
       // switches state to idle if down button is pressed
-      if(master.get_digital_new_press(b_lift_down_button)){
+      if(master.get_digital_new_press(lift_down_button)&& drivebase.get_lift_button(0)){
         master.rumble("-");
         master.print(B_LIFT_STATE_LINE, 0, "B_Lift: Idle         ");
 
@@ -131,7 +131,7 @@ void B_Lift::handle(){
       break;
 
     case b_lift_states::grabbed:
-      if(master.get_digital_new_press(b_lift_up_button)){ // lifts goal to tall goal platform height if up button is pressed
+      if(drivebase.get_lift_button(0) && master.get_digital_new_press(lift_up_button)){ // lifts goal to tall goal platform height if up button is pressed
         // // intake.raise_and_disable();
         delay(100);
         move_absolute(tall_dropoff_position);
@@ -139,7 +139,7 @@ void B_Lift::handle(){
         set_state(b_lift_states::tall_platform);
       }
       // releases goal and turns off intake if down button is pressed
-      if((master.get_digital_new_press(b_lift_down_button) || master.get_digital_new_press(b_lift_release_button)) && fabs(bottom_position - motor.get_position()) < end_error){
+      if(((master.get_digital_new_press(lift_down_button)&& drivebase.get_lift_button(0)) || (master.get_digital_new_press(lift_release_button)&& drivebase.get_lift_button(0))) && fabs(bottom_position - motor.get_position()) < end_error){
         b_claw_p.set_value(LOW);
         held = false;
         // master.print(B_LIFT_STATE_LINE, 0, "B_Lift: Idle         ");
@@ -163,12 +163,12 @@ void B_Lift::handle(){
       break;
 
     case b_lift_states::tip:
-      if(master.get_digital_new_press(b_lift_up_button)){ // lifts goal to platform height if up button is pressed
+      if(drivebase.get_lift_button(0) && master.get_digital_new_press(lift_up_button)){ // lifts goal to platform height if up button is pressed
         move_absolute(last_target);
 
         set_state(last_state);
       }
-      if(master.get_digital_new_press(b_lift_down_button)){ // lowers goal if down button is pressed
+      if(master.get_digital_new_press(lift_down_button)&& drivebase.get_lift_button(0)){ // lowers goal if down button is pressed
         move_absolute(bottom_position);
 
         set_state(b_lift_states::lowering);
@@ -177,7 +177,7 @@ void B_Lift::handle(){
 
     case b_lift_states::platform:
       // drops off goal if up button is pressed and has reached platform height
-      if((master.get_digital_new_press(b_lift_up_button) || master.get_digital_new_press(b_lift_release_button)) && fabs(motor.get_position() - platform_position) < end_error){
+      if(((drivebase.get_lift_button(0) && master.get_digital_new_press(lift_up_button)) || (master.get_digital_new_press(lift_release_button)&& drivebase.get_lift_button(0))) && fabs(motor.get_position() - platform_position) < end_error){
         b_claw_p.set_value(LOW);
         held = false;
 
@@ -192,19 +192,19 @@ void B_Lift::handle(){
 
     case b_lift_states::tall_platform:
       // drops off goal if up button is pressed
-      if(master.get_digital_new_press(b_lift_up_button)){ // moves to platform height if up button is pressed
+      if(drivebase.get_lift_button(0) && master.get_digital_new_press(lift_up_button)){ // moves to platform height if up button is pressed
         move_absolute(platform_position);
 
         set_state(b_lift_states::platform);
       }
       // releases goal if release button is pressed
-      if(master.get_digital_new_press(b_lift_release_button) && fabs(motor.get_position() - tall_dropoff_position) < end_error){
+      if((master.get_digital_new_press(lift_release_button)&& drivebase.get_lift_button(0)) && fabs(motor.get_position() - tall_dropoff_position) < end_error){
         b_claw_p.set_value(LOW);
         held = false;
 
         set_state(b_lift_states::dropoff);
       }
-      if(master.get_digital_new_press(b_lift_down_button)){ // lowers goal if down button is pressed
+      if(master.get_digital_new_press(lift_down_button) && drivebase.get_lift_button(0)){ // lowers goal if down button is pressed
         move_absolute(raised_position);
 
         set_state(b_lift_states::tip);
@@ -213,7 +213,7 @@ void B_Lift::handle(){
 
     case b_lift_states::dropoff:
       // releases goal if up or down button is pressed
-      if(master.get_digital_new_press(b_lift_up_button) || master.get_digital_new_press(b_lift_down_button)){
+      if((master.get_digital_new_press(lift_up_button) && drivebase.get_lift_button(0))|| (master.get_digital_new_press(lift_down_button)&& drivebase.get_lift_button(0))){
         move_absolute(bottom_position);
 
         set_state(b_lift_states::lowering);
@@ -223,7 +223,7 @@ void B_Lift::handle(){
 
     case b_lift_states::lowering:
       // moves to last position if up button is pressed
-      if(master.get_digital_new_press(b_lift_up_button)){
+      if(drivebase.get_lift_button(0) && master.get_digital_new_press(lift_up_button)){
         switch (last_state) {
           case b_lift_states::dropoff:
             move_absolute(last_target);
@@ -279,7 +279,7 @@ void B_Lift::handle(){
       if (fabs(lift_power) < 10 || (lift_power < 0 && motor.get_position() <= bottom_position) || (lift_power > 0 && motor.get_position() >= top_position)) lift_power = -10;
 
       motor.move(lift_power);
-      if(master.get_digital_new_press(b_lift_down_button)){
+      if(master.get_digital_new_press(lift_down_button)&& drivebase.get_lift_button(0)){
         bad_count = 0;  // resets the safety
         move_absolute(bottom_position);
         // intake_piston.set_value(LOW); // lowers the intake back
@@ -292,7 +292,7 @@ void B_Lift::handle(){
       }
 
       // toggles state of lift pneumatic if lift up button is pressed
-      if(master.get_digital_new_press(b_lift_up_button)){
+      if(drivebase.get_lift_button(0) && master.get_digital_new_press(lift_up_button)){
         held = !held;
         b_claw_p.set_value(held);
       }

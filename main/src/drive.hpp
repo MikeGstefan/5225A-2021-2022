@@ -1,4 +1,6 @@
 #pragma once
+#include <array>
+
 #include "Tracking.hpp"
 #include "util.hpp"
 #include "logging.hpp"
@@ -9,6 +11,7 @@
 #include "Subsystems/f_lift.hpp"
 
 using namespace pros;
+using namespace std;
 
 // aliases to make code more readable, used to encode vales of drive.cur_driver
 // enum class drivers{Nikhil = 0, Emily = 1, Sarah = 2};
@@ -89,10 +92,14 @@ public:
   void handle_trans();
 
   bool get_reverse();
-  bool get_lift_button(lift_button side);
+  bool get_lift_button(int side = 0);
 };
 
 
+void f_lift_inc();
+void f_lift_dec();
+void b_lift_inc();
+void b_lift_dec();
 
 
 
