@@ -48,6 +48,7 @@ namespace Autons{
   void next_start_pos();
   void prev_start_pos();
   void file_read();
-  void pos_file_read();
+  void selector();
+  void pos_selector();
 
 }

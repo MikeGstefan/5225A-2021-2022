@@ -101,24 +101,24 @@ void GUI::end_flash (){
 bool GUI::go(std::string short_msg, std::string long_msg, std::uint32_t delay_time){
  if(!go_enabled) return true;
   master.clear();
-  master.print(0, 0, "Press A to start");
-  printf("\n\n%s\nPress the big button or A on the controller when ready.\n", long_msg.c_str());
+  master.print(0, 0, "Press OK btn to start");
+  printf("\n\n%s\nPress the screen big button or the controller OK button when ready.\n", long_msg.c_str());
   snprintf(go_string, 90, "%s", short_msg.c_str());
 
   bool pressed = false, interrupted = false;
   const Page* page = GUI::current_page;
   go_sequence.go_to();
 
-  waitUntil(!(go_button.pressed() || master.get_digital(E_CONTROLLER_DIGITAL_A)) || interrupted){ //Wait for Release
+  waitUntil(!(go_button.pressed() || master.get_digital(ok_button)) || interrupted){ //Wait for Release
     GUI::update_screen_status();
     if (go_back_button.pressed() || master.interrupt()) interrupted = true;
   }
-  waitUntil((go_button.pressed() || master.get_digital(E_CONTROLLER_DIGITAL_A)) || interrupted){ //Wait for Press
+  waitUntil((go_button.pressed() || master.get_digital(ok_button)) || interrupted){ //Wait for Press
     drivebase.handle_input();
     GUI::update_screen_status();
     if (go_back_button.pressed() || master.interrupt()) interrupted = true;
   }
-  waitUntil(!(go_button.pressed() || master.get_digital(E_CONTROLLER_DIGITAL_A)) || interrupted){ //Wait for Release
+  waitUntil(!(go_button.pressed() || master.get_digital(ok_button)) || interrupted){ //Wait for Release
     GUI::update_screen_status();
     if (go_back_button.pressed() || master.interrupt()) interrupted = true;
   }
@@ -141,7 +141,7 @@ bool GUI::go(std::string short_msg, std::string long_msg, std::uint32_t delay_ti
 bool GUI::go_end(std::string msg, std::uint32_t delay_time){
   if(!go_enabled) return true;
   master.clear();
-  master.print(0, 0, "Press A to start");
+  master.print(0, 0, "Press OK btn to start");
   printf("Press Again when done.\n");
   snprintf(go_string, 90, "END %s", msg.c_str());
 
@@ -149,16 +149,16 @@ bool GUI::go_end(std::string msg, std::uint32_t delay_time){
   const Page* page = GUI::current_page;
   go_sequence.go_to();
 
-  waitUntil(!(go_button.pressed() || master.get_digital(E_CONTROLLER_DIGITAL_A)) || interrupted){ //Wait for Release
+  waitUntil(!(go_button.pressed() || master.get_digital(ok_button)) || interrupted){ //Wait for Release
     GUI::update_screen_status();
     if (go_back_button.pressed() || master.interrupt()) interrupted = true;
   }
-  waitUntil((go_button.pressed() || master.get_digital(E_CONTROLLER_DIGITAL_A)) || interrupted){ //Wait for Press
+  waitUntil((go_button.pressed() || master.get_digital(ok_button)) || interrupted){ //Wait for Press
     drivebase.handle_input();
     GUI::update_screen_status();
     if (go_back_button.pressed() || master.interrupt()) interrupted = true;
   }
-  waitUntil(!(go_button.pressed() || master.get_digital(E_CONTROLLER_DIGITAL_A)) || interrupted){ //Wait for Release
+  waitUntil(!(go_button.pressed() || master.get_digital(ok_button)) || interrupted){ //Wait for Release
     GUI::update_screen_status();
     if (go_back_button.pressed() || master.interrupt()) interrupted = true;
   }

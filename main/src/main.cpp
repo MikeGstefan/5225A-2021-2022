@@ -51,7 +51,6 @@ void initialize() {
 	tracking.x_coord = 108.0, tracking.y_coord = 16.0, tracking.global_angle = 0.0_deg;
 	update_t.start();
 	Autons::file_read();
-	Autons::pos_file_read();
 	// master.print(2, 0, "Driver: %s", drivebase.drivers[drivebase.cur_driver].name);
 	// gyro.finish_calibrating(); //Finishes calibrating gyro before program starts
 }
@@ -109,6 +108,7 @@ void opcontrol() {
 
 	while(true){
 		GUI::update();
+		Autons::selector();
 		// drivebase.non_blocking_driver_practice();
 		
 		// printf("In: %d\n", intake_jam.get_value());
