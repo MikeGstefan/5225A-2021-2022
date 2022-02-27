@@ -536,9 +536,11 @@ void lrt_auton(){
 }
 
 
-extern Button alliance, pos_alliance; //From gui_construction.cpp (for autons)
+extern Button alliance, pos_alliance, goal1, goal2, goal3; //From gui_construction.cpp (for autons)
 
 namespace Autons{
+
+  constexpr bool normal = false;
 
   enum class autons{
     Skills,
@@ -593,6 +595,7 @@ namespace Autons{
     Data::log_t.data_update();
     file.open(file_name, fstream::in);
     pos_file.open(pos_file_name, fstream::in);
+    master.clear();
 
     if (pros::usd::is_installed()){
       if (!file){//File doesn't exist
@@ -714,23 +717,25 @@ namespace Autons{
   }
 
   void selector(){
-    if(master.get_digital_new_press(ok_button)); //run auton
-    else if(master.get_digital_new_press(auton_prev_button)) prev_route();
-    else if(master.get_digital_new_press(auton_next_button)) next_route();
-  }
-
-  void pos_selector(){
-    if(master.get_digital_new_press(ok_button)); //run auton
-    else if(master.get_digital_new_press(auton_prev_button)) prev_start_pos();
-    else if(master.get_digital_new_press(auton_next_button)) next_start_pos();
-    else if(master.get_digital(pros::E_CONTROLLER_DIGITAL_L1)){
-      if(cur_goal != 1) set_target_goal(cur_goal-1);
-      else set_target_goal(num_of_goals);
+    if(normal){
+      if(master.get_digital_new_press(ok_button)) printf("Running Auton\n");
+      else if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_L1)) prev_route();
+      else if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_R1)) next_route();
+      else if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_X)) switch_alliance();
     }
-    else if(master.get_digital(pros::E_CONTROLLER_DIGITAL_R1)){
-      if(cur_goal != num_of_goals) set_target_goal(cur_goal+1);
-      else set_target_goal(1);
+    else{
+      if(master.get_digital_new_press(ok_button)) printf("Running Position Auton\n");
+      else if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_L1)) prev_start_pos();
+      else if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_R1)) next_start_pos();
+      else if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_X)) switch_alliance();
+      else if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_L2)){
+        if(cur_goal != 1) set_target_goal(cur_goal-1);
+        else set_target_goal(num_of_goals);
+      }
+      else if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_R2)){
+        if(cur_goal != num_of_goals) set_target_goal(cur_goal+1);
+        else set_target_goal(1);
+      }
     }
   }
-
 }

@@ -123,11 +123,7 @@ void opcontrol() {
 		// 	waitUntil(!intake_jam.get_value());
 		// 	intk.move(127);
 		// }
-
-		if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_UP)) Autons::prev_route();
-		else if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_DOWN)) Autons::next_route();
-		if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_X)) Autons::switch_alliance();
-		if (master.get_digital_new_press(cancel_button)) break;
+		
 		// if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_A)){
 		// 	int speed = mot_speed_set.get_value();
 		// 	move_start(move_types::line, line_params({0.0, 0.0}, {0.0, 24.0, 0.0}, speed));

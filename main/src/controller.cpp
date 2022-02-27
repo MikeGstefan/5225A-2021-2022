@@ -22,8 +22,6 @@ controller_digital_e_t shift_button = DIGITAL_X;
 controller_digital_e_t intake_button = DIGITAL_LEFT;
 controller_digital_e_t reverse_drive_button = DIGITAL_L1;
 controller_digital_e_t ok_button = DIGITAL_A;
-controller_digital_e_t auton_prev_button = DIGITAL_L1;
-controller_digital_e_t auton_next_button = DIGITAL_R1;
 
 
 
