@@ -266,7 +266,7 @@ void Drivebase::driver_practice(){
   cur_driver = 0; // defaults driver to Nikhil
   // master.print(2, 0, "Driver: %s", driver_name());
   while(true){
-    while(!master.get_digital_new_press(E_CONTROLLER_DIGITAL_B)){
+    while(true){
       /*
       if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_UP)){ // goes to next driver
         cur_driver++;
@@ -287,11 +287,11 @@ void Drivebase::driver_practice(){
         intake_on = !intake_on;
         intk.move(127*(int)intake_on);
       }
-      if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_A)){
-        intake_on = false;
-        intake_reverse = !intake_reverse;
-        intk.move(-127*(int)intake_reverse);
-      }
+      // if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_A)){
+      //   intake_on = false;
+      //   intake_reverse = !intake_reverse;
+      //   intk.move(-127*(int)intake_reverse);
+      // }
 
 
       drivebase.handle_input();

@@ -99,6 +99,14 @@ void handle_lifts(){
         
       }
 
+      if(master.get_digital_new_press(DIGITAL_A)){
+          b_lift_index = 0;
+        b_lift.move_absolute(b_lift_pos[b_lift_index]);
+        f_lift_index = 0;
+        f_lift.move_absolute(f_lift_pos[f_lift_index]);
+        
+      }
+
 
       if(master.get_digital_new_press(lift_release_button)){ 
         if(get_lift()){

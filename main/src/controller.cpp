@@ -17,7 +17,7 @@ controller_digital_e_t lift_down_button = DIGITAL_R2;
 controller_digital_e_t lift_release_button =  DIGITAL_L2;
 
 // misc buttons
-controller_digital_e_t cancel_button = DIGITAL_B;
+controller_digital_e_t cancel_button = DIGITAL_L2;
 controller_digital_e_t shift_button = DIGITAL_X;
 controller_digital_e_t intake_button = DIGITAL_LEFT;
 controller_digital_e_t reverse_drive_button = DIGITAL_L1;
