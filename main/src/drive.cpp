@@ -1,15 +1,15 @@
 #include "drive.hpp"
 
-array<int, 7> f_lift_pos= {10, 150, 300, 475, 630, 665, 675};
-int f_lift_index = 0;
-int f_lift_time = 0;
+// array<int, 7> f_lift_pos= {10, 150, 300, 475, 630, 665, 675};
+// int f_lift_index = 0;
+// int f_lift_time = 0;
 
-array<int, 7> b_lift_pos= {10, 400, 550, 660, 665, 665, 675};
-int b_lift_index = 0;
-int b_lift_time = 0;
-bool looking = false;
-bool found = false;
-int find_count = 0;
+// array<int, 7> b_lift_pos= {10, 400, 550, 660, 665, 665, 675};
+// int b_lift_index = 0;
+// int b_lift_time = 0;
+// bool looking = false;
+// bool found = false;
+// int find_count = 0;
 // int b_lift_time = 0;
 // custom drive class methods
 
@@ -296,66 +296,9 @@ void Drivebase::driver_practice(){
 
       drivebase.handle_input();
       // b_lift.handle();
+      handle_lifts();
       // f_lift.handle();
-      if(master.get_digital_new_press(lift_up_button)){ 
-        if(get_lift_button()){
-          f_lift_inc();
-        }
-        else{ 
-          b_lift_inc();
-        }
-        
-      }
-      if(master.get_digital_new_press(lift_down_button)){ 
-        if(get_lift_button()){
-          f_lift_dec();
-        }
-        else{ 
-          b_lift_dec();
-        }
-      }
-
-      if(master.get_digital_new_press(lift_release_button)){ 
-        if(get_lift_button()){
-          f_claw_p.set_value(0);
-        }
-        else{ 
-          b_claw_p.set_value(0);
-        }
-        
-      }
-
-      if(f_lift_index == 0){ 
-        if(f_touch.get_value() && millis() - f_lift_time > 750){
-          f_claw_p.set_value(1);
-          f_lift_time = millis();
-        }
-      }
-
-      if(b_lift_index == 0){ 
-        if(looking && (b_dist.get() > 75 && b_dist.get() < 90 && !found))find_count++;
-        else {
-          find_count = 0;
-          looking = false;
-        }
-
-        if(find_count >= 2 && !found){
-          b_claw_p.set_value(1);
-          // looking = false;
-          find_count = 0;
-          found = true;
-          b_lift_time =millis();
-        }
-        if(found && (b_dist.get() > 120 || millis() - b_lift_time > 2000)){
-          looking = false;
-          found = false;
-          find_count = 0;
-        }
-
-        if(b_dist.get() < 70 && !looking && millis() - b_lift_time > 1000 && !found){
-          looking = true;
-        }
-      }
+     
 
       handle_trans();
 
@@ -446,45 +389,22 @@ bool Drivebase::get_reverse(){
   return this->reversed;
 }
 
-
-bool Drivebase::get_lift_button(int side){
-  // bool front
-  // if(side == lift_button::front){
-  //     return !this->reversed&&;
-  // }
-  master.print(1,3,"%d",side);
-  master.print(1,1,"%d",(!this->reversed &&  master.get_analog(ANALOG_RIGHT_Y) > deadzone)&& side);
-  misc.print(" side :: %d",side);
-  misc.print(" output :: %d\n",(!this->reversed &&  master.get_analog(ANALOG_RIGHT_Y) > deadzone)&& side);
-  return (!this->reversed ==  master.get_analog(ANALOG_RIGHT_Y) > -1*deadzone);
+int Drivebase::get_deadzone(){
+  return this->deadzone;
 }
 
 
+// bool Drivebase::get_lift_button(int side){
+//   // bool front
+//   // if(side == lift_button::front){
+//   //     return !this->reversed&&;
+//   // }
+//   master.print(1,3,"%d",side);
+//   master.print(1,1,"%d",(!this->reversed &&  master.get_analog(ANALOG_RIGHT_Y) > deadzone)&& side);
+//   misc.print(" side :: %d",side);
+//   misc.print(" output :: %d\n",(!this->reversed &&  master.get_analog(ANALOG_RIGHT_Y) > deadzone)&& side);
+//   return (!this->reversed ==  master.get_analog(ANALOG_RIGHT_Y) > -1*deadzone);
+// }
 
-void f_lift_inc(){
-  if(f_lift_index < f_lift_pos.size()-1){
-    f_lift_index++;
-    f_lift.move_absolute(f_lift_pos[f_lift_index]);
-  }
-}
 
-void f_lift_dec(){
-  if(f_lift_index > 0){
-    f_lift_index--;
-    f_lift.move_absolute(f_lift_pos[f_lift_index]);
-  }
-}
 
-void b_lift_inc(){
-  if(b_lift_index < b_lift_pos.size()-1){
-    b_lift_index++;
-    b_lift.move_absolute(b_lift_pos[b_lift_index]);
-  }
-}
-
-void b_lift_dec(){
-  if(b_lift_index > 0){
-    b_lift_index--;
-    b_lift.move_absolute(b_lift_pos[b_lift_index]);
-  }
-}

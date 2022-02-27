@@ -6,6 +6,7 @@
 #include "logging.hpp"
 #include "auton_util.hpp"
 #include "Libraries/gui.hpp"
+#include "lift.hpp"
 
 #include "Subsystems/b_lift.hpp"
 #include "Subsystems/f_lift.hpp"
@@ -92,14 +93,11 @@ public:
   void handle_trans();
 
   bool get_reverse();
-  bool get_lift_button(int side = 0);
+  int get_deadzone();
+  // bool get_lift_button(int side = 0);
 };
 
 
-void f_lift_inc();
-void f_lift_dec();
-void b_lift_inc();
-void b_lift_dec();
 
 
 
