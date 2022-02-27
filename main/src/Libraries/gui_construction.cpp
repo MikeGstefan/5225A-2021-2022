@@ -39,7 +39,7 @@ Text auto_name(MID_X, 100, GUI::Style::CENTRE, TEXT_LARGE, auto_selection, "%s",
 Button alliance(MID_X, 200, 150, 20, GUI::Style::CENTRE, Button::SINGLE, auto_selection);
 Text ally_name(MID_X, 200, GUI::Style::CENTRE, TEXT_MEDIUM, auto_selection, "Alliance: %s", Autons::alliance_names, Autons::cur_alliance);
 
-Page pos_auto_selection ("Fake Autons"); //Select auton routes
+Page pos_auto_selection ("Position Autons"); //Select auton routes
 Button prev_start_position(20, 110, 100, 40, GUI::Style::SIZE, Button::SINGLE, pos_auto_selection, "Prev Start");
 Button next_start_position(460, 110, -100, 40, GUI::Style::SIZE, Button::SINGLE, pos_auto_selection, "Next Start");
 Button goal_1(15, 35, 140, 55, GUI::Style::SIZE, Button::TOGGLE, pos_auto_selection, "Goal 1");

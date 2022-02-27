@@ -1,6 +1,8 @@
 #include "auton.hpp"
 #include "Tracking.hpp"
+#include "config.hpp"
 #include "logging.hpp"
+#include "pros/misc.h"
 
 
 
@@ -568,7 +570,8 @@ namespace Autons{
   autons cur_auton = static_cast<autons>(0);
   alliances cur_alliance = static_cast<alliances>(0);
   start_pos cur_start_pos;
-  int cur_goal;
+  int cur_goal = 0;
+  static constexpr int num_of_goals = 3;
 
   const char* auton_names[static_cast<int>(autons::NUM_OF_ELEMENTS)] = {"Skills", "Auto1", "Auto2"};
   const char* alliance_names[2] = {"Red", "Blue"};
@@ -583,7 +586,7 @@ namespace Autons{
     Data::log_t.done_update();
     master.clear();
     master.print(0, 0, "Auton: %s          ", auton_names[static_cast<int>(cur_auton)]);
-    master.print(1, 0, "Alliance: %s       ", alliance_names[static_cast<int>(cur_alliance)]);
+    master.print(2, 0, "Alliance: %s       ", alliance_names[static_cast<int>(cur_alliance)]);
   }
 
   void file_read(){
@@ -684,7 +687,7 @@ namespace Autons{
 
   void prev_route(){
     cur_auton = previous_enum_value(cur_auton);
-    printf("Switched auton to %s\n", auton_names[static_cast<int>(cur_auton)]);
+    printf("\033[32mSwitched auton to %s\033[0m\n", auton_names[static_cast<int>(cur_auton)]);
     events.print("Switched auton to %s\n", auton_names[static_cast<int>(cur_auton)]);
     master.print(0, 0, "Auton: %s          ", auton_names[static_cast<int>(cur_auton)]);
     file_update();
@@ -692,8 +695,9 @@ namespace Autons{
 
   void next_route(){
     cur_auton = next_enum_value(cur_auton);
-    printf("Switched auton to %s\n", auton_names[static_cast<int>(cur_auton)]);
+    printf("\033[32mSwitched auton to %s\033[0m\n", auton_names[static_cast<int>(cur_auton)]);
     events.print("Switched auton to %s\n", auton_names[static_cast<int>(cur_auton)]);
+    master.print(0, 0, "Auton: %s          ", auton_names[static_cast<int>(cur_auton)]);
     file_update();
   }
 
@@ -701,6 +705,7 @@ namespace Autons{
     cur_start_pos = previous_enum_value(cur_start_pos);
     printf("Switched start pos to %s\n", start_pos_names[static_cast<int>(cur_start_pos)]);
     events.print("Switched start pos to %s\n", start_pos_names[static_cast<int>(cur_start_pos)]);
+    master.print(0, 0, "Start Pos: %s          ", start_pos_names[static_cast<int>(cur_start_pos)]);
     pos_file_update();
   }
 
@@ -708,6 +713,7 @@ namespace Autons{
     cur_start_pos = next_enum_value(cur_start_pos);
     printf("Switched start pos to %s\n", start_pos_names[static_cast<int>(cur_start_pos)]);
     events.print("Switched start pos to %s\n", start_pos_names[static_cast<int>(cur_start_pos)]);
+    master.print(0, 0, "Start Pos: %s          ", start_pos_names[static_cast<int>(cur_start_pos)]);
     pos_file_update();
   }
 
@@ -715,29 +721,7 @@ namespace Autons{
     cur_goal = goal;
     printf("Switched goal to %d\n", cur_goal);
     events.print("Switched goal to %d\n", cur_goal);
-    pos_file_update();
-  }
-
-  void switch_alliance(){
-    switch(cur_alliance){
-      case alliances::RED: //Opposite, since switching alliances
-        cur_alliance = alliances::BLUE;
-        alliance.set_background(COLOUR(BLUE));
-        pos_alliance.set_background(COLOUR(BLUE));
-        printf("\033[34mSwitched to Blue Alliance\033[0m\n");
-        events.print("Switched to Blue Alliance\n");
-        break;
-
-      case alliances::BLUE:
-        cur_alliance = alliances::RED;
-        alliance.set_background(COLOUR(RED));
-        pos_alliance.set_background(COLOUR(RED));
-        printf("\033[31mSwitched to Red Alliance\033[0m\n");
-        events.print("Switched to Red Alliance\n");
-        break;
-    }
-
-    file_update();
+    master.print(0, 0, "Goal: %d          ", cur_goal);
     pos_file_update();
   }
 
@@ -764,4 +748,31 @@ namespace Autons{
     pos_file_update();
   }
 
+  void selector(){
+    while(true){
+      if(master.get_digital_new_press(ok_button)); //run auton
+      else if(master.get_digital_new_press(auton_prev_button)) prev_route();
+      else if(master.get_digital_new_press(auton_next_button)) next_route();
+
+      delay(10);
+    }
+  }
+
+  void pos_selector(){
+    while(true){
+      if(master.get_digital_new_press(ok_button)); //run auton
+      else if(master.get_digital_new_press(auton_prev_button)) prev_start_pos();
+      else if(master.get_digital_new_press(auton_next_button)) next_start_pos();
+      else if(master.get_digital(pros::E_CONTROLLER_DIGITAL_L1)){
+        if(cur_goal != 1) set_target_goal(cur_goal-1);
+        else set_target_goal(num_of_goals);
+      }
+      else if(master.get_digital(pros::E_CONTROLLER_DIGITAL_R1)){
+        if(cur_goal != num_of_goals) set_target_goal(cur_goal+1);
+        else set_target_goal(1);
+      }
+
+      delay(10);
+    }
+  }
 }

@@ -23,17 +23,17 @@ pros::Motor intk(11, pros::E_MOTOR_GEARSET_18, true, pros::E_MOTOR_ENCODER_DEGRE
 // pros::Imu imu_sensor(4);
 pros::Distance b_dist(9), f_dist(12), r_reset_dist(19), l_reset_dist(20);
 pros::ADIDigitalOut trans_p({{16,8}}), b_claw_p(6), f_claw_p(8);
-pros::ADIDigitalOut Led1({{14, 7}});
-pros::ADIDigitalOut Led2({{14, 8}});
+pros::ADIDigitalOut Led1({{16, 6}});
+pros::ADIDigitalOut Led2({{16, 8}});
 pros::ADIDigitalIn f_touch(7);
-pros::ADIDigitalIn intake_jam(5);
+pros::ADIDigitalIn intake_jam({{16, 7}});
 
 pros::Distance l_dist(18);
 pros::Distance r_dist(17);
 
 pros::Imu ramp_imu(5);
 
-// ADIDigitalOut f_claw_p({{14,1}});
+// ADIDigitalOut f_claw_p({{16,1}});
 
 //1:temp(leave as 0), 2:long name, 3:short name
 std::array<std::tuple<pros::Motor*, int, const char*, const char*, Text_*>, 8> motors_for_gui = {

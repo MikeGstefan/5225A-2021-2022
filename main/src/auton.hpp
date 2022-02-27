@@ -41,8 +41,7 @@ namespace Autons{
   extern alliances cur_alliance;
   extern int cur_goal;
 
-  void switch_alliance(alliances new_ally);
-  void switch_alliance();
+  void switch_alliance(alliances new_ally = static_cast<alliances>(!static_cast<bool>(cur_alliance)));
   void set_target_goal(int goal = cur_goal);
   void next_route();
   void prev_route();

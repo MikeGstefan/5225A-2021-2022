@@ -104,25 +104,25 @@ void opcontrol() {
 
   extern Slider mot_speed_set;
 
-	Timer intake_t ("intake", false);
-	intk.move(127);
-
+	// Timer intake_t ("intake", false);
+	// intk.move(127);
 
 	while(true){
 		GUI::update();
 		// drivebase.non_blocking_driver_practice();
 		
-		if(intake_jam.get_new_press()){
-			intake_t.reset();
-			GUI::flash("Triggered", 200);
-		}
-		else if(!intake_jam.get_value()) intake_t.reset(false);
-		if(intake_t.get_time() > 1000){
-			GUI::flash("Jammed", 200);
-			// intk.move(-127);
-			// waitUntil(!intake_jam.get_value());
-			// intk.move(127);
-		}
+		// printf("In: %d\n", intake_jam.get_value());
+		// if(intake_jam.get_new_press()){ //If pressed
+		// 	intake_t.reset();
+		// 	GUI::flash("Triggered", 200);
+		// }
+		// else if(!intake_jam.get_value()) intake_t.reset(false); //
+		// if(intake_t.get_time() > 1000){
+		// 	GUI::flash("Jammed", 200);
+		// 	intk.move(-127);
+		// 	waitUntil(!intake_jam.get_value());
+		// 	intk.move(127);
+		// }
 
 		if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_UP)) Autons::prev_route();
 		else if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_DOWN)) Autons::next_route();
