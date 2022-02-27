@@ -47,7 +47,7 @@ void update(void* params){
   _Task* ptr = _Task::get_obj(params);
   Timer data_timer{"tracking logs"};
   // LeftEncoder.reset(); RightEncoder.reset(); BackEncoder.reset();
-  double DistanceLR = 9.649, DistanceB = 0.5;
+  double DistanceLR = 9.649, DistanceB = 0.75;
   double Left, Right, Back, NewLeft, NewRight, NewBack, LastLeft = LeftEncoder.get_value()/360.0 *(2.75*M_PI), LastRight =  RightEncoder.get_value()/360.0 *(2.75*M_PI), LastBack = BackEncoder.get_value()/360.0 *(2.77*M_PI);
   double Theta = 0.0, Beta = 0.0, Alpha = 0.0;
   double RadiusR, RadiusB, h, h2;
@@ -63,7 +63,7 @@ void update(void* params){
   while(true){
     NewLeft = LeftEncoder.get_value()/360.0 *(2.75*M_PI);
     NewRight = RightEncoder.get_value()/360.0 *(2.75*M_PI);
-    // NewBack = BackEncoder.get_value()/360.0 *(2.75*M_PI);
+    NewBack = BackEncoder.get_value()/360.0 *(2.75*M_PI);
 
     // printf("l: %d, r: %d \n", NewLeft, NewRight);
     // printf("l: %d, r: %d \n", LeftEncoder.get_value(), RightEncoder.get_value());
@@ -73,7 +73,7 @@ void update(void* params){
 
     Left = NewLeft - LastLeft;
     Right = NewRight - LastRight;
-    // Back = NewBack - LastBack;
+    Back = NewBack - LastBack;
 
 
     velocity_update_time = millis() - last_velocity_time;
@@ -84,7 +84,7 @@ void update(void* params){
 
         last_vel_l = NewLeft;
         last_vel_r = NewRight;
-        // last_vel_b = NewBack;
+        last_vel_b = NewBack;
 
         // gives us linear velocity in inches per second, and angular velocity in radians per second
         tracking.g_velocity.x = (tracking.x_coord - last_position.x) / velocity_update_time * 1000;
@@ -98,25 +98,25 @@ void update(void* params){
 
     LastLeft = NewLeft;
     LastRight = NewRight;
-    // LastBack = NewBack;
+    LastBack = NewBack;
 
     Theta = (Left-Right)/DistanceLR;
     if (Theta != 0){
       RadiusR = Right/Theta;
-      // RadiusB = Back/Theta;
+      RadiusB = Back/Theta;
       Beta = Theta/2.0;
       h = (RadiusR + DistanceLR/2) *2 *sin(Beta);
-      // h2 = (RadiusB + DistanceB) *2 *sin(Beta);
+      h2 = (RadiusB + DistanceB) *2 *sin(Beta);
     }
     else{
       h = Right;
-      // h2 = Back;
+      h2 = Back;
       Beta =0.0;
     }
     Alpha = tracking.global_angle + Beta;
 
-    // Xx = h2 * cos(Alpha);
-    // Xy = h2 * -sin(Alpha);
+    Xx = h2 * cos(Alpha);
+    Xy = h2 * -sin(Alpha);
     Yx = h * sin(Alpha);
     Yy = h * cos(Alpha);
 
@@ -125,9 +125,9 @@ void update(void* params){
     tracking.global_angle += Theta;
 
 
-    tracking_data.print(&data_timer, 100, {
+    tracking_data.print(&data_timer, 10, {
       [=](){return Data::to_char("%d || x: %.2lf, y: %.2lf, a: %.2lf\n", millis(), tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle));},
-      // [=](){return Data::to_char("%d || GLOBAL VELOCITY| x: %.2f, y: %.2f a: %.2f\n", millis(), tracking.g_velocity.x, tracking.g_velocity.y, rad_to_deg(tracking.g_velocity.angle));},
+      [=](){return Data::to_char("%d || GLOBAL VELOCITY| x: %.2f, y: %.2f a: %.2f\n", millis(), tracking.g_velocity.x, tracking.g_velocity.y, rad_to_deg(tracking.g_velocity.angle));},
       // [=](){return Data::to_char("%d || ENCODER L: %d, R: %d, B:%d \n", millis(), LeftEncoder.get_value(), RightEncoder.get_value(), BackEncoder.get_value());},
       // [=](){return Data::to_char("%d || ENCODER VELO| l: %.2f, r: %.2f, b: %.2f\n", millis(), tracking.l_velo, tracking.r_velo, tracking.b_velo);}
     });
@@ -351,7 +351,7 @@ void tank_rush_goal(void* params){
       // printf("Powers | y: %lf, a: %lf\n",tracking.power_y, tracking.power_a);
 
       motion_d.print(" %d || error y : %.2f error a : %.2f pow y : %.2f, pow a : %.2f\n ", millis(), local_error.y, rad_to_deg(error.angle), tracking.power_y, tracking.power_a);
-      
+      graph.print("%d, %f\n", millis()-time, tracking.l_velo);
       // exits movement once the target has been overshot (if the sign of y error along the line has flipped)
       if(f_touch.get_value()){
         f_claw_p.set_value(1);

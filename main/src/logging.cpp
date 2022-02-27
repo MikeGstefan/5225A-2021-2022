@@ -30,6 +30,8 @@ Data motion_i("motion.txt","$06",off,log_locations::both);
 Data motion_d("motion.txt", "%06", off,log_locations::both);
 Data term("terminal.txt","$06",off,log_locations::t);
 Data events("terminal.txt","$06",off,log_locations::sd);
+Data log_d("log.txt","$08",off,log_locations::both);
+Data graph("graph.txt","$09",off,log_locations::sd);
 
 vector<Data*> Data::get_objs(){
   return obj_list;

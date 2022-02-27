@@ -3,6 +3,7 @@
 #include "../timer.hpp"
 #include "../config.hpp"
 #include "../controller.hpp"
+// #include "../drive.hpp"
 
 
 
@@ -24,7 +25,7 @@ public:
   {}
 
   void set_state(const state_type next_state){
-    printf("%s | Going from %s to %s\n", name, state_names[static_cast<int>(state)], state_names[static_cast<int>(next_state)]);
+    motion_d.print("%s | Going from %s to %s\n", name, state_names[static_cast<int>(state)], state_names[static_cast<int>(next_state)]);
     last_state = state;
     state = next_state;
   }
