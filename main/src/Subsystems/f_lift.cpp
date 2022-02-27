@@ -31,8 +31,8 @@ F_Lift::F_Lift(Motorized_subsystem<f_lift_states, NUM_OF_F_LIFT_STATES, LIFT_MAX
 void F_Lift::handle(){
 
   // joystick control
-  lift_power = master.get_analog(E_CONTROLLER_ANALOG_LEFT_X);
-
+  // lift_power = master.get_analog(E_CONTROLLER_ANALOG_LEFT_X);
+  lift_power = 0;
   // lift safety handling
   if(state != f_lift_states::manual){
     if (fabs(target - motor.get_position()) > end_error && fabs(motor.get_actual_velocity()) < 5.0) bad_count++;

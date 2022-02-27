@@ -97,6 +97,13 @@ void Drivebase::brake(){
   back_r.move_relative(0, 200);
 }
 
+void Drivebase::velo_brake(){
+  front_l.move_velocity(0);
+  front_r.move_velocity(0);
+  back_l.move_velocity(0);
+  back_r.move_velocity(0);
+}
+
 void Drivebase::update_screen(){
   master.print(0, 0, "Driver: %s          ", driver_name()); // updates driver
   master.print(1, 0, screen_text[cur_screen]);  // updates text
@@ -192,8 +199,8 @@ void Drivebase::update_lookup_table_util(){
 
 void Drivebase::handle_input(){
   // tracking.power_x = drivers[cur_driver].custom_drives[0].lookup(master.get_analog(drivers[cur_driver].joy_sticks[0]));
-  tracking.power_y = drivers[cur_driver].custom_drives[1].lookup(master.get_analog(drivers[cur_driver].joy_sticks[1]));
-  tracking.power_a = 0.8 * drivers[cur_driver].custom_drives[2].lookup(master.get_analog(drivers[cur_driver].joy_sticks[2]));
+  tracking.power_y = drivers[cur_driver].custom_drives[1].lookup(master.get_analog(ANALOG_LEFT_Y));
+  tracking.power_a = 0.8 * drivers[cur_driver].custom_drives[2].lookup(master.get_analog(ANALOG_LEFT_X));
 
   if(fabs(tracking.power_x) < deadzone) tracking.power_x = 0.0;
   if(fabs(tracking.power_y) < deadzone) tracking.power_y = 0.0;
@@ -210,7 +217,15 @@ void Drivebase::handle_input(){
     tracking.power_x *= -1;
   }
 
-  move(tracking.power_y, tracking.power_a);
+  if(this->state && (fabs(tracking.power_y) <deadzone && fabs(tracking.power_a) <deadzone)){
+    // velo_brake();
+    brake();
+  }
+  else{ 
+    move(tracking.power_y, tracking.power_a);
+  }
+
+  // move(tracking.power_y, tracking.power_a);
   // move(0, tracking.power_a);
 }
 
@@ -353,4 +368,17 @@ void Drivebase::handle_trans(){
   if(master.get_digital_new_press(shift_button)){
     this->set_state(!this->get_state());
   }
+}
+
+bool Drivebase::get_reverse(){
+  return this->reversed;
+}
+
+
+bool Drivebase::get_lift_button(lift_button side){
+  // bool front
+  // if(side == lift_button::front){
+  //     return !this->reversed&&;
+  // }
+  return ((!this->reversed &&  master.get_analog(ANALOG_LEFT_Y) > deadzone)&& static_cast<bool>(side) );
 }

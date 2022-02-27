@@ -32,7 +32,8 @@ B_Lift::B_Lift(Motorized_subsystem<b_lift_states, NUM_OF_B_LIFT_STATES, LIFT_MAX
 void B_Lift::handle(){
 
   // joystick control
-  lift_power = master.get_analog(E_CONTROLLER_ANALOG_LEFT_Y);
+  // lift_power = master.get_analog(E_CONTROLLER_ANALOG_LEFT_Y);
+  lift_power = 0;
 
   // lift safety handling
   if(state != b_lift_states::manual){

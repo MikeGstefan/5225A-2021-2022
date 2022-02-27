@@ -3,6 +3,7 @@
 #include "timer.hpp"
 #include "task.hpp"
 #include "logging.hpp"
+// #include "drive.hpp"
 #include <cstdarg>
 #include <array>
 #include <functional>
@@ -23,6 +24,10 @@ extern controller_digital_e_t b_lift_release_button;
 extern controller_digital_e_t f_lift_up_button;
 extern controller_digital_e_t f_lift_down_button;
 extern controller_digital_e_t f_lift_release_button;
+
+extern controller_digital_e_t lift_up_button;
+extern controller_digital_e_t lift_down_button;
+extern controller_digital_e_t lift_release_button;
 
 // misc buttons
 extern controller_digital_e_t cancel_button;
@@ -55,3 +60,5 @@ public:
   void rumble(const char* rumble_pattern);
   bool interrupt(bool analog=true, bool digital=true, bool A_except = true);
 };
+
+

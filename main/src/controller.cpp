@@ -8,7 +8,7 @@ controller_digital_e_t b_lift_down_button = DIGITAL_R2;
 controller_digital_e_t b_lift_release_button = DIGITAL_DOWN;
 
 // front lift buttons
-controller_digital_e_t f_lift_up_button = DIGITAL_L1;
+controller_digital_e_t f_lift_up_button = DIGITAL_RIGHT;
 controller_digital_e_t f_lift_down_button = DIGITAL_L2;
 controller_digital_e_t f_lift_release_button = DIGITAL_UP;
 
@@ -16,7 +16,7 @@ controller_digital_e_t f_lift_release_button = DIGITAL_UP;
 controller_digital_e_t cancel_button = DIGITAL_B;
 controller_digital_e_t shift_button = DIGITAL_X;
 controller_digital_e_t intake_button = DIGITAL_LEFT;
-controller_digital_e_t reverse_drive_button = DIGITAL_RIGHT;
+controller_digital_e_t reverse_drive_button = DIGITAL_L1;
 
 
 std::array<_Controller*, num_controller> _Controller::objs; //= {nullptr};
@@ -137,3 +137,6 @@ bool _Controller::interrupt(bool analog, bool digital, bool A_except){
 
   return false;
 }
+
+
+

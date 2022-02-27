@@ -19,6 +19,11 @@ using namespace pros;
 //   drivebase.screen_timer.reset();\
 // }
 
+enum class lift_button{
+  front = 1,
+  back = 0,
+};
+
 class custom_drive{
   int lookup_table[255];
   // curve functions
@@ -67,6 +72,7 @@ public:
   void move_side(double l, double r);
 
   void brake();
+  void velo_brake();
   void download_curve_data(); // grabs data from SD card and copies to driver arrays
   void update_lookup_table_util();  // utility to alter expo curves for any driver
   void handle_input();  // move the drivebase according to lookup tables from a joystick input
@@ -81,6 +87,14 @@ public:
   void set_state(bool state);
   //handles controller input for the transmission
   void handle_trans();
+
+  bool get_reverse();
+  bool get_lift_button(lift_button side);
 };
+
+
+
+
+
 
 extern Drivebase drivebase;
