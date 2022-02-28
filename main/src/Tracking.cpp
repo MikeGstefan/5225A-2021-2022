@@ -1114,7 +1114,7 @@ void turn_to_angle(void* params){
   tracking.move_complete = false;
 
   PID angle_pid(kp, 0.0, kd, 0.0, true, 0.0, 360.0);
-  motion_d.print("%d || Starting turn to angle %.2f from %.2f\n", millis(), target_a, rad_to_deg(tracking.global_angle));
+  motion_i.print("%d || Starting turn to angle %.2f from %.2f\n", millis(), target_a, rad_to_deg(tracking.global_angle));
   target_a = deg_to_rad(target_a);
   double new_target_a;
   double power;
@@ -1131,14 +1131,14 @@ void turn_to_angle(void* params){
     if(fabs(power) <min_power_a) power = sgn(power)*min_power_a;
     drivebase.move_tank(0,power);
     if(fabs(rad_to_deg(angle_pid.get_error())) < end_error){
-      motion_d.print("%d || Ending turn to angle : %.2f at X: %.2f Y: %.2f A: %.2f, time: %d\n", millis(), rad_to_deg(target_a), tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle), millis() - start_time);
+      motion_i.print("%d || Ending turn to angle : %.2f at X: %.2f Y: %.2f A: %.2f, time: %d\n", millis(), rad_to_deg(target_a), tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle), millis() - start_time);
       drivebase.move_tank(0, 0);
       if(brake) drivebase.brake();
       tracking.move_complete = true;
       return;
     }
     if(timeout != 0 && millis() - start_time > timeout){ 
-      motion_d.print("%d|| TIMED OUT Ending turn to angle : %.2f at X: %.2f Y: %.2f A: %.2f, time: %d\n", millis(), rad_to_deg(target_a), tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle), millis() - start_time);
+      motion_i.print("%d|| TIMED OUT Ending turn to angle : %.2f at X: %.2f Y: %.2f A: %.2f, time: %d\n", millis(), rad_to_deg(target_a), tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle), millis() - start_time);
       drivebase.move_tank(0, 0);
       if(brake) drivebase.brake();
       tracking.move_complete = true;
@@ -1162,14 +1162,14 @@ void turn_to_angle(double target_a, const bool brake, double max_power, int time
     if(fabs(power) < min_move_power_a) power = sgn(power) * min_move_power_a;
     drivebase.move_tank(0, power);
     if(fabs(rad_to_deg(angle_pid.get_error())) < 5.0){
-      motion_d.print("Ending turn to point with angle: %.2f at X: %.2f Y: %.2f A: %.2f \n", rad_to_deg(target_a), tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle));
+      motion_i.print("Ending turn to point with angle: %.2f at X: %.2f Y: %.2f A: %.2f \n", rad_to_deg(target_a), tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle));
       drivebase.move_tank(0, 0);
       if(brake) drivebase.brake();
       tracking.move_complete = true;
       return;
     }
     if(timeout != 0 && millis() - start_time > timeout){
-      motion_d.print(" TIMED OUT turn to point with angle: %.2f at X: %.2f Y: %.2f A: %.2f \n", rad_to_deg(target_a), tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle));
+      motion_i.print(" TIMED OUT turn to point with angle: %.2f at X: %.2f Y: %.2f A: %.2f \n", rad_to_deg(target_a), tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle));
       drivebase.move_tank(0, 0);
       if(brake) drivebase.brake();
       tracking.move_complete = true;
@@ -1189,9 +1189,9 @@ void turn_to_point(void* params){
   const bool brake = turn_point_params_g.brake;
   double max_power = turn_point_params_g.max_power;
   int timeout = turn_point_params_g.timeout;
-  motion_d.print("starting turn to point (%.2f, %.2f) from (%.2f, %.2f, %.2f) target angle: %.2f\n", target.x, target.y, tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle),rad_to_deg(atan2(target.x - tracking.x_coord, target.y - tracking.y_coord)));
+  motion_i.print("starting turn to point (%.2f, %.2f) from (%.2f, %.2f, %.2f) target angle: %.2f\n", target.x, target.y, tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle),rad_to_deg(atan2(target.x - tracking.x_coord, target.y - tracking.y_coord)));
   turn_to_angle(rad_to_deg(atan2(target.x - tracking.x_coord, target.y - tracking.y_coord)), brake, max_power, timeout, ptr);
-  motion_d.print("Ending turn to point function ending\n");
+  motion_i.print("Ending turn to point function ending\n");
 }
 
 

@@ -37,11 +37,11 @@ void initialize() {
 	_Controller::init();
 	GUI::init();
 	delay(500);
-	// tracking.x_coord = 26.0, tracking.y_coord = 11.75, tracking.global_angle = -90.0_deg;
+	tracking.x_coord = 26.0, tracking.y_coord = 11.75, tracking.global_angle = -90.0_deg;
 	// tracking.x_coord = 104.0, tracking.y_coord = 12.0, tracking.global_angle = -30.0_deg;
 	// tracking.x_coord = 24.5, tracking.y_coord = 15.0, tracking.global_angle = 9.0_deg;
-	tracking.x_coord = 0.0, tracking.y_coord = 0.0, tracking.global_angle = 0.0_deg;
-	//update_t.start();
+	// tracking.x_coord = 0.0, tracking.y_coord = 0.0, tracking.global_angle = 0.0_deg;
+	update_t.start();
 	// auton_file_read();
 	// master.print(2, 0, "Driver: %s", drivebase.drivers[drivebase.cur_driver].name);
 	// gyro.finish_calibrating(); //Finishes calibrating gyro before program starts
@@ -123,7 +123,12 @@ void opcontrol() {
 
 	// lrt_auton();
 	// blue_highside_tall();
-	blue_lowside();
+	int time = millis();
+	// blue_lowside();
+	skills();
+	skills2();
+	master.print(0,0, " TIME: %d", millis() - time);
+	misc.print(0,0, " TIME: %d", millis() -time);
 	// f_lift.move(-10);
 	// move_start(move_types::tank_rush, tank_rush_params({0.0,40.0,0.0},false, 127.0,1.0,true,150.0,0.0,10.0));
 	// move_start(move_types:: tank_point, tank_point_params({0.0,40.0,0.0}, false, 127.0,1.0,true,6.0,150.0,0.0,0));

@@ -146,12 +146,13 @@ Position distance_reset_right(int time){
 }
 
 //15
-void distance_loop(double distance){
+void distance_loop(double distance, int timeout){
 	double y_speed = 40;
 	double a_speed = 30;
 	int count = 0;
 	const Point start_pos = {tracking.x_coord, tracking.y_coord};
 	double delta_dist = 0.0;
+	int start_time = millis();
 
 	while(distance >= delta_dist){
 		delta_dist = sqrt(pow(tracking.x_coord -start_pos.x,2) + pow(tracking.y_coord - start_pos.y,2));
@@ -184,7 +185,7 @@ void distance_loop(double distance){
 				printf("Turn right\n");
 				break;
 		}
-
+		if(timeout != 0 && millis() - start_time > timeout)break;
 		left_eye.last_distance = r_reset_dist.get();
 		right_eye.last_distance = l_reset_dist.get();
 		delay(33);

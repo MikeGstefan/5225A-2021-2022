@@ -1,8 +1,8 @@
 #include "auton_util.hpp"
 // #include "logging.hpp"
 
-Reset_dist reset_dist_r(&r_reset_dist, 8.5);
-Reset_dist reset_dist_l(&l_reset_dist, 8.0);
+Reset_dist reset_dist_r(&r_dist, 7.5);
+Reset_dist reset_dist_l(&l_dist, 7.5);
 
 double get_filtered_output(ADIUltrasonic sensor, int check_count, uint16_t lower_bound, uint16_t upper_bound, int timeout){
   Timer timer{"Timer"};
@@ -33,10 +33,11 @@ void flatten_against_wall(bool front){
   int direction = (static_cast<int>(front)*2)-1;
   tracking_imp.print("%d|| Start wall allign\n", millis());
 
-	drivebase.move(70.0*direction,0.0);
+	drivebase.move(50.0*direction,0.0);
 
 	while((fabs(tracking.l_velo) < 2.0 ||fabs(tracking.r_velo) < 2.0) && safety_check < 12){
 		safety_check++;
+    misc.print(" reset things %.2f, %.2f\n",fabs(tracking.l_velo), fabs(tracking.r_velo));
 		delay(10);
 	}
 	cycleCheck(fabs(tracking.l_velo) <1.0 && fabs(tracking.r_velo) < 1.0, 4,10);
