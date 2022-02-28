@@ -536,7 +536,7 @@ void lrt_auton(){
 }
 
 //From gui_construction.cpp (for autons)
-extern Button alliance, pos_alliance, goal1, goal2, goal3;
+extern Button alliance, pos_alliance;
 extern Page auto_selection, pos_auto_selection;
 
 namespace Autons{
@@ -731,6 +731,10 @@ namespace Autons{
     pos_alliance.set_background(new_colour);
     save_change("alliance");
   }
+
+  void give_up(){ 
+    printf("Insert actual Auton Give up code here\n"); 
+  } 
 
   void selector(){
     file_read();

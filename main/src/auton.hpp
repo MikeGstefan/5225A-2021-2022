@@ -53,6 +53,7 @@ namespace Autons{
   void next_goal();
   void set_target_goal(goals goal);
   void switch_alliance(alliances new_ally = static_cast<alliances>(!static_cast<bool>(cur_alliance)));
+  void give_up();
   void selector();
 
 }

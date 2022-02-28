@@ -94,8 +94,10 @@ void autonomous() {
 
 void opcontrol() {
 	/* GUI:
-	auton give up - ask mike
+	auton give up func - ask mike
 	make gui a task - i can't figure this out
+	text not centering
+	temps randomly show up on first screen
 	check if weird string issue is still there
 	lvgl images
 	*/
@@ -109,7 +111,7 @@ void opcontrol() {
 			else if(!intake_jam.get_value()) intake_t.reset(false); //End timer when unpressed
 			if(intake_t.get_time() > 1000){ //If pressed for more than 1 sec, reverse intk
 				intk.move(-127);
-				waitUntil(!intake_jam.get_value());
+				waitUntil(!intake_jam.get_value()); //Waits for unjam plus some time
 				delay(150);
 				intk.move(127);
 			}
