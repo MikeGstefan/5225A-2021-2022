@@ -683,7 +683,7 @@ namespace Autons{
     }
 
     printf("\033[32mSwitched %s to %s\033[0m\n", which.c_str(), val.c_str());
-    events.print("Switched %s to %s\n", which.c_str(), val.c_str());
+    events.print("\n\nSwitched %s to %s\n\n", which.c_str(), val.c_str());
     master.print(line, 0, "%s: %s          ", which.c_str(), val.c_str());
     file_update();
   }

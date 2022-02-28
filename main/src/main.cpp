@@ -96,8 +96,10 @@ void opcontrol() {
 	/* GUI:
 	auton give up func - ask mike
 	make gui a task - i can't figure this out
+	check if lift page looks good
 	text not centering
 	temps randomly show up on first screen
+	create way to externally show button pressed state on screen
 	check if weird string issue is still there
 	lvgl images
 	*/
@@ -110,6 +112,7 @@ void opcontrol() {
 			if(intake_jam.get_new_press()) intake_t.reset(); //Start timer when pressed
 			else if(!intake_jam.get_value()) intake_t.reset(false); //End timer when unpressed
 			if(intake_t.get_time() > 1000){ //If pressed for more than 1 sec, reverse intk
+				GUI::flash("Intake Jam");
 				intk.move(-127);
 				waitUntil(!intake_jam.get_value()); //Waits for unjam plus some time
 				delay(150);
