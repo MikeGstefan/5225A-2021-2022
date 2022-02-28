@@ -102,8 +102,8 @@ void skills2(){
     f_lift.move(-10);
   });
   
-  // flatten_against_wall(false);
-  //  delay(100);
+  flatten_against_wall(false);
+   delay(100);
    tracking.reset(141.0 - DIST_BACK,141.0 - reset_dist_r.get_dist(), -90.0);
   // Position reset = distance_reset_right(16);
   // master.print(0,0,"%.2f, %.2f, %.2f\n", reset.x, reset.y,rad_to_deg(reset.angle));
@@ -146,11 +146,59 @@ void skills2(){
   drivebase.brake();
   move_start(move_types::tank_arc, tank_arc_params({tracking.x_coord, tracking.y_coord}, {120.5, 102.0,20.0},-127.0,127.0,false));//arc to face neut goal
   move_start(move_types::turn_angle, turn_angle_params(rad_to_deg(atan2(104.5 - tracking.x_coord, 72.0 - tracking.y_coord)) +180.0, true,true,140.0));
-  move_start(move_types::tank_point, tank_point_params({104.5,70.0,  235.0},false, 80.0,1.0,true,9.0,130.0),false);// drive throught neut goal
+  move_start(move_types::tank_point, tank_point_params({104.5,70.0,  45.0},false, 80.0,1.0,true,9.0,130.0),false);// drive throught neut goal
   b_detect_goal();
+  b_lift.move_absolute(620);
   move_stop();
   // while(!master.get_digital(DIGITAL_L1))delay(10);
+  // move_start(move_types::tank_point, tank_point_params(polar_to_vector_point(108,70.0,-40.0,30.0,30.0)));
+  f_lift.move_absolute(580);
+  move_start(move_types::tank_point, tank_point_params({85.0,33.0, 30.0}, false, 70.0));
+  // flatten_against_wall(false);
 
+b_claw_p.set_value(0);
+
+  int safety_check = 0;
+  //bool to + -
+  // int direction = (static_cast<int>(front)*2)-1;
+  tracking_imp.print("%d|| Start wall allign\n", millis());
+
+	drivebase.move(-50.0,0.0);
+
+	while((fabs(tracking.l_velo) < 2.0 ||fabs(tracking.r_velo) < 2.0) && safety_check < 12){
+		safety_check++;
+    misc.print(" reset things %.2f, %.2f\n",fabs(tracking.l_velo), fabs(tracking.r_velo));
+		delay(10);
+	}
+	cycleCheck(fabs(tracking.l_velo) <1.0 && fabs(tracking.r_velo) < 1.0, 1,10);
+	drivebase.move(-20.0,0.0);
+	printf("%d|| Done all allign\n", millis());
+
+  move_start(move_types::tank_point, tank_point_params(polar_to_vector_point(tracking.x_coord, tracking.y_coord, 2, rad_to_deg(tracking.global_angle), rad_to_deg(tracking.global_angle))));
+
+  move_start(move_types::turn_angle, turn_angle_params(200.0, true,false, 150.0,0.0,80.0, 1500));
+  f_lift.move_absolute(550);
+  delay(100);
+  // move_start(move_types::tank_point, tank_point_params(polar_to_vector_point(tracking.x_coord, tracking.y_coord, 5, rad_to_deg(tracking.global_angle), rad_to_deg(tracking.global_angle))));
+  // move_start(move_types::turn_angle, turn_angle_params(210.0, true,false, 150.0,0.0,80.0));
+  f_claw_p.set_value(0);
+  b_lift.move_absolute(10);
+  move_start(move_types::tank_point, tank_point_params(polar_to_vector_point(tracking.x_coord, tracking.y_coord, 2, rad_to_deg(tracking.global_angle), rad_to_deg(tracking.global_angle))));
+  move_start(move_types::tank_point, tank_point_params({83.0,50.0, 180.0}));
+  move_start(move_types::turn_angle, turn_angle_params(135.0));
+  f_lift.move_absolute(10);
+  delay(100);
+  move_start(move_types::tank_point, tank_point_params({71.0,71.0, 135.0}), false);
+  b_detect_goal();
+  // b_lift.move_absolute(620);
+  move_stop();
+
+  move_start(move_types::tank_point, tank_point_params({129.0, 36.0, 135.0}, false,80.0),false);
+  f_detect_goal();
+  move_stop();
+  drivebase.brake();
+
+return;
 	// move_start(move_types::turn_point, turn_point_params({71.0,43.0}, true));  // turns to face plus of rings
   move_start(move_types::turn_angle, turn_angle_params(rad_to_deg(atan2(72 - tracking.x_coord, 43.0 - tracking.y_coord)) +180.0));
 	delay(100);

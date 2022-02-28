@@ -116,7 +116,7 @@ void opcontrol() {
 	drivebase.set_state(0);
 	while(!master.get_digital_new_press(DIGITAL_A)){
 		delay(10);
-		GUI::update();
+		// GUI::update();
 	}
 	// f_claw_p.set_value(1);
 	// f_lift.move_absolute(150,100);
@@ -134,7 +134,7 @@ void opcontrol() {
 	// move_start(move_types:: tank_point, tank_point_params({0.0,40.0,0.0}, false, 127.0,1.0,true,6.0,150.0,0.0,0));
 	// move_start(move_types::turn_angle, turn_angle_params(90.0, true, true,150.0,0.0,127.0,0));
 	while(true){ 
-		GUI::update();
+		// GUI::update();
 		delay(10);
 	}
 	// b_lift.reset();
