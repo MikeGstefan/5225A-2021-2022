@@ -1,4 +1,5 @@
 
+#include "config.hpp"
 #include "drive.hpp"
 #include "controller.hpp"
 #include "Libraries/gui.hpp"
@@ -13,12 +14,14 @@
 #include "lift.hpp"
 // using namespace std;
 #include "task.hpp"
+#include "util.hpp"
+
 #include <fstream>
 #include <sys/wait.h>
 using namespace std;
 
 pros::Task *updt = nullptr;
-GUI* const GUI::current_gui = &g_main;
+const GUI* GUI::current_gui = &g_main;
 
 
 /**
@@ -84,43 +87,23 @@ void competition_initialize() {}
  * from where it left off.
  */
 void autonomous() {
-	
-	// b_lift.reset();
-	// Task([](){ 
-	// 	f_lift.reset();
-	// });
-	// f_claw_p.set_value(0);
-	// b_claw_p.set_value(0);
 	// skills();
-	// skills2();
 
-	// skills3();
-	// lrt_auton();
-	blue_highside();
-	while(true);
-	// FILE * fp;
-	// fp = fopen("/usd/init.txt", "r");
-	// fscanf(fp,"%lf %lf %lf",&x,&y,&a);
-
-	// tracking.reset(x,y,rad_to_deg(a));
-	// ring_piston.set_value(0);
-	// lrt_auton();
-
-	// skills();
-	// skills_pt2();
 
 }
 
 
+// extern Slider mot_speed_set;
 
-//Get rid of these once merged
-// double time;
-//int ring_count = 0;
-// int ring_count = 0, cur_auton = 1;
-bool claw_state = false, claw_state_2 = false, lift_state = false, drive_state = false;
-int lift_speed = 0;
-int safety_check = 0;
 void opcontrol() {
+	/* GUI:
+	auton give up func - ask mike
+	make gui a task - i can't figure this out
+	text not centering
+	temps randomly show up on first screen
+	check if weird string issue is still there
+	lvgl images
+	*/
 	
 
 	// while(true)delay(11);
@@ -143,124 +126,36 @@ void opcontrol() {
 	// skills();
 	// skills2();
 
-  distance_reset_left(16);
+	//Intake Jam code
+	Task([](){
+		Timer intake_t ("intake jam", false);
+		intk.move(127);
+		while(true){
+			if(intake_jam.get_new_press()) intake_t.reset(); //Start timer when pressed
+			else if(!intake_jam.get_value()) intake_t.reset(false); //End timer when unpressed
+			if(intake_t.get_time() > 1000){ //If pressed for more than 1 sec, reverse intk
+				intk.move(-127);
+				waitUntil(!intake_jam.get_value()); //Waits for unjam plus some time
+				delay(150);
+				intk.move(127);
+			}
+			delay(10);
+		}
+	});
 
-	// master.clear();
 
-	// b_lift.move(0);
-  //
-	// f_lift.move(0);
-	// f_claw_p.set_value(0);
-	// Led1.set_value(1);
-	// Led2.set_value(1);
-	// // while(true){
-	// 	if(master.get_digital_new_press(DIGITAL_Y)){
-	// 		master.print(0,0,"%d",BackEncoder.get_value());
-	// 	}
-	// 	if(master.get_digital_new_press(DIGITAL_A)){
-	// 		printf("switching state to %d\n", !claw_state);
-	// 		claw_state = !claw_state;
-	// 		b_claw_p.set_value(claw_state);
-	// 	}
-	// 	if(master.get_digital_new_press(DIGITAL_B)){
-	// 		b_lift.move_absolute(10);
-	// 		detect_goal();
-	// 		claw_state = 1;
-  //
-	// 	}
-	// 	if(master.get_digital_new_press(DIGITAL_L1)){
-	// 		b_lift.move_absolute(300);
-	// 	}
-	// 	if(master.get_digital_new_press(DIGITAL_L2)){
-	// 		b_lift.move_absolute(0);
-	// 	}
-	// 	// printf("dist: %d\n", b_dist.get());
-	// 	drivebase.handle_trans();
-	// 	// drivebase.handle_input();
-	// 	if(master.get_digital_new_press(DIGITAL_R1)){
-	// 		Timer timer {"timer"};
-	// 		// printf("%f\n",reset_dist_r.get_dist());
-	// 		reset_dist_r.reset(141.0,0.0 + DIST_BACK,0.0);
-	// 		// skills();
-	// 		//fits platfor to reset
-	// 		/**
-	// 		move_start(move_types::turn_angle, turn_angle_params(90.0));
-	// 		delay(100);
-	// 		move_start(move_types::tank_arc, tank_arc_params({70.0, 95.0}, {122.0,119.0,0.0}));
-	// 		// move_start(move_types::turn_angle, turn_angle_params(0.0));
-	// 		move_start(move_types::tank_point, tank_point_params({122.0,123.0,0.0},false));
-			// flatten_against_wall(true);
-	// 		*/
-  //
-  //
-	// 		//grab goal on wall
-  //
-	// 		/**
-	// 		move_start(move_types::turn_angle, turn_angle_params(-90.0));
-	// 		move_start(move_types::tank_point, tank_point_params({111.0,34.0,-90.0},false,70));
-	// 		delay(500);
-	// 		move_start(move_types::tank_point, tank_point_params({127.0,34.0,-90.0},false, 70),false);
-	// 		detect_goal();
-	// 		move_stop();
-	// 		// drivebase.brake();
-	// 		move_start(move_types::tank_point, tank_point_params({115.0,34.0,-90.0},false));
-	// 		b_lift.move_absolute(650);
-	// 		while(b_lift.motor.get_position() < 630)delay(10);
-	// 		b_lift.move(10);
-	// 		flatten_against_wall(false);
-  //
-	// 		delay(500);
-	// 		move_start(move_types::tank_point, tank_point_params({117.0,34.0,-90.0},false));
-	// 		b_lift.move_absolute(10);
-	// 		move_start(move_types::turn_point, turn_point_params({70.0,70.0}));
-	// 		delay(50);
-	// 		master.print(0,0,"%d", timer.get_time());
-	// 		delay(10000);
-	// 		*/
-	// 		delay(2000);
-  //
-	// 	}
-	// 	else{
-	// 		drivebase.handle_input();
-	// 	}
-  //
-	// 	if(abs(master.get_analog(ANALOG_LEFT_Y))> 20)b_lift.move(master.get_analog(ANALOG_LEFT_Y));
-	// 	// else b_lift.move(10);
-  //
-	// 	delay(33);
-	// }
+	Autons::selector();
 
 	while(true){
-		if(master.get_digital_new_press(DIGITAL_Y)){
-			master.print(0,0,"%d",BackEncoder.get_value());
-		}
-		if(master.get_digital_new_press(DIGITAL_A)){
-			printf("switching state to %d\n", !claw_state);
-			claw_state = !claw_state;
-			b_claw_p.set_value(claw_state);
-		}
-		if(master.get_digital_new_press(DIGITAL_B)){
-			b_lift.move_absolute(10);
-			b_detect_goal();
-			claw_state = 1;
-
-		}
-		if(master.get_digital_new_press(DIGITAL_L1)){
-			b_lift.move_absolute(300);
-		}
-		if(master.get_digital_new_press(DIGITAL_L2)){
-			b_lift.move_absolute(0);
-		}
-		// printf("dist: %d\n", b_dist.get());
-		drivebase.handle_trans();
-		// drivebase.handle_input();
-			drivebase.handle_input();
+		GUI::update();
+		// drivebase.non_blocking_driver_practice();
+		
+		// if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_A)){
+		// 	int speed = mot_speed_set.get_value();
+		// 	move_start(move_types::line, line_params({0.0, 0.0}, {0.0, 24.0, 0.0}, speed));
+		// 	move_start(move_types::turn_angle, turn_angle_params(45.0, speed));
+		// 	move_start(move_types::line, line_params({0.0, 0.0}, {0.0, 24.0, 0.0}, speed));
 		// }
-
-		if(abs(master.get_analog(ANALOG_LEFT_Y))> 20)b_lift.move(master.get_analog(ANALOG_LEFT_Y));
-		// else b_lift.move(10);
-
-		delay(33);
+		delay(10);
 	}
-
 }

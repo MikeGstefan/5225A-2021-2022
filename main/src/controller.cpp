@@ -21,6 +21,8 @@ controller_digital_e_t cancel_button = DIGITAL_L2;
 controller_digital_e_t shift_button = DIGITAL_X;
 controller_digital_e_t intake_button = DIGITAL_LEFT;
 controller_digital_e_t reverse_drive_button = DIGITAL_L1;
+controller_digital_e_t ok_button = DIGITAL_A;
+
 
 
 std::array<_Controller*, num_controller> _Controller::objs; //= {nullptr};
@@ -117,7 +119,7 @@ void _Controller::rumble(const char* rumble_pattern){
   controller_queue.print("%d| adding rumble to queue for controller %d\n",millis(), this->controller_num);
 }
 
-bool _Controller::interrupt(bool analog, bool digital, bool A_except){
+bool _Controller::interrupt(bool analog, bool digital, bool OK_except){
   if (analog){
     if (fabs(get_analog(ANALOG_LEFT_X)) > 15) return true;
     if (fabs(get_analog(ANALOG_LEFT_Y)) > 15) return true;
@@ -125,7 +127,7 @@ bool _Controller::interrupt(bool analog, bool digital, bool A_except){
     if (fabs(get_analog(ANALOG_RIGHT_Y)) > 15) return true;
   }
   if(digital){
-    if (!A_except && get_digital(DIGITAL_A)) return true;
+    if (!OK_except && get_digital(ok_button)) return true;
     if (get_digital(DIGITAL_B)) return true;
     if (get_digital(DIGITAL_Y)) return true;
     if (get_digital(DIGITAL_X)) return true;

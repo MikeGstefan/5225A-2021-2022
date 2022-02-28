@@ -11,16 +11,15 @@ double get_filtered_output(ADIUltrasonic sensor, int check_count, uint16_t lower
   long total_input;
   uint16_t input;
   double filtered_output;
-  while(timer.get_time() < timeout && success_count < check_count){
+  waitUntil(timer.get_time() > timeout || success_count > check_count){
     input = sensor.get_value();
-    if (lower_bound <= input <= upper_bound){
+    if (inRange(input, lower_bound, upper_bound)){ //This used to be (lower_bound <= input <= upper_bound). I highly doubt that's what you wanted.
 
       total_input += input;
       printf("input: %d\n", input);
       success_count++;
     }
     else printf("FAILED! input: %d\n", input);
-    delay(10);
   }
   filtered_output = total_input / success_count;
   printf("filtered output: %lf\n", filtered_output);
