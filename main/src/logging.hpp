@@ -81,4 +81,5 @@ extern Data motion_d;
 extern Data motion_i;
 extern Data log_d;
 extern Data graph;
+extern Data lift_d;
 

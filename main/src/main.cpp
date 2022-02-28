@@ -10,7 +10,7 @@
 #include "Subsystems/f_lift.hpp"
 #include "Subsystems/b_lift.hpp"
 #include "distance.hpp"
-
+#include "lift.hpp"
 // using namespace std;
 #include "task.hpp"
 #include <fstream>
@@ -36,6 +36,7 @@ void initialize() {
 	// front_r.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
 	// back_l.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
 	// back_r.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
+	f_lift.motor.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
 	drivebase.download_curve_data();
 	Data::init();
 	_Controller::init();
@@ -47,6 +48,7 @@ void initialize() {
 	// tracking.x_coord = 0.0, tracking.y_coord = 0.0, tracking.global_angle = 0.0_deg;
 	tracking.x_coord = 108.0, tracking.y_coord = 16.0, tracking.global_angle = 0.0_deg;
 	update_t.start();
+	lift.start();
 	// auton_file_read();
 	// master.print(2, 0, "Driver: %s", drivebase.drivers[drivebase.cur_driver].name);
 	// gyro.finish_calibrating(); //Finishes calibrating gyro before program starts
@@ -119,6 +121,10 @@ bool claw_state = false, claw_state_2 = false, lift_state = false, drive_state =
 int lift_speed = 0;
 int safety_check = 0;
 void opcontrol() {
+	
+
+	// while(true)delay(11);
+
 	move_stop();
 	// while(true){
 	// 	printf("%d\n", b_dist.get());

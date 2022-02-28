@@ -16,3 +16,8 @@ void b_lift_inc();
 void b_lift_dec();
 
 void handle_lifts();
+
+void lift_pid_set_target(int target);
+void lift_pid(void* params);
+
+extern _Task lift;
