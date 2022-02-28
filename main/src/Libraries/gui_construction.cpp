@@ -42,9 +42,9 @@ Text ally_name(MID_X, 200, GUI::Style::CENTRE, TEXT_MEDIUM, auto_selection, "All
 Page pos_auto_selection ("Position Autons"); //Select auton routes
 Button prev_start_position(20, 110, 100, 40, GUI::Style::SIZE, Button::SINGLE, pos_auto_selection, "Prev Start");
 Button next_start_position(460, 110, -100, 40, GUI::Style::SIZE, Button::SINGLE, pos_auto_selection, "Next Start");
-Button goal_1(15, 35, 140, 55, GUI::Style::SIZE, Button::TOGGLE, pos_auto_selection, "Goal 1");
-Button goal_2(170, 35, 140, 55, GUI::Style::SIZE, Button::TOGGLE, pos_auto_selection, "Tall Goal");
-Button goal_3(325, 35, 140, 55, GUI::Style::SIZE, Button::TOGGLE, pos_auto_selection, "Goal 3");
+Button goal_1(15, 35, 140, 55, GUI::Style::SIZE, Button::TOGGLE, pos_auto_selection, Autons::goal_names[0]);
+Button goal_2(170, 35, 140, 55, GUI::Style::SIZE, Button::TOGGLE, pos_auto_selection, Autons::goal_names[1]);
+Button goal_3(325, 35, 140, 55, GUI::Style::SIZE, Button::TOGGLE, pos_auto_selection, Autons::goal_names[2]);
 Text start_pos_name(MID_X, 130, GUI::Style::CENTRE, TEXT_LARGE, pos_auto_selection, "%s", Autons::start_pos_names, Autons::cur_start_pos);
 Button pos_alliance(MID_X, 200, 150, 20, GUI::Style::CENTRE, Button::SINGLE, pos_auto_selection);
 Text pos_ally_name(MID_X, 200, GUI::Style::CENTRE, TEXT_MEDIUM, pos_auto_selection, "Alliance: %s", Autons::alliance_names, Autons::cur_alliance);
@@ -68,12 +68,6 @@ Slider a_val(35, 175, 250, 40, GUI::Style::SIZE, Slider::HORIZONTAL, 0, 360, mov
 Button go_to_xya(320, 45, 150, 40, GUI::Style::SIZE, Button::SINGLE, moving, "Target");
 Button go_home(320, 110, 150, 40, GUI::Style::SIZE, Button::SINGLE, moving, "Home");
 Button go_centre(320, 175, 150, 40, GUI::Style::SIZE, Button::SINGLE, moving, "Centre");
-
-Page intake_test ("Intake"); //Test for intake with rings
-Text rings(MID_X, 50, GUI::Style::CENTRE, TEXT_LARGE, intake_test, "Ring Count: N/A");
-Button reset_intake (30, 90, 120, 80, GUI::Style::SIZE, Button::SINGLE, intake_test, "Reset Motor");
-Button intake_switch (180, 90, 120, 80, GUI::Style::SIZE, Button::TOGGLE, intake_test, "Start/Stop");
-Button reset_rings (330, 90, 120, 80, GUI::Style::SIZE, Button::SINGLE, intake_test, "Reset Ring Count");
 
 Page elastic ("Elastic Test"); //Testing the elastics on the lift
 Button check_b_elastic(145, 70, 70, 30, GUI::Style::CENTRE, Button::SINGLE, elastic, "Run Back Elastic Test");
@@ -217,21 +211,21 @@ void main_setup(){
   prev_drivr.set_func([](){drivebase.prev_driver();});
   next_drivr.set_func([](){drivebase.next_driver();});
 
+  auto_selection.set_active(Autons::normal);
   prev_auto.set_func(Autons::prev_route);
   next_auto.set_func(Autons::next_route);
   alliance.set_func([](){Autons::switch_alliance();}); //Called in lambda to specify void version
   alliance.add_text(ally_name);
 
+  auto_selection.set_active(!Autons::normal);
   Button::create_options({&goal_1, &goal_2, &goal_3});
   prev_start_position.set_func(Autons::prev_start_pos);
   next_start_position.set_func(Autons::next_start_pos);
-  goal_1.set_func([](){Autons::set_target_goal(1);});
-  goal_2.set_func([](){Autons::set_target_goal(2);});
-  goal_3.set_func([](){Autons::set_target_goal(3);});
+  goal_1.set_func([](){Autons::set_target_goal(static_cast<Autons::goals>(1));});
+  goal_2.set_func([](){Autons::set_target_goal(static_cast<Autons::goals>(2));});
+  goal_3.set_func([](){Autons::set_target_goal(static_cast<Autons::goals>(3));});
   pos_alliance.set_func([](){Autons::switch_alliance();});
   pos_alliance.add_text(pos_ally_name);
-
-  intake_switch.set_func([](){printf("sorry nathan");});
 
   check_b_elastic.set_func([](){b_lift.elastic_util();});
   check_f_elastic.set_func([](){f_lift.elastic_util();});
@@ -492,9 +486,7 @@ void main_background(){
       temp_flashed = true;
       printf("Moving to temps\n");
       temps.go_to();
-      char buffer[50];
-      snprintf(buffer, 50, "%s motor is at %dC\n", std::get<2>(mot_tup), temp);
-      GUI::flash(COLOUR(RED), 15000, buffer);
+      GUI::flash(COLOUR(RED), 15000, "%s motor is at %dC\n", std::get<2>(mot_tup), temp);
       break;
     }
 
@@ -662,6 +654,6 @@ void util_background(){
   }
 }
 
-GUI g_main ({&temps, &driver_curve, &auto_selection, &pos_auto_selection, &track, &moving, &intake_test, &elastic, &motor_subsys, &tuning, &motors, &pneumatics}, &main_setup, &main_background);
+GUI g_main ({&temps, &driver_curve, &auto_selection, &pos_auto_selection, &track, &moving, &elastic, &motor_subsys, &tuning, &motors, &pneumatics}, &main_setup, &main_background);
 
 GUI g_util ({&ports, &encoders, &motor, &pneumatic}, &util_setup, &util_background);

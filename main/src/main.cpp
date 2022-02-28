@@ -50,7 +50,6 @@ void initialize() {
 	// tracking.x_coord = 0.0, tracking.y_coord = 0.0, tracking.global_angle = 0.0_deg;
 	tracking.x_coord = 108.0, tracking.y_coord = 16.0, tracking.global_angle = 0.0_deg;
 	update_t.start();
-	Autons::file_read();
 	// master.print(2, 0, "Driver: %s", drivebase.drivers[drivebase.cur_driver].name);
 	// gyro.finish_calibrating(); //Finishes calibrating gyro before program starts
 }
@@ -91,38 +90,39 @@ void autonomous() {
 }
 
 
+// extern Slider mot_speed_set;
+
 void opcontrol() {
-	/*
-	namespace for auton
-	auton give up
-	make gui a task
-	create good autosizing
+	/* GUI:
+	auton give up - ask mike
+	make gui a task - i can't figure this out
+	check if weird string issue is still there
 	lvgl images
 	*/
 
+	//Intake Jam code
+	Task([](){
+		Timer intake_t ("intake jam", false);
+		intk.move(127);
+		while(true){
+			if(intake_jam.get_new_press()) intake_t.reset(); //Start timer when pressed
+			else if(!intake_jam.get_value()) intake_t.reset(false); //End timer when unpressed
+			if(intake_t.get_time() > 1000){ //If pressed for more than 1 sec, reverse intk
+				intk.move(-127);
+				waitUntil(!intake_jam.get_value());
+				delay(150);
+				intk.move(127);
+			}
+			delay(10);
+		}
+	});
 
-  extern Slider mot_speed_set;
 
-	// Timer intake_t ("intake", false);
-	// intk.move(127);
+	Autons::selector();
 
 	while(true){
 		GUI::update();
-		Autons::selector();
 		// drivebase.non_blocking_driver_practice();
-		
-		// printf("In: %d\n", intake_jam.get_value());
-		// if(intake_jam.get_new_press()){ //If pressed
-		// 	intake_t.reset();
-		// 	GUI::flash("Triggered", 200);
-		// }
-		// else if(!intake_jam.get_value()) intake_t.reset(false); //
-		// if(intake_t.get_time() > 1000){
-		// 	GUI::flash("Jammed", 200);
-		// 	intk.move(-127);
-		// 	waitUntil(!intake_jam.get_value());
-		// 	intk.move(127);
-		// }
 		
 		// if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_A)){
 		// 	int speed = mot_speed_set.get_value();

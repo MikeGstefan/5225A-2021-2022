@@ -169,7 +169,7 @@ void queue_handle(void* params){
 }
 
 uintptr_t data_size(){//returns the number of characters needed to be printed from the queue
-  if(reinterpret_cast<uintptr_t>(back) < reinterpret_cast<uintptr_t>(front))return(queue_size-1-( reinterpret_cast<uintptr_t>(front)-queue_start))+(reinterpret_cast<uintptr_t>(back)-queue_start);
+  if(reinterpret_cast<uintptr_t>(back) < reinterpret_cast<uintptr_t>(front))return(queue_size-1-( reinterpret_cast<uintptr_t>(front)-queue_start))+(reinterpret_cast<uintptr_t>(back)-queue_start); //Should be changeable to return (reinterpret_cast<uintptr_t>(back) - reinterpret_cast<uintptr_t>(front) + queue_size - 1);
   else return reinterpret_cast<uintptr_t>(back)- reinterpret_cast<uintptr_t>(front);
 }
 
