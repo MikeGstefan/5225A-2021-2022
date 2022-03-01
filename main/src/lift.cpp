@@ -1,10 +1,10 @@
 #include "lift.hpp"
 
-array<int, 6> f_lift_pos= {20, 150, 475, 630};
+array<int, 4> f_lift_pos= {20, 150, 475, 630};
 int f_lift_index = 0;
 int f_lift_time = 0;
 
-array<int, 4> b_lift_pos= {20,460, 580};
+array<int, 3> b_lift_pos= {20,460, 580};
 int b_lift_index = 0;
 int b_lift_time = 0;
 bool looking = false;
