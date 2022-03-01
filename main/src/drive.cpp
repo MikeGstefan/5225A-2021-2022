@@ -311,7 +311,7 @@ void Drivebase::driver_practice(){
         screen_timer.reset();
       }
       // takes away control from driver when motors overheat
-      if(front_l.get_temperature() >= 55 || front_r.get_temperature() >= 55 || back_r.get_temperature() >= 55 || back_l.get_temperature() >= 55){
+      if(front_l.get_temperature() >= 55 || front_r.get_temperature() >= 55 || back_r.get_temperature() >= 55 || back_l.get_temperature() >= 55 || b_lift_m.get_temperature() >= 55|| f_lift_m.get_temperature() >= 55|| intk.get_temperature() >= 55){
         master.rumble("- - - "); // rumbles controller if motors are hot to warn driver
         // move(0, 0, 0);  // stops movement
         // return;
