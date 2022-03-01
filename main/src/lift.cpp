@@ -48,13 +48,19 @@ void intk_c(void* params){
 void f_lift_inc(){
   if(f_lift_index < f_lift_pos.size()-1){
     f_lift_index++;
-    f_lift.move_absolute(f_lift_pos[f_lift_index]);
+    // f_lift.move_absolute(f_lift_pos[f_lift_index]);
   }
 }
 
 void f_lift_dec(){
   if(f_lift_index > 0){
     f_lift_index--;
+     if(f_lift_index == 0){
+        intk_state = 0;
+        intk.move(127*intk_state);
+        master.print(0,0,"INTAKE");
+     }
+    
     // f_lift.move_absolute(f_lift_pos[f_lift_index]);
   }
 }
@@ -70,11 +76,12 @@ void b_lift_dec(){
   if(b_lift_index > 0){
     b_lift_index--;
     // b_lift.move_absolute(b_lift_pos[b_lift_index]);
+   
   }
 }
 
 void handle_lifts(){
-    if(master.get_digital_new_press(intake_button)){
+    if(master.get_digital_new_press(intake_button) || partner.get_digital_new_press(intake_button)){
         intk_state = !intk_state;
         intk.move(127*intk_state);
         master.print(0,0,"INTAKE");
@@ -134,12 +141,18 @@ void handle_lifts(){
         
       }
 
-      if(master.get_digital_new_press(DIGITAL_A)){
+      if(master.get_digital_new_press(lift_both_down_button) || partner.get_digital_new_press(lift_down_button)){
           b_lift_index = 0;
         // b_lift.move_absolute(b_lift_pos[b_lift_index]);
         f_lift_index = 0;
         // f_lift.move_absolute(f_lift_pos[f_lift_index]);
         
+      }
+
+      if(partner.get_digital_new_press(lift_up_button)){ 
+        b_lift_index = b_lift_pos.size() -1;
+        // b_lift.move_absolute(b_lift_pos[b_lift_index]);
+        f_lift_index = f_lift_pos.size() -1;
       }
 
 

@@ -28,6 +28,7 @@ extern controller_digital_e_t f_lift_release_button;
 extern controller_digital_e_t lift_up_button;
 extern controller_digital_e_t lift_down_button;
 extern controller_digital_e_t lift_release_button;
+extern controller_digital_e_t lift_both_down_button;
 
 // misc buttons
 extern controller_digital_e_t cancel_button;
