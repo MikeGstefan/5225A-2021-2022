@@ -290,7 +290,7 @@ double F_Lift::height_to_pos(double height){
   return gear_ratio * (rad_to_deg(asin((height - offset_h) / (arm_len)))) + offset_a;
 }
 
-extern int elastic_f_up_time, elastic_f_down_time; //from gui_construction.cpp
+int elastic_f_up_time, elastic_f_down_time; //from gui_construction.cpp
 
 void F_Lift::elastic_util(){
   reset();

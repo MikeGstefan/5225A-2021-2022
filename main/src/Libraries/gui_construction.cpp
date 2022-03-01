@@ -5,11 +5,10 @@
 /*Current Flashing Timer*/ extern Timer Flash;
 
 //Var init for text monitoring
-int left_enc, right_enc, back_enc, angle, elastic_b_up_time, elastic_b_down_time, elastic_f_up_time, elastic_f_down_time;
+int left_enc, right_enc, back_enc;
 const char* motor_port_nums;
 const char* expander_port_nums;
 const char* no_pneumatic_port_nums;
-const char* driver_text;
 std::array<std::tuple<int, Button*, Button*, Text_*, int, char*>, 8> motor_ports; //util: port, run, stop, stall counter, port and rpm
 std::array<int, 21> expander_ports;
 std::array<Button*, 8> expander_btns;
@@ -17,6 +16,8 @@ std::array<Button*, 8> expander_btns;
 //For gui to use
 extern std::array<std::tuple<pros::Motor*, int, const char*, const char*, Text_*>, 8> motors_for_gui; //Declared in config.cpp
 extern std::array<std::pair<pros::ADIDigitalOut*, const char*>, 8> pneumatics_for_gui; //Declared in config.cpp
+extern int elastic_b_up_time, elastic_b_down_time; //Declared in b_lift.cpp
+extern int elastic_f_up_time, elastic_f_down_time; //Declared in f_lift.cpp
 
 Page temps ("Temperature"); //Motor temps
 Text mot_temp_1(75, 85, GUI::Style::CENTRE, TEXT_SMALL, temps, std::get<3>(motors_for_gui[0]) + ": %dC"s, std::get<1>(motors_for_gui[0]), COLOUR(BLACK));
@@ -30,7 +31,7 @@ Text mot_temp_8(405, 175, GUI::Style::CENTRE, TEXT_SMALL, temps, std::get<3>(mot
 
 Page driver_curve ("Drivers"); //Select a driver and their exp curve
 Button prev_drivr(20, 70, 110, 120, GUI::Style::SIZE, Button::SINGLE, driver_curve, "Prev Driver");
-Text drivr_name(MID_X, MID_Y, GUI::Style::CENTRE, TEXT_LARGE, driver_curve, "%s", driver_text);
+Text drivr_name(MID_X, MID_Y, GUI::Style::CENTRE, TEXT_LARGE, driver_curve, "%s", std::function([](){return drivebase.driver_name();}));
 Button next_drivr(350, 70, 110, 120, GUI::Style::SIZE, Button::SINGLE, driver_curve, "Next Driver");
 
 Page auto_selection ("Auton Selector"); //Select auton routes
@@ -54,9 +55,9 @@ Page track ("Tracking"); //Display tracking vals and reset btns
 Text track_x(50, 45, GUI::Style::CENTRE, TEXT_SMALL, track, "X:%.1f", tracking.x_coord);
 Text track_y(135, 45, GUI::Style::CENTRE, TEXT_SMALL, track, "Y:%.1f", tracking.y_coord);
 Text track_a(220, 45, GUI::Style::CENTRE, TEXT_SMALL, track, "A:%d", std::function([](){return tracking.get_angle_in_deg();}));
-Text enc_l(50, 130, GUI::Style::CENTRE, TEXT_SMALL, track, "L:%d", left_enc);
-Text enc_r(135, 130, GUI::Style::CENTRE, TEXT_SMALL, track, "R:%d", right_enc);
-Text enc_b(220, 130, GUI::Style::CENTRE, TEXT_SMALL, track, "B:%d", back_enc);
+Text enc_l(50, 130, GUI::Style::CENTRE, TEXT_SMALL, track, "L:%d", std::function([](){return LeftEncoder.get_value();}));
+Text enc_r(135, 130, GUI::Style::CENTRE, TEXT_SMALL, track, "R:%d", std::function([](){return RightEncoder.get_value();}));
+Text enc_b(220, 130, GUI::Style::CENTRE, TEXT_SMALL, track, "B:%d", std::function([](){return BackEncoder.get_value();}));
 Button res_x(15, 60, 70, 55, GUI::Style::SIZE, Button::SINGLE, track, "Reset X");
 Button res_y(100, 60, 70, 55, GUI::Style::SIZE, Button::SINGLE, track, "Reset Y");
 Button res_a(185, 60, 70, 55, GUI::Style::SIZE, Button::SINGLE, track, "Reset A");
@@ -147,9 +148,9 @@ Text EF_degs (395, 50, GUI::Style::CENTRE, TEXT_SMALL, encoders, "Degs: %d", bac
 Text AB_rots (85, 65, GUI::Style::CENTRE, TEXT_SMALL, encoders, "Rots: %d", std::function([](){return int(right_enc/360);}));
 Text CD_rots (240, 65, GUI::Style::CENTRE, TEXT_SMALL, encoders, "Rots: %d", std::function([](){return int(left_enc/360);}));
 Text EF_rots (395, 65, GUI::Style::CENTRE, TEXT_SMALL, encoders, "Rots: %d", std::function([](){return int(back_enc/360);}));
-Text AB_remain (85, 80, GUI::Style::CENTRE, TEXT_SMALL, encoders, "Remaining: %d", std::function([](){return abs(right_enc-360*int(round((right_enc+sgn(right_enc)*180)/360)));}));
-Text CD_remain (240, 80, GUI::Style::CENTRE, TEXT_SMALL, encoders, "Remaining: %d", std::function([](){return abs(left_enc-360*int(round((left_enc+sgn(right_enc)*180)/360)));}));
-Text EF_remain (395, 80, GUI::Style::CENTRE, TEXT_SMALL, encoders, "Remaining: %d", std::function([](){return abs(back_enc-360*int(round((back_enc+sgn(right_enc)*180)/360)));}));
+Text AB_remain (85, 80, GUI::Style::CENTRE, TEXT_SMALL, encoders, "Remaining: %d", std::function([](){return abs(right_enc-360*int(round((right_enc+sgn(right_enc)*180)/360)));})); //Rewrite using near_angle
+Text CD_remain (240, 80, GUI::Style::CENTRE, TEXT_SMALL, encoders, "Remaining: %d", std::function([](){return abs(left_enc-360*int(round((left_enc+sgn(left_enc)*180)/360)));}));
+Text EF_remain (395, 80, GUI::Style::CENTRE, TEXT_SMALL, encoders, "Remaining: %d", std::function([](){return abs(back_enc-360*int(round((back_enc+sgn(back_enc)*180)/360)));}));
 Button AB_res (35, 100, 100, 50, GUI::Style::SIZE, Button::SINGLE, encoders, "Reset AB");
 Button CD_res (190, 100, 100, 50, GUI::Style::SIZE, Button::SINGLE, encoders, "Reset CD");
 Button EF_res (345, 100, 100, 50, GUI::Style::SIZE, Button::SINGLE, encoders, "Reset EF");
@@ -247,7 +248,6 @@ void main_setup(){
     }
   });
 
-  driver_curve.set_loop_func([](){driver_text = drivebase.driver_name();});
   prev_drivr.set_func([](){drivebase.prev_driver();});
   next_drivr.set_func([](){drivebase.next_driver();});
 
@@ -286,16 +286,12 @@ void main_setup(){
   track.set_loop_func([](){
     screen::set_pen(COLOUR(RED));
     screen::draw_pixel(270+(200*tracking.x_coord/144), 230-(200*tracking.y_coord/144)); //Scales to screen
-    angle = tracking.get_angle_in_deg();
-    left_enc = LeftEncoder.get_value();
-    right_enc = RightEncoder.get_value();
-    back_enc = BackEncoder.get_value();
   });
 
   go_to_xya.set_func([&](){
     int x = x_val.get_value(), y = y_val.get_value(), a = a_val.get_value();
-    char coord_c[20];
-    snprintf(coord_c, 20, " (%d, %d, %d)", x, y, a);
+    char coord_c[17];
+    snprintf(coord_c, 17, " (%d, %d, %d)", x, y, a);
     std::string coord = coord_c;
     if (GUI::go("GO TO" + coord, "Press to move to target selected by sliders" + coord, 1000)) move_start(move_types::point, point_params({double(x), double(y), double(a)}));
   });

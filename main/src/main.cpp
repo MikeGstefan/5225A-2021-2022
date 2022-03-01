@@ -30,8 +30,8 @@ const GUI* GUI::current_gui = &g_main;
  * All other competition modes are blocked by initialize; it is recommended
  * to keep execution time for this mode under a few seconds.
  */
-//  pros::Task *updt = nullptr;
- bool auton_run = false; // has auton run
+
+bool auton_run = false; // has auton run
 
 void initialize() {
 	// gyro.calibrate();
@@ -89,9 +89,6 @@ void autonomous() {
 
 }
 
-
-// extern Slider mot_speed_set;
-
 void opcontrol() {
 	/* GUI:
 	auton give up func - ask mike
@@ -130,10 +127,9 @@ void opcontrol() {
 		// drivebase.non_blocking_driver_practice();
 		
 		// if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_A)){
-		// 	int speed = mot_speed_set.get_value();
-		// 	move_start(move_types::line, line_params({0.0, 0.0}, {0.0, 24.0, 0.0}, speed));
-		// 	move_start(move_types::turn_angle, turn_angle_params(45.0, speed));
-		// 	move_start(move_types::line, line_params({0.0, 0.0}, {0.0, 24.0, 0.0}, speed));
+		// 	move_start(move_types::line, line_params({0.0, 0.0}, {0.0, 24.0, 0.0}, 127));
+		// 	move_start(move_types::turn_angle, turn_angle_params(45.0, 127));
+		// 	move_start(move_types::line, line_params({0.0, 0.0}, {0.0, 24.0, 0.0}, 127));
 		// }
 		delay(10);
 	}

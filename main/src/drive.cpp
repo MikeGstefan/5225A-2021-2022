@@ -339,16 +339,9 @@ void Drivebase::non_blocking_driver_practice(){
 
   // takes away control from driver when motors overheat
   if(inRange(front_l.get_temperature(), 55, std::numeric_limits<double>::max()-1) || inRange(front_r.get_temperature(), 55, std::numeric_limits<double>::max()-1) || inRange(back_l.get_temperature(), 55, std::numeric_limits<double>::max()-1) || inRange(back_r.get_temperature(), 55, std::numeric_limits<double>::max()-1)){
-    move(0, 0, 0);
-    master.print(0, 0, "fl%.0f r%.0f bl%.0f r%.0f\n", front_l.get_temperature(), front_r.get_temperature(), back_l.get_temperature(), back_r.get_temperature());
+    master.rumble("- - - ");
     return;
   }
-  // // prints motor temps every second
-  // if(screen_timer.get_time() > 1000){
-  //   drivers_data.print("fl%.0f r%.0f bl%.0f r%.0f\n", front_l.get_temperature(), front_r.get_temperature(), back_l.get_temperature(), back_r.get_temperature());
-  //   master.print(0, 0, "fl%.0f r%.0f bl%.0f r%.0f\n", front_l.get_temperature(), front_r.get_temperature(), back_l.get_temperature(), back_r.get_temperature());
-  //   screen_timer.reset();
-  // }
 }
 
 void Drivebase::next_driver(){
