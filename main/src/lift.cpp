@@ -226,6 +226,9 @@ void handle_lifts(){
         f_lift.motor.move_velocity(0);
       }
 
+
+      master.print(0,0,"f %d, b %d\n", f_lift_index, b_lift_index);
+
 }
 
       
