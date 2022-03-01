@@ -120,6 +120,7 @@ void handle_lifts(){
             b_lift_index = b_lift_pos.size()-1;
             // b_lift.move_absolute(b_lift_pos[b_lift_index]);
         }
+        up_press_time = millis();
       }
 
       if(master.get_digital(lift_down_button) && !master.get_digital(lift_up_button) && millis() - down_press_time > 300){ //
@@ -131,6 +132,7 @@ void handle_lifts(){
             b_lift_index = 0;
             // b_lift.move_absolute(b_lift_pos[b_lift_index]);
         }
+        down_press_time = millis();
       }
 
       if(master.get_digital(lift_up_button) && master.get_digital(lift_down_button) && (millis() - up_press_time > 300 || millis() - down_press_time > 300)){ //
@@ -138,7 +140,8 @@ void handle_lifts(){
         // b_lift.move_absolute(b_lift_pos[b_lift_index]);
         f_lift_index = 0;
         // f_lift.move_absolute(f_lift_pos[f_lift_index]);
-        
+        up_press_time = millis();
+        down_press_time = millis();
       }
 
       if(master.get_digital_new_press(lift_both_down_button) || partner.get_digital_new_press(lift_down_button)){
