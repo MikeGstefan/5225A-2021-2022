@@ -1,10 +1,10 @@
 #include "lift.hpp"
 
-array<int, 6> f_lift_pos= {20, 150, 300, 475, 630,  675};
+array<int, 6> f_lift_pos= {20, 150, 475, 630};
 int f_lift_index = 0;
 int f_lift_time = 0;
 
-array<int, 4> b_lift_pos= {20, 400, 580,  675};
+array<int, 4> b_lift_pos= {20,460, 580};
 int b_lift_index = 0;
 int b_lift_time = 0;
 bool looking = false;
@@ -16,6 +16,15 @@ int up_press_time = 0;
 int down_press_time = 0;
 
 bool intk_state = false;
+
+double b_error = 0.0;
+double f_error = 0.0;
+
+double b_power = 0.0;
+double f_power = 0.0;
+
+PID b_pid(5.0,0.0,0.0,0.0);
+PID f_pid(5.0,0.0,0.0,0.0);
 
 void intk_c(void* params){
   Timer intake_t ("intake jam", false);
@@ -46,21 +55,21 @@ void f_lift_inc(){
 void f_lift_dec(){
   if(f_lift_index > 0){
     f_lift_index--;
-    f_lift.move_absolute(f_lift_pos[f_lift_index]);
+    // f_lift.move_absolute(f_lift_pos[f_lift_index]);
   }
 }
 
 void b_lift_inc(){
   if(b_lift_index < b_lift_pos.size()-1){
     b_lift_index++;
-    b_lift.move_absolute(b_lift_pos[b_lift_index]);
+    // b_lift.move_absolute(b_lift_pos[b_lift_index]);
   }
 }
 
 void b_lift_dec(){
   if(b_lift_index > 0){
     b_lift_index--;
-    b_lift.move_absolute(b_lift_pos[b_lift_index]);
+    // b_lift.move_absolute(b_lift_pos[b_lift_index]);
   }
 }
 
@@ -98,38 +107,38 @@ void handle_lifts(){
       if(master.get_digital(lift_up_button) && !master.get_digital(lift_down_button) && millis() - up_press_time > 300){ //
         if(get_lift()){
             f_lift_index = f_lift_pos.size()-1;
-            f_lift.move_absolute(f_lift_pos[f_lift_index]);
+            // f_lift.move_absolute(f_lift_pos[f_lift_index]);
         }
         else{ 
             b_lift_index = b_lift_pos.size()-1;
-            b_lift.move_absolute(b_lift_pos[b_lift_index]);
+            // b_lift.move_absolute(b_lift_pos[b_lift_index]);
         }
       }
 
       if(master.get_digital(lift_down_button) && !master.get_digital(lift_up_button) && millis() - down_press_time > 300){ //
         if(get_lift()){
             f_lift_index = 0;
-            f_lift.move_absolute(f_lift_pos[f_lift_index]);
+            // f_lift.move_absolute(f_lift_pos[f_lift_index]);
         }
         else{ 
             b_lift_index = 0;
-            b_lift.move_absolute(b_lift_pos[b_lift_index]);
+            // b_lift.move_absolute(b_lift_pos[b_lift_index]);
         }
       }
 
       if(master.get_digital(lift_up_button) && master.get_digital(lift_down_button) && (millis() - up_press_time > 300 || millis() - down_press_time > 300)){ //
         b_lift_index = 0;
-        b_lift.move_absolute(b_lift_pos[b_lift_index]);
+        // b_lift.move_absolute(b_lift_pos[b_lift_index]);
         f_lift_index = 0;
-        f_lift.move_absolute(f_lift_pos[f_lift_index]);
+        // f_lift.move_absolute(f_lift_pos[f_lift_index]);
         
       }
 
       if(master.get_digital_new_press(DIGITAL_A)){
           b_lift_index = 0;
-        b_lift.move_absolute(b_lift_pos[b_lift_index]);
+        // b_lift.move_absolute(b_lift_pos[b_lift_index]);
         f_lift_index = 0;
-        f_lift.move_absolute(f_lift_pos[f_lift_index]);
+        // f_lift.move_absolute(f_lift_pos[f_lift_index]);
         
       }
 
@@ -149,7 +158,7 @@ void handle_lifts(){
           f_claw_p.set_value(1);
           f_lift_time = millis();
           f_lift_index = 1;
-            f_lift.move_absolute(f_lift_pos[f_lift_index]);
+            // f_lift.move_absolute(f_lift_pos[f_lift_index]);
         }
       }
 
@@ -178,6 +187,27 @@ void handle_lifts(){
         if(b_dist.get() < 70 && !looking && millis() - b_lift_time > 1000 && !found){
           looking = true;
         }
+      }
+
+
+
+      b_error = b_lift_pos[b_lift_index] - b_lift.motor.get_position();
+      if(fabs(b_error)  > 10){
+        b_power = b_pid.compute(-b_error, 0.0);
+        b_lift.move(b_power);
+      }
+      else{ //
+        b_lift.motor.move_velocity(0);
+      }
+
+
+      f_error = f_lift_pos[f_lift_index] - f_lift.motor.get_position();
+      if(fabs(f_error)  > 10){
+        f_power = f_pid.compute(-f_error, 0.0);
+        f_lift.move(f_power);
+      }
+      else{ //
+        f_lift.motor.move_velocity(0);
       }
 
 }
