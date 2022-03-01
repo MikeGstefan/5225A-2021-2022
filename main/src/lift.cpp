@@ -26,6 +26,8 @@ double f_power = 0.0;
 PID b_pid(5.0,0.0,0.0,0.0);
 PID f_pid(5.0,0.0,0.0,0.0);
 
+int timer = millis();
+
 void intk_c(void* params){
   Timer intake_t ("intake jam", false);
 		// intk.move(127);
@@ -226,8 +228,11 @@ void handle_lifts(){
         f_lift.motor.move_velocity(0);
       }
 
-
-      master.print(0,0,"f %d, b %d\n", f_lift_index, b_lift_index);
+      if(millis() - timer > 50){
+        master.print(0,0,"f %d, b %d\n", f_lift_index, b_lift_index);
+        timer = millis();
+      }
+      
 
 }
 
