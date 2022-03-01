@@ -125,6 +125,7 @@ void opcontrol() {
 	// 	delay(10);
 	// }
 	// f_lift_m.move(40);
+	pros::Task intk_task(intk_c);
   drivebase.driver_practice();
   
 	master.clear();

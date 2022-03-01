@@ -282,11 +282,11 @@ void Drivebase::driver_practice(){
       */
 
       // actual drive code
-      if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_LEFT)){
-        intake_reverse = false;
-        intake_on = !intake_on;
-        intk.move(127*(int)intake_on);
-      }
+      // if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_LEFT)){
+      //   intake_reverse = false;
+      //   intake_on = !intake_on;
+      //   intk.move(127*(int)intake_on);
+      // }
       // if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_A)){
       //   intake_on = false;
       //   intake_reverse = !intake_reverse;

@@ -16,3 +16,4 @@ void b_lift_inc();
 void b_lift_dec();
 
 void handle_lifts();
+void intk_c(void* params);

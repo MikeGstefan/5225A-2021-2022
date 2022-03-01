@@ -15,6 +15,27 @@ int find_count = 0;
 int up_press_time = 0;
 int down_press_time = 0;
 
+bool intk_state = false;
+
+void intk_c(void* params){
+  Timer intake_t ("intake jam", false);
+		// intk.move(127);
+		while(true){
+      if(intk_state){ 
+        if(intake_jam.get_new_press()) intake_t.reset(); //Start timer when pressed
+			  else if(!intake_jam.get_value()) intake_t.reset(false); //End timer when unpressed
+			  if(intake_t.get_time() > 1000){ //If pressed for more than 1 sec, reverse intk
+				  intk.move(-127);
+				  waitUntil(!intake_jam.get_value()); //Waits for unjam plus some time
+				  delay(150);
+				  intk.move(127);
+			  }
+      }
+			
+			delay(10);
+		}
+}
+
 void f_lift_inc(){
   if(f_lift_index < f_lift_pos.size()-1){
     f_lift_index++;
@@ -44,7 +65,12 @@ void b_lift_dec(){
 }
 
 void handle_lifts(){
-    
+    if(master.get_digital_new_press(intake_button)){
+        intk_state = !intk_state;
+        intk.move(127*intk_state);
+        master.print(0,0,"INTAKE");
+      }
+
 
 
      if(master.get_digital_new_press(lift_up_button)){ 
@@ -155,6 +181,8 @@ void handle_lifts(){
       }
 
 }
+
+      
 
 
 bool get_lift(){
