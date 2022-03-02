@@ -1,7 +1,7 @@
 {
   "py/object": "pros.conductor.project.Project",
   "py/state": {
-    "project_name": "drive-code",
+    "project_name": "aidan-drive-code",
     "target": "v5",
     "templates": {
       "kernel": {

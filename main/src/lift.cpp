@@ -68,6 +68,7 @@ void f_lift_dec(){
         intk_state = 0;
         intk.move(127*intk_state);
         master.print(0,0,"INTAKE");
+        intk_pos = false;
      }
 
     // f_lift.move_absolute(f_lift_pos[f_lift_index]);
@@ -84,7 +85,7 @@ void b_lift_inc(){
 void b_lift_dec(){
   if(b_lift_index > 0){
     b_lift_index--;
-    intk_pos = false;
+    
     // b_lift.move_absolute(b_lift_pos[b_lift_index]);
 
   }
@@ -146,6 +147,7 @@ void handle_lifts(){
             intk_state = 0;
             intk.move(127*intk_state);
             f_lift_index = 0;
+            intk_pos = false;
             // f_lift.move_absolute(f_lift_pos[f_lift_index]);
         }
         else{
