@@ -20,6 +20,9 @@ int down_press_time = 0;
 
 bool intk_state = false;
 bool reverse_state = false;
+bool intk_pos = false;
+bool started_pos = false;
+int intk_pos_time = millis();
 
 double b_error = 0.0;
 double f_error = 0.0;
@@ -81,6 +84,7 @@ void b_lift_inc(){
 void b_lift_dec(){
   if(b_lift_index > 0){
     b_lift_index--;
+    intk_pos = false;
     // b_lift.move_absolute(b_lift_pos[b_lift_index]);
 
   }
@@ -99,6 +103,8 @@ void handle_lifts(){
       reverse_state = !reverse_state;
       intk.move(-127*reverse_state);
     }
+
+    
 
      if(master.get_digital_new_press(lift_up_button)){
         up_press_time = millis();
@@ -150,6 +156,7 @@ void handle_lifts(){
       }
 
       if(master.get_digital(lift_up_button) && master.get_digital(lift_down_button) && (millis() - up_press_time > 300 || millis() - down_press_time > 300)){ //
+        intk_pos = false;
         b_lift_index = 0;
         // b_lift.move_absolute(b_lift_pos[b_lift_index]);
         f_lift_index = 0;
@@ -165,7 +172,7 @@ void handle_lifts(){
         // turns intake off when f lift lowers to bottom
         intk_state = 0;
         intk.move(127*intk_state);
-
+        intk_pos = false;
           b_lift_index = 0;
         // b_lift.move_absolute(b_lift_pos[b_lift_index]);
         f_lift_index = 0;
@@ -248,6 +255,24 @@ void handle_lifts(){
       else{ //
         f_lift.motor.move_velocity(0);
       }
+
+      if(!intk_pos && f_lift_index == 0 && fabs(f_error)  < 10 && !started_pos){
+        intk.move(-20);
+        intk_state = 0;
+        intk_pos_time = millis();
+        // intk_pos = true;
+        started_pos = true;
+      }
+      if(!intk_pos && f_lift_index == 0 && fabs(f_error)  < 10 && millis() - intk_pos_time > 500 && started_pos){
+        intk.move(0);
+        intk_state = 0;
+        // intk_pos = false;
+        started_pos = false;
+        // intk_pos_time = millis();
+        intk_pos = true;
+
+      }
+
 
       if(millis() - timer > 50){
         master.print(0,0,"f %d, b %d\n", f_lift_index, b_lift_index);
