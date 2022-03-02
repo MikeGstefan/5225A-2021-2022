@@ -1,10 +1,12 @@
 #include "lift.hpp"
 
-array<int, 4> f_lift_pos= {20, 150, 475, 630};
+//4-bar
+array<int, 4> f_lift_pos= {20, 200, 475, 630};
 int f_lift_index = 0;
 int f_lift_time = 0;
 
-array<int, 3> b_lift_pos= {20,460, 580};
+//6bar
+array<int, 4> b_lift_pos= {20,460, 600, 675};
 int b_lift_index = 0;
 int b_lift_time = 0;
 bool looking = false;
@@ -32,7 +34,7 @@ void intk_c(void* params){
   Timer intake_t ("intake jam", false);
 		// intk.move(127);
 		while(true){
-      if(intk_state){ 
+      if(intk_state){
         if(intake_jam.get_new_press()) intake_t.reset(); //Start timer when pressed
 			  else if(!intake_jam.get_value()) intake_t.reset(false); //End timer when unpressed
 			  if(intake_t.get_time() > 1000){ //If pressed for more than 1 sec, reverse intk
@@ -42,7 +44,7 @@ void intk_c(void* params){
 				  intk.move(127);
 			  }
       }
-			
+
 			delay(10);
 		}
 }
@@ -62,7 +64,7 @@ void f_lift_dec(){
         intk.move(127*intk_state);
         master.print(0,0,"INTAKE");
      }
-    
+
     // f_lift.move_absolute(f_lift_pos[f_lift_index]);
   }
 }
@@ -78,12 +80,13 @@ void b_lift_dec(){
   if(b_lift_index > 0){
     b_lift_index--;
     // b_lift.move_absolute(b_lift_pos[b_lift_index]);
-   
+
   }
 }
 
 void handle_lifts(){
-    if(master.get_digital_new_press(intake_button) || partner.get_digital_new_press(intake_button)){
+    // doesn't turn on intake if it's at the bottom
+    if(f_lift_index != 0 && (master.get_digital_new_press(intake_button) || partner.get_digital_new_press(intake_button))){
         intk_state = !intk_state;
         intk.move(127*intk_state);
         master.print(0,0,"INTAKE");
@@ -91,24 +94,24 @@ void handle_lifts(){
 
 
 
-     if(master.get_digital_new_press(lift_up_button)){ 
+     if(master.get_digital_new_press(lift_up_button)){
         up_press_time = millis();
         if(get_lift()){
           f_lift_inc();
         }
-        else{ 
+        else{
           b_lift_inc();
         }
-        
+
       }
 
 
-      if(master.get_digital_new_press(lift_down_button)){ 
+      if(master.get_digital_new_press(lift_down_button)){
         down_press_time = millis();
         if(get_lift()){
           f_lift_dec();
         }
-        else{ 
+        else{
           b_lift_dec();
         }
       }
@@ -118,19 +121,22 @@ void handle_lifts(){
             f_lift_index = f_lift_pos.size()-1;
             // f_lift.move_absolute(f_lift_pos[f_lift_index]);
         }
-        else{ 
+        else{
             b_lift_index = b_lift_pos.size()-1;
             // b_lift.move_absolute(b_lift_pos[b_lift_index]);
         }
         up_press_time = millis();
       }
-
+      // lowers lift to bottom height when down button is held
       if(master.get_digital(lift_down_button) && !master.get_digital(lift_up_button) && millis() - down_press_time > 300){ //
         if(get_lift()){
+          // turns off intake when f lift lowers to bottom
+            intk_state = 0;
+            intk.move(127*intk_state);
             f_lift_index = 0;
             // f_lift.move_absolute(f_lift_pos[f_lift_index]);
         }
-        else{ 
+        else{
             b_lift_index = 0;
             // b_lift.move_absolute(b_lift_pos[b_lift_index]);
         }
@@ -147,31 +153,35 @@ void handle_lifts(){
       }
 
       if(master.get_digital_new_press(lift_both_down_button) || partner.get_digital_new_press(lift_down_button)){
+        // turns intake off when f lift lowers to bottom
+        intk_state = 0;
+        intk.move(127*intk_state);
+
           b_lift_index = 0;
         // b_lift.move_absolute(b_lift_pos[b_lift_index]);
         f_lift_index = 0;
         // f_lift.move_absolute(f_lift_pos[f_lift_index]);
-        
+
       }
 
-      if(partner.get_digital_new_press(lift_up_button)){ 
+      if(partner.get_digital_new_press(lift_up_button)){
         b_lift_index = b_lift_pos.size() -1;
         // b_lift.move_absolute(b_lift_pos[b_lift_index]);
         f_lift_index = f_lift_pos.size() -1;
       }
 
 
-      if(master.get_digital_new_press(lift_release_button)){ 
+      if(master.get_digital_new_press(lift_release_button)){
         if(get_lift()){
           f_claw_p.set_value(0);
         }
-        else{ 
+        else{
           b_claw_p.set_value(0);
         }
-        
+
       }
 
-      if(f_lift_index == 0){ 
+      if(f_lift_index == 0){
         if(f_touch.get_value() && millis() - f_lift_time > 750){
           f_claw_p.set_value(1);
           f_lift_time = millis();
@@ -182,7 +192,7 @@ void handle_lifts(){
 
 
     //this needs to be fixed
-      if(b_lift_index == 0){ 
+      if(b_lift_index == 0){
         if(looking && (b_dist.get() > 75 && b_dist.get() < 90 && !found))find_count++;
         else {
           find_count = 0;
@@ -232,11 +242,11 @@ void handle_lifts(){
         master.print(0,0,"f %d, b %d\n", f_lift_index, b_lift_index);
         timer = millis();
       }
-      
+
 
 }
 
-      
+
 
 
 bool get_lift(){
