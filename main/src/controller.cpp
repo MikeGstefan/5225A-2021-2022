@@ -13,7 +13,8 @@ controller_digital_e_t lift_both_down_button = DIGITAL_A;
 controller_digital_e_t shift_button = DIGITAL_X;
 controller_digital_e_t intake_button = DIGITAL_B;
 controller_digital_e_t reverse_drive_button = DIGITAL_L1;
-
+controller_digital_e_t partner_intk_reverse = DIGITAL_B;
+controller_digital_e_t partner_intk_on = DIGITAL_X;
 
 
 
