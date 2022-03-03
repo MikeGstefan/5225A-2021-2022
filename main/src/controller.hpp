@@ -37,6 +37,7 @@ extern controller_digital_e_t cancel_button;
 extern controller_digital_e_t shift_button;
 extern controller_digital_e_t intake_button;
 extern controller_digital_e_t reverse_drive_button;
+extern controller_digital_e_t ok_button;
 
 #define num_controller 2
 
@@ -61,7 +62,7 @@ public:
   void clear_line (std::uint8_t line);
   void clear();
   void rumble(const char* rumble_pattern);
-  bool interrupt(bool analog=true, bool digital=true, bool A_except = true);
+  bool interrupt(bool analog=true, bool digital=true, bool OK_except = true);
 };
 
 

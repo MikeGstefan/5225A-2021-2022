@@ -310,12 +310,12 @@ double B_Lift::height_to_pos(double height){
   return gear_ratio * (rad_to_deg(asin((height - offset_h) / (arm_len)))) + offset_a;
 }
 
+extern int elastic_b_up_time, elastic_b_down_time; //from gui_construction.cpp
+
 void B_Lift::elastic_util(){
-  master.clear();
   reset();
   motor.move(-10);
-  master.print(0, 0, "press a to start");
-  waitUntil(master.get_digital_new_press(DIGITAL_A));
+  GUI::go("Start Elastic Utility", "Press to start the elastic utility.", 500);
   b_claw_p.set_value(HIGH);
   held = true;
   Timer move_timer{"move"};
@@ -323,11 +323,13 @@ void B_Lift::elastic_util(){
   // // intake_piston.set_value(HIGH);  // raises intake
   waitUntil(fabs(motor.get_position() - top_position) < end_error);
   move_timer.print();
-  master.print(1, 0, "up time: %d", move_timer.get_time());
+  elastic_b_up_time = move_timer.get_time();
+  master.print(1, 0, "up time: %d", elastic_b_up_time);
 
   move_timer.reset();
   move_absolute(bottom_position);
   waitUntil(fabs(motor.get_position() - bottom_position) < end_error);
   move_timer.print();
-  master.print(2, 0, "down time: %d", move_timer.get_time());
+  elastic_b_down_time = move_timer.get_time();
+  master.print(2, 0, "down time: %d", elastic_b_down_time);
 }

@@ -91,7 +91,7 @@ bool _Task::data_update(){
   if(this->task_ptr == NULL ||this->task_ptr->get_state() >=3)return false;
   task_log.print("%d| %s pausing for data\n", millis(), this->name);
   this->task_ptr->notify_ext((int)reset, E_NOTIFY_ACTION_OWRITE,NULL);
-  while(this->task_ptr->get_state()!=3)delay(10);
+  waitUntil (this->task_ptr->get_state()== 3);
   return true;
 }
 

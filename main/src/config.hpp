@@ -5,7 +5,7 @@
 #include "controller.hpp"
 
 class _Controller;
-class Text;
+class Text_;
 
 extern _Controller master;
 extern _Controller partner;
