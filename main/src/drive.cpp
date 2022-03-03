@@ -267,33 +267,10 @@ void Drivebase::driver_practice(){
   // master.print(2, 0, "Driver: %s", driver_name());
   while(true){
     while(true){
-      /*
-      if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_UP)){ // goes to next driver
-        cur_driver++;
-        cur_driver %= num_of_drivers; // rollover
-        // spaces in the controller print are to overwrite names
-        master.print(2, 0, "Driver: %s          ", drivers[cur_driver].name);
+
+      if(master.get_digital_new_press(ok_button)){
+        Autons::selector();
       }
-      else if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_DOWN)){  // goes to previous driver
-        if (cur_driver == 0)  cur_driver = num_of_drivers - 1;
-        else cur_driver--;
-        master.print(2, 0, "Driver: %s          ", drivers[cur_driver].name);
-      }
-      */
-
-      // actual drive code
-      // if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_LEFT)){
-      //   intake_reverse = false;
-      //   intake_on = !intake_on;
-      //   intk.move(127*(int)intake_on);
-      // }
-      // if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_A)){
-      //   intake_on = false;
-      //   intake_reverse = !intake_reverse;
-      //   intk.move(-127*(int)intake_reverse);
-      // }
-
-
       drivebase.handle_input();
       // b_lift.handle();
       handle_lifts();

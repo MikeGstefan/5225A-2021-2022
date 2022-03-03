@@ -681,13 +681,7 @@ extern Page auto_selection, pos_auto_selection;
 
 namespace Autons{
 
-  enum class autons{
-    Skills,
-    AUTO2,
-    AUTO3,
-    NUM_OF_ELEMENTS,
-    DEFAULT = Skills,
-  };
+  
 
   enum class start_pos{
     POS1,
@@ -717,7 +711,7 @@ namespace Autons{
   start_pos cur_start_pos = start_pos::DEFAULT;
   goals cur_goal = goals::DEFAULT;
 
-  const char* auton_names[static_cast<int>(autons::NUM_OF_ELEMENTS)] = {"Skills", "Auto1", "Auto2"};
+  const char* auton_names[static_cast<int>(autons::NUM_OF_ELEMENTS)] = {"Skills", "CNTR", "HIGH", "low"};
   const char* start_pos_names[static_cast<int>(start_pos::NUM_OF_ELEMENTS)] = {"Pos1", "Pos2", "Pos3"};
   const char* alliance_names[2] = {"Red", "Blue"};
   const char* goal_names[3] = {"Left", "Tall", "Right"};
@@ -746,7 +740,7 @@ namespace Autons{
     file.open(file_name, fstream::in);
     pos_file.open(pos_file_name, fstream::in);
     master.clear();
-
+    printf("here\n");
     if (pros::usd::is_installed()){
       if (!file){//File doesn't exist
         file.close();
@@ -787,7 +781,10 @@ namespace Autons{
     file.close();
     pos_file.close();
     Data::log_t.done_update();
-
+    // cout<< auton;
+    printf("%s\n", auton);
+    master.print(0,0,"%s", auton);
+    delay(500);
     const char** autonIt = std::find(auton_names, auton_names+static_cast<int>(autons::NUM_OF_ELEMENTS), auton);
     const char** startIt = std::find(start_pos_names, start_pos_names+static_cast<int>(start_pos::NUM_OF_ELEMENTS), start);
     const char** goalIt = std::find(goal_names, goal_names+static_cast<int>(goals::NUM_OF_ELEMENTS), goal);

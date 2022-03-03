@@ -31,9 +31,17 @@ void blue_highside_tall();
 void blue_lowside();
 
 namespace Autons{
-  constexpr bool normal = false;
+  constexpr bool normal = true;
 
-  enum class autons;
+  // enum class autons;
+  enum class autons{
+    Skills,
+    AUTO2,
+    AUTO3,
+    AUTO4,
+    NUM_OF_ELEMENTS,
+    DEFAULT = Skills,
+  };
   enum class start_pos;
   enum class alliances; //alliances and goals really shouldn't be enums, but it makes my code more consistent
   enum class goals;
@@ -58,5 +66,8 @@ namespace Autons{
   void switch_alliance(alliances new_ally = static_cast<alliances>(!static_cast<bool>(cur_alliance)));
   void give_up();
   void selector();
+
+  void file_update();
+  void file_read();
 
 }

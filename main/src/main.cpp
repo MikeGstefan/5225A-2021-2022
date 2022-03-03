@@ -39,6 +39,7 @@ void initialize() {
 	// front_r.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
 	// back_l.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
 	// back_r.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
+	Autons::file_read();
 	f_lift.motor.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
 	b_lift.motor.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
 	drivebase.download_curve_data();
@@ -46,7 +47,24 @@ void initialize() {
 	_Controller::init();
 	GUI::init();
 	delay(500);
-	tracking.x_coord = 26.0, tracking.y_coord = 11.75, tracking.global_angle = -90.0_deg;
+	switch(Autons::cur_auton){
+		case Autons::autons::Skills:
+			tracking.x_coord = 26.0, tracking.y_coord = 11.75, tracking.global_angle = -90.0_deg;
+		break;
+		case Autons::autons::AUTO2:
+			tracking.x_coord = 108.0, tracking.y_coord = 16.0, tracking.global_angle = 0.0_deg;
+		break;
+		case Autons::autons::AUTO3:
+			tracking.x_coord = 104.0, tracking.y_coord = 12.0, tracking.global_angle = -30.0_deg;
+		break;
+		case Autons::autons::AUTO4:
+			tracking.x_coord = 24.5, tracking.y_coord = 15.0, tracking.global_angle = 9.0_deg;
+		break; 
+		default:
+			tracking.x_coord = 26.0, tracking.y_coord = 11.75, tracking.global_angle = -90.0_deg;
+		break;
+	}
+	
 	// tracking.x_coord = 104.0, tracking.y_coord = 12.0, tracking.global_angle = -30.0_deg;
 	// tracking.x_coord = 24.5, tracking.y_coord = 15.0, tracking.global_angle = 9.0_deg;
 	// tracking.x_coord = 0.0, tracking.y_coord = 0.0, tracking.global_angle = 0.0_deg;
@@ -86,7 +104,28 @@ void competition_initialize() {}
  */
 void autonomous() {
 	// skills();
-
+	switch(Autons::cur_auton){
+		case Autons::autons::Skills:
+			// tracking.x_coord = 26.0, tracking.y_coord = 11.75, tracking.global_angle = -90.0_deg;
+			skills();
+			skills2();
+			new_skills3();
+		break;
+		case Autons::autons::AUTO2:
+			blue_highside_tall();
+		break;
+		case Autons::autons::AUTO3:
+			blue_highside();
+		break;
+		case Autons::autons::AUTO4:
+			blue_lowside();
+		break; 
+		default:
+			skills();
+			skills2();
+			new_skills3();
+		break;
+	}
 
 }
 
