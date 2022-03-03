@@ -7,8 +7,8 @@
 #include "task.hpp"
 #include "auton.hpp"
 #include "auton_util.hpp"
-#include "Subsystem/f_lift.hpp"
-#include "Subsystem/b_lift.hpp"
+#include "Subsystems/f_lift.hpp"
+#include "Subsystems/b_lift.hpp"
 #include "distance.hpp"
 
 // using namespace std;
@@ -32,6 +32,12 @@ GUI* const GUI::current_gui = &g_main;
 
 void initialize() {
 	// gyro.calibrate();
+	// front_l.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
+	// front_r.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
+	// back_l.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
+	// back_r.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
+	f_lift.motor.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
+	b_lift.motor.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
 	drivebase.download_curve_data();
 	Data::init();
 	_Controller::init();
@@ -77,17 +83,19 @@ void competition_initialize() {}
  * from where it left off.
  */
 void autonomous() {
+	
+	// b_lift.reset();
+	// Task([](){ 
+	// 	f_lift.reset();
+	// });
+	// f_claw_p.set_value(0);
+	// b_claw_p.set_value(0);
+	// skills();
+	// skills2();
 
-	b_lift.reset();
-	Task([](){
-		f_lift.reset();
-	});
-	f_claw_p.set_value(0);
-	b_claw_p.set_value(0);
-	skills();
-	skills2();
-
-	skills3();
+	// skills3();
+	// lrt_auton();
+	blue_highside();
 	while(true);
 	// FILE * fp;
 	// fp = fopen("/usd/init.txt", "r");
@@ -112,63 +120,16 @@ bool claw_state = false, claw_state_2 = false, lift_state = false, drive_state =
 int lift_speed = 0;
 int safety_check = 0;
 void opcontrol() {
-	master.clear();
-	drivebase.set_state(0);
-	while(!master.get_digital_new_press(DIGITAL_A)){
-		delay(10);
-		// GUI::update();
-	}
-// 	b_claw_p.set_value(1);
-// 	b_lift.move_absolute(460);
-// 	while(b_lift.motor.get_position() < 380)delay(10);
-//   int safety_check = 0;
-//   tracking_imp.print("%d|| Start wall allign\n", millis());
-//   drivebase.set_state(1);
-// 	drivebase.move(-80.0,0.0);
-
-// 	while((fabs(tracking.l_velo) < 2.0 ||fabs(tracking.r_velo) < 2.0) && safety_check < 20){
-// 		safety_check++;
-//     misc.print(" reset things %.2f, %.2f\n",fabs(tracking.l_velo), fabs(tracking.r_velo));
-// 		delay(10);
-// 	}
-// 	cycleCheck(fabs(tracking.l_velo) <1.0 && fabs(tracking.r_velo) < 1.0, 4,10);
-// 	drivebase.move(-20.0,0.0);
-// 	printf("%d|| Done all allign\n", millis());
-// 	while(true)delay(10);
-
-
-	// drivebase.move(0,0);
-	// b_claw_p.set_value(1);
-	// b_lift.move_absolute(200);
-	// while(true){ //
-	// 	printf("%d, current: %d\n", millis(), b_lift.motor.get_current_draw());
+	move_stop();
+	// while(true){
+	// 	printf("%d\n", b_dist.get());
 	// 	delay(10);
 	// }
-	// f_claw_p.set_value(1);
-	// flatten_against_wall();
-	// while(true); 
-	// f_claw_p.set_value(1);
-	// f_lift.move_absolute(150,100);
-
-	// lrt_auton();
-	// blue_highside_tall();
-	int time = millis();
-	// blue_lowside();
-	skills();
-	skills2();
-	new_skills3();
-	master.print(0,0, " TIME: %d", millis() - time);
-	master.print(1,1, "TIME: %d", millis() - time);
-	master.print(2,2, "TIME: %d", millis() - time);
-	misc.print(" TIME: %d", millis() -time);
-	// f_lift.move(-10);
-	// move_start(move_types::tank_rush, tank_rush_params({0.0,40.0,0.0},false, 127.0,1.0,true,150.0,0.0,10.0));
-	// move_start(move_types:: tank_point, tank_point_params({0.0,40.0,0.0}, false, 127.0,1.0,true,6.0,150.0,0.0,0));
-	// move_start(move_types::turn_angle, turn_angle_params(90.0, true, true,150.0,0.0,127.0,0));
-	while(true){ 
-		// GUI::update();
-		delay(10);
-	}
+	// f_lift_m.move(40);
+	pros::Task intk_task(intk_c);
+  drivebase.driver_practice();
+  
+	master.clear();
 	// b_lift.reset();
 	// Task([](){ 
 	// 	f_lift.reset();
@@ -266,133 +227,36 @@ void opcontrol() {
 	// }
 
 	while(true){
-		GUI::update();
-		// drivebase.set_state(1);
-		if(master.get_digital_new_press(DIGITAL_Y)){ 
-			master.print(0,0,"%f",rad_to_deg(tracking.global_angle));
+		if(master.get_digital_new_press(DIGITAL_Y)){
+			master.print(0,0,"%d",BackEncoder.get_value());
 		}
 		if(master.get_digital_new_press(DIGITAL_A)){
 			printf("switching state to %d\n", !claw_state);
 			claw_state = !claw_state;
 			b_claw_p.set_value(claw_state);
 		}
-		if(master.get_digital_new_press(DIGITAL_R1)){
-			printf("switching state to %d\n", !claw_state);
-			claw_state_2 = !claw_state_2;
-			f_claw_p.set_value(claw_state_2);
-		}
-		if(master.get_digital_new_press(DIGITAL_B)){ 
-			// b_lift.move_absolute(10);
-			// b_detect_goal();
-			f_lift.move_absolute(10);
-			Task([](){ 
-				while(!f_touch.get_value())delay(10);
-				f_claw_p.set_value(1);
-			});
-			// f_detect_goal();
-		}
-		if(master.get_digital_new_press(DIGITAL_LEFT)){ 
-			// b_lift.move_absolute(10);
-			// b_detect_goal();
+		if(master.get_digital_new_press(DIGITAL_B)){
 			b_lift.move_absolute(10);
-			// Task([](){ 
-			// 	while(!f_touch.get_value())delay(10);
-			// 	f_claw_p.set_value(1);
-			// });
-			Task([](){ 
 			b_detect_goal();
-			});
-		}
+			claw_state = 1;
 
-		// 	claw_state = 1;
-			
-		// }
-		// if(master.get_digital_new_press(DIGITAL_L1)){ 
-		// 	b_lift.move_absolute(300);
-		// }
-		// if(master.get_digital_new_press(DIGITAL_L2)){ 
-		// 	b_lift.move_absolute(0);
-		// }
+		}
+		if(master.get_digital_new_press(DIGITAL_L1)){
+			b_lift.move_absolute(300);
+		}
+		if(master.get_digital_new_press(DIGITAL_L2)){
+			b_lift.move_absolute(0);
+		}
 		// printf("dist: %d\n", b_dist.get());
 		drivebase.handle_trans();
 		// drivebase.handle_input();
-		// if(master.get_digital_new_press(DIGITAL_R1)){ 
-		// 	Timer timer {"timer"};
-		// 	// master.clear();
-		// 	// delay(50);
-		// 	// master.print(0,0,"%f",reset_dist_l.get_dist());
-		// 	// reset_dist_r.reset(141.0,0.0 + DIST_BACK,0.0);
-		// 	skills();
-		// 	skills2();
-
-		// 	skills3();
-		// 	// skills4();
-		// 	// skillsPark();
-		// 	//fits platfor to reset
-		// 	/**
-		// 	move_start(move_types::turn_angle, turn_angle_params(90.0));
-		// 	delay(100);
-		// 	move_start(move_types::tank_arc, tank_arc_params({70.0, 95.0}, {122.0,119.0,0.0}));
-		// 	// move_start(move_types::turn_angle, turn_angle_params(0.0));
-		// 	move_start(move_types::tank_point, tank_point_params({122.0,123.0,0.0},false));
-		// 	flatten_against_wall(true);
-		// 	*/
-		// 	// f_claw_p.set_value(HIGH);
-		// 	// b_claw_p.set_value(HIGH);
-		// 	// f_lift.move_absolute(610);
-		// 	// b_lift.move_absolute(150);
-		// 	// waitUntil(f_lift_m.get_position() > 590);
-		// 	// f_lift.move(15);
-
-		// 	// waitUntil(master.get_digital_new_press(DIGITAL_R1));
-		// 	// int t = millis();
-
-		// 	// gyro.climb_ramp();
-		// 	// // gyro.level(2.2, 0);
-
-		// 	// drivebase.brake();
-		// 	// printf("ds:%d\n", millis()-t);
-		// 	// delay(5000);
-		// 	// waitUntil(false);
-
-		// 	//grab goal on wall 
-
-		// 	/**
-		// 	move_start(move_types::turn_angle, turn_angle_params(-90.0));
-		// 	move_start(move_types::tank_point, tank_point_params({111.0,34.0,-90.0},false,70));
-		// 	delay(500);
-		// 	move_start(move_types::tank_point, tank_point_params({127.0,34.0,-90.0},false, 70),false);
-		// 	detect_goal();
-		// 	move_stop();
-		// 	// drivebase.brake();
-		// 	move_start(move_types::tank_point, tank_point_params({115.0,34.0,-90.0},false));
-		// 	b_lift.move_absolute(650);
-		// 	while(b_lift.motor.get_position() < 630)delay(10);
-		// 	b_lift.move(10);
-		// 	flatten_against_wall(false);
-
-		// 	delay(500);
-		// 	move_start(move_types::tank_point, tank_point_params({117.0,34.0,-90.0},false));
-		// 	b_lift.move_absolute(10);
-		// 	move_start(move_types::turn_point, turn_point_params({70.0,70.0}));
-		// 	delay(50);
-		// 	master.print(0,0,"%d", timer.get_time());
-		// 	delay(10000);
-		// 	*/
-		// 	master.print(0,0,"%d", timer.get_time());
-		// 	delay(2000);
-
-		// }
-		// else{
 			drivebase.handle_input();
 		// }
 
-		if(abs(master.get_analog(ANALOG_LEFT_Y))> 30)b_lift.move(master.get_analog(ANALOG_LEFT_Y));
-		else b_lift.motor.move_relative(0, 40);
-		if(abs(master.get_analog(ANALOG_LEFT_X))> 30)f_lift.move(master.get_analog(ANALOG_LEFT_X));
-		else f_lift.motor.move_relative(0, 40);
-		
+		if(abs(master.get_analog(ANALOG_LEFT_Y))> 20)b_lift.move(master.get_analog(ANALOG_LEFT_Y));
+		// else b_lift.move(10);
+
 		delay(33);
 	}
-		
+
 }
