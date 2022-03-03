@@ -16,7 +16,10 @@ controller_digital_e_t reverse_drive_button = DIGITAL_L1;
 controller_digital_e_t partner_intk_reverse = DIGITAL_B;
 controller_digital_e_t partner_intk_on = DIGITAL_X;
 
-
+controller_digital_e_t partner_f_up = DIGITAL_R1;
+controller_digital_e_t partner_f_down = DIGITAL_R2;
+controller_digital_e_t partner_b_up = DIGITAL_L1;
+controller_digital_e_t partner_b_down = DIGITAL_L2;
 
 
 // back lift buttons

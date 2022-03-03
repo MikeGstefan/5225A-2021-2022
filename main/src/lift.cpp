@@ -170,7 +170,7 @@ void handle_lifts(){
         down_press_time = millis();
       }
 
-      if(master.get_digital_new_press(lift_both_down_button) || partner.get_digital_new_press(lift_down_button)){
+      if(master.get_digital_new_press(lift_both_down_button) || (!game && partner.get_digital_new_press(lift_down_button))){
         // turns intake off when f lift lowers to bottom
         intk_state = 0;
         intk.move(127*intk_state);
@@ -182,7 +182,14 @@ void handle_lifts(){
 
       }
 
-      if(partner.get_digital_new_press(lift_up_button)){
+      if(game){
+        if(partner.get_digital_new_press(partner_f_up))f_lift_inc();
+        if(partner.get_digital_new_press(partner_f_down))f_lift_dec();
+        if(partner.get_digital_new_press(partner_b_up))b_lift_inc();
+        if(partner.get_digital_new_press(partner_b_down))b_lift_dec();
+      }
+
+      if(!game && partner.get_digital_new_press(lift_up_button) ){
         b_lift_index = b_lift_pos.size() -1;
         // b_lift.move_absolute(b_lift_pos[b_lift_index]);
         f_lift_index = f_lift_pos.size() -1;

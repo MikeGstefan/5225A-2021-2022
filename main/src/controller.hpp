@@ -32,6 +32,11 @@ extern controller_digital_e_t lift_both_down_button;
 extern controller_digital_e_t partner_intk_reverse;
 extern controller_digital_e_t partner_intk_on;
 
+extern controller_digital_e_t partner_f_up;
+extern controller_digital_e_t partner_f_down;
+extern controller_digital_e_t partner_b_up;
+extern controller_digital_e_t partner_b_down;
+
 // misc buttons
 extern controller_digital_e_t cancel_button;
 extern controller_digital_e_t shift_button;
