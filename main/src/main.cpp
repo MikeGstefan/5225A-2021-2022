@@ -154,10 +154,12 @@ void opcontrol() {
 	// blue_highside_tall();
 	int time = millis();
 	// blue_lowside();
-	// skills();
+	skills();
 	skills2();
 	new_skills3();
 	master.print(0,0, " TIME: %d", millis() - time);
+	master.print(1,1, "TIME: %d", millis() - time);
+	master.print(2,2, "TIME: %d", millis() - time);
 	misc.print(" TIME: %d", millis() -time);
 	// f_lift.move(-10);
 	// move_start(move_types::tank_rush, tank_rush_params({0.0,40.0,0.0},false, 127.0,1.0,true,150.0,0.0,10.0));

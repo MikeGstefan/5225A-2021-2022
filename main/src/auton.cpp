@@ -226,13 +226,14 @@ b_claw_p.set_value(0);
   delay(100);
   move_start(move_types::turn_angle, turn_angle_params(80.0, true, true,140.0,0.0,127.0,400,min_move_power_a,3.0));
   b_lift.move_absolute(200);
+  drivebase.set_state(1);
   drivebase.move(70.0,0.0);
   f_lift.move_absolute(470);
 
   tracking.wait_for_dist(6.0);
   // b_lift.move_absolute(700);
   // move_start(move_types::tank_point, tank_point_params({108.0, 15.0, 0.0}));
-  flatten_against_wall(true);
+  flatten_against_wall(true, 2);
   f_claw_p.set_value(0);
   
 }
@@ -247,10 +248,10 @@ void new_skills3(){
   // b_lift.move_absolute(700);
   // move_start(move_types::tank_point, tank_point_params({108.0, 15.0, 0.0}));
   // flatten_against_wall(true);
-  drivebase.move(10.0,0.0);
+  drivebase.move(5.0,0.0);
   // f_claw_p.set_value(0);
   delay(100);
-
+  drivebase.set_state(0);
 
 
 
@@ -277,18 +278,18 @@ void new_skills3(){
   move_start(move_types::tank_arc, tank_arc_params({tracking.x_coord, tracking.y_coord}, {28.0, 98.0, 190.0}, 90.0,90.0,true, 4.0,0.0,40.0));
   move_start(move_types::tank_point, tank_point_params({24.0, 70.0,180.0}));
   move_start(move_types::tank_arc, tank_arc_params({24.0, 70.0}, {60.0, 38.0, 135.0}, 127.0));
-  move_start(move_types::turn_angle, turn_angle_params(90.0));
-  move_start(move_types::tank_point, tank_point_params({72.0, 39.0,90.0}));
-  b_lift.move_absolute(650);
-  move_start(move_types::turn_angle, turn_angle_params(0.0));
-  while(b_lift.motor.get_position() < 550)delay(10);
-  move_start(move_types::tank_point, tank_point_params({72.0, 32.0,0.0}, false,127.0,1.0,true, 6.5,150.0,0.0,1000,{2.0,0.5}));
-  move_start(move_types::turn_angle, turn_angle_params(0.0));
+  move_start(move_types::turn_angle, turn_angle_params(90.0, true,true,150.0,0.0,127.0,750));
+  move_start(move_types::tank_point, tank_point_params({72.0, 39.0,90.0}, false,127.0,1.0,true,6.5,150.0,0.0,2000));
+  // b_lift.move_absolute(650);
+  move_start(move_types::turn_angle, turn_angle_params(0.0, true,true,150.0,0.0,127.0,1000));
+  // while(b_lift.motor.get_position() < 550)delay(10);
+  // move_start(move_types::tank_point, tank_point_params({72.0, 32.0,0.0}, false,127.0,1.0,true, 6.5,150.0,0.0,1000,{2.0,0.5}));
+  // move_start(move_types::turn_angle, turn_angle_params(0.0));
   b_claw_p.set_value(0);
-  move_start(move_types::tank_point, tank_point_params({72.0, 39.0,0.0}, false,127.0,1.0,true, 6.5,150.0,0.0,0,{2.0,0.5}));
-  move_start(move_types::turn_angle, turn_angle_params(0.0));
-  move_start(move_types::tank_point, tank_point_params({72.0, 30.0,0.0}, false,127.0,1.0,true, 6.5,150.0,0.0,1000,{2.0,0.5}));
-  move_start(move_types::tank_point, tank_point_params({72.0, 45.0,0.0}, false,127.0,1.0,true, 6.5,150.0,0.0,0,{2.0,0.5}));
+  // move_start(move_types::tank_point, tank_point_params({72.0, 39.0,0.0}, false,127.0,1.0,true, 6.5,150.0,0.0,1000,{2.0,0.5}));
+  // move_start(move_types::turn_angle, turn_angle_params(0.0));
+  // move_start(move_types::tank_point, tank_point_params({72.0, 30.0,0.0}, false,127.0,1.0,true, 6.5,150.0,0.0,1000,{2.0,0.5}));
+  // move_start(move_types::tank_point, tank_point_params({72.0, 45.0,0.0}, false,127.0,1.0,true, 6.5,150.0,0.0,0,{2.0,0.5}));
   // move_start(move_types::turn_angle, turn_angle_params(-100.0));
   
 
