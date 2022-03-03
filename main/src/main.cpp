@@ -138,7 +138,7 @@ void opcontrol() {
 
 
 	// drivebase.move(0,0);
-	b_claw_p.set_value(1);
+	// b_claw_p.set_value(1);
 	// b_lift.move_absolute(200);
 	// while(true){ //
 	// 	printf("%d, current: %d\n", millis(), b_lift.motor.get_current_draw());
@@ -147,7 +147,7 @@ void opcontrol() {
 	// f_claw_p.set_value(1);
 	// flatten_against_wall();
 	// while(true); 
-	f_claw_p.set_value(1);
+	// f_claw_p.set_value(1);
 	// f_lift.move_absolute(150,100);
 
 	// lrt_auton();
@@ -155,7 +155,7 @@ void opcontrol() {
 	int time = millis();
 	// blue_lowside();
 	// skills();
-	// skills2();
+	skills2();
 	new_skills3();
 	master.print(0,0, " TIME: %d", millis() - time);
 	misc.print(" TIME: %d", millis() -time);
