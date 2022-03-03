@@ -118,17 +118,47 @@ void opcontrol() {
 		delay(10);
 		// GUI::update();
 	}
+// 	b_claw_p.set_value(1);
+// 	b_lift.move_absolute(460);
+// 	while(b_lift.motor.get_position() < 380)delay(10);
+//   int safety_check = 0;
+//   tracking_imp.print("%d|| Start wall allign\n", millis());
+//   drivebase.set_state(1);
+// 	drivebase.move(-80.0,0.0);
+
+// 	while((fabs(tracking.l_velo) < 2.0 ||fabs(tracking.r_velo) < 2.0) && safety_check < 20){
+// 		safety_check++;
+//     misc.print(" reset things %.2f, %.2f\n",fabs(tracking.l_velo), fabs(tracking.r_velo));
+// 		delay(10);
+// 	}
+// 	cycleCheck(fabs(tracking.l_velo) <1.0 && fabs(tracking.r_velo) < 1.0, 4,10);
+// 	drivebase.move(-20.0,0.0);
+// 	printf("%d|| Done all allign\n", millis());
+// 	while(true)delay(10);
+
+
+	// drivebase.move(0,0);
+	b_claw_p.set_value(1);
+	// b_lift.move_absolute(200);
+	// while(true){ //
+	// 	printf("%d, current: %d\n", millis(), b_lift.motor.get_current_draw());
+	// 	delay(10);
+	// }
 	// f_claw_p.set_value(1);
+	// flatten_against_wall();
+	// while(true); 
+	f_claw_p.set_value(1);
 	// f_lift.move_absolute(150,100);
 
 	// lrt_auton();
 	// blue_highside_tall();
 	int time = millis();
 	// blue_lowside();
-	skills();
-	skills2();
+	// skills();
+	// skills2();
+	new_skills3();
 	master.print(0,0, " TIME: %d", millis() - time);
-	misc.print(0,0, " TIME: %d", millis() -time);
+	misc.print(" TIME: %d", millis() -time);
 	// f_lift.move(-10);
 	// move_start(move_types::tank_rush, tank_rush_params({0.0,40.0,0.0},false, 127.0,1.0,true,150.0,0.0,10.0));
 	// move_start(move_types:: tank_point, tank_point_params({0.0,40.0,0.0}, false, 127.0,1.0,true,6.0,150.0,0.0,0));

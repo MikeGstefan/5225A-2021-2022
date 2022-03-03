@@ -18,6 +18,8 @@
 
 void skills();
 void skills2();
+void new_skills3();
+
 void skills3();
 void skills4();
 void skillsPark();

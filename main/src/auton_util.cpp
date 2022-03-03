@@ -66,12 +66,13 @@ void flatten_against_wall(bool front){
 
 void b_detect_goal(){ 
   // cycleCheck(b_dist.get() > 80 && b_dist.get() < 90, 5, 33);
-  while(b_dist.get() > 70){ 
+  while(tracking.move_complete)delay(10);
+  while(b_dist.get() > 70 && !tracking.move_complete){ 
     misc.print("looking for edge: %d\n", b_dist.get());
     delay(33);
   }
   int successCount = 0;
-    while (successCount < 2){
+    while (successCount < 2&& !tracking.move_complete){
         if (b_dist.get() > 75 && b_dist.get() < 90) {
           successCount++;
           misc.print("found: %d count: %d\n", b_dist.get(), successCount);
