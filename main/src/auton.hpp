@@ -30,6 +30,26 @@ void blue_highside();
 void blue_highside_tall();
 void blue_lowside();
 
+enum autos{
+  auto1,
+  auto2,
+  auto3,
+  auto4,
+  NUM_OF_ELEMENTS =4
+};
+
+extern autos cur_auto;
+
+const string auto_names[] = {
+  "skill ",
+  "high  ",
+  "center",
+  "low   "
+};
+
+void autonFile_read();
+void auto_select();
+
 namespace Autons{
   constexpr bool normal = true;
 

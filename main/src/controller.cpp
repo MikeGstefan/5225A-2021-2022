@@ -34,6 +34,7 @@ controller_digital_e_t f_lift_release_button = DIGITAL_UP;
 // misc buttons
 controller_digital_e_t cancel_button = DIGITAL_L2;
 controller_digital_e_t ok_button = DIGITAL_LEFT;
+controller_digital_e_t tracking_button = DIGITAL_RIGHT;
 
 
 std::array<_Controller*, num_controller> _Controller::objs; //= {nullptr};

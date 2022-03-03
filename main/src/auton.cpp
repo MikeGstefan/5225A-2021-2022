@@ -578,6 +578,7 @@ void blue_highside(){
   move_start(move_types::turn_angle, turn_angle_params(-90.0));
   drivebase.brake();
   delay(100);
+  move_start(move_types::turn_angle, turn_angle_params(-90.0));
   move_start(move_types::tank_point, tank_point_params({128.0,35.0,-90.0}, false,127.0,1.0,true,9.0,150.0,0.0,0,{1.0,0.5}),false);
   b_detect_goal();
   move_stop();
@@ -725,10 +726,10 @@ namespace Autons{
     Data::log_t.data_update();
     file.open(file_name, fstream::out | fstream::trunc);
     pos_file.open(pos_file_name, fstream::out | fstream::trunc);
-    file << auton_names[static_cast<int>(cur_auton)] << std::endl;
-    file << alliance_names[static_cast<int>(cur_alliance)] << std::endl;
-    pos_file << start_pos_names[static_cast<int>(cur_start_pos)] << std::endl;
-    pos_file << goal_names[static_cast<int>(cur_goal)] << std::endl;
+    file << static_cast<int>(cur_auton) << std::endl;
+    file << static_cast<int>(cur_alliance) << std::endl;
+    pos_file << static_cast<int>(cur_start_pos) << std::endl;
+    pos_file << static_cast<int>(cur_goal) << std::endl;
     file.close();
     pos_file.close();
     Data::log_t.done_update();
@@ -901,4 +902,57 @@ namespace Autons{
     }
   }
 
+}
+
+FILE* autoFile = NULL;
+autos cur_auto;
+
+void autonFile_read(){
+  Data::log_t.data_update();
+  autoFile = fopen("/usd/auto.txt","r");
+  if(autoFile==NULL) {printf("could not open logfile\n"); return;}
+  else printf("logfile found\n");
+  int file_auto;
+  if(autoFile != NULL){
+    fscanf(autoFile, "%d", &file_auto);
+    cur_auto = static_cast<autos>(file_auto);
+  }
+  if(autoFile != NULL) fclose(autoFile);
+  Data::log_t.done_update();
+  master.print(0,0,"%s\n", auto_names[(int)cur_auto].c_str());
+  delay(500);
+}
+
+void auto_select(){
+  // void autonFile_read();
+  master.print(0,0," HERE");
+  delay(1000);
+  while(true){
+     if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_B)){
+        // auto_increase();
+        // menu_update();
+        // cur_auto++;
+        cur_auto = next_enum_value(cur_auto);
+        master.print(2,2,"%s\n", auto_names[(int)cur_auto].c_str());
+      }
+      if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_X)){
+        
+        cur_auto = previous_enum_value(cur_auto);
+        master.print(2,2,"%s\n", auto_names[(int)cur_auto].c_str());
+        // auto_decrease();
+        // menu_update();
+      }
+      // if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_Y)) side_select = true;
+      if(master.get_digital_new_press(ok_button)){
+        // auto_set = true;
+        autoFile = fopen("/usd/auto.txt","w");
+        //char name[80]  = auto_names[static_cast<int>(cur_auto)];
+        if(autoFile != NULL){
+          fprintf(autoFile, "%d", static_cast<int>(cur_auto));
+          fclose(autoFile);
+          return;
+        }
+        // done = true;
+      }
+  }
 }

@@ -247,8 +247,8 @@ void Drivebase::driver_practice(){
 
   // master.print(1, 0, "Driver: %s", drivebase.drivers[drivebase.cur_driver].name);
   master.print(0, 0, "Forward");
-  master.print(B_LIFT_STATE_LINE, 0, "B_Lift: Searching     ");
-  master.print(F_LIFT_STATE_LINE, 0, "F_Lift: Searching     ");
+  // master.print(B_LIFT_STATE_LINE, 0, "B_Lift: Searching     ");
+  // master.print(F_LIFT_STATE_LINE, 0, "F_Lift: Searching     ");
 
 
   // initializes pneumatics in appropriate state
@@ -267,9 +267,12 @@ void Drivebase::driver_practice(){
   // master.print(2, 0, "Driver: %s", driver_name());
   while(true){
     while(true){
-
+      if(master.get_digital_new_press(tracking_button)){
+        master.print(1,1,"%.2f, %.2f, %.2f", tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle));
+      }
       if(master.get_digital_new_press(ok_button)){
-        Autons::selector();
+        // Autons::selector();
+        auto_select();
       }
       drivebase.handle_input();
       // b_lift.handle();

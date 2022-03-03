@@ -38,6 +38,7 @@ extern controller_digital_e_t shift_button;
 extern controller_digital_e_t intake_button;
 extern controller_digital_e_t reverse_drive_button;
 extern controller_digital_e_t ok_button;
+extern controller_digital_e_t tracking_button;
 
 #define num_controller 2
 
