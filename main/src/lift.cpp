@@ -1,13 +1,22 @@
 #include "lift.hpp"
 
 //4-bar
+#if game
+array<int, 5> f_lift_pos= {20, 200, 475, 630, 800};
+#else
 array<int, 4> f_lift_pos= {20, 200, 475, 630};
+#endif
 int f_lift_index = 0;
 int f_lift_time = 0;
 bool f_claw_state = false;
 
 //6bar
-array<int, 4> b_lift_pos= {20,460, 600, 675};
+#if game
+array<int, 5> b_lift_pos= {20,460, 600, 675, 950};
+#else
+array<int, 4> b_lift_pos= {20, 200, 475, 630};
+#endif
+
 int b_lift_index = 0;
 int b_lift_time = 0;
 bool looking = false;
@@ -101,8 +110,8 @@ void handle_lifts(){
 
     if(partner.get_digital_new_press(partner_intk_reverse)){
       intk_state = 0;
-      reverse_state = !reverse_state;
-      intk.move(-127*reverse_state);
+      // reverse_state = !reverse_state;
+      intk.move(-127);
     }
 
     
