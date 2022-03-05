@@ -9,6 +9,8 @@ array<int, 4> f_lift_pos= {20, 200, 475, 630};
 int f_lift_index = 0;
 int f_lift_time = 0;
 bool f_claw_state = false;
+int partner_f_time = 0;
+
 
 //6bar
 #if game
@@ -19,6 +21,7 @@ array<int, 4> b_lift_pos= {20, 200, 475, 630};
 
 int b_lift_index = 0;
 int b_lift_time = 0;
+int partner_b_time = 0;
 bool looking = false;
 bool found = false;
 int find_count = 0;
@@ -108,7 +111,7 @@ void handle_lifts(){
         master.print(0,0,"INTAKE");
       }
 
-    if(partner.get_digital_new_press(partner_intk_reverse)){
+    if(partner.get_digital_new_press(partner_intk_reverse) && f_lift_index != 0){
       intk_state = 0;
       // reverse_state = !reverse_state;
       intk.move(-127);
@@ -192,10 +195,35 @@ void handle_lifts(){
       }
 
       if(game){
-        if(partner.get_digital_new_press(partner_f_up))f_lift_inc();
-        if(partner.get_digital_new_press(partner_f_down))f_lift_dec();
-        if(partner.get_digital_new_press(partner_b_up))b_lift_inc();
-        if(partner.get_digital_new_press(partner_b_down))b_lift_dec();
+        if(partner.get_digital_new_press(partner_f_up)){
+          f_lift_inc();
+          partner_f_time = millis();
+        }
+        if(partner.get_digital_new_press(partner_f_down)){
+          f_lift_dec();
+          partner_f_time = millis();
+        }
+        if(partner.get_digital_new_press(partner_b_up)){
+          b_lift_inc();
+          partner_b_time = millis();
+        }
+        if(partner.get_digital_new_press(partner_b_down)){
+          b_lift_dec();
+          partner_b_time = millis();
+        }
+
+        if(partner.get_digital(partner_f_up) &&!partner.get_digital(partner_f_down) && millis() - partner_f_time > 300){
+          f_lift_index = f_lift_pos.size()-1;
+        }
+        if(partner.get_digital(partner_f_down) &&!partner.get_digital(partner_f_up) && millis() - partner_f_time > 300){
+          f_lift_index = 0;
+        }
+        if(partner.get_digital(partner_b_up) &&!partner.get_digital(partner_b_down) && millis() - partner_b_time > 300){
+          b_lift_index = b_lift_pos.size()-1;
+        }
+        if(partner.get_digital(partner_b_down) &&!partner.get_digital(partner_b_up) && millis() - partner_b_time > 300){
+          b_lift_index = 0;
+        }
       }
 
       if(!game && partner.get_digital_new_press(lift_up_button) ){
@@ -209,6 +237,7 @@ void handle_lifts(){
         if(get_lift()){
           f_claw_p.set_value(0);
           f_claw_state = false;
+           f_lift_time = millis();
         }
         else{
           b_claw_p.set_value(0);
@@ -217,7 +246,7 @@ void handle_lifts(){
       }
 
       if(f_lift_index == 0){
-        if(f_touch.get_value() && millis() - f_lift_time > 750 && !f_claw_state){
+        if(f_touch.get_value() && millis() - f_lift_time > 1000 && !f_claw_state){
           f_claw_p.set_value(1);
           f_lift_time = millis();
           f_lift_index = 1;
