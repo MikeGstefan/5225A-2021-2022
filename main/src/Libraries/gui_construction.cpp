@@ -52,7 +52,7 @@ Text pos_ally_name(MID_X, 200, GUI::Style::CENTRE, TEXT_MEDIUM, pos_auto_selecti
 Page track ("Tracking"); //Display tracking vals and reset btns
 Text track_x(50, 45, GUI::Style::CENTRE, TEXT_SMALL, track, "X:%.1f", tracking.x_coord);
 Text track_y(135, 45, GUI::Style::CENTRE, TEXT_SMALL, track, "Y:%.1f", tracking.y_coord);
-Text track_a(220, 45, GUI::Style::CENTRE, TEXT_SMALL, track, "A:%d", std::function([](){return tracking.get_angle_in_deg();}));
+Text track_a(220, 45, GUI::Style::CENTRE, TEXT_SMALL, track, "A:%.1f", std::function([](){return tracking.get_angle_in_deg();}));
 Text enc_l(50, 130, GUI::Style::CENTRE, TEXT_SMALL, track, "L:%d", left_enc);
 Text enc_r(135, 130, GUI::Style::CENTRE, TEXT_SMALL, track, "R:%d", right_enc);
 Text enc_b(220, 130, GUI::Style::CENTRE, TEXT_SMALL, track, "B:%d", back_enc);

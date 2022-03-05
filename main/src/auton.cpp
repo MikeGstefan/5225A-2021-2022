@@ -598,12 +598,17 @@ void blue_highside_tall(){
     // f_lift.move(-10);
   // });
   // drivebase.set_state(1);
-  move_start(move_types::tank_rush, tank_rush_params({71.0,71.0,30.0},false), false);
+  int time = millis();
+  move_start(move_types::tank_rush, tank_rush_params({73.0,71.0,30.0},false), false);
+  // move_start(move_types::tank_point, tank_point_params({71.0,71.0,30.0}), false);
+
   // delay(200);
   // drivebase.set_state(0);
   f_lift.reset();
   f_lift.move(-10);
+  // f_detect_goal();
   move_wait_for_complete();
+  master.print(2,2,"time: %d", millis() - time);
   // drivebase.set_state(0);
   move_start(move_types::tank_point, tank_point_params({91.0,35.0,30.0}, false,127.0,1.0,true,9.0,150.0,0.0,0,{2.0,0.5}),false);
   detect_interference();
@@ -616,6 +621,7 @@ void blue_highside_tall(){
   move_start(move_types::tank_point, tank_point_params({128.0,35.0,-90.0}, false,100.0,1.0,true,9.0,150.0,0.0,0,{2.0,0.5}),false);
   b_detect_goal();
   move_stop();
+  motion_i.print("motion interrupted at %.2f %.2f %.2f\n", tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle));
   delay(200);
   intk.move(50);
   delay(2000);

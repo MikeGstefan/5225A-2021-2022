@@ -272,7 +272,9 @@ void Drivebase::driver_practice(){
       }
       if(master.get_digital_new_press(ok_button)){
         // Autons::selector();
+        master.print(1,1,"HERE");
         auto_select();
+        delay(2000);
       }
       drivebase.handle_input();
       // b_lift.handle();

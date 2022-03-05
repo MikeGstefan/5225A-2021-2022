@@ -99,7 +99,7 @@ void f_detect_goal(){
   //       misc.print("looking: %d\n", f_dist.get());
   //       delay(33);
   //   }
-  while(!f_touch.get_value())delay(10);
+  while(!f_touch.get_value()&& !tracking.move_complete)delay(10);
   misc.print("Detected %d\n", f_dist.get());
   f_claw_p.set_value(1);
 }
