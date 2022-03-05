@@ -562,10 +562,11 @@ void blue_highside(){
   
 
 
-  move_start(move_types::tank_rush, tank_rush_params({108.0,71.0,0.0}, false),false);
-  // f_lift.reset();
-  // f_lift.move(-10);
-  // f_detect_goal();
+  // move_start(move_types::tank_rush, tank_rush_params({108.0,71.0,0.0}, false),false);
+  move_start(move_types::tank_point, tank_point_params({108.0,71.0,0.0}),false);
+  f_lift.reset();
+  f_lift.move(-10);
+  f_detect_goal();
   move_wait_for_complete();
   // f_lift.move_absolute(150,100);
   // intk.move(10);
