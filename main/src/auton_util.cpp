@@ -86,7 +86,7 @@ void b_detect_goal(){
 
 
 
-void f_detect_goal(){ 
+void f_detect_goal(bool safety){ 
   // cycleCheck(b_dist.get() > 80 && b_dist.get() < 90, 5, 33);
   // while(f_dist.get() > 70){ 
   //   misc.print("looking for edge: %d\n", f_dist.get());
@@ -99,7 +99,13 @@ void f_detect_goal(){
   //       misc.print("looking: %d\n", f_dist.get());
   //       delay(33);
   //   }
-  while(!f_touch.get_value()&& !tracking.move_complete)delay(10);
+  if(safety){ 
+    while(!f_touch.get_value()&& !tracking.move_complete)delay(10);
+  }
+  else{
+    while(!f_touch.get_value())delay(10);
+  }
+  
   misc.print("Detected %d\n", f_dist.get());
   f_claw_p.set_value(1);
 }

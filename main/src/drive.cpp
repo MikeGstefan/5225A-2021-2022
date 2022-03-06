@@ -254,12 +254,15 @@ void Drivebase::driver_practice(){
   // initializes pneumatics in appropriate state
 
   // moves motors to necessary positions / speeds
-  b_lift.reset();
-  b_lift.move_absolute(b_lift.bottom_position);
-  f_lift.reset();
-  f_lift.move_absolute(f_lift.bottom_position);
-  f_claw_p.set_value(LOW);
-  b_claw_p.set_value(LOW);
+  // Task([](){ 
+    b_lift.reset();
+    b_lift.move_absolute(b_lift.bottom_position);
+    f_lift.reset();
+    f_lift.move_absolute(f_lift.bottom_position);
+  // });
+  
+  // f_claw_p.set_value(LOW);
+  // b_claw_p.set_value(LOW);
   // lift.move(-10); // gives holding power
   bool intake_on = false;
   bool intake_reverse = false;

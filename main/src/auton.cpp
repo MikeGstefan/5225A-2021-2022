@@ -563,11 +563,16 @@ void blue_highside(){
 
 
   // move_start(move_types::tank_rush, tank_rush_params({108.0,71.0,0.0}, false),false);
+  move_start(move_types::tank_point, tank_point_params({108.0,57.0,0.0}));
+  delay(100);
+  move_start(move_types::turn_point, turn_point_params({108.0,71.0}));
+  delay(100);
   move_start(move_types::tank_point, tank_point_params({108.0,71.0,0.0}),false);
   f_lift.reset();
   f_lift.move(-10);
   f_detect_goal();
-  move_wait_for_complete();
+
+  // move_wait_for_complete();
   // f_lift.move_absolute(150,100);
   // intk.move(10);
   move_stop();
@@ -600,14 +605,17 @@ void blue_highside_tall(){
   // });
   // drivebase.set_state(1);
   int time = millis();
+  // move_start(move_types::tank_rush, tank_rush_params({73.0,71.0,30.0},false), false);
+  move_start(move_types::tank_point, tank_point_params({83.0,59.0,30.0}));
+  delay(100);
+  move_start(move_types::turn_point, turn_point_params({73,71}));
+  delay(100);
   move_start(move_types::tank_rush, tank_rush_params({73.0,71.0,30.0},false), false);
-  // move_start(move_types::tank_point, tank_point_params({71.0,71.0,30.0}), false);
-
   // delay(200);
   // drivebase.set_state(0);
   f_lift.reset();
   f_lift.move(-10);
-  // f_detect_goal();
+  f_detect_goal();
   move_wait_for_complete();
   master.print(2,2,"time: %d", millis() - time);
   // drivebase.set_state(0);
@@ -624,63 +632,58 @@ void blue_highside_tall(){
   move_stop();
   motion_i.print("motion interrupted at %.2f %.2f %.2f\n", tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle));
   delay(200);
-  intk.move(50);
+  intk.move(127);
   delay(2000);
 }
 
 void blue_lowside(){
-  // tracking.x_coord = 24.5, tracking.y_coord = 15.0, tracking.global_angle = 9.0_deg;
-
-
-
-  move_start(move_types::tank_rush, tank_rush_params({35.0,71.0,9.0}, false),false);
-  f_lift.reset();
-  f_lift.move(-10);
-  b_lift.reset();
-  b_lift.move(-5);
-  // f_detect_goal();
-  move_wait_for_complete();
-  // f_lift.move_absolute(150,100);
-  // intk.move(10);
+  Task([](){
+    f_lift.reset();
+    b_lift.reset();
+    f_lift.move_absolute(10);
+    b_lift.move_absolute(10);
+  });
+  
+  move_start(move_types::tank_point, tank_point_params({36.0,11.75,-90.0},false),false); // grabs blue on platform
+	b_detect_goal();
+	move_stop();
+  // intk.move(127);
+	// drivebase.brake();
+	move_start(move_types::tank_arc, tank_arc_params({tracking.x_coord, tracking.y_coord}, {20.5, 39.0,20.0},127.0,127.0,false));//arc to face neut goal
+  move_start(move_types::turn_point, turn_point_params({36.5, 72.0}));
+  delay(50);
+	move_start(move_types::tank_point, tank_point_params({34.5,72.0,  45.0},false, 80.0,1.0,true,9.0,130.0),false);// drive throught neut goal
+  f_detect_goal(false);
+  f_lift.move_absolute(150);
+  // intk.move(127);
   move_stop();
-  move_start(move_types::tank_point, tank_point_params({18.0,18.0,0.0}, false,127.0,1.0,true,9.0,150.0,0.0,0,{2.0,0.5}),false);
-  detect_interference();
-  misc.print("%d||here\n",millis());
-  move_wait_for_complete();
-  f_lift.move_absolute(60,100);
-  move_start(move_types::turn_angle, turn_angle_params(-60.0,true, true,150.0,0.0,80));
-  drivebase.brake();
-  delay(100);
-  move_start(move_types::tank_point, tank_point_params({35.0,14.0,-60.0}, false,80.0),false);
-  b_detect_goal();
-  move_stop();
-   f_lift.move_absolute(150,100);
-  drivebase.brake();
-  intk.move(50);
+  // drivebase.move(0.0,0.0);
+  intk.move(127);
+  move_start(move_types::tank_point, tank_point_params({34.0, 20.0,-90.0}));
+
   
 }
 
 void lrt_auton(){
-  move_start(move_types::tank_point, tank_point_params({108.0,71.0,0.0}),false);
-  f_lift.reset();
-  f_lift.move(-10);
+  Task([](){
+    f_lift.reset();
+    b_lift.reset();
+    f_lift.move_absolute(10);
+    b_lift.move_absolute(10);
+  });
+  
+  move_start(move_types::tank_point, tank_point_params({36.0,11.75,-90.0},false),false); // grabs blue on platform
+	b_detect_goal();
+	move_stop();
+	// drivebase.brake();
+	move_start(move_types::tank_arc, tank_arc_params({tracking.x_coord, tracking.y_coord}, {20.5, 39.0,20.0},127.0,127.0,false));//arc to face neut goal
+  move_start(move_types::turn_point, turn_point_params({36.5, 72.0}));
+  delay(50);
+	move_start(move_types::tank_point, tank_point_params({34.5,72.0,  45.0},false, 80.0,1.0,true,9.0,130.0),false);// drive throught neut goal
   f_detect_goal();
-  f_lift.move_absolute(150,100);
-  // intk.move(10);
+  f_lift.move_absolute(150);
+  // intk.move(127);
   move_stop();
-  // drivebase.move(0,0);
-  move_start(move_types::tank_point, tank_point_params({116.0,46.0,-45.0}),false);
-  // move_start(move_types::turn_point, turn_point_params({130.0,35.0}));
-  move_start(move_types::turn_angle, turn_angle_params(rad_to_deg(atan2(130.0 - tracking.x_coord, 35.0 - tracking.y_coord))+180.0));
-
-  drivebase.brake();
-  delay(100);
-  move_start(move_types::tank_point, tank_point_params(polar_to_vector_point(116.0,46.0,-20.0, rad_to_deg(tracking.global_angle), rad_to_deg(tracking.global_angle)), false,90.0,1.0,true,9.0,150.0,0.0,0,{0.5,1.0}),false);
-  b_detect_goal();
-  move_stop();
-  drivebase.brake();
-  intk.move(50);
-  while(true)delay(10);
 }
 
 //From gui_construction.cpp (for autons)

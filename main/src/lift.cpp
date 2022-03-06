@@ -10,7 +10,7 @@ int f_lift_index = 0;
 int f_lift_time = 0;
 bool f_claw_state = false;
 int partner_f_time = 0;
-
+bool f_lift_manual = false;
 
 //6bar
 #if game
@@ -127,6 +127,7 @@ void handle_lifts(){
         else{
           b_lift_inc();
         }
+        f_lift_manual = false;
 
       }
 
@@ -139,6 +140,7 @@ void handle_lifts(){
         else{
           b_lift_dec();
         }
+        f_lift_manual = false;
       }
 
       if(master.get_digital(lift_up_button) && !master.get_digital(lift_down_button) && millis() - up_press_time > 300){ //
@@ -151,6 +153,7 @@ void handle_lifts(){
             // b_lift.move_absolute(b_lift_pos[b_lift_index]);
         }
         up_press_time = millis();
+        f_lift_manual = false;
       }
       // lowers lift to bottom height when down button is held
       if(master.get_digital(lift_down_button) && !master.get_digital(lift_up_button) && millis() - down_press_time > 300){ //
@@ -166,6 +169,7 @@ void handle_lifts(){
             b_lift_index = 0;
             // b_lift.move_absolute(b_lift_pos[b_lift_index]);
         }
+        f_lift_manual = false;
         down_press_time = millis();
       }
 
@@ -177,7 +181,7 @@ void handle_lifts(){
         // f_lift.move_absolute(f_lift_pos[f_lift_index]);
         intk_state = 0;
         intk.move(127*intk_state);
-
+        f_lift_manual = false;
         up_press_time = millis();
         down_press_time = millis();
       }
@@ -190,6 +194,7 @@ void handle_lifts(){
           b_lift_index = 0;
         // b_lift.move_absolute(b_lift_pos[b_lift_index]);
         f_lift_index = 0;
+        f_lift_manual = false;
         // f_lift.move_absolute(f_lift_pos[f_lift_index]);
 
       }
@@ -198,31 +203,39 @@ void handle_lifts(){
         if(partner.get_digital_new_press(partner_f_up)){
           f_lift_inc();
           partner_f_time = millis();
+          f_lift_manual = false;
         }
         if(partner.get_digital_new_press(partner_f_down)){
           f_lift_dec();
           partner_f_time = millis();
+          f_lift_manual = false;
         }
         if(partner.get_digital_new_press(partner_b_up)){
           b_lift_inc();
           partner_b_time = millis();
+          f_lift_manual = false;
         }
         if(partner.get_digital_new_press(partner_b_down)){
           b_lift_dec();
           partner_b_time = millis();
+          f_lift_manual = false;
         }
 
         if(partner.get_digital(partner_f_up) &&!partner.get_digital(partner_f_down) && millis() - partner_f_time > 300){
           f_lift_index = f_lift_pos.size()-1;
+          f_lift_manual = false;
         }
         if(partner.get_digital(partner_f_down) &&!partner.get_digital(partner_f_up) && millis() - partner_f_time > 300){
           f_lift_index = 0;
+          f_lift_manual = false;
         }
         if(partner.get_digital(partner_b_up) &&!partner.get_digital(partner_b_down) && millis() - partner_b_time > 300){
           b_lift_index = b_lift_pos.size()-1;
+          f_lift_manual = false;
         }
         if(partner.get_digital(partner_b_down) &&!partner.get_digital(partner_b_up) && millis() - partner_b_time > 300){
           b_lift_index = 0;
+          f_lift_manual = false;
         }
       }
 
@@ -230,6 +243,7 @@ void handle_lifts(){
         b_lift_index = b_lift_pos.size() -1;
         // b_lift.move_absolute(b_lift_pos[b_lift_index]);
         f_lift_index = f_lift_pos.size() -1;
+        f_lift_manual = false;
       }
 
 
@@ -283,8 +297,11 @@ void handle_lifts(){
       }
 
 
-
-      b_error = b_lift_pos[b_lift_index] - b_lift.motor.get_position();
+      if(fabs(partner.get_analog(ANALOG_LEFT_Y)) > 20){
+        f_lift_manual = true;
+      }
+      if(!f_lift_manual){
+        b_error = b_lift_pos[b_lift_index] - b_lift.motor.get_position();
       if(fabs(b_error)  > 10){
         b_power = b_pid.compute(-b_error, 0.0);
         b_lift.move(b_power);
@@ -302,6 +319,17 @@ void handle_lifts(){
       else{ //
         f_lift.motor.move_velocity(0);
       }
+      }
+      else{ 
+        if(fabs(partner.get_analog(ANALOG_LEFT_Y)) > 20){
+          if((partner.get_analog(ANALOG_LEFT_Y) > 0 && f_lift.motor.get_position() < 900)|| (partner.get_analog(ANALOG_LEFT_Y) < 0 && f_lift.motor.get_position() >10 ))f_lift.move(partner.get_analog(ANALOG_LEFT_Y));
+          else f_lift.motor.move_velocity(0);
+        }
+        else f_lift.motor.move_velocity(0);
+      }
+
+
+      
 
       if(!intk_pos && f_lift_index == 0 && fabs(f_error)  < 10 && !started_pos){
         intk.move(-20);
