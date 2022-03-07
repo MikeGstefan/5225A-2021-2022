@@ -653,13 +653,15 @@ void blue_lowside(){
   move_start(move_types::turn_point, turn_point_params({36.5, 72.0}));
   delay(50);
 	move_start(move_types::tank_point, tank_point_params({34.5,72.0,  45.0},false, 80.0,1.0,true,9.0,130.0),false);// drive throught neut goal
-  f_detect_goal(false);
+  delay(100);
+  f_detect_goal();
   f_lift.move_absolute(150);
   // intk.move(127);
   move_stop();
   // drivebase.move(0.0,0.0);
   intk.move(127);
-  move_start(move_types::tank_point, tank_point_params({34.0, 20.0,-90.0}));
+  move_start(move_types::tank_point, tank_point_params({34.0, 20.0,-90.0}), false);
+  detect_interference();
 
   
 }
