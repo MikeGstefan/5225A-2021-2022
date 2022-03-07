@@ -45,6 +45,7 @@ namespace Autons{
   extern alliances cur_alliance;
   extern goals cur_goal;
 
+  void file_read();
   void next_route();
   void prev_route();
   void next_start_pos();

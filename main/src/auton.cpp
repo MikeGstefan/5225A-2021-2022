@@ -600,67 +600,6 @@ namespace Autons{
     Data::log_t.done_update();
   }
 
-  void file_read(){
-    //A lot of unnecessary safeties in here. Will remove later
-    Data::log_t.data_update();
-    file.open(file_name, fstream::in);
-    pos_file.open(pos_file_name, fstream::in);
-    master.clear();
-
-    if (pros::usd::is_installed()){
-      if (!file){//File doesn't exist
-        file.close();
-        GUI::flash("Auton File not found!");
-        printf("\033[92mTrying to create new Auton File.\033[0m\n");
-        file_update();
-        file.open(file_name, fstream::in);
-      }
-      if (!pos_file){//File doesn't exist
-        pos_file.close();
-        GUI::flash("Pos Auton File not found!");
-        printf("\033[92mTrying to create new Position Auton File.\033[0m\n");
-        file_update();
-        pos_file.open(pos_file_name, fstream::in);
-      }
-    }
-    else{
-      GUI::flash("No SD Card!");
-      printf("\033[31mNo SD card inserted.\033[0m Using default auton, start position, goal and alliance.\n");
-
-      //Might not be needed
-      cur_auton = autons::DEFAULT;
-      cur_start_pos = start_pos::DEFAULT;
-      cur_goal = goals::DEFAULT;
-      cur_alliance = alliances::DEFAULT;
-      switch_alliance(cur_alliance);
-      return;
-    }
-
-    char auton[10];
-    char start[10];
-    char goal[10];
-    char ally[5];
-    file.getline(auton, 10);
-    file.getline(ally, 5);
-    pos_file.getline(start, 10);
-    pos_file.getline(goal, 10);
-    file.close();
-    pos_file.close();
-    Data::log_t.done_update();
-
-    const char** autonIt = std::find(auton_names, auton_names+static_cast<int>(autons::NUM_OF_ELEMENTS), auton);
-    const char** startIt = std::find(start_pos_names, start_pos_names+static_cast<int>(start_pos::NUM_OF_ELEMENTS), start);
-    const char** goalIt = std::find(goal_names, goal_names+static_cast<int>(goals::NUM_OF_ELEMENTS), goal);
-    const char** allianceIt = std::find(alliance_names, alliance_names+2, ally);
-    
-    cur_auton = autonIt != std::end(auton_names) ? static_cast<autons>(std::distance(auton_names, autonIt)) : autons::DEFAULT;
-    cur_start_pos = startIt != std::end(start_pos_names) ? static_cast<start_pos>(std::distance(start_pos_names, startIt)) : start_pos::DEFAULT;
-    cur_goal = goalIt != std::end(goal_names) ? static_cast<goals>(std::distance(goal_names, goalIt)) : goals::DEFAULT;
-    cur_alliance = allianceIt != std::end(alliance_names) ? static_cast<alliances>(std::distance(alliance_names, allianceIt)) : alliances::DEFAULT;
-
-    switch_alliance(cur_alliance);
-  }
-
   void save_change(std::string which){
     std::string val;
     int line;
@@ -686,6 +625,93 @@ namespace Autons{
     events.print("\n\nSwitched %s to %s\n\n", which.c_str(), val.c_str());
     master.print(line, 0, "%s: %s          ", which.c_str(), val.c_str());
     file_update();
+  }
+
+  void file_read(){
+    if (!pros::usd::is_installed()){
+      GUI::flash("No SD Card!");
+      printf("\033[31mNo SD card inserted.\033[0m Using default auton, start position, goal and alliance.\n");
+
+      //Might not be needed
+      cur_auton = autons::DEFAULT;
+      cur_start_pos = start_pos::DEFAULT;
+      cur_goal = goals::DEFAULT;
+      cur_alliance = alliances::DEFAULT;
+      return;
+    }
+    else{
+      Data::log_t.data_update();
+      file.open(file_name, fstream::in);
+      pos_file.open(pos_file_name, fstream::in);
+      master.clear();
+
+      if (!file){ //File doesn't exist
+        file.close();
+        GUI::flash("Auton File not found!");
+        file_update();
+        
+        printf("\033[92mCreated new Auton File.\033[0m\n");
+        file.open(file_name, fstream::in);
+      }
+      if (!pos_file){ //Pos File doesn't exist
+        pos_file.close();
+        GUI::flash("Pos Auton File not found!");
+        file_update();
+        
+        printf("\033[92mCreated new Position Auton File.\033[0m\n");
+        pos_file.open(pos_file_name, fstream::in);
+      }
+
+      char auton[10];
+      char start[10];
+      char goal[10];
+      char ally[5];
+      file.getline(auton, 10);
+      file.getline(ally, 5);
+      pos_file.getline(start, 10);
+      pos_file.getline(goal, 10);
+      file.close();
+      pos_file.close();
+      Data::log_t.done_update();
+
+      const char** autonIt = std::find(auton_names, auton_names+static_cast<int>(autons::NUM_OF_ELEMENTS), auton);
+      const char** startIt = std::find(start_pos_names, start_pos_names+static_cast<int>(start_pos::NUM_OF_ELEMENTS), start);
+      const char** goalIt = std::find(goal_names, goal_names+static_cast<int>(goals::NUM_OF_ELEMENTS), goal);
+      const char** allianceIt = std::find(alliance_names, alliance_names+2, ally);
+      
+      if(autonIt == std::end(auton_names)){
+        printf("\033[31mInvalid Auton Name in file. Using Default\033[0m\n");
+        cur_auton = autons::DEFAULT;
+      }
+      else cur_auton = static_cast<autons>(std::distance(auton_names, autonIt));
+
+      if(startIt == std::end(start_pos_names)){
+        printf("\033[31mInvalid Auton Name in file. Using Default\033[0m\n");
+        cur_start_pos = start_pos::DEFAULT;
+      }
+      else cur_start_pos = static_cast<start_pos>(std::distance(start_pos_names, startIt));
+
+      if(goalIt == std::end(goal_names)){
+        printf("\033[31mInvalid Auton Name in file. Using Default\033[0m\n");
+        cur_goal = goals::DEFAULT;
+      }
+      else cur_goal = static_cast<goals>(std::distance(goal_names, goalIt));
+
+      if(allianceIt == std::end(alliance_names)){
+        printf("\033[31mInvalid Auton Name in file. Using Default\033[0m\n");
+        cur_alliance = alliances::DEFAULT;
+      }
+      else cur_alliance = static_cast<alliances>(std::distance(alliance_names, allianceIt));
+    }
+
+    Colour new_colour = cur_alliance == alliances::BLUE ? COLOUR(BLUE) : COLOUR(RED);
+    alliance.set_background(new_colour);
+    pos_alliance.set_background(new_colour);
+    
+    save_change("auton");
+    save_change("start_pos");
+    save_change("goal");
+    save_change("alliance");
   }
 
   void prev_route(){
@@ -737,11 +763,13 @@ namespace Autons{
   } 
 
   void selector(){
-    file_read();
     if(normal){
       auto_selection.go_to();
       while (true){
-        if(master.get_digital_new_press(ok_button)) return;
+        if(master.get_digital_new_press(ok_button)){
+          master.clear();
+          return;
+        }
         else if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_L1)) prev_route();
         else if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_R1)) next_route();
         else if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_X)) switch_alliance();
@@ -752,7 +780,10 @@ namespace Autons{
     else{
       pos_auto_selection.go_to();
       while (true){
-        if(master.get_digital_new_press(ok_button)) return;
+        if(master.get_digital_new_press(ok_button)){
+          master.clear();
+          return;
+        }
         else if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_L1)) prev_start_pos();
         else if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_R1)) next_start_pos();
         else if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_X)) switch_alliance();

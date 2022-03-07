@@ -43,6 +43,7 @@ void initialize() {
 	Data::init();
 	_Controller::init();
 	GUI::init();
+	Autons::file_read();
 	delay(500);
 	// tracking.x_coord = 26.0, tracking.y_coord = 11.75, tracking.global_angle = -90.0_deg;
 	// tracking.x_coord = 104.0, tracking.y_coord = 12.0, tracking.global_angle = -30.0_deg;
