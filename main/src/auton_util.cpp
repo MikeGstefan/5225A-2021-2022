@@ -1,6 +1,8 @@
 #include "auton_util.hpp"
+// #include "logging.hpp"
 
-Gyro gyro(imu_sensor);
+Reset_dist reset_dist_r(&r_dist, 7.5);
+Reset_dist reset_dist_l(&l_dist, 7.5);
 
 double get_filtered_output(ADIUltrasonic sensor, int check_count, uint16_t lower_bound, uint16_t upper_bound, int timeout){
   Timer timer{"Timer"};
@@ -9,176 +11,137 @@ double get_filtered_output(ADIUltrasonic sensor, int check_count, uint16_t lower
   long total_input;
   uint16_t input;
   double filtered_output;
-  while(timer.get_time() < timeout && success_count < check_count){
+  waitUntil(timer.get_time() > timeout || success_count > check_count){
     input = sensor.get_value();
-    if (lower_bound <= input <= upper_bound){
+    if (inRange(input, lower_bound, upper_bound)){ //This used to be (lower_bound <= input <= upper_bound). I highly doubt that's what you wanted.
 
       total_input += input;
       printf("input: %d\n", input);
       success_count++;
     }
     else printf("FAILED! input: %d\n", input);
-    delay(10);
   }
   filtered_output = total_input / success_count;
   printf("filtered output: %lf\n", filtered_output);
   return filtered_output;
 }
 
-void flatten_against_wall(bool right){
-  bool front_done, back_done;
-  int front_count = 0, back_count = 0;
-  double front_velocity, back_velocity;
-  const double dist_b = 3.0;  // make sure to keep this same as in tracking
-  const double simulated_radius = 8.0;
-  const double radial_scalar = simulated_radius / dist_b; // how much to multiples the actual radius by to get the simulated radius
-  double angular_component, linear_component;
-  const int cycle_threshold = 20;
-  const double velocity_threshold = 0.5;  // in inches/sec
-  int flatten_power, power_diff;
+void flatten_against_wall(bool front, int cycles){ 
+  int safety_check = 0;
+  //bool to + -
+  int direction = (static_cast<int>(front)*2)-1;
+  tracking_imp.print("%d|| Start wall allign\n", millis());
 
-  if(right) flatten_power = 60, power_diff = 20;
-  else  flatten_power = -60, power_diff = -20;
+	drivebase.move(50.0*direction,0.0);
 
-  delay(100); // waits for robots velocity to rise
-  drivebase.move(flatten_power, 0.0, 0.0);
-
-  // while(!(front_done && back_done)){
-  while(true){
-    drivebase.handle_input();
-    angular_component = tracking.g_velocity.angle * dist_b;
-    linear_component = tracking.b_velo + angular_component;
-
-    back_velocity = linear_component - angular_component * radial_scalar;
-    front_velocity = linear_component + angular_component * radial_scalar;
-
-    printf("Velocities | back: %lf, front: %lf\n", back_velocity, front_velocity);
-
-    if (fabs(front_velocity) < velocity_threshold){
-      front_done = front_count > cycle_threshold;
-      if(!front_done) front_count++;
-    }
-    else{ // resets front counter if robot is moving
-      front_done = false;
-      front_count = 0;
-    }
-
-      back_done = back_count > cycle_threshold;
-    if (fabs(back_velocity) < velocity_threshold){
-      if(!back_done) back_count++;
-    }
-    else{ // resets back counter if robot is moving
-      back_done = false;
-      back_count = 0;
-    }
-
-    if(front_done) drivebase.move(flatten_power, 0.0, -power_diff); // turn back end to align with wall if front is aligned
-    else if(back_done) drivebase.move(flatten_power, 0.0, power_diff); //  turn front end to align with wall if back is aligned
-    else drivebase.move(flatten_power, 0.0, 0.0); // otherwise continune towards wall
-
-  }
-    delay(10);
+	while((fabs(tracking.l_velo) < 2.0 ||fabs(tracking.r_velo) < 2.0) && safety_check < 12){
+		safety_check++;
+    misc.print(" reset things %.2f, %.2f\n",fabs(tracking.l_velo), fabs(tracking.r_velo));
+		delay(10);
+	}
+	cycleCheck(fabs(tracking.l_velo) <1.0 && fabs(tracking.r_velo) < 1.0, cycles,10);
+	drivebase.move(20.0*direction,0.0);
+	printf("%d|| Done all allign\n", millis());
 }
-void find_goal_lift(bool move_stop_b){
-  while(!lift_trigger.get_value()){//NEED TO ADD SAFETY
+
+// double get_front_dist(){
+//   double avg = 0.0;
+//   int count = 0;
+//   while(true){ 
+//     // for(int i = 0; i < 3; i++){
+//     if(front_dist.get() > 10){
+//       avg+= front_dist.get();
+//       count++;
+//     }
+//     if(count > 2){
+//       avg/=count;
+//       break;
+//     }
+//     delay(34);
+//   }
+//   return ((avg/25.4) +front_dist_dist);
   
-    delay(10);
+// }
 
-  }
-	lift_piston.set_value(HIGH);
-  if(move_stop_b)move_stop();
-}
-
-void find_goal_tilter(int delay_t){
-    while(tilter_dist.get() > 70){
-    log_d.print("tilter d: %f\n", tilter_dist.get());
+void b_detect_goal(){ 
+  // cycleCheck(b_dist.get() > 80 && b_dist.get() < 90, 5, 33);
+  while(tracking.move_complete)delay(10);
+  while(b_dist.get() > 70 && !tracking.move_complete){ 
+    misc.print("looking for edge: %d\n", b_dist.get());
     delay(33);
   }
-  log_d.print("%d | grabbing goal 2 at: (%.2f, %.2f, %.2f)\n",millis(),tracking.x_coord, tracking.y_coord,rad_to_deg(tracking.global_angle));
-  delay(delay_t);
-  tilter_top_piston.set_value(0);
-  delay(100);
-  tilter_bottom_piston.set_value(1);
-  delay(200);
-  tilter.move_absolute(300);
-  
-}
-double get_front_dist(){
-  double avg = 0.0;
-  int count = 0;
-  while(true){ 
-    // for(int i = 0; i < 3; i++){
-    if(front_dist.get() > 10){
-      avg+= front_dist.get();
-      count++;
+  int successCount = 0;
+    while (successCount < 2&& !tracking.move_complete){
+        if (b_dist.get() > 75 && b_dist.get() < 90) {
+          successCount++;
+          misc.print("found: %d count: %d\n", b_dist.get(), successCount);
+        }
+        else successCount = 0;
+        misc.print("looking: %d\n", b_dist.get());
+        delay(33);
     }
-    if(count > 2){
-      avg/=count;
+  misc.print("Detected %d\n", b_dist.get());
+  b_claw_p.set_value(1);
+}
+
+
+
+void f_detect_goal(bool safety){ 
+  // cycleCheck(b_dist.get() > 80 && b_dist.get() < 90, 5, 33);
+  // while(f_dist.get() > 70){ 
+  //   misc.print("looking for edge: %d\n", f_dist.get());
+  //   delay(33);
+  // }
+  // int successCount = 0;
+  //   while (successCount < 2){
+  //       if (f_dist.get() > 70 && f_dist.get() < 90) successCount++;
+  //       else successCount = 0;
+  //       misc.print("looking: %d\n", f_dist.get());
+  //       delay(33);
+  //   }
+  if(safety){ 
+    while(!f_touch.get_value()&& !tracking.move_complete)delay(10);
+  }
+  else{
+    while(!f_touch.get_value())delay(10);
+  }
+  
+  misc.print("Detected %d\n", f_dist.get());
+  f_claw_p.set_value(1);
+}
+
+
+void detect_interference(){ 
+  int time = millis();
+  while(move_t.get_task_ptr()->get_state()!= 4){
+    //numbers need funnyimh
+    if(millis()-time > 1500 && fabs(tracking.g_velocity.y) < 2.0){
+      drivebase.set_state(1);
+      master.print(1,1,"PULLING");
+      misc.print("%d || TUG DETECTED\n",millis());
       break;
     }
-    delay(34);
+    else if(millis()-time > 1500 && fabs(tracking.g_velocity.y) > 3.0){
+      break;
+    }
+    delay(10);
   }
-  return ((avg/25.4) +front_dist_dist);
-  
 }
 
-Gyro::Gyro(Imu& imu): inertial(imu){}
+Reset_dist::Reset_dist(pros::Distance* sensor, double dist_from_center): sensor{sensor}, dist_from_center{dist_from_center}{}
 
-double Gyro::get_angle() {
-  angle = GYRO_SIDE*inertial.GYRO_AXIS();
-  return angle;
-}
-
-void Gyro::calibrate(){
-  inertial.reset();
-}
-
-void Gyro::finish_calibrating(){
-	while (imu_sensor.is_calibrating()){
-		printf("Calibrating Gyro...\n");
-		delay(10);
-	}
-	printf("Done Calibrating Gyro\n");
-}
-
-void Gyro::climb_ramp(){
-  finish_calibrating(); //Makes sure it's calibrated before starting (should already be)
-	inertial.tare_roll();
-  inertial.tare_pitch();
-
-	drivebase.move_tank(127, 0);
-	waitUntil(fabs(get_angle()) > 22)
-	printf("ON RAMP\n");
-
-  //Drive forward the equivalent of 400 encoder units
-
-  // double start_position = l1.get_position(); //Change to tracking
-  // waitUntil(l1.get_position() > start_position+400)
-}
-
-void Gyro::level(double kP, double kD){
-	double last_angle=0;
-	std::uint32_t steady_time = 0, last_steady_time = 0;
-	PID gyro_pid(kP, 0, kD, 0);
-  int speed;
-
-	while(true){
-    get_angle();
-    speed = gyro_pid.compute(-angle, 0);
-		drivebase.move_tank(speed, 0);
-		printf("Angle: %f   Speed: %d  \n", angle, speed); //Get rid of speed var
-
-    //Use timer class
-		if (fabs(angle-last_angle) > 0.6) last_steady_time = millis(); //Unsteady, Resets the last known steady time
-		else if (fabs(angle) < 6 && steady_time > 450) break; //If within range to be level and steady on ramp
-
-		if (master.interrupt(true, false)) return;
-
-		steady_time = millis()-last_steady_time;
-		last_angle = angle;
-		delay(10);
-	}
-
-	printf("\nLevelled on ramp\n\n\n");
-	drivebase.brake();
+double Reset_dist::get_dist(){
+  double avg = 0.0;
+  int count = 0;
+  while(count < Reset_dist::cycles){
+    if(this->sensor->get() > Reset_dist::thresh){
+      count++;
+      avg += this->sensor->get();
+      misc.print("%d || Dist in reset %f count %d\n", millis(), (double)this->sensor->get()/25.4, count);
+    }
+    delay(33);
+  }
+  //find averaeg, convert to inches
+  misc.print("%d || reset %f\n",millis(), (avg/count)/25.4);
+  return ((avg/count)/25.4) + this->dist_from_center;
 }

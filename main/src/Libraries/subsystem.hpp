@@ -3,6 +3,7 @@
 #include "../timer.hpp"
 #include "../config.hpp"
 #include "../controller.hpp"
+// #include "../drive.hpp"
 
 
 
@@ -24,7 +25,7 @@ public:
   {}
 
   void set_state(const state_type next_state){
-    printf("%s | Going from %s to %s\n", name, state_names[static_cast<int>(state)], state_names[static_cast<int>(next_state)]);
+    motion_d.print("%s | Going from %s to %s\n", name, state_names[static_cast<int>(state)], state_names[static_cast<int>(next_state)]);
     last_state = state;
     state = next_state;
   }
@@ -79,13 +80,12 @@ public:
     motor.move(-60);
     Timer vel_rise_timeout("vel_rise");
     // waits for motor's velocity to rise or timeout to trigger
-    while(fabs(motor.get_actual_velocity()) < 45.0){
+    waitUntil(fabs(motor.get_actual_velocity()) > 45.0){
       printf("%s's velocity is (rising loop): %lf\n", this->name, motor.get_actual_velocity());
       if (vel_rise_timeout.get_time() > 200){
         printf("%s's rising loop timed out\n", this->name);
         break;
       }
-      delay(10);
     }
     printf("%s's velocity done rising\n", this->name);
     // waits until motors velocity slows down for 5 cycles

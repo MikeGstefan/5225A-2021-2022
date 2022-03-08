@@ -1,23 +1,27 @@
 #pragma once
-#include "../Subsystems/lift.hpp"
+// #include "../Subsystems/lift.hpp"
 #include "../auton.hpp"
 #include "../drive.hpp"
 #include "../util.hpp"
 #include "../include/pros/apix.h"
 #include <bitset>
-// #include <cstdio>
-// #include <iostream>
-// #include <vector>
 
 // Forward-Declaration
 class GUI;
 class Page;
 class Button;
 class Slider;
-template <typename V=std::nullptr_t> class _Text;
+template <typename V=std::nullptr_t> class Text;
 
 //For main.cpp to switch between
 extern GUI g_main, g_util;
+
+
+//From gui.cpp
+extern Page terminal, testing;
+extern Button testing_button_1, testing_button_2;
+extern Text<> testing_text_1, testing_text_2;
+extern Slider testing_slider;
 
 typedef std::uint32_t Colour;
 #define COLOUR(NAME) (Colour)COLOR_##NAME
@@ -42,17 +46,12 @@ typedef std::uint32_t Colour;
 #define CHAR_HEIGHT_LARGE 32
 #define CHAR_WIDTH_LARGE 19
 
-//For gui to use
-extern int ring_count;
-extern const char* alliance_names[];
-extern const char* auton_names[];
-
 class GUI{
   friend class Page;
   friend class Button;
   friend class Slider;
-  friend class Text;
-  template <typename V> friend class _Text;
+  friend class Text_;
+  template <typename V> friend class Text;
 
   public:
     enum class Style{ //how the rect coords get evaluated
@@ -66,34 +65,35 @@ class GUI{
     //Vars
     static bool touched;
     static int x, y;
-    static Page* current_page;
-    static GUI* const current_gui;
+    static const Page* current_page;
+    static const GUI* current_gui;
     static constexpr bool go_enabled=true;
+    static constexpr bool testing_page_active=false;
     std::vector<Page*> pages;
     std::function <void()> setup, background;
 
     //Functions
     static void update_screen_status();
     static void go_next(), go_prev();
+    static void screen_terminal_fix();
     static void end_flash();
-    static void draw_oblong(int, int, int, int, const double, const double);
+    static void draw_oblong(int, int, int, int, double, double);
     static int get_size(text_format_e_t, std::string);
     static std::tuple<int, int, int, int> fix_points(int, int, int, int, Style);
 
   public:
-
-    //Constructor
+    //Pages in the gui, init function, loop function
     GUI(std::vector<Page*>, std::function <void()>, std::function <void()>);
 
     //Functions
     static void aligned_coords (int, int, int, int, int = 480, int = 220);
     static void flash(Colour, std::uint32_t, const char*, ...);
-    static void flash(Colour, std::uint32_t, std::string = "");
+    static void flash(std::string = "", std::uint32_t = 1000, Colour = COLOUR(RED));
     static bool go(std::string, std::string, std::uint32_t=0), go_end(std::string, std::uint32_t=0);
     static void clear_screen(Colour=GREY);
     static void init(), update();
     static void go_to(int);
-    const bool pressed();
+    bool pressed() const;
 };
 
 //All constructor args are in the format points, format, page, Text, Colour
@@ -101,8 +101,8 @@ class Page{
   friend class GUI;
   friend class Button;
   friend class Slider;
-  friend class Text;
-  template <typename V> friend class _Text;
+  friend class Text_;
+  template <typename V> friend class Text;
   private:
 
     //Vars
@@ -113,33 +113,36 @@ class Page{
     std::vector<GUI*> guis; //Parents
     std::vector<Button*> buttons; //Children
     std::vector<Slider*> sliders; //Children
-    std::vector<Text*> texts; //Children
+    std::vector<Text_*> texts; //Children
 
     //Functions
-    static Page* const page_id(int);
-    static const int page_num(Page*);
-    const void draw();
-    const void update();
+    static Page* page_id(int);
+    static int page_num(const Page*);
+    void draw() const;
+    void update() const;
 
   public:
     //Title, Bcolour
     explicit Page(std::string, Colour = GREY);
 
     //Functions
-    const bool pressed();
-    const void go_to();
+    bool pressed() const;
+    void go_to() const;
     void set_setup_func(std::function <void()>), set_loop_func(std::function <void()>);
     void set_active(bool=true);
 };
 
-class Text{
+//Text parent class
+class Text_{
   friend class GUI;
   friend class Page;
   friend class Button;
+  private:
+  int x1=USER_RIGHT, y1=USER_DOWN, x2=USER_LEFT, y2=USER_UP;
 
   protected:
     //Vars
-    int x, y, x1=USER_RIGHT, y1=USER_DOWN, x2=USER_LEFT, y2=USER_UP;
+    int x, y;
     text_format_e_t txt_fmt;
     std::string label;
     Colour l_col, b_col=GREY;
@@ -148,69 +151,41 @@ class Text{
     bool active = true;
 
     //Functions
-    const virtual void update() = 0;
-    virtual void draw() = 0;
+    virtual void update() = 0;
+    virtual int update_val(char* const buffer) = 0;
+    void draw();
 
   public:
     //Functions
-    void set_background(int, int, Colour = 0xFFFFFFFF);
+    void set_background(int, int, Colour = 0xFFFFFFFF); //Centre
     void set_background(int, int, int, int, GUI::Style, Colour = 0xFFFFFFFF);
     void set_background(Colour);
     void set_active(bool=true);
 };
 
-template <typename V> class _Text: public Text{
+template <typename V>
+class Text: public Text_{
   friend class Button;
   friend class Slider;
   private:
-    _Text(){};
+    Text(){};
 
     //Vars
-    V prev_value=0;
-    std::function<V()> get_value;
+    std::remove_const_t<V> prev_value;
+    std::function<V()> value;
 
     //Functions
-    const void update() override {
-      if (get_value && active && prev_value != get_value()) draw();
+    void update() override {
+      if (active && value && prev_value != value()) draw();
     }
-    void draw() override {
-      if (!active) return;
-      char buffer [100];
-      int length;
-
-      if(get_value){
-        prev_value = get_value();
-        length = snprintf(buffer, 100, label.c_str(), prev_value);
+    int update_val(char* const buffer) override {
+      if(value){
+        prev_value = value();
+        return snprintf(buffer, 100, label.c_str(), prev_value);
       }
-      else length = snprintf(buffer, 100, label.c_str());
-
-      if (x2 != 0 && y2 != 0){
-        screen::set_eraser(page->b_col); //Erases previous box
-        screen::erase_rect(x1, y1, x2, y2);
-
-        screen::set_pen(b_col);
-        GUI::draw_oblong(x1, y1, x2, y2, 0, 0.15);
-        screen::set_pen(l_col);
-        screen::set_eraser(b_col);
-      }
-      else{
-        screen::set_pen(l_col);
-        screen::set_eraser(b_col);
-      }
-
-      int x_coord = x, y_coord = y;
-      if (type == GUI::Style::CENTRE){
-        x_coord -= (length*GUI::get_size(txt_fmt, "width"))/2;
-        y_coord -= GUI::get_size(txt_fmt, "height")/2;
-      }
-      x1 = min(x1, x_coord); //Resizes the background so it won't have overwriting issues
-      x2 = max(x2, x_coord + length*(GUI::get_size(txt_fmt, "width")+1));
-      y1 = min(y1, y_coord);
-      y2 = max(y2, y_coord + GUI::get_size(txt_fmt, "height"));
-
-      screen::print(txt_fmt, x_coord, y_coord, "%s", buffer);
+      return snprintf(buffer, 100, label.c_str());
     }
-    void construct (int x, int y, GUI::Style type, text_format_e_t txt_fmt, Page* page, std::string label, const std::function<V()>& get_value, Colour l_col){
+    void construct (int x, int y, GUI::Style type, text_format_e_t txt_fmt, Page* page, std::string label, std::function<V()> value, Colour l_col){
       static_assert(!std::is_same_v<V, std::string>, "Text variable cannot be std::string, it causes unknown failures");
       this->x = x;
       this->y = y;
@@ -218,81 +193,47 @@ template <typename V> class _Text: public Text{
       this->txt_fmt = txt_fmt;
       this->page = page;
       this->label = label;
-      this->get_value = get_value;
+      this->value = value;
       this->l_col = l_col;
       this->b_col = page->b_col;
       page->texts.push_back(this);
-    }
+    } 
 
   public:
     //Points, Format, Page, Label, [var info], Lcolour
 
+    // Terminal - no format
+    Text (std::string text, V& value_obj, Colour label_colour = COLOUR(WHITE)){
+      construct (5, 0, GUI::Style::CORNER, E_TEXT_LARGE_CENTER, &terminal, text, [&](){return value_obj;}, label_colour);
+    }
+
+    // Terminal - format
+    Text (std::string text, V& value_obj, text_format_e_t size, Colour label_colour = COLOUR(WHITE)){
+      construct (5, 0, GUI::Style::CORNER, size, &terminal, text, [&](){return value_obj;}, label_colour);
+    }
+
     //No var
-    _Text (int x, int y, GUI::Style rect_type, text_format_e_t size, Page& page, std::string text, Colour label_colour = COLOUR(WHITE))
-    {
+    Text (int x, int y, GUI::Style rect_type, text_format_e_t size, Page& page, std::string text, Colour label_colour = COLOUR(WHITE)){
       construct (x, y, rect_type, size, &page, text, nullptr, label_colour);
     }
 
     //Variable
-    template <typename = typename std::enable_if_t<!std::is_array_v<V>, void>> //Array types not allowed here
-    _Text (int x, int y, GUI::Style rect_type, text_format_e_t size, Page& page, std::string text, const V& val, Colour label_colour = COLOUR(WHITE))
-    {
-      construct (x, y, rect_type, size, &page, text, [&](){return val;}, label_colour);
+    Text (int x, int y, GUI::Style rect_type, text_format_e_t size, Page& page, std::string text, V& value_obj, Colour label_colour = COLOUR(WHITE)){
+      construct (x, y, rect_type, size, &page, text, [&](){return value_obj;}, label_colour);
     }
 
     //Array
-    template <typename I, typename = typename std::enable_if_t<!std::is_same_v<I, Colour>, void>> //Don't let I be a colour
-    _Text (int x, int y, GUI::Style rect_type, text_format_e_t size, Page& page, std::string text, const V* array, const I& index, Colour label_colour = COLOUR(WHITE))
-    {
-      static_assert(std::is_scalar_v<I>, "Text Index type must be int-convertible");
-      construct (x, y, rect_type, size, &page, text, [&index, array](){return array[static_cast<int>(index)];}, label_colour);
-    }
-
-    //STL random access containers {vector, array, deque...}
-    template <typename Container, typename = typename std::enable_if_t<std::is_base_of_v<typename std::random_access_iterator_tag, typename std::iterator_traits<typename Container::iterator>::iterator_category>, void>>
-    _Text (int x, int y, GUI::Style rect_type, text_format_e_t size, Page& page, std::string text, Container& c, const typename Container::size_type& index, Colour label_colour = COLOUR(WHITE))
-    {
-      static_assert(std::is_scalar_v<Container::size_type>, "Text Index type must be int-convertible");
-      construct (x, y, rect_type, size, &page, text, [&](){return c[static_cast<int>(index)];}, label_colour);
-    }
-
-    //STL random access associative containers {map, unordered_map...}
-    template <typename Container, typename = typename std::enable_if_t<std::is_base_of_v<typename std::forward_iterator_tag, typename std::iterator_traits<typename Container::iterator>::iterator_category>, void>>
-    _Text (int x, int y, GUI::Style rect_type, text_format_e_t size, Page& page, std::string text, Container& c, const typename Container::key_type& index, Colour label_colour = COLOUR(WHITE))
-    {
-      construct (x, y, rect_type, size, &page, text, [&](){return c[index];}, label_colour);
+    template <typename I>
+    Text (int x, int y, GUI::Style rect_type, text_format_e_t size, Page& page, std::string text, V* value_arr, I& index, Colour label_colour = COLOUR(WHITE)){
+      construct (x, y, rect_type, size, &page, text, [value_arr, &index](){return value_arr[static_cast<int>(index)];}, label_colour);
     }
 
     //Function
-    _Text (int x, int y, GUI::Style rect_type, text_format_e_t size, Page& page, std::string text, V (*const func)(), Colour label_colour = COLOUR(WHITE))
-    {
+    Text (int x, int y, GUI::Style rect_type, text_format_e_t size, Page& page, std::string text, const std::function<V()>& func, Colour label_colour = COLOUR(WHITE)){
       construct (x, y, rect_type, size, &page, text, func, label_colour);
     }
 
-    //Member Functions
-    template <class Class>
-    _Text (int x, int y, GUI::Style rect_type, text_format_e_t size, Page& page, std::string text, V (Class::* const func)(), Class& object, Colour label_colour = COLOUR(WHITE))
-    {
-      construct (x, y, rect_type, size, &page, text, [&](){return (object.*func)();}, label_colour);
-    }
-
-    //Const Member Functions
-    template <class Class>
-    _Text (int x, int y, GUI::Style rect_type, text_format_e_t size, Page& page, std::string text, V (Class::* const func)() const, Class& object, Colour label_colour = COLOUR(WHITE))
-    {
-      construct (x, y, rect_type, size, &page, text, [&](){return (object.*func)();}, label_colour);
-    }
-
 };
-
-//Deduction Guides
-template <typename Container>
-_Text(int x, int y, GUI::Style rect_type, text_format_e_t size, Page& page, std::string text, Container& c, const typename Container::size_type& index, Colour label_colour = COLOUR(WHITE)) -> _Text<typename Container::value_type>;
-
-template <typename Container>
-_Text(int x, int y, GUI::Style rect_type, text_format_e_t size, Page& page, std::string text, Container& c, const typename Container::key_type& index, Colour label_colour = COLOUR(WHITE)) -> _Text<typename Container::mapped_type>;
-
-
 class Button{
   friend class GUI;
   friend class Page;
@@ -313,8 +254,8 @@ class Button{
     int x1, y1, x2, y2, text_x, text_y, text_x1, text_y1;
     bool last_pressed=0;
     press_type form; //What type of button
-    std::function <void()> func, off_func;
-    Text* title = nullptr;
+    std::function<void()> func, off_func;
+    Text_* title = nullptr;
     bool active=true;
     Page* page;
 
@@ -325,9 +266,12 @@ class Button{
     //Functions
     void update();
     void construct (int, int, int, int, GUI::Style, press_type, Page*, std::string, Colour, Colour);
-    const void run_func(), run_off_func();
-    const void draw();
-    const void draw_pressed();
+    void run_func() const;
+    void run_off_func() const;
+    void draw() const;
+    void draw_pressed()  const;
+    bool new_press();
+    bool new_release();
 
   public:
     //Points, Format, Page, Label, Bcolour, Lcolour
@@ -335,13 +279,11 @@ class Button{
 
     //Functions
     static void create_options(std::vector<Button*>);
-    const bool pressed();
+    bool pressed() const;
     void set_func(std::function <void()>), set_off_func(std::function <void()>);
     void set_active(bool=true);
     void set_background (Colour);
-    void add_text (Text&, bool=true);
-    bool new_press();
-    bool new_release();
+    void add_text (Text_&, bool=true);
     void wait_for_press(); //Blocking
 };
 
@@ -363,12 +305,12 @@ class Slider{
     bool active=true;
     Page* page;
     Button dec, inc;
-    _Text<int> title;
-    _Text<std::nullptr_t> min_title, max_title;
+    Text<int> title;
+    Text<std::nullptr_t> min_title, max_title;
 
     //Functions
     void update();
-    const void draw();
+    void draw() const;
 
   public:
     //Points, Format, Min, Max, Page, Label, Bcolour, Lcolour
@@ -376,7 +318,7 @@ class Slider{
 
     //Functions
     void set_active(bool=true);
-    const int get_value();
-    const bool pressed();
+    int get_value() const;
+    bool pressed() const;
 
 };

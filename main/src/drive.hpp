@@ -1,12 +1,20 @@
 #pragma once
+#include <array>
+
 #include "Tracking.hpp"
 #include "util.hpp"
 #include "logging.hpp"
-#include "Subsystems/lift.hpp"
-#include "Subsystems/tilter.hpp"
 #include "auton_util.hpp"
+#include "Libraries/gui.hpp"
+#include "lift.hpp"
+
+#include "Subsystems/b_lift.hpp"
+#include "Subsystems/f_lift.hpp"
 
 using namespace pros;
+using namespace std;
+
+#define game true
 
 // aliases to make code more readable, used to encode vales of drive.cur_driver
 // enum class drivers{Nikhil = 0, Emily = 1, Sarah = 2};
@@ -16,6 +24,11 @@ using namespace pros;
 //   delay(drivebase.screen_timer.get_time() < 50 ? 50 - drivebase.screen_timer.get_time() : 0);\
 //   drivebase.screen_timer.reset();\
 // }
+
+enum class lift_button{
+  front = 1,
+  back = 0,
+};
 
 class custom_drive{
   int lookup_table[255];
@@ -44,9 +57,10 @@ struct driver{
 class Drivebase{
   bool reversed; // if false forwards is the intake side
   int cur_screen;
-  int deadzone = 5;
+  int deadzone = 10;
   const char* screen_text[3] = {"LOCAL_X CURVE:", "LOCAL_Y CURVE:", "LOCAL_A CURVE:"};
   void update_screen();
+  bool state;//state for the transmission
 
 public:
   int cur_driver = 0;  // driver defaults to Nikhil rn
@@ -59,10 +73,12 @@ public:
 
   // 'set-drive' methods
   void move(double x, double y, double a);
+  void move(double y, double a);
   void move_tank(double y, double a);
   void move_side(double l, double r);
 
   void brake();
+  void velo_brake();
   void download_curve_data(); // grabs data from SD card and copies to driver arrays
   void update_lookup_table_util();  // utility to alter expo curves for any driver
   void handle_input();  // move the drivebase according to lookup tables from a joystick input
@@ -71,6 +87,21 @@ public:
   void next_driver(); //Goes to next driver. Called on drivebase object.
   void prev_driver(); //Goes to previous driver. Called on drivebase object.
   const char* driver_name(); //Returns the current driver's name
+
+  //returns the current state of the transmission
+  bool get_state();
+  void set_state(bool state);
+  //handles controller input for the transmission
+  void handle_trans();
+
+  bool get_reverse();
+  int get_deadzone();
+  // bool get_lift_button(int side = 0);
 };
+
+
+
+
+
 
 extern Drivebase drivebase;
