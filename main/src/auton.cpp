@@ -600,6 +600,14 @@ namespace Autons{
     Data::log_t.done_update();
   }
 
+  void file_reset(){
+    cur_auton = autons::DEFAULT;
+    cur_start_pos = start_pos::DEFAULT;
+    cur_goal = goals::DEFAULT;
+    cur_alliance = alliances::DEFAULT;
+    if (pros::usd::is_installed()) file_update();
+  }
+
   void save_change(std::string which){
     std::string val;
     int line;
@@ -631,12 +639,7 @@ namespace Autons{
     if (!pros::usd::is_installed()){
       GUI::flash("No SD Card!");
       printf("\033[31mNo SD card inserted.\033[0m Using default auton, start position, goal and alliance.\n");
-
-      //Might not be needed
-      cur_auton = autons::DEFAULT;
-      cur_start_pos = start_pos::DEFAULT;
-      cur_goal = goals::DEFAULT;
-      cur_alliance = alliances::DEFAULT;
+      file_reset();
       return;
     }
     else{
@@ -765,7 +768,7 @@ namespace Autons{
   void selector(){
     if(normal){
       auto_selection.go_to();
-      while (true){
+      waitUntil (false){
         if(master.get_digital_new_press(ok_button)){
           master.clear();
           return;
@@ -773,13 +776,11 @@ namespace Autons{
         else if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_L1)) prev_route();
         else if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_R1)) next_route();
         else if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_X)) switch_alliance();
-
-        delay(10);
       }
     }
     else{
       pos_auto_selection.go_to();
-      while (true){
+      waitUntil (false){
         if(master.get_digital_new_press(ok_button)){
           master.clear();
           return;
@@ -789,8 +790,6 @@ namespace Autons{
         else if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_X)) switch_alliance();
         else if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_L2)) prev_goal();
         else if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_R2)) next_goal();
-
-        delay(10);
       }
     }
   }
