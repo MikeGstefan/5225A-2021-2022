@@ -1562,7 +1562,7 @@ void Gyro::finish_calibrating(){
 }
 
 void Gyro::climb_ramp(){
-  std::function<double(double)> scale = func_scale([](double x){return pow(x, 4);}, {0, 0}, {25, 125}, 10);
+  std::function<double(double)> scale = func_scale([](double x){return sgn(x)*pow(fabs(x), 1.0/7.0);}, {10, 0}, {25, 130}, -22); //Need the sgn thing cuz pow cant handle negatives
   drivebase.set_state(HIGH);
   finish_calibrating(); //Makes sure it's calibrated before starting (should already be)
   inertial.tare_roll();
@@ -1576,7 +1576,7 @@ void Gyro::climb_ramp(){
       velo = (gyro.get_angle() - last)/(millis() - time);
       time = millis();
       last = gyro.get_angle();
-      speed = scale(constrain(gyro.angle, 10., 23.));
+      speed = scale(constrain(gyro.angle, 10.0, 23.0));
       motion_i.print("%d || Speed: %d, Angle_v: %f, Angle: %f dist %d\n", speed, millis(), velo, gyro.angle, r_reset_dist.get());
       delay(10);
     }
@@ -1588,8 +1588,11 @@ void Gyro::climb_ramp(){
   waitUntil(get_angle() > 22)
   motion_i.print("ON RAMP: %f\n", get_angle());
 
-  drivebase.move_ahead(scale(constrain(get_angle(), 10., 23.)));
-  tracking.wait_for_dist(20);
+  drivebase.move_ahead(scale(constrain(get_angle(), 10.0, 23.0)));
+
+  waitUntil(false);
+
+  // tracking.wait_for_dist(20);
 
   // waitUntil(!inRange(r_reset_dist.get(), 0, 200));
   // GUI::flash(COLOUR(RED), 1000, "Saw wall\n");
