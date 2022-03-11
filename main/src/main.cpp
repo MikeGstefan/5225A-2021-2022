@@ -1,4 +1,5 @@
 
+#include "config.hpp"
 #include "drive.hpp"
 #include "controller.hpp"
 #include "Libraries/gui.hpp"
@@ -7,18 +8,20 @@
 #include "task.hpp"
 #include "auton.hpp"
 #include "auton_util.hpp"
-#include "Subsystem/f_lift.hpp"
-#include "Subsystem/b_lift.hpp"
-#include "vision_loop.hpp"
+#include "Subsystems/f_lift.hpp"
+#include "Subsystems/b_lift.hpp"
+#include "distance.hpp"
 
 // using namespace std;
 #include "task.hpp"
+#include "util.hpp"
+
 #include <fstream>
 #include <sys/wait.h>
 using namespace std;
 
 pros::Task *updt = nullptr;
-GUI* const GUI::current_gui = &g_main;
+const GUI* GUI::current_gui = &g_main;
 
 
 /**
@@ -31,18 +34,46 @@ GUI* const GUI::current_gui = &g_main;
  bool auton_run = false; // has auton run
 
 void initialize() {
-	gyro.calibrate();
+	// gyro.calibrate();
+	// front_l.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
+	// front_r.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
+	// back_l.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
+	// back_r.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
+	// Autons::file_read();
+	autonFile_read();
+	f_lift.motor.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
+	b_lift.motor.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
 	drivebase.download_curve_data();
 	Data::init();
 	_Controller::init();
 	GUI::init();
-	// delay(150);
-	// tracking.x_coord = 26.0, tracking.y_coord = 11.75, tracking.global_angle = -90.0_deg;
-	tracking.x_coord = 70.0, tracking.y_coord = 39.0, tracking.global_angle = 0.0_deg;
+	delay(500);
+	switch(cur_auto){
+		case auto1:
+			tracking.x_coord = 26.0, tracking.y_coord = 11.75, tracking.global_angle = -90.0_deg;
+		break;
+		case auto2:
+			tracking.x_coord = 108.0, tracking.y_coord = 16.0, tracking.global_angle = 0.0_deg;
+		break;
+		case auto3:
+			tracking.x_coord = 106.0, tracking.y_coord = 16.0, tracking.global_angle = 0.0_deg;
+			// tracking.x_coord = 104.0, tracking.y_coord = 12.0, tracking.global_angle = -30.0_deg;
+		break;
+		case auto4:
+			// tracking.x_coord = 24.5, tracking.y_coord = 15.0, tracking.global_angle = 9.0_deg;
+			tracking.x_coord = 26.0, tracking.y_coord = 11.75, tracking.global_angle = -90.0_deg;
+		break; 
+		default:
+			tracking.x_coord = 26.0, tracking.y_coord = 11.75, tracking.global_angle = -90.0_deg;
+		break;
+	}
+	
+	// tracking.x_coord = 104.0, tracking.y_coord = 12.0, tracking.global_angle = -30.0_deg;
+	// tracking.x_coord = 24.5, tracking.y_coord = 15.0, tracking.global_angle = 9.0_deg;
+	// tracking.x_coord = 0.0, tracking.y_coord = 0.0, tracking.global_angle = 0.0_deg;
 	update_t.start();
-	// // auton_file_read();
 	// master.print(2, 0, "Driver: %s", drivebase.drivers[drivebase.cur_driver].name);
-	gyro.finish_calibrating(); //Finishes calibrating gyro before program starts
+	// gyro.finish_calibrating(); //Finishes calibrating gyro before program starts
 }
 
 /**
@@ -75,143 +106,92 @@ void competition_initialize() {}
  * from where it left off.
  */
 void autonomous() {
-	auton_run = true;
-	double x;
-	double y;
-	double a;
-
-	// FILE * fp;
-	// fp = fopen("/usd/init.txt", "r");
-	// fscanf(fp,"%lf %lf %lf",&x,&y,&a);
-
-	// tracking.reset(x,y,rad_to_deg(a));
-	// ring_piston.set_value(0);
-	// lrt_auton();
-
 	// skills();
-	// skills_pt2();
+	switch(cur_auto){
+		case auto1:
+			// tracking.x_coord = 26.0, tracking.y_coord = 11.75, tracking.global_angle = -90.0_deg;
+			skills();
+			skills2();
+			new_skills3();
+		break;
+		case auto2:
+			f_claw_p.set_value(0);
+			b_claw_p.set_value(0);
+			blue_highside();
+		break;
+		case auto3:
+			f_claw_p.set_value(0);
+			b_claw_p.set_value(0);
+			blue_highside_tall();
+			
+		break;
+		case auto4:
+			f_claw_p.set_value(0);
+			b_claw_p.set_value(0);
+			blue_lowside();
+		break; 
+		default:
+			skills();
+			skills2();
+			new_skills3();
+		break;
+	}
 
 }
 
-/**
- * Runs the operator control code. This function will be started in its own task
- * with the default priority and stack size whenever the robot is enabled via
- * the Field Management System or the VEX Competition Switch in the operator
- * control mode.
- *
- * If no competition control is connected, this function will run immediately
- * following initialize().
- *
- * If the robot is disabled or communications is lost, the
- * operator control task will be stopped. Re-enabling the robot will restart the
- * task, not resume it from where it left off.
- */
 
-//Get rid of these once merged
+// extern Slider mot_speed_set;
 
-int ring_count = 0;
-// int ring_count = 0, cur_auton = 1;
-bool claw_state = false, lift_state = false, drive_state = false;
-int lift_speed = 0;
-int safety_check = 0;
 void opcontrol() {
-	
+	move_stop();
+	// while(true){
+	// 	printf("%d\n", b_dist.get());
+	// 	delay(10);
+	// }
+	// f_lift_m.move(40);
+	pros::Task intk_task(intk_c);
+  drivebase.driver_practice();
+  
 	master.clear();
-	b_lift.reset();
-	// b_lift.move(0);
-	drivebase.set_state(HIGH);
+	// b_lift.reset();
+	// Task([](){ 
+	// 	f_lift.reset();
+	// });
+	// f_claw_p.set_value(0);
+	// b_claw_p.set_value(0);
+	// skills();
+	// skills2();
+
+	//Intake Jam code
+	Task([](){
+		Timer intake_t ("intake jam", false);
+		intk.move(127);
+		while(true){
+			if(intake_jam.get_new_press()) intake_t.reset(); //Start timer when pressed
+			else if(!intake_jam.get_value()) intake_t.reset(false); //End timer when unpressed
+			if(intake_t.get_time() > 1000){ //If pressed for more than 1 sec, reverse intk
+				intk.move(-127);
+				waitUntil(!intake_jam.get_value()); //Waits for unjam plus some time
+				delay(150);
+				intk.move(127);
+			}
+			delay(10);
+		}
+	});
+
+
+	Autons::selector();
 
 	while(true){
-		if(master.get_digital_new_press(DIGITAL_Y)){ 
-			master.print(0,0,"%d",BackEncoder.get_value());
-		}
-		if(master.get_digital_new_press(DIGITAL_A)){
-			printf("switching state to %d\n", !claw_state);
-			claw_state = !claw_state;
-			b_claw_p.set_value(claw_state);
-		}
-		if(master.get_digital_new_press(DIGITAL_B)){ 
-			b_lift.move_absolute(10);
-			detect_goal();
-			claw_state = 1;
-			
-		}
-		if(master.get_digital_new_press(DIGITAL_L1)){ 
-			b_lift.move_absolute(300);
-		}
-		if(master.get_digital_new_press(DIGITAL_L2)){ 
-			b_lift.move_absolute(0);
-		}
-		// printf("dist: %d\n", b_dist.get());
-		drivebase.handle_trans();
-		// drivebase.handle_input();
-		if(master.get_digital_new_press(DIGITAL_R1)){ 
-			Timer timer {"timer"};
-			// printf("%f\n",reset_dist_r.get_dist());
-			// reset_dist_r.reset(141.0,0.0 + DIST_BACK,0.0);
-			// skills();
-			//fits platfor to reset
-			/**
-			move_start(move_types::turn_angle, turn_angle_params(90.0));
-			delay(100);
-			move_start(move_types::tank_arc, tank_arc_params({70.0, 95.0}, {122.0,119.0,0.0}));
-			// move_start(move_types::turn_angle, turn_angle_params(0.0));
-			move_start(move_types::tank_point, tank_point_params({122.0,123.0,0.0},false));
-			flatten_against_wall(true);
-			*/
-			f_claw_p.set_value(HIGH);
-			b_claw_p.set_value(HIGH);
-			f_lift.move_absolute(610);
-			b_lift.move_absolute(150);
-			waitUntil(f_lift_m.get_position() > 590);
-			f_lift.move(15);
-
-			waitUntil(master.get_digital_new_press(DIGITAL_R1));
-			int t = millis();
-
-			gyro.climb_ramp();
-			// gyro.level(2.2, 0);
-
-			drivebase.brake();
-			printf("ds:%d\n", millis()-t);
-			delay(5000);
-			waitUntil(false);
-
-			//grab goal on wall 
-
-			/**
-			move_start(move_types::turn_angle, turn_angle_params(-90.0));
-			move_start(move_types::tank_point, tank_point_params({111.0,34.0,-90.0},false,70));
-			delay(500);
-			move_start(move_types::tank_point, tank_point_params({127.0,34.0,-90.0},false, 70),false);
-			detect_goal();
-			move_stop();
-			// drivebase.brake();
-			move_start(move_types::tank_point, tank_point_params({115.0,34.0,-90.0},false));
-			b_lift.move_absolute(650);
-			while(b_lift.motor.get_position() < 630)delay(10);
-			b_lift.move(10);
-			flatten_against_wall(false);
-
-			delay(500);
-			move_start(move_types::tank_point, tank_point_params({117.0,34.0,-90.0},false));
-			b_lift.move_absolute(10);
-			move_start(move_types::turn_point, turn_point_params({70.0,70.0}));
-			delay(50);
-			master.print(0,0,"%d", timer.get_time());
-			delay(10000);
-			*/
-			delay(2000);
-
-		}
-		else{
-			drivebase.handle_input();
-		}
-
-		if(abs(master.get_analog(ANALOG_LEFT_Y))> 20)b_lift.move(master.get_analog(ANALOG_LEFT_Y));
-		// else b_lift.move(10);
+		GUI::update();
+		// drivebase.non_blocking_driver_practice();
 		
-		delay(33);
+		// if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_A)){
+		// 	int speed = mot_speed_set.get_value();
+		// 	move_start(move_types::line, line_params({0.0, 0.0}, {0.0, 24.0, 0.0}, speed));
+		// 	move_start(move_types::turn_angle, turn_angle_params(45.0, speed));
+		// 	move_start(move_types::line, line_params({0.0, 0.0}, {0.0, 24.0, 0.0}, speed));
+		// }
+		delay(10);
 	}
-		
 }

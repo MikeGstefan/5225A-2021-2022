@@ -55,7 +55,12 @@ void _Task::kill(){
   if(this->task_ptr != NULL){
     task_log.print("%d| %s killing\n", millis(), this->name);
     this->task_ptr->notify_ext((int)stop, E_NOTIFY_ACTION_OWRITE,NULL);
-    while(this->task_ptr->get_state()!=4)delay(10);
+    task_log.print("%d| %s notified\n", millis(), this->name);
+    while(this->task_ptr->get_state()!=4){
+      task_log.print("%d| %s state %d\n", millis(), this->name, this->task_ptr->get_state());
+      delay(10);
+    }
+    task_log.print("%d| %s state check passed\n", millis(), this->name);
     delete this->task_ptr;
     this->task_ptr = NULL;
     task_log.print("%d| %s killed\n", millis(), this->name);
@@ -86,7 +91,7 @@ bool _Task::data_update(){
   if(this->task_ptr == NULL ||this->task_ptr->get_state() >=3)return false;
   task_log.print("%d| %s pausing for data\n", millis(), this->name);
   this->task_ptr->notify_ext((int)reset, E_NOTIFY_ACTION_OWRITE,NULL);
-  while(this->task_ptr->get_state()!=3)delay(10);
+  waitUntil (this->task_ptr->get_state()== 3);
   return true;
 }
 
