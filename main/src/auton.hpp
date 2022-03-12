@@ -68,14 +68,15 @@ namespace Autons{
 
   extern const char* start_pos_names[];
   extern const char* auton_names[];
-  extern const char* alliance_names[2];
-  extern const char* goal_names[3];
+  extern const char* alliance_names[];
+  extern const char* goal_names[];
 
   extern autons cur_auton;
   extern start_pos cur_start_pos;
   extern alliances cur_alliance;
   extern goals cur_goal;
 
+  void file_read();
   void next_route();
   void prev_route();
   void next_start_pos();

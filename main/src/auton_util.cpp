@@ -11,7 +11,7 @@ double get_filtered_output(ADIUltrasonic sensor, int check_count, uint16_t lower
   long total_input;
   uint16_t input;
   double filtered_output;
-  waitUntil(timer.get_time() > timeout || success_count > check_count){
+  wait_until(timer.get_time() > timeout || success_count > check_count){
     input = sensor.get_value();
     if (inRange(input, lower_bound, upper_bound)){ //This used to be (lower_bound <= input <= upper_bound). I highly doubt that's what you wanted.
 
@@ -34,14 +34,10 @@ void flatten_against_wall(bool front, int cycles){
 
 	drivebase.move(50.0*direction,0.0);
 
-	while((fabs(tracking.l_velo) < 2.0 ||fabs(tracking.r_velo) < 2.0) && safety_check < 12){
-		safety_check++;
-    misc.print(" reset things %.2f, %.2f\n",fabs(tracking.l_velo), fabs(tracking.r_velo));
-		delay(10);
-	}
-	cycleCheck(fabs(tracking.l_velo) <1.0 && fabs(tracking.r_velo) < 1.0, cycles,10);
-	drivebase.move(20.0*direction,0.0);
-	printf("%d|| Done all allign\n", millis());
+	wait_until((fabs(tracking.l_velo) >= 2.0 && fabs(tracking.r_velo) >= 2.0) || safety_check >= 12) safety_check++;
+	cycleCheck(fabs(tracking.l_velo) < 1.0 && fabs(tracking.r_velo) < 1.0, 4, 10);
+	drivebase.move(20.0*direction, 0.0);
+	printf("%d|| Done all align\n", millis());
 }
 
 // double get_front_dist(){
@@ -107,13 +103,13 @@ void f_detect_goal(bool safety){
   }
   
   misc.print("Detected %d\n", f_dist.get());
-  f_claw_p.set_value(1);
+  f_claw_p.set_value(HIGH);
 }
 
 
 void detect_interference(){ 
   int time = millis();
-  while(move_t.get_task_ptr()->get_state()!= 4){
+  wait_until(move_t.get_task_ptr()->get_state() == 4){
     //numbers need funnyimh
     if(millis()-time > 1500 && fabs(tracking.g_velocity.y) < 2.0){
       drivebase.set_state(1);
@@ -124,7 +120,6 @@ void detect_interference(){
     else if(millis()-time > 1500 && fabs(tracking.g_velocity.y) > 3.0){
       break;
     }
-    delay(10);
   }
 }
 

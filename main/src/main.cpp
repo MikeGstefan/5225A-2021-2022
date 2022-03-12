@@ -12,12 +12,8 @@
 #include "Subsystems/b_lift.hpp"
 #include "distance.hpp"
 
-// using namespace std;
 #include "task.hpp"
 #include "util.hpp"
-
-#include <fstream>
-#include <sys/wait.h>
 using namespace std;
 
 pros::Task *updt = nullptr;
@@ -30,8 +26,8 @@ const GUI* GUI::current_gui = &g_main;
  * All other competition modes are blocked by initialize; it is recommended
  * to keep execution time for this mode under a few seconds.
  */
-//  pros::Task *updt = nullptr;
- bool auton_run = false; // has auton run
+
+bool auton_run = false; // has auton run
 
 void initialize() {
 	gyro.calibrate();
@@ -90,9 +86,6 @@ void competition_initialize() {}
  */
 void autonomous() {
 }
-
-
-// extern Slider mot_speed_set;
 
 void opcontrol() {
 

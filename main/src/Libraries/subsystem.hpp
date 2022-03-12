@@ -80,7 +80,7 @@ public:
     motor.move(-60);
     Timer vel_rise_timeout("vel_rise");
     // waits for motor's velocity to rise or timeout to trigger
-    while(fabs(motor.get_actual_velocity()) >= 45.0){
+    while(fabs(motor.get_actual_velocity()) < 45.0){
       printf("%s's velocity is (rising loop): %lf\n", this->name, motor.get_actual_velocity());
       if (vel_rise_timeout.get_time() > 200){
         printf("%s's rising loop timed out\n", this->name);
@@ -96,10 +96,11 @@ public:
     motor.move(0);
   }
 
-  void move_absolute(double position, double velocity = default_velocity){ // sets target and last target
+  void move_absolute(double position, double velocity = default_velocity, bool wait_for_comp = false, double end_error = 50.0){ // sets target and last target
     last_target = target;
     target = position;
     motor.move_absolute(position, velocity);
+    if (wait_for_comp) wait_until(fabs(motor.get_position() - position) < end_error);
   }
 
   void move(double speed){

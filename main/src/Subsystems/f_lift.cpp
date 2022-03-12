@@ -290,7 +290,7 @@ double F_Lift::height_to_pos(double height){
   return gear_ratio * (rad_to_deg(asin((height - offset_h) / (arm_len)))) + offset_a;
 }
 
-extern int elastic_f_up_time, elastic_f_down_time; //from gui_construction.cpp
+int elastic_f_up_time, elastic_f_down_time; //from gui_construction.cpp
 
 void F_Lift::elastic_util(){
   reset();
@@ -301,14 +301,14 @@ void F_Lift::elastic_util(){
   Timer move_timer{"move"};
   move_absolute(top_position);
   // // intake_piston.set_value(HIGH);  // raises intake
-  waitUntil(fabs(motor.get_position() - top_position) < end_error);
+  wait_until(fabs(motor.get_position() - top_position) < end_error);
   move_timer.print();
   elastic_f_up_time = move_timer.get_time();
   master.print(1, 0, "up time: %d", elastic_f_up_time);
 
   move_timer.reset();
   move_absolute(bottom_position);
-  waitUntil(fabs(motor.get_position() - bottom_position) < end_error);
+  wait_until(fabs(motor.get_position() - bottom_position) < end_error);
   move_timer.print();
   elastic_f_down_time = move_timer.get_time();
   master.print(2, 0, "down time: %d", elastic_f_up_time);

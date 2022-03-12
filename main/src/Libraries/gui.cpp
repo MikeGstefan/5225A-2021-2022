@@ -72,7 +72,7 @@ void GUI::flash(std::string text, std::uint32_t time, Colour colour){
   screen::set_eraser(colour);
 
   printf("\n\n\033[31mWARNING: %s\033[0m\n\n", text.c_str());
-  events.print("%s\n", text.c_str());
+  events.print("\n\n%d | %s\n\n", millis(), text.c_str());
 
   int spaces = int(CHAR_WIDTH_LARGE*text.length()/460)+1;
   std::size_t space, last_space=0;
@@ -109,16 +109,16 @@ bool GUI::go(std::string short_msg, std::string long_msg, std::uint32_t delay_ti
   const Page* page = GUI::current_page;
   go_sequence.go_to();
 
-  waitUntil(!(go_button.pressed() || master.get_digital(ok_button)) || interrupted){ //Wait for Release
+  wait_until(!(go_button.pressed() || master.get_digital(ok_button)) || interrupted){ //Wait for Release
     GUI::update_screen_status();
     if (go_back_button.pressed() || master.interrupt()) interrupted = true;
   }
-  waitUntil((go_button.pressed() || master.get_digital(ok_button)) || interrupted){ //Wait for Press
+  wait_until((go_button.pressed() || master.get_digital(ok_button)) || interrupted){ //Wait for Press
     drivebase.handle_input();
     GUI::update_screen_status();
     if (go_back_button.pressed() || master.interrupt()) interrupted = true;
   }
-  waitUntil(!(go_button.pressed() || master.get_digital(ok_button)) || interrupted){ //Wait for Release
+  wait_until(!(go_button.pressed() || master.get_digital(ok_button)) || interrupted){ //Wait for Release
     GUI::update_screen_status();
     if (go_back_button.pressed() || master.interrupt()) interrupted = true;
   }
@@ -149,16 +149,16 @@ bool GUI::go_end(std::string msg, std::uint32_t delay_time){
   const Page* page = GUI::current_page;
   go_sequence.go_to();
 
-  waitUntil(!(go_button.pressed() || master.get_digital(ok_button)) || interrupted){ //Wait for Release
+  wait_until(!(go_button.pressed() || master.get_digital(ok_button)) || interrupted){ //Wait for Release
     GUI::update_screen_status();
     if (go_back_button.pressed() || master.interrupt()) interrupted = true;
   }
-  waitUntil((go_button.pressed() || master.get_digital(ok_button)) || interrupted){ //Wait for Press
+  wait_until((go_button.pressed() || master.get_digital(ok_button)) || interrupted){ //Wait for Press
     drivebase.handle_input();
     GUI::update_screen_status();
     if (go_back_button.pressed() || master.interrupt()) interrupted = true;
   }
-  waitUntil(!(go_button.pressed() || master.get_digital(ok_button)) || interrupted){ //Wait for Release
+  wait_until(!(go_button.pressed() || master.get_digital(ok_button)) || interrupted){ //Wait for Release
     GUI::update_screen_status();
     if (go_back_button.pressed() || master.interrupt()) interrupted = true;
   }
@@ -807,7 +807,7 @@ void GUI::init(){
 
   current_gui->setup();
   if(terminal.active) terminal.go_to();
-  else go_to(1); //Sets it to page 1 for program start. Don't delete this. If you want to change the starting page, call GUI::go_to(Page Number) this in initialize()
+  else go_to(1); //Sets it to page 1 for program start. Don't delete this. If you want to change the starting page, call GUI::go_to(Page Number) in initialize()
   update();
 }
 

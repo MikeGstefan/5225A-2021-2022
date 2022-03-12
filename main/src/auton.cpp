@@ -535,7 +535,7 @@ void skillsPark(){
   // delay(500);
   // f_lift.move_absolute(800);
 	// 		b_lift.move_absolute(150);
-	// waitUntil(f_lift_m.get_position() > 780);
+	// wait_until(f_lift_m.get_position() > 780);
   // delay(500);
   // f_lift.move_absolute(610);
 
@@ -543,7 +543,7 @@ void skillsPark(){
   // Task([](){
   //   delay(300);
 	// 	f_lift.move(70);
-  //   waitUntil(f_lift_m.get_position() > 700);
+  //   wait_until(f_lift_m.get_position() > 700);
   //   f_lift.motor.move_relative(0, 100);
   // });
   drivebase.set_state(1);
@@ -727,7 +727,7 @@ namespace Autons{
   const char* auton_names[static_cast<int>(autons::NUM_OF_ELEMENTS)] = {"Skills", "CNTR", "HIGH", "low"};
   const char* start_pos_names[static_cast<int>(start_pos::NUM_OF_ELEMENTS)] = {"Pos1", "Pos2", "Pos3"};
   const char* alliance_names[2] = {"Red", "Blue"};
-  const char* goal_names[3] = {"Left", "Tall", "Right"};
+  const char* goal_names[static_cast<int>(goals::NUM_OF_ELEMENTS)] = {"Left", "Tall", "Right"};
 
   std::string file_name = "/usd/auton.txt";
   std::string pos_file_name = "/usd/pos_auton.txt";
@@ -833,9 +833,68 @@ namespace Autons{
     }
 
     printf("\033[32mSwitched %s to %s\033[0m\n", which.c_str(), val.c_str());
-    events.print("Switched %s to %s\n", which.c_str(), val.c_str());
+    events.print("\n\nSwitched %s to %s\n\n", which.c_str(), val.c_str());
     master.print(line, 0, "%s: %s          ", which.c_str(), val.c_str());
     file_update();
+  }
+
+  void file_read(){
+    if (!pros::usd::is_installed()){
+      GUI::flash("No SD Card!");
+      printf("\033[31mNo SD card inserted.\033[0m Using default auton, start position, goal and alliance.\n");
+      file_reset();
+      return;
+    }
+    else{
+      Data::log_t.data_update();
+      file.open(file_name, fstream::in);
+      pos_file.open(pos_file_name, fstream::in);
+      master.clear();
+
+      if (!file){ //File doesn't exist
+        file.close();
+        GUI::flash("Auton File not found!");
+        file_update();
+        
+        printf("\033[92mCreated new Auton File.\033[0m\n");
+        file.open(file_name, fstream::in);
+      }
+      if (!pos_file){ //Pos File doesn't exist
+        pos_file.close();
+        GUI::flash("Pos Auton File not found!");
+        file_update();
+        
+        printf("\033[92mCreated new Position Auton File.\033[0m\n");
+        pos_file.open(pos_file_name, fstream::in);
+      }
+
+      int auton;
+      int ally;
+      int start;
+      int goal;
+      file >> auton;
+      file >> ally;
+      pos_file >> start;
+      pos_file >> goal;
+      file.close();
+      pos_file.close();
+      Data::log_t.done_update();
+
+      cur_auton = static_cast<autons>(auton);
+      cur_start_pos = static_cast<start_pos>(start);
+      cur_goal = static_cast<goals>(goal);
+      cur_alliance = static_cast<alliances>(ally);
+    }
+
+    Colour new_colour = cur_alliance == alliances::BLUE ? COLOUR(BLUE) : COLOUR(RED);
+    alliance.set_background(new_colour);
+    pos_alliance.set_background(new_colour);
+    
+    //Get rid of this
+    save_change("auton");
+    save_change("start_pos");
+    save_change("goal");
+    save_change("alliance");
   }
 
   void prev_route(){
@@ -887,29 +946,30 @@ namespace Autons{
   } 
 
   void selector(){
-    file_read();
     if(normal){
       auto_selection.go_to();
-      while (true){
-        if(master.get_digital_new_press(ok_button)) return;
+      wait_until (false){
+        if(master.get_digital_new_press(ok_button)){
+          master.clear();
+          return;
+        }
         else if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_L1)) prev_route();
         else if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_R1)) next_route();
         else if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_X)) switch_alliance();
-
-        delay(10);
       }
     }
     else{
       pos_auto_selection.go_to();
-      while (true){
-        if(master.get_digital_new_press(ok_button)) return;
+      wait_until (false){
+        if(master.get_digital_new_press(ok_button)){
+          master.clear();
+          return;
+        }
         else if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_L1)) prev_start_pos();
         else if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_R1)) next_start_pos();
         else if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_X)) switch_alliance();
         else if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_L2)) prev_goal();
         else if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_R2)) next_goal();
-
-        delay(10);
       }
     }
   }
