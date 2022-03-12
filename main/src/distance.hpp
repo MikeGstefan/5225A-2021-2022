@@ -19,6 +19,6 @@ class cDistance{
       double last_distance = 0;
 };
 
-void distance_loop(double distance);
+void distance_loop(double distance, int timeout = 0);
 Position distance_reset_left(int time);
 Position distance_reset_right(int time);

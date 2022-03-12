@@ -247,53 +247,38 @@ void Drivebase::driver_practice(){
 
   // master.print(1, 0, "Driver: %s", drivebase.drivers[drivebase.cur_driver].name);
   master.print(0, 0, "Forward");
-  master.print(B_LIFT_STATE_LINE, 0, "B_Lift: Searching     ");
-  master.print(F_LIFT_STATE_LINE, 0, "F_Lift: Searching     ");
+  // master.print(B_LIFT_STATE_LINE, 0, "B_Lift: Searching     ");
+  // master.print(F_LIFT_STATE_LINE, 0, "F_Lift: Searching     ");
 
 
   // initializes pneumatics in appropriate state
 
   // moves motors to necessary positions / speeds
-  b_lift.reset();
-  b_lift.move_absolute(b_lift.bottom_position);
-  f_lift.reset();
-  f_lift.move_absolute(f_lift.bottom_position);
-  f_claw_p.set_value(LOW);
-  b_claw_p.set_value(LOW);
+  // Task([](){ 
+    b_lift.reset();
+    b_lift.move_absolute(b_lift.bottom_position);
+    f_lift.reset();
+    f_lift.move_absolute(f_lift.bottom_position);
+  // });
+  
+  // f_claw_p.set_value(LOW);
+  // b_claw_p.set_value(LOW);
   // lift.move(-10); // gives holding power
   bool intake_on = false;
   bool intake_reverse = false;
   cur_driver = 0; // defaults driver to Nikhil
   // master.print(2, 0, "Driver: %s", driver_name());
   while(true){
-    while(!master.get_digital_new_press(E_CONTROLLER_DIGITAL_B)){
-      /*
-      if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_UP)){ // goes to next driver
-        cur_driver++;
-        cur_driver %= num_of_drivers; // rollover
-        // spaces in the controller print are to overwrite names
-        master.print(2, 0, "Driver: %s          ", drivers[cur_driver].name);
+    while(true){
+      if(master.get_digital_new_press(tracking_button)){
+        master.print(1,1,"%.2f, %.2f, %.2f", tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle));
       }
-      else if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_DOWN)){  // goes to previous driver
-        if (cur_driver == 0)  cur_driver = num_of_drivers - 1;
-        else cur_driver--;
-        master.print(2, 0, "Driver: %s          ", drivers[cur_driver].name);
+      if(master.get_digital_new_press(ok_button)){
+        Autons::selector();
+        // master.print(1,1,"HERE");
+        // auto_select();
+        delay(2000);
       }
-      */
-
-      // actual drive code
-      if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_LEFT)){
-        intake_reverse = false;
-        intake_on = !intake_on;
-        intk.move(127*(int)intake_on);
-      }
-      if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_A)){
-        intake_on = false;
-        intake_reverse = !intake_reverse;
-        intk.move(-127*(int)intake_reverse);
-      }
-
-
       drivebase.handle_input();
       // b_lift.handle();
       handle_lifts();
@@ -311,7 +296,7 @@ void Drivebase::driver_practice(){
         screen_timer.reset();
       }
       // takes away control from driver when motors overheat
-      if(front_l.get_temperature() >= 55 || front_r.get_temperature() >= 55 || back_r.get_temperature() >= 55 || back_l.get_temperature() >= 55){
+      if(front_l.get_temperature() >= 55 || front_r.get_temperature() >= 55 || back_r.get_temperature() >= 55 || back_l.get_temperature() >= 55 || b_lift_m.get_temperature() >= 55|| f_lift_m.get_temperature() >= 55|| intk.get_temperature() >= 55){
         master.rumble("- - - "); // rumbles controller if motors are hot to warn driver
         // move(0, 0, 0);  // stops movement
         // return;

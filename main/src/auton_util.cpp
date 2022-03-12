@@ -1,8 +1,8 @@
 #include "auton_util.hpp"
 // #include "logging.hpp"
 
-Reset_dist reset_dist_r(&r_reset_dist, 8.5);
-Reset_dist reset_dist_l(&l_reset_dist, 8.0);
+Reset_dist reset_dist_r(&r_dist, 7.5);
+Reset_dist reset_dist_l(&l_dist, 7.5);
 
 double get_filtered_output(ADIUltrasonic sensor, int check_count, uint16_t lower_bound, uint16_t upper_bound, int timeout){
   Timer timer{"Timer"};
@@ -26,15 +26,18 @@ double get_filtered_output(ADIUltrasonic sensor, int check_count, uint16_t lower
   return filtered_output;
 }
 
-void flatten_against_wall(bool front){ 
+void flatten_against_wall(bool front, int cycles){ 
   int safety_check = 0;
   //bool to + -
   int direction = (static_cast<int>(front)*2)-1;
   tracking_imp.print("%d|| Start wall allign\n", millis());
 
-	drivebase.move(70.0*direction,0.0);
+	drivebase.move(50.0*direction,0.0);
 
-	wait_until((fabs(tracking.l_velo) >= 2.0 && fabs(tracking.r_velo) >= 2.0) || safety_check >= 12) safety_check++;
+	wait_until((fabs(tracking.l_velo) >= 2.0 && fabs(tracking.r_velo) >= 2.0) || safety_check >= 12){
+        safety_check++;
+        misc.print(" reset things %.2f, %.2f\n",fabs(tracking.l_velo), fabs(tracking.r_velo));
+    }
 	cycleCheck(fabs(tracking.l_velo) < 1.0 && fabs(tracking.r_velo) < 1.0, 4, 10);
 	drivebase.move(20.0*direction, 0.0);
 	printf("%d|| Done all align\n", millis());
@@ -61,12 +64,13 @@ void flatten_against_wall(bool front){
 
 void b_detect_goal(){ 
   // cycleCheck(b_dist.get() > 80 && b_dist.get() < 90, 5, 33);
-  while(b_dist.get() > 70){ 
+  while(tracking.move_complete)delay(10);
+  while(b_dist.get() > 70 && !tracking.move_complete){ 
     misc.print("looking for edge: %d\n", b_dist.get());
     delay(33);
   }
   int successCount = 0;
-    while (successCount < 2){
+    while (successCount < 2&& !tracking.move_complete){
         if (b_dist.get() > 75 && b_dist.get() < 90) {
           successCount++;
           misc.print("found: %d count: %d\n", b_dist.get(), successCount);
@@ -81,7 +85,7 @@ void b_detect_goal(){
 
 
 
-void f_detect_goal(){ 
+void f_detect_goal(bool safety){ 
   // cycleCheck(b_dist.get() > 80 && b_dist.get() < 90, 5, 33);
   // while(f_dist.get() > 70){ 
   //   misc.print("looking for edge: %d\n", f_dist.get());
@@ -94,7 +98,9 @@ void f_detect_goal(){
   //       misc.print("looking: %d\n", f_dist.get());
   //       delay(33);
   //   }
-  wait_until(f_touch.get_value());
+  if(safety) wait_until(f_touch.get_value() || tracking.move_complete);
+  else wait_until(f_touch.get_value());
+  
   misc.print("Detected %d\n", f_dist.get());
   f_claw_p.set_value(HIGH);
 }

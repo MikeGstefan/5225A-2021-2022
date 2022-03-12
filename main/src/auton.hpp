@@ -9,6 +9,7 @@
 #include "task.hpp"
 #include "auton_util.hpp"
 #include "config.hpp"
+#include "distance.hpp"
 #include "Subsystems/b_lift.hpp"
 #include "Subsystems/f_lift.hpp"
 #include <fstream>
@@ -17,6 +18,8 @@
 
 void skills();
 void skills2();
+void new_skills3();
+
 void skills3();
 void skills4();
 void skillsPark();
@@ -56,5 +59,8 @@ namespace Autons{
   void switch_alliance(alliances new_ally = static_cast<alliances>(!static_cast<bool>(cur_alliance)));
   void give_up();
   void selector();
+
+  void file_update();
+  void file_read();
 
 }
