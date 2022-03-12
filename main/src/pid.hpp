@@ -1,16 +1,6 @@
 #pragma once
 #include "main.h"
 #include "timer.hpp"
-#include "config.hpp"
-#include "util.hpp"
-#include "Tracking.hpp"
-#include <iostream>
-#include <cmath>
-#include <memory>
-#include <vector>
-#include <array>
-
-
 
 using namespace pros;
 

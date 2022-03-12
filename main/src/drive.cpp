@@ -218,16 +218,16 @@ void Drivebase::handle_input(){
   if(fabs(tracking.power_y) < deadzone) tracking.power_y = 0.0;
   if(fabs(tracking.power_a) < deadzone) tracking.power_a = 0.0;
 
-  if(master.get_digital_new_press(reverse_drive_button)){
-    master.rumble("-");
-    reversed = !reversed;
-    if(reversed) master.print(0, 0, "Reverse");
-    else master.print(0, 0, "Forward");
-  }
-  if (reversed){
-    tracking.power_y *= -1;
-    tracking.power_x *= -1;
-  }
+  // if(master.get_digital_new_press(reverse_drive_button)){
+  //   master.rumble("-");
+  //   reversed = !reversed;
+  //   if(reversed) master.print(0, 0, "Reverse");
+  //   else master.print(0, 0, "Forward");
+  // }
+  // if (reversed){
+  //   tracking.power_y *= -1;
+  //   tracking.power_x *= -1;
+  // }
 
   if(this->state && (fabs(tracking.power_y) <deadzone && fabs(tracking.power_a) <deadzone)){
     // velo_brake();
@@ -270,19 +270,21 @@ void Drivebase::driver_practice(){
   // master.print(2, 0, "Driver: %s", driver_name());
   while(true){
     while(true){
-      if(master.get_digital_new_press(tracking_button)){
-        master.print(1,1,"%.2f, %.2f, %.2f", tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle));
-      }
-      if(master.get_digital_new_press(ok_button)){
-        // Autons::selector();
-        master.print(1,1,"HERE");
-        auto_select();
-        delay(2000);
-      }
+      // if(master.get_digital_new_press(tracking_button)){
+      //   master.print(1,1,"%.2f, %.2f, %.2f", tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle));
+      // }
+      // if(master.get_digital_new_press(ok_button)){
+      //   // Autons::selector();
+      //   master.print(1,1,"HERE");
+      //   auto_select();
+      //   delay(2000);
+      // }
       drivebase.handle_input();
       // b_lift.handle();
-      handle_lifts();
-      // f_lift.handle();
+      // handle_lifts();
+      f_lift.handle();
+      f_claw.handle();
+      intake_handle();
      
 
       handle_trans();
