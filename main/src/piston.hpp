@@ -1,23 +1,31 @@
 #pragma once //
-#include "main.h" 
+#include "main.h"
+#include "Libraries/gui.hpp"
+#include <vector>
 
 using namespace std;
 using namespace pros;
 
 
 class Piston : public ADIDigitalOut{
-    private:    
-        bool state;
-        bool open_state;
-        int change_time = 0;
+  friend class Button;
+  private:    
+    bool state;
+    bool open_state;
+    int change_time = 0;
+    const char* name;
 
-    public: 
-        Piston(std::uint8_t adi_port, bool open_state = 0, bool init_state = LOW);
-        Piston(ext_adi_port_pair_t port_pair, bool open_state = 0, bool init_state = LOW);
+    int count = 0;
+  public:
+    static array<Piston*, 8> list_for_gui;
 
-        void set_state(bool state);
-        bool get_state();
-        bool toggle_state();
+    Piston(std::uint8_t adi_port, const char* name, bool open_state = 0, bool init_state = LOW);
+    Piston(ext_adi_port_pair_t port_pair, const char* name, bool open_state = 0, bool init_state = LOW);
 
-        int get_state_time();
+    void set_state(bool state);
+    bool get_state();
+    bool toggle_state();
+
+    int get_state_time();
+    const char* get_name();
 };

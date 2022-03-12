@@ -15,7 +15,7 @@ std::array<Button*, 8> expander_btns;
 
 //For gui to use
 extern std::array<std::tuple<pros::Motor*, int, const char*, const char*, Text_*>, 8> motors_for_gui; //Declared in config.cpp
-extern std::array<std::pair<pros::ADIDigitalOut*, const char*>, 8> pneumatics_for_gui; //Declared in config.cpp
+// extern std::array<std::pair<pros::ADIDigitalOut*, const char*>, 8> pneumatics_for_gui; //Declared in config.cpp
 extern int elastic_b_up_time, elastic_b_down_time; //Declared in b_lift.cpp
 extern int elastic_f_up_time, elastic_f_down_time; //Declared in f_lift.cpp
 
@@ -123,14 +123,14 @@ Button mot_7_stop (300, 190, 45, 30, GUI::Style::SIZE, Button::SINGLE, motors, "
 Button mot_8_stop (415, 190, 45, 30, GUI::Style::SIZE, Button::SINGLE, motors, "Stop");
 
 Page pneumatics ("Pneumatics"); //Pneumatic testing page for known ports
-Button pneum_1 (15, 45, 100, 75, GUI::Style::SIZE, Button::TOGGLE, pneumatics, pneumatics_for_gui[0].second); //Names are caps to avoid conflicts
-Button pneum_2 (130, 45, 100, 75, GUI::Style::SIZE, Button::TOGGLE, pneumatics, pneumatics_for_gui[1].second);
-Button pneum_3 (245, 45, 100, 80, GUI::Style::SIZE, Button::TOGGLE, pneumatics, pneumatics_for_gui[2].second);
-Button pneum_4 (360, 45, 100, 75, GUI::Style::SIZE, Button::TOGGLE, pneumatics, pneumatics_for_gui[3].second);
-Button pneum_5 (15, 140, 100, 75, GUI::Style::SIZE, Button::TOGGLE, pneumatics, pneumatics_for_gui[4].second);
-Button pneum_6 (130, 140, 100, 75, GUI::Style::SIZE, Button::TOGGLE, pneumatics, pneumatics_for_gui[5].second);
-Button pneum_7 (245, 140, 100, 75, GUI::Style::SIZE, Button::TOGGLE, pneumatics, pneumatics_for_gui[6].second);
-Button pneum_8 (360, 140, 100, 75, GUI::Style::SIZE, Button::TOGGLE, pneumatics, pneumatics_for_gui[7].second);
+Button pneum_1 (15, 45, 100, 75, GUI::Style::SIZE, Button::TOGGLE, pneumatics, (Piston::list_for_gui[0] ? Piston::list_for_gui[0]->get_name() : ""));
+Button pneum_2 (130, 45, 100, 75, GUI::Style::SIZE, Button::TOGGLE, pneumatics, (Piston::list_for_gui[1] ? Piston::list_for_gui[1]->get_name() : ""));
+Button pneum_3 (245, 45, 100, 80, GUI::Style::SIZE, Button::TOGGLE, pneumatics, (Piston::list_for_gui[2] ? Piston::list_for_gui[2]->get_name() : ""));
+Button pneum_4 (360, 45, 100, 75, GUI::Style::SIZE, Button::TOGGLE, pneumatics, (Piston::list_for_gui[3] ? Piston::list_for_gui[3]->get_name() : ""));
+Button pneum_5 (15, 140, 100, 75, GUI::Style::SIZE, Button::TOGGLE, pneumatics, (Piston::list_for_gui[4] ? Piston::list_for_gui[4]->get_name() : ""));
+Button pneum_6 (130, 140, 100, 75, GUI::Style::SIZE, Button::TOGGLE, pneumatics, (Piston::list_for_gui[5] ? Piston::list_for_gui[5]->get_name() : ""));
+Button pneum_7 (245, 140, 100, 75, GUI::Style::SIZE, Button::TOGGLE, pneumatics, (Piston::list_for_gui[6] ? Piston::list_for_gui[6]->get_name() : ""));
+Button pneum_8 (360, 140, 100, 75, GUI::Style::SIZE, Button::TOGGLE, pneumatics, (Piston::list_for_gui[7] ? Piston::list_for_gui[7]->get_name() : ""));
 
 
 Page ports ("Ports"); //Shows what ports to use on builder util
@@ -320,44 +320,44 @@ void main_setup(){
   b_claw.set_off_func([](){b_claw_p.set_value(LOW);});
 
   //Known Pneumatics Port Setup
-  if(pneumatics_for_gui[0].first){
-    pneum_1.set_func([](){pneumatics_for_gui[0].first->set_value(HIGH);});
-    pneum_1.set_off_func([](){pneumatics_for_gui[0].first->set_value(LOW);});
+  if(Piston::list_for_gui[0]){
+    pneum_1.set_func([](){Piston::list_for_gui[0]->set_value(HIGH);});
+    pneum_1.set_off_func([](){Piston::list_for_gui[0]->set_value(LOW);});
   }
   else pneum_1.set_active(false);
-  if(pneumatics_for_gui[1].first){
-    pneum_2.set_func([](){pneumatics_for_gui[1].first->set_value(HIGH);});
-    pneum_2.set_off_func([](){pneumatics_for_gui[1].first->set_value(LOW);});
+  if(Piston::list_for_gui[1]){
+    pneum_2.set_func([](){Piston::list_for_gui[1]->set_value(HIGH);});
+    pneum_2.set_off_func([](){Piston::list_for_gui[1]->set_value(LOW);});
   }
   else pneum_2.set_active(false);
-  if(pneumatics_for_gui[2].first){
-    pneum_3.set_func([](){pneumatics_for_gui[2].first->set_value(HIGH);});
-    pneum_3.set_off_func([](){pneumatics_for_gui[2].first->set_value(LOW);});
+  if(Piston::list_for_gui[2]){
+    pneum_3.set_func([](){Piston::list_for_gui[2]->set_value(HIGH);});
+    pneum_3.set_off_func([](){Piston::list_for_gui[2]->set_value(LOW);});
   }
   else pneum_3.set_active(false);
-  if(pneumatics_for_gui[3].first){
-    pneum_4.set_func([](){pneumatics_for_gui[3].first->set_value(HIGH);});
-    pneum_4.set_off_func([](){pneumatics_for_gui[3].first->set_value(LOW);});
+  if(Piston::list_for_gui[3]){
+    pneum_4.set_func([](){Piston::list_for_gui[3]->set_value(HIGH);});
+    pneum_4.set_off_func([](){Piston::list_for_gui[3]->set_value(LOW);});
   }
   else pneum_4.set_active(false);
-  if(pneumatics_for_gui[4].first){
-    pneum_5.set_func([](){pneumatics_for_gui[4].first->set_value(HIGH);});
-    pneum_5.set_off_func([](){pneumatics_for_gui[4].first->set_value(LOW);});
+  if(Piston::list_for_gui[4]){
+    pneum_5.set_func([](){Piston::list_for_gui[4]->set_value(HIGH);});
+    pneum_5.set_off_func([](){Piston::list_for_gui[4]->set_value(LOW);});
   }
   else pneum_5.set_active(false);
-  if(pneumatics_for_gui[5].first){
-    pneum_6.set_func([](){pneumatics_for_gui[5].first->set_value(HIGH);});
-    pneum_6.set_off_func([](){pneumatics_for_gui[5].first->set_value(LOW);});
+  if(Piston::list_for_gui[5]){
+    pneum_6.set_func([](){Piston::list_for_gui[5]->set_value(HIGH);});
+    pneum_6.set_off_func([](){Piston::list_for_gui[5]->set_value(LOW);});
   }
   else pneum_6.set_active(false);
-  if(pneumatics_for_gui[6].first){
-    pneum_7.set_func([](){pneumatics_for_gui[6].first->set_value(HIGH);});
-    pneum_7.set_off_func([](){pneumatics_for_gui[6].first->set_value(LOW);});
+  if(Piston::list_for_gui[6]){
+    pneum_7.set_func([](){Piston::list_for_gui[6]->set_value(HIGH);});
+    pneum_7.set_off_func([](){Piston::list_for_gui[6]->set_value(LOW);});
   }
   else pneum_7.set_active(false);
-  if(pneumatics_for_gui[7].first){
-    pneum_8.set_func([](){pneumatics_for_gui[7].first->set_value(HIGH);});
-    pneum_8.set_off_func([](){pneumatics_for_gui[7].first->set_value(LOW);});
+  if(Piston::list_for_gui[7]){
+    pneum_8.set_func([](){Piston::list_for_gui[7]->set_value(HIGH);});
+    pneum_8.set_off_func([](){Piston::list_for_gui[7]->set_value(LOW);});
   }
   else pneum_8.set_active(false);
 

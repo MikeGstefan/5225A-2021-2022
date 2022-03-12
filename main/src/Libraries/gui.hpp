@@ -2,6 +2,7 @@
 // #include "../Subsystems/lift.hpp"
 #include "../auton.hpp"
 #include "../drive.hpp"
+#include "../piston.hpp"
 #include "../util.hpp"
 #include "../include/pros/apix.h"
 #include <bitset>
