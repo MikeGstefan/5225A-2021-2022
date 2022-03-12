@@ -24,6 +24,8 @@ extern controller_digital_e_t intake_reverse_button;
 extern controller_digital_e_t shift_button;
 extern controller_digital_e_t hitch_toggle_button;
 extern controller_digital_e_t ok_button;
+extern controller_digital_e_t b_claw_toggle_button;
+extern controller_digital_e_t search_button;
 
 
 #define num_controller 2

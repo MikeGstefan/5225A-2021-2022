@@ -168,7 +168,6 @@ void F_Claw::handle(){
   switch(state){
     case f_claw_states::idle:
       // enters search mode if the lift is at the bottom and it's been 2 seconds since the mogo was released
-      printf("time:%d\n", release_timer.get_time());
       if(f_lift.get_state() == f_lift_states::bottom && release_timer.get_time() > 2000){
         set_state(f_claw_states::searching);
       }

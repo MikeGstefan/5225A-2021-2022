@@ -13,8 +13,11 @@ controller_digital_e_t intake_button = DIGITAL_Y;
 controller_digital_e_t ok_button = DIGITAL_A;
 
 controller_digital_e_t intake_reverse_button = DIGITAL_B;
-controller_digital_e_t shift_button = DIGITAL_X;
+controller_digital_e_t shift_button = DIGITAL_DOWN;
 controller_digital_e_t hitch_toggle_button = DIGITAL_B;
+controller_digital_e_t b_claw_toggle_button = DIGITAL_X;
+controller_digital_e_t search_button = DIGITAL_RIGHT;
+
 
 
 std::array<_Controller*, num_controller> _Controller::objs; //= {nullptr};

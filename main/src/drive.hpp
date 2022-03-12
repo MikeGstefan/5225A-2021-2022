@@ -11,6 +11,7 @@
 #include "Subsystems/b_lift.hpp"
 #include "Subsystems/f_lift.hpp"
 #include "Subsystems/intake.hpp"
+#include "Subsystems/b_claw.hpp"
 
 
 using namespace pros;
