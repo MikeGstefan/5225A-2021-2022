@@ -17,7 +17,7 @@ using namespace std;
 class Timer;
 
 
-#define waitUntil(condition) while(delay(10),!(condition))
+#define wait_until(condition) while(delay(10),!(condition))
 
 // cycle check macro (checks a condition for a specified amount of cycles)
 #define cycleCheck(condition, checkCount, delayTime) \

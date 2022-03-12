@@ -109,16 +109,16 @@ bool GUI::go(std::string short_msg, std::string long_msg, std::uint32_t delay_ti
   const Page* page = GUI::current_page;
   go_sequence.go_to();
 
-  waitUntil(!(go_button.pressed() || master.get_digital(ok_button)) || interrupted){ //Wait for Release
+  wait_until(!(go_button.pressed() || master.get_digital(ok_button)) || interrupted){ //Wait for Release
     GUI::update_screen_status();
     if (go_back_button.pressed() || master.interrupt()) interrupted = true;
   }
-  waitUntil((go_button.pressed() || master.get_digital(ok_button)) || interrupted){ //Wait for Press
+  wait_until((go_button.pressed() || master.get_digital(ok_button)) || interrupted){ //Wait for Press
     drivebase.handle_input();
     GUI::update_screen_status();
     if (go_back_button.pressed() || master.interrupt()) interrupted = true;
   }
-  waitUntil(!(go_button.pressed() || master.get_digital(ok_button)) || interrupted){ //Wait for Release
+  wait_until(!(go_button.pressed() || master.get_digital(ok_button)) || interrupted){ //Wait for Release
     GUI::update_screen_status();
     if (go_back_button.pressed() || master.interrupt()) interrupted = true;
   }
@@ -149,16 +149,16 @@ bool GUI::go_end(std::string msg, std::uint32_t delay_time){
   const Page* page = GUI::current_page;
   go_sequence.go_to();
 
-  waitUntil(!(go_button.pressed() || master.get_digital(ok_button)) || interrupted){ //Wait for Release
+  wait_until(!(go_button.pressed() || master.get_digital(ok_button)) || interrupted){ //Wait for Release
     GUI::update_screen_status();
     if (go_back_button.pressed() || master.interrupt()) interrupted = true;
   }
-  waitUntil((go_button.pressed() || master.get_digital(ok_button)) || interrupted){ //Wait for Press
+  wait_until((go_button.pressed() || master.get_digital(ok_button)) || interrupted){ //Wait for Press
     drivebase.handle_input();
     GUI::update_screen_status();
     if (go_back_button.pressed() || master.interrupt()) interrupted = true;
   }
-  waitUntil(!(go_button.pressed() || master.get_digital(ok_button)) || interrupted){ //Wait for Release
+  wait_until(!(go_button.pressed() || master.get_digital(ok_button)) || interrupted){ //Wait for Release
     GUI::update_screen_status();
     if (go_back_button.pressed() || master.interrupt()) interrupted = true;
   }

@@ -395,7 +395,7 @@ void skillsPark(){
   // delay(500);
   // f_lift.move_absolute(800);
 	// 		b_lift.move_absolute(150);
-	// waitUntil(f_lift_m.get_position() > 780);
+	// wait_until(f_lift_m.get_position() > 780);
   // delay(500);
   // f_lift.move_absolute(610);
 
@@ -403,7 +403,7 @@ void skillsPark(){
   // Task([](){
   //   delay(300);
 	// 	f_lift.move(70);
-  //   waitUntil(f_lift_m.get_position() > 700);
+  //   wait_until(f_lift_m.get_position() > 700);
   //   f_lift.motor.move_relative(0, 100);
   // });
   drivebase.set_state(1);
@@ -580,7 +580,7 @@ namespace Autons{
   const char* auton_names[static_cast<int>(autons::NUM_OF_ELEMENTS)] = {"Skills", "Auto1", "Auto2"};
   const char* start_pos_names[static_cast<int>(start_pos::NUM_OF_ELEMENTS)] = {"Pos1", "Pos2", "Pos3"};
   const char* alliance_names[2] = {"Red", "Blue"};
-  const char* goal_names[3] = {"Left", "Tall", "Right"};
+  const char* goal_names[static_cast<int>(goals::NUM_OF_ELEMENTS)] = {"Left", "Tall", "Right"};
 
   std::string file_name = "/usd/auton.txt";
   std::string pos_file_name = "/usd/pos_auton.txt";
@@ -591,10 +591,10 @@ namespace Autons{
     Data::log_t.data_update();
     file.open(file_name, fstream::out | fstream::trunc);
     pos_file.open(pos_file_name, fstream::out | fstream::trunc);
-    file << auton_names[static_cast<int>(cur_auton)] << std::endl;
-    file << alliance_names[static_cast<int>(cur_alliance)] << std::endl;
-    pos_file << start_pos_names[static_cast<int>(cur_start_pos)] << std::endl;
-    pos_file << goal_names[static_cast<int>(cur_goal)] << std::endl;
+    file << static_cast<int>(cur_auton) << std::endl;
+    file << static_cast<int>(cur_alliance) << std::endl;
+    pos_file << static_cast<int>(cur_start_pos) << std::endl;
+    pos_file << static_cast<int>(cur_goal) << std::endl;
     file.close();
     pos_file.close();
     Data::log_t.done_update();
@@ -665,52 +665,29 @@ namespace Autons{
         pos_file.open(pos_file_name, fstream::in);
       }
 
-      char auton[10];
-      char start[10];
-      char goal[10];
-      char ally[5];
-      file.getline(auton, 10);
-      file.getline(ally, 5);
-      pos_file.getline(start, 10);
-      pos_file.getline(goal, 10);
+      int auton;
+      int ally;
+      int start;
+      int goal;
+      file >> auton;
+      file >> ally;
+      pos_file >> start;
+      pos_file >> goal;
       file.close();
       pos_file.close();
       Data::log_t.done_update();
 
-      const char** autonIt = std::find(auton_names, auton_names+static_cast<int>(autons::NUM_OF_ELEMENTS), auton);
-      const char** startIt = std::find(start_pos_names, start_pos_names+static_cast<int>(start_pos::NUM_OF_ELEMENTS), start);
-      const char** goalIt = std::find(goal_names, goal_names+static_cast<int>(goals::NUM_OF_ELEMENTS), goal);
-      const char** allianceIt = std::find(alliance_names, alliance_names+2, ally);
-      
-      if(autonIt == std::end(auton_names)){
-        printf("\033[31mInvalid Auton Name in file. Using Default\033[0m\n");
-        cur_auton = autons::DEFAULT;
-      }
-      else cur_auton = static_cast<autons>(std::distance(auton_names, autonIt));
-
-      if(startIt == std::end(start_pos_names)){
-        printf("\033[31mInvalid Auton Name in file. Using Default\033[0m\n");
-        cur_start_pos = start_pos::DEFAULT;
-      }
-      else cur_start_pos = static_cast<start_pos>(std::distance(start_pos_names, startIt));
-
-      if(goalIt == std::end(goal_names)){
-        printf("\033[31mInvalid Auton Name in file. Using Default\033[0m\n");
-        cur_goal = goals::DEFAULT;
-      }
-      else cur_goal = static_cast<goals>(std::distance(goal_names, goalIt));
-
-      if(allianceIt == std::end(alliance_names)){
-        printf("\033[31mInvalid Auton Name in file. Using Default\033[0m\n");
-        cur_alliance = alliances::DEFAULT;
-      }
-      else cur_alliance = static_cast<alliances>(std::distance(alliance_names, allianceIt));
+      cur_auton = static_cast<autons>(auton);
+      cur_start_pos = static_cast<start_pos>(start);
+      cur_goal = static_cast<goals>(goal);
+      cur_alliance = static_cast<alliances>(ally);
     }
 
     Colour new_colour = cur_alliance == alliances::BLUE ? COLOUR(BLUE) : COLOUR(RED);
     alliance.set_background(new_colour);
     pos_alliance.set_background(new_colour);
     
+    //Get rid of this
     save_change("auton");
     save_change("start_pos");
     save_change("goal");
@@ -768,7 +745,7 @@ namespace Autons{
   void selector(){
     if(normal){
       auto_selection.go_to();
-      waitUntil (false){
+      wait_until (false){
         if(master.get_digital_new_press(ok_button)){
           master.clear();
           return;
@@ -780,7 +757,7 @@ namespace Autons{
     }
     else{
       pos_auto_selection.go_to();
-      waitUntil (false){
+      wait_until (false){
         if(master.get_digital_new_press(ok_button)){
           master.clear();
           return;

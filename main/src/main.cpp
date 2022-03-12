@@ -12,12 +12,8 @@
 #include "Subsystems/b_lift.hpp"
 #include "distance.hpp"
 
-// using namespace std;
 #include "task.hpp"
 #include "util.hpp"
-
-#include <fstream>
-#include <sys/wait.h>
 using namespace std;
 
 pros::Task *updt = nullptr;
@@ -103,22 +99,22 @@ void opcontrol() {
 	*/
 
 	//Intake Jam code
-	Task([](){
-		Timer intake_t ("intake jam", false);
-		intk.move(127);
-		while(true){
-			if(intake_jam.get_new_press()) intake_t.reset(); //Start timer when pressed
-			else if(!intake_jam.get_value()) intake_t.reset(false); //End timer when unpressed
-			if(intake_t.get_time() > 1000){ //If pressed for more than 1 sec, reverse intk
-				GUI::flash("Intake Jam");
-				intk.move(-127);
-				waitUntil(!intake_jam.get_value()); //Waits for unjam plus some time
-				delay(150);
-				intk.move(127);
-			}
-			delay(10);
-		}
-	});
+	// Task([](){
+	// 	Timer intake_t ("intake jam", false);
+	// 	intk.move(127);
+	// 	while(true){
+	// 		if(intake_jam.get_new_press()) intake_t.reset(); //Start timer when pressed
+	// 		else if(!intake_jam.get_value()) intake_t.reset(false); //End timer when unpressed
+	// 		if(intake_t.get_time() > 1000){ //If pressed for more than 1 sec, reverse intk
+	// 			GUI::flash("Intake Jam");
+	// 			intk.move(-127);
+	// 			wait_until(!intake_jam.get_value()); //Waits for unjam plus some time
+	// 			delay(150);
+	// 			intk.move(127);
+	// 		}
+	// 		delay(10);
+	// 	}
+	// });
 
 
 	Autons::selector();
