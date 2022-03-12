@@ -1563,7 +1563,7 @@ void Gyro::climb_ramp(){
   inertial.tare_pitch();
 
   drivebase.move_ahead(-GYRO_SIDE*127);
-  waitUntil(get_angle() > 22);
+  wait_until(get_angle() > 22);
   motion_i.print("ON RAMP: %f\n", get_angle());
   GUI::flash("On Ramp", 1000, COLOUR(GREEN));
 
@@ -1573,14 +1573,14 @@ void Gyro::climb_ramp(){
   // GUI::flash("Braked\n");
 
 
-  // waitUntil(master.get_digital_new_press(DIGITAL_R1));
+  // wait_until(master.get_digital_new_press(DIGITAL_R1));
 
   drivebase.move_ahead(-GYRO_SIDE*127);
-  waitUntil(get_angle() < 20);
+  wait_until(get_angle() < 20);
 
   drivebase.move_ahead(GYRO_SIDE*127);
   tracking.wait_for_dist(1.5);
-  printf("End: %d\n", millis());
+  printf("\n\nEnd: %d\n", millis());
 
   drivebase.brake();
   GUI::flash("Braked\n", 1000, COLOUR(GREEN));

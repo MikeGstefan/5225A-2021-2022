@@ -36,7 +36,7 @@ void initialize() {
 	// back_l.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
 	// back_r.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
 	// Autons::file_read();
-	autonFile_read();
+	// autonFile_read();
 	f_lift.motor.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
 	b_lift.motor.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
 	drivebase.download_curve_data();
@@ -89,26 +89,27 @@ void autonomous() {
 
 void opcontrol() {
 
-	waitUntil(master.get_digital_new_press(DIGITAL_R1));
+	wait_until(master.get_digital_new_press(DIGITAL_R1));
 	b_claw_p.set_value(HIGH);
 	f_claw_p.set_value(HIGH);
-	f_lift.move_absolute(600);
+	f_lift.move_absolute(600, 100, true, 100);
 	b_lift.move_absolute(100);
 
-	waitUntil(f_lift.motor.get_position() > 500);
+	// wait_until(f_lift.motor.get_position() > 500);
 	flatten_against_wall(true);
 	tracking.reset();
-  printf("Start: %d\n", millis());
+  printf("\n\nStart: %d\n", millis());
 
 	move_start(move_types::turn_angle, turn_angle_params(-85.0));
-	drivebase.brake();
+	drivebase.set_state(HIGH);
+	// drivebase.brake();
 
 	b_lift.move_absolute(100);
-	f_lift.move_absolute(0);
-	drivebase.brake();
+	f_lift.move_absolute(0, 100, true, 50);
+	// drivebase.brake();
 
-	drivebase.set_state(HIGH);
-	waitUntil(f_lift.motor.get_position() < 50);
+	// drivebase.set_state(HIGH);
+	// wait_until(f_lift.motor.get_position() < 50);
 	f_lift.move(-10);
 
 	// drivebase.move_ahead(25);
@@ -117,7 +118,7 @@ void opcontrol() {
 
 	move_start(move_types::turn_angle, turn_angle_params(-90.0));
 
-	// waitUntil(master.get_digital_new_press(DIGITAL_R1));
+	// wait_until(master.get_digital_new_press(DIGITAL_R1));
 	gyro.climb_ramp();
 	delay(1000);
 	b_claw_p.set_value(LOW);

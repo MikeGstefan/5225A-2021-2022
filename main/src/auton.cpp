@@ -694,7 +694,13 @@ extern Page auto_selection, pos_auto_selection;
 
 namespace Autons{
 
-  
+  enum class autons{
+    Skills,
+    AUTO2,
+    AUTO3,
+    NUM_OF_ELEMENTS,
+    DEFAULT = Skills,
+  };
 
   enum class start_pos{
     POS1,
@@ -724,7 +730,7 @@ namespace Autons{
   start_pos cur_start_pos = start_pos::DEFAULT;
   goals cur_goal = goals::DEFAULT;
 
-  const char* auton_names[static_cast<int>(autons::NUM_OF_ELEMENTS)] = {"Skills", "CNTR", "HIGH", "low"};
+  const char* auton_names[static_cast<int>(autons::NUM_OF_ELEMENTS)] = {"Skills", "Auto1", "Auto2"};
   const char* start_pos_names[static_cast<int>(start_pos::NUM_OF_ELEMENTS)] = {"Pos1", "Pos2", "Pos3"};
   const char* alliance_names[2] = {"Red", "Blue"};
   const char* goal_names[static_cast<int>(goals::NUM_OF_ELEMENTS)] = {"Left", "Tall", "Right"};
@@ -747,68 +753,12 @@ namespace Autons{
     Data::log_t.done_update();
   }
 
-  void file_read(){
-    //A lot of unnecessary safeties in here. Will remove later
-    Data::log_t.data_update();
-    file.open(file_name, fstream::in);
-    pos_file.open(pos_file_name, fstream::in);
-    master.clear();
-    printf("here\n");
-    if (pros::usd::is_installed()){
-      if (!file){//File doesn't exist
-        file.close();
-        GUI::flash("Auton File not found!");
-        printf("\033[92mTrying to create new Auton File.\033[0m\n");
-        file_update();
-        file.open(file_name, fstream::in);
-      }
-      if (!pos_file){//File doesn't exist
-        pos_file.close();
-        GUI::flash("Pos Auton File not found!");
-        printf("\033[92mTrying to create new Position Auton File.\033[0m\n");
-        file_update();
-        pos_file.open(pos_file_name, fstream::in);
-      }
-    }
-    else{
-      GUI::flash("No SD Card!");
-      printf("\033[31mNo SD card inserted.\033[0m Using default auton, start position, goal and alliance.\n");
-
-      //Might not be needed
-      cur_auton = autons::DEFAULT;
-      cur_start_pos = start_pos::DEFAULT;
-      cur_goal = goals::DEFAULT;
-      cur_alliance = alliances::DEFAULT;
-      switch_alliance(cur_alliance);
-      return;
-    }
-
-    char auton[10];
-    char start[10];
-    char goal[10];
-    char ally[5];
-    file.getline(auton, 10);
-    file.getline(ally, 5);
-    pos_file.getline(start, 10);
-    pos_file.getline(goal, 10);
-    file.close();
-    pos_file.close();
-    Data::log_t.done_update();
-    // cout<< auton;
-    printf("%s\n", auton);
-    master.print(0,0,"%s", auton);
-    delay(500);
-    const char** autonIt = std::find(auton_names, auton_names+static_cast<int>(autons::NUM_OF_ELEMENTS), auton);
-    const char** startIt = std::find(start_pos_names, start_pos_names+static_cast<int>(start_pos::NUM_OF_ELEMENTS), start);
-    const char** goalIt = std::find(goal_names, goal_names+static_cast<int>(goals::NUM_OF_ELEMENTS), goal);
-    const char** allianceIt = std::find(alliance_names, alliance_names+2, ally);
-    
-    cur_auton = autonIt != std::end(auton_names) ? static_cast<autons>(std::distance(auton_names, autonIt)) : autons::DEFAULT;
-    cur_start_pos = startIt != std::end(start_pos_names) ? static_cast<start_pos>(std::distance(start_pos_names, startIt)) : start_pos::DEFAULT;
-    cur_goal = goalIt != std::end(goal_names) ? static_cast<goals>(std::distance(goal_names, goalIt)) : goals::DEFAULT;
-    cur_alliance = allianceIt != std::end(alliance_names) ? static_cast<alliances>(std::distance(alliance_names, allianceIt)) : alliances::DEFAULT;
-
-    switch_alliance(cur_alliance);
+  void file_reset(){
+    cur_auton = autons::DEFAULT;
+    cur_start_pos = start_pos::DEFAULT;
+    cur_goal = goals::DEFAULT;
+    cur_alliance = alliances::DEFAULT;
+    if (pros::usd::is_installed()) file_update();
   }
 
   void save_change(std::string which){
@@ -974,57 +924,4 @@ namespace Autons{
     }
   }
 
-}
-
-FILE* autoFile = NULL;
-autos cur_auto;
-
-void autonFile_read(){
-  Data::log_t.data_update();
-  autoFile = fopen("/usd/auto.txt","r");
-  if(autoFile==NULL) {printf("could not open logfile\n"); return;}
-  else printf("logfile found\n");
-  int file_auto;
-  if(autoFile != NULL){
-    fscanf(autoFile, "%d", &file_auto);
-    cur_auto = static_cast<autos>(file_auto);
-  }
-  if(autoFile != NULL) fclose(autoFile);
-  Data::log_t.done_update();
-  master.print(0,0,"%s\n", auto_names[(int)cur_auto].c_str());
-  delay(500);
-}
-
-void auto_select(){
-  // void autonFile_read();
-  master.print(0,0," HERE");
-  delay(1000);
-  while(true){
-     if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_B)){
-        // auto_increase();
-        // menu_update();
-        // cur_auto++;
-        cur_auto = next_enum_value(cur_auto);
-        master.print(2,2,"%s\n", auto_names[(int)cur_auto].c_str());
-      }
-      if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_X)){
-        
-        cur_auto = previous_enum_value(cur_auto);
-        master.print(2,2,"%s\n", auto_names[(int)cur_auto].c_str());
-        // auto_decrease();
-        // menu_update();
-      }
-      // if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_Y)) side_select = true;
-      if(master.get_digital_new_press(ok_button)){
-        // auto_set = true;
-        autoFile = fopen("/usd/auto.txt","w");
-        //char name[80]  = auto_names[static_cast<int>(cur_auto)];
-        if(autoFile != NULL){
-          fprintf(autoFile, "%d", static_cast<int>(cur_auto));
-          fclose(autoFile);
-          return;
-        }
-        // done = true;
-      }
-  }
 }
