@@ -1,7 +1,7 @@
 {
   "py/object": "pros.conductor.project.Project",
   "py/state": {
-    "project_name": "driver-game",
+    "project_name": "Auto Balance",
     "target": "v5",
     "templates": {
       "kernel": {

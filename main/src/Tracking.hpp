@@ -5,7 +5,6 @@
 #include "geometry.hpp"
 #include "pid.hpp"
 #include "drive.hpp"
-#include "geometry.hpp"
 #include "task.hpp"
 #include "Libraries/gui.hpp"
 #include <iostream>
@@ -25,8 +24,8 @@ extern _Task move_t;
 // Left: get_roll, 1
 // Back: get_pitch, 1
 // Front: get_pitch, -1
-#define GYRO_AXIS get_roll
-#define GYRO_SIDE 1
+#define GYRO_AXIS get_pitch
+#define GYRO_SIDE -1
 
 
 #define DIST_BACK 8.5
