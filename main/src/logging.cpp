@@ -81,7 +81,7 @@ void Data::print(const char* format,...){
   va_end(args);
 
   //Events log gets special formatting
-  if(this == &events) buffer_len = snprintf(buffer,256,"\n\n%s\n\n",buffer) + 3;
+  // if(this == &events) buffer_len = snprintf(buffer,256,"\n\n%s\n\n",buffer) + 3;
 
   if(int(this->log_type) !=0){
     switch(log_location){

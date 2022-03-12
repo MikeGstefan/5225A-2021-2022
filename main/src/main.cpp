@@ -47,6 +47,8 @@ void initialize() {
 	Data::init();
 	_Controller::init();
 	GUI::init();
+	f_lift.reset();
+	b_lift.reset();
 	delay(500);
 	
 	// tracking.x_coord = 104.0, tracking.y_coord = 12.0, tracking.global_angle = -30.0_deg;
@@ -94,10 +96,42 @@ void autonomous() {
 
 void opcontrol() {
 
+	waitUntil(master.get_digital_new_press(DIGITAL_R1));
+	b_claw_p.set_value(HIGH);
+	f_claw_p.set_value(HIGH);
+	f_lift.move_absolute(600);
+	b_lift.move_absolute(100);
+
+	waitUntil(f_lift.motor.get_position() > 500);
+	flatten_against_wall(true);
+	tracking.reset();
+  printf("Start: %d\n", millis());
+
+	move_start(move_types::turn_angle, turn_angle_params(-85.0));
+	drivebase.brake();
+
+	b_lift.move_absolute(100);
+	f_lift.move_absolute(0);
+	drivebase.brake();
+
+	drivebase.set_state(HIGH);
+	waitUntil(f_lift.motor.get_position() < 50);
+	f_lift.move(-10);
+
+	// drivebase.move_ahead(25);
+	// move_start(move_types::tank_point, tank_point_params({-5.0, 0.0, -90.0}, false, 127.0, 1.0, true, 6.5, 150.0, 0.0, 0, {6.0, 0.5}), false);
+	// f_detect_goal(false);
+
+	move_start(move_types::turn_angle, turn_angle_params(-90.0));
+
+	// waitUntil(master.get_digital_new_press(DIGITAL_R1));
+	gyro.climb_ramp();
+	delay(1000);
+	b_claw_p.set_value(LOW);
+	f_claw_p.set_value(LOW);
+
 	while(true){
 		GUI::update();
-		
-		gyro.climb_ramp();
 		delay(10);
 	}
 }

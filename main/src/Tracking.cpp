@@ -1562,50 +1562,38 @@ void Gyro::finish_calibrating(){
 }
 
 void Gyro::climb_ramp(){
-  std::function<double(double)> scale = func_scale([](double x){return sgn(x)*pow(fabs(x), 1.0/7.0);}, {10, 0}, {25, 130}, -22); //Need the sgn thing cuz pow cant handle negatives
   drivebase.set_state(HIGH);
   finish_calibrating(); //Makes sure it's calibrated before starting (should already be)
   inertial.tare_roll();
   inertial.tare_pitch();
-  Task([=](){
-    int time = millis();
-    double last = gyro.get_angle();
-    double velo = 0.0;
-    int speed;
-    while(true){
-      velo = (gyro.get_angle() - last)/(millis() - time);
-      time = millis();
-      last = gyro.get_angle();
-      speed = scale(constrain(gyro.angle, 10.0, 23.0));
-      motion_i.print("%d || Speed: %d, Angle_v: %f, Angle: %f dist %d\n", speed, millis(), velo, gyro.angle, r_reset_dist.get());
-      delay(10);
-    }
-    
-  });
 
-  get_angle();
-  drivebase.move_ahead(127);
-  waitUntil(get_angle() > 22)
+  drivebase.move_ahead(-GYRO_SIDE*127);
+  waitUntil(get_angle() > 22);
   motion_i.print("ON RAMP: %f\n", get_angle());
+  GUI::flash("On Ramp", 1000, COLOUR(GREEN));
 
-  drivebase.move_ahead(scale(constrain(get_angle(), 10.0, 23.0)));
 
-  waitUntil(false);
+	f_lift.move_absolute(100);
+  // drivebase.brake();
+  // GUI::flash("Braked\n");
 
-  // tracking.wait_for_dist(20);
 
-  // waitUntil(!inRange(r_reset_dist.get(), 0, 200));
-  // GUI::flash(COLOUR(RED), 1000, "Saw wall\n");
-  // Led1.set_value(0);
+  // waitUntil(master.get_digital_new_press(DIGITAL_R1));
 
-  // tracking.wait_for_dist(5.5);
+  drivebase.move_ahead(-GYRO_SIDE*127);
+  waitUntil(get_angle() < 20);
+
+  drivebase.move_ahead(GYRO_SIDE*127);
+  tracking.wait_for_dist(1.5);
+  printf("End: %d\n", millis());
 
   drivebase.brake();
-  GUI::flash("Braked\n");
+  GUI::flash("Braked\n", 1000, COLOUR(GREEN));
   
 }
 
 void Gyro::level(double kP, double kD){
+  printf("\nIn level function\n");
 	PID gyro_p(kP, 0, kD, 0);
   Timer gyro_steady ("Gyro", &motion_d);
   int speed;
@@ -1617,13 +1605,14 @@ void Gyro::level(double kP, double kD){
     gyro_steady.print("Angle: %f | Speed: %d\n", angle, speed);
     
 		if (get_angle_dif() > 0.6) gyro_steady.reset(); //Unsteady, Resets the steady timer - //Diff calculated from get_angle() after loop
-		else if (fabs(angle) < 6 && gyro_steady.get_time() > 450) break; //If within range to be level and steady on ramp
+		else if (fabs(angle) < 6 && gyro_steady.get_time() > 500) break; //If within range to be level and steady on ramp
 
 		if (master.interrupt(true, false)) return;
 
 		delay(10);
 	}
 
-	motion_d.print("\nLevelled on ramp\n\n");
+	motion_i.print("\nLevelled on ramp\n\n");
 	drivebase.brake();
+  GUI::flash("Braked\n");
 }

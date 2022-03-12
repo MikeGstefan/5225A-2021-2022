@@ -32,7 +32,7 @@ pros::ADIDigitalIn f_touch(7);
 pros::Distance l_dist(18);
 pros::Distance r_dist(17);
 
-pros::Imu ramp_imu(5);
+pros::Imu ramp_imu(8);
 
 // ADIDigitalOut f_claw_p({{16,1}});
 
