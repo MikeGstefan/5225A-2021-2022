@@ -263,4 +263,4 @@ void turn_to_point(void* params);
   {start_x + sin(deg_to_rad(theta)) * magnitude, start_y + cos(deg_to_rad(theta)) * magnitude, angle}\
 
 #define angle_to_point(x, y)\
-  rad_to_deg(atan2(x - tracking.x_coord, y - tracking.y_coord)\
+  rad_to_deg(atan2(x - tracking.x_coord, y - tracking.y_coord)
