@@ -110,7 +110,30 @@ bool claw_state = false, claw_state_2 = false, lift_state = false, drive_state =
 int lift_speed = 0;
 int safety_check = 0;
 void opcontrol() {
-  //move_start(move_types::turn_angle, turn_angle_params(60));
+
+	
+	while(true){
+		if(master.get_digital_new_press(DIGITAL_A))distance_reset_left(16);
+		delay(10);
+	}
+	move_stop();
+	// while(true){
+	// 	printf("%d\n", b_dist.get());
+	// 	delay(10);
+	// }
+	// f_lift_m.move(40);
+	// pros::Task intk_task(intk_c);
+  drivebase.driver_practice();
+  
+	master.clear();
+	// b_lift.reset();
+	// Task([](){ 
+	// 	f_lift.reset();
+	// });
+	// f_claw_p.set_value(0);
+	// b_claw_p.set_value(0);
+	// skills();
+	// skills2();
 
   distance_reset_left(16);
 

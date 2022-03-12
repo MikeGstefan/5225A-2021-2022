@@ -16,7 +16,7 @@ Position distance_reset_left(int cycles){
 	double dist_to_centre = 190; //Side distance sensor to tracking centre
 	double local_y = 0, local_x = 0, angle = 0;
 	double averageleft = 0, averageright = 0, averageside = 0;
-	double dist_sensor = 305; //Distance between Sensors
+	double dist_sensor = 429; //Distance between Sensors
 	int start_time = millis();
 	vector <int> left;
 	vector <int> right;
@@ -84,7 +84,7 @@ Position distance_reset_right(int cycles){
 	double dist_to_centre = 190; //Side distance sensor to tracking centre
 	double local_y = 0, local_x = 0, angle = 0;
 	double averageleft = 0, averageright = 0, averageside = 0;
-	double dist_sensor = 305; //Distance between Sensors
+	double dist_sensor = 429; //Distance between Sensors
 	int start_time = millis();
 	vector <int> left;
 	vector <int> right;
