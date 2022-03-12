@@ -75,6 +75,8 @@ void update(void* params){
     Right = NewRight - LastRight;
     Back = NewBack - LastBack;
 
+    Back = 0;
+
 
     velocity_update_time = millis() - last_velocity_time;
     if(velocity_update_time > 20){  // velocity is updated every 20 ms
@@ -126,10 +128,11 @@ void update(void* params){
 
 
     tracking_data.print(&data_timer, 10, {
-      [=](){return Data::to_char("%d || x: %.2lf, y: %.2lf, a: %.2lf\n", millis(), tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle));},
-      [=](){return Data::to_char("%d || GLOBAL VELOCITY| x: %.2f, y: %.2f a: %.2f\n", millis(), tracking.g_velocity.x, tracking.g_velocity.y, rad_to_deg(tracking.g_velocity.angle));},
+      // [=](){return Data::to_char("%d || x: %.2lf, y: %.2lf, a: %.2lf\n", millis(), tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle));},
+      // [=](){return Data::to_char("%d || GLOBAL VELOCITY| x: %.2f, y: %.2f a: %.2f\n", millis(), tracking.g_velocity.x, tracking.g_velocity.y, rad_to_deg(tracking.g_velocity.angle));},
       // [=](){return Data::to_char("%d || ENCODER L: %d, R: %d, B:%d \n", millis(), LeftEncoder.get_value(), RightEncoder.get_value(), BackEncoder.get_value());},
       // [=](){return Data::to_char("%d || ENCODER VELO| l: %.2f, r: %.2f, b: %.2f\n", millis(), tracking.l_velo, tracking.r_velo, tracking.b_velo);}
+      [=](){return Data::to_char("%d, %.2f, %.2f\n", millis(), tracking.l_velo, tracking.r_velo);}
     });
 
 
@@ -237,7 +240,7 @@ void rush_goal2(double target_x, double target_y, double target_a){
         //   printf("GOT TO GOAL: %d\n", millis());
         //   return;
         // }
-        if (fabs(tracking.y_coord) > fabs(target_y) + 10.0){
+        if (fabs(tracking.y_coord) > fabs(target_y)){
           printf("target_y: %lf\n", target_y);
           printf("x: %lf, y: %lf, a: %lf\n", tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle));
           printf("FAILED GETTING TO GOAL: %d\n", millis());
@@ -303,7 +306,8 @@ void tank_rush_goal(void* params){
     line_disp.rotate(follow_line.get_angle());
     orig_sgn_line_y = sgn(line_disp.get_y()); // used to calculate if the robot has overshot
     // END OF MOTION FIX
-
+    const Point start_pos = {tracking.x_coord, tracking.y_coord};
+    double delta_dist = 0.0;
     motion_i.print("%d|| Starting tank rush goal to point from (%.2f, %.2f, %.2f) to (%.2f, %.2f, %.2f)\n", millis(), tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle),target.x, target.y, target.angle);
     while(true){
       // global displacement of robot and target
@@ -349,7 +353,7 @@ void tank_rush_goal(void* params){
       }
       else tracking.power_y = orig_sgn_line_y*(max_power - total_power);
       // printf("Powers | y: %lf, a: %lf\n",tracking.power_y, tracking.power_a);
-
+      delta_dist = sqrt(pow(tracking.x_coord -start_pos.x,2) + pow(tracking.y_coord - start_pos.y,2));
       motion_d.print(" %d || error y : %.2f error a : %.2f pow y : %.2f, pow a : %.2f\n ", millis(), local_error.y, rad_to_deg(error.angle), tracking.power_y, tracking.power_a);
       graph.print("%d, %f\n", millis()-time, tracking.l_velo);
       // exits movement once the target has been overshot (if the sign of y error along the line has flipped)
@@ -362,7 +366,7 @@ void tank_rush_goal(void* params){
         // tracking.move_stop_task();
         break;
       }
-      if(orig_sgn_line_y != sgn_line_y){
+      if(delta_dist > 44){
         f_claw_p.set_value(1);
         if (brake) drivebase.brake();
         tracking.move_complete = true;
@@ -377,6 +381,11 @@ void tank_rush_goal(void* params){
     }
 }
 
+
+
+void speed_test(){
+  // drivebase.move(127.0);
+}
 
 
 arc_params::arc_params(const Point start, Position target, const double radius, const bool positive, const double max_power, const bool angle_relative_to_arc, const double min_angle_percent, const bool brake, const double decel_dist, const double decel_speed):

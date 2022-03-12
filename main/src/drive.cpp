@@ -87,6 +87,8 @@ void Drivebase::move(double y, double a){
   front_r.move(y-a);
   back_l.move(y+a);
   back_r.move(y-a);
+  center_l.move(y+a);
+  center_r.move(y-a);
   // back_l.move(0);
   // back_r.move(0);
 }

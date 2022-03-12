@@ -48,25 +48,25 @@ void initialize() {
 	_Controller::init();
 	GUI::init();
 	delay(500);
-	switch(cur_auto){
-		case auto1:
-			tracking.x_coord = 26.0, tracking.y_coord = 11.75, tracking.global_angle = -90.0_deg;
-		break;
-		case auto2:
-			tracking.x_coord = 108.0, tracking.y_coord = 16.0, tracking.global_angle = 0.0_deg;
-		break;
-		case auto3:
+	// switch(cur_auto){
+		// case auto1:
+		// 	tracking.x_coord = 26.0, tracking.y_coord = 11.75, tracking.global_angle = -90.0_deg;
+		// break;
+		// case auto2:
+		// 	tracking.x_coord = 108.0, tracking.y_coord = 16.0, tracking.global_angle = 0.0_deg;
+		// break;
+		// case auto3:
 			tracking.x_coord = 106.0, tracking.y_coord = 16.0, tracking.global_angle = 0.0_deg;
-			// tracking.x_coord = 104.0, tracking.y_coord = 12.0, tracking.global_angle = -30.0_deg;
-		break;
-		case auto4:
-			// tracking.x_coord = 24.5, tracking.y_coord = 15.0, tracking.global_angle = 9.0_deg;
-			tracking.x_coord = 26.0, tracking.y_coord = 11.75, tracking.global_angle = -90.0_deg;
-		break; 
-		default:
-			tracking.x_coord = 26.0, tracking.y_coord = 11.75, tracking.global_angle = -90.0_deg;
-		break;
-	}
+		// 	// tracking.x_coord = 104.0, tracking.y_coord = 12.0, tracking.global_angle = -30.0_deg;
+		// break;
+		// case auto4:
+		// 	// tracking.x_coord = 24.5, tracking.y_coord = 15.0, tracking.global_angle = 9.0_deg;
+		// 	tracking.x_coord = 26.0, tracking.y_coord = 11.75, tracking.global_angle = -90.0_deg;
+		// break; 
+		// default:
+		// 	tracking.x_coord = 26.0, tracking.y_coord = 11.75, tracking.global_angle = -90.0_deg;
+		// break;
+	// }
 	
 	// tracking.x_coord = 104.0, tracking.y_coord = 12.0, tracking.global_angle = -30.0_deg;
 	// tracking.x_coord = 24.5, tracking.y_coord = 15.0, tracking.global_angle = 9.0_deg;
@@ -143,7 +143,15 @@ void autonomous() {
 // extern Slider mot_speed_set;
 
 void opcontrol() {
-	move_stop();
+	// move_stop();
+	int time = millis();
+	move_start(move_types::tank_rush, tank_rush_params({106.0,71.0, 0.0}, false));
+	master.print(0,0,"%d",millis()-time);
+	while(true){
+		// if(master.get_digital_new_press(DIGITAL_A))master.print(0,0,"%.2f, %.2f",LeftEncoder.get_value(), RightEncoder.get_value());
+		// drivebase.handle_input();
+		delay(10);
+	}
 	// while(true){
 	// 	printf("%d\n", b_dist.get());
 	// 	delay(10);
