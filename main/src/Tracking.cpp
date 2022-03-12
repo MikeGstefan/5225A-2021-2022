@@ -394,8 +394,8 @@ point_params::point_params(const Position target, const double max_power, const 
 tank_arc_params::tank_arc_params(const Point start_pos, Position target, const double power, const double max_power, const bool brake, double decel_start, double decel_end, double decel_target_speed):
   start_pos{start_pos}, target{target}, power{power}, max_power{max_power}, brake{brake}, decel_start{decel_start}, decel_end{decel_end}, decel_target_speed{decel_target_speed}{}
 
-tank_point_params::tank_point_params(const Position target, const bool turn_dir_if_0, const double max_power, const double min_angle_percent, const bool brake, double kp_y, double kp_a, double kd_a, int timeout, Point end_error):
-  target{target}, turn_dir_if_0{turn_dir_if_0}, max_power{max_power}, min_angle_percent{min_angle_percent}, brake{brake}, kp_y{kp_y}, kp_a{kp_a}, kd_a{kd_a}, timeout{timeout}, end_error{end_error}{}
+tank_point_params::tank_point_params(const Position target, const bool turn_dir_if_0, const double max_power, const double min_angle_percent, const bool brake, double kp_y, double kd_y, double kp_a, double kd_a, int timeout, Point end_error):
+  target{target}, turn_dir_if_0{turn_dir_if_0}, max_power{max_power}, min_angle_percent{min_angle_percent}, brake{brake}, kp_y{kp_y}, kd_y{kd_y}, kp_a{kp_a}, kd_a{kd_a}, timeout{timeout}, end_error{end_error}{}
 
 tank_rush_params::tank_rush_params(const Position target, const bool turn_dir_if_0, const double max_power, const double min_angle_percent, const bool brake, double kp_a, double kd_a, double dist_past): 
   target{target}, turn_dir_if_0{turn_dir_if_0}, max_power{max_power}, min_angle_percent{min_angle_percent}, brake{brake}, kp_a{kp_a}, kd_a{kd_a}, dist_past{dist_past}{}
@@ -955,6 +955,7 @@ void tank_move_to_target(void* params){
     const double min_angle_percent = tank_point_params_g.min_angle_percent;
     const bool brake = tank_point_params_g.brake;
     double kp_y = tank_point_params_g.kp_y;
+    double kd_y = tank_point_params_g.kd_y;
     double kp_a =tank_point_params_g.kp_a;
     double kd_a = tank_point_params_g.kd_a;
     int timeout = tank_point_params_g.timeout;
@@ -980,7 +981,7 @@ void tank_move_to_target(void* params){
 
     // double deriv_a = 0.0;
     PID angle(kp_a, 0.0, kd_a, 0.0);
-    PID y_pid(6.4,0.0,350.0,0.0);
+    PID y_pid(kp_y,0.0,kd_y,0.0);
 
     // move on line variables
     Vector follow_line(target.y - tracking.y_coord, target.x - tracking.x_coord); // used to keep track of angle of follow_line relative to the vertical
