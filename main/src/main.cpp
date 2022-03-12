@@ -111,9 +111,18 @@ int lift_speed = 0;
 int safety_check = 0;
 void opcontrol() {
 
-	
+	double high = -1000.0;
+	double low = 10000.0;
+	Position pos;
+	for(int i = 0; i < 1; i++){
+		pos = distance_reset_right(24);
+		if(pos.angle > high)high = pos.angle;
+		if(pos.angle < low)low = pos.angle;
+		misc.print("%d low: %.2f, high %.2f \n", i, low, high);
+		delay(10);
+	}
 	while(true){
-		if(master.get_digital_new_press(DIGITAL_A))distance_reset_left(16);
+		// if(master.get_digital_new_press(DIGITAL_A))
 		delay(10);
 	}
 	move_stop();

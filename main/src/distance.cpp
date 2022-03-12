@@ -5,15 +5,18 @@ cDistance left_eye;
 cDistance right_eye;
 bool ram = false;
 
+
+double d_offset = 5.0;//depth of the funny wall thing
+
 void setVisionState(Distance_States state) {
 	Last_Distance_State = Distance_State;
 	Distance_State = state;
 }
 
 Position distance_reset_left(int cycles){
-	double dist_corner = 72; //Distance sensor to corner
-	double side_length = 135; //Corner of the robot to side distance sensor
-	double dist_to_centre = 190; //Side distance sensor to tracking centre
+	double dist_corner = 6; //Distance sensor to corner
+	double side_length = 86; //Corner of the robot to side distance sensor
+	double dist_to_centre = 196; //Side distance sensor to tracking centre
 	double local_y = 0, local_x = 0, angle = 0;
 	double averageleft = 0, averageright = 0, averageside = 0;
 	double dist_sensor = 429; //Distance between Sensors
@@ -61,7 +64,8 @@ Position distance_reset_left(int cycles){
 	}
 	if(ram == 0){
 		int diff = averageleft-averageright;
-		angle = atan(diff/dist_sensor);
+		// angle = atan(diff/dist_sensor);
+		angle = near_angle(2*atan2(sqrt(pow(diff,2.0) + pow(dist_sensor, 2.0)- pow(d_offset, 2.0)) - dist_sensor, diff - d_offset),0.0);
 
 		misc.print("Angle Reset to: %f\n", rad_to_deg(angle));
 		local_y = ((averageleft/25.4) - tan(angle) + (dist_to_centre/25.4) * tan(angle) + (side_length/25.4)) * cos(angle);
@@ -79,9 +83,9 @@ Position distance_reset_left(int cycles){
 }
 
 Position distance_reset_right(int cycles){
-	double dist_corner = 72; //Distance sensor to corner
-	double side_length = 135; //Corner of the robot to side distance sensor
-	double dist_to_centre = 190; //Side distance sensor to tracking centre
+	double dist_corner = 6; //Distance sensor to corner
+	double side_length = 86; //Corner of the robot to side distance sensor
+	double dist_to_centre = 196; //Side distance sensor to tracking centre
 	double local_y = 0, local_x = 0, angle = 0;
 	double averageleft = 0, averageright = 0, averageside = 0;
 	double dist_sensor = 429; //Distance between Sensors
@@ -93,6 +97,7 @@ Position distance_reset_right(int cycles){
 	int left_low = l_reset_dist.get();
 	int right_low = r_reset_dist.get();
 	int side_low = r_dist.get();
+
 
 	int error_count = 0;
 
@@ -129,14 +134,15 @@ Position distance_reset_right(int cycles){
 	}
 	if(ram == 0){
 		int diff = averageleft-averageright;
-		angle = atan(diff/dist_sensor);
+		// angle = atan(diff/dist_sensor);
+		angle = near_angle(2*atan2(sqrt(pow(diff,2.0) + pow(dist_sensor, 2.0)- pow(d_offset, 2.0)) - dist_sensor, diff - d_offset),0.0);
 
 		misc.print("Angle Reset to: %f\n", rad_to_deg(angle));
-		local_y = ((averageleft/25.4) - tan(angle) + (dist_to_centre/25.4) * tan(angle) + (side_length/25.4)) * cos(angle);
+		local_y = ((averageright/25.4) - tan(angle) + (dist_to_centre/25.4) * tan(angle) + (side_length/25.4)) * cos(angle);
 		local_x = ((averageside/25.4) + (dist_to_centre/25.4)) * cos(angle);
 
 		misc.print("Front: %f, Side: %f, Side sensor: %f\n", local_y, local_x, averageside);
-		Position Reset (local_x, local_y, angle);
+		Position Reset (local_x, local_y, rad_to_deg(angle));
 		return Reset;
 	}else{
 		//Make it ram into the wall or just throw a flag to another program
