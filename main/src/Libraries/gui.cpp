@@ -10,6 +10,7 @@ bool touched_when_flashed;
 const Page* GUI::current_page = nullptr;
 bool GUI::touched = false;
 int GUI::x = 0, GUI::y = 0;
+_Task GUI::task(update, "GUI");
 
 //Text Vars
 char* const go_string = (char*)malloc(90*sizeof(char));
@@ -793,16 +794,23 @@ void GUI::init(){
   current_gui->setup();
   if(terminal.active) terminal.go_to();
   else go_to(1); //Sets it to page 1 for program start. Don't delete this. If you want to change the starting page, call GUI::go_to(Page Number) in initialize()
-  update();
+  // update();
+  GUI::task.start();
 }
 
-void GUI::update(){
-  current_gui->background();
-  update_screen_status();
-  const Page& cur_p = *current_page;
-  /*Page*/cur_p.update();
-  /*Button*/for (std::vector<Button*>::const_iterator it = cur_p.buttons.begin(); it != cur_p.buttons.end(); it++) {(*it)->update(); if(&cur_p != current_page) return;}
-  /*Slider*/for (std::vector<Slider*>::const_iterator it = cur_p.sliders.begin(); it != cur_p.sliders.end(); it++) (*it)->update();
-  /*Text*/for (std::vector<Text_*>::const_iterator it = cur_p.texts.begin(); it != cur_p.texts.end(); it++) (*it)->update();
-  /*Flash*/end_flash();
+void GUI::update(void* params){
+  _Task* ptr = _Task::get_obj(params);
+  while(true){
+    current_gui->background();
+    update_screen_status();
+    const Page& cur_p = *current_page;
+    /*Page*/cur_p.update();
+    /*Button*/for (std::vector<Button*>::const_iterator it = cur_p.buttons.begin(); it != cur_p.buttons.end(); it++) {(*it)->update(); if(&cur_p != current_page) continue;}
+    /*Slider*/for (std::vector<Slider*>::const_iterator it = cur_p.sliders.begin(); it != cur_p.sliders.end(); it++) (*it)->update();
+    /*Text*/for (std::vector<Text_*>::const_iterator it = cur_p.texts.begin(); it != cur_p.texts.end(); it++) (*it)->update();
+    /*Flash*/end_flash();
+
+    delay(10);
+    if(ptr->notify_handle()) break;
+  }
 }

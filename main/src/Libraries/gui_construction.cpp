@@ -1,6 +1,4 @@
 #include "gui.hpp"
-#include <limits>
-#include <sys/_stdint.h>
 
 /*Field array*/ static std::vector<std::bitset<200>> field (200, std::bitset<200>{}); //Initializes to 200 blank bitsets
 /*Temperature Alert Flag*/ static bool temp_flashed;
@@ -61,8 +59,8 @@ Slider f_lift_val(30, 45, 300, 35, GUI::Style::SIZE, Slider::HORIZONTAL, 0, f_li
 Slider b_lift_val(30, 110, 300, 40, GUI::Style::SIZE, Slider::HORIZONTAL, 0, b_lift.top_position, lift_move, "Back Lift", 10);
 Button f_lift_move(470, 45, -100, 40, GUI::Style::SIZE, Button::SINGLE, lift_move, "Move Front Lift");
 Button b_lift_move(470, 95, -100, 40, GUI::Style::SIZE, Button::SINGLE, lift_move, "Move Back Lift");
-Button f_claw(470, 145, -100, 40, GUI::Style::SIZE, Button::TOGGLE, lift_move, "Front Claw");
-Button b_claw(470, 195, -100, 40, GUI::Style::SIZE, Button::TOGGLE, lift_move, "Back Claw");
+Button front_claw(470, 145, -100, 40, GUI::Style::SIZE, Button::TOGGLE, lift_move, "Front Claw");
+Button back_claw(470, 195, -100, 40, GUI::Style::SIZE, Button::TOGGLE, lift_move, "Back Claw");
 
 Page elastic ("Elastic Test"); //Testing the elastics on the lift
 Button check_b_elastic(145, 70, 70, 30, GUI::Style::CENTRE, Button::SINGLE, elastic, "Run Back Elastic Test");
@@ -287,10 +285,10 @@ void main_setup(){
     std::string coord = coord_c;
     if (GUI::go("Move back lift to" + coord, "Press to move back lift to" + coord, 1000)) b_lift.move_absolute(b_lift_val.get_value());
   });
-  f_claw.set_func([](){f_claw_p.set_value(HIGH);});
-  f_claw.set_off_func([](){f_claw_p.set_value(LOW);});
-  b_claw.set_func([](){b_claw_p.set_value(HIGH);});
-  b_claw.set_off_func([](){b_claw_p.set_value(LOW);});
+  front_claw.set_func([](){f_claw_p.set_value(HIGH);});
+  front_claw.set_off_func([](){f_claw_p.set_value(LOW);});
+  back_claw.set_func([](){b_claw_p.set_value(HIGH);});
+  back_claw.set_off_func([](){b_claw_p.set_value(LOW);});
 
   //Known Pneumatics Port Setup
   if(Piston::list_for_gui[0]){

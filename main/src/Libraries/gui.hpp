@@ -85,13 +85,16 @@ class GUI{
     //Pages in the gui, init function, loop function
     GUI(std::vector<Page*>, std::function <void()>, std::function <void()>);
 
+
+    static _Task task;
+
     //Functions
     static void aligned_coords (int, int, int, int, int = 480, int = 220);
     static void flash(Colour, std::uint32_t, const char*, ...);
     static void flash(std::string = "", std::uint32_t = 1000, Colour = COLOUR(RED));
     static bool go(std::string, std::string, std::uint32_t=0), go_end(std::string, std::uint32_t=0);
     static void clear_screen(Colour=GREY);
-    static void init(), update();
+    static void init(), update(void* = nullptr);
     static void go_to(int);
     bool pressed() const;
 };

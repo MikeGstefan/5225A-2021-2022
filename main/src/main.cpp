@@ -95,9 +95,7 @@ void opcontrol() {
 	*/
 
 	// Autons::selector();
-
 	while(true){
-		GUI::update();
 		drivebase.non_blocking_driver_practice();
 		delay(10);
 	}
