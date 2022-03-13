@@ -67,6 +67,8 @@ void initialize() {
 			tracking.x_coord = 26.0, tracking.y_coord = 11.75, tracking.global_angle = -90.0_deg;
 		break;
 	}
+	tracking.x_coord = 0.0, tracking.y_coord = 0.0, tracking.global_angle = 0.0_deg;
+
 	
 	// tracking.x_coord = 104.0, tracking.y_coord = 12.0, tracking.global_angle = -30.0_deg;
 	// tracking.x_coord = 24.5, tracking.y_coord = 15.0, tracking.global_angle = 9.0_deg;
@@ -143,6 +145,22 @@ void autonomous() {
 // extern Slider mot_speed_set;
 
 void opcontrol() {
+	b_claw_p.set_value(LOW);
+	waitUntil(master.get_digital_new_press(DIGITAL_A));
+	b_claw_p.set_value(HIGH);
+  move_start(move_types::tank_point, tank_point_params({-10.0, 20.0, 0.0}));
+  move_start(move_types::tank_point, tank_point_params({20.0, 50.0, 0.0}));
+
+	while(true) delay(10);
+	waitUntil(master.get_digital_new_press(DIGITAL_A));
+
+	drivebase.move(50,0);
+	while(!master.get_digital_new_press(DIGITAL_A)){
+		printf("l_vel:%lf, r_vel: %lf, avg: %lf\n", tracking.l_velo, tracking.r_velo, (tracking.l_velo + tracking.r_velo) / 2);
+		delay(10);
+	}
+	drivebase.move(-1.0, 0.0);
+	delay(1000);
 	move_stop();
 	// while(true){
 	// 	printf("%d\n", b_dist.get());

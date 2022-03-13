@@ -978,9 +978,17 @@ void tank_move_to_target(void* params){
     // double end_error = 0.5, end_error_x = 0.5;
     double end_dist;
 
+
+    double end_y_velocity = 0.0;  // defaults to 0.0
     // double deriv_a = 0.0;
     PID angle(kp_a, 0.0, kd_a, 0.0);
-    PID y_pid(6.4,0.0,350.0,0.0);
+    // PID y_pid(6.4,0.0,350.0,0.0);
+    // PID y_pid(6.4,0.0,0.0,0.0);
+    double kB = 1/0.5;  // the ratio of motor power to local y velocity (inches/sec)
+    PID y_vel_pid(2.0, 0.0000, 20.0, 0.0);
+    double target_y_velocity; // what the y_vel_pid is trying to reach
+    double cur_y_velocity;
+    double max_y_velocity = 60.0; // the robot can travel at 60 inches/sec at its fastest
 
     // move on line variables
     Vector follow_line(target.y - tracking.y_coord, target.x - tracking.x_coord); // used to keep track of angle of follow_line relative to the vertical
@@ -1000,6 +1008,12 @@ void tank_move_to_target(void* params){
     int start_time = millis();
     bool last_state= false;
     motion_i.print("%d|| Starting tank move to point from (%.2f, %.2f, %.2f) to (%.2f, %.2f, %.2f)\n", millis(), tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle),target.x, target.y, target.angle);
+    // velocity relation testing
+    // power - > velocity (inches/sec)
+    // 50 -> 23 = 0.46
+    // 75 -> 37 = 0.49
+    // 100 -> 50 = 0.5
+    // 127 -> 65 = 0.51
     while(true){
       // global displacement of robot and target
       line_disp = Vector(target.x - tracking.x_coord, target.y - tracking.y_coord);
@@ -1028,7 +1042,15 @@ void tank_move_to_target(void* params){
       motion_d.print("%d|| end_dist: %.2f, hypotenuse: %.2f, local %.2f, angle: %.2f\n",millis(), end_dist,hypotenuse, local_error.y,rad_to_deg(tracking.global_angle - atan2(target.x - tracking.x_coord,target.y - tracking.y_coord)));
 
       // tracking.power_y = kp_y * local_error.y;
-      tracking.power_y = y_pid.compute(-local_error.y,0.0);
+      cur_y_velocity = (tracking.l_velo + tracking.r_velo) / 2; // average of side encoders is approximately the local_y_velocity
+      // target_y_velocity = y_pid.compute(-local_error.y, 0.0);
+      target_y_velocity = map(local_error.y, 0.0, 18.0, end_y_velocity, max_y_velocity);
+      // target_y_velocity = map(target_y_velocity, );
+      if(fabs(target_y_velocity) > max_y_velocity) target_y_velocity = max_y_velocity * sgn(target_y_velocity);
+      tracking.power_y = kB * target_y_velocity + y_vel_pid.compute(cur_y_velocity, target_y_velocity);
+      printf("error: %lf, power_y: %lf, cur_vel: %lf, target_vel: %lf, base: %lf, diff_vel:%lf\n", local_error.y, tracking.power_y, cur_y_velocity, target_y_velocity, kB * target_y_velocity, target_y_velocity - cur_y_velocity);
+      // tracking.power_y = kB * target_y_velocity;
+
       // tracking.power_y = kp_y * line_y_local_y;
       // tracking.power_a = angle.compute(error.angle, 0.0);
       if( end_dist > end_error.x ){
