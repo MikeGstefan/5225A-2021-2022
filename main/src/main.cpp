@@ -113,8 +113,6 @@ void autonomous() {
 		case auto1:
 			// tracking.x_coord = 26.0, tracking.y_coord = 11.75, tracking.global_angle = -90.0_deg;
 			skills();
-			skills2();
-			new_skills3();
 		break;
 		case auto2:
 			f_claw_p.set_value(0);
@@ -134,8 +132,6 @@ void autonomous() {
 		break; 
 		default:
 			skills();
-			skills2();
-			new_skills3();
 		break;
 	}
 
