@@ -898,30 +898,24 @@ namespace Autons{
   void selector(){
     if(normal){
       auto_selection.go_to();
-      wait_until (false){
-        if(master.get_digital_new_press(ok_button)){
-          master.clear();
-          return;
-        }
-        else if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_L1)) prev_route();
+      wait_until(master.get_digital_new_press(ok_button)){
+        if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_L1)) prev_route();
         else if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_R1)) next_route();
         else if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_X)) switch_alliance();
       }
     }
     else{
       pos_auto_selection.go_to();
-      wait_until (false){
-        if(master.get_digital_new_press(ok_button)){
-          master.clear();
-          return;
-        }
-        else if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_L1)) prev_start_pos();
+      wait_until(master.get_digital_new_press(ok_button)){
+        if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_L1)) prev_start_pos();
         else if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_R1)) next_start_pos();
         else if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_X)) switch_alliance();
         else if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_L2)) prev_goal();
         else if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_R2)) next_goal();
       }
     }
+    
+    master.clear();
   }
 
 }

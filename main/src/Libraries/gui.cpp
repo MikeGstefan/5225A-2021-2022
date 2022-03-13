@@ -1,4 +1,5 @@
 #include "gui.hpp"
+#include <sys/select.h>
 
 //Timer stuff
 Timer Flash("Flash Timer", false);
@@ -657,88 +658,72 @@ void Page::update() const{
   if (loop_func) loop_func();
 }
 
+void Button::select(){
+  switch(form){
+    case Button::LATCH:
+    case Button::TOGGLE:
+      on = true;
+
+      for (std::vector<Button*>::const_iterator option_it = options.begin(); option_it != options.end(); option_it++) (*option_it)->deselect();
+
+    case Button::SINGLE:
+    case Button::REPEAT:
+      draw_pressed();
+      run_func();
+      break;
+  }
+}
+
+void Button::deselect(){
+  switch(form){
+    case Button::LATCH:
+    case Button::TOGGLE:
+      on = false;
+    case Button::SINGLE:
+    case Button::REPEAT:
+      draw();
+      run_off_func();
+      break;
+  }
+}
+
 void Button::update(){
   if (!active) return;
 
   switch(form){
-    case Button::SINGLE:
-      if (new_press()){
-        draw_pressed();
-        run_func();
-
-      }
-
-      else if (new_release()){
-        draw();
-        run_off_func();
-      }
-
-      break;
-
     case Button::LATCH:
       if (new_press()){
         on = !on; //Toggles the latch
-
-        //Draws button's new state
-        if(on){
-          //Deselects connected buttons
-          for (std::vector<Button*>::const_iterator option_it = options.begin(); option_it != options.end(); option_it++){
-            (*option_it)->on = false;
-            (*option_it)->draw();
-          }
-        }
-
-        draw();
-      }
-
-      else if (new_release()){
-        draw();
+        if (on) select();
+        else deselect();
       }
 
       if(on) run_func();
       else run_off_func();
+      break;
+    
+    case Button::TOGGLE:
+      if (new_press()){
+        on = !on; //Toggles the latch
+        if (on) select();
+        else deselect();
+      }
+      break;
+
+    case Button::SINGLE:
+      if (new_press()) select();
+      else if (new_release()) deselect();
 
       break;
 
     case Button::REPEAT:
-      if (new_press()){
-        draw_pressed();
-        run_func();
-      }
-
-      else if (new_release()){
-        draw();
-        run_off_func();
-      }
+      if (new_press()) select();
+      else if (new_release()) deselect();
 
       if (pressed()) run_func();
 
       break;
-
-    case Button::TOGGLE:
-      if (new_press()){
-        on = !on;
-        //Draws button's new state
-        if(on){
-          //Deselects connected buttons
-          for (std::vector<Button*>::const_iterator option_it = options.begin(); option_it != options.end(); option_it++){
-            (*option_it)->on = false;
-            (*option_it)->draw();
-          }
-          draw_pressed();
-          run_func();
-        }
-        else{ //Just turned off
-          run_off_func();
-          draw();
-        }
-      }
-
-      else if (new_release()){
-        draw();
-      }
-      break;
-  } //switch
+  }
 }
 
 void Slider::update(){
@@ -821,5 +806,3 @@ void GUI::update(){
   /*Text*/for (std::vector<Text_*>::const_iterator it = cur_p.texts.begin(); it != cur_p.texts.end(); it++) (*it)->update();
   /*Flash*/end_flash();
 }
-
-// _Task gui_task(GUI::update, "GUI"); Make GUI::update a void (void*)() first

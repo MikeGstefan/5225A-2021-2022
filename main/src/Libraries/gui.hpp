@@ -285,6 +285,7 @@ class Button{
     void set_background (Colour);
     void add_text (Text_&, bool=true);
     void wait_for_press(); //Blocking
+    void select(), deselect();
 };
 
 class Slider{
