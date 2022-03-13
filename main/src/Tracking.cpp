@@ -371,7 +371,7 @@ void tank_rush_goal(void* params){
         // tracking.move_stop_task();
         break;
       }
-      drivebase.move_tank(tracking.power_y, tracking.power_a);
+      drivebase.move(tracking.power_y, tracking.power_a);
       if(ptr->notify_handle())return;
       delay(10);
     }
@@ -1117,7 +1117,7 @@ void tank_move_to_target(void* params){
         motion_i.print("%d || TIME OUT move to target X: %f Y: %f A: %f at X: %f Y: %f A: %f time: %d\n", millis(), target.x, target.y, target.angle, tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle), millis()- time);
         break;
       }
-      drivebase.move_tank(tracking.power_y, tracking.power_a);
+      drivebase.move(tracking.power_y, tracking.power_a);
       if(ptr->notify_handle())return;
       delay(10);
     }
@@ -1153,17 +1153,17 @@ void turn_to_angle(void* params){
     power =  angle_pid.compute(tracking.global_angle, new_target_a);
     if(fabs(power) > max_speed)power = max_speed*sgn(power);
     if(fabs(power) <min_power_a) power = sgn(power)*min_power_a;
-    drivebase.move_tank(0,power);
+    drivebase.move(0, power);
     if(fabs(rad_to_deg(angle_pid.get_error())) < end_error){
       motion_i.print("%d || Ending turn to angle : %.2f at X: %.2f Y: %.2f A: %.2f, time: %d\n", millis(), rad_to_deg(target_a), tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle), millis() - start_time);
-      drivebase.move_tank(0, 0);
+      drivebase.move(0, 0);
       if(brake) drivebase.brake();
       tracking.move_complete = true;
       return;
     }
     if(timeout != 0 && millis() - start_time > timeout){ 
       motion_i.print("%d|| TIMED OUT Ending turn to angle : %.2f at X: %.2f Y: %.2f A: %.2f, time: %d\n", millis(), rad_to_deg(target_a), tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle), millis() - start_time);
-      drivebase.move_tank(0, 0);
+      drivebase.move(0, 0);
       if(brake) drivebase.brake();
       tracking.move_complete = true;
       return;
@@ -1184,17 +1184,17 @@ void turn_to_angle(double target_a, const bool brake, double max_power, int time
     power = angle_pid.compute(tracking.global_angle, near_angle(target_a, tracking.global_angle) + tracking.global_angle);
     if(fabs(power)  > max_power) power = sgn(power) * max_power;
     if(fabs(power) < min_move_power_a) power = sgn(power) * min_move_power_a;
-    drivebase.move_tank(0, power);
+    drivebase.move(0, power);
     if(fabs(rad_to_deg(angle_pid.get_error())) < 5.0){
       motion_i.print("Ending turn to point with angle: %.2f at X: %.2f Y: %.2f A: %.2f \n", rad_to_deg(target_a), tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle));
-      drivebase.move_tank(0, 0);
+      drivebase.move(0, 0);
       if(brake) drivebase.brake();
       tracking.move_complete = true;
       return;
     }
     if(timeout != 0 && millis() - start_time > timeout){
       motion_i.print(" TIMED OUT turn to point with angle: %.2f at X: %.2f Y: %.2f A: %.2f \n", rad_to_deg(target_a), tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle));
-      drivebase.move_tank(0, 0);
+      drivebase.move(0, 0);
       if(brake) drivebase.brake();
       tracking.move_complete = true;
       return;
@@ -1331,7 +1331,7 @@ void tank_move_on_arc(void* params){
     if (rad_to_deg(fabs(near_angle(final_angle, atan2(tracking.y_coord - centre.y, tracking.x_coord - centre.x)))) < 1.0){
 
       // printf("ang: %lf\n", atan2(tracking.y_coord - centre.y, tracking.x_coord - centre.x));
-      drivebase.move_tank(0.0, 0.0);
+      drivebase.move(0.0, 0.0);
       if (brake)  drivebase.brake();
       tracking.move_complete = true;
       motion_d.print("Ending move on arc to target X: %.2f Y: %.2f A: %.2f at X: %.2f Y: %.2f A: %.2f \n", target.x, target.y, target.angle, tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle));
@@ -1343,7 +1343,7 @@ void tank_move_on_arc(void* params){
 #else
     printf("power_y:%lf, power_a: %lf\n",tracking.power_y, tracking.power_a);
 #endif
-    drivebase.move_tank(tracking.power_y, tracking.power_a);
+    drivebase.move(tracking.power_y, tracking.power_a);
     if(ptr->notify_handle())return;
     delay(10);
   }
@@ -1360,8 +1360,8 @@ void tank_move_on_arc(void* params){
 		// if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_DOWN))	tracking.power_a -= 5;
 		master.print(0, 0, "pow:%.lf, vel:%.lf", tracking.power_a, rad_to_deg(tracking.g_velocity.angle));
 		printf("pow:%.lf, vel:%.lf, raw:%lf, predicted: %lf\n", tracking.power_a, rad_to_deg(tracking.g_velocity.angle), tracking.g_velocity.angle, 50 * deg_to_rad(1.6));
-		// drivebase.move_tank(0, tracking.power_a);
-		drivebase.move_tank(0, 50);
+		// drivebase.move(0, tracking.power_a);
+		drivebase.move(0, 50);
 		delay(50);
 	}
 // "approximately" x power will result in (1.6x)degrees/sec
@@ -1604,7 +1604,7 @@ void Gyro::climb_ramp(){
   });
 
   get_angle();
-  drivebase.move_tank(127, 0);
+  drivebase.move(127, 0);
   waitUntil(get_angle() > 22)
   motion_i.print("ON RAMP: %f\n", get_angle());
   waitUntil(!inRange(r_reset_dist.get(), 0, 200));
@@ -1654,7 +1654,7 @@ void Gyro::level(double kP, double kD){
 	while(true){
     get_angle();
     speed = gyro_p.compute(-angle, 0);
-		drivebase.move_tank(speed, 0);
+		drivebase.move(speed, 0);
     gyro_steady.print("Angle: %f | Speed: %d\n", angle, speed);
     
 		if (fabs(angle-last_angle) > 0.6) gyro_steady.reset(); //Unsteady, Resets the steady timer
