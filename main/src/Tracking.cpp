@@ -366,7 +366,7 @@ void tank_rush_goal(void* params){
         // tracking.move_stop_task();
         break;
       }
-      if(delta_dist > 44){
+      if(delta_dist > 54){
         f_claw_p.set_value(1);
         if (brake) drivebase.brake();
         tracking.move_complete = true;

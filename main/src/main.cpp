@@ -144,6 +144,7 @@ void autonomous() {
 
 void opcontrol() {
 	// move_stop();
+	master.clear();
 	int time = millis();
 	move_start(move_types::tank_rush, tank_rush_params({106.0,71.0, 0.0}, false));
 	master.print(0,0,"%d",millis()-time);
