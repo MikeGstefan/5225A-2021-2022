@@ -1,4 +1,6 @@
 #include "gui.hpp"
+#include <limits>
+#include <sys/_stdint.h>
 
 /*Field array*/ static std::vector<std::bitset<200>> field (200, std::bitset<200>{}); //Initializes to 200 blank bitsets
 /*Temperature Alert Flag*/ static bool temp_flashed;
@@ -38,9 +40,9 @@ Page track ("Tracking"); //Display tracking vals and reset btns
 Text track_x(50, 45, GUI::Style::CENTRE, TEXT_SMALL, track, "X:%.1f", tracking.x_coord);
 Text track_y(135, 45, GUI::Style::CENTRE, TEXT_SMALL, track, "Y:%.1f", tracking.y_coord);
 Text track_a(220, 45, GUI::Style::CENTRE, TEXT_SMALL, track, "A:%.1f", std::function([](){return tracking.get_angle_in_deg();}));
-Text enc_l(50, 130, GUI::Style::CENTRE, TEXT_SMALL, track, "L:%d", std::function([](){return LeftEncoder.get_value();}));
-Text enc_r(135, 130, GUI::Style::CENTRE, TEXT_SMALL, track, "R:%d", std::function([](){return RightEncoder.get_value();}));
-Text enc_b(220, 130, GUI::Style::CENTRE, TEXT_SMALL, track, "B:%d", std::function([](){return BackEncoder.get_value();}));
+Text enc_l(50, 130, GUI::Style::CENTRE, TEXT_SMALL, track, "L:%d", std::function([](){return LeftEncoder.get_value() != std::numeric_limits<int32_t>::max() ? LeftEncoder.get_value() : 0;}));
+Text enc_r(135, 130, GUI::Style::CENTRE, TEXT_SMALL, track, "R:%d", std::function([](){return RightEncoder.get_value() != std::numeric_limits<int32_t>::max() ? RightEncoder.get_value() : 0;}));
+Text enc_b(220, 130, GUI::Style::CENTRE, TEXT_SMALL, track, "B:%d", std::function([](){return BackEncoder.get_value() != std::numeric_limits<int32_t>::max() ? BackEncoder.get_value() : 0;}));
 Button res_x(15, 60, 70, 55, GUI::Style::SIZE, Button::SINGLE, track, "Reset X");
 Button res_y(100, 60, 70, 55, GUI::Style::SIZE, Button::SINGLE, track, "Reset Y");
 Button res_a(185, 60, 70, 55, GUI::Style::SIZE, Button::SINGLE, track, "Reset A");
@@ -55,8 +57,8 @@ Button go_home(320, 110, 150, 40, GUI::Style::SIZE, Button::SINGLE, moving, "Hom
 Button go_centre(320, 175, 150, 40, GUI::Style::SIZE, Button::SINGLE, moving, "Centre");
 
 Page lift_move ("Motorized Subsystems"); //Moving the lift
-Slider f_lift_val(30, 45, 300, 35, GUI::Style::SIZE, Slider::HORIZONTAL, 0, 0, lift_move, "Front Lift", 10);
-Slider b_lift_val(30, 110, 300, 40, GUI::Style::SIZE, Slider::HORIZONTAL, 0, 0, lift_move, "Back Lift", 10);
+Slider f_lift_val(30, 45, 300, 35, GUI::Style::SIZE, Slider::HORIZONTAL, 0, f_lift.top_position, lift_move, "Front Lift", 10);
+Slider b_lift_val(30, 110, 300, 40, GUI::Style::SIZE, Slider::HORIZONTAL, 0, b_lift.top_position, lift_move, "Back Lift", 10);
 Button f_lift_move(470, 45, -100, 40, GUI::Style::SIZE, Button::SINGLE, lift_move, "Move Front Lift");
 Button b_lift_move(470, 95, -100, 40, GUI::Style::SIZE, Button::SINGLE, lift_move, "Move Back Lift");
 Button f_claw(470, 145, -100, 40, GUI::Style::SIZE, Button::TOGGLE, lift_move, "Front Claw");
@@ -198,7 +200,11 @@ void main_setup(){
   std::get<4>(motors_for_gui[6]) = &mot_temp_7;
   std::get<4>(motors_for_gui[7]) = &mot_temp_8;
 
-  for (int i = 0; i < 7; i++) std::get<4>(motors_for_gui[i])->set_background(40, 30);
+  for (int i = 0; i < 7; i++){
+    std::get<1>(motors_for_gui[i]) = std::get<0>(motors_for_gui[i]) ? std::get<0>(motors_for_gui[i])->get_temperature() : std::numeric_limits<int>::max();
+    if(std::get<1>(motors_for_gui[i]) == std::numeric_limits<int>::max()) std::get<4>(motors_for_gui[i])->set_active(false);
+    std::get<4>(motors_for_gui[i])->set_background(40, 30);
+  }
 
   temps.set_loop_func([](){
     for (int i = 0; i < 7; i++){
@@ -476,9 +482,9 @@ void main_background(){
 
   for (std::array<std::tuple<Motor*, int, const char*, const char*, Text_*>, 8>::iterator it = motors_for_gui.begin(); it != motors_for_gui.end(); it++){
     std::tuple<Motor*, int, const char*, const char*, Text_*>& mot_tup = *it;
-    std::get<1>(mot_tup) = std::get<0>(mot_tup) ? std::get<0>(*it)->get_temperature() : std::numeric_limits<int>::max();
+    std::get<1>(mot_tup) = std::get<0>(mot_tup) ? std::get<0>(mot_tup)->get_temperature() : std::numeric_limits<int>::max();
 
-    if (!(temp_flashed || !std::get<0>(mot_tup) || std::get<1>(mot_tup) < 55 || Flash.playing())){ //Overheating
+    if (!temp_flashed && std::get<0>(mot_tup) && inRange(std::get<1>(mot_tup), 55, std::numeric_limits<int>::max()-1) && !Flash.playing()){ //Overheating
       temp_flashed = true;
       temps.go_to();
       GUI::flash(COLOUR(RED), 10000, "%s motor is at %dC\n", std::get<2>(mot_tup), std::get<1>(mot_tup));

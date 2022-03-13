@@ -749,21 +749,25 @@ namespace Autons{
     std::string val;
     int line;
 
-    if(which == "auton"){
+    if(which == "Auton"){
       val = auton_names[static_cast<int>(cur_auton)];
-      line = 0;
-    }
-    else if(which == "start_pos"){
-      val = start_pos_names[static_cast<int>(cur_start_pos)];
-      line = 0;
-    }
-    else if(which == "goal"){
-      val = goal_names[static_cast<int>(cur_goal)];
       line = 1;
     }
-    else if(which == "alliance"){
-      val = alliance_names[static_cast<int>(cur_alliance)];
+    else if(which == "Start Pos"){
+      val = start_pos_names[static_cast<int>(cur_start_pos)];
+      line = 1;
+    }
+    else if(which == "Goal"){
+      val = goal_names[static_cast<int>(cur_goal)];
       line = 2;
+    }
+    else if(which == "Alliance"){
+      val = alliance_names[static_cast<int>(cur_alliance)];
+      line = 0;
+    }
+    else{
+      printf("\033[31mInvalid selection to save auton data.\033[0m\n");
+      return;
     }
 
     printf("\033[32mSwitched %s to %s\033[0m\n", which.c_str(), val.c_str());
@@ -781,7 +785,6 @@ namespace Autons{
     else{
       Data::log_t.data_update();
       file.open(file_name, fstream::in);
-      master.clear();
 
       if (!file){ //File doesn't exist
         file.close();
@@ -792,14 +795,8 @@ namespace Autons{
         file.open(file_name, fstream::in);
       }
 
-      int auton;
-      int ally;
-      int start;
-      int goal;
-      file >> auton;
-      file >> ally;
-      file >> start;
-      file >> goal;
+      int auton, ally, start, goal;
+      file >> auton >> ally  >> start  >> goal;
       file.close();
       Data::log_t.done_update();
 
@@ -808,52 +805,57 @@ namespace Autons{
       cur_goal = static_cast<goals>(goal);
       cur_alliance = static_cast<alliances>(ally);
     }
-    
-    //Get rid of this
-    save_change("auton");
-    save_change("start_pos");
-    save_change("goal");
-    save_change("alliance");
+
+    master.clear();
+    if(normal){
+      master.print(0, 0, "%s: %s          ", "Alliance", alliance_names[static_cast<int>(cur_alliance)]);    
+      master.print(1, 0, "%s: %s          ", "Auton", auton_names[static_cast<int>(cur_auton)]);
+    }
+    else{
+      master.print(0, 0, "%s: %s          ", "Alliance", alliance_names[static_cast<int>(cur_alliance)]);  
+      master.print(1, 0, "%s: %s          ", "Start Pos", start_pos_names[static_cast<int>(cur_start_pos)]);
+      master.print(2, 0, "%s: %s          ", "Goal: ", goal_names[static_cast<int>(cur_goal)]);  
+    }
   }
 
   void prev_route(){
     cur_auton = previous_enum_value(cur_auton);
-    save_change("auton");
+    save_change("Auton");
   }
 
   void next_route(){
     cur_auton = next_enum_value(cur_auton);
-    save_change("auton");
+    save_change("Auton");
   }
 
   void prev_start_pos(){
     cur_start_pos = previous_enum_value(cur_start_pos);
-    save_change("start_pos");
+    save_change("Start Pos");
   }
 
   void next_start_pos(){
     cur_start_pos = next_enum_value(cur_start_pos);
-    save_change("start_pos");
+    save_change("Start Pos");
   }
 
   void prev_goal(){
     cur_goal = previous_enum_value(cur_goal);
-    save_change("goal");
+    save_change("Goal");
   }
 
   void next_goal(){
     cur_goal = next_enum_value(cur_goal);
-    save_change("goal");
+    save_change("Goal");
   }
 
   void set_target_goal(goals goal){
     cur_goal = goal;
-    save_change("goal");
+    save_change("Goal");
   }
 
   void switch_alliance(alliances new_ally){
     cur_alliance = new_ally;
-    save_change("alliance");
+    save_change("Alliance");
   }
 
   void give_up(){ 

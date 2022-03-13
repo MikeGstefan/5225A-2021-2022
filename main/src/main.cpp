@@ -89,15 +89,12 @@ void opcontrol() {
 	/* GUI:
 	auton give up func - ask mike
 	make gui a task - i can't figure this out
-	check if lift page looks good
 	text not centering
-	temps randomly show up on first screen
-	-create way to externally show button pressed state on screen
 	check if weird string issue is still there
 	lvgl images
 	*/
 
-	Autons::selector();
+	// Autons::selector();
 
 	while(true){
 		GUI::update();
