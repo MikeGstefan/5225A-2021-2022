@@ -71,7 +71,7 @@ void update(void* params){
 
 
 
-    Left = NewLeft - LastLeft;
+    Left = NewRight - LastRight;
     Right = NewRight - LastRight;
     Back = NewBack - LastBack;
 
@@ -355,7 +355,7 @@ void tank_rush_goal(void* params){
       // printf("Powers | y: %lf, a: %lf\n",tracking.power_y, tracking.power_a);
       delta_dist = sqrt(pow(tracking.x_coord -start_pos.x,2) + pow(tracking.y_coord - start_pos.y,2));
       motion_d.print(" %d || error y : %.2f error a : %.2f pow y : %.2f, pow a : %.2f\n ", millis(), local_error.y, rad_to_deg(error.angle), tracking.power_y, tracking.power_a);
-      graph.print("%d, %f\n", millis()-time, tracking.l_velo);
+      graph.print("%d, %f\n", millis()-time, tracking.r_velo);
       // exits movement once the target has been overshot (if the sign of y error along the line has flipped)
       if(f_touch.get_value()){
         f_claw_p.set_value(1);
@@ -366,7 +366,7 @@ void tank_rush_goal(void* params){
         // tracking.move_stop_task();
         break;
       }
-      if(delta_dist > 54){
+      if(delta_dist > 44){
         f_claw_p.set_value(1);
         if (brake) drivebase.brake();
         tracking.move_complete = true;
@@ -375,7 +375,7 @@ void tank_rush_goal(void* params){
         // tracking.move_stop_task();
         break;
       }
-      drivebase.move_tank(tracking.power_y, tracking.power_a);
+      drivebase.move(tracking.power_y, tracking.power_a);
       if(ptr->notify_handle())return;
       delay(10);
     }
