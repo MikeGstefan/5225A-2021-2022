@@ -1,5 +1,4 @@
 #include "gui.hpp"
-#include <sys/select.h>
 
 //Timer stuff
 Timer Flash("Flash Timer", false);
