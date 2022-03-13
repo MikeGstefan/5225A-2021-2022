@@ -100,6 +100,7 @@ void f_detect_goal(bool safety){
   //       delay(33);
   //   }
   if(safety){ 
+    while(tracking.move_complete)delay(10);
     while(!f_touch.get_value()&& !tracking.move_complete)delay(10);
   }
   else{
@@ -107,7 +108,7 @@ void f_detect_goal(bool safety){
   }
   
   misc.print("Detected %d\n", f_dist.get());
-  f_claw_p.set_value(1);
+  f_claw.set_state(1);
 }
 
 

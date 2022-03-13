@@ -125,11 +125,11 @@ void update(void* params){
     tracking.global_angle += Theta;
 
 
-    tracking_data.print(&data_timer, 10, {
+    tracking_data.print(&data_timer, 40, {
       [=](){return Data::to_char("%d || x: %.2lf, y: %.2lf, a: %.2lf\n", millis(), tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle));},
       [=](){return Data::to_char("%d || GLOBAL VELOCITY| x: %.2f, y: %.2f a: %.2f\n", millis(), tracking.g_velocity.x, tracking.g_velocity.y, rad_to_deg(tracking.g_velocity.angle));},
       // [=](){return Data::to_char("%d || ENCODER L: %d, R: %d, B:%d \n", millis(), LeftEncoder.get_value(), RightEncoder.get_value(), BackEncoder.get_value());},
-      // [=](){return Data::to_char("%d || ENCODER VELO| l: %.2f, r: %.2f, b: %.2f\n", millis(), tracking.l_velo, tracking.r_velo, tracking.b_velo);}
+      [=](){return Data::to_char("%d || ENCODER VELO| l: %.2f, r: %.2f, b: %.2f\n", millis(), tracking.l_velo, tracking.r_velo, tracking.b_velo);}
     });
 
 
@@ -354,7 +354,7 @@ void tank_rush_goal(void* params){
       graph.print("%d, %f\n", millis()-time, tracking.l_velo);
       // exits movement once the target has been overshot (if the sign of y error along the line has flipped)
       if(f_touch.get_value()){
-        f_claw_p.set_value(1);
+        f_claw.set_state(1);
         if (brake) drivebase.brake();
         tracking.move_complete = true;
         motion_i.print("%d || Ending tank rush goal target X: %f Y: %f A: %f at X: %f Y: %f A: %f time: %d\n", millis(), target.x, target.y, target.angle, tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle), millis()- time);
@@ -363,7 +363,7 @@ void tank_rush_goal(void* params){
         break;
       }
       if(orig_sgn_line_y != sgn_line_y){
-        f_claw_p.set_value(1);
+        f_claw.set_state(1);
         if (brake) drivebase.brake();
         tracking.move_complete = true;
         motion_i.print("%d || MISSED GOAL tank rush goal target X: %f Y: %f A: %f at X: %f Y: %f A: %f time: %d\n", millis(), target.x, target.y, target.angle, tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle), millis()- time);
@@ -1303,7 +1303,7 @@ void tank_move_on_arc(void* params){
       tracking.power_y *= max_power_scale;
       tracking.power_a *= max_power_scale;
     }
-    motion_d.print("%d|| power: y: %.2f, a: %.2\n", millis(), tracking.power_y, tracking.power_a);
+    motion_d.print("%d|| ARC power: y: %.2f, a: %.2f\n", millis(), tracking.power_y, tracking.power_a);
     // exits movement after arc angle becomes less than 1 degree
     if (rad_to_deg(fabs(near_angle(final_angle, atan2(tracking.y_coord - centre.y, tracking.x_coord - centre.x)))) < 1.0){
 

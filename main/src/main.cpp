@@ -142,10 +142,12 @@ void autonomous() {
 
 void opcontrol() {
 	move_stop();
-	// while(true){
-	// 	printf("%d\n", b_dist.get());
-	// 	delay(10);
-	// }
+	f_lift.reset();
+	b_lift.reset();
+	while(true){
+		if(master.get_digital_new_press(DIGITAL_A))skills();
+		delay(10);
+	}
 	// f_lift_m.move(40);
 	pros::Task intk_task(intk_c);
   drivebase.driver_practice();

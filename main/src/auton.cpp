@@ -6,20 +6,44 @@
 
 
 void skills(){
+  int time = millis();
    f_lift.move_absolute(10); 
   b_lift.move_absolute(10); 
   move_start(move_types::tank_point, tank_point_params({36.0,11.75,-90.0},false),false); // grabs blue on platform 
 	b_detect_goal(); 
+  skills_d.print("FIRST GOAL GOt %d\n", millis() - time);
 	move_stop(); 
 	// drivebase.brake(); 
 	move_start(move_types::tank_arc, tank_arc_params({tracking.x_coord, tracking.y_coord}, {20.5, 39.0,20.0},127.0,127.0,false));//arc to face neut goal 
-  move_start(move_types::turn_point, turn_point_params({36.5, 72.0})); 
-  delay(50); 
-	move_start(move_types::tank_point, tank_point_params({34.5,72.0,  45.0},false, 80.0,1.0,true,9.0,130.0),false);// drive throught neut goal 
+  // move_start(move_types::turn_point, turn_point_params({36.5, 72.0})); 
+  // delay(50); 
+	move_start(move_types::tank_point, tank_point_params({51.0,109.0,  20.0},false, 127.0,1.0,true,6.4,150.0),false);// drive throught neut goal 
   f_detect_goal(); 
-  f_lift.move_absolute(150); 
+  skills_d.print("first neutral got %d\n", millis() - time);
+  f_lift.move_absolute(900); 
   // intk.move(127); 
-  move_stop(); 
+  // move_stop(); 
+  // move_wait_for_complete();
+  move_start(move_types::tank_point, tank_point_params({54.0,109.0,  20.0},false, 60.0,1.0,true,6.4,150.0));
+  f_lift.move_absolute(500);
+  move_start(move_types::tank_point, tank_point_params({58.0,115.0,  20.0},false, 60.0,1.0,true,6.4,150.0));
+  while(f_lift.motor.get_position() >510)delay(10);
+  f_claw.set_state(0);
+  skills_d.print("First neutral on plat %d\n", millis() - time);
+  master.print(1,1,"goal %d", millis() - time);
+  f_lift.move_absolute(540);
+  move_start(move_types::tank_arc, tank_arc_params({58.0,115.0}, {48.0,105.0,50.0}, -127.0,127.0,true));
+  f_lift.move_absolute(150);
+  intk.move(127);
+  move_start(move_types::tank_arc, tank_arc_params({48.0,105.0}, {72.0,94.0,180.0}, 127.0,127.0,true));
+  f_lift.move_absolute(10);
+  move_start(move_types::tank_point, tank_point_params({71.0,72.0,180.0}), false);
+  while(f_lift.motor.get_position() > 60)delay(10);
+  intk.move(0);
+  f_detect_goal();
+  move_stop();
+  drivebase.brake();
+  delay(300);
   drivebase.move(0.0,0.0);
 }
 
