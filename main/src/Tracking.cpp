@@ -130,9 +130,9 @@ void update(void* params){
     tracking_data.print(&data_timer, 10, {
       // [=](){return Data::to_char("%d || x: %.2lf, y: %.2lf, a: %.2lf\n", millis(), tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle));},
       // [=](){return Data::to_char("%d || GLOBAL VELOCITY| x: %.2f, y: %.2f a: %.2f\n", millis(), tracking.g_velocity.x, tracking.g_velocity.y, rad_to_deg(tracking.g_velocity.angle));},
-      // [=](){return Data::to_char("%d || ENCODER L: %d, R: %d, B:%d \n", millis(), LeftEncoder.get_value(), RightEncoder.get_value(), BackEncoder.get_value());},
+      [=](){return Data::to_char("%d || ENCODER L: %d, R: %d, B:%d \n", millis(), LeftEncoder.get_value(), RightEncoder.get_value(), BackEncoder.get_value());},
       // [=](){return Data::to_char("%d || ENCODER VELO| l: %.2f, r: %.2f, b: %.2f\n", millis(), tracking.l_velo, tracking.r_velo, tracking.b_velo);}
-      [=](){return Data::to_char("%d, %.2f, %.2f\n", millis(), tracking.l_velo, tracking.r_velo);}
+      // [=](){return Data::to_char("%d, %.2f, %.2f\n", millis(), tracking.l_velo, tracking.r_velo);}
     });
 
 
@@ -366,7 +366,7 @@ void tank_rush_goal(void* params){
         // tracking.move_stop_task();
         break;
       }
-      if(delta_dist > 54){
+      if(delta_dist > 44){
         f_claw_p.set_value(1);
         if (brake) drivebase.brake();
         tracking.move_complete = true;
