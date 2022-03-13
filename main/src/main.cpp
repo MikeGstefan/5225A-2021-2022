@@ -12,17 +12,12 @@
 #include "Subsystems/b_lift.hpp"
 #include "distance.hpp"
 
-// using namespace std;
 #include "task.hpp"
 #include "util.hpp"
-
-#include <fstream>
-#include <sys/wait.h>
 using namespace std;
 
-pros::Task *updt = nullptr;
+pros::Task *updt = nullptr; //What's this for
 const GUI* GUI::current_gui = &g_main;
-
 
 /**
  * Runs initialization code. This occurs as soon as the program is started.
@@ -30,8 +25,8 @@ const GUI* GUI::current_gui = &g_main;
  * All other competition modes are blocked by initialize; it is recommended
  * to keep execution time for this mode under a few seconds.
  */
-//  pros::Task *updt = nullptr;
- bool auton_run = false; // has auton run
+
+bool auton_run = false; // has auton run
 
 void initialize() {
 	// gyro.calibrate();
@@ -39,38 +34,17 @@ void initialize() {
 	// front_r.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
 	// back_l.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
 	// back_r.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
-	// Autons::file_read();
-	autonFile_read();
-	f_lift.motor.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
-	b_lift.motor.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
 	drivebase.download_curve_data();
 	Data::init();
 	_Controller::init();
 	GUI::init();
+	Autons::file_read();
 	delay(500);
-	switch(cur_auto){
-		case auto1:
-			tracking.x_coord = 26.0, tracking.y_coord = 11.75, tracking.global_angle = -90.0_deg;
-		break;
-		case auto2:
-			tracking.x_coord = 108.0, tracking.y_coord = 16.0, tracking.global_angle = 0.0_deg;
-		break;
-		case auto3:
-			tracking.x_coord = 106.0, tracking.y_coord = 16.0, tracking.global_angle = 0.0_deg;
-			// tracking.x_coord = 104.0, tracking.y_coord = 12.0, tracking.global_angle = -30.0_deg;
-		break;
-		case auto4:
-			// tracking.x_coord = 24.5, tracking.y_coord = 15.0, tracking.global_angle = 9.0_deg;
-			tracking.x_coord = 26.0, tracking.y_coord = 11.75, tracking.global_angle = -90.0_deg;
-		break; 
-		default:
-			tracking.x_coord = 26.0, tracking.y_coord = 11.75, tracking.global_angle = -90.0_deg;
-		break;
-	}
-	
+	// tracking.x_coord = 26.0, tracking.y_coord = 11.75, tracking.global_angle = -90.0_deg;
 	// tracking.x_coord = 104.0, tracking.y_coord = 12.0, tracking.global_angle = -30.0_deg;
 	// tracking.x_coord = 24.5, tracking.y_coord = 15.0, tracking.global_angle = 9.0_deg;
 	// tracking.x_coord = 0.0, tracking.y_coord = 0.0, tracking.global_angle = 0.0_deg;
+	tracking.x_coord = 108.0, tracking.y_coord = 16.0, tracking.global_angle = 0.0_deg;
 	update_t.start();
 	// master.print(2, 0, "Driver: %s", drivebase.drivers[drivebase.cur_driver].name);
 	// gyro.finish_calibrating(); //Finishes calibrating gyro before program starts
@@ -107,91 +81,22 @@ void competition_initialize() {}
  */
 void autonomous() {
 	// skills();
-	switch(cur_auto){
-		case auto1:
-			// tracking.x_coord = 26.0, tracking.y_coord = 11.75, tracking.global_angle = -90.0_deg;
-			skills();
-			skills2();
-			new_skills3();
-		break;
-		case auto2:
-			f_claw_p.set_value(0);
-			b_claw_p.set_value(0);
-			blue_highside();
-		break;
-		case auto3:
-			f_claw_p.set_value(0);
-			b_claw_p.set_value(0);
-			blue_highside_tall();
-			
-		break;
-		case auto4:
-			f_claw_p.set_value(0);
-			b_claw_p.set_value(0);
-			blue_lowside();
-		break; 
-		default:
-			skills();
-			skills2();
-			new_skills3();
-		break;
-	}
+
 
 }
 
-
-// extern Slider mot_speed_set;
-
 void opcontrol() {
-	move_stop();
-	// while(true){
-	// 	printf("%d\n", b_dist.get());
-	// 	delay(10);
-	// }
-	// f_lift_m.move(40);
-	pros::Task intk_task(intk_c);
-  drivebase.driver_practice();
-  
-	master.clear();
-	// b_lift.reset();
-	// Task([](){ 
-	// 	f_lift.reset();
-	// });
-	// f_claw_p.set_value(0);
-	// b_claw_p.set_value(0);
-	// skills();
-	// skills2();
+	/* GUI:
+	auton give up func - ask mike
+	make gui a task - i can't figure this out
+	text not centering
+	check if weird string issue is still there
+	lvgl images
+	*/
 
-	//Intake Jam code
-	Task([](){
-		Timer intake_t ("intake jam", false);
-		intk.move(127);
-		while(true){
-			if(intake_jam.get_new_press()) intake_t.reset(); //Start timer when pressed
-			else if(!intake_jam.get_value()) intake_t.reset(false); //End timer when unpressed
-			if(intake_t.get_time() > 1000){ //If pressed for more than 1 sec, reverse intk
-				intk.move(-127);
-				waitUntil(!intake_jam.get_value()); //Waits for unjam plus some time
-				delay(150);
-				intk.move(127);
-			}
-			delay(10);
-		}
-	});
-
-
-	Autons::selector();
-
+	// Autons::selector();
 	while(true){
-		GUI::update();
-		// drivebase.non_blocking_driver_practice();
-		
-		// if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_A)){
-		// 	int speed = mot_speed_set.get_value();
-		// 	move_start(move_types::line, line_params({0.0, 0.0}, {0.0, 24.0, 0.0}, speed));
-		// 	move_start(move_types::turn_angle, turn_angle_params(45.0, speed));
-		// 	move_start(move_types::line, line_params({0.0, 0.0}, {0.0, 24.0, 0.0}, speed));
-		// }
+		drivebase.non_blocking_driver_practice();
 		delay(10);
 	}
 }

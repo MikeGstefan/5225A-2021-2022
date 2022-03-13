@@ -1,8 +1,8 @@
-
-// NEW CONFIG
 #pragma once
 #include "main.h"
 #include "controller.hpp"
+#include "piston.hpp"
+#include "pros/adi.hpp"
 
 class _Controller;
 class Text_;

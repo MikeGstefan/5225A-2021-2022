@@ -34,12 +34,10 @@ double Tracking::get_angle_in_deg(){
 
 void Tracking::wait_for_dist(double distance, int timeout){
   const Point start_pos = {tracking.x_coord, tracking.y_coord};
-  double delta_dist = 0.0;
   int start_time = millis();
-  while(distance >= delta_dist){
-    delta_dist = sqrt(pow(tracking.x_coord -start_pos.x,2) + pow(tracking.y_coord - start_pos.y,2));
-    delay(10);
-    if(timeout != 0 && millis() - start_time > timeout)break;
+
+  wait_until(sqrt(pow(tracking.x_coord - start_pos.x, 2) + pow(tracking.y_coord - start_pos.y, 2)) > distance){
+    if(timeout != 0 && millis() - start_time > timeout) break;
   }
 }
 
@@ -451,7 +449,7 @@ void move_start(move_types type, std::variant<arc_params, line_params, tank_arc_
 }
 
 bool move_wait_for_complete(){
-  waitUntil(move_t.get_task_ptr()->get_state() == 4);
+  wait_until(move_t.get_task_ptr()->get_state() == 4);
   return tracking.move_complete;
 }
 
@@ -1551,13 +1549,10 @@ void Gyro::calibrate(){
 
 void Gyro::finish_calibrating(){
   if(inertial.is_calibrating()){
-    while (inertial.is_calibrating()){
-      motion_d.print("Calibrating Gyro...\n");
-      delay(10);
-    }
+    wait_until(!inertial.is_calibrating()) motion_d.print("Calibrating Gyro...\n");
     motion_i.print("Done Calibrating Gyro\n");
   }
-  motion_i.print("Already Calibrated Gyro\n");
+  else motion_i.print("Already Calibrated Gyro\n");
 }
 
 void Gyro::climb_ramp(){
@@ -1581,9 +1576,9 @@ void Gyro::climb_ramp(){
 
   get_angle();
   drivebase.move_tank(127, 0);
-  waitUntil(get_angle() > 22)
+  wait_until(get_angle() > 22)
   motion_i.print("ON RAMP: %f\n", get_angle());
-  waitUntil(!inRange(r_reset_dist.get(), 0, 200));
+  wait_until(!inRange(r_reset_dist.get(), 0, 200));
   GUI::flash("Saw wall\n");
   Led1.set_value(0);
   drivebase.move(60.0,0.0);

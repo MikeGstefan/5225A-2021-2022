@@ -1,4 +1,5 @@
 #include "gui.hpp"
+#include <sys/select.h>
 
 //Timer stuff
 Timer Flash("Flash Timer", false);
@@ -9,6 +10,7 @@ bool touched_when_flashed;
 const Page* GUI::current_page = nullptr;
 bool GUI::touched = false;
 int GUI::x = 0, GUI::y = 0;
+_Task GUI::task(update, "GUI");
 
 //Text Vars
 char* const go_string = (char*)malloc(90*sizeof(char));
@@ -72,7 +74,7 @@ void GUI::flash(std::string text, std::uint32_t time, Colour colour){
   screen::set_eraser(colour);
 
   printf("\n\n\033[31mWARNING: %s\033[0m\n\n", text.c_str());
-  events.print("%s\n", text.c_str());
+  events.print("\n\n%d | %s\n\n", millis(), text.c_str());
 
   int spaces = int(CHAR_WIDTH_LARGE*text.length()/460)+1;
   std::size_t space, last_space=0;
@@ -109,16 +111,16 @@ bool GUI::go(std::string short_msg, std::string long_msg, std::uint32_t delay_ti
   const Page* page = GUI::current_page;
   go_sequence.go_to();
 
-  waitUntil(!(go_button.pressed() || master.get_digital(ok_button)) || interrupted){ //Wait for Release
+  wait_until(!(go_button.pressed() || master.get_digital(ok_button)) || interrupted){ //Wait for Release
     GUI::update_screen_status();
     if (go_back_button.pressed() || master.interrupt()) interrupted = true;
   }
-  waitUntil((go_button.pressed() || master.get_digital(ok_button)) || interrupted){ //Wait for Press
+  wait_until((go_button.pressed() || master.get_digital(ok_button)) || interrupted){ //Wait for Press
     drivebase.handle_input();
     GUI::update_screen_status();
     if (go_back_button.pressed() || master.interrupt()) interrupted = true;
   }
-  waitUntil(!(go_button.pressed() || master.get_digital(ok_button)) || interrupted){ //Wait for Release
+  wait_until(!(go_button.pressed() || master.get_digital(ok_button)) || interrupted){ //Wait for Release
     GUI::update_screen_status();
     if (go_back_button.pressed() || master.interrupt()) interrupted = true;
   }
@@ -149,16 +151,16 @@ bool GUI::go_end(std::string msg, std::uint32_t delay_time){
   const Page* page = GUI::current_page;
   go_sequence.go_to();
 
-  waitUntil(!(go_button.pressed() || master.get_digital(ok_button)) || interrupted){ //Wait for Release
+  wait_until(!(go_button.pressed() || master.get_digital(ok_button)) || interrupted){ //Wait for Release
     GUI::update_screen_status();
     if (go_back_button.pressed() || master.interrupt()) interrupted = true;
   }
-  waitUntil((go_button.pressed() || master.get_digital(ok_button)) || interrupted){ //Wait for Press
+  wait_until((go_button.pressed() || master.get_digital(ok_button)) || interrupted){ //Wait for Press
     drivebase.handle_input();
     GUI::update_screen_status();
     if (go_back_button.pressed() || master.interrupt()) interrupted = true;
   }
-  waitUntil(!(go_button.pressed() || master.get_digital(ok_button)) || interrupted){ //Wait for Release
+  wait_until(!(go_button.pressed() || master.get_digital(ok_button)) || interrupted){ //Wait for Release
     GUI::update_screen_status();
     if (go_back_button.pressed() || master.interrupt()) interrupted = true;
   }
@@ -657,88 +659,72 @@ void Page::update() const{
   if (loop_func) loop_func();
 }
 
+void Button::select(){
+  switch(form){
+    case Button::LATCH:
+    case Button::TOGGLE:
+      on = true;
+
+      for (std::vector<Button*>::const_iterator option_it = options.begin(); option_it != options.end(); option_it++) (*option_it)->deselect();
+
+    case Button::SINGLE:
+    case Button::REPEAT:
+      draw_pressed();
+      run_func();
+      break;
+  }
+}
+
+void Button::deselect(){
+  switch(form){
+    case Button::LATCH:
+    case Button::TOGGLE:
+      on = false;
+    case Button::SINGLE:
+    case Button::REPEAT:
+      draw();
+      run_off_func();
+      break;
+  }
+}
+
 void Button::update(){
   if (!active) return;
 
   switch(form){
-    case Button::SINGLE:
-      if (new_press()){
-        draw_pressed();
-        run_func();
-
-      }
-
-      else if (new_release()){
-        draw();
-        run_off_func();
-      }
-
-      break;
-
     case Button::LATCH:
       if (new_press()){
         on = !on; //Toggles the latch
-
-        //Draws button's new state
-        if(on){
-          //Deselects connected buttons
-          for (std::vector<Button*>::const_iterator option_it = options.begin(); option_it != options.end(); option_it++){
-            (*option_it)->on = false;
-            (*option_it)->draw();
-          }
-        }
-
-        draw();
-      }
-
-      else if (new_release()){
-        draw();
+        if (on) select();
+        else deselect();
       }
 
       if(on) run_func();
       else run_off_func();
+      break;
+    
+    case Button::TOGGLE:
+      if (new_press()){
+        on = !on; //Toggles the latch
+        if (on) select();
+        else deselect();
+      }
+      break;
+
+    case Button::SINGLE:
+      if (new_press()) select();
+      else if (new_release()) deselect();
 
       break;
 
     case Button::REPEAT:
-      if (new_press()){
-        draw_pressed();
-        run_func();
-      }
-
-      else if (new_release()){
-        draw();
-        run_off_func();
-      }
+      if (new_press()) select();
+      else if (new_release()) deselect();
 
       if (pressed()) run_func();
 
       break;
-
-    case Button::TOGGLE:
-      if (new_press()){
-        on = !on;
-        //Draws button's new state
-        if(on){
-          //Deselects connected buttons
-          for (std::vector<Button*>::const_iterator option_it = options.begin(); option_it != options.end(); option_it++){
-            (*option_it)->on = false;
-            (*option_it)->draw();
-          }
-          draw_pressed();
-          run_func();
-        }
-        else{ //Just turned off
-          run_off_func();
-          draw();
-        }
-      }
-
-      else if (new_release()){
-        draw();
-      }
-      break;
-  } //switch
+  }
 }
 
 void Slider::update(){
@@ -807,19 +793,24 @@ void GUI::init(){
 
   current_gui->setup();
   if(terminal.active) terminal.go_to();
-  else go_to(1); //Sets it to page 1 for program start. Don't delete this. If you want to change the starting page, call GUI::go_to(Page Number) this in initialize()
-  update();
+  else go_to(1); //Sets it to page 1 for program start. Don't delete this. If you want to change the starting page, call GUI::go_to(Page Number) in initialize()
+  // update();
+  GUI::task.start();
 }
 
-void GUI::update(){
-  current_gui->background();
-  update_screen_status();
-  const Page& cur_p = *current_page;
-  /*Page*/cur_p.update();
-  /*Button*/for (std::vector<Button*>::const_iterator it = cur_p.buttons.begin(); it != cur_p.buttons.end(); it++) {(*it)->update(); if(&cur_p != current_page) return;}
-  /*Slider*/for (std::vector<Slider*>::const_iterator it = cur_p.sliders.begin(); it != cur_p.sliders.end(); it++) (*it)->update();
-  /*Text*/for (std::vector<Text_*>::const_iterator it = cur_p.texts.begin(); it != cur_p.texts.end(); it++) (*it)->update();
-  /*Flash*/end_flash();
-}
+void GUI::update(void* params){
+  _Task* ptr = _Task::get_obj(params);
+  while(true){
+    current_gui->background();
+    update_screen_status();
+    const Page& cur_p = *current_page;
+    /*Page*/cur_p.update();
+    /*Button*/for (std::vector<Button*>::const_iterator it = cur_p.buttons.begin(); it != cur_p.buttons.end(); it++) {(*it)->update(); if(&cur_p != current_page) continue;}
+    /*Slider*/for (std::vector<Slider*>::const_iterator it = cur_p.sliders.begin(); it != cur_p.sliders.end(); it++) (*it)->update();
+    /*Text*/for (std::vector<Text_*>::const_iterator it = cur_p.texts.begin(); it != cur_p.texts.end(); it++) (*it)->update();
+    /*Flash*/end_flash();
 
-// _Task gui_task(GUI::update, "GUI"); Make GUI::update a void (void*)() first
+    delay(10);
+    if(ptr->notify_handle()) break;
+  }
+}

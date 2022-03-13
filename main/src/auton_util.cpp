@@ -11,7 +11,7 @@ double get_filtered_output(ADIUltrasonic sensor, int check_count, uint16_t lower
   long total_input;
   uint16_t input;
   double filtered_output;
-  waitUntil(timer.get_time() > timeout || success_count > check_count){
+  wait_until(timer.get_time() > timeout || success_count > check_count){
     input = sensor.get_value();
     if (inRange(input, lower_bound, upper_bound)){ //This used to be (lower_bound <= input <= upper_bound). I highly doubt that's what you wanted.
 
@@ -34,14 +34,13 @@ void flatten_against_wall(bool front, int cycles){
 
 	drivebase.move(50.0*direction,0.0);
 
-	while((fabs(tracking.l_velo) < 2.0 ||fabs(tracking.r_velo) < 2.0) && safety_check < 12){
-		safety_check++;
-    misc.print(" reset things %.2f, %.2f\n",fabs(tracking.l_velo), fabs(tracking.r_velo));
-		delay(10);
-	}
-	cycleCheck(fabs(tracking.l_velo) <1.0 && fabs(tracking.r_velo) < 1.0, cycles,10);
-	drivebase.move(20.0*direction,0.0);
-	printf("%d|| Done all allign\n", millis());
+	wait_until((fabs(tracking.l_velo) >= 2.0 && fabs(tracking.r_velo) >= 2.0) || safety_check >= 12){
+      safety_check++;
+      misc.print(" reset things %.2f, %.2f\n",fabs(tracking.l_velo), fabs(tracking.r_velo));
+    }
+	cycleCheck(fabs(tracking.l_velo) < 1.0 && fabs(tracking.r_velo) < 1.0, 4, 10);
+	drivebase.move(20.0*direction, 0.0);
+	printf("%d|| Done all align\n", millis());
 }
 
 // double get_front_dist(){
@@ -65,13 +64,13 @@ void flatten_against_wall(bool front, int cycles){
 
 void b_detect_goal(){ 
   // cycleCheck(b_dist.get() > 80 && b_dist.get() < 90, 5, 33);
-  while(tracking.move_complete)delay(10);
+  wait_until(!tracking.move_complete);
   while(b_dist.get() > 70 && !tracking.move_complete){ 
     misc.print("looking for edge: %d\n", b_dist.get());
     delay(33);
   }
   int successCount = 0;
-    while (successCount < 2&& !tracking.move_complete){
+    while (successCount < 2 && !tracking.move_complete){
         if (b_dist.get() > 75 && b_dist.get() < 90) {
           successCount++;
           misc.print("found: %d count: %d\n", b_dist.get(), successCount);
@@ -99,21 +98,17 @@ void f_detect_goal(bool safety){
   //       misc.print("looking: %d\n", f_dist.get());
   //       delay(33);
   //   }
-  if(safety){ 
-    while(!f_touch.get_value()&& !tracking.move_complete)delay(10);
-  }
-  else{
-    while(!f_touch.get_value())delay(10);
-  }
+  if(safety) wait_until(f_touch.get_value() || tracking.move_complete);
+  else wait_until(f_touch.get_value());
   
   misc.print("Detected %d\n", f_dist.get());
-  f_claw_p.set_value(1);
+  f_claw_p.set_value(HIGH);
 }
 
 
 void detect_interference(){ 
   int time = millis();
-  while(move_t.get_task_ptr()->get_state()!= 4){
+  wait_until(move_t.get_task_ptr()->get_state() == 4){
     //numbers need funnyimh
     if(millis()-time > 1500 && fabs(tracking.g_velocity.y) < 2.0){
       drivebase.set_state(1);
@@ -124,7 +119,6 @@ void detect_interference(){
     else if(millis()-time > 1500 && fabs(tracking.g_velocity.y) > 3.0){
       break;
     }
-    delay(10);
   }
 }
 

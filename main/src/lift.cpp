@@ -53,10 +53,10 @@ void intk_c(void* params){
 		while(true){
       if(intk_state){
         if(intake_jam.get_new_press()) intake_t.reset(); //Start timer when pressed
-			  else if(!intake_jam.get_value()) intake_t.reset(false); //End timer when unpressed
-			  if(intake_t.get_time() > 500){ //If pressed for more than 1 sec, reverse intk
+        else if(!intake_jam.get_value()) intake_t.reset(false); //End timer when unpressed
+        if(intake_t.get_time() > 500){ //If pressed for more than 0.5 sec, reverse intk
 				  intk.move(-127);
-				  waitUntil(!intake_jam.get_value()); //Waits for unjam plus some time
+				  wait_until(!intake_jam.get_value()); //Waits for unjam plus some time
 				  delay(150);
 				  intk.move(127);
 			  }

@@ -30,52 +30,20 @@ void blue_highside();
 void blue_highside_tall();
 void blue_lowside();
 
-enum autos{
-  auto1,
-  auto2,
-  auto3,
-  auto4,
-  NUM_OF_ELEMENTS =4
-};
-
-extern autos cur_auto;
-
-const string auto_names[] = {
-  "skill ",
-  "high  ",
-  "center",
-  "low   "
-};
-
-void autonFile_read();
-void auto_select();
-
 namespace Autons{
   constexpr bool normal = true;
 
-  // enum class autons;
-  enum class autons{
-    Skills,
-    AUTO2,
-    AUTO3,
-    AUTO4,
-    NUM_OF_ELEMENTS,
-    DEFAULT = Skills,
-  };
+  enum class autons;
   enum class start_pos;
   enum class alliances; //alliances and goals really shouldn't be enums, but it makes my code more consistent
   enum class goals;
-
-  extern const char* start_pos_names[];
-  extern const char* auton_names[];
-  extern const char* alliance_names[2];
-  extern const char* goal_names[3];
 
   extern autons cur_auton;
   extern start_pos cur_start_pos;
   extern alliances cur_alliance;
   extern goals cur_goal;
 
+  void file_read();
   void next_route();
   void prev_route();
   void next_start_pos();
@@ -89,5 +57,6 @@ namespace Autons{
 
   void file_update();
   void file_read();
+  void file_reset();
 
 }

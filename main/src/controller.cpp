@@ -46,11 +46,11 @@ _Task _Controller::controller_task = nullptr;
 int constructed = 0;
 
 _Controller::_Controller(pros::controller_id_e_t id): pros::Controller{id}
-  {
-      objs[constructed] = this;
-      this->controller_num = constructed+1;
-      constructed++;
-  }
+{
+  objs[constructed] = this;
+  this->controller_num = constructed+1;
+  constructed++;
+}
 
 void _Controller::print_queue(void* params){
   _Task* ptr = _Task::get_obj(params);
@@ -143,6 +143,7 @@ bool _Controller::interrupt(bool analog, bool digital, bool OK_except){
   }
   if(digital){
     if (!OK_except && get_digital(ok_button)) return true;
+    if (get_digital(DIGITAL_A)) return true;
     if (get_digital(DIGITAL_B)) return true;
     if (get_digital(DIGITAL_Y)) return true;
     if (get_digital(DIGITAL_X)) return true;
@@ -159,5 +160,14 @@ bool _Controller::interrupt(bool analog, bool digital, bool OK_except){
   return false;
 }
 
-
-
+void _Controller::wait_for_press(controller_digital_e_t button, int timeout){
+  int start_time = millis();
+  controller_queue.print("%d| waiting for button %d from controller %d\n", millis(), button, this->controller_num);
+  wait_until(get_digital_new_press(button)){
+    if(timeout != 0 && millis() - start_time > timeout){
+      controller_queue.print("%d| timed out on waiting for button %d press from controller %d\n", millis(), button, this->controller_num);
+      return;
+    }
+  }
+  controller_queue.print("%d| button %d pressed from controller %d\n", millis(), button, this->controller_num);
+}
