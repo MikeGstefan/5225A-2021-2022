@@ -1,4 +1,3 @@
-
 #include "config.hpp"
 #include "drive.hpp"
 #include "controller.hpp"
@@ -90,37 +89,30 @@ void autonomous() {
 void opcontrol() {
 
 	wait_until(master.get_digital_new_press(DIGITAL_R1));
-	b_claw_p.set_value(HIGH);
+	b_claw_p.set_value(HIGH);//locks in goals and raises lift
 	f_claw_p.set_value(HIGH);
 	f_lift.move_absolute(600, 100, true, 100);
 	b_lift.move_absolute(100);
 
-	// wait_until(f_lift.motor.get_position() > 500);
-	flatten_against_wall(true);
+	flatten_against_wall(true);//resets, change to dist sensor
 	tracking.reset();
   printf("\n\nStart: %d\n", millis());
 
-	move_start(move_types::turn_angle, turn_angle_params(-85.0));
+	move_start(move_types::turn_angle, turn_angle_params(-85.0)); //turns to goal
 	drivebase.set_state(HIGH);
-	// drivebase.brake();
-
-	b_lift.move_absolute(100);
+	b_lift.move_absolute(100); //lowers lifts
 	f_lift.move_absolute(0, 100, true, 50);
-	// drivebase.brake();
-
-	// drivebase.set_state(HIGH);
-	// wait_until(f_lift.motor.get_position() < 50);
-	f_lift.move(-10);
+	f_lift.move(-10); //holds lift down
 
 	// drivebase.move_ahead(25);
 	// move_start(move_types::tank_point, tank_point_params({-5.0, 0.0, -90.0}, false, 127.0, 1.0, true, 6.5, 150.0, 0.0, 0, {6.0, 0.5}), false);
 	// f_detect_goal(false);
 
-	move_start(move_types::turn_angle, turn_angle_params(-90.0));
+	move_start(move_types::turn_angle, turn_angle_params(-90.0)); //aligns to ramp
 
 	// wait_until(master.get_digital_new_press(DIGITAL_R1));
 	gyro.climb_ramp();
-	delay(1000);
+	delay(1000); //releases goals
 	b_claw_p.set_value(LOW);
 	f_claw_p.set_value(LOW);
 

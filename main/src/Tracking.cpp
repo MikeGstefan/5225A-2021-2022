@@ -1,4 +1,5 @@
 #include "Tracking.hpp"
+#include "util.hpp"
 
 Tracking tracking;
 
@@ -1563,23 +1564,27 @@ void Gyro::climb_ramp(){
   inertial.tare_pitch();
 
   drivebase.move_ahead(-GYRO_SIDE*127);
+  Task([this](){
+    wait_until(false){
+      printf("%d | Angle:%f Dist:%f\n", millis(), get_angle(), tracking.x_coord);
+    }
+  });
   wait_until(get_angle() > 22);
   motion_i.print("ON RAMP: %f\n", get_angle());
   GUI::flash("On Ramp", 1000, COLOUR(GREEN));
 
-
-	f_lift.move_absolute(100);
-  // drivebase.brake();
-  // GUI::flash("Braked\n");
-
-
-  // wait_until(master.get_digital_new_press(DIGITAL_R1));
+	f_lift.move_absolute(100); //Lowers lift
 
   drivebase.move_ahead(-GYRO_SIDE*127);
-  wait_until(get_angle() < 20);
+  cycleCheck(get_angle() < 20, 8, 10);
+
+
+  motion_i.print("Tipped: %f\n", get_angle());
+  GUI::flash("Tipped", 1000, COLOUR(GREEN));
 
   drivebase.move_ahead(GYRO_SIDE*127);
-  tracking.wait_for_dist(1.5);
+  wait_until(get_angle() < 6.5);
+  // tracking.wait_for_dist(1.5);
   printf("\n\nEnd: %d\n", millis());
 
   drivebase.brake();
