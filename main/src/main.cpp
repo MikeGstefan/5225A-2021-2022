@@ -16,9 +16,8 @@
 #include "util.hpp"
 using namespace std;
 
-pros::Task *updt = nullptr;
+pros::Task *updt = nullptr; //What's this for
 const GUI* GUI::current_gui = &g_main;
-
 
 /**
  * Runs initialization code. This occurs as soon as the program is started.
@@ -93,41 +92,16 @@ void opcontrol() {
 	check if lift page looks good
 	text not centering
 	temps randomly show up on first screen
-	create way to externally show button pressed state on screen
+	-create way to externally show button pressed state on screen
 	check if weird string issue is still there
 	lvgl images
 	*/
-
-	//Intake Jam code
-	// Task([](){
-	// 	Timer intake_t ("intake jam", false);
-	// 	intk.move(127);
-	// 	while(true){
-	// 		if(intake_jam.get_new_press()) intake_t.reset(); //Start timer when pressed
-	// 		else if(!intake_jam.get_value()) intake_t.reset(false); //End timer when unpressed
-	// 		if(intake_t.get_time() > 1000){ //If pressed for more than 1 sec, reverse intk
-	// 			GUI::flash("Intake Jam");
-	// 			intk.move(-127);
-	// 			wait_until(!intake_jam.get_value()); //Waits for unjam plus some time
-	// 			delay(150);
-	// 			intk.move(127);
-	// 		}
-	// 		delay(10);
-	// 	}
-	// });
-
 
 	Autons::selector();
 
 	while(true){
 		GUI::update();
-		// drivebase.non_blocking_driver_practice();
-		
-		// if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_A)){
-		// 	move_start(move_types::line, line_params({0.0, 0.0}, {0.0, 24.0, 0.0}, 127));
-		// 	move_start(move_types::turn_angle, turn_angle_params(45.0, 127));
-		// 	move_start(move_types::line, line_params({0.0, 0.0}, {0.0, 24.0, 0.0}, 127));
-		// }
+		drivebase.non_blocking_driver_practice();
 		delay(10);
 	}
 }

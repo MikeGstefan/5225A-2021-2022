@@ -38,10 +38,10 @@ namespace Autons{
   enum class alliances; //alliances and goals really shouldn't be enums, but it makes my code more consistent
   enum class goals;
 
-  extern const char* start_pos_names[];
-  extern const char* auton_names[];
-  extern const char* alliance_names[];
-  extern const char* goal_names[];
+  // extern const char* start_pos_names[];
+  // extern const char* auton_names[];
+  // extern const char* alliance_names[];
+  // extern const char* goal_names[];
 
   extern autons cur_auton;
   extern start_pos cur_start_pos;

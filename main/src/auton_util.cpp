@@ -35,8 +35,8 @@ void flatten_against_wall(bool front, int cycles){
 	drivebase.move(50.0*direction,0.0);
 
 	wait_until((fabs(tracking.l_velo) >= 2.0 && fabs(tracking.r_velo) >= 2.0) || safety_check >= 12){
-        safety_check++;
-        misc.print(" reset things %.2f, %.2f\n",fabs(tracking.l_velo), fabs(tracking.r_velo));
+      safety_check++;
+      misc.print(" reset things %.2f, %.2f\n",fabs(tracking.l_velo), fabs(tracking.r_velo));
     }
 	cycleCheck(fabs(tracking.l_velo) < 1.0 && fabs(tracking.r_velo) < 1.0, 4, 10);
 	drivebase.move(20.0*direction, 0.0);
@@ -64,13 +64,13 @@ void flatten_against_wall(bool front, int cycles){
 
 void b_detect_goal(){ 
   // cycleCheck(b_dist.get() > 80 && b_dist.get() < 90, 5, 33);
-  while(tracking.move_complete)delay(10);
+  wait_until(!tracking.move_complete);
   while(b_dist.get() > 70 && !tracking.move_complete){ 
     misc.print("looking for edge: %d\n", b_dist.get());
     delay(33);
   }
   int successCount = 0;
-    while (successCount < 2&& !tracking.move_complete){
+    while (successCount < 2 && !tracking.move_complete){
         if (b_dist.get() > 75 && b_dist.get() < 90) {
           successCount++;
           misc.print("found: %d count: %d\n", b_dist.get(), successCount);

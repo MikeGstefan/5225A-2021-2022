@@ -688,10 +688,6 @@ void lrt_auton(){
   move_stop();
 }
 
-//From gui_construction.cpp (for autons)
-extern Button alliance, pos_alliance;
-extern Page auto_selection, pos_auto_selection;
-
 namespace Autons{
 
   enum class autons{
@@ -735,30 +731,18 @@ namespace Autons{
   const char* alliance_names[2] = {"Red", "Blue"};
   const char* goal_names[static_cast<int>(goals::NUM_OF_ELEMENTS)] = {"Left", "Tall", "Right"};
 
-  std::string file_name = "/usd/auton.txt";
-  std::string pos_file_name = "/usd/pos_auton.txt";
+  const std::string file_name = "/usd/auton.txt";
   std::fstream file;
-  std::fstream pos_file;
 
   void file_update(){
     Data::log_t.data_update();
     file.open(file_name, fstream::out | fstream::trunc);
-    pos_file.open(pos_file_name, fstream::out | fstream::trunc);
     file << static_cast<int>(cur_auton) << std::endl;
     file << static_cast<int>(cur_alliance) << std::endl;
-    pos_file << static_cast<int>(cur_start_pos) << std::endl;
-    pos_file << static_cast<int>(cur_goal) << std::endl;
+    file << static_cast<int>(cur_start_pos) << std::endl;
+    file << static_cast<int>(cur_goal) << std::endl;
     file.close();
-    pos_file.close();
     Data::log_t.done_update();
-  }
-
-  void file_reset(){
-    cur_auton = autons::DEFAULT;
-    cur_start_pos = start_pos::DEFAULT;
-    cur_goal = goals::DEFAULT;
-    cur_alliance = alliances::DEFAULT;
-    if (pros::usd::is_installed()) file_update();
   }
 
   void save_change(std::string which){
@@ -792,13 +776,11 @@ namespace Autons{
     if (!pros::usd::is_installed()){
       GUI::flash("No SD Card!");
       printf("\033[31mNo SD card inserted.\033[0m Using default auton, start position, goal and alliance.\n");
-      file_reset();
       return;
     }
     else{
       Data::log_t.data_update();
       file.open(file_name, fstream::in);
-      pos_file.open(pos_file_name, fstream::in);
       master.clear();
 
       if (!file){ //File doesn't exist
@@ -809,14 +791,6 @@ namespace Autons{
         printf("\033[92mCreated new Auton File.\033[0m\n");
         file.open(file_name, fstream::in);
       }
-      if (!pos_file){ //Pos File doesn't exist
-        pos_file.close();
-        GUI::flash("Pos Auton File not found!");
-        file_update();
-        
-        printf("\033[92mCreated new Position Auton File.\033[0m\n");
-        pos_file.open(pos_file_name, fstream::in);
-      }
 
       int auton;
       int ally;
@@ -824,10 +798,9 @@ namespace Autons{
       int goal;
       file >> auton;
       file >> ally;
-      pos_file >> start;
-      pos_file >> goal;
+      file >> start;
+      file >> goal;
       file.close();
-      pos_file.close();
       Data::log_t.done_update();
 
       cur_auton = static_cast<autons>(auton);
@@ -835,10 +808,6 @@ namespace Autons{
       cur_goal = static_cast<goals>(goal);
       cur_alliance = static_cast<alliances>(ally);
     }
-
-    Colour new_colour = cur_alliance == alliances::BLUE ? COLOUR(BLUE) : COLOUR(RED);
-    alliance.set_background(new_colour);
-    pos_alliance.set_background(new_colour);
     
     //Get rid of this
     save_change("auton");
@@ -884,10 +853,6 @@ namespace Autons{
 
   void switch_alliance(alliances new_ally){
     cur_alliance = new_ally;
-    Colour new_colour = cur_alliance == alliances::BLUE ? COLOUR(BLUE) : COLOUR(RED);
-
-    alliance.set_background(new_colour);
-    pos_alliance.set_background(new_colour);
     save_change("alliance");
   }
 
@@ -897,7 +862,6 @@ namespace Autons{
 
   void selector(){
     if(normal){
-      auto_selection.go_to();
       wait_until(master.get_digital_new_press(ok_button)){
         if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_L1)) prev_route();
         else if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_R1)) next_route();
@@ -905,7 +869,6 @@ namespace Autons{
       }
     }
     else{
-      pos_auto_selection.go_to();
       wait_until(master.get_digital_new_press(ok_button)){
         if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_L1)) prev_start_pos();
         else if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_R1)) next_start_pos();
