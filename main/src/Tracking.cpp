@@ -1,4 +1,7 @@
 #include "Tracking.hpp"
+#include "config.hpp"
+#include "drive.hpp"
+#include "pros/motors.h"
 #include "util.hpp"
 
 Tracking tracking;
@@ -1531,18 +1534,18 @@ void move_on_line_old(void* params){
 Gyro::Gyro(Imu& imu): inertial(imu){}
 
 //Updates last/cur angle
-double Gyro::get_angle() {
-  last_angle = angle;
+double Gyro::get_angle(){
   angle = GYRO_SIDE*inertial.GYRO_AXIS();
   return fabs(angle);
 }
 
-//Updates last/cur angle
+// Updates last/cur angle
 double Gyro::get_angle_dif(){
-  get_angle();
-  double diff = last_angle-angle;
+  double da = angle - last_angle;
+  int dt = millis() - time;
+  time = millis();
   last_angle = angle;
-  return fabs(diff);
+  return da/dt;
 }
 
 void Gyro::calibrate(){
@@ -1563,53 +1566,54 @@ void Gyro::climb_ramp(){
   inertial.tare_roll();
   inertial.tare_pitch();
 
-  drivebase.move_ahead(-GYRO_SIDE*127);
+  drivebase.move(0.0, -GYRO_SIDE*127, 0.0);
   Task([this](){
     wait_until(false){
-      printf("%d | Angle:%f Dist:%f\n", millis(), get_angle(), tracking.x_coord);
+      get_angle();
+      printf("%d | Angle:%f Velo:%f,  Dist:%f\n", millis(), angle, get_angle_dif(),tracking.x_coord);
     }
   });
-  wait_until(get_angle() > 22);
-  motion_i.print("ON RAMP: %f\n", get_angle());
+  wait_until(angle > 22);
+  motion_i.print("ON RAMP: %f\n", angle);
   GUI::flash("On Ramp", 1000, COLOUR(GREEN));
 
 	f_lift.move_absolute(100); //Lowers lift
 
-  drivebase.move_ahead(-GYRO_SIDE*127);
-  cycleCheck(get_angle() < 20, 8, 10);
+  tracking.wait_for_dist(15);
 
+  GUI::flash("Slowed\n", 1000, COLOUR(GREEN));
+  drivebase.move(0.0, -GYRO_SIDE*60, 0.0);
+  cycleCheck(angle < 18, 8, 10);
 
-  motion_i.print("Tipped: %f\n", get_angle());
-  GUI::flash("Tipped", 1000, COLOUR(GREEN));
+  GUI::flash("Reversed\n", 1000, COLOUR(GREEN));
 
-  drivebase.move_ahead(GYRO_SIDE*127);
-  wait_until(get_angle() < 6.5);
-  // tracking.wait_for_dist(1.5);
-  printf("\n\nEnd: %d\n", millis());
+  drivebase.move(0.0, GYRO_SIDE*127, 0.0);
+  // tracking.wait_for_dist(2);
+  wait_until(angle < 0.5);
 
-  drivebase.brake();
+  front_l.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
+  front_r.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
+  back_l.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
+  back_r.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
+  drivebase.velo_brake();
+
+  // drivebase.brake();
   GUI::flash("Braked\n", 1000, COLOUR(GREEN));
-  
 }
 
 void Gyro::level(double kP, double kD){
   printf("\nIn level function\n");
 	PID gyro_p(kP, 0, kD, 0);
-  Timer gyro_steady ("Gyro", &motion_d);
+  Timer gyro_steady ("Gyro", &motion_i);
   int speed;
 
-	while(true){
+	wait_until(master.interrupt(true, false)){ //(fabs(angle) < 6 && gyro_steady.get_time() > 500) || 
     get_angle();
-    speed = gyro_p.compute(-angle, 0);
-		drivebase.move_ahead(speed);
-    gyro_steady.print("Angle: %f | Speed: %d\n", angle, speed);
+    gyro_p.compute(-angle, 0);
+		drivebase.move(0.0, gyro_p.get_output(), 0.0);
+    gyro_steady.print("Angle: %f | Speed: %f\n", angle, gyro_p.get_output());
     
 		if (get_angle_dif() > 0.6) gyro_steady.reset(); //Unsteady, Resets the steady timer - //Diff calculated from get_angle() after loop
-		else if (fabs(angle) < 6 && gyro_steady.get_time() > 500) break; //If within range to be level and steady on ramp
-
-		if (master.interrupt(true, false)) return;
-
-		delay(10);
 	}
 
 	motion_i.print("\nLevelled on ramp\n\n");

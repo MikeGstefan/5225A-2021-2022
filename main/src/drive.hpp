@@ -76,7 +76,6 @@ public:
   void move(double y, double a);
   void move_tank(double y, double a);
   void move_side(double l, double r);
-  void move_ahead(double y);
 
   void brake();
   void velo_brake();

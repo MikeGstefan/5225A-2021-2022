@@ -64,6 +64,7 @@ class Gyro{
   private:
     Imu& inertial;
     double angle, last_angle;
+    int time;
 
   public:
     Gyro(Imu& imu);
