@@ -69,6 +69,7 @@ public:
   void clear();
   void rumble(const char* rumble_pattern);
   bool interrupt(bool analog=true, bool digital=true, bool OK_except = true);
+  void wait_for_press(controller_digital_e_t button, int timeout = 0);
 };
 
 

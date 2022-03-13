@@ -1,5 +1,4 @@
 #include "piston.hpp"
-// #include "pros/adi.hpp"
 
 array<Piston*, 8> Piston::list_for_gui = {
   nullptr,
@@ -13,11 +12,11 @@ array<Piston*, 8> Piston::list_for_gui = {
 };
 
 Piston::Piston(std::uint8_t adi_port, const char* name, bool open_state, bool init_state) : ADIDigitalOut(adi_port, init_state), open_state{open_state}, name(name){
-  list_for_gui[count] = this;
+  if(count < 8) list_for_gui[count] = this;
   count++;
 }
 Piston::Piston(ext_adi_port_pair_t port_pair, const char* name, bool open_state, bool init_state): ADIDigitalOut(port_pair, init_state), open_state{open_state}, name(name){
-  list_for_gui[count] = this;
+  if(count < 8) list_for_gui[count] = this;
   count++;
 }
 

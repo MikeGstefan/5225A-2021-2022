@@ -1,7 +1,7 @@
 #pragma once //
 #include "main.h"
-#include "Libraries/gui.hpp"
-#include <vector>
+#include "util.hpp"
+#include "pros/adi.hpp"
 
 using namespace std;
 using namespace pros;

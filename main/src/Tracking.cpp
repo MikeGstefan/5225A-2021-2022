@@ -37,7 +37,7 @@ void Tracking::wait_for_dist(double distance, int timeout){
   int start_time = millis();
 
   wait_until(sqrt(pow(tracking.x_coord - start_pos.x, 2) + pow(tracking.y_coord - start_pos.y, 2)) > distance){
-    if(timeout != 0 && millis() - start_time > timeout)break;
+    if(timeout != 0 && millis() - start_time > timeout) break;
   }
 }
 
