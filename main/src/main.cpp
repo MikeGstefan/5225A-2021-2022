@@ -94,7 +94,7 @@ void opcontrol() {
 	f_lift.move_absolute(600, 100, true, 100);
 	b_lift.move_absolute(100);
 
-	flatten_against_wall(true);//resets, change to dist sensor
+	flatten_against_wall(true); //resets, change to dist sensor
 	tracking.reset();
   int start = millis();
 
@@ -118,10 +118,19 @@ void opcontrol() {
   // b_lift.move(-10);
   // f_lift.move(-10);
   // wait_until(master.get_digital_new_press(DIGITAL_R1));
-  gyro.level(2, 350);
+  gyro.level(1.8, 300);
 
   printf("\n\nStart: %d\n", start);
-  printf("\n\End: %d\n", millis());
+  printf("\n\nEnd: %d\n", millis());
+  printf("\n\nTotal: %d\n", millis()-start);
+
+  /*
+    pid
+    18,2 -> 15,3
+    func scale
+    pure tracking from wall
+    track up to 17, 
+  */
 
 	while(true){
 		GUI::update();
