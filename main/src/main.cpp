@@ -67,7 +67,9 @@ void initialize() {
 			tracking.x_coord = 26.0, tracking.y_coord = 11.75, tracking.global_angle = -90.0_deg;
 		break;
 	}
-	tracking.x_coord = 0.0, tracking.y_coord = 0.0, tracking.global_angle = 0.0_deg;
+	// tracking.x_coord = 0.0, tracking.y_coord = 0.0, tracking.global_angle = 0.0_deg;
+	tracking.x_coord = 89.75, tracking.y_coord = 110.0, tracking.global_angle = 0.0_deg;
+	// tracking.x_coord = 95.0, tracking.y_coord = 70.0, tracking.global_angle = 0.0_deg;
 
 	
 	// tracking.x_coord = 104.0, tracking.y_coord = 12.0, tracking.global_angle = -30.0_deg;
@@ -108,7 +110,9 @@ void competition_initialize() {}
  * from where it left off.
  */
 void autonomous() {
-	// skills();
+	printf("x: %lf, y:%lf, a:%lf\n", tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle));
+	skills();
+	while(true) delay(10);
 	switch(cur_auto){
 		case auto1:
 			// tracking.x_coord = 26.0, tracking.y_coord = 11.75, tracking.global_angle = -90.0_deg;
@@ -146,6 +150,8 @@ void opcontrol() {
 	b_claw_p.set_value(HIGH);
   move_start(move_types::tank_point, tank_point_params({-10.0, 20.0, 0.0}));
   move_start(move_types::tank_point, tank_point_params({20.0, 50.0, 0.0}));
+
+  move_start(move_types::tank_point, tank_point_params({20.0, 50.0, 0.0}), false);
 
 	while(true) delay(10);
 	waitUntil(master.get_digital_new_press(DIGITAL_A));

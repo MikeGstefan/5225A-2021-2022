@@ -28,10 +28,11 @@ void Tracking::reset(double x, double y, double a){
   update_t.done_update();
 }
 
+// gets angle closest to 360 degrees
 double Tracking::get_angle_in_deg(){
   return fmod(rad_to_deg(global_angle), 360);
 }
-
+// waits until the distance from current position to starting position is greater than the specified amount
 void Tracking::wait_for_dist(double distance, int timeout){
   const Point start_pos = {tracking.x_coord, tracking.y_coord};
   double delta_dist = 0.0;
@@ -991,6 +992,7 @@ void tank_move_to_target(void* params){
     double target_y_velocity; // what the y_vel_pid is trying to reach
     double cur_y_velocity;
     double max_y_velocity = 60.0; // the robot can travel at 60 inches/sec at its fastest
+    int sgn_y_error; // sign of local y error
 
     // move on line variables
     Vector follow_line(target.y - tracking.y_coord, target.x - tracking.x_coord); // used to keep track of angle of follow_line relative to the vertical
@@ -1045,9 +1047,9 @@ void tank_move_to_target(void* params){
 
       // tracking.power_y = kp_y * local_error.y;
       cur_y_velocity = (tracking.l_velo + tracking.r_velo) / 2; // average of side encoders is approximately the local_y_velocity
-      // target_y_velocity = y_pid.compute(-local_error.y, 0.0);
-      target_y_velocity = map(local_error.y, 0.0, 18.0, end_y_velocity, max_y_velocity);
-      // target_y_velocity = map(target_y_velocity, );
+      sgn_y_error = sgn(local_error.y);
+      target_y_velocity = map(local_error.y, sgn_y_error * 0.0, sgn_y_error * 18.0, sgn_y_error * end_y_velocity, sgn_y_error * max_y_velocity);
+      
       if(fabs(target_y_velocity) > max_y_velocity) target_y_velocity = max_y_velocity * sgn(target_y_velocity);
       tracking.power_y = kB * target_y_velocity + y_vel_pid.compute(cur_y_velocity, target_y_velocity);
       printf("error: %lf, power_y: %lf, cur_vel: %lf, target_vel: %lf, base: %lf, diff_vel:%lf\n", local_error.y, tracking.power_y, cur_y_velocity, target_y_velocity, kB * target_y_velocity, target_y_velocity - cur_y_velocity);
@@ -1142,10 +1144,10 @@ void turn_to_angle(void* params){
   target_a = deg_to_rad(target_a);
   double new_target_a;
   double power;
-  if(near){
+  if(near){ // picks the closest angle to turn to
     new_target_a = near_angle(target_a, tracking.global_angle) + tracking.global_angle;
   }
-  else {
+  else {  // otherwise pick the angle passed in
     new_target_a = target_a;
   }
   int start_time = millis();

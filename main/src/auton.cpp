@@ -6,6 +6,55 @@
 
 
 void skills(){
+
+  // tank_point_params( Position target,  bool turn_dir_if_0 = false,  double max_power = 127.0,  double min_angle_percent = 1.0, const bool brake = true, double kp_y = 2.0, double kd_y = 20.0, double kp_a =150.0, double kd_a = 0.0, int timeout = 0, Point end_error = {0.5, 0.5}, double end_velo = 0.0);
+  f_lift.reset();
+  b_lift.reset();
+  
+  f_lift.move_absolute(10);
+  b_lift.move_absolute(10);
+
+
+  // move_start(move_types::turn_angle, turn_angle_params(90.0));
+  // return;
+//mikey test
+  // Timer timer{"timer"};
+  // move_start(move_types::tank_point, tank_point_params({-10.0, 20.0, 0.0}, false, 127.0, 1.0, false, 2.0, 20.0, 150.0,0.0, 0, {1.5,1.5}, 0.0), true);
+  // timer.print();
+  // move_start(move_types::turn_point, turn_point_params({20.0, 50.0}), true);
+  // move_start(move_types::tank_point, tank_point_params({20.0, 50.0, 0.0}, false, 127.0, 1.0, true, 2.0, 20.0, 150.0, 50.0, 0, {1.5,1.5}, 0.0), true);
+  // move_start(move_types::tank_point, tank_point_params({00.0, 00.0, 0.0}, false, 127.0, 1.0, true, 2.0, 20.0, 150.0, 50.0, 0, {1.5,1.5}, 0.0), true);
+
+  // timer.print();
+  // move_stop();
+// end of mikey test
+
+//  old partial skills routine
+  // Timer timer{"timer"};
+  // move_start(move_types::tank_point, tank_point_params({93.0, 70.0, 0.0}, false, 127.0, 1.0, false, 2.0, 20.0, 150.0,0.0, 0, {1.5,1.5}, 40.0), true);
+  // timer.print();
+  // // 116,34
+  // // tank_arc_params(const Point start_pos, Position target, const double power = 127.0, const double max_power = 127.0, const bool brake = false, double decel_start = 0.0, double decel_end = 0.0, double decel_target_speed = 0.0);
+
+  // move_start(move_types::tank_arc, tank_arc_params({93.0, 70.0}, {116.0, 35.0, -85.0}, -127.0, 127.0, false), true);
+  // timer.print();
+  // move_start(move_types::tank_point, tank_point_params({130.0, 34.0, 0.0}, false, 127.0, 1.0, true, 2.0, 20.0, 150.0,0.0, 0, {1.5,1.5}, 0.0), false);
+  // b_detect_goal();
+  // timer.print();
+// end of old partial skills routine
+// start of actual partial skills route
+  Timer timer{"timer"};
+  move_start(move_types::tank_point, tank_point_params({85.0, 90.0, 0.0}, false, 127.0, 1.0, false, 2.0, 20.0, 150.0,0.0, 0, {0.5,0.5}, 50.0), true);
+  move_start(move_types::tank_arc, tank_arc_params({85.0, 90.0}, {116.0, 35.0, -90.0}, -127.0, 127.0, false), true);
+  move_start(move_types::tank_point, tank_point_params({135.0, 34.0, 0.0}, false, 127.0, 1.0, true, 2.0, 20.0, 150.0,0.0, 0, {0.5,0.5}, 0.0), false);
+  b_detect_goal();
+  move_stop();
+  drivebase.brake();
+  timer.print();
+  master.print(0, 0, "time: %d", timer.get_time());
+// end of actual partial skills route
+
+
 }
 
 void blue_highside(){
