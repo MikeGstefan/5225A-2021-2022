@@ -766,11 +766,11 @@ namespace Autons{
       line = 0;
     }
     else{
-      printf("\033[31mInvalid selection to save auton data.\033[0m\n");
+      printf("%sInvalid selection to save auton data.%s\n", GUI::get_term_colour(GUI::Colours::ERROR), GUI::get_term_colour(GUI::Colours::NONE));
       return;
     }
 
-    printf("\033[32mSwitched %s to %s\033[0m\n", which.c_str(), val.c_str());
+    printf("%sSwitched %s to %s%s\n", GUI::get_term_colour(GUI::Colours::GREEN), which.c_str(), val.c_str(), GUI::get_term_colour(GUI::Colours::NONE));
     events.print("\n\nSwitched %s to %s\n\n", which.c_str(), val.c_str());
     master.print(line, 0, "%s: %s          ", which.c_str(), val.c_str());
     file_update();
@@ -779,7 +779,7 @@ namespace Autons{
   void file_read(){
     if (!pros::usd::is_installed()){
       GUI::flash("No SD Card!");
-      printf("\033[31mNo SD card inserted.\033[0m Using default auton, start position, goal and alliance.\n");
+      printf("%sNo SD card inserted.%s Using default auton, start position, goal and alliance.\n", GUI::get_term_colour(GUI::Colours::ERROR), GUI::get_term_colour(GUI::Colours::NONE));
       return;
     }
     else{
@@ -791,7 +791,7 @@ namespace Autons{
         GUI::flash("Auton File not found!");
         file_update();
         
-        printf("\033[92mCreated new Auton File.\033[0m\n");
+        printf("%sCreated new Auton File.%s\n", GUI::get_term_colour(GUI::Colours::GOOD), GUI::get_term_colour(GUI::Colours::NONE));
         file.open(file_name, fstream::in);
       }
 
