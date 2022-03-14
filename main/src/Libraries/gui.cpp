@@ -613,7 +613,7 @@ void Page::draw() const{
 }
 
 void Button::draw() const{
-  if (!active) return;
+  if (!(active && (page == GUI::current_page || page == &perm))) return;
   if (on) { //on buttons must be drawn in a pressed state
     draw_pressed();
     return;
@@ -630,7 +630,7 @@ void Button::draw() const{
 }
 
 void Button::draw_pressed() const{
-  if (!active) return;
+  if (!(active && (page == GUI::current_page || page == &perm))) return;
   screen::set_eraser(page->b_col); //Erases button
   screen::erase_rect(x1, y1, x2, y2);
 
@@ -646,7 +646,7 @@ void Button::draw_pressed() const{
 }
 
 void Slider::draw() const{
-  if (!active) return;
+  if (!(active && (page == GUI::current_page || page == &perm))) return;
   screen::set_pen(b_col);
   screen::fill_rect(x1, y1, x2, y2);
   screen::set_pen(l_col);
@@ -655,7 +655,7 @@ void Slider::draw() const{
 }
 
 void Text_::draw(){
-  if (!active) return;
+  if (!(active && (page == GUI::current_page || page == &perm))) return;
   char buffer [100];
   int length = update_val(buffer);
 
