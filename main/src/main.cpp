@@ -40,6 +40,14 @@ void initialize() {
 	// back_l.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
 	// back_r.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
 	// Autons::file_read();
+	front_l.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
+	front_r.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
+	back_l.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
+	back_r.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
+	centerf_l.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
+	centerf_r.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
+	centerb_l.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
+	centerb_r.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
 	autonFile_read();
 	f_lift.motor.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
 	b_lift.motor.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
@@ -146,12 +154,20 @@ void opcontrol() {
 	// move_stop();
 	master.clear();
 	int time = millis();
-	// move_start(move_types::tank_rush, tank_rush_params({106.0,71.0, 0.0}, false));
+	move_start(move_types::tank_rush, tank_rush_params({106.0,71.0, 0.0}, false));
 	master.print(0,0,"%d",millis()-time);
+	front_l.move_velocity(0);
+	front_r.move_velocity(0);
+	back_l.move_velocity(0);
+	back_r.move_velocity(0);
+	centerf_l.move_velocity(0);
+	centerf_r.move_velocity(0);
+	centerb_l.move_velocity(0);
+	centerb_r.move_velocity(0);
 	while(true){
-		GUI::update();
+		// GUI::update();
 		// if(master.get_digital_new_press(DIGITAL_A))master.print(0,0,"%.2f, %.2f",LeftEncoder.get_value(), RightEncoder.get_value());
-		drivebase.handle_input();
+		// drivebase.handle_input();
 		delay(10);
 	}
 	// while(true){
