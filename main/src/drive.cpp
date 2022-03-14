@@ -87,14 +87,16 @@ void Drivebase::move(double y, double a){
   front_r.move(y-a);
   back_l.move(y+a);
   back_r.move(y-a);
-  center_l.move(y+a);
-  center_r.move(y-a);
+  centerf_l.move(y+a);
+  centerf_r.move(y-a);
+  centerb_l.move(y+a);
+  centerb_r.move(y-a);
   // back_l.move(0);
   // back_r.move(0);
 }
 
 void Drivebase::move_tank(double y, double a){
-  move(0.0, y, a);
+  move(y, a);
 }
 
 void Drivebase::move_side(double l, double r){
