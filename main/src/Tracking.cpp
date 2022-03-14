@@ -1573,7 +1573,7 @@ void Gyro::climb_ramp(){
     }
   });
 
-  drivebase.move(0.0, -GYRO_SIDE*127, 0.0);
+  drivebase.move(-GYRO_SIDE*127, 0.0);
   wait_until(angle > 22);
 
   motion_i.print("ON RAMP: %f\n", angle);
@@ -1587,23 +1587,28 @@ void Gyro::climb_ramp(){
 }
 
 void Gyro::level(){
-  std::function<double(double)> scale = func_scale([](double x){return sgn(x)*pow(fabs(x), 1.0/7.0);}, {10, 0}, {25, 130}, -22); //Need the sgn thing cuz pow cant handle negatives
+  // std::function<double(double)> scale = func_scale([](double x){return 1.0/x;}, {10, 0}, {25, 130}, -28); //Need the sgn thing cuz pow cant handle negatives
+  std::function<double(double)> scale = [](double x){return 200.0/(1.0+exp(-x/3.0+7.0))-30.0;};
 
   double kP = 2, kD = 0;
 	PID gyro_p(kP, 0, kD, 0);
   Timer gyro_steady ("Gyro", &motion_i);
   int speed;
 
-	wait_until(gyro_steady.get_time() > 500 || master.interrupt(true, false)){
+	while(true){ //!(gyro_steady.get_time() > 500 || master.interrupt(true, false))
     // speed = gyro_p.compute(-angle, 0);
+    get_angle();
     speed = -GYRO_SIDE*scale(angle);
 
-    if(inRange(fabs(speed), 10, 25)) speed = sgn(speed)*40;
-
-    drivebase.move(0.0, speed, 0.0);
-    gyro_steady.print("Angle: %f | Speed: %f\n", angle, speed);
+    // if(inRange(fabs(speed), 10, 25)) speed = sgn(speed)*40;
+    // if(speed < -4) break;
+    // speed += sgn(speed)*10;
+    drivebase.move(speed, 0.0);
+    gyro_steady.print("Angle: %f | Speed: %d\n", angle, speed);
     
 		if (fabs(angle) > 6 || get_angle_dif() > 0.06) gyro_steady.reset();
+
+    delay(10);
   }
 
 	motion_i.print("\nLevelled on ramp\n\n");

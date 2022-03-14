@@ -88,38 +88,41 @@ void autonomous() {
 
 void opcontrol() {
 
-	wait_until(master.get_digital_new_press(DIGITAL_R1));
-	b_claw_p.set_value(HIGH);//locks in goals and raises lift
-	f_claw_p.set_value(HIGH);
-	f_lift.move_absolute(600, 100, true, 100);
-	b_lift.move_absolute(100);
+	// wait_until(master.get_digital_new_press(DIGITAL_R1));
+	// b_claw_p.set_value(HIGH);//locks in goals and raises lift
+	// f_claw_p.set_value(HIGH);
+	// f_lift.move_absolute(600, 100, true, 100);
+	// b_lift.move_absolute(100);
 
-	flatten_against_wall(true); //resets, change to dist sensor
-	tracking.reset();
+	// flatten_against_wall(); //resets, change to dist sensor
+	// tracking.reset(141.0-reset_dist_l.get_dist(), DIST_FRONT, 180);
+
   int start = millis();
 
-	move_start(move_types::turn_angle, turn_angle_params(85.0)); //turns to goal
+  // // wait_until(master.get_digital_new_press(DIGITAL_R1));
+	// move_start(move_types::turn_angle, turn_angle_params(-95.0)); //turns to goal
 	drivebase.set_state(HIGH);
-	b_lift.move_absolute(100); //lowers lifts
-	f_lift.move_absolute(0, 100, true, 50);
-	f_lift.move(-10); //holds lift down
+	// b_lift.move_absolute(100); //lowers lifts
+	// f_lift.move_absolute(0, 100, true, 50);
+	// f_lift.move(-10); //holds lift down
 
-	// drivebase.move(0.0, 25, 0.0);
-	// move_start(move_types::tank_point, tank_point_params({-5.0, 0.0, -90.0}, false, 127.0, 1.0, true, 6.5, 150.0, 0.0, 0, {6.0, 0.5}), false);
-	// f_detect_goal(false);
+	// // drivebase.move(0.0, 25, 0.0);
+	// // move_start(move_types::tank_point, tank_point_params({-5.0, 0.0, -90.0}, false, 127.0, 1.0, true, 6.5, 150.0, 0.0, 0, {6.0, 0.5}), false);
+	// // f_detect_goal(false);
 
-	move_start(move_types::turn_angle, turn_angle_params(90.0)); //aligns to ramp
-  //turn doesn't always happen. will change once actually picking up blue goal
-
-	// wait_until(master.get_digital_new_press(DIGITAL_R1));
-	gyro.climb_ramp();
+	// move_start(move_types::turn_angle, turn_angle_params(-90.0)); //aligns to ramp
+  // //turn doesn't always happen. will change once actually picking up blue goal
+  b_claw_p.set_value(HIGH);//locks in goals and raises lift
+	f_claw_p.set_value(HIGH);
+	wait_until(master.get_digital_new_press(DIGITAL_R1));
+	// gyro.climb_ramp();
+  gyro.level();
 	// delay(1000); //releases goals
 	// b_claw_p.set_value(LOW);
 	// f_claw_p.set_value(LOW);
   // b_lift.move(-10);
   // f_lift.move(-10);
   // wait_until(master.get_digital_new_press(DIGITAL_R1));
-  gyro.level();
 
   printf("\n\nStart: %d\n", start);
   printf("\n\nEnd: %d\n", millis());
