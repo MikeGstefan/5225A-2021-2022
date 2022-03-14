@@ -96,7 +96,7 @@ void opcontrol() {
 
 	flatten_against_wall(true);//resets, change to dist sensor
 	tracking.reset();
-  printf("\n\nStart: %d\n", millis());
+  int start = millis();
 
 	move_start(move_types::turn_angle, turn_angle_params(85.0)); //turns to goal
 	drivebase.set_state(HIGH);
@@ -112,11 +112,16 @@ void opcontrol() {
 
 	// wait_until(master.get_digital_new_press(DIGITAL_R1));
 	gyro.climb_ramp();
-	delay(1000); //releases goals
-	b_claw_p.set_value(LOW);
-	f_claw_p.set_value(LOW);
-  b_lift.move(-10);
-  f_lift.move(-10);
+	// delay(1000); //releases goals
+	// b_claw_p.set_value(LOW);
+	// f_claw_p.set_value(LOW);
+  // b_lift.move(-10);
+  // f_lift.move(-10);
+  // wait_until(master.get_digital_new_press(DIGITAL_R1));
+  gyro.level(2, 350);
+
+  printf("\n\nStart: %d\n", start);
+  printf("\n\End: %d\n", millis());
 
 	while(true){
 		GUI::update();

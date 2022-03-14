@@ -1579,44 +1579,33 @@ void Gyro::climb_ramp(){
 
 	f_lift.move_absolute(100); //Lowers lift
 
-  tracking.wait_for_dist(15);
+  tracking.wait_for_dist(17);
 
-  GUI::flash("Slowed\n", 1000, COLOUR(GREEN));
-  drivebase.move(0.0, -GYRO_SIDE*60, 0.0);
-  cycleCheck(angle < 18, 8, 10);
+  drivebase.brake();
+  GUI::flash("Braked\n", 1000, COLOUR(GREEN));
+}
 
-  GUI::flash("Reversed\n", 1000, COLOUR(GREEN));
+void Gyro::level(double kP, double kD){
+  printf("\nIn level function\n");
 
-  drivebase.move(0.0, GYRO_SIDE*127, 0.0);
-  // tracking.wait_for_dist(2);
-  wait_until(angle < 0.5);
+	PID gyro_p(kP, 0, kD, 0);
+  Timer gyro_steady ("Gyro", &motion_i);
+  int speed;
 
+	wait_until((fabs(angle) < 5 && gyro_steady.get_time() > 500) || master.interrupt(true, false)){
+    gyro_p.compute(-angle, 0);
+		drivebase.move(0.0, gyro_p.get_output(), 0.0);
+    gyro_steady.print("Angle: %f | Speed: %f\n", angle, gyro_p.get_output());
+    
+		if (get_angle_dif() > 0.06) gyro_steady.reset();
+  }
+
+	motion_i.print("\nLevelled on ramp\n\n");
   front_l.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
   front_r.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
   back_l.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
   back_r.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
   drivebase.velo_brake();
 
-  // drivebase.brake();
-  GUI::flash("Braked\n", 1000, COLOUR(GREEN));
-}
-
-void Gyro::level(double kP, double kD){
-  printf("\nIn level function\n");
-	PID gyro_p(kP, 0, kD, 0);
-  Timer gyro_steady ("Gyro", &motion_i);
-  int speed;
-
-	wait_until(master.interrupt(true, false)){ //(fabs(angle) < 6 && gyro_steady.get_time() > 500) || 
-    get_angle();
-    gyro_p.compute(-angle, 0);
-		drivebase.move(0.0, gyro_p.get_output(), 0.0);
-    gyro_steady.print("Angle: %f | Speed: %f\n", angle, gyro_p.get_output());
-    
-		if (get_angle_dif() > 0.6) gyro_steady.reset(); //Unsteady, Resets the steady timer - //Diff calculated from get_angle() after loop
-	}
-
-	motion_i.print("\nLevelled on ramp\n\n");
-	drivebase.brake();
-  GUI::flash("Braked\n");
+  // GUI::flash("Braked\n");
 }
