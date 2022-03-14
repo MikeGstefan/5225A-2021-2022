@@ -1566,36 +1566,42 @@ void Gyro::climb_ramp(){
   inertial.tare_roll();
   inertial.tare_pitch();
 
-  drivebase.move(0.0, -GYRO_SIDE*127, 0.0);
-  Task([this](){
+  Task([this](){ //Do not take this out
     wait_until(false){
       get_angle();
-      printf("%d | Angle:%f Velo:%f, Dist:%f\n", millis(), angle, get_angle_dif(), tracking.x_coord);
+      printf("%d | Angle:%f Angle_v:%f   |  tracking_v:%f Dist:%f\n", millis(), angle, get_angle_dif(), (tracking.l_velo+tracking.r_velo)/2, tracking.x_coord);
     }
   });
+
+  drivebase.move(0.0, -GYRO_SIDE*127, 0.0);
   wait_until(angle > 22);
+
   motion_i.print("ON RAMP: %f\n", angle);
   GUI::flash("On Ramp", 1000, COLOUR(GREEN));
+	// f_lift.move_absolute(100); //Lowers lift //Might be able to get rid of this
 
-	f_lift.move_absolute(100); //Lowers lift
+  // tracking.wait_for_dist(17);
 
-  tracking.wait_for_dist(17);
-
-  drivebase.brake();
-  GUI::flash("Braked\n", 1000, COLOUR(GREEN));
+  // drivebase.brake();
+  // GUI::flash("Braked\n", 1000, COLOUR(GREEN));
 }
 
-void Gyro::level(double kP, double kD){
-  printf("\nIn level function\n");
+void Gyro::level(){
+  std::function<double(double)> scale = func_scale([](double x){return sgn(x)*pow(fabs(x), 1.0/7.0);}, {10, 0}, {25, 130}, -22); //Need the sgn thing cuz pow cant handle negatives
 
+  double kP = 2, kD = 0;
 	PID gyro_p(kP, 0, kD, 0);
   Timer gyro_steady ("Gyro", &motion_i);
   int speed;
 
 	wait_until(gyro_steady.get_time() > 500 || master.interrupt(true, false)){
-    gyro_p.compute(-angle, 0);
-		drivebase.move(0.0, gyro_p.get_output(), 0.0);
-    gyro_steady.print("Angle: %f | Speed: %f\n", angle, gyro_p.get_output());
+    // speed = gyro_p.compute(-angle, 0);
+    speed = -GYRO_SIDE*scale(angle);
+
+    if(inRange(fabs(speed), 10, 25)) speed = sgn(speed)*40;
+
+    drivebase.move(0.0, speed, 0.0);
+    gyro_steady.print("Angle: %f | Speed: %f\n", angle, speed);
     
 		if (fabs(angle) > 6 || get_angle_dif() > 0.06) gyro_steady.reset();
   }
@@ -1607,5 +1613,5 @@ void Gyro::level(double kP, double kD){
   back_r.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
   drivebase.velo_brake();
 
-  GUI::flash("Braked\n", 1000, COLOUR(GREEN));
+  GUI::flash("Braked\n");
 }

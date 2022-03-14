@@ -51,8 +51,8 @@ public:
     bool move_complete = true, move_started = false;
     int movetime = 0;
 
-
-    Position g_velocity;   // global g_velocity stores x, y and angular velocities
+    //global g_velocity stores x, y and angular velocities
+    Position g_velocity;
     void wait_for_dist(double distance, int timeout = 0);
     double get_angle_in_deg();
     void reset(double x=0.0, double y=0.0, double a=0.0);
@@ -72,7 +72,7 @@ class Gyro{
     void calibrate();
     void finish_calibrating();
     void climb_ramp();
-    void level(double kP, double kD);
+    void level();
 
     double get_angle();
     double get_angle_dif();

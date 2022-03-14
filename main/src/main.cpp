@@ -109,6 +109,7 @@ void opcontrol() {
 	// f_detect_goal(false);
 
 	move_start(move_types::turn_angle, turn_angle_params(90.0)); //aligns to ramp
+  //turn doesn't always happen. will change once actually picking up blue goal
 
 	// wait_until(master.get_digital_new_press(DIGITAL_R1));
 	gyro.climb_ramp();
@@ -118,7 +119,7 @@ void opcontrol() {
   // b_lift.move(-10);
   // f_lift.move(-10);
   // wait_until(master.get_digital_new_press(DIGITAL_R1));
-  gyro.level(1.8, 300);
+  gyro.level();
 
   printf("\n\nStart: %d\n", start);
   printf("\n\nEnd: %d\n", millis());
