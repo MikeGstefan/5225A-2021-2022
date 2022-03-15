@@ -154,20 +154,27 @@ void opcontrol() {
 	// move_stop();
 	master.clear();
 	int time = millis();
+	f_claw_p.set_value(1);
+	delay(500);
 	move_start(move_types::tank_rush, tank_rush_params({106.0,71.0, 0.0}, false));
 	master.print(0,0,"%d",millis()-time);
-	front_l.move_velocity(0);
-	front_r.move_velocity(0);
-	back_l.move_velocity(0);
-	back_r.move_velocity(0);
-	centerf_l.move_velocity(0);
-	centerf_r.move_velocity(0);
-	centerb_l.move_velocity(0);
-	centerb_r.move_velocity(0);
+	// front_l.move_velocity(0);
+	// front_r.move_velocity(0);
+	// back_l.move_velocity(0);
+	// back_r.move_velocity(0);
+	// centerf_l.move_velocity(0);
+	// centerf_r.move_velocity(0);
+	// centerb_l.move_velocity(0);
+	// centerb_r.move_velocity(0);
+	int state = false;
 	while(true){
 		// GUI::update();
 		// if(master.get_digital_new_press(DIGITAL_A))master.print(0,0,"%.2f, %.2f",LeftEncoder.get_value(), RightEncoder.get_value());
-		// drivebase.handle_input();
+		// if(master.get_digital_new_press(DIGITAL_A)){
+		// 	state = !state;
+		// 	f_claw_p.set_value(state);
+		// }
+		drivebase.handle_input();
 		delay(10);
 	}
 	// while(true){

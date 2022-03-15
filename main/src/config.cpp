@@ -5,17 +5,17 @@
 // NEW config
 _Controller master(pros::E_CONTROLLER_MASTER);
 _Controller partner(pros::E_CONTROLLER_PARTNER);
-pros::ADIEncoder LeftEncoder(3,4, false), RightEncoder(1,2, true), BackEncoder({16,3, 4}, false);
+pros::ADIEncoder LeftEncoder(5,6, false), RightEncoder(1,2, false), BackEncoder({16,3, 4}, false);
 
-pros::Motor front_l(4, pros::E_MOTOR_GEARSET_18, false, pros::E_MOTOR_ENCODER_DEGREES);
-pros::Motor centerf_l(3, pros::E_MOTOR_GEARSET_18, true,pros::E_MOTOR_ENCODER_DEGREES);
-pros::Motor centerb_l(2, pros::E_MOTOR_GEARSET_18, false,pros::E_MOTOR_ENCODER_DEGREES);
-pros::Motor back_l(1, pros::E_MOTOR_GEARSET_18, true, pros::E_MOTOR_ENCODER_DEGREES);
+pros::Motor front_l(4, pros::E_MOTOR_GEARSET_18, !false, pros::E_MOTOR_ENCODER_DEGREES);
+pros::Motor centerf_l(3, pros::E_MOTOR_GEARSET_18,! true,pros::E_MOTOR_ENCODER_DEGREES);
+pros::Motor centerb_l(2, pros::E_MOTOR_GEARSET_18, !false,pros::E_MOTOR_ENCODER_DEGREES);
+pros::Motor back_l(1, pros::E_MOTOR_GEARSET_18, !true, pros::E_MOTOR_ENCODER_DEGREES);
 
-pros::Motor front_r(14, pros::E_MOTOR_GEARSET_18, true, pros::E_MOTOR_ENCODER_DEGREES);
-pros::Motor centerf_r(13, pros::E_MOTOR_GEARSET_18, false,pros::E_MOTOR_ENCODER_DEGREES);
-pros::Motor centerb_r(12, pros::E_MOTOR_GEARSET_18, true,pros::E_MOTOR_ENCODER_DEGREES);
-pros::Motor back_r(11, pros::E_MOTOR_GEARSET_18, false,pros::E_MOTOR_ENCODER_DEGREES);
+pros::Motor front_r(14, pros::E_MOTOR_GEARSET_18, !true, pros::E_MOTOR_ENCODER_DEGREES);
+pros::Motor centerf_r(13, pros::E_MOTOR_GEARSET_18,! false,pros::E_MOTOR_ENCODER_DEGREES);
+pros::Motor centerb_r(12, pros::E_MOTOR_GEARSET_18, !true,pros::E_MOTOR_ENCODER_DEGREES);
+pros::Motor back_r(11, pros::E_MOTOR_GEARSET_18, !false,pros::E_MOTOR_ENCODER_DEGREES);
 
 
 
@@ -29,8 +29,8 @@ pros::Motor intk(6, pros::E_MOTOR_GEARSET_18, true, pros::E_MOTOR_ENCODER_DEGREE
 // pros::Motor back_r(18, pros::E_MOTOR_GEARSET_18, true, pros::E_MOTOR_ENCODER_DEGREES);
 
 // pros::Imu imu_sensor(4);
-pros::Distance b_dist(9), f_dist(12), r_reset_dist(19), l_reset_dist(20);
-pros::ADIDigitalOut trans_p({{16,8}}), b_claw_p(6), f_claw_p(8);
+pros::Distance b_dist(9), f_dist(15), r_reset_dist(19), l_reset_dist(20);
+pros::ADIDigitalOut trans_p({{16,8}}), b_claw_p(4), f_claw_p(3);
 pros::ADIDigitalOut Led1({{14, 7}});
 pros::ADIDigitalOut Led2({{14, 8}});
 pros::ADIDigitalIn intake_jam({{16, 7}});
