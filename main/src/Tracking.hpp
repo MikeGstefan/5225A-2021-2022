@@ -72,7 +72,7 @@ class Gyro{
     void calibrate();
     void finish_calibrating();
     void climb_ramp();
-    void level();
+    void level(double kP, double kD);
 
     double get_angle();
     double get_angle_dif();

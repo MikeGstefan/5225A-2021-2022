@@ -1,6 +1,7 @@
 #include "Tracking.hpp"
 #include "config.hpp"
 #include "drive.hpp"
+#include "logging.hpp"
 #include "pros/motors.h"
 #include "util.hpp"
 
@@ -1566,49 +1567,43 @@ void Gyro::climb_ramp(){
   inertial.tare_roll();
   inertial.tare_pitch();
 
-  Task([this](){ //Do not take this out
+  drivebase.move(0.0, -GYRO_SIDE*127, 0.0);
+  Task([this](){
     wait_until(false){
       get_angle();
-      printf("%d | Angle:%f Angle_v:%f   |  tracking_v:%f Dist:%f\n", millis(), angle, get_angle_dif(), (tracking.l_velo+tracking.r_velo)/2, tracking.x_coord);
+      // motion_i.print("%d | Angle:%f Angle_v:%f, L_v:%f, R_v:%f, Dist:%f\n", millis(), angle, get_angle_dif(), tracking.l_velo, tracking.r_velo, tracking.x_coord);
+      // motion_i.print("%d | Angle:%f\n", millis(), angle);
     }
   });
-
-  drivebase.move(-GYRO_SIDE*127, 0.0);
   wait_until(angle > 22);
-
   motion_i.print("ON RAMP: %f\n", angle);
   GUI::flash("On Ramp", 1000, COLOUR(GREEN));
-	// f_lift.move_absolute(100); //Lowers lift //Might be able to get rid of this
 
-  // tracking.wait_for_dist(17);
+  tracking.reset();
 
-  // drivebase.brake();
-  // GUI::flash("Braked\n", 1000, COLOUR(GREEN));
+	f_lift.move_absolute(100); //Lowers lift
+
+  drivebase.move(0.0, -GYRO_SIDE*127, 0.0);
+  tracking.wait_for_dist(18);
 }
 
-void Gyro::level(){
-  // std::function<double(double)> scale = func_scale([](double x){return 1.0/x;}, {10, 0}, {25, 130}, -28); //Need the sgn thing cuz pow cant handle negatives
-  std::function<double(double)> scale = [](double x){return 200.0/(1.0+exp(-x/3.0+7.0))-30.0;};
-
-  double kP = 2, kD = 0;
+void Gyro::level(double kP, double kD){
 	PID gyro_p(kP, 0, kD, 0);
   Timer gyro_steady ("Gyro", &motion_i);
   int speed;
+  bool neg = false;
 
-	while(true){ //!(gyro_steady.get_time() > 500 || master.interrupt(true, false))
-    // speed = gyro_p.compute(-angle, 0);
-    get_angle();
-    speed = -GYRO_SIDE*scale(angle);
+  GUI::flash("PID", 1000, COLOUR(GREEN));
 
-    // if(inRange(fabs(speed), 10, 25)) speed = sgn(speed)*40;
-    // if(speed < -4) break;
-    // speed += sgn(speed)*10;
-    drivebase.move(speed, 0.0);
-    gyro_steady.print("Angle: %f | Speed: %d\n", angle, speed);
+	wait_until(gyro_steady.get_time() > 500 || master.interrupt(true, true)){
+    gyro_p.compute(-angle, 0);
+		drivebase.move(0.0, gyro_p.get_output(), 0.0);
+    // gyro_steady.print("Angle: %f | Speed: %f\n", angle, gyro_p.get_output());
     
 		if (fabs(angle) > 6 || get_angle_dif() > 0.06) gyro_steady.reset();
 
-    delay(10);
+    if(speed < 0) neg = true;
+    if(neg && speed > 0) break;
   }
 
 	motion_i.print("\nLevelled on ramp\n\n");
@@ -1618,5 +1613,5 @@ void Gyro::level(){
   back_r.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
   drivebase.velo_brake();
 
-  GUI::flash("Braked\n");
+  GUI::flash("Braked\n", 1000, COLOUR(GREEN));
 }
