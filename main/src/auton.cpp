@@ -1,7 +1,9 @@
 #include "auton.hpp"
 #include "Tracking.hpp"
 #include "config.hpp"
+#include "geometry.hpp"
 #include "logging.hpp"
+#include "pros/misc.h"
 #include <string>
 
 
@@ -689,12 +691,29 @@ void lrt_auton(){
 }
 
 void save_positions(){
-  ofstream file;
-  if(GUI::go("Reset position", "Press to reset the position and move the robot.")){
-    tracking.reset();
+  if(GUI::go("Reset position", "Press to reset the position, then move the robot.")){
+    Position pos1 (141.0-8.75, 15.5, 0.0), pos2 (0, 0, 0);
+    master.clear();
+    master.print(0, 0, "L1:(%.1f, %.1f, %.1f)", pos1.x, pos1.y , pos1.angle);
+    master.print(1, 0, "R1:(%.1f, %.1f, %.1f)", pos2.x, pos2.y , pos2.angle);
+
+    wait_until(false){
+      if(master.get_digital_new_press(DIGITAL_L1)){
+        tracking.reset(pos1);
+        break;
+      }
+      if(master.get_digital_new_press(DIGITAL_R1)){
+        tracking.reset(pos2);
+        break;
+      }
+    }
+
     //move the robot
+
     if(GUI::go_end("Save Positions")){
-      printf("Saving X: %f, Y:%f, A:%f\n", tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle));
+      tracking_imp.print("Saving X: %f, Y:%f, A:%f\n", tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle));
+      
+      ofstream file;
       Data::log_t.data_update();
       file.open("/usd/start_positions.txt", fstream::out | fstream::trunc);
       file << tracking.x_coord << endl;
@@ -709,7 +728,6 @@ void save_positions(){
 void load_positions(){
   double x, y, a;
   ifstream file;
-  
 
   Data::log_t.data_update();
   file.open("/usd/start_positions.txt", fstream::in);
@@ -717,7 +735,7 @@ void load_positions(){
   file.close();
   Data::log_t.done_update();
 
-  printf("Loading X: %f, Y:%f, A:%f\n", x, y, a);
+  tracking_imp.print("Loading X: %f, Y:%f, A:%f from file\n", x, y, a);
   tracking.reset(x, y, a);
 }
 

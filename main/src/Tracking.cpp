@@ -1,5 +1,6 @@
 #include "Tracking.hpp"
 #include "config.hpp"
+#include "geometry.hpp"
 
 Tracking tracking;
 
@@ -25,6 +26,15 @@ void Tracking::reset(double x, double y, double a){
   tracking.x_coord = x;
   tracking.y_coord = y;
   tracking.global_angle = deg_to_rad(a);
+  update_t.done_update();
+}
+
+void Tracking::reset(Position position){
+  update_t.data_update();
+  tracking_imp.print("resetting tracking from %.2f, %.2f, %.2f to %.2f, %.2f, %.2f\n", tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle), position.x, position.y, position.angle);
+  tracking.x_coord = position.x;
+  tracking.y_coord = position.y;
+  tracking.global_angle = deg_to_rad(position.angle);
   update_t.done_update();
 }
 
