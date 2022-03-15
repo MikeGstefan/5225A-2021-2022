@@ -30,8 +30,7 @@ void blue_highside();
 void blue_highside_tall();
 void blue_lowside();
 
-namespace Autons{
-  constexpr bool normal = true;
+  constexpr bool normal_auton = true;
 
   enum class autons;
   enum class start_pos;
@@ -43,20 +42,7 @@ namespace Autons{
   extern alliances cur_alliance;
   extern goals cur_goal;
 
-  void file_read();
-  void next_route();
-  void prev_route();
-  void next_start_pos();
-  void prev_start_pos();
-  void prev_goal();
-  void next_goal();
-  void set_target_goal(goals goal);
-  void switch_alliance(alliances new_ally = static_cast<alliances>(!static_cast<bool>(cur_alliance)));
-  void give_up();
-  void selector();
-
-  void file_update();
-  void file_read();
-  void file_reset();
-
-}
+  void auton_file_read();
+  void auton_file_update();
+  void auton_give_up();
+  void auton_selector();

@@ -533,7 +533,7 @@ void Button::set_background (Colour colour){
   if (b_col != colour){
     b_col = colour;
     b_col_dark = RGB2COLOR(int(COLOR2R(b_col)*0.8), int(COLOR2G(b_col)*0.8), int(COLOR2B(b_col)*0.8));
-    if (page == GUI::current_page) draw();
+    draw();
   }
 }
 
@@ -558,7 +558,7 @@ void Text_::set_background (int x1, int y1, int x2, int y2, GUI::Style type){
 void Text_::set_background (Colour colour){
   if (b_col != colour){
     b_col = colour;
-    if (page == GUI::current_page) draw();
+    draw();
   }
 }
 

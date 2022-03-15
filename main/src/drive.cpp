@@ -274,9 +274,8 @@ void Drivebase::driver_practice(){
         master.print(1,1,"%.2f, %.2f, %.2f", tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle));
       }
       if(master.get_digital_new_press(ok_button)){
-        Autons::selector();
+        // auton_selector(); //talk to nathan if you're uncommenting this line
         // master.print(1,1,"HERE");
-        // auto_select();
         delay(2000);
       }
       drivebase.handle_input();
@@ -286,8 +285,6 @@ void Drivebase::driver_practice(){
      
 
       handle_trans();
-
-      GUI::update();
 
       // prints motor temps every second
       if(screen_timer.get_time() > 1000){

@@ -688,7 +688,8 @@ void lrt_auton(){
   move_stop();
 }
 
-namespace Autons{
+
+
 
   enum class autons{
     Skills,
@@ -734,7 +735,7 @@ namespace Autons{
   const std::string file_name = "/usd/auton.txt";
   std::fstream file;
 
-  void file_update(){
+  void auton_file_update(){
     Data::log_t.data_update();
     file.open(file_name, fstream::out | fstream::trunc);
     file << static_cast<int>(cur_auton) << std::endl;
@@ -745,7 +746,7 @@ namespace Autons{
     Data::log_t.done_update();
   }
 
-  void save_change(std::string which){
+  void save_auton_change(std::string which){
     std::string val;
     int line;
 
@@ -773,10 +774,10 @@ namespace Autons{
     printf("%sSwitched %s to %s%s\n", GUI::get_term_colour(GUI::Colours::GREEN), which.c_str(), val.c_str(), GUI::get_term_colour(GUI::Colours::NONE));
     events.print("\n\nSwitched %s to %s\n\n", which.c_str(), val.c_str());
     master.print(line, 0, "%s: %s          ", which.c_str(), val.c_str());
-    file_update();
+    auton_file_update();
   }
 
-  void file_read(){
+  void auton_file_read(){
     if (!pros::usd::is_installed()){
       GUI::flash("No SD Card!");
       printf("%sNo SD card inserted.%s Using default auton, start position, goal and alliance.\n", GUI::get_term_colour(GUI::Colours::ERROR), GUI::get_term_colour(GUI::Colours::NONE));
@@ -789,7 +790,7 @@ namespace Autons{
       if (!file){ //File doesn't exist
         file.close();
         GUI::flash("Auton File not found!");
-        file_update();
+        auton_file_update();
         
         printf("%sCreated new Auton File.%s\n", GUI::get_term_colour(GUI::Colours::GOOD), GUI::get_term_colour(GUI::Colours::NONE));
         file.open(file_name, fstream::in);
@@ -807,7 +808,7 @@ namespace Autons{
     }
 
     master.clear();
-    if(normal){
+    if(normal_auton){
       master.print(0, 0, "%s: %s          ", "Alliance", alliance_names[static_cast<int>(cur_alliance)]);    
       master.print(1, 0, "%s: %s          ", "Auton", auton_names[static_cast<int>(cur_auton)]);
     }
@@ -818,69 +819,52 @@ namespace Autons{
     }
   }
 
-  void prev_route(){
-    cur_auton = previous_enum_value(cur_auton);
-    save_change("Auton");
-  }
-
-  void next_route(){
-    cur_auton = next_enum_value(cur_auton);
-    save_change("Auton");
-  }
-
-  void prev_start_pos(){
-    cur_start_pos = previous_enum_value(cur_start_pos);
-    save_change("Start Pos");
-  }
-
-  void next_start_pos(){
-    cur_start_pos = next_enum_value(cur_start_pos);
-    save_change("Start Pos");
-  }
-
-  void prev_goal(){
-    cur_goal = previous_enum_value(cur_goal);
-    save_change("Goal");
-  }
-
-  void next_goal(){
-    cur_goal = next_enum_value(cur_goal);
-    save_change("Goal");
-  }
-
-  void set_target_goal(goals goal){
-    cur_goal = goal;
-    save_change("Goal");
-  }
-
-  void switch_alliance(alliances new_ally){
-    cur_alliance = new_ally;
-    save_change("Alliance");
-  }
-
-  void give_up(){ 
+  void auton_give_up(){ 
     printf("Insert actual Auton Give up code here\n"); 
   } 
 
-  void selector(){
-    if(normal){
+  void auton_selector(){
+    if(normal_auton){
       wait_until(master.get_digital_new_press(ok_button)){
-        if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_L1)) prev_route();
-        else if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_R1)) next_route();
-        else if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_X)) switch_alliance();
+        if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_L1)){
+          cur_auton = previous_enum_value(cur_auton);
+          save_auton_change("Auton");
+        }
+        else if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_R1)){
+          cur_auton = next_enum_value(cur_auton);
+          save_auton_change("Auton");
+        }
+        else if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_X)){
+          cur_alliance = static_cast<alliances>(!static_cast<bool>(cur_alliance));
+          save_auton_change("Alliance");
+        }
       }
     }
     else{
       wait_until(master.get_digital_new_press(ok_button)){
-        if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_L1)) prev_start_pos();
-        else if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_R1)) next_start_pos();
-        else if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_X)) switch_alliance();
-        else if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_L2)) prev_goal();
-        else if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_R2)) next_goal();
+        if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_L1)){
+          cur_start_pos = previous_enum_value(cur_start_pos);
+          save_auton_change("Start Pos");
+        }
+        else if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_R1)){
+          cur_start_pos = next_enum_value(cur_start_pos);
+          save_auton_change("Start Pos");
+        }
+        else if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_X)){
+          cur_alliance = static_cast<alliances>(!static_cast<bool>(cur_alliance));
+          save_auton_change("Alliance");
+        }
+        else if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_L2)){
+          cur_goal = previous_enum_value(cur_goal);
+          save_auton_change("Goal");
+        }
+        else if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_R2)){
+          cur_goal = next_enum_value(cur_goal);
+          save_auton_change("Goal");
+        }
+
       }
     }
     
     master.clear();
   }
-
-}
