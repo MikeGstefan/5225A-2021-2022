@@ -211,7 +211,7 @@ void F_Lift::handle(){
 //             break;
 
 //           case f_lift_states::tip:
-//             move_absolute(raised_position);
+//move_absolute(raised_position);
 //             break;
 
 //           default:

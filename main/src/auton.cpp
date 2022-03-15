@@ -732,17 +732,17 @@ void lrt_auton(){
   const char* alliance_names[2] = {"Red", "Blue"};
   const char* goal_names[static_cast<int>(goals::NUM_OF_ELEMENTS)] = {"Left", "Tall", "Right"};
 
-  const std::string file_name = "/usd/auton.txt";
-  std::fstream file;
+  const std::string auton_file_name = "/usd/auton.txt";
+  std::fstream auton_file;
 
   void auton_file_update(){
     Data::log_t.data_update();
-    file.open(file_name, fstream::out | fstream::trunc);
-    file << static_cast<int>(cur_auton) << std::endl;
-    file << static_cast<int>(cur_alliance) << std::endl;
-    file << static_cast<int>(cur_start_pos) << std::endl;
-    file << static_cast<int>(cur_goal) << std::endl;
-    file.close();
+    auton_file.open(auton_file_name, fstream::out | fstream::trunc);
+    auton_file << static_cast<int>(cur_auton) << std::endl;
+    auton_file << static_cast<int>(cur_alliance) << std::endl;
+    auton_file << static_cast<int>(cur_start_pos) << std::endl;
+    auton_file << static_cast<int>(cur_goal) << std::endl;
+    auton_file.close();
     Data::log_t.done_update();
   }
 
@@ -785,20 +785,20 @@ void lrt_auton(){
     }
     else{
       Data::log_t.data_update();
-      file.open(file_name, fstream::in);
+      auton_file.open(auton_file_name, fstream::in);
 
-      if (!file){ //File doesn't exist
-        file.close();
+      if (!auton_file){ //File doesn't exist
+        auton_file.close();
         GUI::flash("Auton File not found!");
         auton_file_update();
         
         printf("%sCreated new Auton File.%s\n", GUI::get_term_colour(GUI::Colours::GOOD), GUI::get_term_colour(GUI::Colours::NONE));
-        file.open(file_name, fstream::in);
+        auton_file.open(auton_file_name, fstream::in);
       }
 
       int auton, ally, start, goal;
-      file >> auton >> ally  >> start  >> goal;
-      file.close();
+      auton_file >> auton >> ally  >> start  >> goal;
+      auton_file.close();
       Data::log_t.done_update();
 
       cur_auton = static_cast<autons>(auton);
