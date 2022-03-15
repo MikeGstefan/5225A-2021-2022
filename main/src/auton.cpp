@@ -21,6 +21,12 @@ void skills(){
   f_detect_goal(); 
   skills_d.print("first neutral got %d\n", millis() - time);
   f_lift.move_absolute(900); 
+  Task([](){
+    while(true){ 
+      misc.print("%.2f\n", f_lift.motor.get_actual_velocity());
+      delay(10);
+    }
+  });
   // intk.move(127); 
   // move_stop(); 
   // move_wait_for_complete();
