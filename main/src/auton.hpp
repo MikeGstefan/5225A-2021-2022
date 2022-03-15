@@ -14,7 +14,8 @@
 #include "Subsystems/f_lift.hpp"
 #include <fstream>
 
-
+void save_positions();
+void load_positions();
 
 void skills();
 void skills2();

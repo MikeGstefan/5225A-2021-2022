@@ -14,6 +14,8 @@
 
 #include "task.hpp"
 #include "util.hpp"
+#include <cmath>
+#include <fstream>
 using namespace std;
 
 pros::Task *updt = nullptr; //What's this for
@@ -38,7 +40,7 @@ void initialize() {
 	Data::init();
 	_Controller::init();
 	GUI::init();
-	Autons::file_read();
+	// Autons::file_read();
 	delay(500);
 	// tracking.x_coord = 26.0, tracking.y_coord = 11.75, tracking.global_angle = -90.0_deg;
 	// tracking.x_coord = 104.0, tracking.y_coord = 12.0, tracking.global_angle = -30.0_deg;
@@ -48,6 +50,9 @@ void initialize() {
 	update_t.start();
 	// master.print(2, 0, "Driver: %s", drivebase.drivers[drivebase.cur_driver].name);
 	// gyro.finish_calibrating(); //Finishes calibrating gyro before program starts
+  
+
+  save_positions();
 }
 
 /**
@@ -80,19 +85,12 @@ void competition_initialize() {}
  * from where it left off.
  */
 void autonomous() {
+  load_positions();
 	// skills();
-
 
 }
 
 void opcontrol() {
-	/* GUI:
-	auton give up func - ask mike
-	make gui a task - i can't figure this out
-	text not centering
-	check if weird string issue is still there
-	lvgl images
-	*/
 
 	// Autons::selector();
 	while(true){

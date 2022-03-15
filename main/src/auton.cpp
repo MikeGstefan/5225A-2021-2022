@@ -688,6 +688,40 @@ void lrt_auton(){
   move_stop();
 }
 
+void save_positions(){
+  ofstream file;
+  if(GUI::go("Reset position", "Press to reset the position and move the robot.")){
+    tracking.reset();
+    //move the robot
+    if(GUI::go_end("Save Positions")){
+      printf("Saving X: %f, Y:%f, A:%f\n", tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle));
+      Data::log_t.data_update();
+      file.open("/usd/start_positions.txt", fstream::out | fstream::trunc);
+      file << tracking.x_coord << endl;
+      file << tracking.y_coord << endl;
+      file << rad_to_deg(tracking.global_angle) << endl;
+      file.close();
+      Data::log_t.done_update();
+    }
+  }
+}
+
+void load_positions(){
+  double x, y, a;
+  ifstream file;
+  
+
+  Data::log_t.data_update();
+  file.open("/usd/start_positions.txt", fstream::in);
+  file >> x >> y >> a;
+  file.close();
+  Data::log_t.done_update();
+
+  printf("Loading X: %f, Y:%f, A:%f\n", x, y, a);
+  tracking.reset(x, y, a);
+}
+
+
 namespace Autons{
 
   enum class autons{
