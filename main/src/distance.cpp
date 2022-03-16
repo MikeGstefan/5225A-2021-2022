@@ -65,7 +65,8 @@ Position distance_reset_left(int cycles){
 	if(ram == 0){
 		int diff = averageleft-averageright;
 		// angle = atan(diff/dist_sensor);
-		angle = near_angle(2*atan2(sqrt(pow(diff,2.0) + pow(dist_sensor, 2.0)- pow(d_offset, 2.0)) - dist_sensor, diff - d_offset),0.0);
+		// angle = near_angle(2*atan2(sqrt(pow(diff,2.0) + pow(dist_sensor, 2.0)- pow(d_offset, 2.0)) - dist_sensor, diff - d_offset),0.0);
+		angle = near_angle(2*atan2(sqrt(pow(dist_sensor,2.0) - pow(d_offset,2.0) + pow(averageleft,2.0) + pow(averageright,2.0) -( 2*averageleft*averageright))-dist_sensor, diff + d_offset), 0.0);
 
 		misc.print("Angle Reset to: %f\n", rad_to_deg(angle));
 		local_y = ((averageleft/25.4) - tan(angle) + (dist_to_centre/25.4) * tan(angle) + (side_length/25.4)) * cos(angle);
