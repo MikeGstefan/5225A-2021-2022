@@ -29,10 +29,13 @@ Text mot_temp_6(185, 175, GUI::Style::CENTRE, TEXT_SMALL, temps, std::get<3>(mot
 Text mot_temp_7(295, 175, GUI::Style::CENTRE, TEXT_SMALL, temps, std::get<3>(motors_for_gui[6]) + ": %dC"s, std::get<1>(motors_for_gui[6]), COLOUR(BLACK));
 Text mot_temp_8(405, 175, GUI::Style::CENTRE, TEXT_SMALL, temps, std::get<3>(motors_for_gui[7]) + ": %dC"s, std::get<1>(motors_for_gui[7]), COLOUR(BLACK));
 
-Page driver_curve ("Drivers"); //Select a driver and their exp curve
-Button prev_drivr(20, 70, 110, 120, GUI::Style::SIZE, Button::SINGLE, driver_curve, "Prev Driver");
-Text drivr_name(MID_X, MID_Y, GUI::Style::CENTRE, TEXT_LARGE, driver_curve, "%s", std::function([](){return drivebase.driver_name();}));
-Button next_drivr(350, 70, 110, 120, GUI::Style::SIZE, Button::SINGLE, driver_curve, "Next Driver");
+Page checks("System Checks");
+Button drive_motors (0, 0, 0, 0, GUI::Style::SIZE, Button::SINGLE, checks, "Drive Motors");
+Button intakes (0, 0, 0, 0, GUI::Style::SIZE, Button::SINGLE, checks, "Intake/Uptake");
+Button lifts (0, 0, 0, 0, GUI::Style::SIZE, Button::SINGLE, checks, "Lifts");
+Button pneums (0, 0, 0, 0, GUI::Style::SIZE, Button::SINGLE, checks, "Pneumatics");
+Button save_pos (0, 0, 0, 0, GUI::Style::SIZE, Button::SINGLE, checks, "Save Position");
+Button misc_checks (0, 0, 0, 0, GUI::Style::SIZE, Button::SINGLE, checks, "Misc");
 
 Page track ("Tracking"); //Display tracking vals and reset btns
 Text track_x(50, 45, GUI::Style::CENTRE, TEXT_SMALL, track, "X:%.1f", tracking.x_coord);
@@ -45,6 +48,11 @@ Button res_x(15, 60, 70, 55, GUI::Style::SIZE, Button::SINGLE, track, "Reset X")
 Button res_y(100, 60, 70, 55, GUI::Style::SIZE, Button::SINGLE, track, "Reset Y");
 Button res_a(185, 60, 70, 55, GUI::Style::SIZE, Button::SINGLE, track, "Reset A");
 Button res_all(15, 160, 240, 60, GUI::Style::SIZE, Button::SINGLE, track, "Reset All");
+
+Page driver_curve ("Drivers"); //Select a driver and their exp curve
+Button prev_drivr(20, 70, 110, 120, GUI::Style::SIZE, Button::SINGLE, driver_curve, "Prev Driver");
+Text drivr_name(MID_X, MID_Y, GUI::Style::CENTRE, TEXT_LARGE, driver_curve, "%s", std::function([](){return drivebase.driver_name();}));
+Button next_drivr(350, 70, 110, 120, GUI::Style::SIZE, Button::SINGLE, driver_curve, "Next Driver");
 
 Page moving ("Moving"); //Moves to target, home, or centre
 Slider x_val(35, 45, 250, 40, GUI::Style::SIZE, Slider::HORIZONTAL, 0, 144, moving, "X");
@@ -235,6 +243,42 @@ void main_setup(){
     }
   });
 
+  drive_motors.set_func([](){
+    if(GUI::go("start drive motors", "Press to start the drive motors", 1000)){
+      drivebase.move(60, 0);
+      delay(1000);
+      drivebase.move(-60, 0);
+      delay(1000);
+      drivebase.brake();
+    }
+  });
+  lifts.set_func([](){
+    if(GUI::go("test lifts", "Press to run lifts", 1000)){
+      f_lift.reset();
+      b_lift.reset();
+      f_lift.move_absolute(f_lift.top_position, LIFT_MAX_VELOCITY, true);
+      b_lift.move_absolute(b_lift.top_position, LIFT_MAX_VELOCITY, true);
+      delay(1000);
+      f_lift.move_absolute(f_lift.bottom_position, LIFT_MAX_VELOCITY, true);
+      b_lift.move_absolute(b_lift.bottom_position, LIFT_MAX_VELOCITY, true);
+    }
+  });
+  pneums.set_func([](){
+    for(std::array<Piston*, 8>::iterator it = Piston::list_for_gui.begin(); it != Piston::list_for_gui.begin(); it++){
+      Piston* piston = *it;
+      if (GUI::go("check" + std::string(piston->get_name()), "Press to check" + std::string(piston->get_name()))){
+        piston->toggle_state();
+        delay(1000);
+        piston->toggle_state();
+      }
+      else return;
+    }
+  });
+  // save_pos.set_func(save_positions);
+  misc_checks.set_func([](){
+    if (!pros::usd::is_installed()) GUI::flash("No SD Card!");
+  });
+
   prev_drivr.set_func([](){drivebase.prev_driver();});
   next_drivr.set_func([](){drivebase.next_driver();});
 
@@ -243,7 +287,7 @@ void main_setup(){
   
   res_x.set_func([](){tracking.reset(0.0, tracking.y_coord, rad_to_deg(tracking.global_angle));});
   res_y.set_func([](){tracking.reset(tracking.x_coord, 0.0, rad_to_deg(tracking.global_angle));});
-  res_a.set_func([](){tracking.reset(tracking.x_coord, tracking.y_coord);});
+  res_a.set_func([](){tracking.reset(tracking.x_coord, tracking.y_coord, 0.0);});
   res_all.set_func([](){tracking.reset();});
   track.set_setup_func([](){
     screen::set_pen(COLOUR(WHITE));
@@ -613,6 +657,6 @@ void util_background(){
   }
 }
 
-GUI g_main ({&temps, &driver_curve, &track, &moving, &lift_move, &elastic, &tuning, &motors, &pneumatics}, &main_setup, &main_background);
+GUI g_main ({&temps, &checks, &track, &moving, &lift_move,  &driver_curve, &elastic, &tuning, &motors, &pneumatics}, &main_setup, &main_background);
 
 GUI g_util ({&ports, &encoders, &motor, &pneumatic}, &util_setup, &util_background);

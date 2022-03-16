@@ -82,14 +82,11 @@ void competition_initialize() {}
 void autonomous() {
 	// skills();
 
-
 }
 
 void opcontrol() {
 	/* GUI:
 	auton give up func - ask mike
-	make gui a task - i can't figure this out
-	text not centering
 	check if weird string issue is still there
 	lvgl images
 	*/

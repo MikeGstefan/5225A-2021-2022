@@ -95,7 +95,8 @@ public:
     motor.move(0);
   }
 
-  void move_absolute(double position, double velocity = default_velocity, bool wait_for_comp = false, double end_error = 50.0){ // sets target and last target
+  void move_absolute(double position, double velocity = default_velocity, bool wait_for_comp = false, double end_error = 0.0){ // sets target and last target
+    if (end_error == 0) end_error = this->end_error;
     last_target = target;
     target = position;
     motor.move_absolute(position, velocity);
