@@ -1,5 +1,4 @@
 #include "gui.hpp"
-#include <sys/select.h>
 
 //Timer stuff
 Timer Flash("Flash Timer", false);
@@ -159,7 +158,7 @@ void GUI::end_flash (){
 bool GUI::go(std::string short_msg, std::string long_msg, std::uint32_t delay_time){
  if(!go_enabled) return true;
   master.clear();
-  master.print(0, 0, "Press OK btn to start");
+  master.print(0, 0, "Press OK btn");
   printf("\n\n%s\nPress the screen big button or the controller OK button when ready.\n", long_msg.c_str());
   snprintf(go_string, 90, "%s", short_msg.c_str());
 
@@ -167,18 +166,14 @@ bool GUI::go(std::string short_msg, std::string long_msg, std::uint32_t delay_ti
   const Page* page = GUI::current_page;
   go_sequence.go_to();
 
-  wait_until(!(go_button.pressed() || master.get_digital(ok_button)) || interrupted){ //Wait for Release
-    GUI::update_screen_status();
-    if (go_back_button.pressed() || master.interrupt()) interrupted = true;
+  wait_until(!(go_button.pressed() || master.get_digital(ok_button) || master.interrupt(false, true, false)) || interrupted){ //Wait for Release
+    if (go_back_button.pressed()) interrupted = true;
   }
   wait_until((go_button.pressed() || master.get_digital(ok_button)) || interrupted){ //Wait for Press
-    drivebase.handle_input();
-    GUI::update_screen_status();
-    if (go_back_button.pressed() || master.interrupt()) interrupted = true;
+    if (go_back_button.pressed() || master.interrupt(false)) interrupted = true;
   }
-  wait_until(!(go_button.pressed() || master.get_digital(ok_button)) || interrupted){ //Wait for Release
-    GUI::update_screen_status();
-    if (go_back_button.pressed() || master.interrupt()) interrupted = true;
+  wait_until(!(go_button.pressed() || master.get_digital(ok_button) || master.interrupt(false, true, false)) || interrupted){ //Wait for Release
+    if (go_back_button.pressed()) interrupted = true;
   }
 
   page->go_to();
@@ -186,39 +181,36 @@ bool GUI::go(std::string short_msg, std::string long_msg, std::uint32_t delay_ti
   if (!interrupted){
     if(delay_time){
       const char* time = millis_to_str(delay_time);
-      printf("Waiting for %s before running.\n", time);
+      printf("\nWaiting for %s before running.\n\n", time);
       delete[] time;
       delay(delay_time);
     }
-    printf("Running\n");
+    printf("\nRunning\n\n");
   }
-  else printf("%sInterrupted%s\n", get_term_colour(Colours::ERROR), get_term_colour(Colours::NONE));
+  else printf("\n%sInterrupted%s\n\n", get_term_colour(Colours::ERROR), get_term_colour(Colours::NONE));
+  master.clear();
   return !interrupted;
 }
 
 bool GUI::go_end(std::string msg, std::uint32_t delay_time){
   if(!go_enabled) return true;
   master.clear();
-  master.print(0, 0, "Press OK btn to start");
-  printf("Press Again when done.\n");
+  master.print(0, 0, "Press OK btn");
+  printf("\nPress Again when done.\n\n");
   snprintf(go_string, 90, "END %s", msg.c_str());
 
   bool pressed = false, interrupted = false;
   const Page* page = GUI::current_page;
   go_sequence.go_to();
 
-  wait_until(!(go_button.pressed() || master.get_digital(ok_button)) || interrupted){ //Wait for Release
-    GUI::update_screen_status();
-    if (go_back_button.pressed() || master.interrupt()) interrupted = true;
+  wait_until(!(go_button.pressed() || master.get_digital(ok_button) || master.interrupt(false, true, false)) || interrupted){ //Wait for Release
+    if (go_back_button.pressed()) interrupted = true;
   }
   wait_until((go_button.pressed() || master.get_digital(ok_button)) || interrupted){ //Wait for Press
-    drivebase.handle_input();
-    GUI::update_screen_status();
-    if (go_back_button.pressed() || master.interrupt()) interrupted = true;
+    if (go_back_button.pressed() || master.interrupt(false)) interrupted = true;
   }
-  wait_until(!(go_button.pressed() || master.get_digital(ok_button)) || interrupted){ //Wait for Release
-    GUI::update_screen_status();
-    if (go_back_button.pressed() || master.interrupt()) interrupted = true;
+  wait_until(!(go_button.pressed() || master.get_digital(ok_button) || master.interrupt(false, true, false)) || interrupted){ //Wait for Release
+    if (go_back_button.pressed()) interrupted = true;
   }
 
   page->go_to();
@@ -226,13 +218,14 @@ bool GUI::go_end(std::string msg, std::uint32_t delay_time){
   if (!interrupted){
     if(delay_time){
       const char* time = millis_to_str(delay_time);
-      printf("Waiting for %s before running.\n", time);
+      printf("\nWaiting for %s before running.\n\n", time);
       delete[] time;
       delay(delay_time);
     }
-    printf("Running\n");
+    printf("\nRunning\n\n");
   }
-  else printf("%sInterrupted%s\n", get_term_colour(Colours::ERROR), get_term_colour(Colours::NONE));
+  else printf("\n%sInterrupted%s\n\n", get_term_colour(Colours::ERROR), get_term_colour(Colours::NONE));
+  master.clear();
   return !interrupted;
 }
 

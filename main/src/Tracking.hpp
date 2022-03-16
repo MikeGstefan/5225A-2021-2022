@@ -57,7 +57,7 @@ public:
     void wait_for_dist(double distance, int timeout = 0);
     double get_angle_in_deg();
     void reset(double x=0.0, double y=0.0, double a=0.0);
-
+    void reset(Position position);
 };
 
 

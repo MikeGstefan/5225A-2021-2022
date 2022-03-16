@@ -142,7 +142,7 @@ bool _Controller::interrupt(bool analog, bool digital, bool OK_except){
     if (fabs(get_analog(ANALOG_RIGHT_Y)) > 15) return true;
   }
   if(digital){
-    if (!OK_except && get_digital(ok_button)) return true;
+    if (get_digital(ok_button)) return !OK_except;
     if (get_digital(DIGITAL_A)) return true;
     if (get_digital(DIGITAL_B)) return true;
     if (get_digital(DIGITAL_Y)) return true;
