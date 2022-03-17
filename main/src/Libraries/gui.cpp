@@ -173,7 +173,6 @@ bool GUI::go(std::string short_msg, std::string long_msg, std::uint32_t delay_ti
   wait_until((go_button.pressed() || master.get_digital(ok_button)) || interrupted){ //Wait for Press
     if (go_back_button.pressed() || master.interrupt(false)) interrupted = true;
   }
-
   printf("Pressed - %d\n", interrupted);
   wait_until(!(go_button.pressed() || master.get_digital(ok_button) || master.interrupt(false, true, false)) || interrupted){ //Wait for Release
     if (go_back_button.pressed()) interrupted = true;
@@ -704,6 +703,7 @@ void GUI::update_screen_status(){
   touched = status.touch_status == TOUCH_PRESSED || status.touch_status == TOUCH_HELD;
   x = status.x;
   y = status.y;
+  printf("Updated\n");
 }
 
 bool GUI::pressed() const{
@@ -889,6 +889,7 @@ void GUI::init(){
 void GUI::update(void* params){
   _Task* ptr = _Task::get_obj(params);
   while(true){
+    printf("Loop\n");
     current_gui->background();
     update_screen_status();
     const Page& cur_p = *current_page;
@@ -901,4 +902,5 @@ void GUI::update(void* params){
     delay(10);
     if(ptr->notify_handle()) break;
   }
+  printf("\nGUI Task Ended\n\n");
 }
