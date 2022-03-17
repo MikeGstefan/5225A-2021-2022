@@ -30,12 +30,12 @@ Text mot_temp_7(295, 175, GUI::Style::CENTRE, TEXT_SMALL, temps, std::get<3>(mot
 Text mot_temp_8(405, 175, GUI::Style::CENTRE, TEXT_SMALL, temps, std::get<3>(motors_for_gui[7]) + ": %dC"s, std::get<1>(motors_for_gui[7]), COLOUR(BLACK));
 
 Page checks("System Checks");
-Button drive_motors (0, 0, 0, 0, GUI::Style::SIZE, Button::SINGLE, checks, "Drive Motors");
-Button intakes (0, 0, 0, 0, GUI::Style::SIZE, Button::SINGLE, checks, "Intake/Uptake");
-Button lifts (0, 0, 0, 0, GUI::Style::SIZE, Button::SINGLE, checks, "Lifts");
-Button pneums (0, 0, 0, 0, GUI::Style::SIZE, Button::SINGLE, checks, "Pneumatics");
-Button save_pos (0, 0, 0, 0, GUI::Style::SIZE, Button::SINGLE, checks, "Save Position");
-Button misc_checks (0, 0, 0, 0, GUI::Style::SIZE, Button::SINGLE, checks, "Misc");
+Button drive_motors (30, 30, 120, 90, GUI::Style::SIZE, Button::SINGLE, checks, "Drive Motors");
+Button intakes (180, 30, 120, 90, GUI::Style::SIZE, Button::SINGLE, checks, "Intake/Uptake");
+Button lifts (330, 30, 120, 90, GUI::Style::SIZE, Button::SINGLE, checks, "Lifts");
+Button pneums (30, 130, 120, 90, GUI::Style::SIZE, Button::SINGLE, checks, "Pneumatics");
+Button save_pos (180, 130, 120, 90, GUI::Style::SIZE, Button::SINGLE, checks, "Save Position");
+Button misc_checks (330, 130, 120, 90, GUI::Style::SIZE, Button::SINGLE, checks, "Misc");
 
 Page track ("Tracking"); //Display tracking vals and reset btns
 Text track_x(50, 45, GUI::Style::CENTRE, TEXT_SMALL, track, "X:%.1f", tracking.x_coord);
@@ -274,7 +274,7 @@ void main_setup(){
       else return;
     }
   });
-  // save_pos.set_func(save_positions);
+  save_pos.set_func(save_positions);
   misc_checks.set_func([](){
     if (!pros::usd::is_installed()) GUI::flash("No SD Card!");
   });

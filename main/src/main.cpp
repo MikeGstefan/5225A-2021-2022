@@ -91,9 +91,12 @@ void autonomous() {
 void opcontrol() {
 	/* GUI:
 	auton give up func - ask mike
+  check if lift.move_absolute works before merge
 	check if weird string issue is still there
 	lvgl images
 	*/
+
+  GUI::aligned_coords(3, 2, 120, 75);
 
 	// Autons::selector();
 	while(true){

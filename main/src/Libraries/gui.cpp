@@ -169,12 +169,16 @@ bool GUI::go(std::string short_msg, std::string long_msg, std::uint32_t delay_ti
   wait_until(!(go_button.pressed() || master.get_digital(ok_button) || master.interrupt(false, true, false)) || interrupted){ //Wait for Release
     if (go_back_button.pressed()) interrupted = true;
   }
+  printf("Released1 - %d\n", interrupted);
   wait_until((go_button.pressed() || master.get_digital(ok_button)) || interrupted){ //Wait for Press
     if (go_back_button.pressed() || master.interrupt(false)) interrupted = true;
   }
+
+  printf("Pressed - %d\n", interrupted);
   wait_until(!(go_button.pressed() || master.get_digital(ok_button) || master.interrupt(false, true, false)) || interrupted){ //Wait for Release
     if (go_back_button.pressed()) interrupted = true;
   }
+  printf("Released2 - %d\n", interrupted);
 
   page->go_to();
 
