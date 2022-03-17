@@ -6,7 +6,7 @@ cDistance right_eye;
 bool ram = false;
 
 
-double d_offset = 5.0;//depth of the funny wall thing
+double d_offset = 0.0;//depth of the funny wall thing
 
 void setVisionState(Distance_States state) {
 	Last_Distance_State = Distance_State;
@@ -143,6 +143,7 @@ Position distance_reset_right(int cycles){
 		local_x = ((averageside/25.4) + (dist_to_centre/25.4)) * cos(angle);
 
 		misc.print("Front: %f, Side: %f, Side sensor: %f\n", local_y, local_x, averageside);
+		master.print(0,0," %.3f, %.3f", local_y, local_x);
 		Position Reset (local_x, local_y, rad_to_deg(angle));
 		return Reset;
 	}else{
@@ -180,17 +181,17 @@ void distance_loop(double distance, int timeout){
 		switch (Distance_State) {
 			case Distance_States::stable:
 				printf("stable\n");
-				drivebase.move_tank(-y_speed,0);
+				drivebase.move(-y_speed,0);
 				if(left_eye.last_distance == r_reset_dist.get()) count++;
 				if(count == 4) break;
 				else count = 0;
 				break;
 			case Distance_States::turn_left:
 				printf("Turn left\n");
-				drivebase.move_tank(-y_speed, -a_speed);
+				drivebase.move(-y_speed, -a_speed);
 				break;
 			case Distance_States::turn_right:
-				drivebase.move_tank(-y_speed, a_speed);
+				drivebase.move(-y_speed, a_speed);
 				printf("Turn right\n");
 				break;
 		}

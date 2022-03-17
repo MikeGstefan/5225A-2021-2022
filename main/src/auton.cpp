@@ -46,15 +46,24 @@ void skills(){
   // intk.move(127);
   // move_start(move_types::tank_arc, tank_arc_params({48.0,105.0}, {72.0,94.0,180.0}, 127.0,127.0,true));
   f_lift.move_absolute(10);
-  move_start(move_types::tank_point, tank_point_params({70.0,72.0,180.0}), false);
+  move_start(move_types::tank_point, tank_point_params({71.0,72.0,180.0}), false);
   while(f_lift.motor.get_position() > 60)delay(10);
   // intk.move(0);
   f_detect_goal();
   skills_d.print("Center grab %d\n", millis() - time);
   master.print(2,2,"grab %d", millis() - time);
   delay(100);
-  move_stop();
+  f_lift.move_absolute(550, 200);
+  move_wait_for_complete();
   drivebase.brake();
+  delay(100);
+  move_start(move_types::turn_angle, turn_angle_params(0.0));
+  delay(100);
+  intk.move(127);
+  move_start(move_types::tank_point, tank_point_params({71.0, 110.0,0.0},false,80.0));
+  // move_stop();
+  drivebase.brake();
+  flatten_against_wall();
   // delay(300);
   // drivebase.move(0.0,0.0);
 }

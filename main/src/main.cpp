@@ -141,11 +141,32 @@ void autonomous() {
 // extern Slider mot_speed_set;
 
 void opcontrol() {
+	b_claw_p.set_value(LOW);
+	waitUntil(master.get_digital_new_press(DIGITAL_A));
+	b_claw_p.set_value(HIGH);
+  move_start(move_types::tank_point, tank_point_params({-10.0, 20.0, 0.0}));
+  move_start(move_types::tank_point, tank_point_params({20.0, 50.0, 0.0}));
+
+  move_start(move_types::tank_point, tank_point_params({20.0, 50.0, 0.0}), false);
+
+	while(true) delay(10);
+	waitUntil(master.get_digital_new_press(DIGITAL_A));
+
+	drivebase.move(50,0);
+	while(!master.get_digital_new_press(DIGITAL_A)){
+		printf("l_vel:%lf, r_vel: %lf, avg: %lf\n", tracking.l_velo, tracking.r_velo, (tracking.l_velo + tracking.r_velo) / 2);
+		delay(10);
+	}
+	drivebase.move(-1.0, 0.0);
+	delay(1000);
 	move_stop();
-	f_lift.reset();
-	b_lift.reset();
+	// f_lift.reset();
+	// b_lift.reset();
 	while(true){
-		if(master.get_digital_new_press(DIGITAL_A))skills();
+		if(master.get_digital_new_press(DIGITAL_A)){
+			skills();
+			distance_reset_right();
+		}
 		delay(10);
 	}
 	// f_lift_m.move(40);
