@@ -74,7 +74,6 @@ public:
   // 'set-drive' methods
   void move(double x, double y, double a);
   void move(double y, double a);
-  void move_tank(double y, double a);
   void move_side(double l, double r);
 
   void brake();

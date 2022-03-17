@@ -181,17 +181,17 @@ void distance_loop(double distance, int timeout){
 		switch (Distance_State) {
 			case Distance_States::stable:
 				printf("stable\n");
-				drivebase.move_tank(-y_speed,0);
+				drivebase.move(-y_speed,0);
 				if(left_eye.last_distance == r_reset_dist.get()) count++;
 				if(count == 4) break;
 				else count = 0;
 				break;
 			case Distance_States::turn_left:
 				printf("Turn left\n");
-				drivebase.move_tank(-y_speed, -a_speed);
+				drivebase.move(-y_speed, -a_speed);
 				break;
 			case Distance_States::turn_right:
-				drivebase.move_tank(-y_speed, a_speed);
+				drivebase.move(-y_speed, a_speed);
 				printf("Turn right\n");
 				break;
 		}
