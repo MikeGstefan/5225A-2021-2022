@@ -6,7 +6,7 @@ cDistance right_eye;
 bool ram = false;
 
 
-double d_offset = 5.0;//depth of the funny wall thing
+double d_offset = 0.0;//depth of the funny wall thing
 
 void setVisionState(Distance_States state) {
 	Last_Distance_State = Distance_State;
@@ -143,6 +143,7 @@ Position distance_reset_right(int cycles){
 		local_x = ((averageside/25.4) + (dist_to_centre/25.4)) * cos(angle);
 
 		misc.print("Front: %f, Side: %f, Side sensor: %f\n", local_y, local_x, averageside);
+		master.print(0,0," %.3f, %.3f", local_y, local_x);
 		Position Reset (local_x, local_y, rad_to_deg(angle));
 		return Reset;
 	}else{

@@ -142,10 +142,13 @@ void autonomous() {
 
 void opcontrol() {
 	move_stop();
-	f_lift.reset();
-	b_lift.reset();
+	// f_lift.reset();
+	// b_lift.reset();
 	while(true){
-		if(master.get_digital_new_press(DIGITAL_A))skills();
+		if(master.get_digital_new_press(DIGITAL_A)){
+			skills();
+			distance_reset_right();
+		}
 		delay(10);
 	}
 	// f_lift_m.move(40);
