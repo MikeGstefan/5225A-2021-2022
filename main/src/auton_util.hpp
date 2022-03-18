@@ -27,8 +27,8 @@ void detect_interference();
 
 class Reset_dist{
   private:
-    static const int cycles = 3;
-    static const int thresh = 10;
+    static constexpr int cycles = 3;
+    static constexpr int thresh = 10;
     const double dist_from_center;
     pros::Distance* sensor;
 

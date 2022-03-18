@@ -45,14 +45,3 @@ std::array<std::tuple<pros::Motor*, int, const char*, const char*, Text_*>, 8> m
   std::make_tuple(&intk, 0, "Intake", "IN", nullptr),
   std::make_tuple(nullptr, 0, "", "", nullptr),
 };//std::make_tuple(nullptr, 0, "", "", nullptr),
-
-// std::array<std::pair<pros::ADIDigitalOut*, const char*>, 8> pneumatics_for_gui = {
-//   std::make_pair(&trans_p, "Transmission"),
-//   std::make_pair(&b_claw_p, "Back Claw"),
-//   std::make_pair(&f_claw_p, "Front Claw"),
-//   std::make_pair(&Led1, "LED1"),
-//   std::make_pair(&Led2, "LED 2"),
-//   std::make_pair(nullptr, ""),
-//   std::make_pair(nullptr, ""),
-//   std::make_pair(nullptr, ""),
-// }; //std::make_pair(nullptr, ""),

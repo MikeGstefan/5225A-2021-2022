@@ -175,10 +175,10 @@ uintptr_t data_size(){//returns the number of characters needed to be printed fr
 
 
 char* Data::to_char(const char* fmt, ...){
-    va_list args;
-    va_start(args, fmt);
-    char* buffer = new char[256];
-    vsnprintf(buffer, 256, fmt, args);
-    va_end(args);
-    return buffer;
+  va_list args;
+  va_start(args, fmt);
+  char* buffer = new char[256];
+  vsnprintf(buffer, 256, fmt, args);
+  va_end(args);
+  return buffer;
 }

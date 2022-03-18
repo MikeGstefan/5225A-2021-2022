@@ -32,19 +32,19 @@ void blue_highside();
 void blue_highside_tall();
 void blue_lowside();
 
-  constexpr bool normal_auton = true;
+constexpr bool normal_auton = true;
 
-  enum class autons;
-  enum class start_pos;
-  enum class alliances; //alliances and goals really shouldn't be enums, but it makes my code more consistent
-  enum class goals;
+enum class autons;
+enum class start_pos;
+enum class alliances; //alliances and goals really shouldn't be enums, but it makes my code more consistent
+enum class goals;
 
-  extern autons cur_auton;
-  extern start_pos cur_start_pos;
-  extern alliances cur_alliance;
-  extern goals cur_goal;
+extern autons cur_auton;
+extern start_pos cur_start_pos;
+extern alliances cur_alliance;
+extern goals cur_goal;
 
-  void auton_file_read();
-  void auton_file_update();
-  void auton_give_up();
-  void auton_selector();
+void auton_file_read();
+void auton_file_update();
+void auton_give_up();
+void auton_selector();
