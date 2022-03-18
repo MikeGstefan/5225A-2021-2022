@@ -20,8 +20,8 @@ void B_Claw::handle(){
   switch(state){
     case b_claw_states::idle:
     
-      // enters search mode if the lift is at the bottom and it's been 2 seconds since the mogo was released
-      if(master.get_digital_new_press(search_button) || release_timer.get_time() > 2000){
+      // enters search mode if it's been 2 seconds since the mogo was released
+      if(release_timer.get_time() > 2000){
         master.rumble("-");
         set_state(b_claw_states::search_lip);
       }
@@ -30,22 +30,11 @@ void B_Claw::handle(){
         master.rumble("-");
         b_claw_p.set_value(HIGH);
 
-        // raises mogo above rings automatically if lift is in bottom state
-        if(f_lift.get_state() == f_lift_states::bottom){
-          f_lift.index = 1; // sends f_lift to raised position
-        }
-
         set_state(b_claw_states::grabbed);
       }
       break;
 
     case b_claw_states::search_lip:
-      // cancels search if search button is pressed
-      if(master.get_digital_new_press(search_button)){
-        release_timer.reset(false); // pauses timer
-        master.rumble("-");
-        set_state(b_claw_states::idle);
-      }
       // search for bowl of mogo once lip is detected
       if(b_dist.get() < 70){
         search_cycle_check_count = 0; // resets search cycle count
@@ -58,22 +47,11 @@ void B_Claw::handle(){
         master.rumble("-");
         b_claw_p.set_value(HIGH);
 
-        // raises mogo above rings automatically if lift is in bottom state
-        if(f_lift.get_state() == f_lift_states::bottom){
-          f_lift.index = 1; // sends f_lift to raised position
-        }
-
         set_state(b_claw_states::grabbed);
       }
       break;
 
     case b_claw_states::search_bowl:
-      // cancels search if search button is pressed
-      if(master.get_digital_new_press(search_button)){
-        release_timer.reset(false); // pauses timer
-        master.rumble("-");
-        set_state(b_claw_states::idle);
-      }
       // grabs goal if up button is pressed or bowl is detected
       if (b_dist.get() > 70 && b_dist.get() < 95) search_cycle_check_count++;
 
@@ -81,11 +59,6 @@ void B_Claw::handle(){
       if(master.get_digital_new_press(b_claw_toggle_button) || search_cycle_check_count >= 2){
         master.rumble("-");
         b_claw_p.set_value(HIGH);
-
-        // raises mogo above rings automatically if lift is in bottom state
-        if(f_lift.get_state() == f_lift_states::bottom){
-          f_lift.index = 1; // sends f_lift to raised position
-        }
 
         set_state(b_claw_states::grabbed);
       }
