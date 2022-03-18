@@ -30,8 +30,18 @@ class Timer;
     }\
 }
 
-#define inRange(value, min, max) ((min <= value && value <= max) || (max <= value && value <= min))
-
+/**
+ * @brief checks whether a value is in range
+ * 
+ * @param value value to be checked
+ * @param minimum range minimum value
+ * @param maximum range maximum value
+ * @return whether value is in range. will work even if maximum < minimum
+ */
+template <typename T>
+bool in_range(T value, T minimum, T maximum){
+  return (minimum <= value && value <= maximum) || (maximum <= value && value <= minimum);
+}
 
 double operator "" _deg(long double degree);
 double operator "" _rad(long double radians);
@@ -76,7 +86,7 @@ std::string printf_to_string(const char* fmt, va_list arg);
  * @param milliseconds 
  * @return char* const 
  */
-char* const millis_to_str(std::uint32_t milliseconds);
+std::string millis_to_str(std::uint32_t milliseconds);
 
 /**
  * @brief 
@@ -149,141 +159,3 @@ T previous_enum_value(T enum_type) {
   if (static_cast<int>(enum_type) > static_cast<int>(static_cast<T>(0))) return enum_type--;
   else return static_cast<T>(static_cast<int>(T::NUM_OF_ELEMENTS) - 1);
 }
-
-
-//I'll get rid of this at some point. For now leave it
-
-// template <typename R=std::nullptr_t>
-// struct Value{
-//   private:
-//     std::function<R()> func;
-    
-//   public://Commented out some unused constructors
-//     typedef R value_type;
-
-//     //Blank (no value)
-//     Value (){
-//       func = nullptr;
-//     }
-
-//     //Var
-//     template <typename = typename std::enable_if<!std::is_array_v<R> && !std::is_member_function_pointer_v<R>, void>>
-//     Value (const R& val){
-//       func = [&](){return val;};
-//     }
-
-//     //Array
-//     template <typename I, typename = typename std::enable_if_t<std::is_scalar_v<I>, std::nullptr_t>>
-//     Value (const R* array, const I& index){
-//       // static_assert(std::is_scalar_v<I>, "Text Index type must be int-convertible");
-//       func = [array, &index](){return array[static_cast<uint>(index)];};
-//     }
-
-//     //String
-//     Value (std::string str){
-//       func = [&](){return str.c_str();};
-//     }
-
-//     // //STL random access containers
-//     // template <typename Container, typename I, typename = typename std::enable_if_t<std::is_base_of_v<typename std::random_access_iterator_tag, typename std::iterator_traits<typename Container::iterator>::iterator_category> && std::is_convertible_v<Container::size_type, int>, std::nullptr_t>>
-//     // Value (Container& c, I& index){
-//     //   // static_assert(std::is_scalar_v<typename Container::size_type>, "Text Index type must be int-convertible");
-//     //   func = [&](){return c[static_cast<uint>(index)];};
-//     // }
-
-//     //STL random access associative containers
-//     // template <typename Container, typename I, typename = typename std::enable_if_t<std::is_base_of_v<typename std::forward_iterator_tag, typename std::iterator_traits<typename Container::iterator>::iterator_category> && !std::is_base_of_v<typename std::random_access_iterator_tag, typename std::iterator_traits<typename Container::iterator>::iterator_category>, std::nullptr_t>>
-//     // Value (Container& c, I& index){
-//     //   func = [&](){return c[index];};
-//     // }
-
-//     //Function ptr with params
-//     template <typename... Args>
-//     Value (R (*const function)(Args...), Args... args){
-//       func = std::bind(function, args...);
-//     }
-
-//     //std::function with params
-//     template <typename... Args>
-//     Value (std::function<R(Args...)> function, Args... args){
-//       func = std::bind(function, args...);
-//     }
-
-//     // Member Functions
-//     template <typename Class, typename... Args>
-//     Value (R (Class::* const & function)(Args...), Class& object, Args... args){
-//       func = std::bind(function, object, args...);
-//     }
-
-//     // Const Member Functions, because for some reason they can't be the same as normal member functions
-//     template <typename Class, typename... Args>
-//     Value (R (Class::* const & function)(Args...) const, Class& object, Args... args){
-//       func = std::bind(function, object, args...);
-//     }
-
-//     explicit operator bool() const{
-//       return bool(func);
-//     }
-
-//     R operator ()() const{
-//       return func();
-//     }
-
-// };
-
-
-// //void specialization
-// template <>
-// struct Value<void>{
-//   private:
-//     std::function<void()> func;
-    
-//   public:
-//     typedef void value_type;
-
-//     Value(){
-//       func = [](){};
-//     }
-
-//     //Function ptr with params
-//     template <typename... Args>
-//     explicit Value (void (*const function)(Args...), Args... args){
-//       func = std::bind(function, args...);
-//     }
-
-//     //std::function with params
-//     template <typename... Args>
-//     Value (std::function<void(Args...)> function, Args... args){
-//       func = std::bind(function, args...);
-//     }
-
-//     // Member Functions
-//     template <typename Class, typename... Args>
-//     Value (void (Class::* const & function)(Args...), Class& object, Args... args){
-//       func = std::bind(function, object, args...);
-//     }
-
-//     // Const Member Functions, because for some reason they can't be the same as normal member functions
-//     template <typename Class, typename... Args>
-//     Value (void (Class::* const & function)(Args...) const, Class& object, Args... args){
-//       func = std::bind(function, object, args...);
-//     }
-
-//     explicit operator bool() const{
-//       return bool(func);
-//     }
-
-//     void operator ()() const{
-//       return func();
-//     }
-
-// };
-
-// //Deduction Guides for Value struct
-// Value() -> Value<std::nullptr_t>;
-
-// template <typename Container, typename I>
-// Value(Container&, I&) -> Value<typename Container::value_type>;
-
-// template <typename Container, typename I>
-// Value(Container&, I&) -> Value<typename Container::mapped_type>;

@@ -523,13 +523,13 @@ void main_setup(){
 void main_background(){
   //Saving Field coords
   int x = 200*tracking.x_coord/144, y = 200*tracking.y_coord/144;
-  if(inRange(x, 0, 199) && inRange(y, 0, 199)) field[x].set(y); //Saves position (x,y) to as tracked
+  if(in_range(x, 0, 199) && in_range(y, 0, 199)) field[x].set(y); //Saves position (x,y) to as tracked
 
   for (std::array<std::tuple<Motor*, int, const char*, const char*, Text_*>, 8>::iterator it = motors_for_gui.begin(); it != motors_for_gui.end(); it++){
     std::tuple<Motor*, int, const char*, const char*, Text_*>& mot_tup = *it;
     std::get<1>(mot_tup) = std::get<0>(mot_tup) ? std::get<0>(mot_tup)->get_temperature() : std::numeric_limits<int>::max();
 
-    if (!temp_flashed && std::get<0>(mot_tup) && inRange(std::get<1>(mot_tup), 55, std::numeric_limits<int>::max()-1) && screen_flash::timer.playing()){ //Overheating
+    if (!temp_flashed && std::get<0>(mot_tup) && in_range(std::get<1>(mot_tup), 55, std::numeric_limits<int>::max()-1) && screen_flash::timer.playing()){ //Overheating
       temp_flashed = true;
       temps.go_to();
       screen_flash::start(GUI::Colours::ERROR, 10000, "%s motor is at %dC\n", std::get<2>(mot_tup), std::get<1>(mot_tup));

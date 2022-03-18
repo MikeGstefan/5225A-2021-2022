@@ -1,6 +1,5 @@
 #include "util.hpp"
 
-
 double operator "" _deg(long double degree){
   return degree/180 *M_PI;
 }
@@ -27,8 +26,8 @@ std::string printf_to_string(const char* fmt, va_list arg){
 }
 
 //Returns a heap-allocated c-string. Call delete[] after usage
-char* const millis_to_str(std::uint32_t milliseconds){
-  char* const buffer = new char[20];
+std::string millis_to_str(std::uint32_t milliseconds){
+  char buffer[20];
   if (milliseconds == 1) sprintf(buffer, "1 millisecond");
   else if (milliseconds < 1000) sprintf(buffer, "%d milliseconds", milliseconds);
   else if (milliseconds == 1000) sprintf(buffer, "1 second");

@@ -1,5 +1,4 @@
 #include "gui.hpp"
-#include "pros/rtos.h"
 
 //Static Variable Declarations
 const Page* GUI::current_page = nullptr;
@@ -187,9 +186,7 @@ bool GUI::go(std::string short_msg, std::string long_msg, std::uint32_t delay_ti
 
   if (!interrupted){
     if(delay_time){
-      const char* time = millis_to_str(delay_time);
-      printf("\nWaiting for %s before running.\n\n", time);
-      delete[] time;
+      printf("\nWaiting for %s before running.\n\n", millis_to_str(delay_time).c_str());
       delay(delay_time);
     }
     printf("\nRunning\n\n");
@@ -226,9 +223,7 @@ bool GUI::go_end(std::string msg, std::uint32_t delay_time){
 
   if (!interrupted){
     if(delay_time){
-      const char* time = millis_to_str(delay_time);
-      printf("\nWaiting for %s before running.\n\n", time);
-      delete[] time;
+      printf("\nWaiting for %s before running.\n\n", millis_to_str(delay_time).c_str());
       delay(delay_time);
     }
     printf("\nRunning\n\n");
@@ -342,7 +337,7 @@ Slider::Slider (int x1, int y1, int x2, int y2, GUI::Style type, direction dir, 
   this->min = min;
   this->max = max;
   this->page = &page;
-  this->val = inRange(0, min, max) ? 0 : (min+max)/2; //0 if that's the min, otherwise the average
+  this->val = in_range(0, min, max) ? 0 : (min+max)/2; //0 if that's the min, otherwise the average
   this->b_col = background_colour;
   this->l_col = label_colour;
   this->page->sliders.push_back(this);
@@ -373,8 +368,8 @@ Slider::Slider (int x1, int y1, int x2, int y2, GUI::Style type, direction dir, 
 
   //Buttons
   if(min > max) increment = -increment;
-  dec.set_func([&, increment](){this->val-=increment; if(!inRange(this->val, this->min, this->max)) this->val = this->min;});
-  inc.set_func([&, increment](){this->val+=increment; if(!inRange(this->val, this->min, this->max)) this->val = this->max;});
+  dec.set_func([&, increment](){this->val-=increment; if(!in_range(this->val, this->min, this->max)) this->val = this->min;});
+  inc.set_func([&, increment](){this->val+=increment; if(!in_range(this->val, this->min, this->max)) this->val = this->max;});
 }
 
 Page::Page(std::string title, Colour background_colour){
@@ -742,11 +737,11 @@ bool Page::pressed() const{
 }
 
 bool Slider::pressed() const{
-  return (page->pressed() && active && inRange(GUI::x, x1, x2) && inRange(GUI::y, y1, y2));
+  return (page->pressed() && active && in_range(GUI::x, x1, x2) && in_range(GUI::y, y1, y2));
 }
 
 bool Button::pressed() const{
-  return (page->pressed() && active && inRange(GUI::x, x1, x2) && inRange(GUI::y, y1, y2));
+  return (page->pressed() && active && in_range(GUI::x, x1, x2) && in_range(GUI::y, y1, y2));
 }
 
 bool Button::new_press(){

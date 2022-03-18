@@ -223,12 +223,12 @@ class Text: public Text_{
   public:
     //Points, Format, Page, Label, [var info], Lcolour
 
-    // Terminal - no format
+    // Terminal var - no format
     Text (std::string text, V& value_obj, Colour label_colour = COLOUR(WHITE)){
       construct (5, 0, GUI::Style::CORNER, E_TEXT_LARGE_CENTER, &terminal, text, [&](){return value_obj;}, label_colour);
     }
 
-    // Terminal - format
+    // Terminal var - format
     Text (std::string text, V& value_obj, text_format_e_t size, Colour label_colour = COLOUR(WHITE)){
       construct (5, 0, GUI::Style::CORNER, size, &terminal, text, [&](){return value_obj;}, label_colour);
     }

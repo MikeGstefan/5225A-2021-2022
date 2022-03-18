@@ -318,12 +318,6 @@ void Drivebase::non_blocking_driver_practice(){
 
   // actual drive code
   drivebase.handle_input();
-
-  // takes away control from driver when motors overheat
-  if(inRange(front_l.get_temperature(), 55, std::numeric_limits<double>::max()-1) || inRange(front_r.get_temperature(), 55, std::numeric_limits<double>::max()-1) || inRange(back_l.get_temperature(), 55, std::numeric_limits<double>::max()-1) || inRange(back_r.get_temperature(), 55, std::numeric_limits<double>::max()-1)){
-    master.rumble("- - - ");
-    return;
-  }
 }
 
 void Drivebase::next_driver(){
