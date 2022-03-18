@@ -9,6 +9,7 @@ bool touched_when_flashed;
 const Page* GUI::current_page = nullptr;
 bool GUI::touched = false;
 int GUI::x = 0, GUI::y = 0;
+_Task GUI::task(update, "GUI");
 
 //Text Vars
 char* const go_string = (char*)malloc(90*sizeof(char));
@@ -58,21 +59,77 @@ void GUI::aligned_coords (int x_objects, int y_objects, int x_size, int y_size, 
 }
 
 //Flashing
-void GUI::flash(Colour colour, std::uint32_t time, const char* fmt, ...){
+void GUI::flash(std::uint32_t time, const char* fmt, ...){
+  std::va_list args;
+  va_start(args, fmt);
+  GUI::flash(printf_to_string(fmt, args), time, Colours::ERROR);
+  va_end(args);
+}
+
+void GUI::flash(GUI::Colours colour, const char* fmt, ...){
+  std::va_list args;
+  va_start(args, fmt);
+  GUI::flash(printf_to_string(fmt, args), 1000, colour);
+  va_end(args);
+}
+
+void GUI::flash(const char* fmt, ...){
+  std::va_list args;
+  va_start(args, fmt);
+  GUI::flash(printf_to_string(fmt, args), 1000, Colours::ERROR);
+  va_end(args);
+}
+
+void GUI::flash(GUI::Colours colour, std::uint32_t time, const char* fmt, ...){
   std::va_list args;
   va_start(args, fmt);
   GUI::flash(printf_to_string(fmt, args), time, colour);
   va_end(args);
 }
 
-void GUI::flash(std::string text, std::uint32_t time, Colour colour){
+void GUI::flash(std::string text,  std::uint32_t time, Colour colour){
   touched_when_flashed = touched;
   clear_screen(colour);
   screen::set_pen(~colour&0xFFFFFF); //Makes text inverted colour of background so it is always visible
   screen::set_eraser(colour);
 
-  printf("\n\n\033[31mWARNING: %s\033[0m\n\n", text.c_str());
-  events.print("%s\n", text.c_str());
+  printf("\n\n%s\n\n", text.c_str());
+  events.print("\n\n%d | %s\n\n", millis(), text.c_str());
+
+  int spaces = int(CHAR_WIDTH_LARGE*text.length()/460)+1;
+  std::size_t space, last_space=0;
+  std::string sub;
+
+  master.rumble(".-");
+
+  for(int i=1; i <= spaces; i++){ //make the printing actually look good
+    space = text.find(' ', text.length()*i/spaces);
+    sub = text.substr(last_space, space-last_space);
+    screen::print(TEXT_LARGE, (480-sub.length()*CHAR_WIDTH_LARGE)/2, (CHAR_HEIGHT_LARGE+5)*i, sub.c_str());
+    last_space = space+1;
+  }
+
+  Flash.reset(); //Starts counting
+  flash_end = time;
+}
+
+
+void GUI::flash(std::string text, std::uint32_t time, GUI::Colours colour){
+  touched_when_flashed = touched;
+  clear_screen(get_gui_colour(colour));
+  screen::set_pen(~get_gui_colour(colour)&0xFFFFFF); //Makes text inverted colour of background so it is always visible
+  screen::set_eraser(get_gui_colour(colour));
+
+  std::string pretext;
+  switch(colour){
+    case Colours::ERROR: pretext = "ERROR: "; break;
+    case Colours::WARNING: pretext = "WARNING: "; break;
+    case Colours::GOOD: pretext = "NOTIF: "; break;
+    default: pretext = ""; break;
+  }
+
+  printf("\n\n%s%s%s%s\n\n", get_term_colour(colour), pretext.c_str(), text.c_str(), get_term_colour(Colours::NONE));
+  events.print("\n\n%d | %s\n\n", millis(), text.c_str());
 
   int spaces = int(CHAR_WIDTH_LARGE*text.length()/460)+1;
   std::size_t space, last_space=0;
@@ -100,63 +157,68 @@ void GUI::end_flash (){
 
 bool GUI::go(std::string short_msg, std::string long_msg, std::uint32_t delay_time){
  if(!go_enabled) return true;
-  printf("\n\n%s\nPress the big button or A on the controller when ready.\n", long_msg.c_str());
+  master.clear();
+  master.print(0, 0, "Press OK btn");
+  printf("\n\n%s\nPress the screen big button or the controller OK button when ready.\n", long_msg.c_str());
   snprintf(go_string, 90, "%s", short_msg.c_str());
 
   bool pressed = false, interrupted = false;
   const Page* page = GUI::current_page;
   go_sequence.go_to();
 
-  waitUntil(!go_button.pressed() || interrupted){ //Wait for Release
+  //Wait for Release
+  wait_until(!(go_button.pressed() || master.get_digital(ok_button) || master.interrupt(false, true, false)) || interrupted){ //checks that no button is being pressed
     GUI::update_screen_status();
-    if (go_back_button.pressed() || master.interrupt()) interrupted = true;
-  }
-  waitUntil(go_button.pressed() || interrupted){ //Wait for Press
-    drivebase.handle_input();
-    GUI::update_screen_status();
-    if (go_back_button.pressed() || master.interrupt()) interrupted = true;
-  }
-  waitUntil(!go_button.pressed() || interrupted){ //Wait for Release
-    GUI::update_screen_status();
-    if (go_back_button.pressed() || master.interrupt()) interrupted = true;
+    if (go_back_button.pressed()) interrupted = true;
   }
 
-  page->go_to();
+  //Wait for Press
+  wait_until((go_button.pressed() || master.get_digital(ok_button)) || interrupted){ //waits for a press from go btn or ok btn. Interrupts with any controller digital btn
+    GUI::update_screen_status();
+    if (go_back_button.pressed() || master.interrupt(false, true, true)) interrupted = true;
+  }
+  
+  //Wait for Release
+  wait_until(!(go_button.pressed() || master.get_digital(ok_button) || master.interrupt(false, true, false)) || interrupted){ //checks that no button is being pressed
+    GUI::update_screen_status();
+    if (go_back_button.pressed()) interrupted = true;
+  }
 
   if (!interrupted){
     if(delay_time){
       const char* time = millis_to_str(delay_time);
-      printf("Waiting for %s before running.\n", time);
+      printf("\nWaiting for %s before running.\n\n", time);
       delete[] time;
       delay(delay_time);
     }
-    printf("Running\n");
+    printf("\nRunning\n\n");
   }
-  else printf("\033[31mInterrupted\033[0m\n");
+  else printf("\n%sInterrupted%s\n\n", get_term_colour(Colours::ERROR), get_term_colour(Colours::NONE));
+
+  page->go_to();
+  master.clear();
   return !interrupted;
 }
 
 bool GUI::go_end(std::string msg, std::uint32_t delay_time){
   if(!go_enabled) return true;
-  printf("Press Again when done.\n");
+  master.clear();
+  master.print(0, 0, "Press OK btn");
+  printf("\nPress Again when done.\n\n");
   snprintf(go_string, 90, "END %s", msg.c_str());
 
   bool pressed = false, interrupted = false;
   const Page* page = GUI::current_page;
   go_sequence.go_to();
 
-  waitUntil(!go_button.pressed() || interrupted){ //Wait for Release
-    GUI::update_screen_status();
-    if (go_back_button.pressed() || master.interrupt()) interrupted = true;
+  wait_until(!(go_button.pressed() || master.get_digital(ok_button) || master.interrupt(false, true, false)) || interrupted){ //Wait for Release
+    if (go_back_button.pressed()) interrupted = true;
   }
-  waitUntil(go_button.pressed() || interrupted){ //Wait for Press
-    drivebase.handle_input();
-    GUI::update_screen_status();
-    if (go_back_button.pressed() || master.interrupt()) interrupted = true;
+  wait_until((go_button.pressed() || master.get_digital(ok_button)) || interrupted){ //Wait for Press
+    if (go_back_button.pressed() || master.interrupt(false)) interrupted = true;
   }
-  waitUntil(!go_button.pressed() || interrupted){ //Wait for Release
-    GUI::update_screen_status();
-    if (go_back_button.pressed() || master.interrupt()) interrupted = true;
+  wait_until(!(go_button.pressed() || master.get_digital(ok_button) || master.interrupt(false, true, false)) || interrupted){ //Wait for Release
+    if (go_back_button.pressed()) interrupted = true;
   }
 
   page->go_to();
@@ -164,13 +226,14 @@ bool GUI::go_end(std::string msg, std::uint32_t delay_time){
   if (!interrupted){
     if(delay_time){
       const char* time = millis_to_str(delay_time);
-      printf("Waiting for %s before running.\n", time);
+      printf("\nWaiting for %s before running.\n\n", time);
       delete[] time;
       delay(delay_time);
     }
-    printf("Running\n");
+    printf("\nRunning\n\n");
   }
-  else printf("\033[31mInterrupted\033[0m\n");
+  else printf("\n%sInterrupted%s\n\n", get_term_colour(Colours::ERROR), get_term_colour(Colours::NONE));
+  master.clear();
   return !interrupted;
 }
 
@@ -188,22 +251,52 @@ void GUI::draw_oblong(int x1, int y1, int x2, int y2, double kS, double kR){ //k
   screen::fill_circle(x2-s-r, y2-s-r, r);
 }
 
-int GUI::get_size(text_format_e_t size, std::string type){
+int GUI::get_height(text_format_e_t size){
   switch(size){
-    case TEXT_SMALL:
-      if(type == "height") return CHAR_HEIGHT_SMALL;
-      else if(type == "width") return CHAR_WIDTH_SMALL;
-      break;
-    case TEXT_MEDIUM:
-      if(type == "height") return CHAR_HEIGHT_MEDIUM;
-      else if(type == "width") return CHAR_WIDTH_MEDIUM;
-      break;
-    case TEXT_LARGE:
-      if(type == "height") return CHAR_HEIGHT_LARGE;
-      else if(type == "width") return CHAR_WIDTH_LARGE;
-      break;
+    case TEXT_SMALL: return CHAR_HEIGHT_SMALL; break;
+    case TEXT_MEDIUM: return CHAR_HEIGHT_MEDIUM; break;
+    case TEXT_LARGE: return CHAR_HEIGHT_LARGE; break;
   }
   return 0;
+}
+
+int GUI::get_width(text_format_e_t size){
+  switch(size){
+    case TEXT_SMALL: return CHAR_WIDTH_SMALL; break;
+    case TEXT_MEDIUM: return CHAR_WIDTH_MEDIUM; break;
+    case TEXT_LARGE: return CHAR_WIDTH_LARGE; break;
+  }
+  return 0;
+}
+
+const char* GUI::get_term_colour(GUI::Colours colour){
+  switch(colour){
+    case Colours::BLACK: return "\033[30m"; break;
+    case Colours::RED: return "\033[31m"; break;
+    case Colours::GREEN: return "\033[32m"; break;
+    case Colours::YELLOW: return "\033[33m"; break;
+    case Colours::BLUE: return "\033[34m"; break;
+    case Colours::MAGENTA: return "\033[35m"; break;
+    case Colours::CYAN: return "\033[36m"; break;
+    case Colours::WHITE: return "\033[37m"; break;
+    case Colours::NONE: return "\033[0m"; break;
+  }
+  return "";
+}
+
+Colour GUI::get_gui_colour(GUI::Colours colour){
+  switch(colour){
+    case Colours::BLACK: return COLOUR(BLACK); break;
+    case Colours::RED: return COLOUR(RED); break;
+    case Colours::GREEN: return COLOUR(GREEN); break;
+    case Colours::YELLOW: return COLOUR(YELLOW); break;
+    case Colours::BLUE: return COLOUR(BLUE); break;
+    case Colours::MAGENTA: return COLOUR(MAGENTA); break;
+    case Colours::CYAN: return COLOUR(CYAN); break;
+    case Colours::WHITE: return COLOUR(WHITE); break;
+    case Colours::NONE: return GREY; break;
+  }
+  return GREY;
 }
 
 //Formats coordinates based on a GUI::Style (always in x1, y1, x2, y2)
@@ -239,36 +332,36 @@ std::tuple<int, int, int, int> GUI::fix_points (int x1, int y1,int x2, int y2, S
 
 void Button::construct(int x1, int y1, int x2, int y2, GUI::Style type, press_type form, Page* page, std::string text, Colour b_col, Colour l_col){
 
-    //Saves params to class private vars
-    this->b_col = b_col;
-    this->b_col_dark = RGB2COLOR(int(COLOR2R(b_col)*0.8), int(COLOR2G(b_col)*0.8), int(COLOR2B(b_col)*0.8));
-    this->l_col = l_col;
-    this->form = form;
+  //Saves params to class private vars
+  this->b_col = b_col;
+  this->b_col_dark = RGB2COLOR(int(COLOR2R(b_col)*0.8), int(COLOR2G(b_col)*0.8), int(COLOR2B(b_col)*0.8));
+  this->l_col = l_col;
+  this->form = form;
 
-    //Saves the buttons owning page
-    this->page = page;
-    (this->page->buttons).push_back(this);
-    std::tie(this->x1, this->y1, this->x2, this->y2) = GUI::fix_points(x1, y1, x2, y2, type);
+  //Saves the buttons owning page
+  this->page = page;
+  (this->page->buttons).push_back(this);
+  std::tie(this->x1, this->y1, this->x2, this->y2) = GUI::fix_points(x1, y1, x2, y2, type);
 
 
-    std::size_t next_space = text.find(' ', text.length()/2);
-    std::size_t prev_space = text.find_last_of(' ', text.length()/2);
-    std::size_t space = (next_space-text.length()/2 < text.length()/2-prev_space) ? next_space : prev_space;
+  std::size_t next_space = text.find(' ', text.length()/2);
+  std::size_t prev_space = text.find_last_of(' ', text.length()/2);
+  std::size_t space = (next_space-text.length()/2 < text.length()/2-prev_space) ? next_space : prev_space;
 
-    if (space != std::string::npos && 8*text.length()+5 > this->x2-this->x1){ //Spaces it if it's too long for one line
-      this->label = text.substr(0, space);
-      this->label1 = text.substr(space+1);
+  if (space != std::string::npos && 8*text.length()+5 > this->x2-this->x1){ //Spaces it if it's too long for one line
+    this->label = text.substr(0, space);
+    this->label1 = text.substr(space+1);
 
-      this->text_x = (this->x1+this->x2-(this->label.length()*CHAR_WIDTH_SMALL))/2;
-      this->text_x1 = (this->x1+this->x2-(this->label1.length()*CHAR_WIDTH_SMALL))/2;
-      this->text_y = (this->y1+this->y2-CHAR_HEIGHT_SMALL)/2-CHAR_HEIGHT_SMALL;
-      this->text_y1 = (this->y1+this->y2-CHAR_HEIGHT_SMALL)/2+CHAR_HEIGHT_SMALL;
-    }
-    else{
-      this->text_x = (this->x1+this->x2-(text.length()*CHAR_WIDTH_SMALL))/2;
-      this->text_y = (this->y1+this->y2-CHAR_HEIGHT_SMALL)/2;
-      this->label = text;
-    }
+    this->text_x = (this->x1+this->x2-(this->label.length()*CHAR_WIDTH_SMALL))/2;
+    this->text_x1 = (this->x1+this->x2-(this->label1.length()*CHAR_WIDTH_SMALL))/2;
+    this->text_y = (this->y1+this->y2-CHAR_HEIGHT_SMALL)/2 - CHAR_HEIGHT_SMALL;
+    this->text_y1 = (this->y1+this->y2-CHAR_HEIGHT_SMALL)/2 + CHAR_HEIGHT_SMALL;
+  }
+  else{
+    this->text_x = (this->x1+this->x2-(text.length()*CHAR_WIDTH_SMALL))/2;
+    this->text_y = (this->y1+this->y2-CHAR_HEIGHT_SMALL)/2;
+    this->label = text;
+  }
 }
 
 GUI::GUI(std::vector<Page*> pages, std::function <void()> setup, std::function <void()> background){
@@ -426,16 +519,14 @@ void Button::add_text(Text_& text_ref, bool overwrite) {
     label1 = "";
   }
   else{
-    text_ref.y = (y1+y2+GUI::get_size(text_ref.txt_fmt, "height"))/2;
-    text_y -= GUI::get_size(text_ref.txt_fmt, "height");
+    text_ref.y = (y1+y2)/2 + GUI::get_height(text_ref.txt_size);
+    text_y -= GUI::get_height(text_ref.txt_size);
   }
   text_ref.y = (y1+y2)/2;
   text_ref.x1=USER_RIGHT;
   text_ref.y1=USER_DOWN;
   text_ref.x2=USER_LEFT;
   text_ref.y2=USER_UP;
-  // GUI::clear_screen();
-  // GUI::current_page->go_to();
 }
 
 void Button::set_background (Colour colour){
@@ -443,25 +534,32 @@ void Button::set_background (Colour colour){
   if (b_col != colour){
     b_col = colour;
     b_col_dark = RGB2COLOR(int(COLOR2R(b_col)*0.8), int(COLOR2G(b_col)*0.8), int(COLOR2B(b_col)*0.8));
-    if (page == GUI::current_page) draw();
+    draw();
   }
 }
 
-void Text_::set_background (int x1, int y1, Colour colour){
-  if (colour == 0xFFFFFFFF) colour = b_col;
-  set_background(x, y, x1, y1, GUI::Style::CENTRE, colour);
+void Text_::set_background (int x1, int y1, Colour colour){ //Centre
+  std::tie(this->x1, this->y1, this->x2, this->y2) = GUI::fix_points(this->x, this->y, x1, y1, GUI::Style::CENTRE);
+  set_background(colour);
 }
 
 void Text_::set_background (int x1, int y1, int x2, int y2, GUI::Style type, Colour colour){
-    if (colour == 0xFFFFFFFF) colour = b_col;
-    std::tie(this->x1, this->y1, this->x2, this->y2) = GUI::fix_points(x1, y1, x2, y2, type);
-    set_background(colour);
+  std::tie(this->x1, this->y1, this->x2, this->y2) = GUI::fix_points(x1, y1, x2, y2, type);
+  set_background(colour);
+}
+
+void Text_::set_background (int x1, int y1){ //Centre
+  std::tie(this->x1, this->y1, this->x2, this->y2) = GUI::fix_points(this->x, this->y, x1, y1, GUI::Style::CENTRE);
+}
+
+void Text_::set_background (int x1, int y1, int x2, int y2, GUI::Style type){
+  std::tie(this->x1, this->y1, this->x2, this->y2) = GUI::fix_points(x1, y1, x2, y2, type);
 }
 
 void Text_::set_background (Colour colour){
   if (b_col != colour){
     b_col = colour;
-    if (page == GUI::current_page) draw();
+    draw();
   }
 }
 
@@ -516,7 +614,7 @@ void Page::draw() const{
 }
 
 void Button::draw() const{
-  if (!active) return;
+  if (!(active && (page == GUI::current_page || page == &perm))) return;
   if (on) { //on buttons must be drawn in a pressed state
     draw_pressed();
     return;
@@ -533,7 +631,7 @@ void Button::draw() const{
 }
 
 void Button::draw_pressed() const{
-  if (!active) return;
+  if (!(active && (page == GUI::current_page || page == &perm))) return;
   screen::set_eraser(page->b_col); //Erases button
   screen::erase_rect(x1, y1, x2, y2);
 
@@ -549,7 +647,7 @@ void Button::draw_pressed() const{
 }
 
 void Slider::draw() const{
-  if (!active) return;
+  if (!(active && (page == GUI::current_page || page == &perm))) return;
   screen::set_pen(b_col);
   screen::fill_rect(x1, y1, x2, y2);
   screen::set_pen(l_col);
@@ -558,7 +656,7 @@ void Slider::draw() const{
 }
 
 void Text_::draw(){
-  if (!active) return;
+  if (!(active && (page == GUI::current_page || page == &perm))) return;
   char buffer [100];
   int length = update_val(buffer);
 
@@ -574,17 +672,17 @@ void Text_::draw(){
 
   int x_coord = x, y_coord = y;
   if (type == GUI::Style::CENTRE){
-    x_coord -= GUI::get_size(txt_fmt, "width")/2*length;
-    y_coord -= GUI::get_size(txt_fmt, "height")/2;
+    x_coord -= GUI::get_width(txt_size)/2.0*length;
+    y_coord -= GUI::get_height(txt_size)/2.0;
   }
   
   //Resizes the background so it won't have overwriting issues
   x1 = min(x1, x_coord);
-  x2 = max(x2, x_coord + (GUI::get_size(txt_fmt, "width")+1)*length);
+  x2 = max(x2, x_coord + (GUI::get_width(txt_size)+1)*length);
   y1 = min(y1, y_coord);
-  y2 = max(y2, y_coord + GUI::get_size(txt_fmt, "height"));
+  y2 = max(y2, y_coord + GUI::get_height(txt_size));
 
-  screen::print(txt_fmt, x_coord, y_coord, "%s", buffer);
+  screen::print(txt_size, x_coord, y_coord, "%s", buffer);
 }
 
 
@@ -610,6 +708,7 @@ void GUI::update_screen_status(){
   touched = status.touch_status == TOUCH_PRESSED || status.touch_status == TOUCH_HELD;
   x = status.x;
   y = status.y;
+  printf("Updated\n");
 }
 
 bool GUI::pressed() const{
@@ -653,88 +752,72 @@ void Page::update() const{
   if (loop_func) loop_func();
 }
 
+void Button::select(){
+  switch(form){
+    case Button::LATCH:
+    case Button::TOGGLE:
+      on = true;
+
+      for (std::vector<Button*>::const_iterator option_it = options.begin(); option_it != options.end(); option_it++) (*option_it)->deselect();
+
+    case Button::SINGLE:
+    case Button::REPEAT:
+      draw_pressed();
+      run_func();
+      break;
+  }
+}
+
+void Button::deselect(){
+  switch(form){
+    case Button::LATCH:
+    case Button::TOGGLE:
+      on = false;
+    case Button::SINGLE:
+    case Button::REPEAT:
+      draw();
+      run_off_func();
+      break;
+  }
+}
+
 void Button::update(){
   if (!active) return;
 
   switch(form){
-    case Button::SINGLE:
-      if (new_press()){
-        draw_pressed();
-        run_func();
-
-      }
-
-      else if (new_release()){
-        draw();
-        run_off_func();
-      }
-
-      break;
-
     case Button::LATCH:
       if (new_press()){
         on = !on; //Toggles the latch
-
-        //Draws button's new state
-        if(on){
-          //Deselects connected buttons
-          for (std::vector<Button*>::const_iterator option_it = options.begin(); option_it != options.end(); option_it++){
-            (*option_it)->on = false;
-            (*option_it)->draw();
-          }
-        }
-
-        draw();
-      }
-
-      else if (new_release()){
-        draw();
+        if (on) select();
+        else deselect();
       }
 
       if(on) run_func();
       else run_off_func();
+      break;
+    
+    case Button::TOGGLE:
+      if (new_press()){
+        on = !on; //Toggles the latch
+        if (on) select();
+        else deselect();
+      }
+      break;
+
+    case Button::SINGLE:
+      if (new_press()) select();
+      else if (new_release()) deselect();
 
       break;
 
     case Button::REPEAT:
-      if (new_press()){
-        draw_pressed();
-        run_func();
-      }
-
-      else if (new_release()){
-        draw();
-        run_off_func();
-      }
+      if (new_press()) select();
+      else if (new_release()) deselect();
 
       if (pressed()) run_func();
 
       break;
-
-    case Button::TOGGLE:
-      if (new_press()){
-        on = !on;
-        //Draws button's new state
-        if(on){
-          //Deselects connected buttons
-          for (std::vector<Button*>::const_iterator option_it = options.begin(); option_it != options.end(); option_it++){
-            (*option_it)->on = false;
-            (*option_it)->draw();
-          }
-          draw_pressed();
-          run_func();
-        }
-        else{ //Just turned off
-          run_off_func();
-          draw();
-        }
-      }
-
-      else if (new_release()){
-        draw();
-      }
-      break;
-  } //switch
+  }
 }
 
 void Slider::update(){
@@ -766,10 +849,10 @@ void GUI::screen_terminal_fix(){
   //Sees how much space is user-requested
   int y = USER_UP;
   for (std::vector<Text_*>::iterator it = terminal.texts.begin(); it != terminal.texts.end(); it++){
-    if ((*it)->txt_fmt != 4) y += get_size((*it)->txt_fmt, "height") + 5;
+    if ((*it)->txt_size != 4) y += get_height((*it)->txt_size) + 5;
   }
 
-  int size = (PAGE_DOWN - y)/(std::count_if(terminal.texts.begin(), terminal.texts.end(), [](Text_* text){return text->txt_fmt == 4;})) - 5;
+  int size = (PAGE_DOWN - y)/(std::count_if(terminal.texts.begin(), terminal.texts.end(), [](Text_* text){return text->txt_size == 4;})) - 5;
   text_format_e_t fmt;
 
   if(CHAR_HEIGHT_LARGE <= size) fmt = TEXT_LARGE;
@@ -782,11 +865,11 @@ void GUI::screen_terminal_fix(){
 
   y = USER_UP;
 
-  //Saves y-pos and txt_fmt
+  //Saves y-pos and txt_size
   for (std::vector<Text_*>::iterator it = terminal.texts.begin(); it != terminal.texts.end(); it++){
     (*it)->y = y;
-    if ((*it)->txt_fmt == 4) (*it)->txt_fmt = fmt;
-    y += get_size((*it)->txt_fmt, "height") + 5;
+    if ((*it)->txt_size == 4) (*it)->txt_size = fmt;
+    y += get_height((*it)->txt_size) + 5;
   }
 }
 
@@ -803,17 +886,26 @@ void GUI::init(){
 
   current_gui->setup();
   if(terminal.active) terminal.go_to();
-  else go_to(1); //Sets it to page 1 for program start. Don't delete this. If you want to change the starting page, call GUI::go_to(Page Number) this in initialize()
-  update();
+  else go_to(1); //Sets it to page 1 for program start. Don't delete this. If you want to change the starting page, call GUI::go_to(Page Number) in initialize()
+  // update();
+  GUI::task.start();
 }
 
-void GUI::update(){
-  current_gui->background();
-  update_screen_status();
-  const Page& cur_p = *current_page;
-  /*Page*/cur_p.update();
-  /*Button*/for (std::vector<Button*>::const_iterator it = cur_p.buttons.begin(); it != cur_p.buttons.end(); it++) {(*it)->update(); if(&cur_p != current_page) return;}
-  /*Slider*/for (std::vector<Slider*>::const_iterator it = cur_p.sliders.begin(); it != cur_p.sliders.end(); it++) (*it)->update();
-  /*Text*/for (std::vector<Text_*>::const_iterator it = cur_p.texts.begin(); it != cur_p.texts.end(); it++) (*it)->update();
-  /*Flash*/end_flash();
+void GUI::update(void* params){
+  _Task* ptr = _Task::get_obj(params);
+  while(true){
+    printf("Loop\n");
+    current_gui->background();
+    update_screen_status();
+    const Page& cur_p = *current_page;
+    /*Page*/cur_p.update();
+    /*Button*/for (std::vector<Button*>::const_iterator it = cur_p.buttons.begin(); it != cur_p.buttons.end(); it++) {(*it)->update(); if(&cur_p != current_page) continue;}
+    /*Slider*/for (std::vector<Slider*>::const_iterator it = cur_p.sliders.begin(); it != cur_p.sliders.end(); it++) (*it)->update();
+    /*Text*/for (std::vector<Text_*>::const_iterator it = cur_p.texts.begin(); it != cur_p.texts.end(); it++) (*it)->update();
+    /*Flash*/end_flash();
+
+    delay(10);
+    if(ptr->notify_handle()) break;
+  }
+  printf("\nGUI Task Ended\n\n");
 }

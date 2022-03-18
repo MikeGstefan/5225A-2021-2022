@@ -1,5 +1,15 @@
 #include "task.hpp"
 
+struct point_params{ 
+  Position target;
+  const double max_power;
+  const bool overshoot;
+  const double min_angle_percent;
+  const bool brake;
+  const double decel_dist, decel_speed;
+  point_params(Position target, const double max_power = 127.0, const bool overshoot = false, const double min_angle_percent = 0.0, const bool brake = true, const double decel_dist = 0.0, const double decel_speed = 0.0);
+};
+
 _Task::_Task(pros::task_fn_t function, const char* name, void* params, std::uint32_t prio, std::uint16_t stack_depth){
   this->function = function;
   this->name = name;
@@ -34,7 +44,9 @@ void _Task::start(void* params){
      task_log.print("%d| %s was already started\n", millis(), this->name);
      this->kill();
    }
+  //  printf("before move: %f\n",static_cast<point_params*>(params)->target.x);
    this->params = std::make_tuple(this,std::move(params));
+  //  printf("after move: %f\n",static_cast<point_params*>(_Task::get_params((void*)&this->params))->target.x);
    this->task_ptr = new pros::Task(this->function, &this->params, this->prio, this->stack_depth, this->name);
    task_log.print("%d| %s started\n", millis(), this->name);
 }
@@ -43,7 +55,12 @@ void _Task::kill(){
   if(this->task_ptr != NULL){
     task_log.print("%d| %s killing\n", millis(), this->name);
     this->task_ptr->notify_ext((int)stop, E_NOTIFY_ACTION_OWRITE,NULL);
-    waitUntil(this->task_ptr->get_state() == 4);
+    task_log.print("%d| %s notified\n", millis(), this->name);
+    while(this->task_ptr->get_state()!=4){ //please make wait_until
+      task_log.print("%d| %s state %d\n", millis(), this->name, this->task_ptr->get_state());
+      delay(10);
+    }
+    task_log.print("%d| %s state check passed\n", millis(), this->name);
     delete this->task_ptr;
     this->task_ptr = NULL;
     task_log.print("%d| %s killed\n", millis(), this->name);
@@ -74,7 +91,7 @@ bool _Task::data_update(){
   if(this->task_ptr == NULL ||this->task_ptr->get_state() >=3)return false;
   task_log.print("%d| %s pausing for data\n", millis(), this->name);
   this->task_ptr->notify_ext((int)reset, E_NOTIFY_ACTION_OWRITE,NULL);
-  waitUntil (this->task_ptr->get_state()== 3);
+  wait_until (this->task_ptr->get_state()== 3);
   return true;
 }
 

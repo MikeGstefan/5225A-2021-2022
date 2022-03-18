@@ -3,6 +3,7 @@
 #include "../timer.hpp"
 #include "../config.hpp"
 #include "../controller.hpp"
+// #include "../drive.hpp"
 
 
 
@@ -24,7 +25,7 @@ public:
   {}
 
   void set_state(const state_type next_state){
-    printf("%s | Going from %s to %s\n", name, state_names[static_cast<int>(state)], state_names[static_cast<int>(next_state)]);
+    motion_d.print("%s | Going from %s to %s\n", name, state_names[static_cast<int>(state)], state_names[static_cast<int>(next_state)]);
     last_state = state;
     state = next_state;
   }
@@ -79,7 +80,7 @@ public:
     motor.move(-60);
     Timer vel_rise_timeout("vel_rise");
     // waits for motor's velocity to rise or timeout to trigger
-    waitUntil(fabs(motor.get_actual_velocity()) > 45.0){
+    wait_until(fabs(motor.get_actual_velocity()) > 45.0){
       printf("%s's velocity is (rising loop): %lf\n", this->name, motor.get_actual_velocity());
       if (vel_rise_timeout.get_time() > 200){
         printf("%s's rising loop timed out\n", this->name);
@@ -94,10 +95,16 @@ public:
     motor.move(0);
   }
 
-  void move_absolute(double position, double velocity = default_velocity){ // sets target and last target
+  void move_absolute(double position, double velocity = default_velocity, bool wait_for_comp = false, double end_error = 0.0){ // sets target and last target
+    if (end_error == 0) end_error = this->end_error;
     last_target = target;
     target = position;
     motor.move_absolute(position, velocity);
+    if (wait_for_comp) wait_until(fabs(motor.get_position() - position) < end_error);
+  }
+
+  void move(double speed){
+    motor.move(speed);
   }
 
 };

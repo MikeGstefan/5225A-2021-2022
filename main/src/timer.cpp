@@ -52,8 +52,17 @@ void Timer::pause(){
     else    data_obj->print("Timer \"%s\" is already paused.\n", name);
 }
 
-void Timer::print(const char* str){
-    data_obj->print("%s's current time is: %lld | %s\n", name, get_time(), str);
+void Timer::print(const std::string str){
+    data_obj->print("%s's current time is: %lld | %s\n", name, get_time(), str.c_str());
+}
+
+void Timer::print(const char* fmt, ...){
+    va_list args;
+    va_start(args, fmt);
+    char buffer[100];
+    vsnprintf(buffer, 100, fmt, args);
+    va_end(args);
+    data_obj->print("%s's current time is: %lld | %s\n", name, get_time(), buffer);
 }
 
 uint64_t Timer::get_time_in_timing_unit(){ // returns time in either millis or micros

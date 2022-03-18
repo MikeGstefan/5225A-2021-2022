@@ -1,7 +1,7 @@
 #pragma once
-#include "../Subsystems/lift.hpp"
 #include "../auton.hpp"
 #include "../drive.hpp"
+#include "../piston.hpp"
 #include "../util.hpp"
 #include "../include/pros/apix.h"
 #include <bitset>
@@ -61,8 +61,24 @@ class GUI{
       CENTER=CENTRE
     };
 
+    enum class Colours{ //how the rect coords get evaluated
+      BLACK,
+      RED,
+      GREEN,
+      YELLOW,
+      BLUE,
+      MAGENTA,
+      CYAN,
+      WHITE,
+      NONE,
+      ERROR = RED,
+      WARNING = YELLOW,
+      GOOD = GREEN,
+    };
+
   private:
     //Vars
+    static _Task task;
     static bool touched;
     static int x, y;
     static const Page* current_page;
@@ -78,7 +94,7 @@ class GUI{
     static void screen_terminal_fix();
     static void end_flash();
     static void draw_oblong(int, int, int, int, double, double);
-    static int get_size(text_format_e_t, std::string);
+    static int get_height(text_format_e_t), get_width(text_format_e_t);
     static std::tuple<int, int, int, int> fix_points(int, int, int, int, Style);
 
   public:
@@ -86,13 +102,20 @@ class GUI{
     GUI(std::vector<Page*>, std::function <void()>, std::function <void()>);
 
     //Functions
+    static const char* get_term_colour(Colours);
+    static Colour get_gui_colour(Colours);
+    static void flash(Colours, std::uint32_t, const char*, ...);
+    static void flash(Colours, const char*, ...);
+    static void flash(std::uint32_t, const char*, ...);
+    static void flash(const char*, ...);
+    static void flash(std::string, std::uint32_t, Colour);
+    static void flash(std::string, std::uint32_t, Colours);
+
     static void aligned_coords (int, int, int, int, int = 480, int = 220);
-    static void flash(Colour, std::uint32_t, const char*, ...);
-    static void flash(std::string = "", std::uint32_t = 1000, Colour = COLOUR(RED));
-    static bool go(std::string, std::string, std::uint32_t=0), go_end(std::string, std::uint32_t=0);
     static void clear_screen(Colour=GREY);
-    static void init(), update();
+    static void init(), update(void* = nullptr);
     static void go_to(int);
+    static bool go(std::string, std::string, std::uint32_t=0), go_end(std::string, std::uint32_t=0);
     bool pressed() const;
 };
 
@@ -143,7 +166,7 @@ class Text_{
   protected:
     //Vars
     int x, y;
-    text_format_e_t txt_fmt;
+    text_format_e_t txt_size;
     std::string label;
     Colour l_col, b_col=GREY;
     GUI::Style type;
@@ -157,8 +180,10 @@ class Text_{
 
   public:
     //Functions
-    void set_background(int, int, Colour = 0xFFFFFFFF); //Centre
-    void set_background(int, int, int, int, GUI::Style, Colour = 0xFFFFFFFF);
+    void set_background(int, int, Colour); //Centre
+    void set_background(int, int); //Centre
+    void set_background(int, int, int, int, GUI::Style, Colour);
+    void set_background(int, int, int, int, GUI::Style);
     void set_background(Colour);
     void set_active(bool=true);
 };
@@ -185,12 +210,12 @@ class Text: public Text_{
       }
       return snprintf(buffer, 100, label.c_str());
     }
-    void construct (int x, int y, GUI::Style type, text_format_e_t txt_fmt, Page* page, std::string label, std::function<V()> value, Colour l_col){
+    void construct (int x, int y, GUI::Style type, text_format_e_t txt_size, Page* page, std::string label, std::function<V()> value, Colour l_col){
       static_assert(!std::is_same_v<V, std::string>, "Text variable cannot be std::string, it causes unknown failures");
       this->x = x;
       this->y = y;
       this->type = type;
-      this->txt_fmt = txt_fmt;
+      this->txt_size = txt_size;
       this->page = page;
       this->label = label;
       this->value = value;
@@ -285,6 +310,7 @@ class Button{
     void set_background (Colour);
     void add_text (Text_&, bool=true);
     void wait_for_press(); //Blocking
+    void select(), deselect();
 };
 
 class Slider{

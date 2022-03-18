@@ -28,6 +28,7 @@ public:
     uint64_t get_time();
     void play();
     void pause();
-    void print(const char* str = "");
+    void print(const std::string str = "");
+    void print(const char* fmt, ...);
     bool playing();
 };
