@@ -2,9 +2,10 @@
 
 // #define master partner
 
-// Back Lift object
+// Front Lift object
 F_Lift f_lift({{"F_Lift",
 {
+  "managed",
   "bottom",
   "idle",
   "move_to_target",
@@ -13,12 +14,11 @@ F_Lift f_lift({{"F_Lift",
 }, f_lift_m});
 
 
-F_Lift::F_Lift(Motorized_subsystem<f_lift_states, NUM_OF_F_LIFT_STATES, LIFT_MAX_VELOCITY> motorized_subsystem): Motorized_subsystem(motorized_subsystem){ // constructor
+F_Lift::F_Lift(Motorized_subsystem<f_lift_states, NUM_OF_F_LIFT_STATES, F_LIFT_MAX_VELOCITY> motorized_subsystem): Motorized_subsystem(motorized_subsystem){ // constructor
 
-  state = f_lift_states::idle;
-  last_state = state;
-  target = bottom_position;
-  last_target = target;
+  // state setup
+  target_state = f_lift_states::idle;
+  state = f_lift_states::managed;
 
   index = 0;
   last_index = index;
@@ -27,31 +27,24 @@ F_Lift::F_Lift(Motorized_subsystem<f_lift_states, NUM_OF_F_LIFT_STATES, LIFT_MAX
   down_press.pause();
 }
 
-void F_Lift::handle(){
-
+void F_Lift::button_handling(){
   // index incrementing and decrementing
-  if(master.get_digital_new_press(lift_up_button) && index < positions.size() - 1){
-    index++;
+  if(master.get_digital_new_press(lift_up_button) && index < driver_positions.size() - 1){
     up_press.reset();
+    set_state(f_lift_states::move_to_target, ++index);
   }
   if(master.get_digital_new_press(lift_down_button) && index > 0){
     down_press.reset();
-    index--;
+    set_state(f_lift_states::move_to_target, --index);
   }
-  // resets and pauses the timers if driver release button
+  // resets and pauses the timers if driver releases button
   if(!master.get_digital(lift_up_button)) up_press.reset(false);
   if(!master.get_digital(lift_down_button)) down_press.reset(false);
 
   // goes to top position of top button is held
-  if(up_press.get_time() > 300) index = positions.size() - 1;
-  if(down_press.get_time() > 300) index = 0;
-
-
-  // moves to target if index has changed since last loop cycle
-  if(index != last_index){
-    last_index = index;
-    set_state(f_lift_states::move_to_target);
-  }
+  if(up_press.get_time() > 300) set_state(f_lift_states::move_to_target, driver_positions.size() - 1);
+  // goes to bottom position of top button is held
+  if(down_press.get_time() > 300) set_state(f_lift_states::move_to_target, 0);
 
   // joystick control
   lift_power = master.get_analog(ANALOG_RIGHT_Y);
@@ -64,14 +57,21 @@ void F_Lift::handle(){
       set_state(f_lift_states::manual);
     }
   }
+}
+
+void F_Lift::handle(bool driver_array){
+  // decides which position vector to use
+  std::vector<int>& positions = driver_array? driver_positions: prog_positions;
 
   switch(state){
-    case f_lift_states::bottom: // at lowest position:
+    case f_lift_states::managed:  // being controlled externally
+      break;
+    case f_lift_states::bottom: // at lowest position, this state is used by the intake and f_claw
       break;
     case f_lift_states::idle: // not doing anything
       break;
 
-    case f_lift_states::move_to_target: // not doing anything
+    case f_lift_states::move_to_target: // moving to target
       motor.move(pid.compute(motor.get_position(), positions[index]));
       
       // moves to next state if the lift has reached its target
@@ -79,7 +79,7 @@ void F_Lift::handle(){
         motor.move_velocity(0); // holds motor
         // switches to idle by default or special case depending on current target
         switch(index){
-          case 0: // lift is at bottom position
+          case 0: // lift is at bottom position, this state is used by intake 
             set_state(f_lift_states::bottom);
             break;
           default:
@@ -111,16 +111,47 @@ void F_Lift::handle(){
       else motor.move(lift_power);
       // exits manual state if up or down button is pressed or held
       break;
-
   }
+  handle_state_change(); // cleans up and preps the machine to be in the target state
 }
 
-double F_Lift::pos_to_height(double pos){
-  return offset_h + arm_len * sin(deg_to_rad((pos - offset_a) / gear_ratio));
+void F_Lift::handle_state_change(){
+  if(target_state == state) return;
+  // if state has changed, performs the necessary cleanup operation before entering next state
+
+  // NOTE: this switch is commented out because currently no cleanup is needed
+  /*
+  switch(target_state){
+    case f_lift_states::managed:
+      break;
+
+    case f_lift_states::bottom:
+      break;
+
+    case f_lift_states::idle:
+      break;
+
+    case f_lift_states::move_to_target:
+      break;
+
+    case f_lift_states::manual:
+      break;
+  }
+  */
+  log_state_change();  
 }
 
-double F_Lift::height_to_pos(double height){
-  return gear_ratio * (rad_to_deg(asin((height - offset_h) / (arm_len)))) + offset_a;
+// regular set state method (common to all subsystems)
+void F_Lift::set_state(const f_lift_states next_state){  // requests a state change and logs it (NORMAL set state)
+  state_log.print("%s | State change requested from %s to %s, index is: %d\n", name, state_names[static_cast<int>(state)], state_names[static_cast<int>(next_state)], index);
+  target_state = next_state;
+}
+// accepts an index argument
+void F_Lift::set_state(const f_lift_states next_state, const double index){  // requests a state change and logs it
+  state_log.print("%s | State change requested from %s to %s, index is: %d\n", name, state_names[static_cast<int>(state)], state_names[static_cast<int>(next_state)], index);
+  target_state = next_state;
+  // updates index only if it's valid (the state is actually move to target)
+  if (target_state == f_lift_states::move_to_target)  this->index = index;
 }
 
 extern int elastic_f_up_time, elastic_f_down_time; //from gui_construction.cpp
@@ -151,6 +182,7 @@ void F_Lift::elastic_util(){
 // FRONT CLAW SUBSYSTEM
 F_Claw f_claw({"F_Claw",
 {
+  "managed",
   "idle",
   "searching",
   "grabbed",
@@ -160,12 +192,15 @@ F_Claw f_claw({"F_Claw",
 F_Claw::F_Claw(Subsystem<f_claw_states, NUM_OF_F_CLAW_STATES> subsystem): Subsystem(subsystem)  // constructor
 {
   // state setup
-  state = f_claw_states::searching;
-  last_state = state;
+  target_state = f_claw_states::searching;
+  state = f_claw_states::managed;
 }
 
 void F_Claw::handle(){
   switch(state){
+    case f_claw_states::managed:
+      break;
+
     case f_claw_states::idle:
       // enters search mode if the lift is at the bottom and it's been 2 seconds since the mogo was released
       if(f_lift.get_state() == f_lift_states::bottom && release_timer.get_time() > 2000){
@@ -174,13 +209,6 @@ void F_Claw::handle(){
       // grabs goal if toggle button is pressed
       if(master.get_digital_new_press(lift_claw_toggle_button)){
         master.rumble("-");
-        f_claw_p.set_value(HIGH);
-
-        // raises mogo above rings automatically if lift is in bottom state
-        if(f_lift.get_state() == f_lift_states::bottom){
-          f_lift.index = 1; // sends f_lift to raised position
-        }
-
         set_state(f_claw_states::grabbed);
       }
       break;
@@ -189,30 +217,42 @@ void F_Claw::handle(){
       // grabs goal if toggle button is pressed or mogo is detected
       if(master.get_digital_new_press(lift_claw_toggle_button) || f_touch.get_value()){
         master.rumble("-");
-        f_claw_p.set_value(HIGH);
-
-        // raises mogo above rings automatically if lift is in bottom state
-        if(f_lift.get_state() == f_lift_states::bottom){
-          f_lift.index = 1; // sends f_lift to raised position
-        }
-
         set_state(f_claw_states::grabbed);
-      }
-      // doesn't let driver search if lift is not at bottom
-      if(f_lift.motor.get_position() > f_lift.positions[1] - 50){
-        set_state(f_claw_states::idle);
       }
       break;
 
     case f_claw_states::grabbed:
       // releases goal if down button is pressed
-      if(master.get_digital_new_press(lift_claw_toggle_button)){
-        f_claw_p.set_value(LOW);
-        release_timer.reset();
+      if(master.get_digital_new_press(lift_claw_toggle_button)) set_state(f_claw_states::idle);
+      break;
+  }
+  handle_state_change(); // cleans up and preps the machine to be in the target state
+}
 
-        set_state(f_claw_states::idle);
-      }
+void F_Claw::handle_state_change(){
+  if(target_state == state) return;
+  // if state has changed, performs the necessary cleanup operation before entering next state
+
+  switch(target_state){
+    case f_claw_states::managed:
       break;
 
+    case f_claw_states::idle:
+      release_timer.reset(); // timer to wait 2 seconds before entering search again
+      f_claw_p.set_value(LOW);
+      break;
+
+    case f_claw_states::searching:
+      f_claw_p.set_value(LOW);
+      break;
+
+    case f_claw_states::grabbed:
+      // raises mogo above rings automatically if lift is in bottom state
+      if(f_lift.get_state() == f_lift_states::bottom){
+        f_lift.set_state(f_lift_states::move_to_target, 1); // sends f_lift to raised position
+      }
+      f_claw_p.set_value(HIGH);
+      break;
   }
+  log_state_change();  
 }

@@ -20,12 +20,10 @@ B_Lift b_lift({{"B_Lift",
 }
 }, b_lift_m});
 
-B_Lift::B_Lift(Motorized_subsystem<b_lift_states, NUM_OF_B_LIFT_STATES, LIFT_MAX_VELOCITY> motorized_subsystem): Motorized_subsystem(motorized_subsystem){ // constructor
+B_Lift::B_Lift(Motorized_subsystem<b_lift_states, NUM_OF_B_LIFT_STATES, B_LIFT_MAX_VELOCITY> motorized_subsystem): Motorized_subsystem(motorized_subsystem){ // constructor
 
-  state = b_lift_states::search_lip;
-  last_state = state;
-  target = bottom_position;
-  last_target = target;
+  target_state = b_lift_states::search_lip;
+  state = target_state;
   held = false;
 }
 
