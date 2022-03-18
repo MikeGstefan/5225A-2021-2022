@@ -282,10 +282,10 @@ void Drivebase::driver_practice(){
       drivebase.handle_input();
       // b_lift.handle();
       // handle_lifts();
-      f_lift.handle();
+      f_lift.handle(true);
       f_claw.handle();
       b_claw.handle();
-      intake_handle();
+      intake.handle();
      
 
       handle_trans();
