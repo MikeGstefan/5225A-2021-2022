@@ -559,6 +559,55 @@ void skillsPark(){
 
 }
 
+
+void rush_high(){
+  move_start(move_types::tank_point, tank_point_params({107.0, 57.0, 0.0}));
+  delay(100);
+  move_start(move_types::turn_point, turn_point_params({107.0, 71.0}));
+  delay(100);
+  move_start(move_types::tank_point, tank_point_params({107.0, 71.0, 0.0}), false);
+  f_lift.reset();
+  f_lift.move(-10);
+  f_detect_goal();
+
+  // move_wait_for_complete();
+  // f_lift.move_absolute(150,100);
+  // intk.move(10);
+  move_stop();
+}
+
+void rush_tall(){
+  int start_time = millis();
+
+  move_start(move_types::tank_point, tank_point_params({83.0, 59.0, 30.0}));
+  delay(100);
+  move_start(move_types::turn_point, turn_point_params({73, 71}));
+  delay(100);
+  move_start(move_types::tank_rush, tank_rush_params({73.0, 71.0, 30.0}, false), false);
+  // delay(200);
+  // drivebase.set_state(0);
+  f_lift.reset();
+  f_lift.move(-10);
+  f_detect_goal();
+  move_wait_for_complete();
+  master.print(2, 2, "Time: %d", millis() - start_time);
+}
+
+void rush_low(){
+  Task([](){
+    f_lift.reset();
+    b_lift.reset();
+    f_lift.move_absolute(10);
+    b_lift.move_absolute(10);
+  });
+  
+	move_start(move_types::tank_point, tank_point_params({34.5, 72.0, 45.0}, false, 80.0, 1.0, true, 9.0, 130.0), false);// drive throught neut goal
+  delay(100);
+  f_detect_goal();
+  move_stop();
+}
+
+
 void blue_highside(){
   // tracking.x_coord = 108.0, tracking.y_coord = 16.0, tracking.global_angle = 0.0_deg;
   
@@ -594,8 +643,6 @@ void blue_highside(){
   intk.move(127);
   delay(2000);
 }
-
-
 
 void blue_highside_tall(){
   //tracking.x_coord = 104.0, tracking.y_coord = 12.0, tracking.global_angle = -30.0_deg;
@@ -689,56 +736,6 @@ void lrt_auton(){
   // intk.move(127);
   move_stop();
 }
-
-void save_positions(){
-  if(GUI::go("Reset position", "Press to reset the position, then move the robot.")){
-    Position pos1 (141.0-8.75, 15.5, 0.0), pos2 (0, 0, 0);
-    master.clear();
-    master.print(0, 0, "L1:(%.1f, %.1f, %.1f)", pos1.x, pos1.y , pos1.angle);
-    master.print(1, 0, "R1:(%.1f, %.1f, %.1f)", pos2.x, pos2.y , pos2.angle);
-
-    wait_until(false){
-      if(master.get_digital_new_press(DIGITAL_L1)){
-        tracking.reset(pos1);
-        break;
-      }
-      if(master.get_digital_new_press(DIGITAL_R1)){
-        tracking.reset(pos2);
-        break;
-      }
-    }
-
-    //move the robot
-
-    if(GUI::go_end("Save Positions")){
-      tracking_imp.print("Saving X: %f, Y:%f, A:%f\n", tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle));
-      
-      ofstream file;
-      Data::log_t.data_update();
-      file.open("/usd/start_positions.txt", fstream::out | fstream::trunc);
-      file << tracking.x_coord << endl;
-      file << tracking.y_coord << endl;
-      file << rad_to_deg(tracking.global_angle) << endl;
-      file.close();
-      Data::log_t.done_update();
-    }
-  }
-}
-
-void load_positions(){
-  double x, y, a;
-  ifstream file;
-
-  Data::log_t.data_update();
-  file.open("/usd/start_positions.txt", fstream::in);
-  file >> x >> y >> a;
-  file.close();
-  Data::log_t.done_update();
-
-  tracking_imp.print("Loading X: %f, Y:%f, A:%f from file\n", x, y, a);
-  tracking.reset(x, y, a);
-}
-
 
 namespace Autons{
 

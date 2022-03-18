@@ -5,9 +5,8 @@
 #include "pid.hpp"
 #include "util.hpp"
 
-// Gyro Placement
-// Gyro must be placed  vertically (port facing ground)
-//These values are for it facing the outside
+void save_positions();
+void load_positions();
 
 
 using namespace pros;
@@ -28,13 +27,13 @@ void f_detect_goal(bool safety = true);
 void detect_interference();
 
 class Reset_dist{
-    private: 
-        static const int cycles = 3;
-        static const int thresh = 10;
-        const double dist_from_center;
-        pros::Distance* sensor;
+  private: 
+    static const int cycles = 3;
+    static const int thresh = 10;
+    const double dist_from_center;
+    pros::Distance* sensor;
 
-    public: 
+  public: 
     Reset_dist(pros::Distance* sensor, double dist_from_center);
 
     double get_dist();

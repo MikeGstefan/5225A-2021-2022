@@ -52,7 +52,7 @@ void initialize() {
 	// gyro.finish_calibrating(); //Finishes calibrating gyro before program starts
   
 
-  // save_positions();
+  save_positions();
 }
 
 /**
@@ -92,7 +92,9 @@ void autonomous() {
 
 void opcontrol() {
   load_positions();
-  blue_highside_tall();
+  rush_low();
+  delay(1000);
+  f_claw_p.set_value(LOW);
 
 	// Autons::selector();
 	while(true){
