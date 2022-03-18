@@ -32,6 +32,8 @@ Data term("terminal.txt","$07",debug,log_locations::t);
 Data log_d("log.txt","$08",debug,log_locations::both);
 Data graph("graph.txt","$09",debug,log_locations::sd);
 Data events("events.txt", "%10", debug,log_locations::sd);
+Data state_log("state.txt", "%11", debug,log_locations::both);
+
 
 vector<Data*> Data::get_objs(){
   return obj_list;

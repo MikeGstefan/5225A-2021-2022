@@ -41,8 +41,7 @@ void update(void* params);
 
 
 class Tracking{
-
-public:
+  public:
     double x_coord = 0.0; double y_coord = 0.0; double global_angle = 0.0; //double target_x = 0.0;
     double power_x, power_y, power_a;
     double l_velo, r_velo, b_velo;

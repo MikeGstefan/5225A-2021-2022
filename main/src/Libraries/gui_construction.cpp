@@ -259,11 +259,11 @@ void main_setup(){
     if(GUI::go("Test lifts", "Press to check lifts", 1000)){
       f_lift.reset();
       b_lift.reset();
-      f_lift.move_absolute(f_lift.top_position, LIFT_MAX_VELOCITY, true);
-      b_lift.move_absolute(b_lift.top_position, LIFT_MAX_VELOCITY, true);
+      f_lift.move_absolute(f_lift.top_position, F_LIFT_MAX_VELOCITY, true);
+      b_lift.move_absolute(b_lift.top_position, B_LIFT_MAX_VELOCITY, true);
       delay(1000);
-      f_lift.move_absolute(f_lift.bottom_position, LIFT_MAX_VELOCITY, true);
-      b_lift.move_absolute(b_lift.bottom_position, LIFT_MAX_VELOCITY, true);
+      f_lift.move_absolute(f_lift.bottom_position, F_LIFT_MAX_VELOCITY, true);
+      b_lift.move_absolute(b_lift.bottom_position, B_LIFT_MAX_VELOCITY, true);
     }
   });
   pneums.set_func([](){

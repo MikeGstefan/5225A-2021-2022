@@ -212,22 +212,22 @@ void Drivebase::update_lookup_table_util(){
 void Drivebase::handle_input(){
   // tracking.power_x = drivers[cur_driver].custom_drives[0].lookup(master.get_analog(drivers[cur_driver].joy_sticks[0]));
   tracking.power_y = drivers[cur_driver].custom_drives[1].lookup(master.get_analog(ANALOG_LEFT_Y));
-  tracking.power_a = 0.8 * drivers[cur_driver].custom_drives[2].lookup(master.get_analog(ANALOG_LEFT_X));
+  tracking.power_a = 0.7 * drivers[cur_driver].custom_drives[2].lookup(master.get_analog(ANALOG_LEFT_X));
 
   if(fabs(tracking.power_x) < deadzone) tracking.power_x = 0.0;
   if(fabs(tracking.power_y) < deadzone) tracking.power_y = 0.0;
   if(fabs(tracking.power_a) < deadzone) tracking.power_a = 0.0;
 
-  if(master.get_digital_new_press(reverse_drive_button)){
-    master.rumble("-");
-    reversed = !reversed;
-    if(reversed) master.print(0, 0, "Reverse");
-    else master.print(0, 0, "Forward");
-  }
-  if (reversed){
-    tracking.power_y *= -1;
-    tracking.power_x *= -1;
-  }
+  // if(master.get_digital_new_press(reverse_drive_button)){
+  //   master.rumble("-");
+  //   reversed = !reversed;
+  //   if(reversed) master.print(0, 0, "Reverse");
+  //   else master.print(0, 0, "Forward");
+  // }
+  // if (reversed){
+  //   tracking.power_y *= -1;
+  //   tracking.power_x *= -1;
+  // }
 
   if(this->state && (fabs(tracking.power_y) <deadzone && fabs(tracking.power_a) <deadzone)){
     // velo_brake();
@@ -270,9 +270,9 @@ void Drivebase::driver_practice(){
   // master.print(2, 0, "Driver: %s", driver_name());
   while(true){
     while(true){
-      if(master.get_digital_new_press(tracking_button)){
-        master.print(1,1,"%.2f, %.2f, %.2f", tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle));
-      }
+      // if(master.get_digital_new_press(tracking_button)){
+      //   master.print(1,1,"%.2f, %.2f, %.2f", tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle));
+      // }
       if(master.get_digital_new_press(ok_button)){
         // auton_selector(); //talk to nathan if you're uncommenting this line
         // master.print(1,1,"HERE");
@@ -280,8 +280,11 @@ void Drivebase::driver_practice(){
       }
       drivebase.handle_input();
       // b_lift.handle();
-      handle_lifts();
-      // f_lift.handle();
+      // handle_lifts();
+      f_lift.handle(true);
+      f_claw.handle();
+      b_claw.handle();
+      intake.handle();
      
 
       handle_trans();
