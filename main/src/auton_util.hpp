@@ -5,9 +5,8 @@
 #include "pid.hpp"
 #include "util.hpp"
 
-// Gyro Placement
-// Gyro must be placed  vertically (port facing ground)
-//These values are for it facing the outside
+void save_positions();
+void load_positions();
 
 
 using namespace pros;
