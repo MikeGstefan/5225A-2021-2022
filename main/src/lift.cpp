@@ -248,26 +248,28 @@ void handle_lifts(){
 
 
       if(master.get_digital_new_press(lift_release_button)){
-        if(get_lift()){
-          f_claw_p.set_value(0);
-          f_claw_state = false;
-           f_lift_time = millis();
-        }
-        else{
-          b_claw_p.set_value(0);
-        }
+        f_claw_state = !f_claw_state; //
+
+        // if(get_lift()){
+          f_claw_p.set_value(f_claw_state);
+        //   f_claw_state = false;
+        //    f_lift_time = millis();
+        // }
+        // else{
+        //   b_claw_p.set_value(0);
+        // }
 
       }
 
-      if(f_lift_index == 0){
-        if(f_touch.get_value() && millis() - f_lift_time > 1000 && !f_claw_state){
-          f_claw_p.set_value(1);
-          f_lift_time = millis();
-          f_lift_index = 1;
-          f_claw_state = true;
-            // f_lift.move_absolute(f_lift_pos[f_lift_index]);
-        }
-      }
+      // if(f_lift_index == 0){
+      //   if(f_touch.get_value() && millis() - f_lift_time > 1000 && !f_claw_state){
+      //     f_claw_p.set_value(1);
+      //     f_lift_time = millis();
+      //     f_lift_index = 1;
+      //     f_claw_state = true;
+      //       // f_lift.move_absolute(f_lift_pos[f_lift_index]);
+      //   }
+      // }
 
 
     //this needs to be fixed
