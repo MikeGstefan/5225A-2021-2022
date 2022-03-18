@@ -255,6 +255,20 @@ void main_setup(){
       drivebase.brake();
     }
   });
+  intakes.set_func([](){
+    if(GUI::go("Check intake", "Press to check the intake", 1000)){
+      intake.set_state(intake_states::on);
+      delay(1000);
+
+      intake.set_state(intake_states::off);
+      delay(250);
+
+      intake.set_state(intake_states::reversed);
+      delay(1000);
+
+      intake.set_state(intake_states::off);
+    }
+  });
   lifts.set_func([](){
     if(GUI::go("Test lifts", "Press to check lifts", 1000)){
       f_lift.reset();
