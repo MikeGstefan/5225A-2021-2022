@@ -1,9 +1,5 @@
 #include "gui.hpp"
-
-//Timer stuff
-Timer Flash("Flash Timer", false);
-std::uint32_t flash_end; //Sets the flash's end time to max possible val
-bool touched_when_flashed;
+#include "pros/rtos.h"
 
 //Static Variable Declarations
 const Page* GUI::current_page = nullptr;
@@ -35,6 +31,109 @@ Text go_button_text (300, 140, GUI::Style::CENTRE, TEXT_SMALL, go_sequence, "%s"
 
 Page terminal ("Screen Printing");
 
+namespace screen_flash{
+  Timer timer("Flash Timer", false);
+  std::uint32_t end_time; //Sets the end time to max possible val
+  bool touched;
+
+  //Flashing
+  void start(std::uint32_t time, const char* fmt, ...){
+    std::va_list args;
+    va_start(args, fmt);
+    start(printf_to_string(fmt, args), time, GUI::Colours::ERROR);
+    va_end(args);
+  }
+
+  void start(GUI::Colours colour, const char* fmt, ...){
+    std::va_list args;
+    va_start(args, fmt);
+    start(printf_to_string(fmt, args), 1000, colour);
+    va_end(args);
+  }
+
+  void start(const char* fmt, ...){
+    std::va_list args;
+    va_start(args, fmt);
+    start(printf_to_string(fmt, args), 1000, GUI::Colours::ERROR);
+    va_end(args);
+  }
+
+  void start(GUI::Colours colour, std::uint32_t time, const char* fmt, ...){
+    std::va_list args;
+    va_start(args, fmt);
+    start(printf_to_string(fmt, args), time, colour);
+    va_end(args);
+  }
+
+  void start(std::string text,  std::uint32_t time, Colour colour){
+    touched = GUI::is_touched();
+    GUI::clear_screen(colour);
+    screen::set_pen(~colour&0xFFFFFF); //Makes text inverted colour of background so it is always visible
+    screen::set_eraser(colour);
+
+    printf("\n\n%s\n\n", text.c_str());
+    events.print("\n\n%d | %s\n\n", millis(), text.c_str());
+
+    int spaces = int(CHAR_WIDTH_LARGE*text.length()/460)+1;
+    std::size_t space, last_space=0;
+    std::string sub;
+
+    master.rumble(".-");
+
+    for(int i=1; i <= spaces; i++){ //make the printing actually look good
+      space = text.find(' ', text.length()*i/spaces);
+      sub = text.substr(last_space, space-last_space);
+      screen::print(TEXT_LARGE, (480-sub.length()*CHAR_WIDTH_LARGE)/2, (CHAR_HEIGHT_LARGE+5)*i, sub.c_str());
+      last_space = space+1;
+    }
+
+    timer.reset(); //Starts counting
+    end_time = time;
+  }
+
+  void start(std::string text, std::uint32_t time, GUI::Colours colour){
+    touched = GUI::is_touched();
+    GUI::clear_screen(GUI::get_gui_colour(colour));
+    screen::set_pen(~GUI::get_gui_colour(colour)&0xFFFFFF); //Makes text inverted colour of background so it is always visible
+    screen::set_eraser(GUI::get_gui_colour(colour));
+
+    std::string pretext;
+    switch(colour){
+      case GUI::Colours::ERROR: pretext = "ERROR: "; break;
+      case GUI::Colours::WARNING: pretext = "WARNING: "; break;
+      case GUI::Colours::GOOD: pretext = "NOTIF: "; break;
+      default: pretext = ""; break;
+    }
+
+    printf("\n\n%s%s%s%s\n\n", GUI::get_term_colour(colour), pretext.c_str(), text.c_str(), GUI::get_term_colour(GUI::Colours::NONE));
+    events.print("\n\n%d | %s\n\n", millis(), text.c_str());
+
+    int spaces = int(CHAR_WIDTH_LARGE*text.length()/460)+1;
+    std::size_t space, last_space=0;
+    std::string sub;
+
+    master.rumble(".-");
+
+    for(int i=1; i <= spaces; i++){ //make the printing actually look good
+      space = text.find(' ', text.length()*i/spaces);
+      sub = text.substr(last_space, space-last_space);
+      screen::print(TEXT_LARGE, (480-sub.length()*CHAR_WIDTH_LARGE)/2, (CHAR_HEIGHT_LARGE+5)*i, sub.c_str());
+      last_space = space+1;
+    }
+
+    timer.reset(); //Starts counting
+    end_time = time;
+  }
+
+  void end(){
+    if (timer.playing() && (timer.get_time() >= end_time || (!touched && GUI::is_touched()))){
+      timer.reset(false);
+      GUI::get_current_page()->go_to();
+    }
+  }
+
+}
+
 //To get coordinates for aligned objects, (buttons, sliders...) of same size
 //Put in how many of buttons/sliders you want, and get properly spaced coords
 void GUI::aligned_coords (int x_objects, int y_objects, int x_size, int y_size, int x_range, int y_range){
@@ -56,103 +155,6 @@ void GUI::aligned_coords (int x_objects, int y_objects, int x_size, int y_size, 
   if ((x_space+x_size)*(x_objects) > 480) printf("X out of bounds\n");
   if ((y_space+y_size)*(y_objects) > 220) printf("Y out of bounds\n");
   printf("\n\n");
-}
-
-//Flashing
-void GUI::flash(std::uint32_t time, const char* fmt, ...){
-  std::va_list args;
-  va_start(args, fmt);
-  GUI::flash(printf_to_string(fmt, args), time, Colours::ERROR);
-  va_end(args);
-}
-
-void GUI::flash(GUI::Colours colour, const char* fmt, ...){
-  std::va_list args;
-  va_start(args, fmt);
-  GUI::flash(printf_to_string(fmt, args), 1000, colour);
-  va_end(args);
-}
-
-void GUI::flash(const char* fmt, ...){
-  std::va_list args;
-  va_start(args, fmt);
-  GUI::flash(printf_to_string(fmt, args), 1000, Colours::ERROR);
-  va_end(args);
-}
-
-void GUI::flash(GUI::Colours colour, std::uint32_t time, const char* fmt, ...){
-  std::va_list args;
-  va_start(args, fmt);
-  GUI::flash(printf_to_string(fmt, args), time, colour);
-  va_end(args);
-}
-
-void GUI::flash(std::string text,  std::uint32_t time, Colour colour){
-  touched_when_flashed = touched;
-  clear_screen(colour);
-  screen::set_pen(~colour&0xFFFFFF); //Makes text inverted colour of background so it is always visible
-  screen::set_eraser(colour);
-
-  printf("\n\n%s\n\n", text.c_str());
-  events.print("\n\n%d | %s\n\n", millis(), text.c_str());
-
-  int spaces = int(CHAR_WIDTH_LARGE*text.length()/460)+1;
-  std::size_t space, last_space=0;
-  std::string sub;
-
-  master.rumble(".-");
-
-  for(int i=1; i <= spaces; i++){ //make the printing actually look good
-    space = text.find(' ', text.length()*i/spaces);
-    sub = text.substr(last_space, space-last_space);
-    screen::print(TEXT_LARGE, (480-sub.length()*CHAR_WIDTH_LARGE)/2, (CHAR_HEIGHT_LARGE+5)*i, sub.c_str());
-    last_space = space+1;
-  }
-
-  Flash.reset(); //Starts counting
-  flash_end = time;
-}
-
-
-void GUI::flash(std::string text, std::uint32_t time, GUI::Colours colour){
-  touched_when_flashed = touched;
-  clear_screen(get_gui_colour(colour));
-  screen::set_pen(~get_gui_colour(colour)&0xFFFFFF); //Makes text inverted colour of background so it is always visible
-  screen::set_eraser(get_gui_colour(colour));
-
-  std::string pretext;
-  switch(colour){
-    case Colours::ERROR: pretext = "ERROR: "; break;
-    case Colours::WARNING: pretext = "WARNING: "; break;
-    case Colours::GOOD: pretext = "NOTIF: "; break;
-    default: pretext = ""; break;
-  }
-
-  printf("\n\n%s%s%s%s\n\n", get_term_colour(colour), pretext.c_str(), text.c_str(), get_term_colour(Colours::NONE));
-  events.print("\n\n%d | %s\n\n", millis(), text.c_str());
-
-  int spaces = int(CHAR_WIDTH_LARGE*text.length()/460)+1;
-  std::size_t space, last_space=0;
-  std::string sub;
-
-  master.rumble(".-");
-
-  for(int i=1; i <= spaces; i++){ //make the printing actually look good
-    space = text.find(' ', text.length()*i/spaces);
-    sub = text.substr(last_space, space-last_space);
-    screen::print(TEXT_LARGE, (480-sub.length()*CHAR_WIDTH_LARGE)/2, (CHAR_HEIGHT_LARGE+5)*i, sub.c_str());
-    last_space = space+1;
-  }
-
-  Flash.reset(); //Starts counting
-  flash_end = time;
-}
-
-void GUI::end_flash (){
-  if (Flash.playing() && (Flash.get_time() >= flash_end || (!touched_when_flashed && touched))){
-    Flash.reset(false);
-    GUI::current_page->go_to();
-  }
 }
 
 bool GUI::go(std::string short_msg, std::string long_msg, std::uint32_t delay_time){
@@ -249,54 +251,6 @@ void GUI::draw_oblong(int x1, int y1, int x2, int y2, double kS, double kR){ //k
   screen::fill_circle(x2-s-r, y1+s+r, r);
   screen::fill_circle(x1+s+r, y2-s-r, r);
   screen::fill_circle(x2-s-r, y2-s-r, r);
-}
-
-int GUI::get_height(text_format_e_t size){
-  switch(size){
-    case TEXT_SMALL: return CHAR_HEIGHT_SMALL; break;
-    case TEXT_MEDIUM: return CHAR_HEIGHT_MEDIUM; break;
-    case TEXT_LARGE: return CHAR_HEIGHT_LARGE; break;
-  }
-  return 0;
-}
-
-int GUI::get_width(text_format_e_t size){
-  switch(size){
-    case TEXT_SMALL: return CHAR_WIDTH_SMALL; break;
-    case TEXT_MEDIUM: return CHAR_WIDTH_MEDIUM; break;
-    case TEXT_LARGE: return CHAR_WIDTH_LARGE; break;
-  }
-  return 0;
-}
-
-const char* GUI::get_term_colour(GUI::Colours colour){
-  switch(colour){
-    case Colours::BLACK: return "\033[30m"; break;
-    case Colours::RED: return "\033[31m"; break;
-    case Colours::GREEN: return "\033[32m"; break;
-    case Colours::YELLOW: return "\033[33m"; break;
-    case Colours::BLUE: return "\033[34m"; break;
-    case Colours::MAGENTA: return "\033[35m"; break;
-    case Colours::CYAN: return "\033[36m"; break;
-    case Colours::WHITE: return "\033[37m"; break;
-    case Colours::NONE: return "\033[0m"; break;
-  }
-  return "";
-}
-
-Colour GUI::get_gui_colour(GUI::Colours colour){
-  switch(colour){
-    case Colours::BLACK: return COLOUR(BLACK); break;
-    case Colours::RED: return COLOUR(RED); break;
-    case Colours::GREEN: return COLOUR(GREEN); break;
-    case Colours::YELLOW: return COLOUR(YELLOW); break;
-    case Colours::BLUE: return COLOUR(BLUE); break;
-    case Colours::MAGENTA: return COLOUR(MAGENTA); break;
-    case Colours::CYAN: return COLOUR(CYAN); break;
-    case Colours::WHITE: return COLOUR(WHITE); break;
-    case Colours::NONE: return GREY; break;
-  }
-  return GREY;
 }
 
 //Formats coordinates based on a GUI::Style (always in x1, y1, x2, y2)
@@ -702,6 +656,70 @@ void Button::run_off_func() const {if (off_func) off_func();}
 
 int Slider::get_value() const {return val;}
 
+
+//Data getters
+
+int GUI::get_height(text_format_e_t size){
+  switch(size){
+    case TEXT_SMALL: return CHAR_HEIGHT_SMALL; break;
+    case TEXT_MEDIUM: return CHAR_HEIGHT_MEDIUM; break;
+    case TEXT_LARGE: return CHAR_HEIGHT_LARGE; break;
+  }
+  return 0;
+}
+
+int GUI::get_width(text_format_e_t size){
+  switch(size){
+    case TEXT_SMALL: return CHAR_WIDTH_SMALL; break;
+    case TEXT_MEDIUM: return CHAR_WIDTH_MEDIUM; break;
+    case TEXT_LARGE: return CHAR_WIDTH_LARGE; break;
+  }
+  return 0;
+}
+
+const char* GUI::get_term_colour(GUI::Colours colour){
+  switch(colour){
+    case Colours::BLACK: return "\033[30m"; break;
+    case Colours::RED: return "\033[31m"; break;
+    case Colours::GREEN: return "\033[32m"; break;
+    case Colours::YELLOW: return "\033[33m"; break;
+    case Colours::BLUE: return "\033[34m"; break;
+    case Colours::MAGENTA: return "\033[35m"; break;
+    case Colours::CYAN: return "\033[36m"; break;
+    case Colours::WHITE: return "\033[37m"; break;
+    case Colours::NONE: return "\033[0m"; break;
+  }
+  return "";
+}
+
+Colour GUI::get_gui_colour(GUI::Colours colour){
+  switch(colour){
+    case Colours::BLACK: return COLOUR(BLACK); break;
+    case Colours::RED: return COLOUR(RED); break;
+    case Colours::GREEN: return COLOUR(GREEN); break;
+    case Colours::YELLOW: return COLOUR(YELLOW); break;
+    case Colours::BLUE: return COLOUR(BLUE); break;
+    case Colours::MAGENTA: return COLOUR(MAGENTA); break;
+    case Colours::CYAN: return COLOUR(CYAN); break;
+    case Colours::WHITE: return COLOUR(WHITE); break;
+    case Colours::NONE: return GREY; break;
+  }
+  return GREY;
+}
+
+const Page* const GUI::get_current_page(){
+  return current_page;
+}
+
+const GUI* const GUI::get_current_gui(){
+  return current_gui;
+}
+
+bool GUI::is_touched(){
+  return touched;
+}
+
+
 //Data Updates
 void GUI::update_screen_status(){
   screen_touch_status_s_t status = screen::touch_status();
@@ -902,7 +920,7 @@ void GUI::update(void* params){
     /*Button*/for (std::vector<Button*>::const_iterator it = cur_p.buttons.begin(); it != cur_p.buttons.end(); it++) {(*it)->update(); if(&cur_p != current_page) continue;}
     /*Slider*/for (std::vector<Slider*>::const_iterator it = cur_p.sliders.begin(); it != cur_p.sliders.end(); it++) (*it)->update();
     /*Text*/for (std::vector<Text_*>::const_iterator it = cur_p.texts.begin(); it != cur_p.texts.end(); it++) (*it)->update();
-    /*Flash*/end_flash();
+    /*Flash*/screen_flash::end();
 
     delay(10);
     if(ptr->notify_handle()) break;

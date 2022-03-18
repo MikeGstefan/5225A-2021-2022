@@ -1,8 +1,7 @@
 #include "gui.hpp"
 
 /*Field array*/ static std::vector<std::bitset<200>> field (200, std::bitset<200>{}); //Initializes to 200 blank bitsets
-/*Temperature Alert Flag*/ static bool temp_flashed;
-/*Current Flashing Timer*/ extern Timer Flash;
+/*Temperature Alert Flag*/ static bool temp_flashed = false;
 
 //Var init for text monitoring
 int left_enc, right_enc, back_enc;
@@ -280,7 +279,7 @@ void main_setup(){
   });
   save_pos.set_func(save_positions);
   misc_checks.set_func([](){
-    if (!pros::usd::is_installed()) GUI::flash("No SD Card!");
+    if (!pros::usd::is_installed()) screen_flash::start("No SD Card!");
   });
 
   prev_drivr.set_func([](){drivebase.prev_driver();});
@@ -530,10 +529,10 @@ void main_background(){
     std::tuple<Motor*, int, const char*, const char*, Text_*>& mot_tup = *it;
     std::get<1>(mot_tup) = std::get<0>(mot_tup) ? std::get<0>(mot_tup)->get_temperature() : std::numeric_limits<int>::max();
 
-    if (!temp_flashed && std::get<0>(mot_tup) && inRange(std::get<1>(mot_tup), 55, std::numeric_limits<int>::max()-1) && !Flash.playing()){ //Overheating
+    if (!temp_flashed && std::get<0>(mot_tup) && inRange(std::get<1>(mot_tup), 55, std::numeric_limits<int>::max()-1) && screen_flash::timer.playing()){ //Overheating
       temp_flashed = true;
       temps.go_to();
-      GUI::flash("%s motor is at %dC\n", std::get<2>(mot_tup), std::get<1>(mot_tup));
+      screen_flash::start("%s motor is at %dC\n", std::get<2>(mot_tup), std::get<1>(mot_tup));
       break;
     }
   }
@@ -602,7 +601,7 @@ void util_setup(){
       int expander_port = expander.get_value();
       if (expander_port){
         if(c::registry_get_plugged_type(expander_port-1) != c::E_DEVICE_ADI){
-          GUI::flash("No Expander in port %d", expander_port);
+          screen_flash::start("No Expander in port %d", expander_port);
         }
         c::ext_adi_port_set_config(expander_port, i, E_ADI_DIGITAL_OUT);
         c::ext_adi_port_set_value(expander_port, i, HIGH);
@@ -616,7 +615,7 @@ void util_setup(){
       int expander_port = expander.get_value();
       if (expander_port){
         if(c::registry_get_plugged_type(expander_port-1) != c::E_DEVICE_ADI){
-          GUI::flash("No Expander in port %d", expander_port);
+          screen_flash::start("No Expander in port %d", expander_port);
         }
         c::ext_adi_port_set_config(expander_port, i, E_ADI_DIGITAL_OUT);
         c::ext_adi_port_set_value(expander_port, i, LOW);
@@ -654,7 +653,7 @@ void util_background(){
       else std::get<4>(mot_arr) = 0;
       if (std::get<4>(mot_arr) > 10){
         std::get<4>(mot_arr) = 0;
-        GUI::flash("Stopping Motor %d\n", port);
+        screen_flash::start("Stopping Motor %d\n", port);
         c::motor_move(port, 0);
       }
     }

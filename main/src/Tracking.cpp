@@ -1589,7 +1589,7 @@ void Gyro::climb_ramp(){
   wait_until(get_angle() > 22)
   motion_i.print("ON RAMP: %f\n", get_angle());
   wait_until(!inRange(r_reset_dist.get(), 0, 200));
-  GUI::flash("Saw wall\n");
+  screen_flash::start("Saw wall\n");
   Led1.set_value(0);
   drivebase.move(60.0,0.0);
 
@@ -1622,7 +1622,7 @@ void Gyro::climb_ramp(){
   // tracking.wait_for_dist(1.5);
 
   drivebase.brake();
-  GUI::flash("Braked\n");
+  screen_flash::start("Braked\n");
   
 }
 

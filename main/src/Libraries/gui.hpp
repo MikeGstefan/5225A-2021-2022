@@ -92,7 +92,6 @@ class GUI{
     static void update_screen_status();
     static void go_next(), go_prev();
     static void screen_terminal_fix();
-    static void end_flash();
     static void draw_oblong(int, int, int, int, double, double);
     static int get_height(text_format_e_t), get_width(text_format_e_t);
     static std::tuple<int, int, int, int> fix_points(int, int, int, int, Style);
@@ -104,18 +103,15 @@ class GUI{
     //Functions
     static const char* get_term_colour(Colours);
     static Colour get_gui_colour(Colours);
-    static void flash(Colours, std::uint32_t, const char*, ...);
-    static void flash(Colours, const char*, ...);
-    static void flash(std::uint32_t, const char*, ...);
-    static void flash(const char*, ...);
-    static void flash(std::string, std::uint32_t, Colour);
-    static void flash(std::string, std::uint32_t, Colours);
 
     static void aligned_coords (int, int, int, int, int = 480, int = 220);
     static void clear_screen(Colour=GREY);
     static void init(), update(void* = nullptr);
     static void go_to(int);
     static bool go(std::string, std::string, std::uint32_t=0), go_end(std::string, std::uint32_t=0);
+    static bool is_touched();
+    static const Page* const get_current_page();
+    static const GUI* const get_current_gui();
     bool pressed() const;
 };
 
@@ -348,3 +344,16 @@ class Slider{
     bool pressed() const;
 
 };
+
+namespace screen_flash{
+  void end();
+
+  void start(GUI::Colours, std::uint32_t, const char*, ...);
+  void start(GUI::Colours, const char*, ...);
+  void start(std::uint32_t, const char*, ...);
+  void start(const char*, ...);
+  void start(std::string, std::uint32_t, Colour);
+  void start(std::string, std::uint32_t, GUI::Colours);
+
+  extern Timer timer;
+}

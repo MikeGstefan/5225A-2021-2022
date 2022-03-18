@@ -828,7 +828,7 @@ void load_positions(){
 
   void auton_file_read(){
     if (!pros::usd::is_installed()){
-      GUI::flash("No SD Card!");
+      screen_flash::start("No SD Card!");
       printf("%sNo SD card inserted.%s Using default auton, start position, goal and alliance.\n", GUI::get_term_colour(GUI::Colours::ERROR), GUI::get_term_colour(GUI::Colours::NONE));
       return;
     }
@@ -838,7 +838,7 @@ void load_positions(){
 
       if (!auton_file){ //File doesn't exist
         auton_file.close();
-        GUI::flash("Auton File not found!");
+        screen_flash::start("Auton File not found!");
         auton_file_update();
         
         printf("%sCreated new Auton File.%s\n", GUI::get_term_colour(GUI::Colours::GOOD), GUI::get_term_colour(GUI::Colours::NONE));
