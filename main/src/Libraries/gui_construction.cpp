@@ -15,7 +15,6 @@ std::array<Button*, 8> expander_btns;
 
 //For gui to use
 extern std::array<std::tuple<pros::Motor*, int, const char*, const char*, Text_*>, 8> motors_for_gui; //Declared in config.cpp
-// extern std::array<std::pair<pros::ADIDigitalOut*, const char*>, 8> pneumatics_for_gui; //Declared in config.cpp
 extern int elastic_b_up_time, elastic_b_down_time; //Declared in b_lift.cpp
 extern int elastic_f_up_time, elastic_f_down_time; //Declared in f_lift.cpp
 
@@ -244,16 +243,21 @@ void main_setup(){
   });
 
   drive_motors.set_func([](){
-    if(GUI::go("start drive motors", "Press to start the drive motors", 1000)){
+    if(GUI::go("Check drive motors", "Press to check the drive motors", 1000)){
       drivebase.move(60, 0);
       delay(1000);
+
+      drivebase.brake();
+      delay(250);
+
       drivebase.move(-60, 0);
       delay(1000);
+
       drivebase.brake();
     }
   });
   lifts.set_func([](){
-    if(GUI::go("test lifts", "Press to run lifts", 1000)){
+    if(GUI::go("Test lifts", "Press to check lifts", 1000)){
       f_lift.reset();
       b_lift.reset();
       f_lift.move_absolute(f_lift.top_position, LIFT_MAX_VELOCITY, true);
@@ -266,9 +270,9 @@ void main_setup(){
   pneums.set_func([](){
     for(std::array<Piston*, 8>::iterator it = Piston::list_for_gui.begin(); it != Piston::list_for_gui.begin(); it++){
       Piston* piston = *it;
-      if (GUI::go("check" + std::string(piston->get_name()), "Press to check" + std::string(piston->get_name()))){
+      if (GUI::go("Check" + std::string(piston->get_name()), "Press to check" + std::string(piston->get_name()))){
         piston->toggle_state();
-        delay(1000);
+        delay(500);
         piston->toggle_state();
       }
       else return;

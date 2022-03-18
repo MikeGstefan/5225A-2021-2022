@@ -96,8 +96,6 @@ void opcontrol() {
 	lvgl images
 	*/
 
-  GUI::aligned_coords(3, 2, 120, 75);
-
 	// Autons::selector();
 	while(true){
 		drivebase.non_blocking_driver_practice();
