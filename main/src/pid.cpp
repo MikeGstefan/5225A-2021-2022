@@ -1,4 +1,5 @@
 #include "pid.hpp"
+#include "logging.hpp"
 
 PID::PID(double kP, double kI, double kD, double bias, bool integral_sgn_reset, double integral_lower_bound, double integral_upper_bound):
     kP(kP), kI(kI), kD(kD),
@@ -42,5 +43,7 @@ double PID::compute(double input, double target){
     }
     
     output = proportional + integral + derivative + bias;
+
+    motion_i.print("%d |  P: %f, D:%f, In:%f, Out:%f X:%f\n", millis(), proportional, derivative, -input, output, tracking.y_coord);
     return output;
 }

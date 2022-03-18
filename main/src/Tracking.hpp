@@ -5,7 +5,6 @@
 #include "geometry.hpp"
 #include "pid.hpp"
 #include "drive.hpp"
-#include "geometry.hpp"
 #include "task.hpp"
 #include "Libraries/gui.hpp"
 #include <iostream>
@@ -26,7 +25,7 @@ extern _Task move_t;
 // Back: get_pitch, 1
 // Front: get_pitch, -1
 #define GYRO_AXIS get_roll
-#define GYRO_SIDE 1
+#define GYRO_SIDE -1
 
 
 #define DIST_BACK 8.5
@@ -52,8 +51,8 @@ public:
     bool move_complete = true, move_started = false;
     int movetime = 0;
 
-
-    Position g_velocity;   // global g_velocity stores x, y and angular velocities
+    //global g_velocity stores x, y and angular velocities
+    Position g_velocity;
     void wait_for_dist(double distance, int timeout = 0);
     double get_angle_in_deg();
     void reset(double x=0.0, double y=0.0, double a=0.0);
@@ -65,6 +64,7 @@ class Gyro{
   private:
     Imu& inertial;
     double angle, last_angle;
+    int time;
 
   public:
     Gyro(Imu& imu);

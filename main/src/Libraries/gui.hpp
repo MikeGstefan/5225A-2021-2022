@@ -346,14 +346,14 @@ class Slider{
 };
 
 namespace screen_flash{
-  void end();
-
-  void start(GUI::Colours, std::uint32_t, const char*, ...);
-  void start(GUI::Colours, const char*, ...);
-  void start(std::uint32_t, const char*, ...);
-  void start(const char*, ...);
-  void start(std::string, std::uint32_t, Colour);
-  void start(std::string, std::uint32_t, GUI::Colours);
-
   extern Timer timer;
+
+  void start(std::string, Colour, std::uint32_t = 1000); //text+col+time
+  void start(std::string, GUI::Colours = GUI::Colours::ERROR, std::uint32_t = 1000); //text+cols+time
+  void start(GUI::Colours, std::uint32_t, const char*, ...); //text+cols+time
+  void start(Colour, std::uint32_t, const char*, ...); //text+col+time
+  void start(std::uint32_t, const char*, ...); //text+red+time
+  void start(GUI::Colours, const char*, ...); //text+col+1000
+
+  void end();
 }

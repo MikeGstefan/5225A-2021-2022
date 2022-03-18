@@ -36,36 +36,7 @@ namespace screen_flash{
   std::uint32_t end_time; //Sets the end time to max possible val
   bool touched;
 
-  //Flashing
-  void start(std::uint32_t time, const char* fmt, ...){
-    std::va_list args;
-    va_start(args, fmt);
-    start(printf_to_string(fmt, args), time, GUI::Colours::ERROR);
-    va_end(args);
-  }
-
-  void start(GUI::Colours colour, const char* fmt, ...){
-    std::va_list args;
-    va_start(args, fmt);
-    start(printf_to_string(fmt, args), 1000, colour);
-    va_end(args);
-  }
-
-  void start(const char* fmt, ...){
-    std::va_list args;
-    va_start(args, fmt);
-    start(printf_to_string(fmt, args), 1000, GUI::Colours::ERROR);
-    va_end(args);
-  }
-
-  void start(GUI::Colours colour, std::uint32_t time, const char* fmt, ...){
-    std::va_list args;
-    va_start(args, fmt);
-    start(printf_to_string(fmt, args), time, colour);
-    va_end(args);
-  }
-
-  void start(std::string text,  std::uint32_t time, Colour colour){
+  void start(std::string text, Colour colour, std::uint32_t time){
     touched = GUI::is_touched();
     GUI::clear_screen(colour);
     screen::set_pen(~colour&0xFFFFFF); //Makes text inverted colour of background so it is always visible
@@ -91,7 +62,7 @@ namespace screen_flash{
     end_time = time;
   }
 
-  void start(std::string text, std::uint32_t time, GUI::Colours colour){
+  void start(std::string text, GUI::Colours colour, std::uint32_t time){
     touched = GUI::is_touched();
     GUI::clear_screen(GUI::get_gui_colour(colour));
     screen::set_pen(~GUI::get_gui_colour(colour)&0xFFFFFF); //Makes text inverted colour of background so it is always visible
@@ -123,6 +94,34 @@ namespace screen_flash{
 
     timer.reset(); //Starts counting
     end_time = time;
+  }
+
+  void start(GUI::Colours colour, std::uint32_t time, const char* fmt, ...){
+    std::va_list args;
+    va_start(args, fmt);
+    start(printf_to_string(fmt, args), colour, time);
+    va_end(args);
+  }
+
+  void start(Colour colour, std::uint32_t time, const char* fmt, ...){
+    std::va_list args;
+    va_start(args, fmt);
+    start(printf_to_string(fmt, args), GUI::Colours::ERROR, 1000);
+    va_end(args);
+  }
+
+  void start(std::uint32_t time, const char* fmt, ...){
+    std::va_list args;
+    va_start(args, fmt);
+    start(printf_to_string(fmt, args), GUI::Colours::ERROR, time);
+    va_end(args);
+  }
+
+  void start(GUI::Colours colour, const char* fmt, ...){
+    std::va_list args;
+    va_start(args, fmt);
+    start(printf_to_string(fmt, args), colour, 1000);
+    va_end(args);
   }
 
   void end(){

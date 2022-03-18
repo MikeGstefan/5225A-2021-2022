@@ -1,4 +1,3 @@
-
 #include "config.hpp"
 #include "drive.hpp"
 #include "controller.hpp"
@@ -89,10 +88,10 @@ void autonomous() {
 }
 
 void opcontrol() {
-	/* GUI:
+	/* Nathan:
 	auton give up func - ask mike
   check if lift.move_absolute works before merge
-	check if weird string issue is still there
+	reintegrate std::string. If it fails, do an inline conversion with .c_str()
 	lvgl images
 	*/
 

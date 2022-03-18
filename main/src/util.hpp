@@ -2,6 +2,7 @@
 #include "main.h"
 #include "config.hpp"
 #include "timer.hpp"
+#include "geometry.hpp"
 #include "logging.hpp"
 #include <array>
 #include <cmath>
@@ -16,7 +17,6 @@ using namespace std;
 //forward declarations
 class Timer;
 
-
 #define wait_until(condition) while(delay(10),!(condition))
 
 // cycle check macro (checks a condition for a specified amount of cycles)
@@ -24,9 +24,9 @@ class Timer;
 {\
     int successCount = 0;\
     while (successCount < checkCount){\
-        if (condition) successCount++;\
-        else successCount = 0;\
-        delay(delayTime);\
+      if (condition) successCount++;\
+      else successCount = 0;\
+      delay(delayTime);\
     }\
 }
 
@@ -77,6 +77,20 @@ std::string printf_to_string(const char* fmt, va_list arg);
  * @return char* const 
  */
 char* const millis_to_str(std::uint32_t milliseconds);
+
+/**
+ * @brief 
+ * 
+ * @param f base function to scale
+ * @param p1 1st point to pass through
+ * @param p2 2nd point to pass through. Defaults to (0, 0)
+ * @param control Control value
+ * @return std::function<long double (long double)> 
+ */
+//Scales a function using two points to pass through and a control value
+
+//Not a template because that won't allow implicit lambda
+std::function<long double (long double)> func_scale(std::function<long double(long double)> f, Point p1, Point p2 = {0.0, 0.0}, double control = 1.0);
 
 //std::clamp already exists
 // restricts a value to a range
