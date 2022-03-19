@@ -43,7 +43,7 @@ public:
   
   void handle(bool driver_array);  // contains state machine code, (if driver_array is false, uses prog_array)
   void handle_state_change(); // cleans up and preps the machine to be in the target state
-  void button_handling(); // handles driver button input
+  void handle_buttons(); // handles driver button input
   void set_state(const f_lift_states next_state);  // requests a state change and logs it (NORMAL set state)
   // THIS IS AN OVERLOAD for the existing set state function, accepts an index for the lift
   void set_state(const f_lift_states next_state, const double index);  // requests a state change and logs it

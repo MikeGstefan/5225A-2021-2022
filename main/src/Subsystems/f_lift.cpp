@@ -17,7 +17,7 @@ F_Lift f_lift({{"F_Lift",
 F_Lift::F_Lift(Motorized_subsystem<f_lift_states, NUM_OF_F_LIFT_STATES, F_LIFT_MAX_VELOCITY> motorized_subsystem): Motorized_subsystem(motorized_subsystem){ // constructor
 
   // state setup
-  target_state = f_lift_states::idle;
+  target_state = f_lift_states::bottom;
   state = f_lift_states::managed;
 
   index = 0;
@@ -27,15 +27,21 @@ F_Lift::F_Lift(Motorized_subsystem<f_lift_states, NUM_OF_F_LIFT_STATES, F_LIFT_M
   down_press.pause();
 }
 
-void F_Lift::button_handling(){
+void F_Lift::handle_buttons(){
   // index incrementing and decrementing
-  if(master.get_digital_new_press(lift_up_button) && index < driver_positions.size() - 1){
+  if(master.get_digital_new_press(lift_up_button)){
     up_press.reset();
-    set_state(f_lift_states::move_to_target, ++index);
+    // doesn't increment index if it's out of bounds or lift is in manual mode
+    if(index < driver_positions.size() - 1 && state != f_lift_states::manual){
+      set_state(f_lift_states::move_to_target, ++index);
+    } 
   }
-  if(master.get_digital_new_press(lift_down_button) && index > 0){
+  if(master.get_digital_new_press(lift_down_button)){
     down_press.reset();
-    set_state(f_lift_states::move_to_target, --index);
+    // doesn't decrement index if it's out of bounds or lift is in manual mode
+    if(index > 0 && state != f_lift_states::manual){
+      set_state(f_lift_states::move_to_target, --index);
+    } 
   }
   // resets and pauses the timers if driver releases button
   if(!master.get_digital(lift_up_button)) up_press.reset(false);
@@ -119,8 +125,6 @@ void F_Lift::handle_state_change(){
   if(target_state == state) return;
   // if state has changed, performs the necessary cleanup operation before entering next state
 
-  // NOTE: this switch is commented out because currently no cleanup is needed
-  /*
   switch(target_state){
     case f_lift_states::managed:
       break;
@@ -135,9 +139,12 @@ void F_Lift::handle_state_change(){
       break;
 
     case f_lift_states::manual:
+      // we don't want the f_claw in search mode while the lift is in manual
+      if(f_claw.get_state() == f_claw_states::searching){
+        f_claw.set_state(f_claw_states::idle);
+      }
       break;
   }
-  */
   log_state_change();  
 }
 
@@ -215,7 +222,7 @@ void F_Claw::handle(){
 
     case f_claw_states::searching:
       // grabs goal if toggle button is pressed or mogo is detected
-      if(master.get_digital_new_press(lift_claw_toggle_button) || f_touch.get_value()){
+      if(master.get_digital_new_press(lift_claw_toggle_button) || f_lift_dist.get() < 50){
         master.rumble("-");
         set_state(f_claw_states::grabbed);
       }
@@ -247,11 +254,11 @@ void F_Claw::handle_state_change(){
       break;
 
     case f_claw_states::grabbed:
+      f_claw_p.set_value(HIGH);
       // raises mogo above rings automatically if lift is in bottom state
       if(f_lift.get_state() == f_lift_states::bottom){
         f_lift.set_state(f_lift_states::move_to_target, 1); // sends f_lift to raised position
       }
-      f_claw_p.set_value(HIGH);
       break;
   }
   log_state_change();  

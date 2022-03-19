@@ -70,7 +70,7 @@ void initialize() {
 	
 	// tracking.x_coord = 104.0, tracking.y_coord = 12.0, tracking.global_angle = -30.0_deg;
 	// tracking.x_coord = 24.5, tracking.y_coord = 15.0, tracking.global_angle = 9.0_deg;
-	// tracking.x_coord = 0.0, tracking.y_coord = 0.0, tracking.global_angle = 0.0_deg;
+	tracking.x_coord = 0.0, tracking.y_coord = 0.0, tracking.global_angle = 0.0_deg;
 	update_t.start();
 	// master.print(2, 0, "Driver: %s", drivebase.drivers[drivebase.cur_driver].name);
 	// gyro.finish_calibrating(); //Finishes calibrating gyro before program starts
@@ -106,6 +106,39 @@ void competition_initialize() {}
  * from where it left off.
  */
 void autonomous() {
+	// start of prog state machine testing
+	/*
+	b_lift.reset();
+	f_lift.reset();
+	Task handlers([](){
+		while(true){
+      f_lift.handle_buttons();
+      f_lift.handle(false);
+      f_claw.handle();
+      b_claw.handle();
+      intake.handle();
+			delay(10);
+		}
+	});
+	move_start(move_types::tank_point, tank_point_params({10.0, 20.0, 0.0}, true));
+	b_claw.set_state(b_claw_states::search_lip);
+	move_start(move_types::tank_point, tank_point_params({00.0, 00.0, 0.0}, false));
+	f_claw.set_state(f_claw_states::searching);
+	waitUntil(f_claw.get_state() == f_claw_states::grabbed);
+	// f_lift.set_state(f_lift_states::move_to_target, );
+	delay(3000);
+	for(int i = 0; i < 7; i++){
+		f_lift.set_state(f_lift_states::move_to_target, i);
+		delay(500);
+	}
+
+	while(true){
+		
+		delay(10);
+	}
+	*/
+// END OF PROG STATE MACHINE TESTING
+
 	// skills();
 	switch(cur_auto){
 		case auto1:
@@ -143,6 +176,20 @@ void autonomous() {
 // extern Slider mot_speed_set;
 
 void opcontrol() {
+	// pros::Task task{[=] {
+	// 	while(true){
+	// 		b_claw.handle();
+	// 		delay(10);
+	// 	}
+	// }};
+	// delay(2000);
+	// b_claw.set_state(b_claw_states::grabbed);
+	// delay(3000);
+	// b_claw.set_state(b_claw_states::search_lip);
+	// while(true) delay(10);
+
+	master.print(2, 0, "hello");
+	drivebase.driver_practice();
 	move_stop();
 	// while(true){
 	// 	printf("%d\n", b_dist.get());
