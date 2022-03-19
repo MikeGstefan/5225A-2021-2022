@@ -147,11 +147,11 @@ void opcontrol() {
 	// move_start
 	f_claw_p.set_value(0);
 	delay(500);
-	// move_start(move_types::tank_rush, tank_rush_params({106.0,71.0, 0.0}, false));
-	// while(true){
-	// 	// printf("%d\n", b_dist.get());
-	// 	delay(10);
-	// }
+	move_start(move_types::tank_rush, tank_rush_params({106.0,71.0, 0.0}, false));
+	while(true){
+		// printf("%d\n", b_dist.get());
+		delay(10);
+	}
 	// f_lift_m.move(40);
 	pros::Task intk_task(intk_c);
   drivebase.driver_practice();
