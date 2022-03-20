@@ -24,10 +24,10 @@ void B_Claw::handle(){
 
     case b_claw_states::idle:
       // enters search mode if it's been 2 seconds since the mogo was released
-      if(release_timer.get_time() > 2000){
-        master.rumble("-");
-        set_state(b_claw_states::search_lip);
-      }
+      // if(release_timer.get_time() > 2000){
+      
+      // starts search if search button is pressed
+      if(master.get_digital_new_press(b_claw_search_button))  set_state(b_claw_states::search_lip);
       // grabs goal if toggle button is pressed
       if(master.get_digital_new_press(b_claw_toggle_button)){
         master.rumble("-");
@@ -36,6 +36,9 @@ void B_Claw::handle(){
       break;
 
     case b_claw_states::search_lip:
+      // cancels search if search button is pressed
+      if(master.get_digital_new_press(b_claw_search_button)) set_state(b_claw_states::idle);
+
       // search for bowl of mogo once lip is detected
       if(b_dist.get() < 70) set_state(b_claw_states::search_bowl);
 
@@ -47,6 +50,9 @@ void B_Claw::handle(){
       break;
 
     case b_claw_states::search_bowl:
+      // cancels search if search button is pressed
+      if(master.get_digital_new_press(b_claw_search_button)) set_state(b_claw_states::idle);
+
       // grabs goal if up button is pressed or bowl is detected
       if (b_dist.get() > 70 && b_dist.get() < 95) search_cycle_check_count++;
 
@@ -73,11 +79,15 @@ void B_Claw::handle_state_change(){
       break;
 
     case b_claw_states::idle:
+      master.rumble("-");
+      master.print(0, 0, "Idle    ");
       b_claw_p.set_value(LOW);
       release_timer.reset();    
       break;
 
     case b_claw_states::search_lip:
+      master.rumble("-");
+      master.print(0, 0, "Searching");
       b_claw_p.set_value(LOW);
       break;
 

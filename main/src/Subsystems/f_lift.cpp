@@ -210,9 +210,9 @@ void F_Claw::handle(){
 
     case f_claw_states::idle:
       // enters search mode if the lift is at the bottom and it's been 2 seconds since the mogo was released
-      if(f_lift.get_state() == f_lift_states::bottom && release_timer.get_time() > 2000){
-        set_state(f_claw_states::searching);
-      }
+      // if(f_lift.get_state() == f_lift_states::bottom && release_timer.get_time() > 2000){
+      //   set_state(f_claw_states::searching);
+      // }
       // grabs goal if toggle button is pressed
       if(master.get_digital_new_press(lift_claw_toggle_button)){
         master.rumble("-");
