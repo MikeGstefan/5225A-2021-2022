@@ -176,6 +176,21 @@ void autonomous() {
 // extern Slider mot_speed_set;
 
 void opcontrol() {
+	pros::Motor f_bar(7, pros::E_MOTOR_GEARSET_06, true, pros::E_MOTOR_ENCODER_DEGREES);
+	bool f_bar_state = LOW; // LOW is f_bar, HIGH is intake
+	pros::ADIDigitalOut f_bar_p(1);
+	f_bar_p.set_value(f_bar_state);
+	while(true){
+		f_bar.move(master.get_analog(ANALOG_RIGHT_Y));
+		if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_A)){
+			f_bar_state = !f_bar_state;
+			f_bar_p.set_value(f_bar_state);
+			f_bar.move(20);	// for jiggling the motor
+			delay(200);
+		}
+		delay(10);
+	}
+
 	// pros::Task task{[=] {
 	// 	while(true){
 	// 		b_claw.handle();
