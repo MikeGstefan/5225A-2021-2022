@@ -65,7 +65,7 @@ public:
     Timer vel_rise_timeout("vel_rise");
     // waits for motor's velocity to rise or timeout to trigger
     wait_until(fabs(motor.get_actual_velocity()) > 45.0){
-      printf("%s's velocity is (rising loop): %lf\n", this->name, motor.get_actual_velocity());
+      printf("%s's velocity is (rising loop): %lf\n", this->name, motor.get_actual_velocity()); //change these printf's to logs
       if (vel_rise_timeout.get_time() > 200){
         printf("%s's rising loop timed out\n", this->name);
         break;

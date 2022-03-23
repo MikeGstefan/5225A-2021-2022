@@ -223,15 +223,39 @@ class Text: public Text_{
   public:
     //Points, Format, Page, Label, [var info], Lcolour
 
-    // Terminal var - no format
+    // Terminal (var - no format)
     Text (std::string text, V& value_obj, Colour label_colour = COLOUR(WHITE)){
       construct (5, 0, GUI::Style::CORNER, E_TEXT_LARGE_CENTER, &terminal, text, [&](){return value_obj;}, label_colour);
     }
 
-    // Terminal var - format
+    // Terminal (var - format)
     Text (std::string text, V& value_obj, text_format_e_t size, Colour label_colour = COLOUR(WHITE)){
       construct (5, 0, GUI::Style::CORNER, size, &terminal, text, [&](){return value_obj;}, label_colour);
     }
+
+    // Terminal (array - no format)
+    template <typename I>
+    Text (std::string text, V* value_arr, I& index, Colour label_colour = COLOUR(WHITE)){
+      construct (5, 0, GUI::Style::CORNER, E_TEXT_LARGE_CENTER, &terminal, text, [value_arr, &index](){return value_arr[static_cast<int>(index)];}, label_colour);
+    }
+
+    // Terminal (array - format)
+    template <typename I>
+    Text (std::string text, V* value_arr, I& index, text_format_e_t size, Colour label_colour = COLOUR(WHITE)){
+      construct (5, 0, GUI::Style::CORNER, size, &terminal, text, [value_arr, &index](){return value_arr[static_cast<int>(index)];}, label_colour);
+    }
+
+    // Terminal (function - no format)
+    Text (std::string text, const std::function<V()>& func, Colour label_colour = COLOUR(WHITE)){
+      construct (5, 0, GUI::Style::CORNER, E_TEXT_LARGE_CENTER, &terminal, text, func, label_colour);
+    }
+
+    // Terminal (function - format)
+    Text (std::string text, const std::function<V()>& func, text_format_e_t size, Colour label_colour = COLOUR(WHITE)){
+      construct (5, 0, GUI::Style::CORNER, size, &terminal, text, func, label_colour);
+    }
+
+
 
     //No var
     Text (int x, int y, GUI::Style rect_type, text_format_e_t size, Page& page, std::string text, Colour label_colour = COLOUR(WHITE)){
@@ -328,7 +352,7 @@ class Slider{
     Page* page;
     Button dec, inc;
     Text<int> title;
-    Text<std::nullptr_t> min_title, max_title;
+    Text<> min_title, max_title;
 
     //Functions
     void update();
@@ -348,8 +372,8 @@ class Slider{
 namespace screen_flash{
   extern Timer timer;
 
-  void start(std::string, Colour, std::uint32_t = 1000); //text+col+time
-  void start(std::string, GUI::Colours = GUI::Colours::ERROR, std::uint32_t = 1000); //text+cols+time
+  void start(std::string, Colour, std::uint32_t = 1000); //text+col+time / text+col
+  void start(std::string, GUI::Colours = GUI::Colours::ERROR, std::uint32_t = 1000); //text+cols+time / text+cols / text
   void start(GUI::Colours, std::uint32_t, const char*, ...); //text+cols+time
   void start(Colour, std::uint32_t, const char*, ...); //text+col+time
   void start(std::uint32_t, const char*, ...); //text+red+time

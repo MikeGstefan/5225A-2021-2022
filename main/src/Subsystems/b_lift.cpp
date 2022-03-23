@@ -317,17 +317,17 @@ void B_Lift::elastic_util(){
   b_claw_p.set_value(HIGH);
   held = true;
   Timer move_timer{"move"};
-  move_absolute(top_position);
+  move_absolute(top_position); //move_absolute(top_position, 100, true);
   // // intake_piston.set_value(HIGH);  // raises intake
   wait_until(fabs(motor.get_position() - top_position) < end_error);
   move_timer.print();
   elastic_b_up_time = move_timer.get_time();
-  master.print(1, 0, "up time: %d", elastic_b_up_time);
+  master.print(1, 0, "Up Time: %d", elastic_b_up_time);
 
   move_timer.reset();
-  move_absolute(bottom_position);
+  move_absolute(bottom_position); //move_absolute(bottom_position, 100, true);
   wait_until(fabs(motor.get_position() - bottom_position) < end_error);
   move_timer.print();
   elastic_b_down_time = move_timer.get_time();
-  master.print(2, 0, "down time: %d", elastic_b_down_time);
+  master.print(2, 0, "Down Time: %d", elastic_b_down_time);
 }

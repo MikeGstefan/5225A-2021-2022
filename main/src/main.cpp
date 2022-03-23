@@ -90,9 +90,21 @@ void autonomous() {
 void opcontrol() {
 	/* Nathan:
 	auton give up func - ask mike
-  check if lift.move_absolute works before merge
-	reintegrate std::string. If it fails, do an inline conversion with .c_str()
 	lvgl images
+
+  check what actually kills the auto balance loop
+  check auton selector
+	reintegrate std::string. If it fails, do an inline conversion with std::function and .c_str()
+  integrate pneumatics
+  check that flash works
+  make sure comp check works
+  rename go
+  check that go works
+  check if lift.move_absolute works before merge
+  make screen printing resize from horizontal overload too
+  check that screen printing works
+  get rid of slider vertical
+  make button wait for press
 	*/
 
 	// Autons::selector();

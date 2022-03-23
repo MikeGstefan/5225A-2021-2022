@@ -36,7 +36,7 @@ class Timer;
  * @param value value to be checked
  * @param minimum range minimum value
  * @param maximum range maximum value
- * @return whether value is in range. will work even if maximum < minimum
+ * @return whether value is between minimum and maximum. will work even if maximum < minimum
  */
 template <typename T>
 bool in_range(T value, T minimum, T maximum){
