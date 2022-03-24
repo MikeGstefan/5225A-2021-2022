@@ -21,7 +21,6 @@ F_Lift::F_Lift(Motorized_subsystem<f_lift_states, NUM_OF_F_LIFT_STATES, F_LIFT_M
   state = f_lift_states::managed;
 
   index = 0;
-  last_index = index;
 
   up_press.pause();
   down_press.pause();
@@ -31,25 +30,43 @@ void F_Lift::handle_buttons(){
   // index incrementing and decrementing
   if(master.get_digital_new_press(lift_up_button)){
     up_press.reset();
-    // doesn't increment index if it's out of bounds or lift is in manual mode
-    if(index < driver_positions.size() - 1 && state != f_lift_states::manual){
-      set_state(f_lift_states::move_to_target, ++index);
-    } 
+    // if state is manual, go to the closest position that's higher than the current position
+    if(state == f_lift_states::manual){
+      int i = 0;
+      while (i < driver_positions.size()){
+        if(driver_positions[i] > motor.get_position()){
+          set_state(f_lift_states::move_to_target, i);
+          break;
+        }
+        i++;
+      }
+    }
+    // otherwise just go to the next highest position, but doesn't increment index if it's out of bounds
+    else if(index < driver_positions.size() - 1)  set_state(f_lift_states::move_to_target, ++index);
   }
   if(master.get_digital_new_press(lift_down_button)){
     down_press.reset();
-    // doesn't decrement index if it's out of bounds or lift is in manual mode
-    if(index > 0 && state != f_lift_states::manual){
-      set_state(f_lift_states::move_to_target, --index);
-    } 
+    // if state is manual, go to the closest position that's lower than the current position
+    if(state == f_lift_states::manual){
+      int i = driver_positions.size() - 1;
+      while (i > -1){
+        if(driver_positions[i] < motor.get_position()){
+          set_state(f_lift_states::move_to_target, i);
+          break;
+        }
+        i--;
+      }
+    }
+    // otherwise just go to the next lowest position, but doesn't decrement index if it's out of bounds
+    else if(index > 0)  set_state(f_lift_states::move_to_target, --index);
   }
   // resets and pauses the timers if driver releases button
   if(!master.get_digital(lift_up_button)) up_press.reset(false);
   if(!master.get_digital(lift_down_button)) down_press.reset(false);
 
-  // goes to top position of top button is held
+  // goes to top position if up button is held
   if(up_press.get_time() > 300) set_state(f_lift_states::move_to_target, driver_positions.size() - 1);
-  // goes to bottom position of top button is held
+  // goes to bottom position of down button is held
   if(down_press.get_time() > 300) set_state(f_lift_states::move_to_target, 0);
 
   // joystick control
@@ -153,12 +170,15 @@ void F_Lift::set_state(const f_lift_states next_state){  // requests a state cha
   state_log.print("%s | State change requested from %s to %s, index is: %d\n", name, state_names[static_cast<int>(state)], state_names[static_cast<int>(next_state)], index);
   target_state = next_state;
 }
-// accepts an index argument
+// accepts an index argument used specifically for a move to target
 void F_Lift::set_state(const f_lift_states next_state, const double index){  // requests a state change and logs it
-  state_log.print("%s | State change requested from %s to %s, index is: %d\n", name, state_names[static_cast<int>(state)], state_names[static_cast<int>(next_state)], index);
-  target_state = next_state;
-  // updates index only if it's valid (the state is actually move to target)
-  if (target_state == f_lift_states::move_to_target)  this->index = index;
+  // confirms state change only if the state is actually move to target
+  if (target_state == f_lift_states::move_to_target){
+    state_log.print("%s | State change requested from %s to %s, index is: %d\n", name, state_names[static_cast<int>(state)], state_names[static_cast<int>(next_state)], index);
+    target_state = next_state;
+    this->index = index;
+  }
+  else state_log.print("%s | INVALID move to target State change requested from %s to %s, index is: %d\n", index, name, state_names[static_cast<int>(state)], state_names[static_cast<int>(next_state)], index);
 }
 
 extern int elastic_f_up_time, elastic_f_down_time; //from gui_construction.cpp
