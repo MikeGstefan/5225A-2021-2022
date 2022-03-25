@@ -1,5 +1,7 @@
 #include "drive.hpp"
 
+joy_modes joy_mode = joy_modes::lift_select;
+
 // array<int, 7> f_lift_pos= {10, 150, 300, 475, 630, 665, 675};
 // int f_lift_index = 0;
 // int f_lift_time = 0;
@@ -218,16 +220,16 @@ void Drivebase::handle_input(){
   if(fabs(tracking.power_y) < deadzone) tracking.power_y = 0.0;
   if(fabs(tracking.power_a) < deadzone) tracking.power_a = 0.0;
 
-  // if(master.get_digital_new_press(reverse_drive_button)){
-  //   master.rumble("-");
-  //   reversed = !reversed;
-  //   if(reversed) master.print(0, 0, "Reverse");
-  //   else master.print(0, 0, "Forward");
-  // }
-  // if (reversed){
-  //   tracking.power_y *= -1;
-  //   tracking.power_x *= -1;
-  // }
+  if(master.get_digital_new_press(reverse_drive_button)){
+    master.rumble("-");
+    reversed = !reversed;
+    if(reversed) master.print(0, 0, "Reverse");
+    else master.print(0, 0, "Forward");
+  }
+  if (reversed){
+    tracking.power_y *= -1;
+    tracking.power_x *= -1;
+  }
 
   if(this->state && (fabs(tracking.power_y) <deadzone && fabs(tracking.power_a) <deadzone)){
     // velo_brake();
@@ -262,8 +264,6 @@ void Drivebase::driver_practice(){
   // f_claw_p.set_value(LOW);
   // b_claw_p.set_value(LOW);
   // lift.move(-10); // gives holding power
-  bool intake_on = false;
-  bool intake_reverse = false;
   cur_driver = 0; // defaults driver to Nikhil
   // master.print(2, 0, "Driver: %s", driver_name());
   while(true){
@@ -278,12 +278,11 @@ void Drivebase::driver_practice(){
       //   delay(2000);
       // }
       drivebase.handle_input();
-      // b_lift.handle();
-      // handle_lifts();
-      f_lift.handle_buttons();
-      f_lift.handle(true);
+
+      handle_lifts();
       f_claw.handle();
       b_claw.handle();
+      intake.handle_buttons();
       intake.handle();
      
 
@@ -393,5 +392,33 @@ int Drivebase::get_deadzone(){
 //   return (!this->reversed ==  master.get_analog(ANALOG_RIGHT_Y) > -1*deadzone);
 // }
 
+bool get_lift(){
+  if(joy_mode == joy_modes::lift_select)  return (!drivebase.get_reverse() ==  master.get_analog(ANALOG_RIGHT_Y) > -1* drivebase.get_deadzone());
+  else return false;
+}
 
-
+void handle_lifts(){      
+  // toggles the state of the joystick mode if the joy mode switch button is pressed
+  if(master.get_digital_new_press(joy_mode_switch_button)){
+    if(joy_mode == joy_modes::lift_select){
+      printf("joy mode now manual\n");
+      joy_mode == joy_modes::manual;
+      b_lift.set_state(b_lift_states::manual);
+      f_lift.set_state(f_lift_states::manual);
+    }
+    else{
+      joy_mode = joy_modes::lift_select;
+      printf("joy mode now in lift select\n");
+    }
+  }
+  // moves both lifts to bottom if both_lifts_down_button is pressed
+  if(master.get_digital_new_press(both_lifts_down_button)){
+    f_lift.set_state(f_lift_states::move_to_target, 0);
+    b_lift.set_state(b_lift_states::move_to_target, 0);
+  }
+  // lift handlers
+  f_lift.handle_buttons();
+  f_lift.handle(true);
+  b_lift.handle_buttons();
+  b_lift.handle(true);
+}

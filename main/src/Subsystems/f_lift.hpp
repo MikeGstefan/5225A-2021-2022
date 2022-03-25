@@ -2,15 +2,9 @@
 #include "../Libraries/subsystem.hpp"
 #include "../drive.hpp"
 #include "../pid.hpp"
-// #include "logging.hpp"
-// #include "intake.hpp" // because lift controls intake
-
-#define F_LIFT_STATE_LINE 2 // line on controller which "searching" and "lowered" lift states are printed on
 
 #define NUM_OF_F_LIFT_STATES 5
 #define F_LIFT_MAX_VELOCITY 100
-
-#define NUM_OF_F_CLAW_STATES 4
 
 enum class f_lift_states{
   managed, // being managed externally (NOT DOING ANYTHING)
@@ -19,7 +13,6 @@ enum class f_lift_states{
   move_to_target,  // moving to target position
   manual  // controlled by joystick
 };
-extern PID f_lift_pid;
 
 class F_Lift: public Motorized_subsystem<f_lift_states, NUM_OF_F_LIFT_STATES, F_LIFT_MAX_VELOCITY> {
   Timer up_press{"Up_press"}, down_press{"Down_press"};
@@ -61,6 +54,8 @@ public:
 
 extern F_Lift f_lift;
 
+#define NUM_OF_F_CLAW_STATES 4
+
 // FRONT CLAW SUBSYSTEM
 
 enum class f_claw_states{
@@ -71,11 +66,10 @@ enum class f_claw_states{
 };
 
 class F_Claw: public Subsystem<f_claw_states, NUM_OF_F_CLAW_STATES> {
-  Timer release_timer{"release_timer"}; // when the f claw was last released
 
 public:
-  bool tilted = false;
   F_Claw(Subsystem<f_claw_states, NUM_OF_F_CLAW_STATES> subsystem);  // constructor
+  void handle_buttons();  // handles driver button input
   void handle();  // contains state machine code
   void handle_state_change(); // cleans up and preps the machine to be in the target state
 };

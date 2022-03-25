@@ -5,19 +5,19 @@
 // lift buttons
 controller_digital_e_t lift_up_button = DIGITAL_R1;
 controller_digital_e_t lift_down_button = DIGITAL_R2;
-controller_digital_e_t lift_claw_toggle_button =  DIGITAL_L2;
-controller_digital_e_t lift_tilt_toggle_button =  DIGITAL_L1;
+
+controller_digital_e_t reverse_drive_button = DIGITAL_L1;
+controller_digital_e_t claw_toggle_button =  DIGITAL_L2;
+
+// intake buttons
+controller_digital_e_t intake_button = DIGITAL_B;
+controller_digital_e_t intake_reverse_button = DIGITAL_DOWN;
 
 // misc buttons
-controller_digital_e_t intake_button = DIGITAL_Y;
 controller_digital_e_t ok_button = DIGITAL_A;
-
-controller_digital_e_t intake_reverse_button = DIGITAL_B;
-controller_digital_e_t shift_button = DIGITAL_DOWN;
-controller_digital_e_t b_claw_toggle_button = DIGITAL_X;
-controller_digital_e_t b_claw_search_button = DIGITAL_RIGHT;
-
-
+controller_digital_e_t both_lifts_down_button = DIGITAL_A;
+controller_digital_e_t joy_mode_switch_button = DIGITAL_Y;
+controller_digital_e_t shift_button = DIGITAL_X;
 
 std::array<_Controller*, num_controller> _Controller::objs; //= {nullptr};
 _Task _Controller::controller_task = nullptr;

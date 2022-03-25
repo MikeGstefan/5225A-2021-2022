@@ -188,57 +188,5 @@ void opcontrol() {
 	// b_claw.set_state(b_claw_states::search_lip);
 	// while(true) delay(10);
 
-	master.print(2, 0, "hello");
 	drivebase.driver_practice();
-	move_stop();
-	// while(true){
-	// 	printf("%d\n", b_dist.get());
-	// 	delay(10);
-	// }
-	// f_lift_m.move(40);
-	pros::Task intk_task(intk_c);
-  drivebase.driver_practice();
-  
-	master.clear();
-	// b_lift.reset();
-	// Task([](){ 
-	// 	f_lift.reset();
-	// });
-	// f_claw_p.set_value(0);
-	// b_claw_p.set_value(0);
-	// skills();
-	// skills2();
-
-	//Intake Jam code
-	Task([](){
-		Timer intake_t ("intake jam", false);
-		intk.move(127);
-		while(true){
-			if(intake_jam.get_new_press()) intake_t.reset(); //Start timer when pressed
-			else if(!intake_jam.get_value()) intake_t.reset(false); //End timer when unpressed
-			if(intake_t.get_time() > 1000){ //If pressed for more than 1 sec, reverse intk
-				intk.move(-127);
-				waitUntil(!intake_jam.get_value()); //Waits for unjam plus some time
-				delay(150);
-				intk.move(127);
-			}
-			delay(10);
-		}
-	});
-
-
-	Autons::selector();
-
-	while(true){
-		GUI::update();
-		// drivebase.non_blocking_driver_practice();
-		
-		// if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_A)){
-		// 	int speed = mot_speed_set.get_value();
-		// 	move_start(move_types::line, line_params({0.0, 0.0}, {0.0, 24.0, 0.0}, speed));
-		// 	move_start(move_types::turn_angle, turn_angle_params(45.0, speed));
-		// 	move_start(move_types::line, line_params({0.0, 0.0}, {0.0, 24.0, 0.0}, speed));
-		// }
-		delay(10);
-	}
 }

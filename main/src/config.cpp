@@ -22,7 +22,7 @@ pros::Motor intk(6, pros::E_MOTOR_GEARSET_06, true, pros::E_MOTOR_ENCODER_DEGREE
 
 // pros::Imu imu_sensor(4);
 pros::Distance b_dist(9), f_dist(12), r_reset_dist(19), f_lift_dist(20);
-pros::ADIDigitalOut trans_p({{16,8}}), b_claw_p(6), f_claw_p(8);
+pros::ADIDigitalOut trans_p({{16,8}}), b_claw_p(6), f_claw_p(8), lift_trans_p(5);
 pros::ADIDigitalOut Led1({{14, 7}});
 pros::ADIDigitalOut Led2({{14, 8}});
 pros::ADIDigitalIn intake_jam({{16, 7}});

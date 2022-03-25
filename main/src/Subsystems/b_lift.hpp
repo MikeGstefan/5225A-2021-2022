@@ -1,50 +1,86 @@
 #pragma once
 #include "../Libraries/subsystem.hpp"
 #include "../drive.hpp"
-// #include "intake.hpp" // because lift controls intake
+#include "../pid.hpp"
 
-#define B_LIFT_STATE_LINE 1 // line on controller which "searching" and "lowered" lift states are printed on
-
-#define NUM_OF_B_LIFT_STATES 12
+#define NUM_OF_B_LIFT_STATES 6
 #define B_LIFT_MAX_VELOCITY 100
 
-
 enum class b_lift_states{
-  idle,  // at bottom_position, waiting for button to search for mogo
-  search_lip,  // at bottom_position and waiting to detect mogo's lip or button to grab mogo
-  search_bowl, // at bottom_position and waiting to detect mogo's lip or button to grab mogo
-  grabbed, // has goal
-  releasing, // waiting for 1 second before entering searching state again
-  tip, // at height to keep mogo away from opponent/ tip mogos
-  platform, // at platform height
-  tall_platform, // tall goal at platform height
-  dropoff, // mogo released at platform height
-  lowering, // on the way to grabbed or searching state
-  tall_goal,  // filling up rings on tall goal
-  manual  // controlled by joystick
+  managed, // being managed externally (NOT DOING ANYTHING)
+  bottom, // at lowest position
+  idle,  // not doing anything
+  move_to_target,  // moving to target position
+  manual,  // controlled by joystick
+  shifting_to_lift // lift/intake transmission switching to lift mode
 };
 
 class B_Lift: public Motorized_subsystem<b_lift_states, NUM_OF_B_LIFT_STATES, B_LIFT_MAX_VELOCITY> {
+  Timer up_press{"Up_press"}, down_press{"Down_press"};
+  Timer shift_timer{"b_lift_shift_timer"};  // how long since back lift was set to shift
+  b_lift_states after_switch_state; // the state the lift will go to after transmission switches to lift
   int search_cycle_check_count = 0, bad_count = 0; // cycle check for safeties
-  bool held; // if the lift is holding a mogo (used for joystick control)
-
+  PID pid = PID(5.0,0.0,0.0,0.0);
   int lift_power; // for manual control
 
   // height conversion constants
   double offset_a = 365.0, offset_h = 9.75;
   double arm_len = 8.0;
   double gear_ratio = 5.0;
-
-  Timer release_timer{"release_timer"};
+  int index, last_index;
 
 public:
-  const double bottom_position = 35.0, raised_position = 400.0, tall_dropoff_position = 550, platform_position = 660.0, tall_goal_position = 665.0, top_position = 675.0;
+  vector<int> driver_positions = {20, 200, 475, 630, 800};
+  vector<int> prog_positions = {20, 200, 475, 630, 800};
+
+  bool trans_p_state = LOW; // HIGH is lift LOW is intake
+
+  const double bottom_position = 25.0, holding_position = 150.0, raised_position = 300.0, tall_dropoff_position = 475.0, platform_position = 630.0, tall_goal_position = 665.0, top_position = 675.0;
 
   B_Lift(Motorized_subsystem<b_lift_states, NUM_OF_B_LIFT_STATES, B_LIFT_MAX_VELOCITY> motorized_subsystem);  // constructor
-  void handle();  // contains state machine code
-  double pos_to_height(const double position);
-  double height_to_pos(const double height);
-  void elastic_util(); // up time should be about 1100mms, down time should be slightly slower than that
+  
+  void handle(bool driver_array);  // contains state machine code, (if driver_array is false, uses prog_array)
+  void handle_state_change(); // cleans up and preps the machine to be in the target state
+  void handle_buttons(); // handles driver button input
+  void set_state(const b_lift_states next_state);  // requests a state change and logs it (NORMAL set state)
+  // THIS IS AN OVERLOAD for the existing set state function, accepts an index for the lift
+  void set_state(const b_lift_states next_state, const double index);  // requests a state change and logs it
+  
+  // getters because index is private
+  int get_index() const{
+    return index;
+  }
+  int get_last_index()  const{
+    return last_index;
+  }
+  
+  void elastic_util(); // up time should be about 1100mms (ignore this time, it was on the old lift), down time should be slightly slower than that
 };
 
 extern B_Lift b_lift;
+
+#define NUM_OF_B_CLAW_STATES 6
+
+// FRONT CLAW SUBSYSTEM
+
+enum class b_claw_states{
+  managed, // being managed externally (NOT DOING ANYTHING)
+  idle, // claw is open and NOT waiting to detect mogo, will enter search_lip state after 2 seconds of inactivity
+  search_lip,  // claw is open and waiting to detect mogo's lip (FIRST SEARCH STATE)
+  search_bowl,  // claw is open and waiting to detect mogo's bowl (SECOND SEARCH STATE)
+  tilted, // holding mogo tilted
+  flat, // holding mogo flat
+};
+
+class B_Claw: public Subsystem<b_claw_states, NUM_OF_B_CLAW_STATES> {
+  Timer toggle_press_timer{"Toggle_timer"};  // when the toggle buttons was last pressed
+  int search_cycle_check_count = 0; // for searching for mogo's lip
+
+public:
+  B_Claw(Subsystem<b_claw_states, NUM_OF_B_CLAW_STATES> subsystem);  // constructor
+  void handle_buttons(); // handles driver button input
+  void handle();  // contains state machine code
+  void handle_state_change(); // cleans up and preps the machine to be in the target state
+};
+
+extern B_Claw b_claw;
