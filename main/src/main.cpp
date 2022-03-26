@@ -92,7 +92,6 @@ void opcontrol() {
   integrate pneumatics
   make sure comp check works
   rename go
-  check that go works
   check if lift.move_absolute works before merge
   make screen printing resize from horizontal overload too
   check that screen printing works

@@ -151,7 +151,7 @@ void GUI::aligned_coords (int x_objects, int y_objects, int x_size, int y_size, 
     }
     printf("\n");
   }
-  printf("\nScreen Size: [%d, %d]\n", x_range, y_range);
+  printf("\nScreen Size: %d x %d\n", x_range, y_range);
   if ((x_space+x_size)*(x_objects) > 480) printf("X out of bounds\n");
   if ((y_space+y_size)*(y_objects) > 220) printf("Y out of bounds\n");
   printf("\n\n");
@@ -864,21 +864,35 @@ void GUI::screen_terminal_fix(){
   int y = USER_UP;
   for (std::vector<Text_*>::iterator it = terminal.texts.begin(); it != terminal.texts.end(); it++){
     if ((*it)->txt_size != 4) y += get_height((*it)->txt_size) + 5;
+    if(get_width(TEXT_SMALL) * (*it)->label.length() + 5 > 480){
+        throw std::length_error("Item too long to print\n");
+        return;
+      }
   }
 
   int size = (PAGE_DOWN - y)/(std::count_if(terminal.texts.begin(), terminal.texts.end(), [](Text_* text){return text->txt_size == 4;})) - 5;
+  
   text_format_e_t fmt;
-
-  if(CHAR_HEIGHT_LARGE <= size) fmt = TEXT_LARGE;
-  else if(CHAR_HEIGHT_MEDIUM <= size) fmt = TEXT_MEDIUM;
-  else if(CHAR_HEIGHT_SMALL <= size) fmt = TEXT_SMALL;
+  if(get_height(TEXT_LARGE) <= size) fmt = TEXT_LARGE;
+  else if(get_height(TEXT_MEDIUM) <= size) fmt = TEXT_MEDIUM;
+  else if(get_height(TEXT_SMALL) <= size) fmt = TEXT_SMALL;
   else{
     throw std::length_error("Too Many items being printed to screen\n");
     return;
   }
 
-  y = USER_UP;
+  for (std::vector<Text_*>::iterator it = terminal.texts.begin(); it != terminal.texts.end(); it++){
+    if (get_width(fmt) * (*it)->label.length() + 5 > 480){
+      if(fmt == TEXT_LARGE){
+        if(get_width(TEXT_MEDIUM) * (*it)->label.length() + 5 < 480) (*it)->txt_size = TEXT_MEDIUM;
+        else if(get_width(TEXT_SMALL) * (*it)->label.length() + 5 < 480) (*it)->txt_size = TEXT_SMALL;
+      }
 
+      else if(fmt == TEXT_MEDIUM) (*it)->txt_size = TEXT_SMALL;
+    }
+  }
+
+  y = USER_UP;
   //Saves y-pos and txt_size
   for (std::vector<Text_*>::iterator it = terminal.texts.begin(); it != terminal.texts.end(); it++){
     (*it)->y = y;
@@ -908,7 +922,6 @@ void GUI::init(){
 void GUI::update(void* params){
   _Task* ptr = _Task::get_obj(params);
   while(true){
-    // printf("Loop\n");
     current_gui->background();
     update_screen_status();
     const Page& cur_p = *current_page;
@@ -921,5 +934,4 @@ void GUI::update(void* params){
     delay(10);
     if(ptr->notify_handle()) break;
   }
-  printf("\nGUI Task Ended\n\n");
 }
