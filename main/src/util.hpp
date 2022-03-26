@@ -81,14 +81,6 @@ double near_angle(double angle, double reference);
 std::string printf_to_string(const char* fmt, va_list arg);
 
 /**
- * @brief outputs heap allocated string representing user friendly time
- * 
- * @param milliseconds 
- * @return char* const 
- */
-std::string millis_to_str(std::uint32_t milliseconds);
-
-/**
  * @brief 
  * 
  * @param f base function to scale

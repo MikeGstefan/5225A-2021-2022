@@ -59,7 +59,7 @@ namespace screen_flash{
 
     timer.reset(); //Starts counting
     end_time = time;
-    if(time) printf("\nShowing for %s.\n\n", millis_to_str(time).c_str());
+    if(time) printf("\nShowing for %s.\n\n", Timer::to_string(time, timing_units::millis, 1, true).c_str());
   }
 
   void start(std::string text, GUI::Colours colour, std::uint32_t time){
@@ -94,7 +94,8 @@ namespace screen_flash{
 
     timer.reset(); //Starts counting
     end_time = time;
-    if(time) printf("\nShowing for %s.\n\n", millis_to_str(time).c_str());
+
+    if(time) printf("\nShowing for %s.\n\n", Timer::to_string(time, timing_units::millis, 1, true).c_str());
   }
 
   void start(GUI::Colours colour, std::uint32_t time, const char* fmt, ...){
@@ -188,7 +189,7 @@ bool GUI::go(std::string short_msg, std::string long_msg, std::uint32_t delay_ti
 
   if (!interrupted){
     if(delay_time){
-      printf("\nWaiting for %s before running.\n\n", millis_to_str(delay_time).c_str());
+      printf("\nWaiting for %s before running.\n\n", Timer::to_string(delay_time, timing_units::millis, 2, true).c_str());
       delay(delay_time);
     }
     printf("\nRunning\n\n");
@@ -225,7 +226,7 @@ bool GUI::go_end(std::string msg, std::uint32_t delay_time){
 
   if (!interrupted){
     if(delay_time){
-      printf("\nWaiting for %s before running.\n\n", millis_to_str(delay_time).c_str());
+      printf("\nWaiting for %s before running.\n\n", Timer::to_string(delay_time, timing_units::millis, 2, true).c_str());
       delay(delay_time);
     }
     printf("\nRunning\n\n");

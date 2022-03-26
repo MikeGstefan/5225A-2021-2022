@@ -25,17 +25,6 @@ std::string printf_to_string(const char* fmt, va_list arg){
   return std::string(buffer);
 }
 
-//Returns a heap-allocated c-string. Call delete[] after usage
-std::string millis_to_str(std::uint32_t milliseconds){
-  char buffer[20];
-  if (milliseconds == 1) sprintf(buffer, "1 millisecond");
-  else if (milliseconds < 1000) sprintf(buffer, "%d milliseconds", milliseconds);
-  else if (milliseconds == 1000) sprintf(buffer, "1 second");
-  else sprintf(buffer, "%d seconds", milliseconds/1000);
-
-  return buffer;
-}
-
 std::function<long double (long double)> func_scale(std::function<long double(long double)> f, Point p1, Point p2, double control){
   long double f1 = f(p1.x+control);
   long double f2 = f(p2.x+control);
