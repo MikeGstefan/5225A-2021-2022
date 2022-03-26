@@ -33,15 +33,3 @@ pros::Distance r_dist(17);
 pros::Imu ramp_imu(8);
 
 // ADIDigitalOut f_claw_p({{16,1}});
-
-//1:temp(leave as 0), 2:long name, 3:short name
-std::array<std::tuple<pros::Motor*, int, const char*, const char*, Text_*>, 8> motors_for_gui = {
-  std::make_tuple(&front_l, 0, "Front Left", "FL", nullptr),
-  std::make_tuple(&front_r, 0, "Front Right", "FR", nullptr),
-  std::make_tuple(&back_l, 0, "Back Left", "BL", nullptr),
-  std::make_tuple(&back_r, 0, "Back Right", "BR", nullptr),
-  std::make_tuple(&f_lift_m, 0, "Front Lift", "F", nullptr),
-  std::make_tuple(&b_lift_m, 0, "Back Lift", "B", nullptr),
-  std::make_tuple(&intk, 0, "Intake", "IN", nullptr),
-  std::make_tuple(nullptr, 0, "", "", nullptr),
-};//std::make_tuple(nullptr, 0, "", "", nullptr),

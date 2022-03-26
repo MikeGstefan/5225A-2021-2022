@@ -47,9 +47,6 @@ void initialize() {
 	update_t.start();
 	// master.print(2, 0, "Driver: %s", drivebase.drivers[drivebase.cur_driver].name);
 	// gyro.finish_calibrating(); //Finishes calibrating gyro before program starts
-  
-
-  // save_positions();
 }
 
 /**
@@ -83,8 +80,6 @@ void competition_initialize() {}
  */
 void autonomous() {
   load_positions();
-	// skills();
-
 }
 
 void opcontrol() {
@@ -94,9 +89,7 @@ void opcontrol() {
 
   check what actually kills the auto balance loop
   check auton selector
-	reintegrate std::string. If it fails, do an inline conversion with std::function and .c_str()
   integrate pneumatics
-  check that flash works
   make sure comp check works
   rename go
   check that go works
@@ -107,7 +100,6 @@ void opcontrol() {
   make button wait for press
 	*/
 
-	// Autons::selector();
 	while(true){
 		drivebase.non_blocking_driver_practice();
 		delay(10);

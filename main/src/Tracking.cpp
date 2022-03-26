@@ -1593,7 +1593,7 @@ void Gyro::climb_ramp(){
 
 	f_lift.move_absolute(100); //Lowers lift
 
-  drivebase.move(0.0, -GYRO_SIDE*127, 0.0);
+  drivebase.move(0.0, -GYRO_SIDE*127, 0.0); //Can probably get rid of this
   tracking.wait_for_dist(18);
 }
 

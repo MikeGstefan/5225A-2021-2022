@@ -59,6 +59,7 @@ namespace screen_flash{
 
     timer.reset(); //Starts counting
     end_time = time;
+    if(time) printf("\nShowing for %s.\n\n", millis_to_str(time).c_str());
   }
 
   void start(std::string text, GUI::Colours colour, std::uint32_t time){
@@ -93,6 +94,7 @@ namespace screen_flash{
 
     timer.reset(); //Starts counting
     end_time = time;
+    if(time) printf("\nShowing for %s.\n\n", millis_to_str(time).c_str());
   }
 
   void start(GUI::Colours colour, std::uint32_t time, const char* fmt, ...){
@@ -105,7 +107,7 @@ namespace screen_flash{
   void start(Colour colour, std::uint32_t time, const char* fmt, ...){
     std::va_list args;
     va_start(args, fmt);
-    start(printf_to_string(fmt, args), GUI::Colours::ERROR, 1000);
+    start(printf_to_string(fmt, args), colour, 1000);
     va_end(args);
   }
 
@@ -720,7 +722,7 @@ void GUI::update_screen_status(){
   touched = status.touch_status == TOUCH_PRESSED || status.touch_status == TOUCH_HELD;
   x = status.x;
   y = status.y;
-  printf("Updated\n");
+  // printf("Updated\n");
 }
 
 bool GUI::pressed() const{
@@ -906,7 +908,7 @@ void GUI::init(){
 void GUI::update(void* params){
   _Task* ptr = _Task::get_obj(params);
   while(true){
-    printf("Loop\n");
+    // printf("Loop\n");
     current_gui->background();
     update_screen_status();
     const Page& cur_p = *current_page;

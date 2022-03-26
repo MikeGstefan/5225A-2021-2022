@@ -5,27 +5,38 @@
 
 //Var init for text monitoring
 int left_enc, right_enc, back_enc;
-const char* motor_port_nums;
-const char* expander_port_nums;
-const char* no_pneumatic_port_nums;
-std::array<std::tuple<int, Button*, Button*, Text_*, int, char*>, 8> motor_ports; //util: port, run, stop, stall counter, port and rpm
+std::string motor_port_nums;
+std::string expander_port_nums;
+std::string no_pneumatic_port_nums;
+std::array<std::tuple<int, Button*, Button*, Text_*, int, std::string>, 8> motor_ports; //util: port, run, stop, stall counter, port and rpm
 std::array<int, 21> expander_ports;
 std::array<Button*, 8> expander_btns;
 
 //For gui to use
-extern std::array<std::tuple<pros::Motor*, int, const char*, const char*, Text_*>, 8> motors_for_gui; //Declared in config.cpp
 extern int elastic_b_up_time, elastic_b_down_time; //Declared in b_lift.cpp
 extern int elastic_f_up_time, elastic_f_down_time; //Declared in f_lift.cpp
 
+//1:temp(leave as 0), 2:long name, 3:short name
+std::array<std::tuple<pros::Motor*, int, std::string, std::string, Text_*>, 8> motors_for_gui = {
+  std::make_tuple(&front_l, 0, "Front Left", "FL", nullptr),
+  std::make_tuple(&front_r, 0, "Front Right", "FR", nullptr),
+  std::make_tuple(&back_l, 0, "Back Left", "BL", nullptr),
+  std::make_tuple(&back_r, 0, "Back Right", "BR", nullptr),
+  std::make_tuple(&f_lift_m, 0, "Front Lift", "F", nullptr),
+  std::make_tuple(&b_lift_m, 0, "Back Lift", "B", nullptr),
+  std::make_tuple(&intk, 0, "Intake", "IN", nullptr),
+  std::make_tuple(nullptr, 0, "", "", nullptr),
+};//std::make_tuple(nullptr, 0, "", "", nullptr),
+
 Page temps ("Temperature"); //Motor temps
-Text mot_temp_1(75, 85, GUI::Style::CENTRE, TEXT_SMALL, temps, std::get<3>(motors_for_gui[0]) + ": %dC"s, std::get<1>(motors_for_gui[0]), COLOUR(BLACK));
-Text mot_temp_2(185, 85, GUI::Style::CENTRE, TEXT_SMALL, temps, std::get<3>(motors_for_gui[1]) + ": %dC"s, std::get<1>(motors_for_gui[1]), COLOUR(BLACK));
-Text mot_temp_3(295, 85, GUI::Style::CENTRE, TEXT_SMALL, temps, std::get<3>(motors_for_gui[2]) + ": %dC"s, std::get<1>(motors_for_gui[2]), COLOUR(BLACK));
-Text mot_temp_4(405, 85, GUI::Style::CENTRE, TEXT_SMALL, temps, std::get<3>(motors_for_gui[3]) + ": %dC"s, std::get<1>(motors_for_gui[3]), COLOUR(BLACK));
-Text mot_temp_5(75, 175, GUI::Style::CENTRE, TEXT_SMALL, temps, std::get<3>(motors_for_gui[4]) + ": %dC"s, std::get<1>(motors_for_gui[4]), COLOUR(BLACK));
-Text mot_temp_6(185, 175, GUI::Style::CENTRE, TEXT_SMALL, temps, std::get<3>(motors_for_gui[5]) + ": %dC"s, std::get<1>(motors_for_gui[5]), COLOUR(BLACK));
-Text mot_temp_7(295, 175, GUI::Style::CENTRE, TEXT_SMALL, temps, std::get<3>(motors_for_gui[6]) + ": %dC"s, std::get<1>(motors_for_gui[6]), COLOUR(BLACK));
-Text mot_temp_8(405, 175, GUI::Style::CENTRE, TEXT_SMALL, temps, std::get<3>(motors_for_gui[7]) + ": %dC"s, std::get<1>(motors_for_gui[7]), COLOUR(BLACK));
+Text mot_temp_1(75, 85, GUI::Style::CENTRE, TEXT_SMALL, temps, std::get<3>(motors_for_gui[0]) + ": %dC", std::get<1>(motors_for_gui[0]), COLOUR(BLACK));
+Text mot_temp_2(185, 85, GUI::Style::CENTRE, TEXT_SMALL, temps, std::get<3>(motors_for_gui[1]) + ": %dC", std::get<1>(motors_for_gui[1]), COLOUR(BLACK));
+Text mot_temp_3(295, 85, GUI::Style::CENTRE, TEXT_SMALL, temps, std::get<3>(motors_for_gui[2]) + ": %dC", std::get<1>(motors_for_gui[2]), COLOUR(BLACK));
+Text mot_temp_4(405, 85, GUI::Style::CENTRE, TEXT_SMALL, temps, std::get<3>(motors_for_gui[3]) + ": %dC", std::get<1>(motors_for_gui[3]), COLOUR(BLACK));
+Text mot_temp_5(75, 175, GUI::Style::CENTRE, TEXT_SMALL, temps, std::get<3>(motors_for_gui[4]) + ": %dC", std::get<1>(motors_for_gui[4]), COLOUR(BLACK));
+Text mot_temp_6(185, 175, GUI::Style::CENTRE, TEXT_SMALL, temps, std::get<3>(motors_for_gui[5]) + ": %dC", std::get<1>(motors_for_gui[5]), COLOUR(BLACK));
+Text mot_temp_7(295, 175, GUI::Style::CENTRE, TEXT_SMALL, temps, std::get<3>(motors_for_gui[6]) + ": %dC", std::get<1>(motors_for_gui[6]), COLOUR(BLACK));
+Text mot_temp_8(405, 175, GUI::Style::CENTRE, TEXT_SMALL, temps, std::get<3>(motors_for_gui[7]) + ": %dC", std::get<1>(motors_for_gui[7]), COLOUR(BLACK));
 
 Page checks("System Checks");
 Button drive_motors (30, 40, 120, 75, GUI::Style::SIZE, Button::SINGLE, checks, "Drive Motors");
@@ -539,14 +550,14 @@ void main_background(){
   int x = 200*tracking.x_coord/144, y = 200*tracking.y_coord/144;
   if(in_range(x, 0, 199) && in_range(y, 0, 199)) field[x].set(y); //Saves position (x,y) to as tracked
 
-  for (std::array<std::tuple<Motor*, int, const char*, const char*, Text_*>, 8>::iterator it = motors_for_gui.begin(); it != motors_for_gui.end(); it++){
-    std::tuple<Motor*, int, const char*, const char*, Text_*>& mot_tup = *it;
+  for (std::array<std::tuple<Motor*, int, std::string, std::string, Text_*>, 8>::iterator it = motors_for_gui.begin(); it != motors_for_gui.end(); it++){
+    std::tuple<Motor*, int, std::string, std::string, Text_*>& mot_tup = *it;
     std::get<1>(mot_tup) = std::get<0>(mot_tup) ? std::get<0>(mot_tup)->get_temperature() : std::numeric_limits<int>::max();
 
     if (!temp_flashed && std::get<0>(mot_tup) && in_range(std::get<1>(mot_tup), 55, std::numeric_limits<int>::max()-1) && screen_flash::timer.playing()){ //Overheating
       temp_flashed = true;
       temps.go_to();
-      screen_flash::start(GUI::Colours::ERROR, 10000, "%s motor is at %dC\n", std::get<2>(mot_tup), std::get<1>(mot_tup));
+      screen_flash::start(GUI::Colours::ERROR, 10000, "%s motor is at %dC\n", std::get<2>(mot_tup).c_str(), std::get<1>(mot_tup));
       break;
     }
   }
@@ -555,14 +566,14 @@ void main_background(){
 void util_setup(){
   expander_btns = {&ADI_a, &ADI_b, &ADI_c, &ADI_d, &ADI_e, &ADI_f, &ADI_g, &ADI_h};
   motor_ports = {
-    std::make_tuple(std::numeric_limits<int>::max(), &mot_update_1, &mot_stop_1, &mot_text_1, 0, (char*)malloc(10*sizeof(char))),
-    std::make_tuple(std::numeric_limits<int>::max(), &mot_update_2, &mot_stop_2, &mot_text_2, 0, (char*)malloc(10*sizeof(char))),
-    std::make_tuple(std::numeric_limits<int>::max(), &mot_update_3, &mot_stop_3, &mot_text_3, 0, (char*)malloc(10*sizeof(char))),
-    std::make_tuple(std::numeric_limits<int>::max(), &mot_update_4, &mot_stop_4, &mot_text_4, 0, (char*)malloc(10*sizeof(char))),
-    std::make_tuple(std::numeric_limits<int>::max(), &mot_update_5, &mot_stop_5, &mot_text_5, 0, (char*)malloc(10*sizeof(char))),
-    std::make_tuple(std::numeric_limits<int>::max(), &mot_update_6, &mot_stop_6, &mot_text_6, 0, (char*)malloc(10*sizeof(char))),
-    std::make_tuple(std::numeric_limits<int>::max(), &mot_update_7, &mot_stop_7, &mot_text_7, 0, (char*)malloc(10*sizeof(char))),
-    std::make_tuple(std::numeric_limits<int>::max(), &mot_update_8, &mot_stop_8, &mot_text_8, 0, (char*)malloc(10*sizeof(char))),
+    std::make_tuple(std::numeric_limits<int>::max(), &mot_update_1, &mot_stop_1, &mot_text_1, 0, ""),
+    std::make_tuple(std::numeric_limits<int>::max(), &mot_update_2, &mot_stop_2, &mot_text_2, 0, ""),
+    std::make_tuple(std::numeric_limits<int>::max(), &mot_update_3, &mot_stop_3, &mot_text_3, 0, ""),
+    std::make_tuple(std::numeric_limits<int>::max(), &mot_update_4, &mot_stop_4, &mot_text_4, 0, ""),
+    std::make_tuple(std::numeric_limits<int>::max(), &mot_update_5, &mot_stop_5, &mot_text_5, 0, ""),
+    std::make_tuple(std::numeric_limits<int>::max(), &mot_update_6, &mot_stop_6, &mot_text_6, 0, ""),
+    std::make_tuple(std::numeric_limits<int>::max(), &mot_update_7, &mot_stop_7, &mot_text_7, 0, ""),
+    std::make_tuple(std::numeric_limits<int>::max(), &mot_update_8, &mot_stop_8, &mot_text_8, 0, ""),
   };
 
   //Motor Port Detection
@@ -574,21 +585,22 @@ void util_setup(){
   }
 
   //Motor port numbers and motor buttons
-  std::string motor_port_string;
-  for (std::array<std::tuple<int, Button*, Button*, Text_*, int, char*>, 8>::iterator it = motor_ports.begin(); it != motor_ports.end(); it++){
-    std::tuple<int, Button*, Button*, Text_*, int, char*>& mot_arr = *it;
+  for (std::array<std::tuple<int, Button*, Button*, Text_*, int, std::string>, 8>::iterator it = motor_ports.begin(); it != motor_ports.end(); it++){
+    std::tuple<int, Button*, Button*, Text_*, int, std::string>& mot_arr = *it;
 
-    if (std::get<0>(mot_arr) != std::numeric_limits<int>::max()) motor_port_string.append(std::to_string(std::get<0>(mot_arr)) + ",");
+    if (std::get<0>(mot_arr) != std::numeric_limits<int>::max()) motor_port_nums.append(std::to_string(std::get<0>(mot_arr)) + ",");
     else{
       std::get<1>(mot_arr)->set_active(false);
       std::get<2>(mot_arr)->set_active(false);
       std::get<3>(mot_arr)->set_active(false);
     }
-    std::get<1>(mot_arr)->set_func([&](){c::motor_move(std::get<0>(mot_arr), mot_speed.get_value());});
+    std::get<1>(mot_arr)->set_func([&](){
+      c::motor_move(std::get<0>(mot_arr), mot_speed.get_value());
+      printf("POWERING\n");
+    });
     std::get<2>(mot_arr)->set_func([&](){c::motor_move(std::get<0>(mot_arr), 0);});
   }
-  if (motor_port_string.back() == ',') motor_port_string.pop_back();
-  motor_port_nums = strdup(motor_port_string.c_str());
+  if (motor_port_nums.back() == ',') motor_port_nums.pop_back();
 
   //Expander Port Detection
   for (int port=0; port<21; port++){
@@ -596,29 +608,26 @@ void util_setup(){
     else expander_ports[port] = std::numeric_limits<int>::max();
   }
 
-  std::string expander_port_string;
   for (std::array<int, 21>::iterator it = expander_ports.begin(); it != expander_ports.end(); it++){
-    if (*it != std::numeric_limits<int>::max()) expander_port_string.append(std::to_string(*it) + ",");
+    if (*it != std::numeric_limits<int>::max()) expander_port_nums.append(std::to_string(*it) + ",");
   }
-  if (expander_port_string.back() == ',') expander_port_string.pop_back();
-  expander_port_nums = strdup(expander_port_string.c_str());
+  if (expander_port_nums.back() == ',') expander_port_nums.pop_back();
 
 
   //Expander buttons
-  std::string no_pneumatic_port_string;
   for (int i = 1; i <= 8; i++){
     if(c::adi_port_get_config(i) != pros::E_ADI_DIGITAL_IN && c::adi_port_get_config(i) != E_ADI_DIGITAL_OUT){
-      no_pneumatic_port_string.push_back(char(i+64));
-      no_pneumatic_port_string.push_back(',');
+      no_pneumatic_port_nums.push_back(char(i+64));
+      no_pneumatic_port_nums.push_back(',');
     }
     expander_btns[i-1]->set_func([i](){
-      int expander_port = expander.get_value();
-      if (expander_port){
-        if(c::registry_get_plugged_type(expander_port-1) != c::E_DEVICE_ADI){
-          screen_flash::start(GUI::Colours::ERROR, "No Expander in port %d", expander_port);
+      int port = expander.get_value();
+      if (port){
+        if(c::registry_get_plugged_type(port-1) != c::E_DEVICE_ADI){
+          screen_flash::start(GUI::Colours::ERROR, "No Expander in port %d", port);
         }
-        c::ext_adi_port_set_config(expander_port, i, E_ADI_DIGITAL_OUT);
-        c::ext_adi_port_set_value(expander_port, i, HIGH);
+        c::ext_adi_port_set_config(port, i, E_ADI_DIGITAL_OUT);
+        c::ext_adi_port_set_value(port, i, HIGH);
       }
       else{
         c::adi_port_set_config(i, E_ADI_DIGITAL_OUT);
@@ -626,13 +635,13 @@ void util_setup(){
       }
     });
     expander_btns[i-1]->set_off_func([i](){
-      int expander_port = expander.get_value();
-      if (expander_port){
-        if(c::registry_get_plugged_type(expander_port-1) != c::E_DEVICE_ADI){
-          screen_flash::start(GUI::Colours::ERROR, "No Expander in port %d", expander_port);
+      int port = expander.get_value();
+      if (port){
+        if(c::registry_get_plugged_type(port-1) != c::E_DEVICE_ADI){
+          screen_flash::start(GUI::Colours::ERROR, "No Expander in port %d", port);
         }
-        c::ext_adi_port_set_config(expander_port, i, E_ADI_DIGITAL_OUT);
-        c::ext_adi_port_set_value(expander_port, i, LOW);
+        c::ext_adi_port_set_config(port, i, E_ADI_DIGITAL_OUT);
+        c::ext_adi_port_set_value(port, i, LOW);
       }
       else{
         c::adi_port_set_config(i, E_ADI_DIGITAL_OUT);
@@ -641,8 +650,7 @@ void util_setup(){
     });
   }
 
-  if (no_pneumatic_port_string.back() == ',') no_pneumatic_port_string.pop_back();
-  no_pneumatic_port_nums = strdup(no_pneumatic_port_string.c_str());
+  if (no_pneumatic_port_nums.back() == ',') no_pneumatic_port_nums.pop_back();
 
 
   encoders.set_loop_func([](){
@@ -658,11 +666,11 @@ void util_setup(){
 
 void util_background(){
   //Motor Stalled
-  for (std::array<std::tuple<int, Button*, Button*, Text_*, int, char*>, 8>::iterator it = motor_ports.begin(); it != motor_ports.end(); it++){
-    std::tuple<int, Button*, Button*, Text_*, int, char*>& mot_arr = *it;
+  for (std::array<std::tuple<int, Button*, Button*, Text_*, int, std::string>, 8>::iterator it = motor_ports.begin(); it != motor_ports.end(); it++){
+    std::tuple<int, Button*, Button*, Text_*, int, std::string>& mot_arr = *it;
     int port = std::get<0>(mot_arr);
     if (port != std::numeric_limits<int>::max()){
-      snprintf(std::get<5>(mot_arr), 9, "%d: %d", port, (int)c::motor_get_actual_velocity(port));
+      std::get<5>(mot_arr) = std::to_string(port) + ": " + std::to_string((int)c::motor_get_actual_velocity(port));
       if (fabs(c::motor_get_actual_velocity(port)) < fabs(c::motor_get_target_velocity(port))/4) std::get<4>(mot_arr) += 1;
       else std::get<4>(mot_arr) = 0;
       if (std::get<4>(mot_arr) > 10){
