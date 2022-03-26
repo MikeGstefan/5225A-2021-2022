@@ -738,37 +738,6 @@ void lrt_auton(){
 }
 
 
-enum class autons{
-  Skills,
-  AUTO2,
-  AUTO3,
-  NUM_OF_ELEMENTS,
-  DEFAULT = Skills,
-};
-
-enum class start_pos{
-  POS1,
-  POS2,
-  POS3,
-  NUM_OF_ELEMENTS,
-  DEFAULT = POS1,
-};
-
-enum class alliances{
-  RED,
-  BLUE,
-  NUM_OF_ELEMENTS,
-  DEFAULT = RED
-};
-
-enum class goals{
-  LEFT,
-  TALL,
-  RIGHT,
-  NUM_OF_ELEMENTS,
-  DEFAULT = TALL
-};
-
 autons cur_auton = autons::DEFAULT;
 alliances cur_alliance = alliances::DEFAULT;
 start_pos cur_start_pos = start_pos::DEFAULT;
@@ -813,11 +782,10 @@ void save_auton_change(std::string which){
     line = 0;
   }
   else{
-    printf("%sInvalid selection to save auton data.%s\n", GUI::get_term_colour(GUI::Colours::ERROR), GUI::get_term_colour(GUI::Colours::NONE));
+    printf2(term_colours::ERROR, 0, "Invalid selection to save auton data.");
     return;
   }
-
-  printf("%sSwitched %s to %s%s\n", GUI::get_term_colour(GUI::Colours::GREEN), which.c_str(), val.c_str(), GUI::get_term_colour(GUI::Colours::NONE));
+  printf2(term_colours::GREEN, 0, "Switched %s to %s", which, val);
   events.print("\n\nSwitched %s to %s\n\n", which.c_str(), val.c_str());
   master.print(line, 0, "%s: %s          ", which.c_str(), val.c_str());
   auton_file_update();
@@ -826,7 +794,7 @@ void save_auton_change(std::string which){
 void auton_file_read(){
   if (!pros::usd::is_installed()){
     screen_flash::start("No SD Card!");
-    printf("%sNo SD card inserted.%s Using default auton, start position, goal and alliance.\n", GUI::get_term_colour(GUI::Colours::ERROR), GUI::get_term_colour(GUI::Colours::NONE));
+    printf2(term_colours::ERROR, 0, "No SD card inserted. Using default auton, start position, goal and alliance.");
     return;
   }
   else{
@@ -838,7 +806,7 @@ void auton_file_read(){
       screen_flash::start("Auton File not found!");
       auton_file_update();
       
-      printf("%sCreated new Auton File.%s\n", GUI::get_term_colour(GUI::Colours::GOOD), GUI::get_term_colour(GUI::Colours::NONE));
+      printf2(term_colours::NOTIF, 0, "Created new Auton File.");
       auton_file.open(auton_file_name, fstream::in);
     }
 

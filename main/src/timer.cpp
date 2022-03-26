@@ -120,30 +120,30 @@ std::string Timer::to_string(std::uint64_t time, timing_units unit, int long_nam
       std::uint64_t milliseconds = time/1000;
       time -= milliseconds*1000;
 
-      if(milliseconds >= 1000) buffer += to_string(milliseconds, timing_units::millis, long_names, true);
-      else buffer += std::to_string(milliseconds) + millis;
+      if(milliseconds >= 1000) buffer += to_string(milliseconds, timing_units::millis, long_names, true) + ' ';
+      else buffer += std::to_string(milliseconds) + millis + ' ';
     }
 
     else if(time >= 1000 && unit == timing_units::millis){
       std::uint64_t seconds = time/1000;
       time -= seconds*1000;
 
-      if(seconds >= 60) buffer += to_string(seconds, timing_units::seconds, long_names, true);
-      else buffer += std::to_string(seconds) + sec;
+      if(seconds >= 60) buffer += to_string(seconds, timing_units::seconds, long_names, true) + ' ';
+      else buffer += std::to_string(seconds) + sec + ' ';
     }
 
     else if(time >= 60 && unit == timing_units::seconds){
       std::uint64_t minutes = time/60;
       time -= minutes*60;
 
-      buffer += std::to_string(minutes) + min;
+      buffer += std::to_string(minutes) + min + ' ';
     }
 
   }
 
   //Writes value
   if(time){
-    buffer += ' ' + std::to_string(time);
+    buffer += std::to_string(time);
     //Writes unit
     switch(unit){
       case timing_units::micros: buffer += micros; break;

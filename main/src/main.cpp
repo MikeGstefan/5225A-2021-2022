@@ -87,6 +87,8 @@ void opcontrol() {
 	auton give up func - ask mike
 	lvgl images
 
+  make screen flash template for Params...
+
   check what actually kills the auto balance loop
   check auton selector
   integrate pneumatics

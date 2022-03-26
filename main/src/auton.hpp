@@ -34,10 +34,37 @@ void blue_lowside();
 
 constexpr bool normal_auton = true;
 
-enum class autons;
-enum class start_pos;
-enum class alliances; //alliances and goals really shouldn't be enums, but it makes my code more consistent
-enum class goals;
+//alliances and goals really shouldn't be enums, but it makes my code more consistent
+enum class autons{
+  Skills,
+  AUTO2,
+  AUTO3,
+  NUM_OF_ELEMENTS,
+  DEFAULT = Skills,
+};
+
+enum class start_pos{
+  POS1,
+  POS2,
+  POS3,
+  NUM_OF_ELEMENTS,
+  DEFAULT = POS1,
+};
+
+enum class alliances{
+  RED,
+  BLUE,
+  NUM_OF_ELEMENTS,
+  DEFAULT = RED
+};
+
+enum class goals{
+  LEFT,
+  TALL,
+  RIGHT,
+  NUM_OF_ELEMENTS,
+  DEFAULT = TALL
+};
 
 extern autons cur_auton;
 extern start_pos cur_start_pos;

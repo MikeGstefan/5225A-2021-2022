@@ -19,12 +19,6 @@ double near_angle(double angle, double reference){
 	return round((reference - angle) / (2 * M_PI)) * (2 * M_PI) + angle - reference;
 }
 
-std::string printf_to_string(const char* fmt, va_list arg){
-  char buffer[150];
-  vsnprintf(buffer,150,fmt,arg);
-  return std::string(buffer);
-}
-
 std::function<long double (long double)> func_scale(std::function<long double(long double)> f, Point p1, Point p2, double control){
   long double f1 = f(p1.x+control);
   long double f2 = f(p2.x+control);

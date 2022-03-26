@@ -53,6 +53,7 @@ double operator "" _rad(long double radians);
  * @return degrees
  */
 double rad_to_deg(double rad);
+
 /**
  * @brief converts degrees to radians
  * 
@@ -60,7 +61,6 @@ double rad_to_deg(double rad);
  * @return radians
  */
 double deg_to_rad(double deg);
-
 
 /**
  * @brief returns the closest equivalent angle to refrence in radians
@@ -70,15 +70,6 @@ double deg_to_rad(double deg);
  * @return double 
  */
 double near_angle(double angle, double reference);
-
-/**
- * @brief format string to std::string
- * 
- * @param fmt format string
- * @param arg printf style args
- * @return std::string 
- */
-std::string printf_to_string(const char* fmt, va_list arg);
 
 /**
  * @brief 
@@ -127,6 +118,8 @@ T map_set(T input, T in_min, T in_max, T out_min, T out_max, T range1, T val_1, 
   if (input <= range1) return map(input, in_min, range1, out_min, val_1);
   else return map_set(input, range1, in_max, val_1, out_max, args...);
 }
+
+//ENUM HELPERS
 
 //Assumes enum values are consecutive
 template <typename T>

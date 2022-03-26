@@ -1587,7 +1587,7 @@ void Gyro::climb_ramp(){
   });
   wait_until(angle > 22);
   motion_i.print("ON RAMP: %f\n", angle);
-  screen_flash::start("On Ramp", GUI::Colours::GOOD);
+  screen_flash::start("On Ramp", term_colours::NOTIF);
 
   tracking.reset();
 
@@ -1603,7 +1603,7 @@ void Gyro::level(double kP, double kD){
   int speed;
   bool neg = false;
 
-  screen_flash::start("PID", GUI::Colours::GOOD);
+  screen_flash::start("PID", term_colours::NOTIF);
 
 	wait_until(gyro_steady.get_time() > 500 || master.interrupt(true, true)){
     gyro_p.compute(-angle, 0);
@@ -1623,5 +1623,5 @@ void Gyro::level(double kP, double kD){
   back_r.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
   drivebase.velo_brake();
 
-  screen_flash::start("Braked", GUI::Colours::GOOD);
+  screen_flash::start("Braked", term_colours::NOTIF);
 }

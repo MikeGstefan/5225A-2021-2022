@@ -557,7 +557,7 @@ void main_background(){
     if (!temp_flashed && std::get<0>(mot_tup) && in_range(std::get<1>(mot_tup), 55, std::numeric_limits<int>::max()-1) && screen_flash::timer.playing()){ //Overheating
       temp_flashed = true;
       temps.go_to();
-      screen_flash::start(GUI::Colours::ERROR, 10000, "%s motor is at %dC\n", std::get<2>(mot_tup).c_str(), std::get<1>(mot_tup));
+      screen_flash::start(term_colours::ERROR, 10000, "%s motor is at %dC\n", std::get<2>(mot_tup).c_str(), std::get<1>(mot_tup));
       break;
     }
   }
@@ -624,7 +624,7 @@ void util_setup(){
       int port = expander.get_value();
       if (port){
         if(c::registry_get_plugged_type(port-1) != c::E_DEVICE_ADI){
-          screen_flash::start(GUI::Colours::ERROR, "No Expander in port %d", port);
+          screen_flash::start(term_colours::ERROR, "No Expander in port %d", port);
         }
         c::ext_adi_port_set_config(port, i, E_ADI_DIGITAL_OUT);
         c::ext_adi_port_set_value(port, i, HIGH);
@@ -638,7 +638,7 @@ void util_setup(){
       int port = expander.get_value();
       if (port){
         if(c::registry_get_plugged_type(port-1) != c::E_DEVICE_ADI){
-          screen_flash::start(GUI::Colours::ERROR, "No Expander in port %d", port);
+          screen_flash::start(term_colours::ERROR, "No Expander in port %d", port);
         }
         c::ext_adi_port_set_config(port, i, E_ADI_DIGITAL_OUT);
         c::ext_adi_port_set_value(port, i, LOW);
@@ -675,7 +675,7 @@ void util_background(){
       else std::get<4>(mot_arr) = 0;
       if (std::get<4>(mot_arr) > 10){
         std::get<4>(mot_arr) = 0;
-        screen_flash::start(GUI::Colours::ERROR, "Stopping Motor %d\n", port);
+        screen_flash::start(term_colours::ERROR, "Stopping Motor %d\n", port);
         c::motor_move(port, 0);
       }
     }

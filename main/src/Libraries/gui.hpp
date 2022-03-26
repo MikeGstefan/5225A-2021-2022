@@ -1,4 +1,5 @@
 #pragma once
+#include "printing.hpp"
 #include "../auton.hpp"
 #include "../drive.hpp"
 #include "../piston.hpp"
@@ -15,7 +16,6 @@ template <typename V=std::nullptr_t> class Text;
 
 //For main.cpp to switch between
 extern GUI g_main, g_util;
-
 
 //From gui.cpp
 extern Page terminal, testing;
@@ -61,21 +61,6 @@ class GUI{
       CENTER=CENTRE
     };
 
-    enum class Colours{ //how the rect coords get evaluated
-      BLACK,
-      RED,
-      GREEN,
-      YELLOW,
-      BLUE,
-      MAGENTA,
-      CYAN,
-      WHITE,
-      NONE,
-      ERROR = RED,
-      WARNING = YELLOW,
-      GOOD = GREEN,
-    };
-
   private:
     //Vars
     static _Task task;
@@ -101,8 +86,7 @@ class GUI{
     GUI(std::vector<Page*>, std::function <void()>, std::function <void()>);
 
     //Functions
-    static const char* get_term_colour(Colours);
-    static Colour get_gui_colour(Colours);
+    static Colour get_colour(term_colours);
 
     static void aligned_coords (int, int, int, int, int = 480, int = 220);
     static void clear_screen(Colour=GREY);
@@ -372,11 +356,11 @@ namespace screen_flash{
   extern Timer timer;
 
   void start(std::string, Colour, std::uint32_t = 1000); //text+col+time / text+col
-  void start(std::string, GUI::Colours = GUI::Colours::ERROR, std::uint32_t = 1000); //text+cols+time / text+cols / text
-  void start(GUI::Colours, std::uint32_t, const char*, ...); //text+cols+time
+  void start(std::string, term_colours = term_colours::ERROR, std::uint32_t = 1000); //text+cols+time / text+cols / text
+  void start(term_colours, std::uint32_t, const char*, ...); //text+cols+time
   void start(Colour, std::uint32_t, const char*, ...); //text+col+time
   void start(std::uint32_t, const char*, ...); //text+red+time
-  void start(GUI::Colours, const char*, ...); //text+col+1000
+  void start(term_colours, const char*, ...); //text+col+1000
 
   void end();
 }

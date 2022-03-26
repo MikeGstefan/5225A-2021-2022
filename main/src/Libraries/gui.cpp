@@ -41,7 +41,7 @@ namespace screen_flash{
     screen::set_pen(~colour&0xFFFFFF); //Makes text inverted colour of background so it is always visible
     screen::set_eraser(colour);
 
-    printf("\n\n%s\n\n", text.c_str());
+    printf2("\n\n%s\n", text);
     events.print("\n\n%d | %s\n\n", millis(), text.c_str());
 
     int spaces = int(CHAR_WIDTH_LARGE*text.length()/460)+1;
@@ -62,21 +62,13 @@ namespace screen_flash{
     if(time) printf("\nShowing for %s.\n\n", Timer::to_string(time, timing_units::millis, 1, true).c_str());
   }
 
-  void start(std::string text, GUI::Colours colour, std::uint32_t time){
+  void start(std::string text, term_colours colour, std::uint32_t time){
     touched = GUI::is_touched();
-    GUI::clear_screen(GUI::get_gui_colour(colour));
-    screen::set_pen(~GUI::get_gui_colour(colour)&0xFFFFFF); //Makes text inverted colour of background so it is always visible
-    screen::set_eraser(GUI::get_gui_colour(colour));
+    GUI::clear_screen(GUI::get_colour(colour));
+    screen::set_pen(~GUI::get_colour(colour)&0xFFFFFF); //Makes text inverted colour of background so it is always visible
+    screen::set_eraser(GUI::get_colour(colour));
 
-    std::string pretext;
-    switch(colour){
-      case GUI::Colours::ERROR: pretext = "ERROR: "; break;
-      case GUI::Colours::WARNING: pretext = "WARNING: "; break;
-      case GUI::Colours::GOOD: pretext = "NOTIF: "; break;
-      default: pretext = ""; break;
-    }
-
-    printf("\n\n%s%s%s%s\n\n", GUI::get_term_colour(colour), pretext.c_str(), text.c_str(), GUI::get_term_colour(GUI::Colours::NONE));
+    printf2(colour, 1, "\n\n%s\n", text);
     events.print("\n\n%d | %s\n\n", millis(), text.c_str());
 
     int spaces = int(CHAR_WIDTH_LARGE*text.length()/460)+1;
@@ -98,7 +90,7 @@ namespace screen_flash{
     if(time) printf("\nShowing for %s.\n\n", Timer::to_string(time, timing_units::millis, 1, true).c_str());
   }
 
-  void start(GUI::Colours colour, std::uint32_t time, const char* fmt, ...){
+  void start(term_colours colour, std::uint32_t time, const char* fmt, ...){
     std::va_list args;
     va_start(args, fmt);
     start(printf_to_string(fmt, args), colour, time);
@@ -115,11 +107,11 @@ namespace screen_flash{
   void start(std::uint32_t time, const char* fmt, ...){
     std::va_list args;
     va_start(args, fmt);
-    start(printf_to_string(fmt, args), GUI::Colours::ERROR, time);
+    start(printf_to_string(fmt, args), term_colours::ERROR, time);
     va_end(args);
   }
 
-  void start(GUI::Colours colour, const char* fmt, ...){
+  void start(term_colours colour, const char* fmt, ...){
     std::va_list args;
     va_start(args, fmt);
     start(printf_to_string(fmt, args), colour, 1000);
@@ -194,7 +186,7 @@ bool GUI::go(std::string short_msg, std::string long_msg, std::uint32_t delay_ti
     }
     printf("\nRunning\n\n");
   }
-  else printf("\n%sInterrupted%s\n\n", get_term_colour(Colours::ERROR), get_term_colour(Colours::NONE));
+  else printf("\n%sInterrupted%s\n\n", get_term_colour(term_colours::ERROR), get_term_colour(term_colours::NONE));
 
   page->go_to();
   master.clear();
@@ -231,7 +223,7 @@ bool GUI::go_end(std::string msg, std::uint32_t delay_time){
     }
     printf("\nRunning\n\n");
   }
-  else printf("\n%sInterrupted%s\n\n", get_term_colour(Colours::ERROR), get_term_colour(Colours::NONE));
+  else printf("\n%sInterrupted%s\n\n", get_term_colour(term_colours::ERROR), get_term_colour(term_colours::NONE));
   master.clear();
   return !interrupted;
 }
@@ -674,32 +666,20 @@ int GUI::get_width(text_format_e_t size){
   return 0;
 }
 
-const char* GUI::get_term_colour(GUI::Colours colour){
+Colour GUI::get_colour(term_colours colour){
   switch(colour){
-    case Colours::BLACK: return "\033[30m"; break;
-    case Colours::RED: return "\033[31m"; break;
-    case Colours::GREEN: return "\033[32m"; break;
-    case Colours::YELLOW: return "\033[33m"; break;
-    case Colours::BLUE: return "\033[34m"; break;
-    case Colours::MAGENTA: return "\033[35m"; break;
-    case Colours::CYAN: return "\033[36m"; break;
-    case Colours::WHITE: return "\033[37m"; break;
-    case Colours::NONE: return "\033[0m"; break;
-  }
-  return "";
-}
-
-Colour GUI::get_gui_colour(GUI::Colours colour){
-  switch(colour){
-    case Colours::BLACK: return COLOUR(BLACK); break;
-    case Colours::RED: return COLOUR(RED); break;
-    case Colours::GREEN: return COLOUR(GREEN); break;
-    case Colours::YELLOW: return COLOUR(YELLOW); break;
-    case Colours::BLUE: return COLOUR(BLUE); break;
-    case Colours::MAGENTA: return COLOUR(MAGENTA); break;
-    case Colours::CYAN: return COLOUR(CYAN); break;
-    case Colours::WHITE: return COLOUR(WHITE); break;
-    case Colours::NONE: return GREY; break;
+    case term_colours::BLACK: return COLOUR(BLACK); break;
+    case term_colours::ERROR:
+    case term_colours::RED: return COLOUR(RED); break;
+    case term_colours::NOTIF:
+    case term_colours::GREEN: return COLOUR(GREEN); break;
+    case term_colours::WARNING:
+    case term_colours::YELLOW: return COLOUR(YELLOW); break;
+    case term_colours::BLUE: return COLOUR(BLUE); break;
+    case term_colours::MAGENTA: return COLOUR(MAGENTA); break;
+    case term_colours::CYAN: return COLOUR(CYAN); break;
+    case term_colours::WHITE: return COLOUR(WHITE); break;
+    case term_colours::NONE: return GREY; break;
   }
   return GREY;
 }
