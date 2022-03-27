@@ -191,6 +191,86 @@ Position distance_reset_right(int cycles){
 }
 
 
+Position distance_reset_center(int cycle){
+	double dist_corner = 6; //Distance sensor to corner
+	double side_length = 86; //Corner of the robot to side distance sensor
+	double dist_to_centre = 196; //Side distance sensor to tracking centre
+	double local_y = 0, l_local_x = 0, r_local_x = 0, angle = 0;
+	double averageleft = 0, averageright = 0, average_l_side = 0, average_r_side = 0;
+	double dist_sensor = 429; //Distance between Sensors
+	int start_time = millis();
+	vector <int> left;
+	vector <int> right;
+	vector <int> r_side;
+	vector <int> l_side;
+	ram = false;
+	int left_low = l_reset_dist.get();
+	int right_low = r_reset_dist.get();
+	int r_side_low = r_dist.get();
+	int l_side_low = l_dist.get();
+
+
+	int error_count = 0;
+
+	misc.print("Start Time: %d\n", start_time);
+	for(int i = 0; i < cycle; i++){
+		misc.print("%d| Left:%d Right: %d, r_Side: %d, l_side: %d\n", millis(), l_reset_dist.get(), r_reset_dist.get(), r_dist.get(), l_dist.get());
+
+		if(l_reset_dist.get() <= left_low) left_low = l_reset_dist.get();
+		if(r_reset_dist.get() <= right_low) right_low = r_reset_dist.get();
+		if(r_dist.get() <= r_side_low) r_side_low = r_dist.get();
+		if(l_dist.get() <= l_side_low) l_side_low = l_dist.get();
+
+
+		if(l_reset_dist.get() < left_low + 20) left.push_back(l_reset_dist.get()); else error_count++;
+		if(r_reset_dist.get() < right_low + 20) right.push_back(r_reset_dist.get()); else error_count++;
+		if(r_dist.get() < r_side_low + 20) r_side.push_back(r_dist.get()); else error_count++;
+		if(l_dist.get() < l_side_low + 20) l_side.push_back(l_dist.get()); else error_count++;
+
+		delay(33);
+	}
+	if(error_count < 5){
+		sort(left.begin(), left.end());
+		sort(right.begin(), right.end());
+		sort(r_side.begin(), r_side.end());
+		sort(l_side.begin(), l_side.end());
+
+		averageleft = left.at(left. size() / 2);
+		averageright = right.at(right.size() / 2);
+		average_r_side = r_side.at(r_side.size() / 2);
+		average_l_side = l_side.at(l_side.size() / 2);
+
+		printf("Average: Left:%f Right:%f\n", averageleft, averageright);
+		printf("Average: Left:%f Right:%f\n", average_l_side, average_r_side);
+		misc.print("End Time: %d\n", millis());
+	}
+	else{
+		misc.print("Reset Failed Error Count is %d", error_count);
+		ram = true;
+	}
+	if(ram == 0){
+		int diff = averageleft-averageright;
+		// angle = atan(diff/dist_sensor);
+		angle = near_angle(2*atan2(sqrt(pow(diff,2.0) + pow(dist_sensor, 2.0)- pow(d_offset, 2.0)) - dist_sensor, diff - d_offset),0.0);
+
+		misc.print("Angle Reset to: %f\n", rad_to_deg(angle));
+		local_y = ((averageright/25.4) - tan(angle) + (dist_to_centre/25.4) * tan(angle) + (side_length/25.4)) * cos(angle);
+		l_local_x = ((average_l_side/25.4) + (dist_to_centre/25.4)) * cos(angle);
+		r_local_x = 141.0-(((average_r_side/25.4) + (dist_to_centre/25.4)) * cos(angle));
+
+		misc.print("Front: %f, l_Side: %f, r_Side: %f\n", local_y, l_local_x, r_local_x);
+		// master.print(0,0," %.3f, %.3f", local_y, l_local_x, r_local_x);
+		Position Reset (0, local_y, rad_to_deg(angle));
+		return Reset;
+	}else{
+		//Make it ram into the wall or just throw a flag to another program
+		flatten_against_wall();
+		Position Reset(0,local_y,angle);
+		return Reset;
+	}
+}
+
+
 //15
 void distance_loop(double distance, int timeout){
 	double y_speed = 40;
