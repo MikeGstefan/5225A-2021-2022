@@ -8,6 +8,7 @@
 
 //Var init for text monitoring
 int enc_val;
+c::ext_adi_encoder_t ext_test_enc;
 c::adi_encoder_t test_enc;
 std::string motor_port_nums;
 std::string expander_port_nums;
@@ -147,7 +148,7 @@ Slider expander_1 (30, 80, 30, 120, GUI::Style::SIZE, Slider::VERTICAL, 0, 21, e
 Slider port_1 (115, 80, 30, 120, GUI::Style::SIZE, Slider::VERTICAL, 1, 8, encoders, "P1");
 Slider port_2 (200, 80, 30, 120, GUI::Style::SIZE, Slider::VERTICAL, 1, 8, encoders, "P2");
 Button enc_set (350, 60, 50, 20, GUI::Style::CENTRE, Button::SINGLE, encoders, "Set");
-Text enc (350, 100, GUI::Style::CENTRE, TEXT_SMALL, encoders, "%s", std::function([](){return std::string({char(port_1.get_value()+64), char(port_2.get_value()+64)});}));
+Text enc (350, 100, GUI::Style::CENTRE, TEXT_SMALL, encoders, "%s", std::function([](){return std::to_string(expander_1.get_value()) + ':' + char(port_1.get_value()+64) + char(port_2.get_value()+64);}));
 Text enc_degs (350, 120, GUI::Style::CENTRE, TEXT_SMALL, encoders, "Degs: %d", enc_val);
 Text enc_rots (350, 140, GUI::Style::CENTRE, TEXT_SMALL, encoders, "Rots: %d", std::function([](){return int(enc_val/360);}));
 Text enc_remain (350, 160, GUI::Style::CENTRE, TEXT_SMALL, encoders, "Remaining: %d", std::function([](){return abs(enc_val-360*int(round((enc_val+sgn(enc_val)*180)/360)));}));
@@ -621,6 +622,7 @@ void util_setup(){
       if (port){
         if(c::registry_get_plugged_type(port-1) != c::E_DEVICE_ADI){
           screen_flash::start(term_colours::ERROR, "No Expander in port %d", port);
+          return;
         }
         c::ext_adi_port_set_config(port, i, E_ADI_DIGITAL_OUT);
         c::ext_adi_port_set_value(port, i, HIGH);
@@ -635,6 +637,7 @@ void util_setup(){
       if (port){
         if(c::registry_get_plugged_type(port-1) != c::E_DEVICE_ADI){
           screen_flash::start(term_colours::ERROR, "No Expander in port %d", port);
+          return;
         }
         c::ext_adi_port_set_config(port, i, E_ADI_DIGITAL_OUT);
         c::ext_adi_port_set_value(port, i, LOW);
@@ -649,15 +652,36 @@ void util_setup(){
   if (no_pneumatic_port_nums.back() == ',') no_pneumatic_port_nums.pop_back();
 
   enc_set.set_func([](){
-    test_enc = c::adi_encoder_init(port_1.get_value(), port_2.get_value(), false);
+    int port = expander_1.get_value();
+    if(abs(port_1.get_value()-port_2.get_value()) != 1){
+      screen_flash::start(term_colours::ERROR, "Invalid Ports %c%c", char(port_1.get_value()+64), char(port_2.get_value()+64));
+      return;
+    }
+    if(port){
+      if(c::registry_get_plugged_type(port-1) != c::E_DEVICE_ADI){
+        screen_flash::start(term_colours::ERROR, "No Expander in port %d", port);
+        return;
+      }
+      ext_test_enc = c::ext_adi_encoder_init(port, port_1.get_value(), port_2.get_value(), false);
+    }
+    else test_enc = c::adi_encoder_init(port_1.get_value(), port_2.get_value(), false);
+  });
+
+  enc_res.set_func([](){
+    int port = expander_1.get_value();
+    if(port){
+      c::ext_adi_encoder_reset(ext_test_enc);
+    }
+    else c::adi_encoder_reset(test_enc);
   });
 
   encoders.set_loop_func([](){
-    enc_val = c::adi_encoder_get(test_enc);
+    if(expander_1.get_value()) enc_val = c::ext_adi_encoder_get(ext_test_enc);
+    else enc_val = c::adi_encoder_get(test_enc);
+
     if(enc_val == std::numeric_limits<int32_t>::max()) enc_val = 0;
   });
 
-  enc_res.set_func([](){c::adi_encoder_reset(test_enc);});
 }
 
 void util_background(){

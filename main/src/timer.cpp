@@ -97,10 +97,10 @@ std::string Timer::to_string(std::uint64_t time, timing_units unit, int long_nam
     plural = "";
   }
   else if (long_names==1){
-    millis = "millis";
-    micros = "micros";
-    sec = "sec";
-    min = "min";
+    millis = " millis";
+    micros = " micros";
+    sec = " sec";
+    min = " min";
     plural = "";
   }
   else if (long_names==2){

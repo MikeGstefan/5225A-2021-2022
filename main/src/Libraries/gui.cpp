@@ -68,7 +68,7 @@ namespace screen_flash{
     screen::set_pen(~GUI::get_colour(colour)&0xFFFFFF); //Makes text inverted colour of background so it is always visible
     screen::set_eraser(GUI::get_colour(colour));
 
-    printf2(colour, 1, "\n\n%s\n", text);
+    printf2(colour, 1, "%s\n", text);
     events.print("\n\n%d | %s\n\n", millis(), text.c_str());
 
     int spaces = int(CHAR_WIDTH_LARGE*text.length()/460)+1;

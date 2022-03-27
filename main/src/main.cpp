@@ -48,7 +48,6 @@ void initialize() {
 	update_t.start();
 	// master.print(2, 0, "Driver: %s", drivebase.drivers[drivebase.cur_driver].name);
 	// gyro.finish_calibrating(); //Finishes calibrating gyro before program starts
-  GUI::go_to(2);
 }
 
 /**
@@ -91,11 +90,12 @@ void opcontrol() {
   2d sliders
 
   Don't allow presses until finger release when switching a page
+  touched when flashed doesn't work
   check what actually kills the auto balance loop
   check auton selector
   integrate pneumatics
   make sure comp check works
-  put vertical sliders bounds withing vertical are
+  put vertical sliders bounds within vertical aree
 	*/
 
 	while(true){
