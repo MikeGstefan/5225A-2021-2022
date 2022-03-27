@@ -81,7 +81,7 @@ void Intake::handle(){
       // starts shifting lift/intake transmission to intake once lift has reached the bottom
       if(b_lift.get_state() == b_lift_states::bottom) set_state(intake_states::shifting_to_intake);
       // if the driver cancelled the 'lift move down to bottom' routine, turn off intake
-      else if(b_lift.get_state() != b_lift_states::move_to_target)  set_state(intake_states::off);
+      else if(b_lift.get_state() != b_lift_states::move_to_target || b_lift.get_index() != 0)  set_state(intake_states::off);
       break;
 
   }

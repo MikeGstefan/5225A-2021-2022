@@ -393,8 +393,9 @@ int Drivebase::get_deadzone(){
 // }
 
 bool get_lift(){
-  if(joy_mode == joy_modes::lift_select)  return (!drivebase.get_reverse() ==  master.get_analog(ANALOG_RIGHT_Y) > -1* drivebase.get_deadzone());
-  else return false;
+  // if in lift select mode, compute the lift, otherwise return last value of cur lift
+  static bool cur_lift = (joy_mode == joy_modes::lift_select) ? (!drivebase.get_reverse() == master.get_analog(ANALOG_RIGHT_Y) > -1* drivebase.get_deadzone()) : cur_lift;
+  return cur_lift;
 }
 
 void handle_lifts(){      
