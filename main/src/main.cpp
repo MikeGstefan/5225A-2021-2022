@@ -95,7 +95,7 @@ void opcontrol() {
   check auton selector
   integrate pneumatics
   make sure comp check works
-  put vertical sliders bounds within vertical aree
+  -put vertical sliders bounds within vertical aree
 	*/
 
 	while(true){
