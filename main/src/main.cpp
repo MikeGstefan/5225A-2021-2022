@@ -82,6 +82,7 @@ void autonomous() {
   load_positions();
 }
 
+//Do not push to builder-util
 void opcontrol() {
 	/* Nathan:
 	auton give up func - ask mike

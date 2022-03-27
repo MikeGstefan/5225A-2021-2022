@@ -59,7 +59,7 @@ namespace screen_flash{
 
     timer.reset(); //Starts counting
     end_time = time;
-    if(time) printf("\nShowing for %s.\n\n", Timer::to_string(time, timing_units::millis, 1, true).c_str());
+    if(time) printf2("\nShowing for %s.\n", Timer::to_string(time, timing_units::millis, 1, true));
   }
 
   void start(std::string text, term_colours colour, std::uint32_t time){
@@ -86,37 +86,10 @@ namespace screen_flash{
 
     timer.reset(); //Starts counting
     end_time = time;
-
-    if(time) printf("\nShowing for %s.\n\n", Timer::to_string(time, timing_units::millis, 1, true).c_str());
+    if(time) printf2("\nShowing for %s.\n", Timer::to_string(time, timing_units::millis, 1, true));
   }
 
-  void start(term_colours colour, std::uint32_t time, const char* fmt, ...){
-    std::va_list args;
-    va_start(args, fmt);
-    start(printf_to_string(fmt, args), colour, time);
-    va_end(args);
-  }
-
-  void start(Colour colour, std::uint32_t time, const char* fmt, ...){
-    std::va_list args;
-    va_start(args, fmt);
-    start(printf_to_string(fmt, args), colour, 1000);
-    va_end(args);
-  }
-
-  void start(std::uint32_t time, const char* fmt, ...){
-    std::va_list args;
-    va_start(args, fmt);
-    start(printf_to_string(fmt, args), term_colours::ERROR, time);
-    va_end(args);
-  }
-
-  void start(term_colours colour, const char* fmt, ...){
-    std::va_list args;
-    va_start(args, fmt);
-    start(printf_to_string(fmt, args), colour, 1000);
-    va_end(args);
-  }
+  //rest are templates, so defined in header
 
   void end(){
     if (timer.playing() && (timer.get_time() >= end_time || (!touched && GUI::is_touched()))){
@@ -137,24 +110,24 @@ void GUI::aligned_coords (int x_objects, int y_objects, int x_size, int y_size, 
   while (fmod(x_space, 5)) x_space = ((--x_range)-x_objects*x_size)/(x_objects+1.0);
   while (fmod(y_space, 5)) y_space = ((--y_range)-y_objects*y_size)/(y_objects+1.0);
 
-  printf("\n\n");
+  newline(2);
   for (int y = 0; y < y_objects; y++){
     for (int x = 0; x < x_objects; x++){
       printf("(%d, %d, %d, %d, GUI::Style::SIZE)\n", int(x_space)*(x+1) + x_size*x, int(y_space)*(y+1) + y_size*y + 20, x_size, y_size);
     }
-    printf("\n");
+    newline();
   }
   printf("\nScreen Size: %d x %d\n", x_range, y_range);
   if ((x_space+x_size)*(x_objects) > 480) printf("X out of bounds\n");
   if ((y_space+y_size)*(y_objects) > 220) printf("Y out of bounds\n");
-  printf("\n\n");
+  newline(2);
 }
 
 bool GUI::go(std::string short_msg, std::string long_msg, std::uint32_t delay_time){
  if(!go_enabled) return true;
   master.clear();
   master.print(0, 0, "Press OK btn");
-  printf("\n\n%s\nPress the screen big button or the controller OK button when ready.\n", long_msg.c_str());
+  printf2("\n\n%s\nPress the screen big button or the controller OK button when ready.", long_msg);
   snprintf(go_string, 90, "%s", short_msg.c_str());
 
   bool pressed = false, interrupted = false;
@@ -181,12 +154,12 @@ bool GUI::go(std::string short_msg, std::string long_msg, std::uint32_t delay_ti
 
   if (!interrupted){
     if(delay_time){
-      printf("\nWaiting for %s before running.\n\n", Timer::to_string(delay_time, timing_units::millis, 2, true).c_str());
+      printf2("\nWaiting for %s before running.\n", Timer::to_string(delay_time, timing_units::millis, 2, true));
       delay(delay_time);
     }
     printf("\nRunning\n\n");
   }
-  else printf("\n%sInterrupted%s\n\n", get_term_colour(term_colours::ERROR), get_term_colour(term_colours::NONE));
+  else printf2(term_colours::ERROR, 0, "\nInterrupted\n");
 
   page->go_to();
   master.clear();
@@ -218,12 +191,12 @@ bool GUI::go_end(std::string msg, std::uint32_t delay_time){
 
   if (!interrupted){
     if(delay_time){
-      printf("\nWaiting for %s before running.\n\n", Timer::to_string(delay_time, timing_units::millis, 2, true).c_str());
+      printf2("\nWaiting for %s before running.\n", Timer::to_string(delay_time, timing_units::millis, 2, true));
       delay(delay_time);
     }
     printf("\nRunning\n\n");
   }
-  else printf("\n%sInterrupted%s\n\n", get_term_colour(term_colours::ERROR), get_term_colour(term_colours::NONE));
+  else printf2(term_colours::ERROR, 0, "\nInterrupted\n");
   master.clear();
   return !interrupted;
 }
@@ -256,10 +229,12 @@ std::tuple<int, int, int, int> GUI::fix_points (int x1, int y1,int x2, int y2, S
       x2 += x1;
       y2 += y1;
       break;
+    case GUI::Style::CORNER:
+      break;
   }
-
-  int temp; //Putting coordinates in a left-right up-down order in case it was accidentally reversed or given negatives. Makes checking presses easier
-
+  
+  //Arranging coordinates in a left-right up-down order.
+  int temp;
   temp = std::max(x1, x2);
   x1 = std::min(x1, x2);
   x2 = temp;
@@ -653,8 +628,8 @@ int GUI::get_height(text_format_e_t size){
     case TEXT_SMALL: return CHAR_HEIGHT_SMALL; break;
     case TEXT_MEDIUM: return CHAR_HEIGHT_MEDIUM; break;
     case TEXT_LARGE: return CHAR_HEIGHT_LARGE; break;
+    default: return 0; break;
   }
-  return 0;
 }
 
 int GUI::get_width(text_format_e_t size){
@@ -662,8 +637,8 @@ int GUI::get_width(text_format_e_t size){
     case TEXT_SMALL: return CHAR_WIDTH_SMALL; break;
     case TEXT_MEDIUM: return CHAR_WIDTH_MEDIUM; break;
     case TEXT_LARGE: return CHAR_WIDTH_LARGE; break;
+    default: return 0; break;
   }
-  return 0;
 }
 
 Colour GUI::get_colour(term_colours colour){
@@ -703,7 +678,6 @@ void GUI::update_screen_status(){
   touched = status.touch_status == TOUCH_PRESSED || status.touch_status == TOUCH_HELD;
   x = status.x;
   y = status.y;
-  // printf("Updated\n");
 }
 
 bool GUI::pressed() const{

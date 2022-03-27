@@ -355,12 +355,27 @@ class Slider{
 namespace screen_flash{
   extern Timer timer;
 
+  void end();
   void start(std::string, Colour, std::uint32_t = 1000); //text+col+time / text+col
   void start(std::string, term_colours = term_colours::ERROR, std::uint32_t = 1000); //text+cols+time / text+cols / text
-  void start(term_colours, std::uint32_t, const char*, ...); //text+cols+time
-  void start(Colour, std::uint32_t, const char*, ...); //text+col+time
-  void start(std::uint32_t, const char*, ...); //text+red+time
-  void start(term_colours, const char*, ...); //text+col+1000
 
-  void end();
+  template <typename... Params> //text+cols+time
+  void start(term_colours colour, std::uint32_t time, const char* fmt, Params... args){
+    start(printf_to_string(fmt, screen::convert_args(args)...), colour, time);
+  }
+
+  template <typename... Params> //text+col+time
+  void start(Colour colour, std::uint32_t time, const char* fmt, Params... args){
+    start(printf_to_string(fmt, screen::convert_args(args)...), colour, 1000);
+  }
+
+  template <typename... Params> //text+red+time
+  void start(std::uint32_t time, const char* fmt, Params... args){
+    start(printf_to_string(fmt, screen::convert_args(args)...), term_colours::ERROR, time);
+  }
+
+  template <typename... Params> //text+col+1000
+  void start(term_colours colour, const char* fmt, Params... args){
+    start(printf_to_string(fmt, screen::convert_args(args)...), colour, 1000);
+  }
 }

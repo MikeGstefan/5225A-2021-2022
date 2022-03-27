@@ -1,11 +1,5 @@
 #include "printing.hpp"
 
-std::string printf_to_string(const char* fmt, va_list args){
-  char buffer[150];
-  vsnprintf(buffer, 150, fmt, args);
-  return std::string(buffer);
-}
-
 std::string printf_to_string(const char* fmt, ...){
   char buffer[150];
 
@@ -14,7 +8,11 @@ std::string printf_to_string(const char* fmt, ...){
   vsnprintf(buffer, 150, fmt, args);
   va_end(args);
   
-  return std::string(buffer);
+  return buffer;
+}
+
+void newline(int count){
+  std::cout << std::string (count , '\n');
 }
 
 const char* get_term_colour(term_colours colour){
