@@ -1,4 +1,5 @@
 #include "gui.hpp"
+#include <limits>
 
 /*Field array*/ static std::vector<std::bitset<200>> field (200, std::bitset<200>{}); //Initializes to 200 blank bitsets
 /*Temperature Alert Flag*/ static bool temp_flashed = false;
@@ -596,7 +597,6 @@ void util_setup(){
     }
     std::get<1>(mot_arr)->set_func([&](){
       c::motor_move(std::get<0>(mot_arr), mot_speed.get_value());
-      printf("POWERING\n");
     });
     std::get<2>(mot_arr)->set_func([&](){c::motor_move(std::get<0>(mot_arr), 0);});
   }
@@ -657,6 +657,10 @@ void util_setup(){
     left_enc = LeftEncoder.get_value();
     right_enc = RightEncoder.get_value();
     back_enc = BackEncoder.get_value();
+
+    if(right_enc == std::numeric_limits<int>::max()) right_enc = 0;
+    if(left_enc == std::numeric_limits<int>::max()) left_enc = 0;
+    if(back_enc == std::numeric_limits<int>::max()) back_enc = 0;
   });
   AB_res.set_func([&](){RightEncoder.reset();});
   CD_res.set_func([&](){LeftEncoder.reset();});

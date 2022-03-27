@@ -2,6 +2,7 @@
 #include "drive.hpp"
 #include "controller.hpp"
 #include "Libraries/gui.hpp"
+#include "Libraries/printing.hpp"
 #include "pid.hpp"
 #include "Tracking.hpp"
 #include "task.hpp"
@@ -82,24 +83,22 @@ void autonomous() {
   load_positions();
 }
 
-//Do not push to builder-util
 void opcontrol() {
 	/* Nathan:
 	auton give up func - ask mike
 	lvgl images
+  2d sliders
 
-  make screen flash template for Params...
-
+  Don't allow presses until finger release when switching a page
   check what actually kills the auto balance loop
   check auton selector
   integrate pneumatics
   make sure comp check works
-  check that screen printing works
   get rid of slider vertical
 	*/
 
 	while(true){
-		drivebase.non_blocking_driver_practice();
+		// drivebase.non_blocking_driver_practice();
 		delay(10);
 	}
 }

@@ -104,10 +104,10 @@ std::string Timer::to_string(std::uint64_t time, timing_units unit, int long_nam
     plural = "";
   }
   else if (long_names==2){
-    millis = "millisecond";
-    micros = "microsecond";
-    sec = "second";
-    min = "minute";
+    millis = " millisecond";
+    micros = " microsecond";
+    sec = " second";
+    min = " minute";
     plural = "s";
   }
 
@@ -152,5 +152,6 @@ std::string Timer::to_string(std::uint64_t time, timing_units unit, int long_nam
     }
   }
 
+  if(buffer.back() == ' ') buffer.pop_back();
   return buffer;
 }

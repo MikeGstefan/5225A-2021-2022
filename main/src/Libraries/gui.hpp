@@ -191,7 +191,7 @@ class Text: public Text_{
       return snprintf(buffer, 100, label.c_str());
     }
     void construct (int x, int y, GUI::Style type, text_format_e_t txt_size, Page* page, std::string label, std::function<V()> value, Colour l_col){
-      // static_assert(!std::is_same_v<V, std::string>, "Text variable cannot be std::string, it causes unknown failures");
+      // static_assert(!std::is_same_v<V, std::string>, "Text variable cannot be std::string, it causes unknown failures"); //Keep this for memories
       this->x = x;
       this->y = y;
       this->type = type;

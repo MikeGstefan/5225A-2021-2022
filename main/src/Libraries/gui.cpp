@@ -159,7 +159,7 @@ bool GUI::prompt(std::string short_msg, std::string long_msg, std::uint32_t dela
     }
     printf("\nRunning\n\n");
   }
-  else printf2(term_colours::ERROR, 0, "\nInterrupted\n");
+  else printf2(term_colours::ERROR, 0, "Interrupted\n");
 
   page->go_to();
   master.clear();
@@ -196,7 +196,7 @@ bool GUI::prompt_end(std::string msg, std::uint32_t delay_time){
     }
     printf("\nRunning\n\n");
   }
-  else printf2(term_colours::ERROR, 0, "\nInterrupted\n");
+  else printf2(term_colours::ERROR, 0, "Interrupted\n");
   master.clear();
   return !interrupted;
 }
