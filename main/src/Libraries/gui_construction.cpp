@@ -1,11 +1,14 @@
 #include "gui.hpp"
+#include "pros/adi.h"
+#include "pros/ext_adi.h"
 #include <limits>
 
 /*Field array*/ static std::vector<std::bitset<200>> field (200, std::bitset<200>{}); //Initializes to 200 blank bitsets
 /*Temperature Alert Flag*/ static bool temp_flashed = false;
 
 //Var init for text monitoring
-int left_enc, right_enc, back_enc;
+int enc_val;
+c::adi_encoder_t test_enc;
 std::string motor_port_nums;
 std::string expander_port_nums;
 std::string no_pneumatic_port_nums;
@@ -140,22 +143,15 @@ Text expanders (10, 100, GUI::Style::CORNER, TEXT_MEDIUM, ports, "Expanders: %s"
 Text no_pneumatic (10, 150, GUI::Style::CORNER, TEXT_MEDIUM, ports, "No Pneumatics: %s", no_pneumatic_port_nums);
 
 Page encoders ("Encoders"); //Display tracking vals and reset btns
-Text AB (85, 35, GUI::Style::CENTRE, TEXT_SMALL, encoders, "AB");
-Text CD (240, 35, GUI::Style::CENTRE, TEXT_SMALL, encoders, "CD");
-Text EF (395, 35, GUI::Style::CENTRE, TEXT_SMALL, encoders, "EF");
-Text AB_degs (85, 50, GUI::Style::CENTRE, TEXT_SMALL, encoders, "Degs: %d", right_enc);
-Text CD_degs (240, 50, GUI::Style::CENTRE, TEXT_SMALL, encoders, "Degs: %d", left_enc);
-Text EF_degs (395, 50, GUI::Style::CENTRE, TEXT_SMALL, encoders, "Degs: %d", back_enc);
-Text AB_rots (85, 65, GUI::Style::CENTRE, TEXT_SMALL, encoders, "Rots: %d", std::function([](){return int(right_enc/360);}));
-Text CD_rots (240, 65, GUI::Style::CENTRE, TEXT_SMALL, encoders, "Rots: %d", std::function([](){return int(left_enc/360);}));
-Text EF_rots (395, 65, GUI::Style::CENTRE, TEXT_SMALL, encoders, "Rots: %d", std::function([](){return int(back_enc/360);}));
-Text AB_remain (85, 80, GUI::Style::CENTRE, TEXT_SMALL, encoders, "Remaining: %d", std::function([](){return abs(right_enc-360*int(round((right_enc+sgn(right_enc)*180)/360)));})); //Rewrite using near_angle
-Text CD_remain (240, 80, GUI::Style::CENTRE, TEXT_SMALL, encoders, "Remaining: %d", std::function([](){return abs(left_enc-360*int(round((left_enc+sgn(left_enc)*180)/360)));}));
-Text EF_remain (395, 80, GUI::Style::CENTRE, TEXT_SMALL, encoders, "Remaining: %d", std::function([](){return abs(back_enc-360*int(round((back_enc+sgn(back_enc)*180)/360)));}));
-Button AB_res (35, 100, 100, 50, GUI::Style::SIZE, Button::SINGLE, encoders, "Reset AB");
-Button CD_res (190, 100, 100, 50, GUI::Style::SIZE, Button::SINGLE, encoders, "Reset CD");
-Button EF_res (345, 100, 100, 50, GUI::Style::SIZE, Button::SINGLE, encoders, "Reset EF");
-Button res_all_enc (240, 200, 200, 30, GUI::Style::CENTRE, Button::SINGLE, encoders, "Reset All");
+Slider expander_1 (30, 80, 30, 120, GUI::Style::SIZE, Slider::VERTICAL, 0, 21, encoders, "E1");
+Slider port_1 (115, 80, 30, 120, GUI::Style::SIZE, Slider::VERTICAL, 1, 8, encoders, "P1");
+Slider port_2 (200, 80, 30, 120, GUI::Style::SIZE, Slider::VERTICAL, 1, 8, encoders, "P2");
+Button enc_set (350, 60, 50, 20, GUI::Style::CENTRE, Button::SINGLE, encoders, "Set");
+Text enc (350, 100, GUI::Style::CENTRE, TEXT_SMALL, encoders, "%s", std::function([](){return std::string({char(port_1.get_value()+64), char(port_2.get_value()+64)});}));
+Text enc_degs (350, 120, GUI::Style::CENTRE, TEXT_SMALL, encoders, "Degs: %d", enc_val);
+Text enc_rots (350, 140, GUI::Style::CENTRE, TEXT_SMALL, encoders, "Rots: %d", std::function([](){return int(enc_val/360);}));
+Text enc_remain (350, 160, GUI::Style::CENTRE, TEXT_SMALL, encoders, "Remaining: %d", std::function([](){return abs(enc_val-360*int(round((enc_val+sgn(enc_val)*180)/360)));}));
+Button enc_res (350, 200, 50, 20, GUI::Style::CENTRE, Button::SINGLE, encoders, "Reset");
 
 Page motor ("Motor Control");
 Slider mot_speed (MID_X, 60, 180 , 15, GUI::Style::CENTRE, Slider::HORIZONTAL, -127, 127, motor, "Speed");
@@ -652,20 +648,16 @@ void util_setup(){
 
   if (no_pneumatic_port_nums.back() == ',') no_pneumatic_port_nums.pop_back();
 
+  enc_set.set_func([](){
+    test_enc = c::adi_encoder_init(port_1.get_value(), port_2.get_value(), false);
+  });
 
   encoders.set_loop_func([](){
-    left_enc = LeftEncoder.get_value();
-    right_enc = RightEncoder.get_value();
-    back_enc = BackEncoder.get_value();
-
-    if(right_enc == std::numeric_limits<int>::max()) right_enc = 0;
-    if(left_enc == std::numeric_limits<int>::max()) left_enc = 0;
-    if(back_enc == std::numeric_limits<int>::max()) back_enc = 0;
+    enc_val = c::adi_encoder_get(test_enc);
+    if(enc_val == std::numeric_limits<int32_t>::max()) enc_val = 0;
   });
-  AB_res.set_func([&](){RightEncoder.reset();});
-  CD_res.set_func([&](){LeftEncoder.reset();});
-  EF_res.set_func([&](){BackEncoder.reset();});
-  res_all_enc.set_func([&](){LeftEncoder.reset(); RightEncoder.reset(); BackEncoder.reset();});
+
+  enc_res.set_func([](){c::adi_encoder_reset(test_enc);});
 }
 
 void util_background(){

@@ -13,7 +13,7 @@ char* const prompt_string = (char*)malloc(90*sizeof(char));
 
 Page perm ("PERM BTNS", COLOUR(PINK)); //Common page objects
 Button prev_page(PAGE_LEFT, PAGE_UP, 75, 20, GUI::Style::SIZE, Button::SINGLE, perm, "<-");
-Button next_page(480, 0, -75, 20, GUI::Style::SIZE, Button::SINGLE, perm, "->");
+Button next_page(PAGE_RIGHT, 0, -75, 20, GUI::Style::SIZE, Button::SINGLE, perm, "->");
 Button home(100, 10, 18, 6, GUI::Style::CENTRE, Button::SINGLE, perm, "Home");
 
 Page testing ("Testing"); //Blank page made so it already exists when quick tests are created
@@ -328,11 +328,11 @@ Slider::Slider (int x1, int y1, int x2, int y2, GUI::Style type, direction dir, 
     case VERTICAL:
       text_x = (this->x1+this->x2)/2;
       text_y = (this->y1+this->y2)/2;
-      inc.construct(this->x1, this->y1-25, this->x2, this->y1-5, GUI::Style::CORNER, Button::SINGLE, this->page, "▲", l_col, b_col);
-      dec.construct(this->x1, this->y2+5, this->x2, this->y2+25, GUI::Style::CORNER, Button::SINGLE, this->page, "▼", l_col, b_col);
+      inc.construct(this->x1, this->y1-25, this->x2, this->y1-5, GUI::Style::CORNER, Button::SINGLE, this->page, "^", l_col, b_col);
+      dec.construct(this->x1, this->y2+5, this->x2, this->y2+25, GUI::Style::CORNER, Button::SINGLE, this->page, "v", l_col, b_col);
       title.construct(text_x, this->y1-27-CHAR_HEIGHT_SMALL, GUI::Style::CENTRE, TEXT_SMALL, this->page, label + ":%d", [&](){return val;}, l_col);
-      min_title.construct(this->x1-25, this->y2, GUI::Style::CENTRE, TEXT_SMALL, this->page, std::to_string(min), nullptr, l_col);
-      max_title.construct(this->x1-25, this->y1, GUI::Style::CENTRE, TEXT_SMALL, this->page, std::to_string(max), nullptr, l_col);
+      min_title.construct(this->x1-15, this->y2, GUI::Style::CENTRE, TEXT_SMALL, this->page, std::to_string(min), nullptr, l_col);
+      max_title.construct(this->x1-15, this->y1, GUI::Style::CENTRE, TEXT_SMALL, this->page, std::to_string(max), nullptr, l_col);
       break;
   }
 

@@ -17,7 +17,7 @@
 using namespace std;
 
 pros::Task *updt = nullptr; //What's this for
-const GUI* GUI::current_gui = &g_main;
+const GUI* GUI::current_gui = &g_util;
 
 /**
  * Runs initialization code. This occurs as soon as the program is started.
@@ -48,6 +48,7 @@ void initialize() {
 	update_t.start();
 	// master.print(2, 0, "Driver: %s", drivebase.drivers[drivebase.cur_driver].name);
 	// gyro.finish_calibrating(); //Finishes calibrating gyro before program starts
+  GUI::go_to(2);
 }
 
 /**
@@ -94,7 +95,7 @@ void opcontrol() {
   check auton selector
   integrate pneumatics
   make sure comp check works
-  get rid of slider vertical
+  put vertical sliders bounds withing vertical are
 	*/
 
 	while(true){
