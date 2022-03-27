@@ -68,7 +68,7 @@ class GUI{
     static int x, y;
     static const Page* current_page;
     static const GUI* current_gui;
-    static constexpr bool go_enabled=true;
+    static constexpr bool prompt_enabled=true;
     static constexpr bool testing_page_active=false;
     std::vector<Page*> pages;
     std::function <void()> setup, background;
@@ -92,7 +92,7 @@ class GUI{
     static void clear_screen(Colour=GREY);
     static void init(), update(void* = nullptr);
     static void go_to(int);
-    static bool go(std::string, std::string, std::uint32_t=0), go_end(std::string, std::uint32_t=0);
+    static bool prompt(std::string, std::string, std::uint32_t=0), prompt_end(std::string, std::uint32_t=0);
     static bool is_touched();
     static const Page* const get_current_page();
     static const GUI* const get_current_gui();

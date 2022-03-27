@@ -7,7 +7,7 @@ int GUI::x = 0, GUI::y = 0;
 _Task GUI::task(update, "GUI");
 
 //Text Vars
-char* const go_string = (char*)malloc(90*sizeof(char));
+char* const prompt_string = (char*)malloc(90*sizeof(char));
 
 //Default pages
 
@@ -23,10 +23,10 @@ Button testing_button_1 (25, 70, 200, 80, GUI::Style::SIZE, Button::SINGLE, test
 Button testing_button_2 (250, 70, 200, 80, GUI::Style::SIZE, Button::SINGLE, testing, "BLANK BUTTON 2");
 Slider testing_slider (MID_X, 200, 200, 20, GUI::Style::CENTRE, Slider::HORIZONTAL, -100, 100, testing, "BLANK SLIDER");
 
-Page go_sequence ("Go Sequence");
-Button go_button (300, MID_Y, 160, 90, GUI::Style::CENTRE, Button::SINGLE, go_sequence, "PRESS TO");
-Button go_back_button (20, USER_UP, 100, 50, GUI::Style::SIZE, Button::SINGLE, go_sequence, "BACK");
-Text go_button_text (300, 140, GUI::Style::CENTRE, TEXT_SMALL, go_sequence, "%s", go_string, COLOUR(BLACK));
+Page prompt_sequence ("Prompt");
+Button prompt_button (300, MID_Y, 160, 90, GUI::Style::CENTRE, Button::SINGLE, prompt_sequence, "PRESS TO");
+Button prompt_back_button (20, USER_UP, 100, 50, GUI::Style::SIZE, Button::SINGLE, prompt_sequence, "BACK");
+Text prompt_button_text (300, 140, GUI::Style::CENTRE, TEXT_SMALL, prompt_sequence, "%s", prompt_string, COLOUR(BLACK));
 
 Page terminal ("Screen Printing");
 
@@ -123,33 +123,33 @@ void GUI::aligned_coords (int x_objects, int y_objects, int x_size, int y_size, 
   newline(2);
 }
 
-bool GUI::go(std::string short_msg, std::string long_msg, std::uint32_t delay_time){
- if(!go_enabled) return true;
+bool GUI::prompt(std::string short_msg, std::string long_msg, std::uint32_t delay_time){
+ if(!prompt_enabled) return true;
   master.clear();
   master.print(0, 0, "Press OK btn");
   printf2("\n\n%s\nPress the screen big button or the controller OK button when ready.", long_msg);
-  snprintf(go_string, 90, "%s", short_msg.c_str());
+  snprintf(prompt_string, 90, "%s", short_msg.c_str());
 
   bool pressed = false, interrupted = false;
   const Page* page = GUI::current_page;
-  go_sequence.go_to();
+  prompt_sequence.go_to();
 
   //Wait for Release
-  wait_until(!(go_button.pressed() || master.get_digital(ok_button) || master.interrupt(false, true, false)) || interrupted){ //checks that no button is being pressed
+  wait_until(!(prompt_button.pressed() || master.get_digital(ok_button) || master.interrupt(false, true, false)) || interrupted){ //checks that no button is being pressed
     GUI::update_screen_status();
-    if (go_back_button.pressed()) interrupted = true;
+    if (prompt_back_button.pressed()) interrupted = true;
   }
 
   //Wait for Press
-  wait_until((go_button.pressed() || master.get_digital(ok_button)) || interrupted){ //waits for a press from go btn or ok btn. Interrupts with any controller digital btn
+  wait_until((prompt_button.pressed() || master.get_digital(ok_button)) || interrupted){ //waits for a press from prompt btn or ok btn. Interrupts with any controller digital btn
     GUI::update_screen_status();
-    if (go_back_button.pressed() || master.interrupt(false, true, true)) interrupted = true;
+    if (prompt_back_button.pressed() || master.interrupt(false, true, true)) interrupted = true;
   }
   
   //Wait for Release
-  wait_until(!(go_button.pressed() || master.get_digital(ok_button) || master.interrupt(false, true, false)) || interrupted){ //checks that no button is being pressed
+  wait_until(!(prompt_button.pressed() || master.get_digital(ok_button) || master.interrupt(false, true, false)) || interrupted){ //checks that no button is being pressed
     GUI::update_screen_status();
-    if (go_back_button.pressed()) interrupted = true;
+    if (prompt_back_button.pressed()) interrupted = true;
   }
 
   if (!interrupted){
@@ -166,25 +166,25 @@ bool GUI::go(std::string short_msg, std::string long_msg, std::uint32_t delay_ti
   return !interrupted;
 }
 
-bool GUI::go_end(std::string msg, std::uint32_t delay_time){
-  if(!go_enabled) return true;
+bool GUI::prompt_end(std::string msg, std::uint32_t delay_time){
+  if(!prompt_enabled) return true;
   master.clear();
   master.print(0, 0, "Press OK btn");
   printf("\nPress Again when done.\n\n");
-  snprintf(go_string, 90, "END %s", msg.c_str());
+  snprintf(prompt_string, 90, "END %s", msg.c_str());
 
   bool pressed = false, interrupted = false;
   const Page* page = GUI::current_page;
-  go_sequence.go_to();
+  prompt_sequence.go_to();
 
-  wait_until(!(go_button.pressed() || master.get_digital(ok_button) || master.interrupt(false, true, false)) || interrupted){ //Wait for Release
-    if (go_back_button.pressed()) interrupted = true;
+  wait_until(!(prompt_button.pressed() || master.get_digital(ok_button) || master.interrupt(false, true, false)) || interrupted){ //Wait for Release
+    if (prompt_back_button.pressed()) interrupted = true;
   }
-  wait_until((go_button.pressed() || master.get_digital(ok_button)) || interrupted){ //Wait for Press
-    if (go_back_button.pressed() || master.interrupt(false)) interrupted = true;
+  wait_until((prompt_button.pressed() || master.get_digital(ok_button)) || interrupted){ //Wait for Press
+    if (prompt_back_button.pressed() || master.interrupt(false)) interrupted = true;
   }
-  wait_until(!(go_button.pressed() || master.get_digital(ok_button) || master.interrupt(false, true, false)) || interrupted){ //Wait for Release
-    if (go_back_button.pressed()) interrupted = true;
+  wait_until(!(prompt_button.pressed() || master.get_digital(ok_button) || master.interrupt(false, true, false)) || interrupted){ //Wait for Release
+    if (prompt_back_button.pressed()) interrupted = true;
   }
 
   page->go_to();
@@ -288,7 +288,7 @@ GUI::GUI(std::vector<Page*> pages, std::function <void()> setup, std::function <
   for (std::vector<Page*>::const_iterator it = pages.begin(); it != pages.end(); it++) this->pages.push_back(*it);
   this->pages.push_back(&testing);
   this->pages.push_back(&terminal);
-  this->pages.push_back(&go_sequence);
+  this->pages.push_back(&prompt_sequence);
 
   //Saves gui to pages
   for (std::vector<Page*>::const_iterator it = this->pages.begin(); it != this->pages.end(); it++) (*it)->guis.push_back(this);
@@ -345,7 +345,7 @@ Slider::Slider (int x1, int y1, int x2, int y2, GUI::Style type, direction dir, 
 Page::Page(std::string title, Colour background_colour){
   this->b_col = background_colour;
   this->title = title;
-  if (!(title == "PERM BTNS" || title == "Go Sequence")){
+  if (!(title == "PERM BTNS" || title == "Prompt")){
     for (std::vector<Button*>::const_iterator it = perm.buttons.begin(); it != perm.buttons.end(); it++) buttons.push_back(*it);
   }
 }
@@ -865,7 +865,7 @@ void GUI::init(){
   testing.set_active(testing_page_active);
 
   home.set_func([](){go_to(1);});
-  go_button.add_text(go_button_text);
+  prompt_button.add_text(prompt_button_text);
 
   current_gui->setup();
   if(terminal.active) terminal.go_to();

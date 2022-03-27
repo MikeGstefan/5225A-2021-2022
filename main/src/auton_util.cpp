@@ -1,11 +1,12 @@
 #include "auton_util.hpp"
-// #include "logging.hpp"
+
+static const std::string start_pos_file_name ="/usd/start_position.txt";
 
 Reset_dist reset_dist_r(&r_dist, 7.5);
 Reset_dist reset_dist_l(&l_dist, 7.5);
 
 void save_positions(){
-  if(GUI::go("Reset position", "Press to reset the position, then move the robot.")){
+  if(GUI::prompt("Reset position", "Press to reset the position, then move the robot.")){
     Position pos1 (141.0-8.75, 15.5, 0.0), pos2 (8.75, 15.5, 0);
     master.clear();
     master.print(0, 0, "L1:(%.1f, %.1f, %.1f)", pos1.x, pos1.y , pos1.angle);
@@ -26,12 +27,12 @@ void save_positions(){
 
     //move the robot
 
-    if(GUI::go_end("Save Positions")){
+    if(GUI::prompt_end("Save Positions")){
       tracking_imp.print("Saving X: %f, Y:%f, A:%f\n", tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle));
       
       ofstream file;
       Data::log_t.data_update();
-      file.open("/usd/start_positions.txt", fstream::out | fstream::trunc);
+      file.open(start_pos_file_name, fstream::out | fstream::trunc);
       file << tracking.x_coord << endl;
       file << tracking.y_coord << endl;
       file << rad_to_deg(tracking.global_angle) << endl;
@@ -46,7 +47,7 @@ void load_positions(){
   ifstream file;
 
   Data::log_t.data_update();
-  file.open("/usd/start_positions.txt", fstream::in);
+  file.open(start_pos_file_name, fstream::in);
   file >> x >> y >> a;
   file.close();
   Data::log_t.done_update();

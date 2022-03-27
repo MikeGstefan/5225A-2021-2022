@@ -4,8 +4,6 @@
 #include "logging.hpp"
 
 static const std::string auton_file_name = "/usd/auton.txt";
-static const std::string start_pos_file_name ="/usd/start_position.txt";
-
 
 void skills(){
   

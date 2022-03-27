@@ -159,7 +159,7 @@ int elastic_f_up_time, elastic_f_down_time; //from gui_construction.cpp
 void F_Lift::elastic_util(){
   reset();
   motor.move(-10);
-  GUI::go("Start Elastic Utility", "Press to start the elastic utility.", 500);
+  GUI::prompt("Start Elastic Utility", "Press to start the elastic utility.", 500);
   f_claw_p.set_value(HIGH);
   Timer move_timer{"move"};
   move_absolute(top_position);

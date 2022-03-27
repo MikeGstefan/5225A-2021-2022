@@ -26,8 +26,19 @@ enum class term_colours{
  */
 std::string printf_to_string(const char* fmt, ...);
 
+/**
+ * @brief Get the terminal control string to modify its printing colour 
+ * 
+ * @param colour the colour to use
+ * @return const char* 
+ */
 const char* get_term_colour(term_colours colour);
 
+/**
+ * @brief prints a new line to the terminal
+ * 
+ * @param count how many lines to print
+ */
 void newline(int count = 1);
 
 /**
