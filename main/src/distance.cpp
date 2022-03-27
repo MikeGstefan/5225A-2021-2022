@@ -20,33 +20,50 @@ Position distance_reset_left(int cycles){
 	double local_y = 0, local_x = 0, angle = 0;
 	double averageleft = 0, averageright = 0, averageside = 0;
 	double dist_sensor = 429; //Distance between Sensors
+	double l_average, r_average, s_average;
 	int start_time = millis();
 	vector <int> left;
 	vector <int> right;
 	vector <int> side;
 	ram = false;
-	int left_low = l_reset_dist.get();
-	int right_low = r_reset_dist.get();
-	int side_low = l_dist.get();
+	int side_dist = l_dist.get();
 
 	int error_count = 0;
 
 	misc.print("Start Time: %d\n", start_time);
 	for(int i = 0; i < cycles; i++){
-		misc.print("%d| Left:%d Right: %d, Side: %d\n", millis(), l_reset_dist.get(), r_reset_dist.get(), l_dist.get());
-
-		if(l_reset_dist.get() <= left_low) left_low = l_reset_dist.get();
-		if(r_reset_dist.get() <= right_low) right_low = r_reset_dist.get();
-		if(l_dist.get() <= side_low) side_low = l_dist.get();
-
-
-		if(l_reset_dist.get() < left_low + 20) left.push_back(l_reset_dist.get()); else error_count++;
-		if(r_reset_dist.get() < right_low + 20) right.push_back(r_reset_dist.get()); else error_count++;
-		if(l_dist.get() < side_low + 20) side.push_back(l_dist.get()); else error_count++;
-
+		side_dist = l_dist.get();
+		misc.print("%d| Left:%d Right: %d, Side: %d\n", millis(), l_reset_dist.get(), r_reset_dist.get(), side_dist);
+		if(l_reset_dist.get() != 0) left.push_back(l_reset_dist.get()); else error_count++;
+		if(r_reset_dist.get() != 0)right.push_back(r_reset_dist.get());else error_count++;
+		if(side_dist != 0) side.push_back(side_dist); else error_count++;
 		delay(33);
 	}
-	if(error_count < 5){
+
+	for(int i = 0; i < cycles; i++){
+		l_average += left.at(i);
+		r_average += right.at(i);
+		s_average += side.at(i);
+	}
+
+	l_average = l_average/cycles;
+	r_average = r_average/cycles;
+	s_average = s_average/cycles;
+
+	for(int i = 0; i< cycles; i++){
+		if(abs(left.at(i) - l_average) > 50){
+			left.erase(left.begin()+i); error_count++;
+		}
+		if(abs(right.at(i) - r_average) > 50){
+			right.erase(right.begin()+i);error_count++;
+		}
+		if(abs(side.at(i) - s_average) > 50){
+			side.erase(side.begin()+i);error_count++;
+		}
+	}
+
+
+	if(error_count < cycles/3){
 		sort(left.begin(), left.end());
 		sort(right.begin(), right.end());
 		sort(side.begin(), side.end());
@@ -90,34 +107,53 @@ Position distance_reset_right(int cycles){
 	double local_y = 0, local_x = 0, angle = 0;
 	double averageleft = 0, averageright = 0, averageside = 0;
 	double dist_sensor = 429; //Distance between Sensors
+	double l_average, r_average, s_average;
 	int start_time = millis();
 	vector <int> left;
 	vector <int> right;
 	vector <int> side;
 	ram = false;
-	int left_low = l_reset_dist.get();
-	int right_low = r_reset_dist.get();
-	int side_low = r_dist.get();
-
+	int side_dist = r_dist.get();
 
 	int error_count = 0;
 
 	misc.print("Start Time: %d\n", start_time);
 	for(int i = 0; i < cycles; i++){
-		misc.print("%d| Left:%d Right: %d, Side: %d\n", millis(), l_reset_dist.get(), r_reset_dist.get(), r_dist.get());
-
-		if(l_reset_dist.get() <= left_low) left_low = l_reset_dist.get();
-		if(r_reset_dist.get() <= right_low) right_low = r_reset_dist.get();
-		if(r_dist.get() <= side_low) side_low = r_dist.get();
-
-
-		if(l_reset_dist.get() < left_low + 20) left.push_back(l_reset_dist.get()); else error_count++;
-		if(r_reset_dist.get() < right_low + 20) right.push_back(r_reset_dist.get()); else error_count++;
-		if(r_dist.get() < side_low + 20) side.push_back(r_dist.get()); else error_count++;
-
+		side_dist = r_dist.get();
+		misc.print("%d| Left:%d Right: %d, Side: %d\n", millis(), l_reset_dist.get(), r_reset_dist.get(), side_dist);
+		if(l_reset_dist.get() != 0) left.push_back(l_reset_dist.get()); else error_count++;
+		if(r_reset_dist.get() != 0)right.push_back(r_reset_dist.get());else error_count++;
+		if(side_dist != 0) side.push_back(side_dist); else error_count++;
 		delay(33);
 	}
-	if(error_count < 5){
+
+	for(int i = 0; i < cycles; i++){
+		l_average += left.at(i);
+		r_average += right.at(i);
+		s_average += side.at(i);
+	}
+
+	l_average = l_average/cycles;
+	r_average = r_average/cycles;
+	s_average = s_average/cycles;
+
+	for(int i = 0; i< cycles; i++){
+		if(abs(left.at(i) - l_average) > 50){
+			left.erase(left.begin()+i); error_count++;
+		}
+	}
+	for(int i = 0; i< cycles; i++){
+		if(abs(right.at(i) - r_average) > 50){
+			right.erase(right.begin()+i);error_count++;
+		}
+	}
+	for(int i = 0; i< cycles; i++){
+		if(abs(side.at(i) - s_average) > 50){
+			side.erase(side.begin()+i);error_count++;
+		}
+	}
+
+	if(error_count < cycles/3){
 		sort(left.begin(), left.end());
 		sort(right.begin(), right.end());
 		sort(side.begin(), side.end());
