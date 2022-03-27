@@ -9,41 +9,23 @@
 #include <functional>
 
 using namespace pros;
+
 // Buttons
 
-// #define both.get_digital_new_press(button)\
-//  (master.get_digital_new_press(button) || partner.get_digital_new_press(button))
-
-
-// back lift buttons
-extern controller_digital_e_t b_lift_up_button;
-extern controller_digital_e_t b_lift_down_button;
-extern controller_digital_e_t b_lift_release_button;
-
-// front lift buttons
-extern controller_digital_e_t f_lift_up_button;
-extern controller_digital_e_t f_lift_down_button;
-extern controller_digital_e_t f_lift_release_button;
-
+// lift buttons
 extern controller_digital_e_t lift_up_button;
 extern controller_digital_e_t lift_down_button;
-extern controller_digital_e_t lift_release_button;
-extern controller_digital_e_t lift_both_down_button;
-extern controller_digital_e_t partner_intk_reverse;
-extern controller_digital_e_t partner_intk_on;
-
-extern controller_digital_e_t partner_f_up;
-extern controller_digital_e_t partner_f_down;
-extern controller_digital_e_t partner_b_up;
-extern controller_digital_e_t partner_b_down;
+extern controller_digital_e_t lift_claw_toggle_button;
+extern controller_digital_e_t lift_tilt_toggle_button;
 
 // misc buttons
-extern controller_digital_e_t cancel_button;
-extern controller_digital_e_t shift_button;
 extern controller_digital_e_t intake_button;
-extern controller_digital_e_t reverse_drive_button;
+extern controller_digital_e_t intake_reverse_button;
+extern controller_digital_e_t shift_button;
+extern controller_digital_e_t hitch_toggle_button;
 extern controller_digital_e_t ok_button;
-extern controller_digital_e_t tracking_button;
+extern controller_digital_e_t b_claw_toggle_button;
+
 
 #define num_controller 2
 

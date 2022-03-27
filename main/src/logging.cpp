@@ -32,6 +32,8 @@ Data term("terminal.txt","$07",debug,log_locations::t);
 Data log_d("log.txt","$08",debug,log_locations::both);
 Data graph("graph.txt","$09",debug,log_locations::sd);
 Data events("events.txt", "%10", debug,log_locations::sd);
+Data state_log("state.txt", "%11", debug,log_locations::both);
+
 
 vector<Data*> Data::get_objs(){
   return obj_list;
@@ -173,10 +175,10 @@ uintptr_t data_size(){//returns the number of characters needed to be printed fr
 
 
 char* Data::to_char(const char* fmt, ...){
-    va_list args;
-    va_start(args, fmt);
-    char* buffer = new char[256];
-    vsnprintf(buffer, 256, fmt, args);
-    va_end(args);
-    return buffer;
+  va_list args;
+  va_start(args, fmt);
+  char* buffer = new char[256];
+  vsnprintf(buffer, 256, fmt, args);
+  va_end(args);
+  return buffer;
 }

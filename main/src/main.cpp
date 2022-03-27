@@ -1,8 +1,8 @@
-
 #include "config.hpp"
 #include "drive.hpp"
 #include "controller.hpp"
 #include "Libraries/gui.hpp"
+#include "Libraries/printing.hpp"
 #include "pid.hpp"
 #include "Tracking.hpp"
 #include "task.hpp"
@@ -48,9 +48,6 @@ void initialize() {
 	update_t.start();
 	// master.print(2, 0, "Driver: %s", drivebase.drivers[drivebase.cur_driver].name);
 	// gyro.finish_calibrating(); //Finishes calibrating gyro before program starts
-  
-
-  // save_positions();
 }
 
 /**
@@ -84,15 +81,12 @@ void competition_initialize() {}
  */
 void autonomous() {
   load_positions();
-	// skills();
-
 }
 
 void opcontrol() {
 
-	// Autons::selector();
 	while(true){
-		drivebase.non_blocking_driver_practice();
+		// drivebase.non_blocking_driver_practice();
 		delay(10);
 	}
 }

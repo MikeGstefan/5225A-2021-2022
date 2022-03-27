@@ -14,8 +14,9 @@
 #include "Subsystems/f_lift.hpp"
 #include <fstream>
 
-void save_positions();
-void load_positions();
+void rush_high();
+void rush_tall();
+void rush_low();
 
 void skills();
 void skills2();
@@ -31,19 +32,46 @@ void blue_highside();
 void blue_highside_tall();
 void blue_lowside();
 
-  constexpr bool normal_auton = true;
+constexpr bool normal_auton = true;
 
-  enum class autons;
-  enum class start_pos;
-  enum class alliances; //alliances and goals really shouldn't be enums, but it makes my code more consistent
-  enum class goals;
+//alliances and goals really shouldn't be enums, but it makes my code more consistent
+enum class autons{
+  Skills,
+  AUTO2,
+  AUTO3,
+  NUM_OF_ELEMENTS,
+  DEFAULT = Skills,
+};
 
-  extern autons cur_auton;
-  extern start_pos cur_start_pos;
-  extern alliances cur_alliance;
-  extern goals cur_goal;
+enum class start_pos{
+  POS1,
+  POS2,
+  POS3,
+  NUM_OF_ELEMENTS,
+  DEFAULT = POS1,
+};
 
-  void auton_file_read();
-  void auton_file_update();
-  void auton_give_up();
-  void auton_selector();
+enum class alliances{
+  RED,
+  BLUE,
+  NUM_OF_ELEMENTS,
+  DEFAULT = RED
+};
+
+enum class goals{
+  LEFT,
+  TALL,
+  RIGHT,
+  NUM_OF_ELEMENTS,
+  DEFAULT = TALL
+};
+
+extern autons cur_auton;
+extern start_pos cur_start_pos;
+extern alliances cur_alliance;
+extern goals cur_goal;
+
+void auton_file_read();
+void auton_file_update();
+void auton_give_up();
+void auton_selector();

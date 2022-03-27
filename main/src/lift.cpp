@@ -104,6 +104,7 @@ void b_lift_dec(){
 }
 
 void handle_lifts(){
+/*
     // doesn't turn on intake if it's at the bottom
     if(f_lift_index != 0 && (master.get_digital_new_press(intake_button) || partner.get_digital_new_press(partner_intk_on))){
         intk_state = !intk_state;
@@ -354,7 +355,7 @@ void handle_lifts(){
         timer = millis();
       }
 
-
+*/
 }
 
 
