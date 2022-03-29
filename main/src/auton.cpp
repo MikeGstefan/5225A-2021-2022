@@ -738,16 +738,25 @@ void lrt_auton(){
   move_stop();
 }
 
+void save_auton(){
+
+}
+
+//name, target, common point, task at target
 std::vector<std::string> selected_positions;
-std::unordered_map<std::string, Position> targets= {
-  {"Tall", {73.0, 71.0, 30.0}},
-  {"High", {107.0, 71.0, 0.0}},
-  {"Low", {34.5, 72.0, 45.0}},
+std::unordered_map<std::string, std::tuple<Point, Point, std::string>> targets= {
+  {"Tall", {{73.0, 71.0}, {0.0, 0.0}, ""}}, //front
+  {"High", {{107.0, 71.0}, {0.0, 0.0}, ""}}, //front
+  {"Low", {{34.5, 72.0}, {0.0, 0.0}, ""}}, //front
+  {"Ramp", {{128.0, 35.0}, {0.0, 0.0}, ""}}, //back
+  {"AWP", {{36.0, 11.75}, {0.0, 0.0}, ""}}, //back
 };
+//go to common before reaching dest
+//go to common after leaving, on the way to next
 
 void select_auton(){
 
-  while(true){
+  while(true){ //Does not run infinitely. Will only run 2-3 times until user stops
     master.clear();
     master.print(0, 0, "A:");
     master.print(1, 0, "B:");
@@ -755,10 +764,7 @@ void select_auton(){
     
     int row;
     std::array<std::string, 3> current_selection;
-    for(std::unordered_map<std::string, Position>::iterator it = targets.begin(); it != targets.end(); it++){
-      row = 0;
-      std::fill(current_selection.begin(), current_selection.end(), "");
-
+    for(std::unordered_map<std::string, std::tuple<Point, Point, std::string>>::iterator it = targets.begin(); it != targets.end(); it++){
       if(!contains(selected_positions, it->first)){ //If it hasn't been selected already
         current_selection[row] = it->first;
         master.print(row, 3, it->first);
@@ -768,10 +774,16 @@ void select_auton(){
       if(row == 3) break;
     }
 
-    if(master.get_digital_new_press(DIGITAL_X)) break;
-    else if(master.get_digital_new_press(DIGITAL_A)) selected_positions.push_back(current_selection[0]);
-    else if(master.get_digital_new_press(DIGITAL_B)) selected_positions.push_back(current_selection[1]);
-    else if(master.get_digital_new_press(DIGITAL_Y)) selected_positions.push_back(current_selection[2]);
+    while(true){
+      if(master.get_digital_new_press(DIGITAL_X)) {save_auton(); return;}
+      else if(master.get_digital_new_press(DIGITAL_A)) {selected_positions.push_back(current_selection[0]); break;}
+      else if(master.get_digital_new_press(DIGITAL_B))  {selected_positions.push_back(current_selection[1]); break;}
+      else if(master.get_digital_new_press(DIGITAL_Y)) {selected_positions.push_back(current_selection[2]); break;}
+      delay(10);
+    }
+
+    //give option for what to do at dest
+    //pick up front, back, do nothing, etc...
   }
 }
 
@@ -779,6 +791,11 @@ void run_auton(){
   for(std::vector<std::string>::iterator it = selected_positions.begin(); it != selected_positions.end(); it++){
     //decide on how to go to target (move to point, or dedicated function);
 
-    Position target = targets[*it];
+    Position target = std::get<0>(targets[*it]);
+    Position common = std::get<1>(targets[*it]);
+    std::string action = std::get<2>(targets[*it]);
+
+    move_start(move_types::line, line_params({tracking.x_coord, tracking.y_coord}, common, 127.0, true, 0.0, false));
+    move_start(move_types::line, line_params({common.x, common.y}, target));
   }
 }

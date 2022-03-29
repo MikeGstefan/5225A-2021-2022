@@ -9,9 +9,10 @@ Vector Point::operator -(const Point& p2) const{
 }
 
 // position constructors
-Position::Position(double x, double y, double angle): x(x), y(y), angle(angle){}
 Position::Position(): x(0.0), y(0.0), angle(0.0){}
 Position::Position(Point point): x(point.x), y(point.y), angle(0.0){}
+Position::Position(Point point, double angle): x(point.x), y(point.y), angle(angle){}
+Position::Position(double x, double y, double angle): x(x), y(y), angle(angle){}
 
 // vector methods
 
