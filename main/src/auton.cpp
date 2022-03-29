@@ -738,10 +738,8 @@ void lrt_auton(){
   move_stop();
 }
 
-void save_auton(){
 
-}
-
+std::fstream auton_file;
 //name, target, common point, task at target
 std::vector<std::string> selected_positions;
 std::unordered_map<std::string, std::tuple<Point, Point, std::string>> targets= {
@@ -752,8 +750,25 @@ std::unordered_map<std::string, std::tuple<Point, Point, std::string>> targets= 
   {"AWP", {{130.0, 35.0}, {125.0, 30.0}, ""}}, //back
   //needs starting points too
 };
-//go to common before reaching dest
-//go to common after leaving, on the way to next
+
+void load_auton(){
+  std::string str;
+  selected_positions.clear();
+
+  Data::log_t.data_update();
+  auton_file.open(auton_file_name, fstream::in);
+  while(auton_file >> str) selected_positions.push_back(str);
+  auton_file.close();
+  Data::log_t.done_update();
+}
+
+void save_auton(){
+  Data::log_t.data_update();
+  auton_file.open(auton_file_name, fstream::out | fstream::trunc);
+  for(std::vector<std::string>::iterator it = selected_positions.begin(); it != selected_positions.end(); it++) auton_file << *it;
+  auton_file.close();
+  Data::log_t.done_update();
+}
 
 bool run_defined_auton(std::string start, std::string target){
 

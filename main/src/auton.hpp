@@ -34,3 +34,4 @@ void blue_lowside();
 
 void select_auton();
 void run_auton();
+void load_auton();
