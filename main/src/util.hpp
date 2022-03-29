@@ -98,6 +98,11 @@ int sgn(T value){
   return (T(0) < value) - (value < T(0));
 }
 
+template <typename T>
+bool contains(T& container, typename T::value_type item){
+  return std::find(container.begin(), container.end(), item) != container.end();
+}
+
 // maps a value to a range
 template <typename T>
 T map(T x, T in_min, T in_max, T out_min, T out_max){

@@ -75,14 +75,23 @@ void _Controller::print(std::uint8_t line, std::uint8_t col, const char* fmt, ..
   char buffer[19];
   std::va_list args;
   va_start(args, fmt);
-  vsnprintf(buffer,19,fmt,args);
+  vsnprintf(buffer, 19, fmt, args);
   va_end(args);
   std::function<void()> func = [=](){
-    pros::Controller::print(line,col,buffer);
-    controller_queue.print("%d| printing %s to %d\n",millis(), buffer, this->controller_num);
+    pros::Controller::print(line, col, buffer);
+    controller_queue.print("%d| printing %s to %d\n", millis(), buffer, this->controller_num);
   };
   this->add_to_queue(func);
-  controller_queue.print("%d| adding print to queue for controller %d\n",millis(), this->controller_num);
+  controller_queue.print("%d| adding print to queue for controller %d\n", millis(), this->controller_num);
+
+}
+void _Controller::print(std::uint8_t line, std::uint8_t col, std::string str){
+  std::function<void()> func = [=](){
+    pros::Controller::print(line, col, str.c_str());
+    controller_queue.print("%d| printing %s to %d\n", millis(), str.c_str(), this->controller_num);
+  };
+  this->add_to_queue(func);
+  controller_queue.print("%d| adding print to queue for controller %d\n", millis(), this->controller_num);
 
 }
 void _Controller::clear_line (std::uint8_t line){

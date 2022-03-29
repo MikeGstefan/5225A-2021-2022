@@ -38,7 +38,7 @@ void initialize() {
 	Data::init();
 	_Controller::init();
 	GUI::init();
-	// Autons::file_read();
+	// auton_file_read();
 	delay(500);
 	// tracking.x_coord = 26.0, tracking.y_coord = 11.75, tracking.global_angle = -90.0_deg;
 	// tracking.x_coord = 104.0, tracking.y_coord = 12.0, tracking.global_angle = -30.0_deg;
@@ -48,6 +48,7 @@ void initialize() {
 	update_t.start();
 	// master.print(2, 0, "Driver: %s", drivebase.drivers[drivebase.cur_driver].name);
 	// gyro.finish_calibrating(); //Finishes calibrating gyro before program starts
+  select_auton();
 }
 
 /**
@@ -84,19 +85,6 @@ void autonomous() {
 }
 
 void opcontrol() {
-	/* Nathan:
-	auton give up func - ask mike
-	lvgl images
-  2d sliders
-
-  Don't allow presses until finger release when switching a page
-  touched when flashed doesn't work
-  check what actually kills the auto balance loop
-  check auton selector
-  integrate pneumatics
-  make sure comp check works
-  -put vertical sliders bounds within vertical aree
-	*/
 
 	while(true){
 		// drivebase.non_blocking_driver_practice();
