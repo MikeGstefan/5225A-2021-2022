@@ -65,9 +65,9 @@ public:
 
 void queue_handle(void* params);
 uintptr_t data_size();
-const int queue_size = 1024;
-const int print_point = 500;
-const int print_max_time = 1500;
+constexpr int queue_size = 1024;
+constexpr int print_point = 500;
+constexpr int print_max_time = 1500;
 
 
 extern Data task_log;
@@ -82,3 +82,4 @@ extern Data motion_i;
 extern Data log_d;
 extern Data events;
 extern Data graph;
+extern Data state_log;

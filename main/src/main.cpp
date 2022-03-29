@@ -1,8 +1,8 @@
-
 #include "config.hpp"
 #include "drive.hpp"
 #include "controller.hpp"
 #include "Libraries/gui.hpp"
+#include "Libraries/printing.hpp"
 #include "pid.hpp"
 #include "Tracking.hpp"
 #include "task.hpp"
@@ -14,12 +14,10 @@
 
 #include "task.hpp"
 #include "util.hpp"
-#include <cmath>
-#include <fstream>
 using namespace std;
 
 pros::Task *updt = nullptr; //What's this for
-const GUI* GUI::current_gui = &g_main;
+const GUI* GUI::current_gui = &g_util;
 
 /**
  * Runs initialization code. This occurs as soon as the program is started.
@@ -50,9 +48,6 @@ void initialize() {
 	update_t.start();
 	// master.print(2, 0, "Driver: %s", drivebase.drivers[drivebase.cur_driver].name);
 	// gyro.finish_calibrating(); //Finishes calibrating gyro before program starts
-  
-
-  save_positions();
 }
 
 /**
@@ -86,19 +81,25 @@ void competition_initialize() {}
  */
 void autonomous() {
   load_positions();
-	// skills();
-
 }
 
 void opcontrol() {
-  load_positions();
-  rush_low();
-  delay(1000);
-  f_claw_p.set_value(LOW);
+	/* Nathan:
+	auton give up func - ask mike
+	lvgl images
+  2d sliders
 
-	// Autons::selector();
+  Don't allow presses until finger release when switching a page
+  touched when flashed doesn't work
+  check what actually kills the auto balance loop
+  check auton selector
+  integrate pneumatics
+  make sure comp check works
+  -put vertical sliders bounds within vertical aree
+	*/
+
 	while(true){
-		drivebase.non_blocking_driver_practice();
+		// drivebase.non_blocking_driver_practice();
 		delay(10);
 	}
 }

@@ -1,11 +1,9 @@
 #include "auton.hpp"
 #include "Tracking.hpp"
 #include "config.hpp"
-#include "geometry.hpp"
 #include "logging.hpp"
-#include "pros/misc.h"
-#include <string>
 
+static const std::string auton_file_name = "/usd/auton.txt";
 
 void skills(){
   
@@ -737,199 +735,148 @@ void lrt_auton(){
   move_stop();
 }
 
-namespace Autons{
 
-  enum class autons{
-    Skills,
-    AUTO2,
-    AUTO3,
-    NUM_OF_ELEMENTS,
-    DEFAULT = Skills,
-  };
+autons cur_auton = autons::DEFAULT;
+alliances cur_alliance = alliances::DEFAULT;
+start_pos cur_start_pos = start_pos::DEFAULT;
+goals cur_goal = goals::DEFAULT;
 
-  enum class start_pos{
-    POS1,
-    POS2,
-    POS3,
-    NUM_OF_ELEMENTS,
-    DEFAULT = POS1,
-  };
+const char* auton_names[static_cast<int>(autons::NUM_OF_ELEMENTS)] = {"Skills", "Auto1", "Auto2"};
+const char* start_pos_names[static_cast<int>(start_pos::NUM_OF_ELEMENTS)] = {"Pos1", "Pos2", "Pos3"};
+const char* alliance_names[2] = {"Red", "Blue"};
+const char* goal_names[static_cast<int>(goals::NUM_OF_ELEMENTS)] = {"Left", "Tall", "Right"};
 
-  enum class alliances{
-    RED,
-    BLUE,
-    NUM_OF_ELEMENTS,
-    DEFAULT = RED
-  };
+std::fstream auton_file;
 
-  enum class goals{
-    LEFT,
-    TALL,
-    RIGHT,
-    NUM_OF_ELEMENTS,
-    DEFAULT = TALL
-  };
+void auton_file_update(){
+  Data::log_t.data_update();
+  auton_file.open(auton_file_name, fstream::out | fstream::trunc);
+  auton_file << static_cast<int>(cur_auton) << std::endl;
+  auton_file << static_cast<int>(cur_alliance) << std::endl;
+  auton_file << static_cast<int>(cur_start_pos) << std::endl;
+  auton_file << static_cast<int>(cur_goal) << std::endl;
+  auton_file.close();
+  Data::log_t.done_update();
+}
 
-  autons cur_auton = autons::DEFAULT;
-  alliances cur_alliance = alliances::DEFAULT;
-  start_pos cur_start_pos = start_pos::DEFAULT;
-  goals cur_goal = goals::DEFAULT;
+void save_auton_change(std::string which){
+  std::string val;
+  int line;
 
-  const char* auton_names[static_cast<int>(autons::NUM_OF_ELEMENTS)] = {"Skills", "Auto1", "Auto2"};
-  const char* start_pos_names[static_cast<int>(start_pos::NUM_OF_ELEMENTS)] = {"Pos1", "Pos2", "Pos3"};
-  const char* alliance_names[2] = {"Red", "Blue"};
-  const char* goal_names[static_cast<int>(goals::NUM_OF_ELEMENTS)] = {"Left", "Tall", "Right"};
+  if(which == "Auton"){
+    val = auton_names[static_cast<int>(cur_auton)];
+    line = 1;
+  }
+  else if(which == "Start Pos"){
+    val = start_pos_names[static_cast<int>(cur_start_pos)];
+    line = 1;
+  }
+  else if(which == "Goal"){
+    val = goal_names[static_cast<int>(cur_goal)];
+    line = 2;
+  }
+  else if(which == "Alliance"){
+    val = alliance_names[static_cast<int>(cur_alliance)];
+    line = 0;
+  }
+  else{
+    printf2(term_colours::ERROR, 0, "Invalid selection to save auton data.");
+    return;
+  }
+  printf2(term_colours::GREEN, 0, "Switched %s to %s", which, val);
+  events.print("\n\nSwitched %s to %s\n\n", which.c_str(), val.c_str());
+  master.print(line, 0, "%s: %s          ", which.c_str(), val.c_str());
+  auton_file_update();
+}
 
-  const std::string file_name = "/usd/auton.txt";
-  std::fstream file;
-
-  void file_update(){
+void auton_file_read(){
+  if (!pros::usd::is_installed()){
+    screen_flash::start("No SD Card!");
+    printf2(term_colours::ERROR, 0, "No SD card inserted. Using default auton, start position, goal and alliance.");
+    return;
+  }
+  else{
     Data::log_t.data_update();
-    file.open(file_name, fstream::out | fstream::trunc);
-    file << static_cast<int>(cur_auton) << std::endl;
-    file << static_cast<int>(cur_alliance) << std::endl;
-    file << static_cast<int>(cur_start_pos) << std::endl;
-    file << static_cast<int>(cur_goal) << std::endl;
-    file.close();
+    auton_file.open(auton_file_name, fstream::in);
+
+    if (!auton_file){ //File doesn't exist
+      auton_file.close();
+      screen_flash::start("Auton File not found!");
+      auton_file_update();
+      
+      printf2(term_colours::NOTIF, 0, "Created new Auton File.");
+      auton_file.open(auton_file_name, fstream::in);
+    }
+
+    int auton, ally, start, goal;
+    auton_file >> auton >> ally  >> start  >> goal;
+    auton_file.close();
     Data::log_t.done_update();
+
+    cur_auton = static_cast<autons>(auton);
+    cur_start_pos = static_cast<start_pos>(start);
+    cur_goal = static_cast<goals>(goal);
+    cur_alliance = static_cast<alliances>(ally);
   }
 
-  void save_change(std::string which){
-    std::string val;
-    int line;
-
-    if(which == "Auton"){
-      val = auton_names[static_cast<int>(cur_auton)];
-      line = 1;
-    }
-    else if(which == "Start Pos"){
-      val = start_pos_names[static_cast<int>(cur_start_pos)];
-      line = 1;
-    }
-    else if(which == "Goal"){
-      val = goal_names[static_cast<int>(cur_goal)];
-      line = 2;
-    }
-    else if(which == "Alliance"){
-      val = alliance_names[static_cast<int>(cur_alliance)];
-      line = 0;
-    }
-    else{
-      printf("%sInvalid selection to save auton data.%s\n", GUI::get_term_colour(GUI::Colours::ERROR), GUI::get_term_colour(GUI::Colours::NONE));
-      return;
-    }
-
-    printf("%sSwitched %s to %s%s\n", GUI::get_term_colour(GUI::Colours::GREEN), which.c_str(), val.c_str(), GUI::get_term_colour(GUI::Colours::NONE));
-    events.print("\n\nSwitched %s to %s\n\n", which.c_str(), val.c_str());
-    master.print(line, 0, "%s: %s          ", which.c_str(), val.c_str());
-    file_update();
+  master.clear();
+  if(normal_auton){
+    master.print(0, 0, "%s: %s          ", "Alliance", alliance_names[static_cast<int>(cur_alliance)]);    
+    master.print(1, 0, "%s: %s          ", "Auton", auton_names[static_cast<int>(cur_auton)]);
   }
+  else{
+    master.print(0, 0, "%s: %s          ", "Alliance", alliance_names[static_cast<int>(cur_alliance)]);  
+    master.print(1, 0, "%s: %s          ", "Start Pos", start_pos_names[static_cast<int>(cur_start_pos)]);
+    master.print(2, 0, "%s: %s          ", "Goal: ", goal_names[static_cast<int>(cur_goal)]);  
+  }
+}
 
-  void file_read(){
-    if (!pros::usd::is_installed()){
-      GUI::flash("No SD Card!");
-      printf("%sNo SD card inserted.%s Using default auton, start position, goal and alliance.\n", GUI::get_term_colour(GUI::Colours::ERROR), GUI::get_term_colour(GUI::Colours::NONE));
-      return;
-    }
-    else{
-      Data::log_t.data_update();
-      file.open(file_name, fstream::in);
+void auton_give_up(){ 
+  printf("Insert actual Auton Give up code here\n"); 
+} 
 
-      if (!file){ //File doesn't exist
-        file.close();
-        GUI::flash("Auton File not found!");
-        file_update();
-        
-        printf("%sCreated new Auton File.%s\n", GUI::get_term_colour(GUI::Colours::GOOD), GUI::get_term_colour(GUI::Colours::NONE));
-        file.open(file_name, fstream::in);
+void auton_selector(){
+  if(normal_auton){
+    wait_until(master.get_digital_new_press(ok_button)){
+      if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_L1)){
+        cur_auton = previous_enum_value(cur_auton);
+        save_auton_change("Auton");
       }
-
-      int auton, ally, start, goal;
-      file >> auton >> ally  >> start  >> goal;
-      file.close();
-      Data::log_t.done_update();
-
-      cur_auton = static_cast<autons>(auton);
-      cur_start_pos = static_cast<start_pos>(start);
-      cur_goal = static_cast<goals>(goal);
-      cur_alliance = static_cast<alliances>(ally);
-    }
-
-    master.clear();
-    if(normal){
-      master.print(0, 0, "%s: %s          ", "Alliance", alliance_names[static_cast<int>(cur_alliance)]);    
-      master.print(1, 0, "%s: %s          ", "Auton", auton_names[static_cast<int>(cur_auton)]);
-    }
-    else{
-      master.print(0, 0, "%s: %s          ", "Alliance", alliance_names[static_cast<int>(cur_alliance)]);  
-      master.print(1, 0, "%s: %s          ", "Start Pos", start_pos_names[static_cast<int>(cur_start_pos)]);
-      master.print(2, 0, "%s: %s          ", "Goal: ", goal_names[static_cast<int>(cur_goal)]);  
-    }
-  }
-
-  void prev_route(){
-    cur_auton = previous_enum_value(cur_auton);
-    save_change("Auton");
-  }
-
-  void next_route(){
-    cur_auton = next_enum_value(cur_auton);
-    save_change("Auton");
-  }
-
-  void prev_start_pos(){
-    cur_start_pos = previous_enum_value(cur_start_pos);
-    save_change("Start Pos");
-  }
-
-  void next_start_pos(){
-    cur_start_pos = next_enum_value(cur_start_pos);
-    save_change("Start Pos");
-  }
-
-  void prev_goal(){
-    cur_goal = previous_enum_value(cur_goal);
-    save_change("Goal");
-  }
-
-  void next_goal(){
-    cur_goal = next_enum_value(cur_goal);
-    save_change("Goal");
-  }
-
-  void set_target_goal(goals goal){
-    cur_goal = goal;
-    save_change("Goal");
-  }
-
-  void switch_alliance(alliances new_ally){
-    cur_alliance = new_ally;
-    save_change("Alliance");
-  }
-
-  void give_up(){ 
-    printf("Insert actual Auton Give up code here\n"); 
-  } 
-
-  void selector(){
-    if(normal){
-      wait_until(master.get_digital_new_press(ok_button)){
-        if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_L1)) prev_route();
-        else if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_R1)) next_route();
-        else if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_X)) switch_alliance();
+      else if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_R1)){
+        cur_auton = next_enum_value(cur_auton);
+        save_auton_change("Auton");
+      }
+      else if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_X)){
+        cur_alliance = static_cast<alliances>(!static_cast<bool>(cur_alliance));
+        save_auton_change("Alliance");
       }
     }
-    else{
-      wait_until(master.get_digital_new_press(ok_button)){
-        if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_L1)) prev_start_pos();
-        else if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_R1)) next_start_pos();
-        else if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_X)) switch_alliance();
-        else if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_L2)) prev_goal();
-        else if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_R2)) next_goal();
-      }
-    }
-    
-    master.clear();
   }
+  else{
+    wait_until(master.get_digital_new_press(ok_button)){
+      if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_L1)){
+        cur_start_pos = previous_enum_value(cur_start_pos);
+        save_auton_change("Start Pos");
+      }
+      else if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_R1)){
+        cur_start_pos = next_enum_value(cur_start_pos);
+        save_auton_change("Start Pos");
+      }
+      else if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_L2)){
+        cur_goal = previous_enum_value(cur_goal);
+        save_auton_change("Goal");
+      }
+      else if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_R2)){
+        cur_goal = next_enum_value(cur_goal);
+        save_auton_change("Goal");
+      }
+      else if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_X)){
+        cur_alliance = static_cast<alliances>(!static_cast<bool>(cur_alliance));
+        save_auton_change("Alliance");
+      }
 
+    }
+  }
+  
+  master.clear();
 }

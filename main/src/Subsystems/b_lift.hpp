@@ -6,7 +6,7 @@
 #define B_LIFT_STATE_LINE 1 // line on controller which "searching" and "lowered" lift states are printed on
 
 #define NUM_OF_B_LIFT_STATES 12
-#define LIFT_MAX_VELOCITY 100
+#define B_LIFT_MAX_VELOCITY 100
 
 
 enum class b_lift_states{
@@ -24,7 +24,7 @@ enum class b_lift_states{
   manual  // controlled by joystick
 };
 
-class B_Lift: public Motorized_subsystem<b_lift_states, NUM_OF_B_LIFT_STATES, LIFT_MAX_VELOCITY> {
+class B_Lift: public Motorized_subsystem<b_lift_states, NUM_OF_B_LIFT_STATES, B_LIFT_MAX_VELOCITY> {
   int search_cycle_check_count = 0, bad_count = 0; // cycle check for safeties
   bool held; // if the lift is holding a mogo (used for joystick control)
 
@@ -40,7 +40,7 @@ class B_Lift: public Motorized_subsystem<b_lift_states, NUM_OF_B_LIFT_STATES, LI
 public:
   static constexpr double bottom_position = 35.0, raised_position = 400.0, tall_dropoff_position = 550, platform_position = 660.0, tall_goal_position = 665.0, top_position = 675.0;
 
-  B_Lift(Motorized_subsystem<b_lift_states, NUM_OF_B_LIFT_STATES, LIFT_MAX_VELOCITY> motorized_subsystem);  // constructor
+  B_Lift(Motorized_subsystem<b_lift_states, NUM_OF_B_LIFT_STATES, B_LIFT_MAX_VELOCITY> motorized_subsystem);  // constructor
   void handle();  // contains state machine code
   double pos_to_height(const double position);
   double height_to_pos(const double height);
