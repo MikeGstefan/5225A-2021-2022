@@ -8,6 +8,10 @@ Vector Point::operator -(const Point& p2) const{
   return Vector(x - p2.x, y - p2.y, vector_types::CARTESIAN);
 }
 
+Point::Point(): x(0.0), y(0.0){}
+Point::Point(Position position): x(position.x), y(position.y){}
+Point::Point(double x, double y): x(x), y(y){}
+
 // position constructors
 Position::Position(): x(0.0), y(0.0), angle(0.0){}
 Position::Position(Point point): x(point.x), y(point.y), angle(0.0){}

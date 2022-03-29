@@ -745,14 +745,19 @@ void save_auton(){
 //name, target, common point, task at target
 std::vector<std::string> selected_positions;
 std::unordered_map<std::string, std::tuple<Point, Point, std::string>> targets= {
-  {"Tall", {{73.0, 71.0}, {0.0, 0.0}, ""}}, //front
-  {"High", {{107.0, 71.0}, {0.0, 0.0}, ""}}, //front
-  {"Low", {{34.5, 72.0}, {0.0, 0.0}, ""}}, //front
-  {"Ramp", {{128.0, 35.0}, {0.0, 0.0}, ""}}, //back
-  {"AWP", {{36.0, 11.75}, {0.0, 0.0}, ""}}, //back
+  {"Tall", {{73.0, 71.0}, {72.0, 60.0}, ""}}, //front
+  {"High", {{107.0, 71.0}, {107.0, 60.0}, ""}}, //front
+  {"Low", {{34.5, 72.0}, {36.0, 60.0}, ""}}, //front
+  {"Ramp", {{128.0, 35.0}, {30.0, 30.0}, ""}}, //back
+  {"AWP", {{130.0, 35.0}, {125.0, 30.0}, ""}}, //back
+  //needs starting points too
 };
 //go to common before reaching dest
 //go to common after leaving, on the way to next
+
+bool run_defined_auton(std::string start, std::string target){
+
+}
 
 void select_auton(){
 
@@ -788,14 +793,23 @@ void select_auton(){
 }
 
 void run_auton(){
-  for(std::vector<std::string>::iterator it = selected_positions.begin(); it != selected_positions.end(); it++){
-    //decide on how to go to target (move to point, or dedicated function);
+  std::string current, target;
+  for(int i = 0; i+1 < selected_positions.size(); i++){
+    //give option for predetermined functions also
 
-    Position target = std::get<0>(targets[*it]);
-    Position common = std::get<1>(targets[*it]);
-    std::string action = std::get<2>(targets[*it]);
+    current = selected_positions[i];
+    target = selected_positions[i+1];
 
-    move_start(move_types::line, line_params({tracking.x_coord, tracking.y_coord}, common, 127.0, true, 0.0, false));
-    move_start(move_types::line, line_params({common.x, common.y}, target));
+    move_start(move_types::tank_point, tank_point_params(std::get<1>(targets[current]), false, 127.0, 1.0, false));
+    move_start(move_types::tank_point, tank_point_params(std::get<1>(targets[target]), false, 127.0, 1.0, false));
+    move_start(move_types::tank_rush, tank_rush_params(std::get<0>(targets[target]), false));
+
+    //perform action
+    
+    //test this on replit
+    //0t
+    //0c, 1c, 1t, action
+    //1c, 2c, 2t, action
+    //2c, 3c, 3t, action
   }
 }

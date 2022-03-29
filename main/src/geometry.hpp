@@ -2,12 +2,17 @@
 #include "main.h"
 
 class Vector; // forward declares Vector class
+struct Position;
 
 struct Point{
   double x, y;
   // arithmetic operator overloads
   Vector operator +(const Point& p2) const;
   Vector operator -(const Point& p2) const;
+  
+  Point();
+  Point(Position position);
+  Point(double x, double y);
 };
 
 struct Position{   // stores members variables for a coordinate: x, y and angle    MUST BE DEFINED HERE, OTHERWISE IT'LL CAUSE CIRCULAR HEADER FILE DEPENDENCY OCCURS

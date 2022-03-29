@@ -17,7 +17,7 @@
 using namespace std;
 
 pros::Task *updt = nullptr; //What's this for
-const GUI* GUI::current_gui = &g_util;
+const GUI* GUI::current_gui = &g_util; //Also why this
 
 /**
  * Runs initialization code. This occurs as soon as the program is started.
@@ -82,6 +82,7 @@ void competition_initialize() {}
  */
 void autonomous() {
   load_positions();
+  run_auton();
 }
 
 void opcontrol() {
