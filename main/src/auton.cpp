@@ -742,7 +742,7 @@ void lrt_auton(){
 std::fstream auton_file;
 //name, target, common point, task at target
 std::vector<std::string> selected_positions;
-std::unordered_map<std::string, std::tuple<Point, Point, std::string>> targets= {
+std::unordered_map<std::string, std::tuple<Point, Point, std::string>> targets = {
   {"Tall", {{73.0, 71.0}, {72.0, 60.0}, ""}}, //front
   {"High", {{107.0, 71.0}, {107.0, 60.0}, ""}}, //front
   {"Low", {{34.5, 72.0}, {36.0, 60.0}, ""}}, //front
@@ -765,7 +765,7 @@ void load_auton(){
 void save_auton(){
   Data::log_t.data_update();
   auton_file.open(auton_file_name, fstream::out | fstream::trunc);
-  for(std::vector<std::string>::iterator it = selected_positions.begin(); it != selected_positions.end(); it++) auton_file << *it;
+  for(std::vector<std::string>::iterator it = selected_positions.begin(); it != selected_positions.end(); it++) auton_file << *it << std::endl;
   auton_file.close();
   Data::log_t.done_update();
 }
@@ -782,15 +782,16 @@ void select_auton(){
     master.print(1, 0, "B:");
     master.print(2, 0, "Y:");
     
-    int row;
+    int row = 0;
     std::array<std::string, 3> current_selection;
+    
     for(std::unordered_map<std::string, std::tuple<Point, Point, std::string>>::iterator it = targets.begin(); it != targets.end(); it++){
       if(!contains(selected_positions, it->first)){ //If it hasn't been selected already
         current_selection[row] = it->first;
         master.print(row, 3, it->first);
+        row++;
       }
 
-      row++;
       if(row == 3) break;
     }
 
