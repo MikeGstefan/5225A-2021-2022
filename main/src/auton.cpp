@@ -131,7 +131,7 @@ void skills2(){
   // // delay(200);
   
 
-//21, 12.5
+  //21, 12.5
 
   move_start(move_types::tank_point, tank_point_params({tracking.x_coord - 3.0, tracking. y_coord, -90.0}));
   move_start(move_types::turn_point, turn_point_params({120.0,127.0}));
@@ -162,7 +162,7 @@ void skills2(){
   move_start(move_types::tank_point, tank_point_params({85.0,33.0, 30.0}, false, 70.0));
   // flatten_against_wall(false);
 
-b_claw_p.set_value(0);
+  b_claw_p.set_value(0);
 
   int safety_check = 0;
   //bool to + -
@@ -741,17 +741,16 @@ void lrt_auton(){
 
 
 std::fstream auton_file;
-//name, target, common point, task at target
+//name, target, common point, task at target, angle to go to target
 std::vector<std::string> selected_positions;
-std::map<std::string, std::tuple<Point, Point, std::string>> targets = {
-  {"Right", {{73.0, 71.0}, {72.0, 60.0}, ""}}, //start
-  {"Left", {{73.0, 71.0}, {72.0, 60.0}, ""}}, //start
-  {"Tall", {{73.0, 71.0}, {72.0, 60.0}, ""}}, //front
-  {"High", {{107.0, 71.0}, {107.0, 60.0}, ""}}, //front
-  {"Low", {{34.5, 72.0}, {36.0, 60.0}, ""}}, //front
-  {"AWP", {{130.0, 35.0}, {125.0, 30.0}, ""}}, //back
-  {"Ramp", {{128.0, 35.0}, {30.0, 30.0}, ""}}, //back
-  //needs starting points too
+std::map<std::string, std::tuple<Point, Point, std::string, double>> targets = {
+  {"Right", {{108.0, 16.0}, {104.0, 12.0}, "None", 0.0}},
+  {"Left", {{30.0, 12.0}, {36.0, 24.0}, "None", 0.0}},
+  {"Tall", {{73.0, 71.0}, {72.0, 60.0}, "Front", 30.0}},
+  {"High", {{107.0, 71.0}, {107.0, 60.0}, "Front", 0.0}},
+  {"Low", {{34.5, 72.0}, {36.0, 60.0}, "Front", 45.0}},
+  {"AWP", {{130.0, 36.0}, {125.0, 30.0}, "Back", -90.0}},
+  {"Ramp", {{128.0, 36.0}, {30.0, 30.0}, "Back", -90.0}},
 };
 
 void load_auton(){
@@ -773,51 +772,88 @@ void save_auton(){
   Data::log_t.done_update();
 }
 
+void run_auton_task(std::string task){
+
+}
+
 bool run_defined_auton(std::string start, std::string target){
 //handles movement and goal pickup
+  if(start == "" && target == ""){
+
+  }
+  else if(start == "" && target == ""){
+
+  }
+  else return false;
+
+  return true;
+}
+
+std::string select_auton_task(){
+  std::string choice;
+
+  switch(master.wait_for_press({DIGITAL_A, DIGITAL_RIGHT, DIGITAL_LEFT})){ //see how to use ok_button
+    case DIGITAL_A:
+      if(choice == "Back" || "Front"){
+        //select angle
+      }
+
+      return choice;
+
+    case DIGITAL_RIGHT:
+      if(choice == "Front") choice = "Back";
+      else if(choice == "Back") choice = "None";
+      else if(choice == "None") choice = "Front";
+      break;
+    
+    case DIGITAL_LEFT:
+      if(choice == "Front") choice = "None";
+      else if(choice == "Back") choice = "Front";
+      else if(choice == "None") choice = "Back";
+      break;
+
+    default: break;
+  }
+
+  return "";
 }
 
 void select_auton(){
   bool all_selected = false;
-  std::map<std::string, std::tuple<Point, Point, std::string>>::iterator it = targets.begin();
+  std::map<std::string, std::tuple<Point, Point, std::string, double>>::iterator selection = targets.begin();
 
   wait_until(!master.get_digital(DIGITAL_X)); //Waits to release cancel button
 
   wait_until(all_selected || master.get_digital(DIGITAL_X)){
     master.clear();
-    master.print(0, 0, it->first);
+    master.print(0, 0, selection->first);
 
-    std::map<std::string, std::tuple<Point, Point, std::string>>::iterator og = it;
+    std::map<std::string, std::tuple<Point, Point, std::string, double>>::iterator og = selection;
 
     switch(master.wait_for_press({DIGITAL_X, DIGITAL_A, DIGITAL_RIGHT, DIGITAL_LEFT})){//see how to use ok_button
-      case DIGITAL_X:
-        break; //breaks out of switch, then immediately out of loop 
       case DIGITAL_A:
-          selected_positions.push_back(it->first);
-
-          // give option for what to do at dest
-          // pick up front, back, do nothing, etc...
+        selected_positions.push_back(selection->first);
+        std::get<std::string>(selection->second) = select_auton_task();
 
       case DIGITAL_RIGHT:
         do{
-            if(it != std::prev(targets.end())) it++;
-            else it = targets.begin();
-            if(it == og) all_selected = true;
-          }
-        while(!all_selected && contains(selected_positions, it->first));
+          if(selection != std::prev(targets.end())) selection++;
+          else selection = targets.begin();
+          if(selection == og) all_selected = true;
+        }
+        while(!all_selected && contains(selected_positions, selection->first));
         break;
       
       case DIGITAL_LEFT:
         do{
-            if(it != targets.begin()) it--;
-            else it = std::prev(targets.end());
-            if(it == og) all_selected = true;
-          }
-        while(!all_selected && contains(selected_positions, it->first));
+          if(selection != targets.begin()) selection--;
+          else selection = std::prev(targets.end());
+          if(selection == og) all_selected = true;
+        }
+        while(!all_selected && contains(selected_positions, selection->first));
         break;
 
-      default:
-        break;
+      default: break; //breaks out of switch, and if pressed x, then immediately breaks out of loop 
     }
 
   }
@@ -827,16 +863,18 @@ void select_auton(){
 void run_auton(){
   std::string current, target;
   for(int i = 0; i+1 < selected_positions.size(); i++){
-    //give option for predetermined functions also
-
     current = selected_positions[i];
     target = selected_positions[i+1];
 
-    move_start(move_types::tank_point, tank_point_params(std::get<1>(targets[current]), false, 127.0, 1.0, false));
-    move_start(move_types::tank_point, tank_point_params(std::get<1>(targets[target]), false, 127.0, 1.0, false));
-    move_start(move_types::tank_rush, tank_rush_params(std::get<0>(targets[target]), false));
+    if(!run_defined_auton(current, target)){
+      move_start(move_types::tank_point, tank_point_params(std::get<1>(targets[current]), false, 127.0, 1.0, false));
+      move_start(move_types::tank_point, tank_point_params(std::get<1>(targets[target]), false, 127.0, 1.0, false));
+      move_start(move_types::tank_rush, tank_rush_params(std::get<0>(targets[target]), false));
 
-    //perform action at goal
+      run_auton_task(std::get<std::string>(targets[target]));
 
+    }
+
+    master.wait_for_press(DIGITAL_R1); //Just to wait between routes to see
   }
 }

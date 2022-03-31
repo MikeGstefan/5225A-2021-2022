@@ -149,6 +149,9 @@ bool _Controller::interrupt(bool analog, bool digital, bool OK_except){
 }
 
 controller_digital_e_t _Controller::wait_for_press(std::vector<controller_digital_e_t> buttons, int timeout){
+  master.clear();
+  master.print(0, 0, "Waiting for press");
+  
   int start_time = millis();
   controller_queue.print("%d| waiting for button press from controller %d\n", millis(), this->controller_num);
 
@@ -171,6 +174,9 @@ controller_digital_e_t _Controller::wait_for_press(std::vector<controller_digita
 
 //create wait for press for multiple buttons and return the one that was pressed
 void _Controller::wait_for_press(controller_digital_e_t button, int timeout){
+  master.clear();
+  master.print(0, 0, "Waiting for press");
+
   int start_time = millis();
   controller_queue.print("%d| waiting for button %d from controller %d\n", millis(), button, this->controller_num);
   wait_until(get_digital_new_press(button)){
