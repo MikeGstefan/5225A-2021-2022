@@ -148,6 +148,8 @@ bool _Controller::interrupt(bool analog, bool digital, bool OK_except){
   return false;
 }
 
+
+//create wait for press for multiple buttons and return the one that was pressed
 void _Controller::wait_for_press(controller_digital_e_t button, int timeout){
   int start_time = millis();
   controller_queue.print("%d| waiting for button %d from controller %d\n", millis(), button, this->controller_num);

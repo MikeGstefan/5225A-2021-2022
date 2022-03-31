@@ -127,13 +127,13 @@ T map_set(T input, T in_min, T in_max, T out_min, T out_max, T range1, T val_1, 
 //ENUM HELPERS
 
 //Assumes enum values are consecutive
-template <typename T>
+template <typename T, typename = typename std::enable_if_t<std::is_enum_v<T>, void>>
 T operator++ (T enum_type, int) {
   return static_cast<T>(static_cast<int>(enum_type) + 1);
 }
 
 //Assumes enum values are consecutive
-template <typename T>
+template <typename T, typename = typename std::enable_if_t<std::is_enum_v<T>, void>>
 T operator-- (T enum_type, int) {
   return static_cast<T>(static_cast<int>(enum_type) - 1);
 }

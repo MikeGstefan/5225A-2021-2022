@@ -1,10 +1,11 @@
 #include "auton.hpp"
 #include "Tracking.hpp"
 #include "config.hpp"
+#include "controller.hpp"
 #include "geometry.hpp"
 #include "logging.hpp"
 #include "util.hpp"
-#include <unordered_map>
+#include <map>
 
 static const std::string auton_file_name = "/usd/auton.txt";
 
@@ -742,12 +743,14 @@ void lrt_auton(){
 std::fstream auton_file;
 //name, target, common point, task at target
 std::vector<std::string> selected_positions;
-std::unordered_map<std::string, std::tuple<Point, Point, std::string>> targets = {
+std::map<std::string, std::tuple<Point, Point, std::string>> targets = {
+  {"Right", {{73.0, 71.0}, {72.0, 60.0}, ""}}, //start
+  {"Left", {{73.0, 71.0}, {72.0, 60.0}, ""}}, //start
   {"Tall", {{73.0, 71.0}, {72.0, 60.0}, ""}}, //front
   {"High", {{107.0, 71.0}, {107.0, 60.0}, ""}}, //front
   {"Low", {{34.5, 72.0}, {36.0, 60.0}, ""}}, //front
-  {"Ramp", {{128.0, 35.0}, {30.0, 30.0}, ""}}, //back
   {"AWP", {{130.0, 35.0}, {125.0, 30.0}, ""}}, //back
+  {"Ramp", {{128.0, 35.0}, {30.0, 30.0}, ""}}, //back
   //needs starting points too
 };
 
@@ -771,41 +774,59 @@ void save_auton(){
 }
 
 bool run_defined_auton(std::string start, std::string target){
-
+//handles movement and goal pickup
 }
 
 void select_auton(){
+  bool all_selected = false;
+  std::map<std::string, std::tuple<Point, Point, std::string>>::iterator it = targets.begin();
 
-  while(true){ //Does not run infinitely. Will only run 2-3 times until user stops
+  wait_until(all_selected || master.get_digital(DIGITAL_X)){
     master.clear();
-    master.print(0, 0, "A:");
-    master.print(1, 0, "B:");
-    master.print(2, 0, "Y:");
-    
-    int row = 0;
-    std::array<std::string, 3> current_selection;
-    
-    for(std::unordered_map<std::string, std::tuple<Point, Point, std::string>>::iterator it = targets.begin(); it != targets.end(); it++){
-      if(!contains(selected_positions, it->first)){ //If it hasn't been selected already
-        current_selection[row] = it->first;
-        master.print(row, 3, it->first);
-        row++;
+    master.print(0, 0, it->first);
+
+    while(true){ //Checking presses
+      std::map<std::string, std::tuple<Point, Point, std::string>>::iterator og = it;
+
+      if(master.get_digital(DIGITAL_X)) break; //Exit
+      else if(master.get_digital_new_press(ok_button)){ //Selected choice
+        selected_positions.push_back(it->first);
+
+        // give option for what to do at dest
+        // pick up front, back, do nothing, etc...
+
+        do{
+          if(it != std::prev(targets.end())) it++;
+          else it = targets.begin();
+          if(it == og) all_selected = true;
+        }
+        while(!all_selected && contains(selected_positions, it->first));
+        break;
+      }
+      else if(master.get_digital_new_press(DIGITAL_RIGHT)){ //Next choice
+        do{
+          if(it != std::prev(targets.end())) it++;
+          else it = targets.begin();
+          if(it == og) all_selected = true;
+        }
+        while(!all_selected && contains(selected_positions, it->first));
+        break;
+      }
+      else if(master.get_digital_new_press(DIGITAL_LEFT)){ //Prev choice
+        do{
+          if(it != targets.begin()) it--;
+          else it = std::prev(targets.end());
+          if(it == og) all_selected = true;
+        }
+        while(!all_selected && contains(selected_positions, it->first));
+        break;
       }
 
-      if(row == 3) break;
-    }
-
-    while(true){
-      if(master.get_digital_new_press(DIGITAL_X)) {save_auton(); return;}
-      else if(master.get_digital_new_press(DIGITAL_A)) {selected_positions.push_back(current_selection[0]); break;}
-      else if(master.get_digital_new_press(DIGITAL_B))  {selected_positions.push_back(current_selection[1]); break;}
-      else if(master.get_digital_new_press(DIGITAL_Y)) {selected_positions.push_back(current_selection[2]); break;}
       delay(10);
     }
 
-    //give option for what to do at dest
-    //pick up front, back, do nothing, etc...
   }
+  save_auton();
 }
 
 void run_auton(){
@@ -820,12 +841,7 @@ void run_auton(){
     move_start(move_types::tank_point, tank_point_params(std::get<1>(targets[target]), false, 127.0, 1.0, false));
     move_start(move_types::tank_rush, tank_rush_params(std::get<0>(targets[target]), false));
 
-    //perform action
-    
-    //test this on replit
-    //0t
-    //0c, 1c, 1t, action
-    //1c, 2c, 2t, action
-    //2c, 3c, 3t, action
+    //perform action at goal
+
   }
 }
