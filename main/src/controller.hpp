@@ -53,6 +53,14 @@ public:
   void rumble(const char* rumble_pattern);
   bool interrupt(bool analog=true, bool digital=true, bool OK_except = true);
   void wait_for_press(controller_digital_e_t button, int timeout = 0);
+  /**
+   * @brief Waits for any button from param buttons to be pressed
+   * 
+   * @param buttons list of buttons to check
+   * @param timeout how long to wait before timing out on the wait
+   * @return the button that was pressed. 0 if nothing pressed
+   */
+  controller_digital_e_t wait_for_press(std::vector<controller_digital_e_t> buttons, int timeout = 0);
 };
 
 

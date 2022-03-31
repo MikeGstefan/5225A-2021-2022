@@ -166,7 +166,7 @@ b_claw_p.set_value(0);
 
   int safety_check = 0;
   //bool to + -
-  // int direction = (static_cast<int>(front)*2)-1;
+  // int direction = (static_cast<int>(front)*2)-1; //use okapi::boolToSign
   tracking_imp.print("%d|| Start wall allign\n", millis());
 
 	drivebase.move(-50.0,0.0);
@@ -781,48 +781,43 @@ void select_auton(){
   bool all_selected = false;
   std::map<std::string, std::tuple<Point, Point, std::string>>::iterator it = targets.begin();
 
+  wait_until(!master.get_digital(DIGITAL_X)); //Waits to release cancel button
+
   wait_until(all_selected || master.get_digital(DIGITAL_X)){
     master.clear();
     master.print(0, 0, it->first);
 
-    while(true){ //Checking presses
-      std::map<std::string, std::tuple<Point, Point, std::string>>::iterator og = it;
+    std::map<std::string, std::tuple<Point, Point, std::string>>::iterator og = it;
 
-      if(master.get_digital(DIGITAL_X)) break; //Exit
-      else if(master.get_digital_new_press(ok_button)){ //Selected choice
-        selected_positions.push_back(it->first);
+    switch(master.wait_for_press({DIGITAL_X, DIGITAL_A, DIGITAL_RIGHT, DIGITAL_LEFT})){//see how to use ok_button
+      case DIGITAL_X:
+        break; //breaks out of switch, then immediately out of loop 
+      case DIGITAL_A:
+          selected_positions.push_back(it->first);
 
-        // give option for what to do at dest
-        // pick up front, back, do nothing, etc...
+          // give option for what to do at dest
+          // pick up front, back, do nothing, etc...
 
+      case DIGITAL_RIGHT:
         do{
-          if(it != std::prev(targets.end())) it++;
-          else it = targets.begin();
-          if(it == og) all_selected = true;
-        }
+            if(it != std::prev(targets.end())) it++;
+            else it = targets.begin();
+            if(it == og) all_selected = true;
+          }
         while(!all_selected && contains(selected_positions, it->first));
         break;
-      }
-      else if(master.get_digital_new_press(DIGITAL_RIGHT)){ //Next choice
+      
+      case DIGITAL_LEFT:
         do{
-          if(it != std::prev(targets.end())) it++;
-          else it = targets.begin();
-          if(it == og) all_selected = true;
-        }
+            if(it != targets.begin()) it--;
+            else it = std::prev(targets.end());
+            if(it == og) all_selected = true;
+          }
         while(!all_selected && contains(selected_positions, it->first));
         break;
-      }
-      else if(master.get_digital_new_press(DIGITAL_LEFT)){ //Prev choice
-        do{
-          if(it != targets.begin()) it--;
-          else it = std::prev(targets.end());
-          if(it == og) all_selected = true;
-        }
-        while(!all_selected && contains(selected_positions, it->first));
-        break;
-      }
 
-      delay(10);
+      default:
+        break;
     }
 
   }

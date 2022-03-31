@@ -81,7 +81,7 @@ double get_filtered_output(ADIUltrasonic sensor, int check_count, uint16_t lower
 void flatten_against_wall(bool front, int cycles){ 
   int safety_check = 0;
   //bool to + -
-  int direction = (static_cast<int>(front)*2)-1;
+  int direction = (static_cast<int>(front)*2)-1; //use okapi::boolToSign
   tracking_imp.print("%d|| Start wall allign\n", millis());
 
 	drivebase.move(50.0*direction,0.0);
