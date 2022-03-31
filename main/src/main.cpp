@@ -149,18 +149,18 @@ void autonomous() {
 		break;
 		case auto2:
 			f_claw_p.set_value(0);
-			b_claw_p.set_value(0);
+			b_claw_p_1.set_value(0);
 			blue_highside();
 		break;
 		case auto3:
 			f_claw_p.set_value(0);
-			b_claw_p.set_value(0);
+			b_claw_p_1.set_value(0);
 			blue_highside_tall();
 			
 		break;
 		case auto4:
 			f_claw_p.set_value(0);
-			b_claw_p.set_value(0);
+			b_claw_p_1.set_value(0);
 			blue_lowside();
 		break; 
 		default:

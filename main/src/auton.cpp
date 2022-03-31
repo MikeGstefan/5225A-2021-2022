@@ -51,7 +51,7 @@ void skills(){
   b_lift.move_absolute(600);
   while(b_lift.motor.get_position() > 620)delay(10);
   move_start(move_types::turn_angle, turn_angle_params(180.0,true, true, 170.0,0.0, 127.0, 500));
-  b_claw_p.set_value(0);
+  b_claw_p_1.set_value(0);
   delay(200);
   b_lift.move_absolute(600);
   while(b_lift.motor.get_position() < 580)delay(10);
@@ -117,7 +117,7 @@ void skills2(){
   // move_start(move_types::)
   // while(!master.get_digital_new_press(DIGITAL_A))delay(10);
   // f_claw_p.set_value(0);
-  // b_claw_p.set_value(0);
+  // b_claw_p_1.set_value(0);
   // b_lift.move_absolute(10);
   // f_lift.move_absolute(10);
   // delay(2000);
@@ -158,7 +158,7 @@ void skills2(){
   move_start(move_types::tank_point, tank_point_params({85.0,33.0, 30.0}, false, 70.0));
   // flatten_against_wall(false);
 
-b_claw_p.set_value(0);
+b_claw_p_1.set_value(0);
 
   int safety_check = 0;
   //bool to + -
@@ -197,7 +197,7 @@ b_claw_p.set_value(0);
   // move_start(move_types::tank_arc, tank_arc_params({71.0, 71.0}, {100.0, 36.0, 90.0}, 127.0,127.0,false,9.0,2.0,80.0));
   move_start(move_types::tank_point, tank_point_params({100.0, 36.0, 90.0}));
   move_start(move_types::turn_angle, turn_angle_params(90.0));
-  b_claw_p.set_value(0);
+  b_claw_p_1.set_value(0);
   move_start(move_types::tank_point, tank_point_params({129.0, 36.0, 90.0}, false,70.0), false);
 
   // move_start(move_types::tank_point, tank_point_params({129.0, 36.0, 135.0}, false,80.0),false);
@@ -265,7 +265,7 @@ void new_skills3(){
   // tracking.wait_for_dist(3.0);
   // f_lift.move_absolute(600);
   move_wait_for_complete();
-  b_claw_p.set_value(0);
+  b_claw_p_1.set_value(0);
   move_start(move_types::tank_point, tank_point_params({26.0,128, 90.0}));
   move_start(move_types::turn_angle, turn_angle_params(45.0));
   b_lift.move_absolute(10);
@@ -287,7 +287,7 @@ void new_skills3(){
   // while(b_lift.motor.get_position() < 550)delay(10);
   // move_start(move_types::tank_point, tank_point_params({72.0, 32.0,0.0}, false,127.0,1.0,true, 6.5,150.0,0.0,1000,{2.0,0.5}));
   // move_start(move_types::turn_angle, turn_angle_params(0.0));
-  b_claw_p.set_value(0);
+  b_claw_p_1.set_value(0);
   // move_start(move_types::tank_point, tank_point_params({72.0, 39.0,0.0}, false,127.0,1.0,true, 6.5,150.0,0.0,1000,{2.0,0.5}));
   // move_start(move_types::turn_angle, turn_angle_params(0.0));
   // move_start(move_types::tank_point, tank_point_params({72.0, 30.0,0.0}, false,127.0,1.0,true, 6.5,150.0,0.0,1000,{2.0,0.5}));
@@ -301,13 +301,13 @@ void new_skills3(){
 
   // // flatten_against_wall(false);
   // while(b_lift.motor.get_position()>500)delay(10);
-  // // b_claw_p.set_value(0);
+  // // b_claw_p_1.set_value(0);
   // // delay(500);
   // int safety_check = 0;
   // tracking_imp.print("%d|| Start wall allign\n", millis());
   // // Task([](){ 
   // //   while(tracking.x_coord < 30)delay(10);
-  // //   b_claw_p.set_value(0);
+  // //   b_claw_p_1.set_value(0);
   // // });
   // drivebase.set_state(1);
 	// // int safety_check = 0;
@@ -325,7 +325,7 @@ void new_skills3(){
   // // while(tracking.x_coord < 35.0)delay(10);
   // printf("end_coord : %.2f\n", tracking.x_coord);
 	// // drivebase.move(0.0,0.0);
-  // b_claw_p.set_value(0);
+  // b_claw_p_1.set_value(0);
   // delay(500);
   // drivebase.move(80.0,0.0);
   // tracking.wait_for_dist(1.5);
@@ -354,17 +354,17 @@ void new_skills3(){
 
 void skills3(){
 
-  b_claw_p.set_value(1);
+  b_claw_p_1.set_value(1);
 
 
   // f_claw_p.set_value(0);
-  // b_claw_p.set_value(0);
+  // b_claw_p_1.set_value(0);
   // b_lift.move_absolute(10);
   // f_lift.move_absolute(10);
   // while(!master.get_digital_new_press(DIGITAL_R1))delay(10);
 
   // f_claw_p.set_value(1);
-  // b_claw_p.set_value(1);
+  // b_claw_p_1.set_value(1);
   // f_lift.move_absolute(200);
   // b_lift.move_absolute(820);
 	// while(b_lift.motor.get_position() < 800)delay(10);
@@ -387,7 +387,7 @@ void skills3(){
   move_start(move_types::tank_arc, tank_arc_params({105.0, 36.0}, {60.0,102.0, -90.0},127.0));
   f_lift.move_absolute(10);
   f_claw_p.set_value(0);
-  b_claw_p.set_value(0);
+  b_claw_p_1.set_value(0);
   // b_lift.move_absolute(820);
   // move_start(move_types::turn_angle, turn_angle_params(-90.0));
   move_start(move_types::tank_point, tank_point_params({30.0, 102.0, -90.0}, false, 80.0, 1.0,true,9.0,100.0));
@@ -446,13 +446,13 @@ void skills3(){
 
 void skills4(){
   f_claw_p.set_value(0);
-  b_claw_p.set_value(0);
+  b_claw_p_1.set_value(0);
   b_lift.move_absolute(10);
   f_lift.move_absolute(10);
   while(!master.get_digital_new_press(DIGITAL_R1))delay(10);
 
   f_claw_p.set_value(1);
-  b_claw_p.set_value(1);
+  b_claw_p_1.set_value(1);
   f_lift.move_absolute(650);
   // f_lift.move_absolute(200);
   b_lift.move_absolute(950);
@@ -485,13 +485,13 @@ void skills4(){
 
 void skillsPark(){
   f_claw_p.set_value(0);
-  b_claw_p.set_value(0);
+  b_claw_p_1.set_value(0);
   b_lift.move_absolute(10);
   f_lift.move_absolute(10);
   while(!master.get_digital_new_press(DIGITAL_R1))delay(10);
 
   f_claw_p.set_value(1);
-  b_claw_p.set_value(1);
+  b_claw_p_1.set_value(1);
   f_lift.move_absolute(600);
   // f_lift.move_absolute(200);
   // b_lift.move_absolute(150);

@@ -18,7 +18,7 @@ B_Lift b_lift({{"B_Lift",
 B_Lift::B_Lift(Motorized_subsystem<b_lift_states, NUM_OF_B_LIFT_STATES, B_LIFT_MAX_VELOCITY> motorized_subsystem): Motorized_subsystem(motorized_subsystem){ // constructor
 
   // state setup
-  target_state = b_lift_states::bottom;
+  target_state = b_lift_states::move_to_target; // sends lift to bottom upon startup
   state = b_lift_states::managed;
 
   index = 0;
@@ -35,7 +35,7 @@ void B_Lift::handle_buttons(){
     if(state == b_lift_states::manual){
       int i = 0;
       while (i < driver_positions.size()){
-        if(driver_positions[i] > motor.get_position()){
+        if(driver_positions[i] > f_lift_pot.get_value()){
           set_state(b_lift_states::move_to_target, i);
           break;
         }
@@ -51,7 +51,7 @@ void B_Lift::handle_buttons(){
     if(state == b_lift_states::manual){
       int i = driver_positions.size() - 1;
       while (i > -1){
-        if(driver_positions[i] < motor.get_position()){
+        if(driver_positions[i] < f_lift_pot.get_value()){
           set_state(b_lift_states::move_to_target, i);
           break;
         }
@@ -84,7 +84,7 @@ void B_Lift::handle(bool driver_array){
       break;
 
     case b_lift_states::move_to_target: // moving to target
-      motor.move(pid.compute(motor.get_position(), positions[index]));
+      motor.move(pid.compute(b_lift_pot.get_value(), positions[index]));
       
       // moves to next state if the lift has reached its target
       if(fabs(pid.get_error()) < end_error){
@@ -109,7 +109,7 @@ void B_Lift::handle(bool driver_array){
         motor.move(0);
         master.rumble("---");
         master.print(B_LIFT_STATE_LINE, 0, "B_Lift: Manual      ");
-        printf("LIFT SAFETY TRIGGERED %lf, %lf\n", target, motor.get_position());
+        printf("LIFT SAFETY TRIGGERED %lf, %lf\n", target, f_lift_pot.get_value());
 
         set_state(b_lift_states::manual);
       }
@@ -119,7 +119,7 @@ void B_Lift::handle(bool driver_array){
     case b_lift_states::manual:
       lift_power = master.get_analog(ANALOG_RIGHT_X);
       // holds motor if joystick is within deadzone or lift is out of range
-      if (fabs(lift_power) < 10 || (lift_power < 0 && motor.get_position() <= bottom_position) || (lift_power > 0 && motor.get_position() >= top_position)) motor.move_velocity(0);
+      if (fabs(lift_power) < 10 || (lift_power < 0 && f_lift_pot.get_value() <= bottom_position) || (lift_power > 0 && f_lift_pot.get_value() >= top_position)) motor.move_velocity(0);
       else motor.move(lift_power);
       // exits manual state if up or down button is pressed or held
       break;
@@ -139,6 +139,7 @@ void B_Lift::handle_state_change(){
   // if state has changed, performs the necessary cleanup operation before entering next state
 
   if(state == b_lift_states::bottom){ // if lift is leaving the bottom state, turn off the intake
+    b_lock_p.set_value(HIGH);  // unlock the lift
     intake.set_state(intake_states::off);
   }
 
@@ -147,6 +148,7 @@ void B_Lift::handle_state_change(){
       break;
 
     case b_lift_states::bottom:
+      b_lock_p.set_value(HIGH);  // lock the lift
       break;
 
     case b_lift_states::idle:
@@ -206,14 +208,14 @@ void B_Lift::elastic_util(){
   Timer move_timer{"move"};
   move_absolute(top_position);
   // // intake_piston.set_value(HIGH);  // raises intake
-  waitUntil(fabs(motor.get_position() - top_position) < end_error);
+  waitUntil(fabs(f_lift_pot.get_value() - top_position) < end_error);
   move_timer.print();
   elastic_f_up_time = move_timer.get_time();
   master.print(1, 0, "up time: %d", elastic_f_up_time);
 
   move_timer.reset();
   move_absolute(bottom_position);
-  waitUntil(fabs(motor.get_position() - bottom_position) < end_error);
+  waitUntil(fabs(f_lift_pot.get_value() - bottom_position) < end_error);
   move_timer.print();
   elastic_f_down_time = move_timer.get_time();
   master.print(2, 0, "down time: %d", elastic_f_up_time);
@@ -298,25 +300,33 @@ void B_Claw::handle_state_change(){
 
     case b_claw_states::idle:
       master.rumble("-");
-      b_claw_p.set_value(LOW);    
+      b_claw_p_1.set_value(LOW);
+      b_claw_p_2.set_value(LOW);    
       break;
 
     case b_claw_states::search_lip:
-      b_claw_p.set_value(LOW);
+      b_claw_p_1.set_value(LOW);
+      b_claw_p_2.set_value(LOW);
       break;
 
     case b_claw_states::search_bowl:
-      b_claw_p.set_value(LOW);
+      b_claw_p_1.set_value(LOW);
+      b_claw_p_2.set_value(LOW);
       search_cycle_check_count = 0; // resets search cycle count
       break;
 
     case b_claw_states::tilted:
       master.rumble("-");
-      b_claw_p.set_value(HIGH); // grabs mogo
+      b_claw_p_1.set_value(HIGH); // grabs mogo
+      b_claw_p_2.set_value(HIGH);
+      b_lock_p.set_value(LOW);  // holds goal tilted
       break;
 
     case b_claw_states::flat:
-      b_claw_p.set_value(HIGH); // grabs mogo
+      b_claw_p_1.set_value(HIGH); // grabs mogo
+      b_claw_p_2.set_value(HIGH);
+      b_lock_p.set_value(HIGH); // holds goal flat
+
       break;
   }
   log_state_change();  

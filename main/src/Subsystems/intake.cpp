@@ -43,7 +43,7 @@ void Intake::handle_buttons(){
 
 void Intake::handle(){
   // turns intake off if lift is too low
-  if(f_lift.motor.get_position() < f_lift.driver_positions[1] - 50) set_state(intake_states::off);
+  if(f_lift_pot.get_value() < f_lift.driver_positions[1] - 50) set_state(intake_states::off);
 
   switch(state){
     case intake_states::managed:
