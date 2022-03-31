@@ -1,7 +1,7 @@
 #include "util.hpp"
 
 double operator "" _deg(long double degree){
-  return degree/180 *M_PI;
+  return degree/180 *M_PI; //aren't these switched? (this should be radians/M_PI *180)
 }
 double operator "" _rad(long double radians){
   return radians/M_PI *180;
@@ -17,6 +17,10 @@ double rad_to_deg(double rad){
 
 double near_angle(double angle, double reference){
 	return round((reference - angle) / (2 * M_PI)) * (2 * M_PI) + angle - reference;
+}
+
+double weighted_avg(double first, double second, double first_scale){
+  return first*first_scale + second*(1-first_scale);
 }
 
 std::function<long double (long double)> func_scale(std::function<long double(long double)> f, Point p1, Point p2, double control){

@@ -104,6 +104,8 @@ bool contains(T& container, typename T::value_type item){
   return std::find(container.begin(), container.end(), item) != container.end();
 }
 
+double weighted_avg(double first, double second, double first_scale = 0.5);
+
 // maps a value to a range
 template <typename T>
 T map(T x, T in_min, T in_max, T out_min, T out_max){

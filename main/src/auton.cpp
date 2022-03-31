@@ -773,7 +773,8 @@ void save_auton(){
 }
 
 void run_auton_task(std::string task){
-
+  if(task == "Front") f_detect_goal();
+  if(task == "Back") b_detect_goal();
 }
 
 bool run_defined_auton(std::string start, std::string target){
@@ -789,33 +790,44 @@ bool run_defined_auton(std::string start, std::string target){
   return true;
 }
 
-std::string select_auton_task(){
+void select_auton_task(std::string target){
   std::string choice;
+  double angle;
+  bool selected = false;
 
-  switch(master.wait_for_press({DIGITAL_A, DIGITAL_RIGHT, DIGITAL_LEFT})){ //see how to use ok_button
-    case DIGITAL_A:
-      if(choice == "Back" || "Front"){
-        //select angle
-      }
+  wait_until(selected){
+    master.clear();
+    master.print(0, 0, choice);
 
-      return choice;
+    switch(master.wait_for_press({DIGITAL_A, DIGITAL_RIGHT, DIGITAL_LEFT})){ //see how to use ok_button
+      case DIGITAL_A:
+        if(choice == "Back" || "Front"){
+          master.clear();
+          master.print(0, 0, "%.1f", angle);
+          //angle selection
+        }
 
-    case DIGITAL_RIGHT:
-      if(choice == "Front") choice = "Back";
-      else if(choice == "Back") choice = "None";
-      else if(choice == "None") choice = "Front";
-      break;
-    
-    case DIGITAL_LEFT:
-      if(choice == "Front") choice = "None";
-      else if(choice == "Back") choice = "Front";
-      else if(choice == "None") choice = "Back";
-      break;
+        selected = true;
+        break;
 
-    default: break;
+      case DIGITAL_RIGHT:
+        if(choice == "Front") choice = "Back";
+        else if(choice == "Back") choice = "None";
+        else if(choice == "None") choice = "Front";
+        break;
+      
+      case DIGITAL_LEFT:
+        if(choice == "Front") choice = "None";
+        else if(choice == "Back") choice = "Front";
+        else if(choice == "None") choice = "Back";
+        break;
+
+      default: break;
+    }
   }
 
-  return "";
+  std::get<std::string>(targets[target]) = choice;
+  std::get<double>(targets[target]) = angle;
 }
 
 void select_auton(){
@@ -833,7 +845,7 @@ void select_auton(){
     switch(master.wait_for_press({DIGITAL_X, DIGITAL_A, DIGITAL_RIGHT, DIGITAL_LEFT})){//see how to use ok_button
       case DIGITAL_A:
         selected_positions.push_back(selection->first);
-        std::get<std::string>(selection->second) = select_auton_task();
+        select_auton_task(selection->first);
 
       case DIGITAL_RIGHT:
         do{
@@ -861,18 +873,19 @@ void select_auton(){
 }
 
 void run_auton(){
-  std::string current, target;
+  std::tuple<Point, Point, std::string, double> current, target;
+  double angle;
   for(int i = 0; i+1 < selected_positions.size(); i++){
-    current = selected_positions[i];
-    target = selected_positions[i+1];
+    current = targets[selected_positions[i]];
+    target = targets[selected_positions[i+1]];
+    angle = std::get<3>(target);
 
-    if(!run_defined_auton(current, target)){
-      move_start(move_types::tank_point, tank_point_params(std::get<1>(targets[current]), false, 127.0, 1.0, false));
-      move_start(move_types::tank_point, tank_point_params(std::get<1>(targets[target]), false, 127.0, 1.0, false));
-      move_start(move_types::tank_rush, tank_rush_params(std::get<0>(targets[target]), false));
+    if(!run_defined_auton(selected_positions[i], selected_positions[i+1])){
+      move_start(move_types::tank_point, tank_point_params({std::get<1>(current), weighted_avg(tracking.get_angle_in_deg(), angle, 0.2)}, false, 127.0, 1.0, false));
+      move_start(move_types::tank_point, tank_point_params({std::get<1>(target), weighted_avg(tracking.get_angle_in_deg(), angle, 0.6)}, false, 127.0, 1.0, false));
+      move_start(move_types::tank_rush, tank_rush_params({std::get<0>(target), angle}, false));
 
-      run_auton_task(std::get<std::string>(targets[target]));
-
+      run_auton_task(std::get<std::string>(target));
     }
 
     master.wait_for_press(DIGITAL_R1); //Just to wait between routes to see
