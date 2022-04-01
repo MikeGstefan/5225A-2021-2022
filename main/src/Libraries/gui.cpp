@@ -761,6 +761,7 @@ void Button::update(){
         if (on) select();
         else deselect();
       }
+      new_release(); //Must be here even if there is nothing to do.
 
       if(on) run_func();
       else run_off_func();
@@ -772,10 +773,11 @@ void Button::update(){
         if (on) select();
         else deselect();
       }
+      new_release(); //Must be here even if there is nothing to do.
       break;
 
     case Button::SINGLE:
-      if (new_press()) {select(); printf2("Here: %s", label);}
+      if (new_press()) select();
       else if (new_release()) deselect();
 
       break;

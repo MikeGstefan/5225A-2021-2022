@@ -17,7 +17,7 @@
 using namespace std;
 
 pros::Task *updt = nullptr; //What's this for
-const GUI* GUI::current_gui = &g_util;
+const GUI* GUI::current_gui = &g_main;
 
 /**
  * Runs initialization code. This occurs as soon as the program is started.
@@ -85,17 +85,17 @@ void autonomous() {
 
 void opcontrol() {
 	/* Nathan:
+  check auton selector
+  make sure comp check works
 	auton give up func - ask mike
 	lvgl images
   2d sliders
 
-  Don't allow presses until finger release when switching a page
   touched when flashed doesn't work
+  Don't allow presses until finger release when switching a page
   check what actually kills the auto balance loop
-  check auton selector
   integrate pneumatics
-  make sure comp check works
-  -put vertical sliders bounds within vertical aree
+  -put vertical sliders bounds within vertical area
 	*/
 
 	while(true){

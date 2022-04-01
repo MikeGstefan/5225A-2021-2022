@@ -628,9 +628,8 @@ void util_setup(){
         c::ext_adi_port_set_value(port, i, HIGH);
       }
       else{
-        printf("Here1\n");
-        // c::adi_port_set_config(i, E_ADI_DIGITAL_OUT);
-        // c::adi_port_set_value(i, HIGH);
+        c::adi_port_set_config(i, E_ADI_DIGITAL_OUT);
+        c::adi_port_set_value(i, HIGH);
       }
     });
     expander_btns[i-1]->set_off_func([i](){
@@ -644,9 +643,8 @@ void util_setup(){
         c::ext_adi_port_set_value(port, i, LOW);
       }
       else{
-        printf("Here2\n");
-        // c::adi_port_set_config(i, E_ADI_DIGITAL_OUT);
-        // c::adi_port_set_value(i, LOW);
+        c::adi_port_set_config(i, E_ADI_DIGITAL_OUT);
+        c::adi_port_set_value(i, LOW);
       }
     });
   }
