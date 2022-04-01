@@ -10,7 +10,7 @@ class Text_;
 
 extern _Controller master;
 extern _Controller partner;
-extern pros::Motor front_l, front_r, back_l, back_r;
+extern pros::Motor front_l, front_r, center_l, center_r, back_l, back_r;
 extern pros::Motor f_lift_m, b_lift_m, intk;
 extern pros::ADIEncoder LeftEncoder, RightEncoder, BackEncoder;
 

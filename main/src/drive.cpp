@@ -76,10 +76,11 @@ name(name), joy_sticks{joy_sticks[0], joy_sticks[1], joy_sticks[2]}, custom_driv
 Drivebase::Drivebase(std::array<driver, num_of_drivers> drivers) : drivers(drivers) {}
 
 void Drivebase::move(double x, double y, double a){
-  front_l.move(x + y + a);
-  front_r.move(-x + y - a);
-  back_l.move(-x + y + a);
-  back_r.move(x + y - a);
+  ERROR.print("you called the wrong function");
+  // front_l.move(x + y + a);
+  // front_r.move(-x + y - a);
+  // back_l.move(-x + y + a);
+  // back_r.move(x + y - a);
 }
 
 void Drivebase::move(double y, double a){
@@ -87,12 +88,14 @@ void Drivebase::move(double y, double a){
   front_r.move(y-a);
   back_l.move(y+a);
   back_r.move(y-a);
+  center_l.move(y+a);
+  center_r.move(y-a);
   // back_l.move(0);
   // back_r.move(0);
 }
 
 void Drivebase::move_tank(double y, double a){
-  move(0.0, y, a);
+  move(y,a);
 }
 
 void Drivebase::move_side(double l, double r){
@@ -100,6 +103,8 @@ void Drivebase::move_side(double l, double r){
   front_r.move(r);
   back_l.move(l);
   back_r.move(r);
+  center_l.move(l);
+  center_r.move(r);
 }
 
 void Drivebase::brake(){
@@ -107,6 +112,8 @@ void Drivebase::brake(){
   front_r.move_relative(0, 200);
   back_l.move_relative(0, 200);
   back_r.move_relative(0, 200);
+  center_l.move_relative(0,200);
+  center_r.move_relative(0,200);
 }
 
 void Drivebase::velo_brake(){
@@ -114,6 +121,8 @@ void Drivebase::velo_brake(){
   front_r.move_velocity(0);
   back_l.move_velocity(0);
   back_r.move_velocity(0);
+  center_l.move_velocity(0);
+  center_r.move_velocity(0);
 }
 
 void Drivebase::update_screen(){
