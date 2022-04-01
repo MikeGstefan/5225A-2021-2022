@@ -993,7 +993,7 @@ void tank_move_to_target(void* params){
     PID y_vel_pid(kp_y, 0.0000, kd_y, 0.0);
     double target_y_velocity; // what the y_vel_pid is trying to reach
     double cur_y_velocity;
-    double max_y_velocity = 60.0; // the robot can travel at 60 inches/sec at its fastest
+    double max_possible_y_velocity = 60.0; // the robot can travel at 60 inches/sec at its fastest
     int sgn_y_error; // sign of local y error
 
     // move on line variables
@@ -1051,7 +1051,7 @@ void tank_move_to_target(void* params){
       cur_y_velocity = (tracking.l_velo + tracking.r_velo) / 2; // average of side encoders is approximately the local_y_velocity
       sgn_y_error = sgn(local_error.y);
       // 18 inches in the line below is the distance from the target at which the robot is at max speed
-      target_y_velocity = map(local_error.y, sgn_y_error * 0.0, sgn_y_error * 18.0, sgn_y_error * end_y_velocity, sgn_y_error * max_y_velocity);
+      target_y_velocity = map(local_error.y, sgn_y_error * 0.0, sgn_y_error * 18.0, sgn_y_error * end_y_velocity, sgn_y_error * max_possible_y_velocity);
       
       // if the target velocity is greater than max, target become max
       if(fabs(target_y_velocity) > max_y_velocity) target_y_velocity = max_y_velocity * sgn(target_y_velocity);
