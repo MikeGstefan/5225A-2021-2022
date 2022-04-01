@@ -85,17 +85,12 @@ void autonomous() {
 
 void opcontrol() {
 	/* Nathan:
-  check auton selector
-  make sure comp check works
-	auton give up func - ask mike
-	lvgl images
-  2d sliders
-
-  touched when flashed doesn't work
-  Don't allow presses until finger release when switching a page
   check what actually kills the auto balance loop
   integrate pneumatics
-  -put vertical sliders bounds within vertical area
+	auton give up func - ask mike
+  
+	lvgl images
+  2d sliders
 	*/
 
 	while(true){

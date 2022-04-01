@@ -317,7 +317,7 @@ Slider::Slider (int x1, int y1, int x2, int y2, GUI::Style type, direction dir, 
   switch(this->dir){
     case HORIZONTAL:
       text_x = (this->x1+this->x2)/2;
-      text_y = this->y1-(CHAR_HEIGHT_SMALL+1)/2;
+      text_y = this->y1-CHAR_HEIGHT_SMALL/2-2;
       inc.construct(this->x2+5, this->y1, this->x2+25, this->y2, GUI::Style::CORNER, Button::SINGLE, this->page, ">", l_col, b_col);
       dec.construct(this->x1-25, this->y1, this->x1-5, this->y2, GUI::Style::CORNER, Button::SINGLE, this->page, "<", l_col, b_col);
       title.construct(text_x, text_y, GUI::Style::CENTRE, TEXT_SMALL, this->page, label + ":%d", [&](){return val;}, l_col); //why not pass val by reference
@@ -391,6 +391,7 @@ void Page::go_to() const{
   if(!page_num(this)) return;
   GUI::current_page = this; //Saves new page then draws all the buttons on the page
   draw();
+  wait_until(!GUI::touched) GUI::update_screen_status();
 }
 
 void GUI::clear_screen(Colour colour){
