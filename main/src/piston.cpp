@@ -1,5 +1,7 @@
 #include "piston.hpp"
 
+int Piston::count = 0;
+
 array<Piston*, 8> Piston::list_for_gui = {
   nullptr,
   nullptr,

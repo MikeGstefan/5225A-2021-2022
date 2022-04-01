@@ -1,8 +1,8 @@
-
 #include "config.hpp"
 #include "drive.hpp"
 #include "controller.hpp"
 #include "Libraries/gui.hpp"
+#include "Libraries/printing.hpp"
 #include "pid.hpp"
 #include "Tracking.hpp"
 #include "task.hpp"
@@ -38,7 +38,6 @@ void initialize() {
 	Data::init();
 	_Controller::init();
 	GUI::init();
-	Autons::file_read();
 	delay(500);
 	// tracking.x_coord = 26.0, tracking.y_coord = 11.75, tracking.global_angle = -90.0_deg;
 	// tracking.x_coord = 104.0, tracking.y_coord = 12.0, tracking.global_angle = -30.0_deg;
@@ -80,23 +79,23 @@ void competition_initialize() {}
  * from where it left off.
  */
 void autonomous() {
-	// skills();
-
-
+  load_positions();
+  load_auton();
+  run_auton();
 }
 
 void opcontrol() {
-	/* GUI:
+	/* Nathan:
+  check what actually kills the auto balance loop
+  integrate pneumatics
 	auton give up func - ask mike
-	make gui a task - i can't figure this out
-	text not centering
-	check if weird string issue is still there
+  
 	lvgl images
+  2d sliders
 	*/
 
-	// Autons::selector();
 	while(true){
-		drivebase.non_blocking_driver_practice();
+		// drivebase.non_blocking_driver_practice();
 		delay(10);
 	}
 }

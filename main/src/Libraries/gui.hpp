@@ -1,4 +1,5 @@
 #pragma once
+#include "printing.hpp"
 #include "../auton.hpp"
 #include "../drive.hpp"
 #include "../piston.hpp"
@@ -15,7 +16,6 @@ template <typename V=std::nullptr_t> class Text;
 
 //For main.cpp to switch between
 extern GUI g_main, g_util;
-
 
 //From gui.cpp
 extern Page terminal, testing;
@@ -61,21 +61,6 @@ class GUI{
       CENTER=CENTRE
     };
 
-    enum class Colours{ //how the rect coords get evaluated
-      BLACK,
-      RED,
-      GREEN,
-      YELLOW,
-      BLUE,
-      MAGENTA,
-      CYAN,
-      WHITE,
-      NONE,
-      ERROR = RED,
-      WARNING = YELLOW,
-      GOOD = GREEN,
-    };
-
   private:
     //Vars
     static _Task task;
@@ -83,8 +68,8 @@ class GUI{
     static int x, y;
     static const Page* current_page;
     static const GUI* current_gui;
-    static constexpr bool go_enabled=true;
-    static constexpr bool testing_page_active=false;
+    static constexpr bool prompt_enabled = true;
+    static constexpr bool testing_page_active = false;
     std::vector<Page*> pages;
     std::function <void()> setup, background;
 
@@ -92,7 +77,6 @@ class GUI{
     static void update_screen_status();
     static void go_next(), go_prev();
     static void screen_terminal_fix();
-    static void end_flash();
     static void draw_oblong(int, int, int, int, double, double);
     static int get_height(text_format_e_t), get_width(text_format_e_t);
     static std::tuple<int, int, int, int> fix_points(int, int, int, int, Style);
@@ -102,20 +86,16 @@ class GUI{
     GUI(std::vector<Page*>, std::function <void()>, std::function <void()>);
 
     //Functions
-    static const char* get_term_colour(Colours);
-    static Colour get_gui_colour(Colours);
-    static void flash(Colours, std::uint32_t, const char*, ...);
-    static void flash(Colours, const char*, ...);
-    static void flash(std::uint32_t, const char*, ...);
-    static void flash(const char*, ...);
-    static void flash(std::string, std::uint32_t, Colour);
-    static void flash(std::string, std::uint32_t, Colours);
+    static Colour get_colour(term_colours);
 
     static void aligned_coords (int, int, int, int, int = 480, int = 220);
     static void clear_screen(Colour=GREY);
     static void init(), update(void* = nullptr);
     static void go_to(int);
-    static bool go(std::string, std::string, std::uint32_t=0), go_end(std::string, std::uint32_t=0);
+    static bool prompt(std::string, std::string, std::uint32_t=0), prompt_end(std::string, std::uint32_t=0);
+    static bool is_touched();
+    static const Page* const get_current_page();
+    static const GUI* const get_current_gui();
     bool pressed() const;
 };
 
@@ -206,12 +186,12 @@ class Text: public Text_{
     int update_val(char* const buffer) override {
       if(value){
         prev_value = value();
-        return snprintf(buffer, 100, label.c_str(), prev_value);
+        return snprintf(buffer, 100, label.c_str(), screen::convert_args(prev_value));
       }
       return snprintf(buffer, 100, label.c_str());
     }
     void construct (int x, int y, GUI::Style type, text_format_e_t txt_size, Page* page, std::string label, std::function<V()> value, Colour l_col){
-      static_assert(!std::is_same_v<V, std::string>, "Text variable cannot be std::string, it causes unknown failures");
+      // static_assert(!std::is_same_v<V, std::string>, "Text variable cannot be std::string, it causes unknown failures"); //Keep this for memories
       this->x = x;
       this->y = y;
       this->type = type;
@@ -227,15 +207,39 @@ class Text: public Text_{
   public:
     //Points, Format, Page, Label, [var info], Lcolour
 
-    // Terminal - no format
+    // Terminal (var - no format)
     Text (std::string text, V& value_obj, Colour label_colour = COLOUR(WHITE)){
       construct (5, 0, GUI::Style::CORNER, E_TEXT_LARGE_CENTER, &terminal, text, [&](){return value_obj;}, label_colour);
     }
 
-    // Terminal - format
+    // Terminal (var - format)
     Text (std::string text, V& value_obj, text_format_e_t size, Colour label_colour = COLOUR(WHITE)){
       construct (5, 0, GUI::Style::CORNER, size, &terminal, text, [&](){return value_obj;}, label_colour);
     }
+
+    // Terminal (array - no format)
+    template <typename I>
+    Text (std::string text, V* value_arr, I& index, Colour label_colour = COLOUR(WHITE)){
+      construct (5, 0, GUI::Style::CORNER, E_TEXT_LARGE_CENTER, &terminal, text, [value_arr, &index](){return value_arr[static_cast<int>(index)];}, label_colour);
+    }
+
+    // Terminal (array - format)
+    template <typename I>
+    Text (std::string text, V* value_arr, I& index, text_format_e_t size, Colour label_colour = COLOUR(WHITE)){
+      construct (5, 0, GUI::Style::CORNER, size, &terminal, text, [value_arr, &index](){return value_arr[static_cast<int>(index)];}, label_colour);
+    }
+
+    // Terminal (function - no format)
+    Text (std::string text, const std::function<V()>& func, Colour label_colour = COLOUR(WHITE)){
+      construct (5, 0, GUI::Style::CORNER, E_TEXT_LARGE_CENTER, &terminal, text, func, label_colour);
+    }
+
+    // Terminal (function - format)
+    Text (std::string text, const std::function<V()>& func, text_format_e_t size, Colour label_colour = COLOUR(WHITE)){
+      construct (5, 0, GUI::Style::CORNER, size, &terminal, text, func, label_colour);
+    }
+
+
 
     //No var
     Text (int x, int y, GUI::Style rect_type, text_format_e_t size, Page& page, std::string text, Colour label_colour = COLOUR(WHITE)){
@@ -309,7 +313,6 @@ class Button{
     void set_active(bool=true);
     void set_background (Colour);
     void add_text (Text_&, bool=true);
-    void wait_for_press(); //Blocking
     void select(), deselect();
 };
 
@@ -332,7 +335,7 @@ class Slider{
     Page* page;
     Button dec, inc;
     Text<int> title;
-    Text<std::nullptr_t> min_title, max_title;
+    Text<> min_title, max_title;
 
     //Functions
     void update();
@@ -348,3 +351,31 @@ class Slider{
     bool pressed() const;
 
 };
+
+namespace screen_flash{
+  extern Timer timer;
+
+  void end();
+  void start(std::string, Colour, std::uint32_t = 1000); //text+col+time / text+col
+  void start(std::string, term_colours = term_colours::ERROR, std::uint32_t = 1000); //text+cols+time / text+cols / text
+
+  template <typename... Params> //text+cols+time
+  void start(term_colours colour, std::uint32_t time, const char* fmt, Params... args){
+    start(printf_to_string(fmt, screen::convert_args(args)...), colour, time);
+  }
+
+  template <typename... Params> //text+col+time
+  void start(Colour colour, std::uint32_t time, const char* fmt, Params... args){
+    start(printf_to_string(fmt, screen::convert_args(args)...), colour, 1000);
+  }
+
+  template <typename... Params> //text+red+time
+  void start(std::uint32_t time, const char* fmt, Params... args){
+    start(printf_to_string(fmt, screen::convert_args(args)...), term_colours::ERROR, time);
+  }
+
+  template <typename... Params> //text+col+1000
+  void start(term_colours colour, const char* fmt, Params... args){
+    start(printf_to_string(fmt, screen::convert_args(args)...), colour, 1000);
+  }
+}

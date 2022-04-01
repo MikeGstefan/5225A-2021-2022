@@ -1,8 +1,7 @@
 #include "util.hpp"
 
-
 double operator "" _deg(long double degree){
-  return degree/180 *M_PI;
+  return degree/180 *M_PI; //aren't these switched? (this should be radians/M_PI *180)
 }
 double operator "" _rad(long double radians){
   return radians/M_PI *180;
@@ -20,19 +19,13 @@ double near_angle(double angle, double reference){
 	return round((reference - angle) / (2 * M_PI)) * (2 * M_PI) + angle - reference;
 }
 
-std::string printf_to_string(const char* fmt, va_list arg){
-  char buffer[150];
-  vsnprintf(buffer,150,fmt,arg);
-  return std::string(buffer);
+double weighted_avg(double first, double second, double first_scale){
+  return first*first_scale + second*(1-first_scale);
 }
 
-//Returns a heap-allocated c-string. Call delete[] after usage
-char* const millis_to_str(std::uint32_t milliseconds){
-  char* const buffer = new char[20];
-  if (milliseconds == 1) sprintf(buffer, "1 millisecond");
-  else if (milliseconds < 1000) sprintf(buffer, "%d milliseconds", milliseconds);
-  else if (milliseconds == 1000) sprintf(buffer, "1 second");
-  else sprintf(buffer, "%d seconds", milliseconds/1000);
+std::function<long double (long double)> func_scale(std::function<long double(long double)> f, Point p1, Point p2, double control){
+  long double f1 = f(p1.x+control);
+  long double f2 = f(p2.x+control);
 
-  return buffer;
+  return [=](long double inp){return ((p2.y-p1.y) * f(inp+control) + f2*p1.y - f1*p2.y) / (f2-f1);};
 }

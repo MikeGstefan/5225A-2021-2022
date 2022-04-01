@@ -1,8 +1,62 @@
 #include "auton_util.hpp"
-// #include "logging.hpp"
+
+static const std::string start_pos_file_name ="/usd/start_position.txt";
+
+//create an adaptable fll type menu selector, look at select_auton();
 
 Reset_dist reset_dist_r(&r_dist, 7.5);
 Reset_dist reset_dist_l(&l_dist, 7.5);
+
+void save_positions(){
+  if(GUI::prompt("Reset position", "Press to reset the position, then move the robot.")){
+    Position pos1 (141.0-8.75, 15.5, 0.0), pos2 (8.75, 15.5, 0);
+    master.clear();
+    master.print(0, 0, "L1:(%.1f, %.1f, %.1f)", pos1.x, pos1.y , pos1.angle);
+    master.print(1, 0, "R1:(%.1f, %.1f, %.1f)", pos2.x, pos2.y , pos2.angle);
+
+    wait_until(false){
+      if(master.get_digital_new_press(DIGITAL_L1)){
+        tracking.reset(pos1);
+        break;
+      }
+      if(master.get_digital_new_press(DIGITAL_R1)){
+        tracking.reset(pos2);
+        break;
+      }
+    }
+
+    printf("\nMove the robot to its new position.\n");
+
+    //move the robot
+
+    if(GUI::prompt_end("Save Positions")){
+      tracking_imp.print("Saving X: %f, Y:%f, A:%f\n", tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle));
+      
+      ofstream file;
+      Data::log_t.data_update();
+      file.open(start_pos_file_name, fstream::out | fstream::trunc);
+      file << tracking.x_coord << endl;
+      file << tracking.y_coord << endl;
+      file << rad_to_deg(tracking.global_angle) << endl;
+      file.close();
+      Data::log_t.done_update();
+    }
+  }
+}
+
+void load_positions(){
+  double x, y, a;
+  ifstream file;
+
+  Data::log_t.data_update();
+  file.open(start_pos_file_name, fstream::in);
+  file >> x >> y >> a;
+  file.close();
+  Data::log_t.done_update();
+
+  tracking_imp.print("Loading X: %f, Y:%f, A:%f from file\n", x, y, a);
+  tracking.reset(x, y, a);
+}
 
 double get_filtered_output(ADIUltrasonic sensor, int check_count, uint16_t lower_bound, uint16_t upper_bound, int timeout){
   Timer timer{"Timer"};
@@ -13,7 +67,7 @@ double get_filtered_output(ADIUltrasonic sensor, int check_count, uint16_t lower
   double filtered_output;
   wait_until(timer.get_time() > timeout || success_count > check_count){
     input = sensor.get_value();
-    if (inRange(input, lower_bound, upper_bound)){ //This used to be (lower_bound <= input <= upper_bound). I highly doubt that's what you wanted.
+    if (in_range(input, lower_bound, upper_bound)){ //This used to be (lower_bound <= input <= upper_bound). I highly doubt that's what you wanted.
 
       total_input += input;
       printf("input: %d\n", input);
@@ -29,7 +83,7 @@ double get_filtered_output(ADIUltrasonic sensor, int check_count, uint16_t lower
 void flatten_against_wall(bool front, int cycles){ 
   int safety_check = 0;
   //bool to + -
-  int direction = (static_cast<int>(front)*2)-1;
+  int direction = (static_cast<int>(front)*2)-1; //use okapi::boolToSign
   tracking_imp.print("%d|| Start wall allign\n", millis());
 
 	drivebase.move(50.0*direction,0.0);

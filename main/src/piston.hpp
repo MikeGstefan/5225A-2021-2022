@@ -15,7 +15,7 @@ class Piston : public ADIDigitalOut{
     int change_time = 0;
     const char* name;
 
-    int count = 0;
+    static int count;
   public:
     static array<Piston*, 8> list_for_gui;
 
