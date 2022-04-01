@@ -27,6 +27,8 @@ bool found = false;
 int find_count = 0;
 
 
+// bool b_trans_state = false;
+
 int up_press_time = 0;
 int down_press_time = 0;
 

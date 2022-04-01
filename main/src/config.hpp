@@ -3,6 +3,7 @@
 #pragma once
 #include "main.h"
 #include "controller.hpp"
+#include "pros/adi.hpp"
 
 class _Controller;
 class Text_;
@@ -19,3 +20,4 @@ extern pros::Distance r_dist, l_dist, b_dist, f_dist, r_reset_dist, l_reset_dist
 extern pros::ADIDigitalOut trans_p, b_claw_p, f_claw_p, Led1, Led2;
 extern pros::ADIDigitalIn f_touch;
 extern pros::ADIDigitalIn intake_jam;
+extern pros::ADIAnalogIn f_lift_pot, b_lift_pot;

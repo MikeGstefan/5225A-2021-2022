@@ -143,6 +143,82 @@ void autonomous() {
 // extern Slider mot_speed_set;
 
 void opcontrol() {
+	PID f_lift_pid(1.0,0.0,0.0,0.0);
+	array<int, 5> f_lift_pos= {1200, 1500, 2050, 2750};
+	int f_lift_index = 0;
+	double f_error, f_power;
+	bool f_claw_state = false;
+
+
+	PID b_lift_pid(1.0,0.0,0.0,0.0);
+	array<int, 5> b_lift_pos= {1042, 1500, 2050, 2750};
+	int b_lift_index = 0;
+	double b_error, b_power;
+	bool b_claw_state = false;
+
+	while(true){
+		if(master.get_digital_new_press(DIGITAL_A)){
+			f_claw_state = !f_claw_state;
+			f_claw_p.set_value(f_claw_state);
+		}
+		if(!f_claw_state && f_dist.get() < 40){ 
+			f_claw_state = 1;
+			f_claw_p.set_value(f_claw_state);
+		}
+		if(master.get_digital_new_press(DIGITAL_R1)){
+			if(f_lift_index < f_lift_pos.size()-1){
+   				 f_lift_index++;
+  			}
+		}
+		if(master.get_digital_new_press(DIGITAL_R2)){
+			if(f_lift_index >0){
+   				 f_lift_index--;
+  			}
+		}
+		f_error = f_lift_pos[f_lift_index] - f_lift_pot.get_value();
+      	if(fabs(f_error)  > 10){
+        	f_power = f_lift_pid.compute(-f_error, 0.0);
+        	f_lift.move(f_power);
+     	}
+      	else{ //
+        	f_lift.motor.move_velocity(0);
+      	}
+
+
+
+		if(master.get_digital_new_press(DIGITAL_B)){
+			b_claw_state = !b_claw_state;
+			b_claw_p.set_value(b_claw_state);
+		}
+		if(!b_claw_state && b_dist.get() < 45){ 
+			b_claw_state = 1;
+			b_claw_p.set_value(b_claw_state);
+		}
+		if(master.get_digital_new_press(DIGITAL_L1)){
+			if(b_lift_index < b_lift_pos.size()-1){
+   				 b_lift_index++;
+  			}
+		}
+		if(master.get_digital_new_press(DIGITAL_L2)){
+			if(b_lift_index >0){
+   				 b_lift_index--;
+  			}
+		}
+		b_error = b_lift_pos[b_lift_index] - b_lift_pot.get_value();
+      	if(fabs(b_error)  > 10){
+        	b_power = b_lift_pid.compute(-b_error, 0.0);
+        	b_lift.move(b_power);
+     	}
+      	else{ //
+		  if(b_lift_index == 0){b_lift.move(-10);}
+		  else if(b_lift_index ==  b_lift_pos.size()-1)b_lift.move(10);
+          else {b_lift.motor.move_velocity(0);}
+      	}
+
+		delay(10);
+	}
+
+
 	move_stop();
 	// while(true){
 	// 	printf("%d\n", b_dist.get());
