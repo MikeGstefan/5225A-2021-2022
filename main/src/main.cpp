@@ -97,9 +97,10 @@ void autonomous() {
 // extern Slider mot_speed_set;
 
 void opcontrol() {
-	
+	drivebase.move(0.0,0.0);
 
 	while(true){
+		drivebase.handle_input();
 		GUI::update();
 		// drivebase.non_blocking_driver_practice();
 		
