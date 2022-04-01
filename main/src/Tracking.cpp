@@ -952,7 +952,9 @@ void tank_move_to_target(void* params){
     // tank_point_params* param_ptr = static_cast<tank_point_params*>(_Task::get_params(params));
     const Position target = tank_point_params_g.target;
     const bool turn_dir_if_0 = tank_point_params_g.turn_dir_if_0;
-    const double max_power = tank_point_params_g.max_power;
+    const double max_y_velocity = 60.0; // Mike add a parameter here
+    // const double max_power = tank_point_params_g.max_power;
+    const double max_power = 127.0;
     const double min_angle_percent = tank_point_params_g.min_angle_percent;
     const bool brake = tank_point_params_g.brake;
     double kp_y = tank_point_params_g.kp_y;
@@ -1045,11 +1047,13 @@ void tank_move_to_target(void* params){
       end_dist = sqrt(pow(hypotenuse,2) + pow(local_error.y,2) - (2* hypotenuse * local_error.y * cos(tracking.global_angle - atan2(target.x - tracking.x_coord,target.y - tracking.y_coord))));  
       motion_d.print("%d|| end_dist: %.2f, hypotenuse: %.2f, local %.2f, angle: %.2f\n",millis(), end_dist,hypotenuse, local_error.y,rad_to_deg(tracking.global_angle - atan2(target.x - tracking.x_coord,target.y - tracking.y_coord)));
 
-      // tracking.power_y = kp_y * local_error.y;
+      // calculating target local y velocity
       cur_y_velocity = (tracking.l_velo + tracking.r_velo) / 2; // average of side encoders is approximately the local_y_velocity
       sgn_y_error = sgn(local_error.y);
+      // 18 inches in the line below is the distance from the target at which the robot is at max speed
       target_y_velocity = map(local_error.y, sgn_y_error * 0.0, sgn_y_error * 18.0, sgn_y_error * end_y_velocity, sgn_y_error * max_y_velocity);
       
+      // if the target velocity is greater than max, target become max
       if(fabs(target_y_velocity) > max_y_velocity) target_y_velocity = max_y_velocity * sgn(target_y_velocity);
       tracking.power_y = kB * target_y_velocity + y_vel_pid.compute(cur_y_velocity, target_y_velocity);
       printf("error: %lf, power_y: %lf, cur_vel: %lf, target_vel: %lf, base: %lf, diff_vel:%lf\n", local_error.y, tracking.power_y, cur_y_velocity, target_y_velocity, kB * target_y_velocity, target_y_velocity - cur_y_velocity);
