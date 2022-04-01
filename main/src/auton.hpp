@@ -17,18 +17,7 @@
 
 
 void skills();
-void skills2();
-void new_skills3();
 
-void skills3();
-void skills4();
-void skillsPark();
-
-void lrt_auton();
-
-void blue_highside();
-void blue_highside_tall();
-void blue_lowside();
 
 enum autos{
   auto1,

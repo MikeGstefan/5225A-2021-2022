@@ -5,6 +5,71 @@
 #include <string>
 
 
+void skills(){
+  int time = millis();
+   f_lift.move_absolute(10); 
+  b_lift.move_absolute(10); 
+  move_start(move_types::tank_point, tank_point_params({36.0,11.75,-90.0},false),false); // grabs blue on platform 
+	b_detect_goal(); 
+  skills_d.print("FIRST GOAL GOt %d\n", millis() - time);
+	move_stop(); 
+	// drivebase.brake(); 
+	move_start(move_types::tank_arc, tank_arc_params({tracking.x_coord, tracking.y_coord}, {20.5, 39.0,20.0},127.0,127.0,false));//arc to face neut goal 
+  // move_start(move_types::turn_point, turn_point_params({36.5, 72.0})); 
+  // delay(50); 
+	move_start(move_types::tank_point, tank_point_params({51.0,109.0,  20.0},false, 127.0,1.0,true,6.4,150.0),false);// drive throught neut goal 
+  f_detect_goal(); 
+  skills_d.print("first neutral got %d\n", millis() - time);
+  f_lift.move_absolute(900,200); 
+  Task([](){
+    while(true){ 
+      misc.print("%.2f\n", f_lift.motor.get_actual_velocity());
+      delay(10);
+    }
+  });
+  // intk.move(127); 
+  // move_stop(); 
+  // move_wait_for_complete();
+  move_start(move_types::tank_point, tank_point_params({54.0,109.0,  20.0},false, 80.0,1.0,true,6.4,150.0));
+  f_lift.move_absolute(500,100);
+  move_start(move_types::tank_point, tank_point_params({58.0,115.0,  20.0},false, 60.0,1.0,true,6.4,150.0));
+  while(f_lift.motor.get_position() >510)delay(10);
+  f_claw.set_state(0);
+  skills_d.print("First neutral on plat %d\n", millis() - time);
+  master.print(1,1,"goal %d", millis() - time);
+  time = millis();
+  move_start(move_types::tank_arc, tank_arc_params({58.0,115.0}, {40.0,112.0,135.0}, -127.0,127.0,true, 20.0,0.0,70.0), false);
+  tracking.wait_for_dist(0.5);
+  f_lift.move_absolute(540,200);
+  move_wait_for_complete();
+  // f_lift.move_absolute(150,200);
+  // intk.move(127);
+  // move_start(move_types::tank_arc, tank_arc_params({48.0,105.0}, {72.0,94.0,180.0}, 127.0,127.0,true));
+  f_lift.move_absolute(10);
+  move_start(move_types::tank_point, tank_point_params({71.0,72.0,180.0}), false);
+  while(f_lift.motor.get_position() > 60)delay(10);
+  // intk.move(0);
+  f_detect_goal();
+  skills_d.print("Center grab %d\n", millis() - time);
+  master.print(2,2,"grab %d", millis() - time);
+  delay(100);
+  f_lift.move_absolute(550, 200);
+  move_wait_for_complete();
+  drivebase.brake();
+  delay(100);
+  move_start(move_types::turn_angle, turn_angle_params(0.0));
+  delay(100);
+  intk.move(127);
+  move_start(move_types::tank_point, tank_point_params({71.0, 110.0,0.0},false,80.0));
+  // move_stop();
+  drivebase.brake();
+  flatten_against_wall();
+  // delay(300);
+  // drivebase.move(0.0,0.0);
+}
+
+
+
 
 //From gui_construction.cpp (for autons)
 extern Button alliance, pos_alliance;
