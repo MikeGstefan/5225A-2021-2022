@@ -4,6 +4,7 @@
 #include "timer.hpp"
 #include "geometry.hpp"
 #include "logging.hpp"
+// #include "../include/okapi/api/util/mathUtil.hpp" // bool2sgn, motor cartridge colours, adi letter to number...
 #include <array>
 #include <cmath>
 #include <iostream>
@@ -98,6 +99,13 @@ int sgn(T value){
   return (T(0) < value) - (value < T(0));
 }
 
+template <typename T>
+bool contains(T& container, typename T::value_type item){
+  return std::find(container.begin(), container.end(), item) != container.end();
+}
+
+double weighted_avg(double first, double second, double first_scale = 0.5);
+
 // maps a value to a range
 template <typename T>
 T map(T x, T in_min, T in_max, T out_min, T out_max){
@@ -122,13 +130,13 @@ T map_set(T input, T in_min, T in_max, T out_min, T out_max, T range1, T val_1, 
 //ENUM HELPERS
 
 //Assumes enum values are consecutive
-template <typename T>
+template <typename T, typename = typename std::enable_if_t<std::is_enum_v<T>, void>>
 T operator++ (T enum_type, int) {
   return static_cast<T>(static_cast<int>(enum_type) + 1);
 }
 
 //Assumes enum values are consecutive
-template <typename T>
+template <typename T, typename = typename std::enable_if_t<std::is_enum_v<T>, void>>
 T operator-- (T enum_type, int) {
   return static_cast<T>(static_cast<int>(enum_type) - 1);
 }

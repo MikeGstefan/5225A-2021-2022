@@ -71,18 +71,28 @@ void _Controller::queue_handle(){
   }
 }
 
+//template this at some point
 void _Controller::print(std::uint8_t line, std::uint8_t col, const char* fmt, ... ){
   char buffer[19];
   std::va_list args;
   va_start(args, fmt);
-  vsnprintf(buffer,19,fmt,args);
+  vsnprintf(buffer, 19, fmt, args);
   va_end(args);
   std::function<void()> func = [=](){
-    pros::Controller::print(line,col,buffer);
-    controller_queue.print("%d| printing %s to %d\n",millis(), buffer, this->controller_num);
+    pros::Controller::print(line, col, buffer);
+    controller_queue.print("%d| printing %s to %d\n", millis(), buffer, this->controller_num);
   };
   this->add_to_queue(func);
-  controller_queue.print("%d| adding print to queue for controller %d\n",millis(), this->controller_num);
+  controller_queue.print("%d| adding print to queue for controller %d\n", millis(), this->controller_num);
+
+}
+void _Controller::print(std::uint8_t line, std::uint8_t col, std::string str){
+  std::function<void()> func = [=](){
+    pros::Controller::print(line, col, str.c_str());
+    controller_queue.print("%d| printing %s to %d\n", millis(), str.c_str(), this->controller_num);
+  };
+  this->add_to_queue(func);
+  controller_queue.print("%d| adding print to queue for controller %d\n", millis(), this->controller_num);
 
 }
 void _Controller::clear_line (std::uint8_t line){
@@ -139,7 +149,31 @@ bool _Controller::interrupt(bool analog, bool digital, bool OK_except){
   return false;
 }
 
+controller_digital_e_t _Controller::wait_for_press(std::vector<controller_digital_e_t> buttons, int timeout){
+  
+  int start_time = millis();
+  controller_queue.print("%d| waiting for button press from controller %d\n", millis(), this->controller_num);
+
+  controller_digital_e_t button = static_cast<controller_digital_e_t>(0);
+  wait_until(button != static_cast<controller_digital_e_t>(0)){
+    for(std::vector<controller_digital_e_t>::iterator it = buttons.begin(); it != buttons.end(); it++){
+      if(get_digital_new_press(*it)) button = *it;
+    }
+
+    if(timeout != 0 && millis() - start_time > timeout){
+      controller_queue.print("%d| timed out on waiting for button press from controller %d\n", millis(), this->controller_num);
+      return static_cast<controller_digital_e_t>(0);
+    }
+  }
+  controller_queue.print("%d| button %d pressed from controller %d\n", millis(), button, this->controller_num);
+
+  return button;
+}
+
+
+//create wait for press for multiple buttons and return the one that was pressed
 void _Controller::wait_for_press(controller_digital_e_t button, int timeout){
+
   int start_time = millis();
   controller_queue.print("%d| waiting for button %d from controller %d\n", millis(), button, this->controller_num);
   wait_until(get_digital_new_press(button)){

@@ -2,6 +2,8 @@
 
 static const std::string start_pos_file_name ="/usd/start_position.txt";
 
+//create an adaptable fll type menu selector, look at select_auton();
+
 Reset_dist reset_dist_r(&r_dist, 7.5);
 Reset_dist reset_dist_l(&l_dist, 7.5);
 
@@ -81,7 +83,7 @@ double get_filtered_output(ADIUltrasonic sensor, int check_count, uint16_t lower
 void flatten_against_wall(bool front, int cycles){ 
   int safety_check = 0;
   //bool to + -
-  int direction = (static_cast<int>(front)*2)-1;
+  int direction = (static_cast<int>(front)*2)-1; //use okapi::boolToSign
   tracking_imp.print("%d|| Start wall allign\n", millis());
 
 	drivebase.move(50.0*direction,0.0);

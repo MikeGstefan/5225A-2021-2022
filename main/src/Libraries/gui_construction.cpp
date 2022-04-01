@@ -44,12 +44,14 @@ Text mot_temp_7(295, 175, GUI::Style::CENTRE, TEXT_SMALL, temps, std::get<3>(mot
 Text mot_temp_8(405, 175, GUI::Style::CENTRE, TEXT_SMALL, temps, std::get<3>(motors_for_gui[7]) + ": %dC", std::get<1>(motors_for_gui[7]), COLOUR(BLACK));
 
 Page checks("System Checks");
-Button drive_motors (30, 40, 120, 75, GUI::Style::SIZE, Button::SINGLE, checks, "Drive Motors");
-Button intakes (180, 40, 120, 75, GUI::Style::SIZE, Button::SINGLE, checks, "Intake/Uptake");
-Button lifts (330, 40, 120, 75, GUI::Style::SIZE, Button::SINGLE, checks, "Lifts");
-Button pneums (30, 135, 120, 75, GUI::Style::SIZE, Button::SINGLE, checks, "Pneumatics");
-Button save_pos (180, 135, 120, 75, GUI::Style::SIZE, Button::SINGLE, checks, "Save Position");
-Button misc_checks (330, 135, 120, 75, GUI::Style::SIZE, Button::SINGLE, checks, "Misc");
+Button drive_motors (15, 45, 100, 75, GUI::Style::SIZE, Button::SINGLE, checks, "Drive Motors");
+Button intakes (130, 45, 100, 75, GUI::Style::SIZE, Button::SINGLE, checks, "Intake/Uptake");
+Button lifts (245, 45, 100, 75, GUI::Style::SIZE, Button::SINGLE, checks, "Lifts");
+Button pneums (360, 45, 100, 75, GUI::Style::SIZE, Button::SINGLE, checks, "Pneumatics");
+Button save_pos (15, 140, 100, 75, GUI::Style::SIZE, Button::SINGLE, checks, "Save Position");
+Button misc_checks (130, 140, 100, 75, GUI::Style::SIZE, Button::SINGLE, checks, "Misc");
+Button auton_selector (245, 140, 100, 75, GUI::Style::SIZE, Button::SINGLE, checks, "Select Autons");
+// Button placeholder (360, 140, 100, 75, GUI::Style::SIZE, Button::SINGLE, checks, "Misc");
 
 Page track ("Tracking"); //Display tracking vals and reset btns
 Text track_x(50, 45, GUI::Style::CENTRE, TEXT_SMALL, track, "X:%.1f", tracking.x_coord);
@@ -130,7 +132,7 @@ Button mot_8_stop (415, 190, 45, 30, GUI::Style::SIZE, Button::SINGLE, motors, "
 Page pneumatics ("Pneumatics"); //Pneumatic testing page for known ports
 Button pneum_1 (15, 45, 100, 75, GUI::Style::SIZE, Button::TOGGLE, pneumatics, (Piston::list_for_gui[0] ? Piston::list_for_gui[0]->get_name() : ""));
 Button pneum_2 (130, 45, 100, 75, GUI::Style::SIZE, Button::TOGGLE, pneumatics, (Piston::list_for_gui[1] ? Piston::list_for_gui[1]->get_name() : ""));
-Button pneum_3 (245, 45, 100, 80, GUI::Style::SIZE, Button::TOGGLE, pneumatics, (Piston::list_for_gui[2] ? Piston::list_for_gui[2]->get_name() : ""));
+Button pneum_3 (245, 45, 100, 75, GUI::Style::SIZE, Button::TOGGLE, pneumatics, (Piston::list_for_gui[2] ? Piston::list_for_gui[2]->get_name() : ""));
 Button pneum_4 (360, 45, 100, 75, GUI::Style::SIZE, Button::TOGGLE, pneumatics, (Piston::list_for_gui[3] ? Piston::list_for_gui[3]->get_name() : ""));
 Button pneum_5 (15, 140, 100, 75, GUI::Style::SIZE, Button::TOGGLE, pneumatics, (Piston::list_for_gui[4] ? Piston::list_for_gui[4]->get_name() : ""));
 Button pneum_6 (130, 140, 100, 75, GUI::Style::SIZE, Button::TOGGLE, pneumatics, (Piston::list_for_gui[5] ? Piston::list_for_gui[5]->get_name() : ""));
@@ -301,6 +303,7 @@ void main_setup(){
     }
   });
   save_pos.set_func(save_positions);
+  auton_selector.set_func(select_auton);
   misc_checks.set_func([](){
     if (!pros::usd::is_installed()) screen_flash::start("No SD Card!");
   });
