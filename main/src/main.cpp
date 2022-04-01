@@ -48,7 +48,6 @@ void initialize() {
 	update_t.start();
 	// master.print(2, 0, "Driver: %s", drivebase.drivers[drivebase.cur_driver].name);
 	// gyro.finish_calibrating(); //Finishes calibrating gyro before program starts
-  select_auton();
 }
 
 /**
@@ -82,6 +81,7 @@ void competition_initialize() {}
  */
 void autonomous() {
   load_positions();
+  load_auton();
   run_auton();
 }
 
