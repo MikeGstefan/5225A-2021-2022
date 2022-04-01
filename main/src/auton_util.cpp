@@ -2,6 +2,8 @@
 
 static const std::string start_pos_file_name ="/usd/start_position.txt";
 
+//create an adaptable fll type menu selector, look at select_auton();
+
 Reset_dist reset_dist_r(&r_dist, 7.5);
 Reset_dist reset_dist_l(&l_dist, 7.5);
 

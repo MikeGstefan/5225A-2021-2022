@@ -17,7 +17,7 @@
 using namespace std;
 
 pros::Task *updt = nullptr; //What's this for
-const GUI* GUI::current_gui = &g_util; //Also why this
+const GUI* GUI::current_gui = &g_main; //Also why this
 
 /**
  * Runs initialization code. This occurs as soon as the program is started.
@@ -38,7 +38,6 @@ void initialize() {
 	Data::init();
 	_Controller::init();
 	GUI::init();
-	load_auton();
 	delay(500);
 	// tracking.x_coord = 26.0, tracking.y_coord = 11.75, tracking.global_angle = -90.0_deg;
 	// tracking.x_coord = 104.0, tracking.y_coord = 12.0, tracking.global_angle = -30.0_deg;

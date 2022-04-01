@@ -54,7 +54,7 @@ public:
   log_locations log_location;
   static vector<Data*> get_objs();
   void print(const char* format, ...);
-  void print(Timer* tmr,int freq, vector<function<char*()>> str);
+  void print(Timer* tmr,int freq, vector<function<char*()>> str); //How is this used?
   void log_print(char* buffer, int buffer_len);
   Data(const char* obj_name, const char* id_code, log_types log_type_param, log_locations log_location_param);
   static void init();

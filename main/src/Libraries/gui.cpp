@@ -775,7 +775,7 @@ void Button::update(){
       break;
 
     case Button::SINGLE:
-      if (new_press()) {select(); printf2("Here: %s", label);}
+      if (new_press()) {select(); /*printf2("Here: %s", label);*/}
       else if (new_release()) deselect();
 
       break;

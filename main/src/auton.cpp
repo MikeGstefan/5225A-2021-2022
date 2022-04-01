@@ -1,4 +1,5 @@
 #include "auton.hpp"
+#include "Libraries/printing.hpp"
 #include "Tracking.hpp"
 #include "config.hpp"
 #include "controller.hpp"
@@ -740,7 +741,6 @@ void lrt_auton(){
 }
 
 
-std::fstream auton_file;
 //name, target, common point, task at target, angle to go to target
 std::vector<std::string> selected_positions;
 std::map<std::string, std::tuple<Point, Point, std::string, double>> targets = {
@@ -757,18 +757,30 @@ void load_auton(){
   std::string str;
   selected_positions.clear();
 
+  ifstream file;
   Data::log_t.data_update();
-  auton_file.open(auton_file_name, fstream::in);
-  while(auton_file >> str) selected_positions.push_back(str);
-  auton_file.close();
+  printf("\n\nLoading Autons:\n");
+  file.open(auton_file_name, fstream::in);
+  while(file >> str){
+    printf2("%s", str);
+    selected_positions.push_back(str);
+  }
+  newline();
+  file.close();
   Data::log_t.done_update();
 }
 
 void save_auton(){
+  ofstream file;
   Data::log_t.data_update();
-  auton_file.open(auton_file_name, fstream::out | fstream::trunc);
-  for(std::vector<std::string>::iterator it = selected_positions.begin(); it != selected_positions.end(); it++) auton_file << *it << std::endl;
-  auton_file.close();
+  printf("\n\nSaving Autons:\n");
+  file.open(auton_file_name, fstream::out | fstream::trunc);
+  for(std::vector<std::string>::iterator it = selected_positions.begin(); it != selected_positions.end(); it++){
+    file << *it << std::endl;
+    printf2("%s", *it);
+  }
+  newline();
+  file.close();
   Data::log_t.done_update();
 }
 
@@ -785,26 +797,27 @@ bool run_defined_auton(std::string start, std::string target){
   else if(start == "" && target == ""){
 
   }
-  else return false;
+  else return false; //Will be false if none of the ifs matched
 
   return true;
 }
 
 void select_auton_task(std::string target){
-  std::string choice;
-  double angle;
+  std::string choice = std::get<std::string>(targets[target]);
+  double angle = std::get<double>(targets[target]);
   bool selected = false;
 
+  selected_positions.push_back(target);
+
   wait_until(selected){
-    master.clear();
-    master.print(0, 0, choice);
+    master.print(1, 0, choice);
 
     switch(master.wait_for_press({DIGITAL_A, DIGITAL_RIGHT, DIGITAL_LEFT})){ //see how to use ok_button
       case DIGITAL_A:
         if(choice == "Back" || "Front"){
-          master.clear();
-          master.print(0, 0, "%.1f", angle);
+          master.print(2, 0, "%.1f", angle);
           //angle selection
+          master.wait_for_press(DIGITAL_A);
         }
 
         selected = true;
@@ -832,7 +845,7 @@ void select_auton_task(std::string target){
 
 void select_auton(){
   bool all_selected = false;
-  std::map<std::string, std::tuple<Point, Point, std::string, double>>::iterator selection = targets.begin();
+  std::map<std::string, std::tuple<Point, Point, std::string, double>>::iterator selection = targets.find("Right");
 
   wait_until(!master.get_digital(DIGITAL_X)); //Waits to release cancel button
 
@@ -844,11 +857,10 @@ void select_auton(){
 
     switch(master.wait_for_press({DIGITAL_X, DIGITAL_A, DIGITAL_RIGHT, DIGITAL_LEFT})){//see how to use ok_button
       case DIGITAL_A:
-        selected_positions.push_back(selection->first);
         select_auton_task(selection->first);
 
       case DIGITAL_RIGHT:
-        do{
+        do{ //Goes to next available choice
           if(selection != std::prev(targets.end())) selection++;
           else selection = targets.begin();
           if(selection == og) all_selected = true;
@@ -857,7 +869,7 @@ void select_auton(){
         break;
       
       case DIGITAL_LEFT:
-        do{
+        do{ //Goes to previous available choice
           if(selection != targets.begin()) selection--;
           else selection = std::prev(targets.end());
           if(selection == og) all_selected = true;
@@ -869,6 +881,7 @@ void select_auton(){
     }
 
   }
+  master.clear();
   save_auton();
 }
 
@@ -881,8 +894,8 @@ void run_auton(){
     angle = std::get<3>(target);
 
     if(!run_defined_auton(selected_positions[i], selected_positions[i+1])){
-      move_start(move_types::tank_point, tank_point_params({std::get<1>(current), weighted_avg(tracking.get_angle_in_deg(), angle, 0.2)}, false, 127.0, 1.0, false));
-      move_start(move_types::tank_point, tank_point_params({std::get<1>(target), weighted_avg(tracking.get_angle_in_deg(), angle, 0.6)}, false, 127.0, 1.0, false));
+      move_start(move_types::tank_point, tank_point_params({std::get<1>(current), weighted_avg(angle, tracking.get_angle_in_deg(), 0.3)}, false, 127.0, 1.0, false));
+      move_start(move_types::tank_point, tank_point_params({std::get<1>(target), weighted_avg(angle, tracking.get_angle_in_deg(), 0.7)}, false, 127.0, 1.0, false));
       move_start(move_types::tank_rush, tank_rush_params({std::get<0>(target), angle}, false));
 
       run_auton_task(std::get<std::string>(target));
