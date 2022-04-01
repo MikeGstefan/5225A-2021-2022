@@ -68,8 +68,8 @@ class GUI{
     static int x, y;
     static const Page* current_page;
     static const GUI* current_gui;
-    static constexpr bool prompt_enabled=true;
-    static constexpr bool testing_page_active=false;
+    static constexpr bool prompt_enabled = true;
+    static constexpr bool testing_page_active = false;
     std::vector<Page*> pages;
     std::function <void()> setup, background;
 

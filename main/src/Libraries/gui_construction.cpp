@@ -144,9 +144,9 @@ Text expanders (10, 100, GUI::Style::CORNER, TEXT_MEDIUM, ports, "Expanders: %s"
 Text no_pneumatic (10, 150, GUI::Style::CORNER, TEXT_MEDIUM, ports, "No Pneumatics: %s", no_pneumatic_port_nums);
 
 Page encoders ("Encoders"); //Display tracking vals and reset btns
-Slider expander_1 (30, 80, 30, 120, GUI::Style::SIZE, Slider::VERTICAL, 0, 21, encoders, "E1");
-Slider port_1 (115, 80, 30, 120, GUI::Style::SIZE, Slider::VERTICAL, 1, 8, encoders, "P1");
-Slider port_2 (200, 80, 30, 120, GUI::Style::SIZE, Slider::VERTICAL, 1, 8, encoders, "P2");
+Slider expander_1 (30, 90, 30, 100, GUI::Style::SIZE, Slider::VERTICAL, 0, 21, encoders, "E1");
+Slider port_1 (115, 90, 30, 100, GUI::Style::SIZE, Slider::VERTICAL, 1, 8, encoders, "P1");
+Slider port_2 (200, 90, 30, 100, GUI::Style::SIZE, Slider::VERTICAL, 1, 8, encoders, "P2");
 Button enc_set (350, 60, 50, 20, GUI::Style::CENTRE, Button::SINGLE, encoders, "Set");
 Text enc (350, 100, GUI::Style::CENTRE, TEXT_SMALL, encoders, "%s", std::function([](){return std::to_string(expander_1.get_value()) + ':' + char(port_1.get_value()+64) + char(port_2.get_value()+64);}));
 Text enc_degs (350, 120, GUI::Style::CENTRE, TEXT_SMALL, encoders, "Degs: %d", enc_val);
@@ -653,7 +653,7 @@ void util_setup(){
 
   enc_set.set_func([](){
     int port = expander_1.get_value();
-    if(abs(port_1.get_value()-port_2.get_value()) != 1){
+    if(abs(port_1.get_value()-port_2.get_value()) != 1 || std::min(port_1.get_value(), port_2.get_value()) % 2 == 0){
       screen_flash::start(term_colours::ERROR, "Invalid Ports %c%c", char(port_1.get_value()+64), char(port_2.get_value()+64));
       return;
     }

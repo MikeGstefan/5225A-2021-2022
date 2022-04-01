@@ -17,7 +17,7 @@
 using namespace std;
 
 pros::Task *updt = nullptr; //What's this for
-const GUI* GUI::current_gui = &g_util;
+const GUI* GUI::current_gui = &g_main;
 
 /**
  * Runs initialization code. This occurs as soon as the program is started.

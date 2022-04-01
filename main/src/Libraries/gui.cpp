@@ -307,7 +307,7 @@ Slider::Slider (int x1, int y1, int x2, int y2, GUI::Style type, direction dir, 
   this->min = min;
   this->max = max;
   this->page = &page;
-  this->val = in_range(0, min, max) ? 0 : (min+max)/2; //0 if that's the min, otherwise the average
+  this->val = in_range(0, min, max) ? 0 : (in_range(1, min, max) ? 1 : (min+max)/2); //0 if that's the min, otherwise the average
   this->b_col = background_colour;
   this->l_col = label_colour;
   this->page->sliders.push_back(this);
@@ -317,10 +317,10 @@ Slider::Slider (int x1, int y1, int x2, int y2, GUI::Style type, direction dir, 
   switch(this->dir){
     case HORIZONTAL:
       text_x = (this->x1+this->x2)/2;
-      text_y = this->y1-CHAR_HEIGHT_SMALL/2-2;
+      text_y = this->y1-(CHAR_HEIGHT_SMALL+1)/2;
       inc.construct(this->x2+5, this->y1, this->x2+25, this->y2, GUI::Style::CORNER, Button::SINGLE, this->page, ">", l_col, b_col);
       dec.construct(this->x1-25, this->y1, this->x1-5, this->y2, GUI::Style::CORNER, Button::SINGLE, this->page, "<", l_col, b_col);
-      title.construct(text_x, text_y, GUI::Style::CENTRE, TEXT_SMALL, this->page, label + ":%d", [&](){return val;}, l_col);
+      title.construct(text_x, text_y, GUI::Style::CENTRE, TEXT_SMALL, this->page, label + ":%d", [&](){return val;}, l_col); //why not pass val by reference
       min_title.construct(this->x1, text_y, GUI::Style::CENTRE, TEXT_SMALL, this->page, std::to_string(min), nullptr, l_col);
       max_title.construct(this->x2, text_y, GUI::Style::CENTRE, TEXT_SMALL, this->page, std::to_string(max), nullptr, l_col);
       break;
@@ -328,11 +328,11 @@ Slider::Slider (int x1, int y1, int x2, int y2, GUI::Style type, direction dir, 
     case VERTICAL:
       text_x = (this->x1+this->x2)/2;
       text_y = (this->y1+this->y2)/2;
-      inc.construct(this->x1, this->y1-25, this->x2, this->y1-5, GUI::Style::CORNER, Button::SINGLE, this->page, "^", l_col, b_col);
-      dec.construct(this->x1, this->y2+5, this->x2, this->y2+25, GUI::Style::CORNER, Button::SINGLE, this->page, "v", l_col, b_col);
-      title.construct(text_x, this->y1-27-CHAR_HEIGHT_SMALL, GUI::Style::CENTRE, TEXT_SMALL, this->page, label + ":%d", [&](){return val;}, l_col);
-      min_title.construct(this->x1-15, this->y2, GUI::Style::CENTRE, TEXT_SMALL, this->page, std::to_string(min), nullptr, l_col);
-      max_title.construct(this->x1-15, this->y1, GUI::Style::CENTRE, TEXT_SMALL, this->page, std::to_string(max), nullptr, l_col);
+      inc.construct(this->x1, this->y1-17, this->x2-this->x1, -20, GUI::Style::SIZE, Button::SINGLE, this->page, "^", l_col, b_col);
+      dec.construct(this->x1, this->y2+17, this->x2-this->x1, 20, GUI::Style::SIZE, Button::SINGLE, this->page, "v", l_col, b_col);
+      title.construct(text_x, this->y1-17-22-CHAR_HEIGHT_SMALL, GUI::Style::CENTRE, TEXT_SMALL, this->page, label + ":%d", [&](){return val;}, l_col);
+      min_title.construct(text_x, this->y2+(CHAR_HEIGHT_SMALL+3)/2, GUI::Style::CENTRE, TEXT_SMALL, this->page, std::to_string(min), nullptr, l_col);
+      max_title.construct(text_x, this->y1-(CHAR_HEIGHT_SMALL+3)/2, GUI::Style::CENTRE, TEXT_SMALL, this->page, std::to_string(max), nullptr, l_col);
       break;
   }
 
@@ -668,6 +668,7 @@ const GUI* const GUI::get_current_gui(){
 }
 
 bool GUI::is_touched(){
+  update_screen_status();
   return touched;
 }
 
@@ -760,6 +761,7 @@ void Button::update(){
         if (on) select();
         else deselect();
       }
+      new_release(); //Must be here even if there is nothing to do.
 
       if(on) run_func();
       else run_off_func();
@@ -771,6 +773,7 @@ void Button::update(){
         if (on) select();
         else deselect();
       }
+      new_release(); //Must be here even if there is nothing to do.
       break;
 
     case Button::SINGLE:
