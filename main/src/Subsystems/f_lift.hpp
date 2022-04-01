@@ -17,7 +17,7 @@ enum class f_lift_states{
 class F_Lift: public Motorized_subsystem<f_lift_states, NUM_OF_F_LIFT_STATES, F_LIFT_MAX_VELOCITY> {
   Timer up_press{"Up_press"}, down_press{"Down_press"};
   int search_cycle_check_count = 0, bad_count = 0; // cycle check for safeties
-  PID pid = PID(5.0,0.0,0.0,0.0);
+  PID pid = PID(1.0,0.0,0.0,0.0);
   int lift_power; // for manual control
 
   // height conversion constants
@@ -27,8 +27,8 @@ class F_Lift: public Motorized_subsystem<f_lift_states, NUM_OF_F_LIFT_STATES, F_
   int index, last_index;
 
 public:
-  vector<int> driver_positions = {20, 200, 475, 630, 800};
-  vector<int> prog_positions = {20, 200, 475, 630, 800};
+  vector<int> driver_positions = {1200, 1500, 2050, 2750};
+  vector<int> prog_positions = {1200, 1500, 2050, 2750};
 
   const double bottom_position = 25.0, holding_position = 150.0, raised_position = 300.0, tall_dropoff_position = 475.0, platform_position = 630.0, tall_goal_position = 665.0, top_position = 675.0;
 

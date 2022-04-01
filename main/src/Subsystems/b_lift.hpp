@@ -30,8 +30,8 @@ class B_Lift: public Motorized_subsystem<b_lift_states, NUM_OF_B_LIFT_STATES, B_
   int index, last_index;
 
 public:
-  vector<int> driver_positions = {20, 200, 475, 630, 800};
-  vector<int> prog_positions = {20, 200, 475, 630, 800};
+  vector<int> driver_positions = {1042, 1500, 2050, 2750};
+  vector<int> prog_positions = {1042, 1500, 2050, 2750};
 
   bool trans_p_state = LOW; // HIGH is lift LOW is intake
 
