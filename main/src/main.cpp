@@ -79,24 +79,50 @@ void competition_initialize() {}
  * from where it left off.
  */
 void autonomous() {
-  load_positions();
-  load_auton();
-  run_auton();
+  // load_positions();
+  // load_auton();
+  // run_auton();
 }
 
 void opcontrol() {
-	/* Nathan:
-  check what actually kills the auto balance loop
-  integrate pneumatics
-	auton give up func - ask mike
+	move_stop();
+	// while(true){
+	// 	printf("%d\n", b_dist.get());
+	// 	delay(10);
+	// }
+	// f_lift_m.move(40);
+	pros::Task intk_task(intk_c);
+  drivebase.driver_practice();
   
-	lvgl images
-  2d sliders
-	*/
+	master.clear();
+	// b_lift.reset();
+	// Task([](){ 
+	// 	f_lift.reset();
+	// });
+	// f_claw_p.set_value(0);
+	// b_claw_p.set_value(0);
+	// skills();
+	// skills2();
+
+	//Intake Jam code
+	Task([](){
+		Timer intake_t ("intake jam", false);
+		intk.move(127);
+		while(true){
+			if(intake_jam.get_new_press()) intake_t.reset(); //Start timer when pressed
+			else if(!intake_jam.get_value()) intake_t.reset(false); //End timer when unpressed
+			if(intake_t.get_time() > 1000){ //If pressed for more than 1 sec, reverse intk
+				intk.move(-127);
+				wait_until(!intake_jam.get_value()); //Waits for unjam plus some time
+				delay(150);
+				intk.move(127);
+			}
+			delay(10);
+		}
+	});
 
 
 	while(true){
-		// drivebase.non_blocking_driver_practice();
 		delay(10);
 	}
 }
