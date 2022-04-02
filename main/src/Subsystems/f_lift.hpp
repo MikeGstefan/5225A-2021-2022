@@ -1,9 +1,8 @@
 #pragma once
 #include "../Libraries/subsystem.hpp"
-#include "../drive.hpp"
+#include "../config.hpp"
 #include "../pid.hpp"
-// #include "logging.hpp"
-// #include "intake.hpp" // because lift controls intake
+#include "../Libraries/gui.hpp"
 
 #define F_LIFT_STATE_LINE 2 // line on controller which "searching" and "lowered" lift states are printed on
 
@@ -12,6 +11,9 @@
 
 #define NUM_OF_F_CLAW_STATES 4
 
+class PID;
+extern PID f_lift_pid;
+
 enum class f_lift_states{
   managed, // being managed externally (NOT DOING ANYTHING)
   bottom, // at lowest position
@@ -19,7 +21,6 @@ enum class f_lift_states{
   move_to_target,  // moving to target position
   manual  // controlled by joystick
 };
-extern PID f_lift_pid;
 
 class F_Lift: public Motorized_subsystem<f_lift_states, NUM_OF_F_LIFT_STATES, F_LIFT_MAX_VELOCITY> {
   Timer up_press{"Up_press"}, down_press{"Down_press"};

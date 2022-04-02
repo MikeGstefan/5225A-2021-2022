@@ -1,11 +1,6 @@
 #pragma once
-#include "../util.hpp"
-#include "../timer.hpp"
-#include "../config.hpp"
-#include "../controller.hpp"
-
-
-using namespace pros;
+#include "main.h"
+#include "../task.hpp"
 
 // non-motorized subsystem
 template <typename state_type, int num_of_states>

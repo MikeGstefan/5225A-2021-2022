@@ -1,15 +1,7 @@
 #pragma once
 #include "main.h"
-#include "timer.hpp"
 #include "task.hpp"
-#include "logging.hpp"
-// #include "drive.hpp"
-#include <cstdarg>
-#include <array>
-#include <functional>
-#include "util.hpp"
-
-using namespace pros;
+#include "Libraries/printing.hpp"
 
 // Buttons
 

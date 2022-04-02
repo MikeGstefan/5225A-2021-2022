@@ -1,12 +1,8 @@
 #pragma once
-#include <array>
-#include "drive.hpp"
-#include "config.hpp"
-#include "util.hpp"
 #include "main.h"
-
-using namespace std;
-using namespace pros;
+#include "config.hpp"
+#include "pid.hpp"
+#include "drive.hpp"
 
 bool get_lift();
 

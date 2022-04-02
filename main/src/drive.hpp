@@ -1,21 +1,13 @@
 #pragma once
-#include <array>
-
+#include "main.h"
+#include "config.hpp"
+#include "timer.hpp"
 #include "Tracking.hpp"
-#include "util.hpp"
-#include "logging.hpp"
-#include "auton_util.hpp"
-#include "Libraries/gui.hpp"
-#include "lift.hpp"
 
 #include "Subsystems/b_lift.hpp"
 #include "Subsystems/f_lift.hpp"
 #include "Subsystems/intake.hpp"
 #include "Subsystems/b_claw.hpp"
-
-
-using namespace pros;
-using namespace std;
 
 #define game true
 

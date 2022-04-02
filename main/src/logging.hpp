@@ -1,15 +1,8 @@
 #pragma once
+#include "main.h"
 #include "timer.hpp"
 #include "task.hpp"
-#include <iostream>
-#include <vector>
-#include <string>
-#include <cstdarg>
-#include <fstream>
-#include <functional>
 
-using namespace std;
-using namespace pros;
 //forawrd declarations
 class _Task;
 class Timer;

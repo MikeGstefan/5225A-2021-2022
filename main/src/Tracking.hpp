@@ -1,23 +1,12 @@
 #pragma once
 #include "main.h"
-#include "config.hpp"
-#include "util.hpp"
 #include "geometry.hpp"
+#include "config.hpp"
 #include "pid.hpp"
-#include "drive.hpp"
 #include "task.hpp"
+
+#include "drive.hpp"
 #include "Libraries/gui.hpp"
-#include <iostream>
-#include <cmath>
-#include <memory>
-#include <vector>
-#include <functional>
-#include <variant>
-#include <limits>
-
-using namespace pros;
-// struct Coord;
-
 
 extern _Task update_t;
 extern _Task move_t;

@@ -1,6 +1,7 @@
 #pragma once
 #include "../Libraries/subsystem.hpp"
-#include "../drive.hpp"
+#include "../config.hpp"
+#include "f_lift.hpp"
 
 #define NUM_OF_INTAKE_STATES 5
 #define INTAKE_MAX_VELOCITY 600

@@ -1,12 +1,7 @@
 #pragma once
 #include "main.h"
 #include "timer.hpp"
-#include "logging.hpp"
-
-//find a way to include tracking
-
-
-using namespace pros;
+#include "Tracking.hpp"
 
 class PID{
 public:
@@ -22,3 +17,5 @@ public:
   double get_proportional() const;
   double compute(double input, double target);
 };
+
+class PID;

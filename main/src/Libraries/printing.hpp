@@ -1,4 +1,5 @@
 #pragma once
+#include "main.h"
 #include "../timer.hpp"
 
 //feel free to rename this to something shorter

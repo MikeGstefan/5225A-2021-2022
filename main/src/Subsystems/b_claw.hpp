@@ -1,6 +1,6 @@
 #pragma once
 #include "../Libraries/subsystem.hpp"
-#include "../drive.hpp"
+#include "../config.hpp"
 
 #define NUM_OF_B_CLAW_STATES 5
 

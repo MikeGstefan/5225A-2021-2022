@@ -1,11 +1,5 @@
-#pragma once //
+#pragma once
 #include "main.h"
-#include "util.hpp"
-#include "pros/adi.hpp"
-
-using namespace std;
-using namespace pros;
-
 
 class Piston : public ADIDigitalOut{
   friend class Button;

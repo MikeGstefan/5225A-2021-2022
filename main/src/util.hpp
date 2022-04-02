@@ -1,35 +1,20 @@
 #pragma once
 // #include "common.hpp"
 #include "main.h"
-#include "config.hpp"
-#include "timer.hpp"
 #include "geometry.hpp"
-#include "logging.hpp"
 // #include "../include/okapi/api/util/mathUtil.hpp" // bool2sgn, motor cartridge colours, adi letter to number...
-#include <array>
-#include <cmath>
-#include <iostream>
-#include <memory>
-#include <string>
-#include <tuple>
-#include <vector>
-
-using namespace pros;
-using namespace std;
-//forward declarations
-class Timer;
 
 #define wait_until(condition) while(delay(10), !(condition))
 
 // cycle check macro (checks a condition for a specified amount of cycles)
 #define cycleCheck(condition, checkCount, delayTime) \
 {\
-    int successCount = 0;\
-    while (successCount < checkCount){\
-      if (condition) successCount++;\
-      else successCount = 0;\
-      delay(delayTime);\
-    }\
+  int successCount = 0;\
+  while (successCount < checkCount){\
+    if (condition) successCount++;\
+    else successCount = 0;\
+    delay(delayTime);\
+  }\
 }
 
 /**
@@ -112,7 +97,7 @@ template <typename T>
 T map(T x, T in_min, T in_max, T out_min, T out_max){
   return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
 }
-// base case for recrusive function map_set
+// base case for recursive function map_set
 template <typename T>
 T map_set(T input, T in_min, T in_max, T out_min, T out_max, T range, T val) {
   if (input <= range) return map(input, in_min, range, out_min, val);

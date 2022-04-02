@@ -1,17 +1,18 @@
 #pragma once
+#include "main.h"
+#include "pros/apix.h"
+#include "../config.hpp"
 #include "printing.hpp"
 #include "../auton.hpp"
 #include "../drive.hpp"
-#include "../piston.hpp"
-#include "../util.hpp"
-#include "../include/pros/apix.h"
-#include <bitset>
+#include "../Tracking.hpp"
 
 // Forward-Declaration
 class GUI;
 class Page;
 class Button;
 class Slider;
+class Text_;
 template <typename V=std::nullptr_t> class Text;
 
 //For main.cpp to switch between

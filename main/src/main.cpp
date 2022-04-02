@@ -1,20 +1,5 @@
-#include "config.hpp"
-#include "drive.hpp"
-#include "controller.hpp"
+#include "main.h"
 #include "Libraries/gui.hpp"
-#include "Libraries/printing.hpp"
-#include "pid.hpp"
-#include "Tracking.hpp"
-#include "task.hpp"
-#include "auton.hpp"
-#include "auton_util.hpp"
-#include "Subsystems/f_lift.hpp"
-#include "Subsystems/b_lift.hpp"
-#include "distance.hpp"
-
-#include "task.hpp"
-#include "util.hpp"
-using namespace std;
 
 pros::Task *updt = nullptr; //What's this for
 const GUI* GUI::current_gui = &g_main; //Also why this

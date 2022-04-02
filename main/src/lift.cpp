@@ -362,5 +362,5 @@ void handle_lifts(){
 
 
 bool get_lift(){
-    return (!drivebase.get_reverse() ==  master.get_analog(ANALOG_RIGHT_Y) > -1* drivebase.get_deadzone());
+  return (drivebase.get_reverse() != (master.get_analog(ANALOG_RIGHT_Y) > -drivebase.get_deadzone()));
 }

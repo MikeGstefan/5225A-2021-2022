@@ -1,7 +1,7 @@
 #pragma once
 #include "../Libraries/subsystem.hpp"
-#include "../drive.hpp"
-// #include "intake.hpp" // because lift controls intake
+#include "../config.hpp"
+#include "../Libraries/gui.hpp"
 
 #define B_LIFT_STATE_LINE 1 // line on controller which "searching" and "lowered" lift states are printed on
 

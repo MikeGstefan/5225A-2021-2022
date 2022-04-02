@@ -42,6 +42,6 @@ double PID::compute(double input, double target){
     
   output = proportional + integral + derivative + bias;
 
-  motion_i.print("%d |  P: %f, D:%f, In:%f, Out:%f\n", millis(), proportional, derivative, -input, output);
+  motion_i.print("%d |  P: %f, D:%f, In:%f, Out:%f, Pos:(%f, %f, %f)\n", millis(), proportional, derivative, -input, output, tracking.x_coord, tracking.y_coord, tracking.get_angle_in_deg());
   return output;
 }
