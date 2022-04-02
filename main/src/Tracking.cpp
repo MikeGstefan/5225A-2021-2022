@@ -1140,7 +1140,9 @@ void turn_to_angle(void* params){
   tracking.move_complete = false;
 
   PID angle_pid(kp, 0.0, kd, 0.0, true, 0.0, 360.0);
-  PID angle_velocity_pid(0.0, 0.0, 0.0, 0.0, true, 0.0, 360.0);
+  PID angle_velocity_pid(10.0, 0.0, 20.0, 0.0, true, 0.0, 360.0);
+  double target_velocity;
+  double kB = 17.2; // ratio of motor power to target velocity (in radians) i.e. multiply vel by this to get motor power
 
   motion_i.print("%d || Starting turn to angle %.2f from %.2f\n", millis(), target_a, rad_to_deg(tracking.global_angle));
   target_a = deg_to_rad(target_a);
@@ -1154,7 +1156,11 @@ void turn_to_angle(void* params){
   }
   int start_time = millis();
   while(true){
-    power =  angle_pid.compute(tracking.global_angle, new_target_a);
+    target_velocity = angle_pid.compute(tracking.global_angle, new_target_a);
+    // target_velocity = new_target_a - tracking.global_angle;
+
+    power = kB * target_velocity + angle_velocity_pid.compute(tracking.g_velocity.angle, target_velocity); 
+    motion_d.print("target_velocity[deg]: %lf, acc vel: %lf, vel_diff: %lf, power:%lf\n", rad_to_deg(target_velocity), rad_to_deg(tracking.g_velocity.angle), rad_to_deg(target_velocity - tracking.g_velocity.angle), power);
     if(fabs(power) > max_speed)power = max_speed*sgn(power);
     if(fabs(power) <min_power_a) power = sgn(power)*min_power_a;
     drivebase.move(0, power);
@@ -1255,10 +1261,10 @@ void tank_move_on_arc(void* params){
   // from power to velocity * 1.6
   // from velocity to power / 1.6 or * 0.625
   // const double pwm_to_vel = 1.6;
-  const double pwm_to_vel = 0.0628319;
+  const double pwm_to_vel = 0.05814;
   const double kR = 30.0; // multiplier on radial error
 
-  const double kA = pwm_to_vel * 160.0, kB = 1 / pwm_to_vel, kP = 35.0, kD = 0.0;
+  const double kA = pwm_to_vel * 90.0, kB = 1 / pwm_to_vel, kP = 35.0, kD = 0.0;
   const double final_angle = atan2(target.y - centre.y, target.x - centre.x); // angle of final position to centre at end of move
 
   uint32_t last_d_update_time = millis();  // for derivative
