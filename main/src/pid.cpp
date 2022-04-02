@@ -1,7 +1,7 @@
 #include "pid.hpp"
 #include "util.hpp"
 #include "logging.hpp"
-#include "Tracking.hpp"
+#include "tracking.hpp"
 
 PID::PID(double kP, double kI, double kD, double bias, bool integral_sgn_reset, double integral_lower_bound, double integral_upper_bound):
   kP(kP), kI(kI), kD(kD),

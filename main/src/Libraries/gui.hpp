@@ -48,7 +48,6 @@ class GUI{
   friend class Button;
   friend class Slider;
   friend class Text_;
-  template <typename V> friend class Text;
 
   public:
     enum class Style{ //how the rect coords get evaluated
@@ -138,7 +137,7 @@ class Text_{
   friend class Page;
   friend class Button;
   private:
-  int x1=USER_RIGHT, y1=USER_DOWN, x2=USER_LEFT, y2=USER_UP;
+    int x1=USER_RIGHT, y1=USER_DOWN, x2=USER_LEFT, y2=USER_UP;
 
   protected:
     //Vars
@@ -167,7 +166,6 @@ class Text_{
 
 template <typename V>
 class Text: public Text_{
-  friend class Button;
   friend class Slider;
   private:
     Text(){};

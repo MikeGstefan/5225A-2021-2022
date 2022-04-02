@@ -5,7 +5,7 @@
 #include "Subsystems/b_lift.hpp"
 #include "Subsystems/f_lift.hpp"
 #include "Libraries/printing.hpp"
-#include "Tracking.hpp"
+#include "tracking.hpp"
 #include "drive.hpp"
 #include <map> //Not put in main.h because util.hpp cannot include <map>
 
@@ -815,7 +815,7 @@ bool select_auton_task(std::string target){
 
   wait_until(selected){
     master.clear_line(1);
-    master.print(1, 0, choice);
+    master.print(1, 0, "%s", choice);
 
     switch(master.wait_for_press({DIGITAL_A, DIGITAL_RIGHT, DIGITAL_LEFT, DIGITAL_B})){ //see how to use ok_button
       case DIGITAL_B: return false; break;
@@ -859,7 +859,7 @@ void select_auton(){
 
   wait_until(all_selected){
     master.clear();
-    master.print(0, 0, selection->first);
+    master.print(0, 0, "%s", selection->first);
 
     std::map<std::string, std::tuple<Point, Point, std::string, double>>::iterator og = selection;
 

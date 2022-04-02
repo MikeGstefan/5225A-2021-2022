@@ -1,5 +1,5 @@
 #include "task.hpp"
-#include "geometry.hpp"
+#include "Libraries/geometry.hpp"
 #include "logging.hpp"
 #include "util.hpp"
 
@@ -37,7 +37,7 @@ void* _Task::get_params(void* params){
 }
 
 
-pros::Task* _Task::get_task_ptr()const{
+pros::Task* _Task::get_task_ptr() const{
   return this->task_ptr;
 }
 

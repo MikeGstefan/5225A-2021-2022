@@ -1,5 +1,7 @@
 #pragma once
 #include "main.h"
+#include "logging.hpp"
+#include "Libraries/printing.hpp"
 
 // Buttons
 
@@ -37,8 +39,6 @@ public:
   static _Task controller_task;
   static void init();
 
-  void print(std::uint8_t line, std::uint8_t col, const char* fmt, ... );
-  void print(std::uint8_t line, std::uint8_t col, std::string str);
   void clear_line (std::uint8_t line);
   void clear();
   void rumble(const char* rumble_pattern);
@@ -52,4 +52,14 @@ public:
    * @return the button that was pressed. 0 if nothing pressed
    */
   controller_digital_e_t wait_for_press(std::vector<controller_digital_e_t> buttons, int timeout = 0);
+
+  template <typename... Params>
+  void print(std::uint8_t line, std::uint8_t col, const char* fmt, Params... args){
+    std::function<void()> func = [=](){
+      pros::Controller::print(line, col, fmt, args...);
+      controller_queue.print("%d| printing %s to %d\n", millis(), printf_to_string(fmt, convert_args(args)...).c_str(), this->controller_num);
+    };
+    this->add_to_queue(func);
+    controller_queue.print("%d| adding print to queue for controller %d\n", millis(), this->controller_num);
+  }
 };

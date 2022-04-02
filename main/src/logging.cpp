@@ -14,14 +14,17 @@ vector<Data*> Data::obj_list;
 _Task Data::log_t(queue_handle, "logging");
 
 Data::Data(const char* obj_name, const char* id_code, log_types log_type_param, log_locations log_location_param){
+  if(id_code[0] != '$'){
+    char error[60];
+    snprintf(error, 50, "Data object %s failed with invalid ID code %s\n", obj_name, id_code);
+    throw std::invalid_argument(error);
+  }
   this->id = id_code;
   this->name = obj_name;
   this->log_type = log_type_param;
   this->log_location = log_location_param;
   obj_list.push_back(this);
 }
-
-
 
 Data task_log("tasks.txt","$01", debug, log_locations::both);
 Data controller_queue("controller.txt","$02", debug,log_locations::none);

@@ -1,11 +1,11 @@
 #include "auton_util.hpp"
-#include "geometry.hpp"
+#include "Libraries/geometry.hpp"
 #include "config.hpp"
 #include "controller.hpp"
 #include "Libraries/gui.hpp"
 #include "logging.hpp"
 #include "util.hpp"
-#include "Tracking.hpp"
+#include "tracking.hpp"
 #include "drive.hpp"
 
 static const std::string start_pos_file_name ="/usd/start_position.txt";
