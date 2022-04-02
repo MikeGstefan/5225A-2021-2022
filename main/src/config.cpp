@@ -27,6 +27,10 @@ pros::ADIDigitalIn intake_jam({{16, 7}});
 pros::ADIDigitalIn f_touch(7);
 // pros::ADIDigitalIn intake_jam({{16, 7}});
 
+pros::ADIDigitalOut LedY({{10,1}}), LedR({{10,2}}), LedB({{10,3}}),LedG({{10,4}}), LED1({{10,5}}), LED2({{10,6}}), LED3({{10,7}});
+pros::ADIDigitalIn LED4({{10,8}});
+
+
 pros::Distance l_dist(18);
 pros::Distance r_dist(17);
 
