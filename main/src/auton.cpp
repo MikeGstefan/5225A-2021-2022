@@ -785,6 +785,8 @@ void save_auton(){
   newline();
   file.close();
   Data::log_t.done_update();
+  master.clear();
+  master.print(0, 0, "Saved Autons");
 }
 
 void run_auton_task(std::string task){
@@ -805,19 +807,17 @@ bool run_defined_auton(std::string start, std::string target){
   return true;
 }
 
-void select_auton_task(std::string target){
+bool select_auton_task(std::string target){
   std::string choice = std::get<std::string>(targets[target]);
   double angle = std::get<double>(targets[target]);
   bool selected = false;
 
-  selected_positions.push_back(target);
-
   wait_until(selected){
     master.clear_line(1);
-    delay(1000);
     master.print(1, 0, choice);
 
-    switch(master.wait_for_press({DIGITAL_A, DIGITAL_RIGHT, DIGITAL_LEFT})){ //see how to use ok_button
+    switch(master.wait_for_press({DIGITAL_A, DIGITAL_RIGHT, DIGITAL_LEFT, DIGITAL_B})){ //see how to use ok_button
+      case DIGITAL_B: return false; break;
       case DIGITAL_A:
         if(choice == "Back" || "Front"){
           master.print(2, 0, "%.1f", angle);
@@ -844,25 +844,32 @@ void select_auton_task(std::string target){
     }
   }
 
+  selected_positions.push_back(target);
   std::get<std::string>(targets[target]) = choice;
   std::get<double>(targets[target]) = angle;
+
+  return true;
 }
 
 void select_auton(){
   bool all_selected = false;
   std::map<std::string, std::tuple<Point, Point, std::string, double>>::iterator selection = targets.find("Right");
+  selected_positions.clear();
 
-  wait_until(!master.get_digital(DIGITAL_X)); //Waits to release cancel button
-
-  wait_until(all_selected || master.get_digital(DIGITAL_X)){
+  wait_until(all_selected){
     master.clear();
     master.print(0, 0, selection->first);
 
     std::map<std::string, std::tuple<Point, Point, std::string, double>>::iterator og = selection;
 
     switch(master.wait_for_press({DIGITAL_X, DIGITAL_A, DIGITAL_RIGHT, DIGITAL_LEFT})){//see how to use ok_button
+      case DIGITAL_X:
+        master.clear();
+        save_auton();
+        return;
+        break;
       case DIGITAL_A:
-        select_auton_task(selection->first);
+        if(!select_auton_task(selection->first)) break;
 
       case DIGITAL_RIGHT:
         do{ //Goes to next available choice
@@ -882,12 +889,10 @@ void select_auton(){
         while(!all_selected && contains(selected_positions, selection->first));
         break;
 
-      default: break; //breaks out of switch, and if pressed x, then immediately breaks out of loop 
+      default: break;
     }
 
   }
-  master.clear();
-  save_auton();
 }
 
 void run_auton(){

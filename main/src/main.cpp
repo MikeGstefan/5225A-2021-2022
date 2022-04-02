@@ -86,29 +86,6 @@ void autonomous() {
 
 void opcontrol() {
 
-  LedR.set_value(HIGH);
-  LedB.set_value(HIGH);
-  LedG.set_value(HIGH);
-  LedY.set_value(HIGH);
-  LED1.set_value(HIGH);
-  LED2.set_value(HIGH);
-  LED3.set_value(HIGH);
-  // LED4.set_value(LOW);
-
-  // while(true){
-  //   LedY.set_value(LOW); delay(50); LedY.set_value(HIGH); delay(50);
-  //   LedR.set_value(LOW); delay(50); LedR.set_value(HIGH); delay(50);
-  //   LedB.set_value(LOW); delay(50); LedB.set_value(HIGH); delay(50);
-  //   LedG.set_value(LOW); delay(50); LedG.set_value(HIGH); delay(50);
-  //   // LED1.set_value(LOW); delay(50); LED1.set_value(HIGH); delay(50);
-  //   // LED2.set_value(LOW); delay(50); LED2.set_value(HIGH); delay(50);
-  //   // LED3.set_value(LOW); delay(50); LED3.set_value(HIGH); delay(50);
-  //   // LED4.set_value(LOW); delay(50); LED4.set_value(HIGH); delay(50);
-  // }
-
-  
-
-
 
 	while(true){
 		// drivebase.non_blocking_driver_practice();
