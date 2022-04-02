@@ -961,6 +961,8 @@ void tank_move_to_target(void* params){
     double kd_a = tank_point_params_g.kd_a;
     int timeout = tank_point_params_g.timeout;
     Point end_error = tank_point_params_g.end_error;
+    // this distance at which the robot is travelling at max vel (decreasing it is like increasing the kp)
+    double max_vel_dist = 25.0; // Mike this is a parameter
     // double end_velo = tank_point_params_g.end_velo;
     // Pid angle(kp.a);
     
@@ -1045,10 +1047,10 @@ void tank_move_to_target(void* params){
       end_dist = sqrt(pow(hypotenuse,2) + pow(local_error.y,2) - (2* hypotenuse * local_error.y * cos(tracking.global_angle - atan2(target.x - tracking.x_coord,target.y - tracking.y_coord))));  
       motion_d.print("%d|| end_dist: %.2f, hypotenuse: %.2f, local %.2f, angle: %.2f\n",millis(), end_dist,hypotenuse, local_error.y,rad_to_deg(tracking.global_angle - atan2(target.x - tracking.x_coord,target.y - tracking.y_coord)));
 
-      // tracking.power_y = kp_y * local_error.y;
+      // calculating target velocity
       cur_y_velocity = (tracking.l_velo + tracking.r_velo) / 2; // average of side encoders is approximately the local_y_velocity
       sgn_y_error = sgn(local_error.y);
-      target_y_velocity = map(local_error.y, sgn_y_error * 0.0, sgn_y_error * 25.0, sgn_y_error * end_y_velocity, sgn_y_error * max_y_velocity);
+      target_y_velocity = map(local_error.y, sgn_y_error * 0.0, sgn_y_error * max_vel_dist, sgn_y_error * end_y_velocity, sgn_y_error * max_y_velocity);
       
       if(fabs(target_y_velocity) > max_y_velocity) target_y_velocity = max_y_velocity * sgn(target_y_velocity);
       tracking.power_y = kB * target_y_velocity + y_vel_pid.compute(cur_y_velocity, target_y_velocity);
