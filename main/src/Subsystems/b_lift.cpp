@@ -225,8 +225,7 @@ B_Claw b_claw({"B_Claw",
 {
   "managed",
   "idle",
-  "search_lip",
-  "search_bowl",
+  "searching",
   "tilted",
   "flat"
 }
@@ -243,21 +242,19 @@ void B_Claw::handle_buttons(){
   // resets the press timer if toggle button is pressed
   if(master.get_digital_new_press(claw_toggle_button) && !get_lift()){
     toggle_press_timer.reset();
-    // grabs goal if toggle button is pressed
+    // grabs goal if toggle button is pressed and claw is open
     if(state == b_claw_states::idle) set_state(b_claw_states::tilted);
   }
-  if(toggle_press_timer.get_time() > 300){  // if claw button was held
-    // toggles tilt state
+  
+  if(toggle_press_timer.get_time() > 300){  // toggles tilt state if claw button was held
     if(state == b_claw_states::tilted) set_state(b_claw_states::flat);
     else if(state == b_claw_states::flat) set_state(b_claw_states::tilted);
     toggle_press_timer.reset(false); // resets and pauses the timer 
   }
-  else{
-    if(!master.get_digital(claw_toggle_button)){
-      toggle_press_timer.reset(false);  // resets and pauses the timer 
-      // releases goal if toggle button is released before the button hold timeout triggers
-      if(state == b_claw_states::tilted || state == b_claw_states::flat)  set_state(b_claw_states::idle);
-    }
+  // releases goal if toggle button is released before the button hold timeout triggers
+  else if(!master.get_digital(claw_toggle_button)){
+    toggle_press_timer.reset(false);  // resets and pauses the timer 
+    if(state == b_claw_states::tilted || state == b_claw_states::flat)  set_state(b_claw_states::idle);
   }
 }
 
@@ -269,15 +266,9 @@ void B_Claw::handle(){
     case b_claw_states::idle:
       break;
 
-    case b_claw_states::search_lip:
-      // searches for bowl of mogo once lip is detected
-      if(b_dist.get() < 70) set_state(b_claw_states::search_bowl);
-      break;
-
-    case b_claw_states::search_bowl:
-      // grabs goal if up button is pressed or bowl is detected
-      if (b_dist.get() > 70 && b_dist.get() < 95) search_cycle_check_count++;
-      if(search_cycle_check_count >= 2) set_state(b_claw_states::tilted);
+    case b_claw_states::searching:
+      // grabs goal if bowl is detected
+      if(b_dist.get() < 50) set_state(b_claw_states::tilted);
       break;
 
     case b_claw_states::tilted:
@@ -302,12 +293,7 @@ void B_Claw::handle_state_change(){
       b_claw_p_2.set_value(LOW);    
       break;
 
-    case b_claw_states::search_lip:
-      b_claw_p_1.set_value(LOW);
-      b_claw_p_2.set_value(LOW);
-      break;
-
-    case b_claw_states::search_bowl:
+    case b_claw_states::searching:
       b_claw_p_1.set_value(LOW);
       b_claw_p_2.set_value(LOW);
       search_cycle_check_count = 0; // resets search cycle count

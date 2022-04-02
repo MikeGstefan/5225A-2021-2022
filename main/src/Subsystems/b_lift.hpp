@@ -57,15 +57,14 @@ public:
 
 extern B_Lift b_lift;
 
-#define NUM_OF_B_CLAW_STATES 6
+#define NUM_OF_B_CLAW_STATES 5
 
 // FRONT CLAW SUBSYSTEM
 
 enum class b_claw_states{
   managed, // being managed externally (NOT DOING ANYTHING)
-  idle, // claw is open and NOT waiting to detect mogo, will enter search_lip state after 2 seconds of inactivity
-  search_lip,  // claw is open and waiting to detect mogo's lip (FIRST SEARCH STATE)
-  search_bowl,  // claw is open and waiting to detect mogo's bowl (SECOND SEARCH STATE)
+  idle, // claw is open and NOT waiting to detect mogo
+  searching,  // claw is open and is waiting to detect mogo
   tilted, // holding mogo tilted
   flat, // holding mogo flat
 };
