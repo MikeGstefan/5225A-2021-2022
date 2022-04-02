@@ -97,10 +97,26 @@ void autonomous() {
 // extern Slider mot_speed_set;
 
 void opcontrol() {
-	drivebase.move(0.0,0.0);
+	while(!master.get_digital_new_press(DIGITAL_A))delay(10);
+	// drivebase.move(127, 0.0);
+	Timer timer{"timer"};
+	// while(!master.get_digital_new_press(DIGITAL_A) && timer.get_time() < 500){
+	// 	printf("vel: %lf\n", (tracking.l_velo + tracking.r_velo) / 2);
+	// 	delay(10);
+	// }
+	// move_start(move_types::tank_point, tank_point_params({0.0,60.0,0.0},false, 127.0,1.0,true,2.0,25.0));
+	move_start(move_types::turn_angle, turn_angle_params(90.0, true,true,60.0,400.0));
+	delay(5000);
 
+	drivebase.move(0.0,0.0);
+	// int speed = 0;
 	while(true){
-		drivebase.handle_input();
+		// drivebase.handle_input();
+		// if(master.get_digital_new_press(DIGITAL_A)){
+		// 	speed+=2;
+		// 	master.print(0,0,"%d", speed);
+		// }
+		// drivebase.move(0.0,speed);
 		GUI::update();
 		// drivebase.non_blocking_driver_practice();
 		

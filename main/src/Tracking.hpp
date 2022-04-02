@@ -33,9 +33,9 @@ extern _Task move_t;
 #define DIST_FRONT 8.5
 
 
-const int min_move_power_a = 35;
+const int min_move_power_a = 30;
 const int min_move_power_x = 40;
-const int min_move_power_y = 25;
+const int min_move_power_y = 16;
 
 
 void update(void* params);
@@ -161,15 +161,15 @@ struct tank_point_params{
   bool turn_dir_if_0 = false;
   double max_power = 127.0, min_angle_percent = 1.0;
   bool brake= true;
-  double kp_y = 2.0;
-  double kd_y = 20.0;
+  double kp_y = 1.9;
+  double kd_y = 25.0;
   double kp_a = 150.0;
   double kd_a = 0.0;
   int timeout = 0;
   Point end_error = {0.5, 0.5};
   double end_velo =0.0;
   tank_point_params() = default;
-  tank_point_params(const Position target, const bool turn_dir_if_0 = false, const double max_power = 127.0, const double min_angle_percent = 1.0, const bool brake = true, double kp_y = 2.0, double kd_y = 20.0, double kp_a =150.0, double kd_a = 0.0, int timeout = 0, Point end_error = {0.5, 0.5}, double end_velo = 0.0);
+  tank_point_params(const Position target, const bool turn_dir_if_0 = false, const double max_power = 127.0, const double min_angle_percent = 1.0, const bool brake = true, double kp_y = 1.9, double kd_y = 25.0, double kp_a =150.0, double kd_a = 0.0, int timeout = 0, Point end_error = {0.5, 0.5}, double end_velo = 0.0);
 };
 
 struct tank_rush_params{ 

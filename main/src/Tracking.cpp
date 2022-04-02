@@ -987,11 +987,11 @@ void tank_move_to_target(void* params){
     PID angle(kp_a, 0.0, kd_a, 0.0);
     // PID y_pid(6.4,0.0,350.0,0.0);
     // PID y_pid(6.4,0.0,0.0,0.0);
-    double kB = 1/0.5;  // the ratio of motor power to local y velocity (inches/sec)
+    double kB = 1.9;  // the ratio of motor power to local y velocity (inches/sec)
     PID y_vel_pid(kp_y, 0.0000, kd_y, 0.0);
     double target_y_velocity; // what the y_vel_pid is trying to reach
     double cur_y_velocity;
-    double max_y_velocity = 60.0; // the robot can travel at 60 inches/sec at its fastest
+    double max_y_velocity = 74.0; // the robot can travel at 60 inches/sec at its fastest
     int sgn_y_error; // sign of local y error
 
     // move on line variables
@@ -1048,7 +1048,7 @@ void tank_move_to_target(void* params){
       // tracking.power_y = kp_y * local_error.y;
       cur_y_velocity = (tracking.l_velo + tracking.r_velo) / 2; // average of side encoders is approximately the local_y_velocity
       sgn_y_error = sgn(local_error.y);
-      target_y_velocity = map(local_error.y, sgn_y_error * 0.0, sgn_y_error * 18.0, sgn_y_error * end_y_velocity, sgn_y_error * max_y_velocity);
+      target_y_velocity = map(local_error.y, sgn_y_error * 0.0, sgn_y_error * 25.0, sgn_y_error * end_y_velocity, sgn_y_error * max_y_velocity);
       
       if(fabs(target_y_velocity) > max_y_velocity) target_y_velocity = max_y_velocity * sgn(target_y_velocity);
       tracking.power_y = kB * target_y_velocity + y_vel_pid.compute(cur_y_velocity, target_y_velocity);
@@ -1140,6 +1140,8 @@ void turn_to_angle(void* params){
   tracking.move_complete = false;
 
   PID angle_pid(kp, 0.0, kd, 0.0, true, 0.0, 360.0);
+  PID angle_velocity_pid(0.0, 0.0, 0.0, 0.0, true, 0.0, 360.0);
+
   motion_i.print("%d || Starting turn to angle %.2f from %.2f\n", millis(), target_a, rad_to_deg(tracking.global_angle));
   target_a = deg_to_rad(target_a);
   double new_target_a;
