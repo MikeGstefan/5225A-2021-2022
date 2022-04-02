@@ -1,7 +1,5 @@
 #pragma once
 #include "main.h"
-#include "controller.hpp"
-#include "piston.hpp"
 
 class _Controller;
 class Text_;

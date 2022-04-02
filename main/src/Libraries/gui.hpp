@@ -1,11 +1,7 @@
 #pragma once
 #include "main.h"
-#include "pros/apix.h"
-#include "../config.hpp"
+#include "../task.hpp"
 #include "printing.hpp"
-#include "../auton.hpp"
-#include "../drive.hpp"
-#include "../Tracking.hpp"
 
 // Forward-Declaration
 class GUI;

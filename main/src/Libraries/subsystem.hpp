@@ -1,6 +1,8 @@
 #pragma once
 #include "main.h"
-#include "../task.hpp"
+#include "../timer.hpp"
+#include "../logging.hpp"
+#include "../util.hpp"
 
 // non-motorized subsystem
 template <typename state_type, int num_of_states>

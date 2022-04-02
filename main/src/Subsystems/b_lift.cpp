@@ -1,4 +1,8 @@
 #include "b_lift.hpp"
+#include "../config.hpp"
+#include "../controller.hpp"
+#include "../Libraries/gui.hpp"
+#include "../util.hpp"
 
 // #define master partner
 

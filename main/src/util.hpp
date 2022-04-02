@@ -1,8 +1,6 @@
 #pragma once
-// #include "common.hpp"
 #include "main.h"
 #include "geometry.hpp"
-// #include "../include/okapi/api/util/mathUtil.hpp" // bool2sgn, motor cartridge colours, adi letter to number...
 
 #define wait_until(condition) while(delay(10), !(condition))
 

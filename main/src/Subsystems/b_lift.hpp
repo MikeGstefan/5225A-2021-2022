@@ -1,7 +1,6 @@
 #pragma once
 #include "../Libraries/subsystem.hpp"
-#include "../config.hpp"
-#include "../Libraries/gui.hpp"
+#include "../timer.hpp"
 
 #define B_LIFT_STATE_LINE 1 // line on controller which "searching" and "lowered" lift states are printed on
 

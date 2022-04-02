@@ -1,4 +1,8 @@
 #include "gui.hpp"
+#include "../config.hpp"
+#include "../controller.hpp"
+#include "../logging.hpp"
+#include "../util.hpp"
 
 //Static Variable Declarations
 const Page* GUI::current_page = nullptr;

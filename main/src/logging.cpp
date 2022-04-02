@@ -1,4 +1,7 @@
 #include "logging.hpp"
+#include "timer.hpp"
+#include "task.hpp"
+
 const char* file_name= "/usd/data.txt";
 const char* file_meta= "/usd/meta_data.txt";
 char queue[queue_size];

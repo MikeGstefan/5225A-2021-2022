@@ -1,7 +1,5 @@
 #pragma once
-// #include "common.hpp"
 #include "main.h"
-#include "logging.hpp"
 
 //forward declarations
 class Data;

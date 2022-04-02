@@ -1,7 +1,6 @@
 #pragma once
 #include "../Libraries/subsystem.hpp"
-#include "../config.hpp"
-#include "f_lift.hpp"
+#include "../timer.hpp"
 
 #define NUM_OF_INTAKE_STATES 5
 #define INTAKE_MAX_VELOCITY 600

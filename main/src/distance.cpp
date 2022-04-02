@@ -1,4 +1,12 @@
 #include "distance.hpp"
+#include "config.hpp"
+#include "logging.hpp"
+#include "auton_util.hpp"
+#include "util.hpp"
+#include "drive.hpp"
+#include "Tracking.hpp"
+
+
 Distance_States Distance_State = Distance_States::stable;
 Distance_States Last_Distance_State;
 cDistance left_eye;

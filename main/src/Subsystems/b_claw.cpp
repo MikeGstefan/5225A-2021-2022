@@ -1,4 +1,7 @@
 #include "b_claw.hpp"
+#include "../config.hpp"
+#include "../controller.hpp"
+
 // BACK CLAW SUBSYSTEM
 B_Claw b_claw({"B_Claw",
 {

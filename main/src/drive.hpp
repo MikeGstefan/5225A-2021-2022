@@ -1,13 +1,6 @@
 #pragma once
 #include "main.h"
-#include "config.hpp"
 #include "timer.hpp"
-#include "Tracking.hpp"
-
-#include "Subsystems/b_lift.hpp"
-#include "Subsystems/f_lift.hpp"
-#include "Subsystems/intake.hpp"
-#include "Subsystems/b_claw.hpp"
 
 #define game true
 

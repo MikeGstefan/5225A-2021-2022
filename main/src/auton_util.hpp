@@ -1,10 +1,5 @@
 #pragma once
 #include "main.h"
-#include "geometry.hpp"
-#include "config.hpp"
-#include "Libraries/gui.hpp"
-#include "drive.hpp"
-#include "Tracking.hpp"
 
 void save_positions();
 void load_positions();

@@ -1,4 +1,12 @@
 #include "auton.hpp"
+#include "auton_util.hpp"
+#include "config.hpp"
+#include "controller.hpp"
+#include "Subsystems/b_lift.hpp"
+#include "Subsystems/f_lift.hpp"
+#include "Libraries/printing.hpp"
+#include "Tracking.hpp"
+#include "drive.hpp"
 #include <map> //Not put in main.h because util.hpp cannot include <map>
 
 static const std::string auton_file_name = "/usd/auton.txt";

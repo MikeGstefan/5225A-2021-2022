@@ -1,13 +1,6 @@
 #pragma once
 #include "main.h"
 #include "geometry.hpp"
-#include "config.hpp"
-#include "Tracking.hpp"
-// #include <iostream>
-// #include <cmath>
-// #include "drive.hpp"
-// #include "geometry.hpp"
-#include "auton_util.hpp"
 
 enum class Distance_States{
   stable,

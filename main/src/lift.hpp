@@ -1,8 +1,5 @@
 #pragma once
 #include "main.h"
-#include "config.hpp"
-#include "pid.hpp"
-#include "drive.hpp"
 
 bool get_lift();
 

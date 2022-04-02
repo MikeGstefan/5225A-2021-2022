@@ -1,4 +1,5 @@
 #include "timer.hpp"
+#include "logging.hpp"
 
 Timer::Timer(const char* name, const bool& play, timing_units timing_unit, Data* data_obj_ptr):
 name(name), timing_unit(timing_unit)

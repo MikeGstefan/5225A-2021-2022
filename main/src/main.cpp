@@ -1,5 +1,12 @@
 #include "main.h"
 #include "Libraries/gui.hpp"
+#include "auton.hpp"
+#include "auton_util.hpp"
+#include "controller.hpp"
+#include "logging.hpp"
+#include "drive.hpp"
+#include "Tracking.hpp"
+#include "util.hpp"
 
 pros::Task *updt = nullptr; //What's this for
 const GUI* GUI::current_gui = &g_main; //Also why this

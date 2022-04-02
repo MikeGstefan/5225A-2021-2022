@@ -1,12 +1,7 @@
 #pragma once
 #include "main.h"
 #include "geometry.hpp"
-#include "config.hpp"
-#include "pid.hpp"
 #include "task.hpp"
-
-#include "drive.hpp"
-#include "Libraries/gui.hpp"
 
 extern _Task update_t;
 extern _Task move_t;

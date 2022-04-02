@@ -1,10 +1,5 @@
 #pragma once
 #include "main.h"
-#include "auton_util.hpp"
-#include "Subsystems/b_lift.hpp"
-#include "Subsystems/f_lift.hpp"
-#include "drive.hpp"
-#include "util.hpp"
 
 void rush_high();
 void rush_tall();

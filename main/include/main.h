@@ -85,7 +85,7 @@ void opcontrol(void);
 #include <fstream>
 #include <functional>
 #include <limits>
-// #include <map>
+// #include <map> //Cannot include here because util.hpp declares a function called map
 #include <memory>
 #include <string>
 #include <tuple>

@@ -1,4 +1,9 @@
 #include "lift.hpp"
+#include "config.hpp"
+#include "controller.hpp"
+#include "pid.hpp"
+#include "util.hpp"
+#include "drive.hpp"
 
 //4-bar
 #if game

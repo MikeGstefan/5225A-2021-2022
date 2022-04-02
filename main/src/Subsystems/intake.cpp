@@ -1,4 +1,7 @@
 #include "intake.hpp"
+#include "../config.hpp"
+#include "../controller.hpp"
+#include "f_lift.hpp"
 
 // INTAKE SUBSYSTEM
 Intake intake({{"Intake",

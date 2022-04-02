@@ -1,7 +1,5 @@
 #pragma once
 #include "main.h"
-#include "timer.hpp"
-#include "task.hpp"
 
 //forawrd declarations
 class _Task;

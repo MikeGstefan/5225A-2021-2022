@@ -1,4 +1,5 @@
 #include "config.hpp"
+#include "controller.hpp"
 
 // NEW config
 _Controller master(pros::E_CONTROLLER_MASTER);

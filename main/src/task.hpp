@@ -1,8 +1,5 @@
 #pragma once
 #include "main.h"
-#include "geometry.hpp"
-#include "logging.hpp"
-#include "util.hpp"
 
 /*
   _Task take 10ms to start

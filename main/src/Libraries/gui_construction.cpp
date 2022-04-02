@@ -1,4 +1,15 @@
 #include "gui.hpp"
+#include "pros/apix.h"
+#include "../config.hpp"
+#include "../piston.hpp"
+#include "../auton.hpp"
+#include "../auton_util.hpp"
+#include "../util.hpp"
+#include "../Subsystems/f_lift.hpp"
+#include "../Subsystems/b_lift.hpp"
+#include "../Subsystems/intake.hpp"
+#include "../Tracking.hpp"
+#include "../drive.hpp"
 
 /*Field array*/ static std::vector<std::bitset<200>> field (200, std::bitset<200>{}); //Initializes to 200 blank bitsets
 /*Temperature Alert Flag*/ static bool temp_flashed = false;

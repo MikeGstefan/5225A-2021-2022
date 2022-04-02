@@ -1,4 +1,11 @@
 #include "drive.hpp"
+#include "config.hpp"
+#include "controller.hpp"
+#include "Tracking.hpp"
+#include "Subsystems/intake.hpp"
+#include "Subsystems/b_claw.hpp"
+#include "Subsystems/b_lift.hpp"
+#include "Subsystems/f_lift.hpp"
 
 // array<int, 7> f_lift_pos= {10, 150, 300, 475, 630, 665, 675};
 // int f_lift_index = 0;

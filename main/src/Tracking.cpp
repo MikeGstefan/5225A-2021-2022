@@ -1,4 +1,12 @@
 #include "Tracking.hpp"
+#include "config.hpp"
+#include "Libraries/gui.hpp"
+#include "Subsystems/f_lift.hpp"
+#include "controller.hpp"
+#include "pid.hpp"
+#include "logging.hpp"
+#include "drive.hpp"
+#include "util.hpp"
 
 Tracking tracking;
 
