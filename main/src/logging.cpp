@@ -8,7 +8,7 @@ char* back = queue;
 ofstream file;
 uintptr_t queue_start = reinterpret_cast<uintptr_t>(&queue);
 vector<Data*> Data::obj_list;
-_Task log_t(queue_handle, "logging");
+_Task Data::log_t(queue_handle, "logging");
 
 Data::Data(const char* obj_name, const char* id_code, log_types log_type_param, log_locations log_location_param){
   this->id = id_code;
@@ -20,12 +20,19 @@ Data::Data(const char* obj_name, const char* id_code, log_types log_type_param, 
 
 
 
-Data task_log("tasks.txt","$01", general, log_locations::sd);
-Data controller_queue("controller.txt","$02", general,log_locations::sd);
-Data tracking_data("tracking.txt","$03",debug,log_locations::both);
-Data tracking_imp("tracking.txt","$03",general,log_locations::both);
-Data misc("misc.txt","$04", debug,log_locations::t);
-
+Data task_log("tasks.txt","$01", debug, log_locations::both);
+Data controller_queue("controller.txt","$02", debug,log_locations::none);
+Data tracking_data("tracking.txt","$03",debug,log_locations::sd);
+Data tracking_imp("tracking.txt","$03",debug,log_locations::both);
+Data misc("misc.txt", "$04",debug,log_locations::both);
+Data drivers_data("driver.txt", "$05", debug,log_locations::none);
+Data motion_i("motion.txt","$06",debug,log_locations::both);
+Data motion_d("motion.txt", "$06", debug,log_locations::sd);
+Data term("terminal.txt","$07",debug,log_locations::t);
+Data log_d("log.txt","$08",debug,log_locations::both);
+Data graph("graph.txt","$09",debug,log_locations::sd);
+Data events("events.txt", "%10", debug,log_locations::sd);
+Data state_log("state.txt", "%11", debug,log_locations::both);
 
 
 vector<Data*> Data::get_objs(){
@@ -60,10 +67,12 @@ void Data::init(){
     file.close();
     file.open(file_name,ofstream::trunc);
     file.close();
-    log_t.start();
+    Data::log_t.start();
 
   }
 }
+
+
 
 
 void Data::print(const char* format,...){
@@ -72,6 +81,7 @@ void Data::print(const char* format,...){
   va_start(args, format);
   int buffer_len = vsnprintf(buffer,256,format,args) + 3;
   va_end(args);
+
   if(int(this->log_type) !=0){
     switch(log_location){
       case log_locations::t:
@@ -90,14 +100,15 @@ void Data::print(const char* format,...){
   }
 }
 
-void Data::print(Timer* tmr, int freq, std::vector<char*> str){
+void Data::print(Timer* tmr, int freq, std::vector<std::function<char*()>> str){
   if(tmr->get_time() > freq){
-    for(int i = 0; i < str.size(); i++){ 
-        this->print(str[i]);
-        delete[] str[i];
+    for(int i = 0; i < str.size(); i++){
+        char* buffer = str[i]();
+        this->print(buffer);
+        delete[] buffer;
     }
     tmr->reset();
-  } 
+  }
 }
 
 void Data::log_print(char* buffer, int buffer_len){
@@ -124,6 +135,7 @@ void Data::log_print(char* buffer, int buffer_len){
 }
 
 void queue_handle(void* params){
+  _Task* ptr = _Task::get_obj(params);
   Timer logging_tmr{"logging_tmr"};
   char * temp_back;
   while(true){
@@ -149,25 +161,24 @@ void queue_handle(void* params){
       logging_tmr.reset();
     }
     delay(10);
+    if(ptr->notify_handle())break;
   }
 
 
 }
 
 uintptr_t data_size(){//returns the number of characters needed to be printed from the queue
-  if(reinterpret_cast<uintptr_t>(back) < reinterpret_cast<uintptr_t>(front))return(queue_size-1-( reinterpret_cast<uintptr_t>(front)-queue_start))+(reinterpret_cast<uintptr_t>(back)-queue_start);
+  if(reinterpret_cast<uintptr_t>(back) < reinterpret_cast<uintptr_t>(front))return(queue_size-1-( reinterpret_cast<uintptr_t>(front)-queue_start))+(reinterpret_cast<uintptr_t>(back)-queue_start); //Should be changeable to return (reinterpret_cast<uintptr_t>(back) - reinterpret_cast<uintptr_t>(front) + queue_size - 1);
   else return reinterpret_cast<uintptr_t>(back)- reinterpret_cast<uintptr_t>(front);
 }
 
 
 
 char* Data::to_char(const char* fmt, ...){
-    va_list args;
-    va_start(args, fmt);
-    char* buffer = new char[256];
-    vsnprintf(buffer, 256, fmt, args);
-    va_end(args);
-    return buffer;
+  va_list args;
+  va_start(args, fmt);
+  char* buffer = new char[256];
+  vsnprintf(buffer, 256, fmt, args);
+  va_end(args);
+  return buffer;
 }
-
-

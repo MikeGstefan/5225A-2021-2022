@@ -1,5 +1,9 @@
 #pragma once
-#include "common.hpp"
+#include "main.h"
+#include "logging.hpp"
+#include "geometry.hpp"
+// #include "Tracking.hpp"
+#include <tuple>
 
 
 /*
