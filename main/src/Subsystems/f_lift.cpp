@@ -118,7 +118,9 @@ void F_Lift::handle(bool driver_array){
     case f_lift_states::manual:
       lift_power = master.get_analog(ANALOG_RIGHT_Y);
       // holds motor if joystick is within deadzone or lift is out of range
-      if (fabs(lift_power) < 10 || (lift_power < 0 && f_lift_pot.get_value() <= bottom_position) || (lift_power > 0 && f_lift_pot.get_value() >= top_position)) motor.move_velocity(0);
+      if (fabs(lift_power) < 10 || (lift_power < 0 && f_lift_pot.get_value() <= driver_positions[0]) || (lift_power > 0 && f_lift_pot.get_value() >= driver_positions[driver_positions.size() - 1])){
+        motor.move_velocity(0);
+      } 
       else motor.move(lift_power);
       // exits manual state if up or down button is pressed or held
       break;
@@ -171,21 +173,19 @@ void F_Lift::set_state(const f_lift_states next_state, const double index){  // 
 extern int elastic_f_up_time, elastic_f_down_time; //from gui_construction.cpp
 
 void F_Lift::elastic_util(){
-  reset();
   motor.move(-10);
   GUI::go("Start Elastic Utility", "Press to start the elastic utility.", 500);
-  f_claw_p.set_value(HIGH);
   Timer move_timer{"move"};
-  move_absolute(top_position);
+  set_state(f_lift_states::move_to_target, driver_positions.size() - 1); // moves to top
   // // intake_piston.set_value(HIGH);  // raises intake
-  waitUntil(fabs(f_lift_pot.get_value() - top_position) < end_error);
+  waitUntil(state == f_lift_states::idle);
   move_timer.print();
   elastic_f_up_time = move_timer.get_time();
   master.print(1, 0, "up time: %d", elastic_f_up_time);
 
   move_timer.reset();
-  move_absolute(bottom_position);
-  waitUntil(fabs(f_lift_pot.get_value() - bottom_position) < end_error);
+  set_state(f_lift_states::move_to_target, 0); // moves to bottom
+  waitUntil(state == f_lift_states::bottom);
   move_timer.print();
   elastic_f_down_time = move_timer.get_time();
   master.print(2, 0, "down time: %d", elastic_f_up_time);

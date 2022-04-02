@@ -30,8 +30,6 @@ public:
   vector<int> driver_positions = {1200, 1500, 2050, 2750};
   vector<int> prog_positions = {1200, 1500, 2050, 2750};
 
-  const double bottom_position = 25.0, holding_position = 150.0, raised_position = 300.0, tall_dropoff_position = 475.0, platform_position = 630.0, tall_goal_position = 665.0, top_position = 675.0;
-
   F_Lift(Motorized_subsystem<f_lift_states, NUM_OF_F_LIFT_STATES, F_LIFT_MAX_VELOCITY> motorized_subsystem);  // constructor
   
   void handle(bool driver_array);  // contains state machine code, (if driver_array is false, uses prog_array)

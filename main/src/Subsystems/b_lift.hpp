@@ -35,8 +35,6 @@ public:
 
   bool trans_p_state = LOW; // HIGH is lift LOW is intake
 
-  const double bottom_position = 25.0, holding_position = 150.0, raised_position = 300.0, tall_dropoff_position = 475.0, platform_position = 630.0, tall_goal_position = 665.0, top_position = 675.0;
-
   B_Lift(Motorized_subsystem<b_lift_states, NUM_OF_B_LIFT_STATES, B_LIFT_MAX_VELOCITY> motorized_subsystem);  // constructor
   
   void handle(bool driver_array);  // contains state machine code, (if driver_array is false, uses prog_array)
