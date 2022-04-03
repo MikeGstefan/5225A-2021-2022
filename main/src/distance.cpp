@@ -14,12 +14,12 @@ void setVisionState(Distance_States state) {
 }
 
 Position distance_reset_left(int cycles){
-	double dist_corner = 6; //Distance sensor to corner
-	double side_length = 86; //Corner of the robot to side distance sensor
+	double dist_corner = 6; //Front Distance sensor to side of robot
+	double side_length = 86; //Front distance sensor to side distance sensor (Parrallel to the robot not the h value)
 	double dist_to_centre = 196; //Side distance sensor to tracking centre
 	double local_y = 0, local_x = 0, angle = 0;
 	double averageleft = 0, averageright = 0, averageside = 0;
-	double dist_sensor = 429; //Distance between Sensors
+	double dist_sensor = 429; //Distance between Front Sensors
 	double l_average, r_average, s_average;
 	int start_time = millis();
 	vector <int> left;
@@ -101,12 +101,12 @@ Position distance_reset_left(int cycles){
 }
 
 Position distance_reset_right(int cycles){
-	double dist_corner = 6; //Distance sensor to corner
-	double side_length = 86; //Corner of the robot to side distance sensor
+	double dist_corner = 6; //Front Distance sensor to side of robot
+	double side_length = 86; //Front distance sensor to side distance sensor (Parrallel to the robot not the h value)
 	double dist_to_centre = 196; //Side distance sensor to tracking centre
 	double local_y = 0, local_x = 0, angle = 0;
 	double averageleft = 0, averageright = 0, averageside = 0;
-	double dist_sensor = 429; //Distance between Sensors
+	double dist_sensor = 429; //Distance between Front Sensors
 	double l_average, r_average, s_average;
 	int start_time = millis();
 	vector <int> left;
@@ -188,13 +188,13 @@ Position distance_reset_right(int cycles){
 
 
 Position distance_reset_center(int cycles){
-	double dist_corner = 6; //Distance sensor to corner
-	double side_length = 86; //Corner of the robot to side distance sensor
+	double dist_corner = 6; //Front Distance sensor to side of robot
+	double side_length = 86; //Front distance sensor to side distance sensor (Parrallel to the side of the robot not the h value)
 	double dist_to_centre = 196; //Side distance sensor to tracking centre
+	double dist_sensor = 429; //Distance between Front Sensors
 	double local_y = 0, l_local_x = 0, r_local_x = 0, angle = 0, local_x;
 	double averageleft = 0, averageright = 0, average_l_side = 0, average_r_side = 0;
 	double l_average, r_average, l_side_average, r_side_average;
-	double dist_sensor = 429; //Distance between Sensors
 	int start_time = millis();
 	vector <int> left;
 	vector <int> right;
