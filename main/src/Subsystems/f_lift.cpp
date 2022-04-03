@@ -160,7 +160,7 @@ void F_Lift::elastic_util(){
   reset();
   motor.move(-10);
   GUI::prompt("Start Elastic Utility", "Press to start the elastic utility.", 500);
-  f_claw_p.set_value(HIGH);
+  f_claw.set_state(HIGH);
   Timer move_timer{"move"};
   move_absolute(top_position);
   // // intake_piston.set_value(HIGH);  // raises intake
@@ -175,84 +175,4 @@ void F_Lift::elastic_util(){
   move_timer.print();
   elastic_f_down_time = move_timer.get_time();
   master.print(2, 0, "down time: %d", elastic_f_up_time);
-}
-
-
-
-// FRONT CLAW SUBSYSTEM
-F_Claw f_claw({"F_Claw",
-{
-  "managed",
-  "idle",
-  "searching",
-  "grabbed",
-}
-});
-
-F_Claw::F_Claw(Subsystem<f_claw_states, NUM_OF_F_CLAW_STATES> subsystem): Subsystem(subsystem)  // constructor
-{
-  // state setup
-  target_state = f_claw_states::searching;
-  state = f_claw_states::managed;
-}
-
-void F_Claw::handle(){
-  switch(state){
-    case f_claw_states::managed:
-      break;
-
-    case f_claw_states::idle:
-      // enters search mode if the lift is at the bottom and it's been 2 seconds since the mogo was released
-      if(f_lift.get_state() == f_lift_states::bottom && release_timer.get_time() > 2000){
-        set_state(f_claw_states::searching);
-      }
-      // grabs goal if toggle button is pressed
-      if(master.get_digital_new_press(lift_claw_toggle_button)){
-        master.rumble("-");
-        set_state(f_claw_states::grabbed);
-      }
-      break;
-
-    case f_claw_states::searching:
-      // grabs goal if toggle button is pressed or mogo is detected
-      if(master.get_digital_new_press(lift_claw_toggle_button) || f_touch.get_value()){
-        master.rumble("-");
-        set_state(f_claw_states::grabbed);
-      }
-      break;
-
-    case f_claw_states::grabbed:
-      // releases goal if down button is pressed
-      if(master.get_digital_new_press(lift_claw_toggle_button)) set_state(f_claw_states::idle);
-      break;
-  }
-  handle_state_change(); // cleans up and preps the machine to be in the target state
-}
-
-void F_Claw::handle_state_change(){
-  if(target_state == state) return;
-  // if state has changed, performs the necessary cleanup operation before entering next state
-
-  switch(target_state){
-    case f_claw_states::managed:
-      break;
-
-    case f_claw_states::idle:
-      release_timer.reset(); // timer to wait 2 seconds before entering search again
-      f_claw_p.set_value(LOW);
-      break;
-
-    case f_claw_states::searching:
-      f_claw_p.set_value(LOW);
-      break;
-
-    case f_claw_states::grabbed:
-      // raises mogo above rings automatically if lift is in bottom state
-      if(f_lift.get_state() == f_lift_states::bottom){
-        f_lift.set_state(f_lift_states::move_to_target, 1); // sends f_lift to raised position
-      }
-      f_claw_p.set_value(HIGH);
-      break;
-  }
-  log_state_change();  
 }

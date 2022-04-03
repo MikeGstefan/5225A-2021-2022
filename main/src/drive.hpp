@@ -10,8 +10,6 @@
 
 #include "Subsystems/b_lift.hpp"
 #include "Subsystems/f_lift.hpp"
-#include "Subsystems/intake.hpp"
-#include "Subsystems/b_claw.hpp"
 
 
 using namespace pros;
@@ -77,7 +75,6 @@ public:
   // 'set-drive' methods
   void move(double x, double y, double a);
   void move(double y, double a);
-  void move_tank(double y, double a);
   void move_side(double l, double r);
 
   void brake();

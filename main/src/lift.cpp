@@ -27,6 +27,8 @@ bool found = false;
 int find_count = 0;
 
 
+// bool b_trans_state = false;
+
 int up_press_time = 0;
 int down_press_time = 0;
 
@@ -55,10 +57,10 @@ void intk_c(void* params){
         if(intake_jam.get_new_press()) intake_t.reset(); //Start timer when pressed
         else if(!intake_jam.get_value()) intake_t.reset(false); //End timer when unpressed
         if(intake_t.get_time() > 500){ //If pressed for more than 0.5 sec, reverse intk
-				  intk.move(-127);
+				  // intk.move(-127);
 				  wait_until(!intake_jam.get_value()); //Waits for unjam plus some time
 				  delay(150);
-				  intk.move(127);
+				  // intk.move(127);
 			  }
       }
 
@@ -78,7 +80,7 @@ void f_lift_dec(){
     f_lift_index--;
      if(f_lift_index == 0){
         intk_state = 0;
-        intk.move(127*intk_state);
+        // intk.move(127*intk_state);
         master.print(0,0,"INTAKE");
         intk_pos = false;
      }
@@ -250,7 +252,7 @@ void handle_lifts(){
 
       if(master.get_digital_new_press(lift_release_button)){
         if(get_lift()){
-          f_claw_p.set_value(0);
+          f_claw.set_state(0);
           f_claw_state = false;
            f_lift_time = millis();
         }
@@ -262,7 +264,7 @@ void handle_lifts(){
 
       if(f_lift_index == 0){
         if(f_touch.get_value() && millis() - f_lift_time > 1000 && !f_claw_state){
-          f_claw_p.set_value(1);
+          f_claw.set_state(1);
           f_lift_time = millis();
           f_lift_index = 1;
           f_claw_state = true;

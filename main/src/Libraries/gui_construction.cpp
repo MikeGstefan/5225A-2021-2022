@@ -29,7 +29,7 @@ std::array<std::tuple<pros::Motor*, int, std::string, std::string, Text_*>, 8> m
   std::make_tuple(&back_r, 0, "Back Right", "BR", nullptr),
   std::make_tuple(&f_lift_m, 0, "Front Lift", "F", nullptr),
   std::make_tuple(&b_lift_m, 0, "Back Lift", "B", nullptr),
-  std::make_tuple(&intk, 0, "Intake", "IN", nullptr),
+  std::make_tuple(nullptr, 0, "", "", nullptr),
   std::make_tuple(nullptr, 0, "", "", nullptr),
 };//std::make_tuple(nullptr, 0, "", "", nullptr),
 
@@ -268,16 +268,16 @@ void main_setup(){
   });
   intakes.set_func([](){
     if(GUI::prompt("Check intake", "Press to check the intake", 1000)){
-      intake.set_state(intake_states::on);
-      delay(1000);
+      // intake.set_state(intake_states::on);
+      // delay(1000);
 
-      intake.set_state(intake_states::off);
-      delay(250);
+      // intake.set_state(intake_states::off);
+      // delay(250);
 
-      intake.set_state(intake_states::reversed);
-      delay(1000);
+      // intake.set_state(intake_states::reversed);
+      // delay(1000);
 
-      intake.set_state(intake_states::off);
+      // intake.set_state(intake_states::off);
     }
   });
   lifts.set_func([](){
@@ -358,8 +358,8 @@ void main_setup(){
     std::string coord = coord_c;
     if (GUI::prompt("Move back lift to" + coord, "Press to move back lift to" + coord, 1000)) b_lift.move_absolute(b_lift_val.get_value());
   });
-  front_claw.set_func([](){f_claw_p.set_value(HIGH);});
-  front_claw.set_off_func([](){f_claw_p.set_value(LOW);});
+  front_claw.set_func([](){f_claw.set_value(HIGH);});
+  front_claw.set_off_func([](){f_claw.set_value(LOW);});
   back_claw.set_func([](){b_claw_p.set_value(HIGH);});
   back_claw.set_off_func([](){b_claw_p.set_value(LOW);});
 

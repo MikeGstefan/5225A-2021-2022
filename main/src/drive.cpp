@@ -76,10 +76,11 @@ name(name), joy_sticks{joy_sticks[0], joy_sticks[1], joy_sticks[2]}, custom_driv
 Drivebase::Drivebase(std::array<driver, num_of_drivers> drivers) : drivers(drivers) {}
 
 void Drivebase::move(double x, double y, double a){
-  front_l.move(x + y + a);
-  front_r.move(-x + y - a);
-  back_l.move(-x + y + a);
-  back_r.move(x + y - a);
+  ERROR.print("you called the wrong function");
+  // front_l.move(x + y + a);
+  // front_r.move(-x + y - a);
+  // back_l.move(-x + y + a);
+  // back_r.move(x + y - a);
 }
 
 void Drivebase::move(double y, double a){
@@ -87,19 +88,20 @@ void Drivebase::move(double y, double a){
   front_r.move(y-a);
   back_l.move(y+a);
   back_r.move(y-a);
+  center_l.move(y+a);
+  center_r.move(y-a);
   // back_l.move(0);
   // back_r.move(0);
 }
 
-void Drivebase::move_tank(double y, double a){
-  move(0.0, y, a);
-}
 
 void Drivebase::move_side(double l, double r){
   front_l.move(l);
   front_r.move(r);
   back_l.move(l);
   back_r.move(r);
+  center_l.move(l);
+  center_r.move(r);
 }
 
 void Drivebase::brake(){
@@ -107,6 +109,8 @@ void Drivebase::brake(){
   front_r.move_relative(0, 200);
   back_l.move_relative(0, 200);
   back_r.move_relative(0, 200);
+  center_l.move_relative(0,200);
+  center_r.move_relative(0,200);
 }
 
 void Drivebase::velo_brake(){
@@ -114,6 +118,8 @@ void Drivebase::velo_brake(){
   front_r.move_velocity(0);
   back_l.move_velocity(0);
   back_r.move_velocity(0);
+  center_l.move_velocity(0);
+  center_r.move_velocity(0);
 }
 
 void Drivebase::update_screen(){
@@ -282,9 +288,9 @@ void Drivebase::driver_practice(){
       // b_lift.handle();
       // handle_lifts();
       f_lift.handle(true);
-      f_claw.handle();
-      b_claw.handle();
-      intake.handle();
+      // f_claw.handle();
+      // b_claw.handle();
+      // intake.handle();
      
 
       handle_trans();
@@ -296,7 +302,7 @@ void Drivebase::driver_practice(){
         screen_timer.reset();
       }
       // takes away control from driver when motors overheat
-      if(front_l.get_temperature() >= 55 || front_r.get_temperature() >= 55 || back_r.get_temperature() >= 55 || back_l.get_temperature() >= 55 || b_lift_m.get_temperature() >= 55|| f_lift_m.get_temperature() >= 55|| intk.get_temperature() >= 55){
+      if(front_l.get_temperature() >= 55 || front_r.get_temperature() >= 55 || back_r.get_temperature() >= 55 || back_l.get_temperature() >= 55 || b_lift_m.get_temperature() >= 55|| f_lift_m.get_temperature() >= 55){
         master.rumble("- - - "); // rumbles controller if motors are hot to warn driver
         // move(0, 0, 0);  // stops movement
         // return;

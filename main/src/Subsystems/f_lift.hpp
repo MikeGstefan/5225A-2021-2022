@@ -60,24 +60,3 @@ public:
 };
 
 extern F_Lift f_lift;
-
-// FRONT CLAW SUBSYSTEM
-
-enum class f_claw_states{
-  managed, // being managed externally (NOT DOING ANYTHING)
-  idle, // claw is open and NOT waiting to detect mogo
-  searching,  // claw is open and waiting to detect mogo
-  grabbed, // holding mogo
-};
-
-class F_Claw: public Subsystem<f_claw_states, NUM_OF_F_CLAW_STATES> {
-  Timer release_timer{"release_timer"}; // when the f claw was last released
-
-public:
-  bool tilted = false;
-  F_Claw(Subsystem<f_claw_states, NUM_OF_F_CLAW_STATES> subsystem);  // constructor
-  void handle();  // contains state machine code
-  void handle_state_change(); // cleans up and preps the machine to be in the target state
-};
-
-extern F_Claw f_claw;
