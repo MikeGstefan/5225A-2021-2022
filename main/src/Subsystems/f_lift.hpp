@@ -72,4 +72,4 @@ public:
   void handle_state_change(); // cleans up and preps the machine to be in the target state
 };
 
-extern F_Claw f_claw;
+extern F_Claw f_claw_obj;

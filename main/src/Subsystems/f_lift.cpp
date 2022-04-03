@@ -148,7 +148,7 @@ void F_Lift::handle_state_change(){
     case f_lift_states::manual:
       master.rumble("-");
       // we don't want the f_claw in search mode while the lift is in manual
-      if(f_claw.get_state() == f_claw_states::searching)  f_claw.set_state(f_claw_states::idle);
+      if(f_claw_obj.get_state() == f_claw_states::searching)  f_claw_obj.set_state(f_claw_states::idle);
       break;
   }
   log_state_change();  
@@ -195,7 +195,7 @@ void F_Lift::elastic_util(){
 
 
 // FRONT CLAW SUBSYSTEM
-F_Claw f_claw({"F_Claw",
+F_Claw f_claw_obj({"F_Claw",
 {
   "managed",
   "idle",
@@ -233,7 +233,7 @@ void F_Claw::handle(){
       break;
 
     case f_claw_states::searching:
-      if(f_lift_dist.get() < 50)  set_state(f_claw_states::grabbed);  // grabs goal if mogo is detected
+      if(f_dist.get() < 50)  set_state(f_claw_states::grabbed);  // grabs goal if mogo is detected
       break;
 
     case f_claw_states::grabbed:
@@ -252,16 +252,16 @@ void F_Claw::handle_state_change(){
 
     case f_claw_states::idle:
       master.rumble("-");
-      f_claw_p.set_value(LOW);
+      f_claw(LOW);
       break;
 
     case f_claw_states::searching:
-      f_claw_p.set_value(LOW);
+      f_claw(LOW);
       break;
 
     case f_claw_states::grabbed:
       master.rumble("-");
-      f_claw_p.set_value(HIGH);
+      f_claw(HIGH);
       // raises mogo above rings automatically if lift is in bottom state
       if(f_lift.get_state() == f_lift_states::bottom){
         f_lift.set_state(f_lift_states::move_to_target, 1); // sends f_lift to raised position

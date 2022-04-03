@@ -48,25 +48,7 @@ void initialize() {
 	_Controller::init();
 	GUI::init();
 	delay(500);
-	switch(cur_auto){
-		case auto1:
-			tracking.x_coord = 26.0, tracking.y_coord = 11.75, tracking.global_angle = -90.0_deg;
-		break;
-		case auto2:
-			tracking.x_coord = 108.0, tracking.y_coord = 16.0, tracking.global_angle = 0.0_deg;
-		break;
-		case auto3:
-			tracking.x_coord = 106.0, tracking.y_coord = 16.0, tracking.global_angle = 0.0_deg;
-			// tracking.x_coord = 104.0, tracking.y_coord = 12.0, tracking.global_angle = -30.0_deg;
-		break;
-		case auto4:
-			// tracking.x_coord = 24.5, tracking.y_coord = 15.0, tracking.global_angle = 9.0_deg;
-			tracking.x_coord = 26.0, tracking.y_coord = 11.75, tracking.global_angle = -90.0_deg;
-		break; 
-		default:
-			tracking.x_coord = 26.0, tracking.y_coord = 11.75, tracking.global_angle = -90.0_deg;
-		break;
-	}
+	
 	
 	// tracking.x_coord = 104.0, tracking.y_coord = 12.0, tracking.global_angle = -30.0_deg;
 	// tracking.x_coord = 24.5, tracking.y_coord = 15.0, tracking.global_angle = 9.0_deg;
@@ -140,35 +122,7 @@ void autonomous() {
 // END OF PROG STATE MACHINE TESTING
 
 	// skills();
-	switch(cur_auto){
-		case auto1:
-			// tracking.x_coord = 26.0, tracking.y_coord = 11.75, tracking.global_angle = -90.0_deg;
-			skills();
-			skills2();
-			new_skills3();
-		break;
-		case auto2:
-			f_claw_p.set_value(0);
-			b_claw_p.set_value(0);
-			blue_highside();
-		break;
-		case auto3:
-			f_claw_p.set_value(0);
-			b_claw_p.set_value(0);
-			blue_highside_tall();
-			
-		break;
-		case auto4:
-			f_claw_p.set_value(0);
-			b_claw_p.set_value(0);
-			blue_lowside();
-		break; 
-		default:
-			skills();
-			skills2();
-			new_skills3();
-		break;
-	}
+	
 
 }
 

@@ -80,4 +80,4 @@ public:
   void handle_state_change(); // cleans up and preps the machine to be in the target state
 };
 
-extern B_Claw b_claw;
+extern B_Claw b_claw_obj;

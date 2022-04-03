@@ -10,7 +10,7 @@ Intake intake({{"Intake",
   "unjamming",
   "shifting_to_lift"
 }
-}, intk});
+}, b_lift_m});
 
 
 Intake::Intake(Motorized_subsystem<intake_states, NUM_OF_INTAKE_STATES, INTAKE_MAX_VELOCITY> motorized_subsystem): Motorized_subsystem(motorized_subsystem)  // constructor
@@ -115,7 +115,7 @@ void Intake::handle_state_change(){
     case intake_states::shifting_to_intake:
       shift_timer.reset();
       motor.move(30);
-      lift_trans_p.set_value(LOW);
+      lift_t.set_value(LOW);
       b_lift.trans_p_state = LOW;
       break;
   }

@@ -139,7 +139,7 @@ void B_Lift::handle_state_change(){
   // if state has changed, performs the necessary cleanup operation before entering next state
 
   if(state == b_lift_states::bottom){ // if lift is leaving the bottom state, turn off the intake
-    b_lock_p.set_value(HIGH);  // unlock the lift
+    // b_lock_p.set_value(HIGH);  // unlock the lift
     intake.set_state(intake_states::off);
   }
 
@@ -148,7 +148,7 @@ void B_Lift::handle_state_change(){
       break;
 
     case b_lift_states::bottom:
-      b_lock_p.set_value(HIGH);  // lock the lift
+      // b_lock_p.set_value(HIGH);  // lock the lift
       break;
 
     case b_lift_states::idle:
@@ -159,16 +159,16 @@ void B_Lift::handle_state_change(){
 
     case b_lift_states::manual:
       master.rumble("-");
-      // we don't want the f_claw in search mode while the lift is in manual
-      if(f_claw.get_state() == f_claw_states::searching){
-        f_claw.set_state(f_claw_states::idle);
+      // we don't want the b_claw in search mode while the lift is in manual
+      if(b_claw_obj.get_state() == b_claw_states::searching){
+        b_claw_obj.set_state(b_claw_states::idle);
       }
       break;
 
     case b_lift_states::shifting_to_lift:
       shift_timer.reset();
       motor.move(30);
-      lift_trans_p.set_value(HIGH);
+      lift_t.set_value(HIGH);
       trans_p_state = HIGH;
       break;
 
@@ -222,7 +222,7 @@ void B_Lift::elastic_util(){
 
 
 // BACK CLAW SUBSYSTEM
-B_Claw b_claw({"B_Claw",
+B_Claw b_claw_obj({"B_Claw",
 {
   "managed",
   "idle",
@@ -290,23 +290,21 @@ void B_Claw::handle_state_change(){
 
     case b_claw_states::idle:
       master.rumble("-");
-      b_claw_p.set_value(LOW);
+      b_claw.set_value(LOW);
       break;
 
     case b_claw_states::searching:
-      b_claw_p.set_value(LOW);
+      b_claw.set_value(LOW);
       search_cycle_check_count = 0; // resets search cycle count
       break;
 
     case b_claw_states::tilted:
       master.rumble("-");
-      b_claw_p.set_value(HIGH); // grabs mogo
-      b_lock_p.set_value(LOW);  // holds goal tilted
+      b_claw.set_value(HIGH); // grabs mogo
       break;
 
     case b_claw_states::flat:
-      b_claw_p.set_value(HIGH); // grabs mogo
-      b_lock_p.set_value(HIGH); // holds goal flat
+      b_claw.set_value(HIGH); // grabs mogo
       break;
   }
   log_state_change();  
