@@ -316,7 +316,7 @@ void B_Lift::elastic_util(){
   reset();
   motor.move(-10);
   GUI::go("Start Elastic Utility", "Press to start the elastic utility.", 500);
-  b_claw_p.set_value(HIGH);
+  // b_claw_p.set_value(HIGH);
   held = true;
   Timer move_timer{"move"};
   move_absolute(top_position);

@@ -22,3 +22,4 @@ extern pros::ADIDigitalOut trans_p, b_claw_p, Led1, Led2;
 extern pros::ADIDigitalIn f_touch;
 extern pros::ADIDigitalIn intake_jam;
 extern pros::ADIAnalogIn f_lift_pot, b_lift_pot;
+extern Piston drive_t, lift_t, b_claw;

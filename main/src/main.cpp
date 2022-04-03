@@ -97,6 +97,41 @@ void autonomous() {
 // extern Slider mot_speed_set;
 
 void opcontrol() {
+	while(true){
+		if(master.get_digital_new_press(DIGITAL_A)){
+			drivebase.move(0,0);
+			drive_t.toggle_state();
+			back_l.move(15);
+			back_r.move(15);
+			// back_l.move_relative(50,200);
+			// back_r.move_relative(50,200);
+			// while(fabs(back_l.get_target_position() - back_l.get_position()) >15)delay(10);
+			// back_l.move_relative(-50,200);
+			// back_r.move_relative(-50,200);
+			// while(fabs(back_l.get_target_position() - back_l.get_position()) >15)delay(10);
+			delay(100);
+			drivebase.move(0,0);
+
+		}
+		if(master.get_digital_new_press(DIGITAL_B)){
+			lift_t.toggle_state();
+		    b_lift.motor.move_relative(20,100);
+
+			while(fabs(b_lift.motor.get_target_position() - b_lift.motor.get_position()) >10)delay(10);
+			// delay(200);
+			b_lift.motor.move_relative(-20,100);
+			while(fabs(b_lift.motor.get_target_position() - b_lift.motor.get_position()) >10)delay(10);
+			// b_lift.move(0);
+		}
+		if(master.get_digital_new_press(DIGITAL_X))b_claw.toggle_state();
+
+		if(abs(master.get_analog(ANALOG_LEFT_Y)) > 30)b_lift.move(master.get_analog(ANALOG_LEFT_Y));
+		else b_lift_m.move_velocity(0);
+
+
+		drivebase.handle_input();
+		delay(10);
+	}
 	while(!master.get_digital_new_press(DIGITAL_A))delay(10);
 	drivebase.move(0.0, 127.0);
 	Timer timer{"timer"};
