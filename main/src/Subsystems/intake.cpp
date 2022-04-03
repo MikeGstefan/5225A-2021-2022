@@ -42,9 +42,10 @@ void Intake::handle_buttons(){
 }
 
 void Intake::handle(){
-  // turns intake off if lift is too low
-  if(f_lift_pot.get_value() < f_lift.driver_positions[1] - 50) set_state(intake_states::off);
-
+  // turns intake off if front lift is too low
+  if(f_lift_pot.get_value() < f_lift.driver_positions[1] - 50 && state != intake_states::off){
+    set_state(intake_states::off);
+  }
   switch(state){
     case intake_states::managed:
       break;
@@ -77,13 +78,6 @@ void Intake::handle(){
       }
       break;
 
-    case intake_states::wait_for_lift_lowering:
-      // starts shifting lift/intake transmission to intake once lift has reached the bottom
-      if(b_lift.get_state() == b_lift_states::bottom) set_state(intake_states::shifting_to_intake);
-      // if the driver cancelled the 'lift move down to bottom' routine, turn off intake
-      else if(b_lift.get_state() != b_lift_states::move_to_target || b_lift.get_index() != 0)  set_state(intake_states::off);
-      break;
-
   }
   // set the motor to the appropriate power if the state has changed
   handle_state_change();
@@ -93,10 +87,10 @@ void Intake::handle_state_change(){
   if(target_state == state) return;
   // if state has changed, performs the necessary cleanup operation before entering next state
 
-  // lowers the lift and shifts the transmission before activating intake in desired state
+  // shifts the transmission before activating intake in desired state
   if(target_state != intake_states::off && b_lift.trans_p_state){
     after_switch_state = target_state;  // the state to reach after switching the transmission to intake mode
-    set_state(intake_states::wait_for_lift_lowering);
+    set_state(intake_states::shifting_to_intake);
   }
   switch(target_state){
     case intake_states::managed:
@@ -123,10 +117,6 @@ void Intake::handle_state_change(){
       motor.move(30);
       lift_trans_p.set_value(LOW);
       b_lift.trans_p_state = LOW;
-      break;
-
-    case intake_states::wait_for_lift_lowering:
-      b_lift.set_state(b_lift_states::move_to_target, 0); // sets lift to go to bottom
       break;
   }
   log_state_change();  

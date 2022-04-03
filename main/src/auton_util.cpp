@@ -81,8 +81,7 @@ void b_detect_goal(){
         delay(33);
     }
   misc.print("Detected %d\n", b_dist.get());
-  b_claw_p_1.set_value(HIGH);
-  b_claw_p_2.set_value(HIGH);
+  b_claw_p.set_value(HIGH);
 }
 
 

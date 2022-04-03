@@ -174,7 +174,8 @@ extern int elastic_f_up_time, elastic_f_down_time; //from gui_construction.cpp
 
 void F_Lift::elastic_util(){
   motor.move(-10);
-  GUI::go("Start Elastic Utility", "Press to start the elastic utility.", 500);
+  // GUI::go("Start Elastic Utility", "Press to start the elastic utility.", 500);
+  master.get_digital_new_press(DIGITAL_A);
   Timer move_timer{"move"};
   set_state(f_lift_states::move_to_target, driver_positions.size() - 1); // moves to top
   // // intake_piston.set_value(HIGH);  // raises intake

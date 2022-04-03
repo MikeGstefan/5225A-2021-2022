@@ -149,18 +149,18 @@ void autonomous() {
 		break;
 		case auto2:
 			f_claw_p.set_value(0);
-			b_claw_p_1.set_value(0);
+			b_claw_p.set_value(0);
 			blue_highside();
 		break;
 		case auto3:
 			f_claw_p.set_value(0);
-			b_claw_p_1.set_value(0);
+			b_claw_p.set_value(0);
 			blue_highside_tall();
 			
 		break;
 		case auto4:
 			f_claw_p.set_value(0);
-			b_claw_p_1.set_value(0);
+			b_claw_p.set_value(0);
 			blue_lowside();
 		break; 
 		default:
@@ -176,6 +176,28 @@ void autonomous() {
 // extern Slider mot_speed_set;
 
 void opcontrol() {
+	drivebase.driver_practice();
+	// pros::Task task{[=] {
+	// 	while(true){
+	// 		f_lift.handle(true);
+	// 		b_lift.handle(true);
+	// 		delay(10);
+	// 	}
+	// }};
+  // f_lift.set_state(f_lift_states::move_to_target, 2); // moves to top
+
+	// f_lift.elastic_util();
+
+	b_lift.motor.move(0);
+	f_lift.motor.move(0);
+	while(true){
+		printf("f:%d b: %d\n", f_lift_pot.get_value(), b_lift_pot.get_value());
+
+		delay(10);
+	}
+// BACK bottom 1030 top 2754
+// FRONT bottom 1190 top 2778
+
 	// pros::Task task{[=] {
 	// 	while(true){
 	// 		b_claw.handle();

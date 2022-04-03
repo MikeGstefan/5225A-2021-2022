@@ -257,8 +257,8 @@ void Drivebase::driver_practice(){
 
   // moves motors to necessary positions / speeds
   // Task([](){ 
-    b_lift.reset();
-    f_lift.reset();
+    // b_lift.reset();
+    // f_lift.reset();
   // });
   
   // f_claw_p.set_value(LOW);
@@ -282,8 +282,8 @@ void Drivebase::driver_practice(){
       handle_lifts();
       f_claw.handle();
       b_claw.handle();
-      intake.handle_buttons();
-      intake.handle();
+      // intake.handle_buttons();
+      // intake.handle();
      
 
       handle_trans();

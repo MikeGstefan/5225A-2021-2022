@@ -202,7 +202,8 @@ extern int elastic_f_up_time, elastic_f_down_time; //from gui_construction.cpp
 
 void B_Lift::elastic_util(){
   motor.move(-10);
-  GUI::go("Start Elastic Utility", "Press to start the elastic utility.", 500);
+  // GUI::go("Start Elastic Utility", "Press to start the elastic utility.", 500);
+  master.get_digital_new_press(DIGITAL_A);
   Timer move_timer{"move"};
   set_state(b_lift_states::move_to_target, driver_positions.size() - 1); // moves to top
   // // intake_piston.set_value(HIGH);  // raises intake
@@ -245,7 +246,7 @@ void B_Claw::handle_buttons(){
     // grabs goal if toggle button is pressed and claw is open
     if(state == b_claw_states::idle) set_state(b_claw_states::tilted);
   }
-  
+
   if(toggle_press_timer.get_time() > 300){  // toggles tilt state if claw button was held
     if(state == b_claw_states::tilted) set_state(b_claw_states::flat);
     else if(state == b_claw_states::flat) set_state(b_claw_states::tilted);
@@ -289,28 +290,23 @@ void B_Claw::handle_state_change(){
 
     case b_claw_states::idle:
       master.rumble("-");
-      b_claw_p_1.set_value(LOW);
-      b_claw_p_2.set_value(LOW);    
+      b_claw_p.set_value(LOW);
       break;
 
     case b_claw_states::searching:
-      b_claw_p_1.set_value(LOW);
-      b_claw_p_2.set_value(LOW);
+      b_claw_p.set_value(LOW);
       search_cycle_check_count = 0; // resets search cycle count
       break;
 
     case b_claw_states::tilted:
       master.rumble("-");
-      b_claw_p_1.set_value(HIGH); // grabs mogo
-      b_claw_p_2.set_value(HIGH);
+      b_claw_p.set_value(HIGH); // grabs mogo
       b_lock_p.set_value(LOW);  // holds goal tilted
       break;
 
     case b_claw_states::flat:
-      b_claw_p_1.set_value(HIGH); // grabs mogo
-      b_claw_p_2.set_value(HIGH);
+      b_claw_p.set_value(HIGH); // grabs mogo
       b_lock_p.set_value(HIGH); // holds goal flat
-
       break;
   }
   log_state_change();  

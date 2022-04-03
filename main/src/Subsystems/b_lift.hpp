@@ -20,7 +20,7 @@ class B_Lift: public Motorized_subsystem<b_lift_states, NUM_OF_B_LIFT_STATES, B_
   Timer shift_timer{"b_lift_shift_timer"};  // how long since back lift was set to shift
   b_lift_states after_switch_state; // the state the lift will go to after transmission switches to lift
   int search_cycle_check_count = 0, bad_count = 0; // cycle check for safeties
-  PID pid = PID(5.0,0.0,0.0,0.0);
+  PID pid = PID(1.0,0.0,0.0,0.0);
   int lift_power; // for manual control
 
   // height conversion constants

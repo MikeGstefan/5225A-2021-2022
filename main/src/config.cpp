@@ -12,7 +12,8 @@ pros::Motor front_r(4, pros::E_MOTOR_GEARSET_18, false, pros::E_MOTOR_ENCODER_DE
 pros::Motor back_l(1, pros::E_MOTOR_GEARSET_18, false, pros::E_MOTOR_ENCODER_DEGREES);
 pros::Motor back_r(3, pros::E_MOTOR_GEARSET_18, true,pros::E_MOTOR_ENCODER_DEGREES);
 
-pros::Motor f_lift_m(5, pros::E_MOTOR_GEARSET_36, false,pros::E_MOTOR_ENCODER_DEGREES), b_lift_m(7, pros::E_MOTOR_GEARSET_36, true,pros::E_MOTOR_ENCODER_DEGREES);
+//flit 8 blift exp 8
+pros::Motor f_lift_m(4, pros::E_MOTOR_GEARSET_36, false,pros::E_MOTOR_ENCODER_DEGREES), b_lift_m(5, pros::E_MOTOR_GEARSET_36, false,pros::E_MOTOR_ENCODER_DEGREES);
 pros::Motor intk(6, pros::E_MOTOR_GEARSET_06, true, pros::E_MOTOR_ENCODER_DEGREES);
 // tank drive config
 // pros::Motor front_l(19, pros::E_MOTOR_GEARSET_18, false, pros::E_MOTOR_ENCODER_DEGREES);
@@ -22,12 +23,12 @@ pros::Motor intk(6, pros::E_MOTOR_GEARSET_06, true, pros::E_MOTOR_ENCODER_DEGREE
 
 // pros::Imu imu_sensor(4);
 pros::Distance b_dist(9), f_dist(12), l_reset_dist(17), r_reset_dist(19), f_lift_dist(20);
-pros::ADIDigitalOut trans_p({{16,8}}), b_claw_p_1(6), b_claw_p_2(5), f_claw_p(8), lift_trans_p(4), b_lock_p(3);
+pros::ADIDigitalOut trans_p({{16,8}}), b_claw_p(6), f_claw_p(8), lift_trans_p(4), b_lock_p(3);
 pros::ADIDigitalOut Led1({{14, 7}});
 pros::ADIDigitalOut Led2({{14, 8}});
 pros::ADIDigitalIn intake_jam({{16, 7}});
 pros::ADIDigitalIn f_touch(7);
-pros::ADIAnalogIn f_lift_pot(1), b_lift_pot(2);
+pros::ADIAnalogIn f_lift_pot(8), b_lift_pot({{20, 8}});
 
 // pros::ADIDigitalIn intake_jam({{16, 7}});
 
@@ -60,7 +61,7 @@ std::array<std::tuple<pros::Motor*, int, const char*, const char*, Text_*>, 8> m
 
 std::array<std::pair<pros::ADIDigitalOut*, const char*>, 8> pneumatics_for_gui = {
   std::make_pair(&trans_p, "Transmission"),
-  std::make_pair(&b_claw_p_1, "Back Claw"),
+  std::make_pair(&b_claw_p, "Back Claw"),
   std::make_pair(&f_claw_p, "Front Claw"),
   std::make_pair(&Led1, "LED1"),
   std::make_pair(&Led2, "LED 2"),
