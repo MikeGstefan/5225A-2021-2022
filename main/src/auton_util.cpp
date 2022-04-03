@@ -134,7 +134,7 @@ void b_detect_goal(){
         delay(33);
     }
   misc.print("Detected %d\n", b_dist.get());
-  b_claw_p.set_value(1);
+  b_claw.set_value(1);
 }
 
 
@@ -154,14 +154,14 @@ void f_detect_goal(bool safety){
   //   }
   if(safety){ 
     while(tracking.move_complete)delay(10);
-    while(!f_touch.get_value()&& !tracking.move_complete)delay(10);
+    // while(!f_touch.get_value()&& !tracking.move_complete)delay(10);
   }
   else{
-    while(!f_touch.get_value())delay(10);
+    // while(!f_touch.get_value())delay(10);
   }
   
   misc.print("Detected %d\n", f_dist.get());
-  f_claw.set_state(1);
+  // f_claw.set_state(1);
 }
 
 

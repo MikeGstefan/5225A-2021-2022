@@ -358,10 +358,10 @@ void main_setup(){
     std::string coord = coord_c;
     if (GUI::prompt("Move back lift to" + coord, "Press to move back lift to" + coord, 1000)) b_lift.move_absolute(b_lift_val.get_value());
   });
-  front_claw.set_func([](){f_claw.set_value(HIGH);});
-  front_claw.set_off_func([](){f_claw.set_value(LOW);});
-  back_claw.set_func([](){b_claw_p.set_value(HIGH);});
-  back_claw.set_off_func([](){b_claw_p.set_value(LOW);});
+  // front_claw.set_func([](){f_claw.set_value(HIGH);});
+  // front_claw.set_off_func([](){f_claw.set_value(LOW);});
+  // back_claw.set_func([](){b_claw.set_value(HIGH);});
+  // back_claw.set_off_func([](){b_claw.set_value(LOW);});
 
   //Known Pneumatics Port Setup
   if(Piston::list_for_gui[0]){

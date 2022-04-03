@@ -84,7 +84,7 @@ void B_Lift::handle(){
 //       // grabs goal if up button is pressed
 //       if(master.get_digital_new_press(lift_up_button) && drivebase.get_lift_button(0)){
 //         master.rumble("-");
-//         b_claw_p.set_value(HIGH);
+//         b_claw.set_value(HIGH);
 //         held = true;
 //         master.clear_line(B_LIFT_STATE_LINE);
 
@@ -110,7 +110,7 @@ void B_Lift::handle(){
 
 //       if((drivebase.get_lift_button(0) && master.get_digital_new_press(lift_up_button)) || search_cycle_check_count >= 2){
 //         master.rumble("-");
-//         b_claw_p.set_value(HIGH);
+//         b_claw.set_value(HIGH);
 //         held = true;
 //         master.clear_line(B_LIFT_STATE_LINE);
 
@@ -139,7 +139,7 @@ void B_Lift::handle(){
 //       }
 //       // releases goal and turns off intake if down button is pressed
 //       if(((master.get_digital_new_press(lift_down_button)&& drivebase.get_lift_button(0)) || (master.get_digital_new_press(lift_release_button)&& drivebase.get_lift_button(0))) && fabs(bottom_position - motor.get_position()) < end_error){
-//         b_claw_p.set_value(LOW);
+//         b_claw.set_value(LOW);
 //         held = false;
 //         // master.print(B_LIFT_STATE_LINE, 0, "B_Lift: Idle         ");
 //         release_timer.reset();
@@ -177,7 +177,7 @@ void B_Lift::handle(){
 //     case b_lift_states::platform:
 //       // drops off goal if up button is pressed and has reached platform height
 //       if(((drivebase.get_lift_button(0) && master.get_digital_new_press(lift_up_button)) || (master.get_digital_new_press(lift_release_button)&& drivebase.get_lift_button(0))) && fabs(motor.get_position() - platform_position) < end_error){
-//         b_claw_p.set_value(LOW);
+//         b_claw.set_value(LOW);
 //         held = false;
 
 //         set_state(b_lift_states::dropoff);
@@ -198,7 +198,7 @@ void B_Lift::handle(){
 //       }
 //       // releases goal if release button is pressed
 //       if((master.get_digital_new_press(lift_release_button)&& drivebase.get_lift_button(0)) && fabs(motor.get_position() - tall_dropoff_position) < end_error){
-//         b_claw_p.set_value(LOW);
+//         b_claw.set_value(LOW);
 //         held = false;
 
 //         set_state(b_lift_states::dropoff);
@@ -293,7 +293,7 @@ void B_Lift::handle(){
 //       // toggles state of lift pneumatic if lift up button is pressed
 //       if(drivebase.get_lift_button(0) && master.get_digital_new_press(lift_up_button)){
 //         held = !held;
-//         b_claw_p.set_value(held);
+//         b_claw.set_value(held);
 //       }
 //       break;
 
@@ -314,7 +314,7 @@ void B_Lift::elastic_util(){
   reset();
   motor.move(-10);
   GUI::prompt("Start Elastic Utility", "Press to start the elastic utility.", 500);
-  b_claw_p.set_value(HIGH);
+  b_claw.set_value(HIGH);
   held = true;
   Timer move_timer{"move"};
   move_absolute(top_position); //move_absolute(top_position, 100, true);

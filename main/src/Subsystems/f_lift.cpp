@@ -160,7 +160,7 @@ void F_Lift::elastic_util(){
   reset();
   motor.move(-10);
   GUI::prompt("Start Elastic Utility", "Press to start the elastic utility.", 500);
-  f_claw.set_state(HIGH);
+  // f_claw.set_state(HIGH);
   Timer move_timer{"move"};
   move_absolute(top_position);
   // // intake_piston.set_value(HIGH);  // raises intake

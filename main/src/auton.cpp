@@ -46,7 +46,7 @@ void skills(){
   // move_start(move_types::)
   // while(!master.get_digital_new_press(DIGITAL_A))delay(10);
   // f_claw.set_value(0);
-  // b_claw_p.set_value(0);
+  b_claw.set_value(0);
   // b_lift.move_absolute(10);
   // f_lift.move_absolute(10);
   // delay(2000);
@@ -87,7 +87,7 @@ void skills(){
   move_start(move_types::tank_point, tank_point_params({85.0,33.0, 30.0}, false, 70.0));
   // flatten_against_wall(false);
 
-  b_claw_p.set_value(0);
+  b_claw.set_value(0);
 
   int safety_check = 0;
   //bool to + -
@@ -112,7 +112,7 @@ void skills(){
   delay(100);
   // move_start(move_types::tank_point, tank_point_params(polar_to_vector_point(tracking.x_coord, tracking.y_coord, 5, rad_to_deg(tracking.global_angle), rad_to_deg(tracking.global_angle))));
   // move_start(move_types::turn_angle, turn_angle_params(210.0, true,false, 150.0,0.0,80.0));
-  f_claw.set_value(0);
+  // f_claw.set_value(0);
   b_lift.move_absolute(10);
   move_start(move_types::tank_point, tank_point_params(polar_to_vector_point(tracking.x_coord, tracking.y_coord, 2, rad_to_deg(tracking.global_angle), rad_to_deg(tracking.global_angle)), false,127.0,1.0,true,9.0,150.0,0.0,1000));
   move_start(move_types::tank_point, tank_point_params({83.0,50.0, 180.0}));
@@ -142,14 +142,14 @@ void skills(){
 
 
 void skillsPark(){
-  f_claw.set_value(0);
-  b_claw_p.set_value(0);
+  // f_claw.set_value(0);
+  b_claw.set_value(0);
   b_lift.move_absolute(10);
   f_lift.move_absolute(10);
   while(!master.get_digital_new_press(DIGITAL_R1))delay(10);
 
-  f_claw.set_value(1);
-  b_claw_p.set_value(1);
+  // f_claw.set_value(1);
+  b_claw.set_value(1);
   f_lift.move_absolute(600);
   // f_lift.move_absolute(200);
   // b_lift.move_absolute(150);
@@ -161,7 +161,7 @@ void skillsPark(){
 	// delay(100);
 
   flatten_against_wall(false);
-  Led1.set_value(0);
+  // Led1.set_value(0);
   delay(100);
   double dist = reset_dist_l.get_dist();
   tracking.reset(141.0- dist, DIST_BACK,0.0);
@@ -205,7 +205,7 @@ void skillsPark(){
   //   f_lift.motor.move_relative(0, 100);
   // });
   drivebase.set_state(1);
-  Led1.set_value(1);
+  // Led1.set_value(1);
   gyro.climb_ramp();
   drivebase.brake();
   delay(100);

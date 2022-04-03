@@ -268,7 +268,7 @@ void Drivebase::driver_practice(){
   // });
   
   // f_claw_p.set_value(LOW);
-  // b_claw_p.set_value(LOW);
+  b_claw.set_value(LOW);
   // lift.move(-10); // gives holding power
   bool intake_on = false;
   bool intake_reverse = false;
@@ -353,7 +353,7 @@ bool Drivebase::get_state(){
 
 void Drivebase::set_state(bool state){
   this->state = state;
-  trans_p.set_value(state);
+  drive_t.set_value(state);
 }
 
 
