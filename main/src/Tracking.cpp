@@ -4,6 +4,7 @@
 #include "logging.hpp"
 #include "pros/motors.h"
 #include "util.hpp"
+#include "geometry.hpp"
 
 Tracking tracking;
 
@@ -32,6 +33,15 @@ void Tracking::reset(double x, double y, double a){
   update_t.done_update();
 }
 
+void Tracking::reset(Position position){
+  update_t.data_update();
+  tracking_imp.print("resetting tracking from %.2f, %.2f, %.2f to %.2f, %.2f, %.2f\n", tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle), position.x, position.y, position.angle);
+  tracking.x_coord = position.x;
+  tracking.y_coord = position.y;
+  tracking.global_angle = deg_to_rad(position.angle);
+  update_t.done_update();
+}
+
 double Tracking::get_angle_in_deg(){
   return fmod(rad_to_deg(global_angle), 360);
 }
@@ -41,7 +51,7 @@ void Tracking::wait_for_dist(double distance, int timeout){
   int start_time = millis();
 
   wait_until(sqrt(pow(tracking.x_coord - start_pos.x, 2) + pow(tracking.y_coord - start_pos.y, 2)) > distance){
-    if(timeout != 0 && millis() - start_time > timeout)break;
+    if(timeout != 0 && millis() - start_time > timeout) break;
   }
 }
 
@@ -1577,13 +1587,13 @@ void Gyro::climb_ramp(){
   });
   wait_until(angle > 22);
   motion_i.print("ON RAMP: %f\n", angle);
-  GUI::flash("On Ramp", 1000, COLOUR(GREEN));
+  screen_flash::start("On Ramp", term_colours::NOTIF);
 
   tracking.reset();
 
 	f_lift.move_absolute(100); //Lowers lift
 
-  drivebase.move(0.0, -GYRO_SIDE*127, 0.0);
+  drivebase.move(0.0, -GYRO_SIDE*127, 0.0); //Can probably get rid of this
   tracking.wait_for_dist(18);
 }
 
@@ -1593,7 +1603,7 @@ void Gyro::level(double kP, double kD){
   int speed;
   bool neg = false;
 
-  GUI::flash("PID", 1000, COLOUR(GREEN));
+  screen_flash::start("PID", term_colours::NOTIF);
 
 	wait_until(gyro_steady.get_time() > 500 || master.interrupt(true, true)){
     gyro_p.compute(-angle, 0);
@@ -1613,5 +1623,5 @@ void Gyro::level(double kP, double kD){
   back_r.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
   drivebase.velo_brake();
 
-  GUI::flash("Braked\n", 1000, COLOUR(GREEN));
+  screen_flash::start("Braked", term_colours::NOTIF);
 }

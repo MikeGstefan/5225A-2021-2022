@@ -54,7 +54,7 @@ public:
   log_locations log_location;
   static vector<Data*> get_objs();
   void print(const char* format, ...);
-  void print(Timer* tmr,int freq, vector<function<char*()>> str);
+  void print(Timer* tmr,int freq, vector<function<char*()>> str); //How is this used?
   void log_print(char* buffer, int buffer_len);
   Data(const char* obj_name, const char* id_code, log_types log_type_param, log_locations log_location_param);
   static void init();
@@ -65,9 +65,9 @@ public:
 
 void queue_handle(void* params);
 uintptr_t data_size();
-const int queue_size = 1024;
-const int print_point = 500;
-const int print_max_time = 1500;
+constexpr int queue_size = 1024;
+constexpr int print_point = 500;
+constexpr int print_max_time = 1500;
 
 
 extern Data task_log;
@@ -82,3 +82,4 @@ extern Data motion_i;
 extern Data log_d;
 extern Data events;
 extern Data graph;
+extern Data state_log;

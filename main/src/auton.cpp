@@ -1,9 +1,14 @@
 #include "auton.hpp"
+#include "Libraries/printing.hpp"
 #include "Tracking.hpp"
 #include "config.hpp"
+#include "controller.hpp"
+#include "geometry.hpp"
 #include "logging.hpp"
-#include <string>
+#include "util.hpp"
+#include <map>
 
+static const std::string auton_file_name = "/usd/auton.txt";
 
 void skills(){
   
@@ -127,7 +132,7 @@ void skills2(){
   // // delay(200);
   
 
-//21, 12.5
+  //21, 12.5
 
   move_start(move_types::tank_point, tank_point_params({tracking.x_coord - 3.0, tracking. y_coord, -90.0}));
   move_start(move_types::turn_point, turn_point_params({120.0,127.0}));
@@ -158,11 +163,11 @@ void skills2(){
   move_start(move_types::tank_point, tank_point_params({85.0,33.0, 30.0}, false, 70.0));
   // flatten_against_wall(false);
 
-b_claw_p.set_value(0);
+  b_claw_p.set_value(0);
 
   int safety_check = 0;
   //bool to + -
-  // int direction = (static_cast<int>(front)*2)-1;
+  // int direction = (static_cast<int>(front)*2)-1; //use okapi::boolToSign
   tracking_imp.print("%d|| Start wall allign\n", millis());
 
 	drivebase.move(-50.0,0.0);
@@ -557,6 +562,55 @@ void skillsPark(){
 
 }
 
+
+void rush_high(){
+  move_start(move_types::tank_point, tank_point_params({107.0, 57.0, 0.0}));
+  delay(100);
+  move_start(move_types::turn_point, turn_point_params({107.0, 71.0}));
+  delay(100);
+  move_start(move_types::tank_point, tank_point_params({107.0, 71.0, 0.0}), false);
+  f_lift.reset();
+  f_lift.move(-10);
+  f_detect_goal();
+
+  // move_wait_for_complete();
+  // f_lift.move_absolute(150,100);
+  // intk.move(10);
+  move_stop();
+}
+
+void rush_tall(){
+  int start_time = millis();
+
+  move_start(move_types::tank_point, tank_point_params({83.0, 59.0, 30.0}));
+  delay(100);
+  move_start(move_types::turn_point, turn_point_params({73, 71}));
+  delay(100);
+  move_start(move_types::tank_rush, tank_rush_params({73.0, 71.0, 30.0}, false), false);
+  // delay(200);
+  // drivebase.set_state(0);
+  f_lift.reset();
+  f_lift.move(-10);
+  f_detect_goal();
+  move_wait_for_complete();
+  master.print(2, 2, "Time: %d", millis() - start_time);
+}
+
+void rush_low(){
+  Task([](){
+    f_lift.reset();
+    b_lift.reset();
+    f_lift.move_absolute(10);
+    b_lift.move_absolute(10);
+  });
+  
+	move_start(move_types::tank_point, tank_point_params({34.5, 72.0, 45.0}, false, 80.0, 1.0, true, 9.0, 130.0), false);// drive throught neut goal
+  delay(100);
+  f_detect_goal();
+  move_stop();
+}
+
+
 void blue_highside(){
   // tracking.x_coord = 108.0, tracking.y_coord = 16.0, tracking.global_angle = 0.0_deg;
   
@@ -592,8 +646,6 @@ void blue_highside(){
   intk.move(127);
   delay(2000);
 }
-
-
 
 void blue_highside_tall(){
   //tracking.x_coord = 104.0, tracking.y_coord = 12.0, tracking.global_angle = -30.0_deg;
@@ -688,240 +740,177 @@ void lrt_auton(){
   move_stop();
 }
 
-//From gui_construction.cpp (for autons)
-extern Button alliance, pos_alliance;
-extern Page auto_selection, pos_auto_selection;
 
-namespace Autons{
+//name, target, common point, task at target, angle to go to target
+std::vector<std::string> selected_positions;
+std::map<std::string, std::tuple<Point, Point, std::string, double>> targets = {
+  {"Right", {{108.0, 16.0}, {104.0, 12.0}, "None", 0.0}},
+  {"Left", {{30.0, 12.0}, {36.0, 24.0}, "None", 0.0}},
+  {"Tall", {{73.0, 71.0}, {72.0, 60.0}, "Front", 30.0}},
+  {"High", {{107.0, 71.0}, {107.0, 60.0}, "Front", 0.0}},
+  {"Low", {{34.5, 72.0}, {36.0, 60.0}, "Front", 45.0}},
+  {"AWP", {{130.0, 36.0}, {125.0, 30.0}, "Back", -90.0}},
+  {"Ramp", {{128.0, 36.0}, {30.0, 30.0}, "Back", -90.0}},
+};
 
-  enum class autons{
-    Skills,
-    AUTO2,
-    AUTO3,
-    NUM_OF_ELEMENTS,
-    DEFAULT = Skills,
-  };
+void load_auton(){
+  std::string target, task;
+  double angle;
+  selected_positions.clear();
 
-  enum class start_pos{
-    POS1,
-    POS2,
-    POS3,
-    NUM_OF_ELEMENTS,
-    DEFAULT = POS1,
-  };
-
-  enum class alliances{
-    RED,
-    BLUE,
-    NUM_OF_ELEMENTS,
-    DEFAULT = RED
-  };
-
-  enum class goals{
-    LEFT,
-    TALL,
-    RIGHT,
-    NUM_OF_ELEMENTS,
-    DEFAULT = TALL
-  };
-
-  autons cur_auton = autons::DEFAULT;
-  alliances cur_alliance = alliances::DEFAULT;
-  start_pos cur_start_pos = start_pos::DEFAULT;
-  goals cur_goal = goals::DEFAULT;
-
-  const char* auton_names[static_cast<int>(autons::NUM_OF_ELEMENTS)] = {"Skills", "Auto1", "Auto2"};
-  const char* start_pos_names[static_cast<int>(start_pos::NUM_OF_ELEMENTS)] = {"Pos1", "Pos2", "Pos3"};
-  const char* alliance_names[2] = {"Red", "Blue"};
-  const char* goal_names[static_cast<int>(goals::NUM_OF_ELEMENTS)] = {"Left", "Tall", "Right"};
-
-  std::string file_name = "/usd/auton.txt";
-  std::string pos_file_name = "/usd/pos_auton.txt";
-  std::fstream file;
-  std::fstream pos_file;
-
-  void file_update(){
-    Data::log_t.data_update();
-    file.open(file_name, fstream::out | fstream::trunc);
-    pos_file.open(pos_file_name, fstream::out | fstream::trunc);
-    file << static_cast<int>(cur_auton) << std::endl;
-    file << static_cast<int>(cur_alliance) << std::endl;
-    pos_file << static_cast<int>(cur_start_pos) << std::endl;
-    pos_file << static_cast<int>(cur_goal) << std::endl;
-    file.close();
-    pos_file.close();
-    Data::log_t.done_update();
+  ifstream file;
+  Data::log_t.data_update();
+  printf("\n\nLoading Autons:\n");
+  file.open(auton_file_name, fstream::in);
+  while(file >> target >> task >> angle){
+    printf2("%s: %s at %.1f", target, task, angle);
+    selected_positions.push_back(target);
   }
+  newline();
+  file.close();
+  Data::log_t.done_update();
+}
 
-  void file_reset(){
-    cur_auton = autons::DEFAULT;
-    cur_start_pos = start_pos::DEFAULT;
-    cur_goal = goals::DEFAULT;
-    cur_alliance = alliances::DEFAULT;
-    if (pros::usd::is_installed()) file_update();
+void save_auton(){
+  ofstream file;
+  Data::log_t.data_update();
+  printf("\n\nSaving Autons:\n");
+  file.open(auton_file_name, fstream::out | fstream::trunc);
+  for(std::vector<std::string>::iterator it = selected_positions.begin(); it != selected_positions.end(); it++){
+    file << *it << std::endl;
+    file << std::get<std::string>(targets[*it]) << std::endl;
+    file << std::get<double>(targets[*it]) << std::endl;
+    printf2("%s: %s at %.1f", *it, std::get<std::string>(targets[*it]), std::get<double>(targets[*it]));
   }
+  newline();
+  file.close();
+  Data::log_t.done_update();
+  master.clear();
+  master.print(0, 0, "Saved Autons");
+}
 
-  void save_change(std::string which){
-    std::string val;
-    int line;
+void run_auton_task(std::string task){
+  if(task == "Front") f_detect_goal();
+  if(task == "Back") b_detect_goal();
+}
 
-    if(which == "auton"){
-      val = auton_names[static_cast<int>(cur_auton)];
-      line = 0;
-    }
-    else if(which == "start_pos"){
-      val = start_pos_names[static_cast<int>(cur_start_pos)];
-      line = 0;
-    }
-    else if(which == "goal"){
-      val = goal_names[static_cast<int>(cur_goal)];
-      line = 1;
-    }
-    else if(which == "alliance"){
-      val = alliance_names[static_cast<int>(cur_alliance)];
-      line = 2;
-    }
+bool run_defined_auton(std::string start, std::string target){
+//handles movement and goal pickup
+  if(start == "" && target == ""){
 
-    printf("\033[32mSwitched %s to %s\033[0m\n", which.c_str(), val.c_str());
-    events.print("\n\nSwitched %s to %s\n\n", which.c_str(), val.c_str());
-    master.print(line, 0, "%s: %s          ", which.c_str(), val.c_str());
-    file_update();
   }
+  else if(start == "" && target == ""){
 
-  void file_read(){
-    if (!pros::usd::is_installed()){
-      GUI::flash("No SD Card!");
-      printf("\033[31mNo SD card inserted.\033[0m Using default auton, start position, goal and alliance.\n");
-      file_reset();
-      return;
-    }
-    else{
-      Data::log_t.data_update();
-      file.open(file_name, fstream::in);
-      pos_file.open(pos_file_name, fstream::in);
-      master.clear();
-
-      if (!file){ //File doesn't exist
-        file.close();
-        GUI::flash("Auton File not found!");
-        file_update();
-        
-        printf("\033[92mCreated new Auton File.\033[0m\n");
-        file.open(file_name, fstream::in);
-      }
-      if (!pos_file){ //Pos File doesn't exist
-        pos_file.close();
-        GUI::flash("Pos Auton File not found!");
-        file_update();
-        
-        printf("\033[92mCreated new Position Auton File.\033[0m\n");
-        pos_file.open(pos_file_name, fstream::in);
-      }
-
-      int auton;
-      int ally;
-      int start;
-      int goal;
-      file >> auton;
-      file >> ally;
-      pos_file >> start;
-      pos_file >> goal;
-      file.close();
-      pos_file.close();
-      Data::log_t.done_update();
-
-      cur_auton = static_cast<autons>(auton);
-      cur_start_pos = static_cast<start_pos>(start);
-      cur_goal = static_cast<goals>(goal);
-      cur_alliance = static_cast<alliances>(ally);
-    }
-
-    Colour new_colour = cur_alliance == alliances::BLUE ? COLOUR(BLUE) : COLOUR(RED);
-    alliance.set_background(new_colour);
-    pos_alliance.set_background(new_colour);
-    
-    //Get rid of this
-    save_change("auton");
-    save_change("start_pos");
-    save_change("goal");
-    save_change("alliance");
   }
+  else return false; //Will be false if none of the ifs matched
 
-  void prev_route(){
-    cur_auton = previous_enum_value(cur_auton);
-    save_change("auton");
-  }
+  return true;
+}
 
-  void next_route(){
-    cur_auton = next_enum_value(cur_auton);
-    save_change("auton");
-  }
+bool select_auton_task(std::string target){
+  std::string choice = std::get<std::string>(targets[target]);
+  double angle = std::get<double>(targets[target]);
+  bool selected = false;
 
-  void prev_start_pos(){
-    cur_start_pos = previous_enum_value(cur_start_pos);
-    save_change("start_pos");
-  }
+  wait_until(selected){
+    master.clear_line(1);
+    master.print(1, 0, choice);
 
-  void next_start_pos(){
-    cur_start_pos = next_enum_value(cur_start_pos);
-    save_change("start_pos");
-  }
-
-  void prev_goal(){
-    cur_goal = previous_enum_value(cur_goal);
-    save_change("goal");
-  }
-
-  void next_goal(){
-    cur_goal = next_enum_value(cur_goal);
-    save_change("goal");
-  }
-
-  void set_target_goal(goals goal){
-    cur_goal = goal;
-    save_change("goal");
-  }
-
-  void switch_alliance(alliances new_ally){
-    cur_alliance = new_ally;
-    Colour new_colour = cur_alliance == alliances::BLUE ? COLOUR(BLUE) : COLOUR(RED);
-
-    alliance.set_background(new_colour);
-    pos_alliance.set_background(new_colour);
-    save_change("alliance");
-  }
-
-  void give_up(){ 
-    printf("Insert actual Auton Give up code here\n"); 
-  } 
-
-  void selector(){
-    if(normal){
-      auto_selection.go_to();
-      wait_until (false){
-        if(master.get_digital_new_press(ok_button)){
-          master.clear();
-          return;
+    switch(master.wait_for_press({DIGITAL_A, DIGITAL_RIGHT, DIGITAL_LEFT, DIGITAL_B})){ //see how to use ok_button
+      case DIGITAL_B: return false; break;
+      case DIGITAL_A:
+        if(choice == "Back" || "Front"){
+          master.print(2, 0, "%.1f", angle);
+          //angle selection
+          master.wait_for_press(DIGITAL_A);
         }
-        else if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_L1)) prev_route();
-        else if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_R1)) next_route();
-        else if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_X)) switch_alliance();
-      }
-    }
-    else{
-      pos_auto_selection.go_to();
-      wait_until (false){
-        if(master.get_digital_new_press(ok_button)){
-          master.clear();
-          return;
-        }
-        else if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_L1)) prev_start_pos();
-        else if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_R1)) next_start_pos();
-        else if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_X)) switch_alliance();
-        else if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_L2)) prev_goal();
-        else if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_R2)) next_goal();
-      }
+
+        selected = true;
+        break;
+
+      case DIGITAL_RIGHT:
+        if(choice == "Front") choice = "Back";
+        else if(choice == "Back") choice = "None";
+        else if(choice == "None") choice = "Front";
+        break;
+      
+      case DIGITAL_LEFT:
+        if(choice == "Front") choice = "None";
+        else if(choice == "Back") choice = "Front";
+        else if(choice == "None") choice = "Back";
+        break;
+
+      default: break;
     }
   }
 
+  selected_positions.push_back(target);
+  std::get<std::string>(targets[target]) = choice;
+  std::get<double>(targets[target]) = angle;
+
+  return true;
+}
+
+void select_auton(){
+  bool all_selected = false;
+  std::map<std::string, std::tuple<Point, Point, std::string, double>>::iterator selection = targets.find("Right");
+  selected_positions.clear();
+
+  wait_until(all_selected){
+    master.clear();
+    master.print(0, 0, selection->first);
+
+    std::map<std::string, std::tuple<Point, Point, std::string, double>>::iterator og = selection;
+
+    switch(master.wait_for_press({DIGITAL_X, DIGITAL_A, DIGITAL_RIGHT, DIGITAL_LEFT})){//see how to use ok_button
+      case DIGITAL_X:
+        master.clear();
+        save_auton();
+        return;
+        break;
+      case DIGITAL_A:
+        if(!select_auton_task(selection->first)) break;
+
+      case DIGITAL_RIGHT:
+        do{ //Goes to next available choice
+          if(selection != std::prev(targets.end())) selection++;
+          else selection = targets.begin();
+          if(selection == og) all_selected = true;
+        }
+        while(!all_selected && contains(selected_positions, selection->first));
+        break;
+      
+      case DIGITAL_LEFT:
+        do{ //Goes to previous available choice
+          if(selection != targets.begin()) selection--;
+          else selection = std::prev(targets.end());
+          if(selection == og) all_selected = true;
+        }
+        while(!all_selected && contains(selected_positions, selection->first));
+        break;
+
+      default: break;
+    }
+
+  }
+}
+
+void run_auton(){
+  std::tuple<Point, Point, std::string, double> current, target;
+  double angle;
+  for(int i = 0; i+1 < selected_positions.size(); i++){
+    current = targets[selected_positions[i]];
+    target = targets[selected_positions[i+1]];
+    angle = std::get<3>(target);
+
+    if(!run_defined_auton(selected_positions[i], selected_positions[i+1])){
+      move_start(move_types::tank_point, tank_point_params({std::get<1>(current), weighted_avg(angle, tracking.get_angle_in_deg(), 0.3)}, false, 127.0, 1.0, false));
+      move_start(move_types::tank_point, tank_point_params({std::get<1>(target), weighted_avg(angle, tracking.get_angle_in_deg(), 0.7)}, false, 127.0, 1.0, false));
+      move_start(move_types::tank_rush, tank_rush_params({std::get<0>(target), angle}, false));
+
+      run_auton_task(std::get<std::string>(target));
+    }
+
+    master.wait_for_press(DIGITAL_R1); //Just to wait between routes to see
+  }
 }

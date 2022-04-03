@@ -32,17 +32,17 @@ extern _Task move_t;
 #define DIST_FRONT 8.5
 
 
-const int min_move_power_a = 35;
-const int min_move_power_x = 40;
-const int min_move_power_y = 25;
+constexpr int min_move_power_a = 35;
+constexpr int min_move_power_x = 40;
+constexpr int min_move_power_y = 25;
 
 
 void update(void* params);
 
 
 class Tracking{
-
-public:
+  public:
+    //Can we make x_coord, y_coord, global_angle a Position
     double x_coord = 0.0; double y_coord = 0.0; double global_angle = 0.0; //double target_x = 0.0;
     double power_x, power_y, power_a;
     double l_velo, r_velo, b_velo;
@@ -56,7 +56,7 @@ public:
     void wait_for_dist(double distance, int timeout = 0);
     double get_angle_in_deg();
     void reset(double x=0.0, double y=0.0, double a=0.0);
-
+    void reset(Position position);
 };
 
 

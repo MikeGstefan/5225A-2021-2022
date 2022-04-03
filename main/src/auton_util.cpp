@@ -1,8 +1,62 @@
 #include "auton_util.hpp"
-// #include "logging.hpp"
+
+static const std::string start_pos_file_name ="/usd/start_position.txt";
+
+//create an adaptable fll type menu selector, look at select_auton();
 
 Reset_dist reset_dist_r(&r_dist, 7.5);
 Reset_dist reset_dist_l(&l_dist, 7.5);
+
+void save_positions(){
+  if(GUI::prompt("Reset position", "Press to reset the position, then move the robot.")){
+    Position pos1 (141.0-8.75, 15.5, 0.0), pos2 (8.75, 15.5, 0);
+    master.clear();
+    master.print(0, 0, "L1:(%.1f, %.1f, %.1f)", pos1.x, pos1.y , pos1.angle);
+    master.print(1, 0, "R1:(%.1f, %.1f, %.1f)", pos2.x, pos2.y , pos2.angle);
+
+    wait_until(false){
+      if(master.get_digital_new_press(DIGITAL_L1)){
+        tracking.reset(pos1);
+        break;
+      }
+      if(master.get_digital_new_press(DIGITAL_R1)){
+        tracking.reset(pos2);
+        break;
+      }
+    }
+
+    printf("\nMove the robot to its new position.\n");
+
+    //move the robot
+
+    if(GUI::prompt_end("Save Positions")){
+      tracking_imp.print("Saving X: %f, Y:%f, A:%f\n", tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle));
+      
+      ofstream file;
+      Data::log_t.data_update();
+      file.open(start_pos_file_name, fstream::out | fstream::trunc);
+      file << tracking.x_coord << endl;
+      file << tracking.y_coord << endl;
+      file << rad_to_deg(tracking.global_angle) << endl;
+      file.close();
+      Data::log_t.done_update();
+    }
+  }
+}
+
+void load_positions(){
+  double x, y, a;
+  ifstream file;
+
+  Data::log_t.data_update();
+  file.open(start_pos_file_name, fstream::in);
+  file >> x >> y >> a;
+  file.close();
+  Data::log_t.done_update();
+
+  tracking_imp.print("Loading X: %f, Y:%f, A:%f from file\n", x, y, a);
+  tracking.reset(x, y, a);
+}
 
 double get_filtered_output(ADIUltrasonic sensor, int check_count, uint16_t lower_bound, uint16_t upper_bound, int timeout){
   Timer timer{"Timer"};
@@ -13,7 +67,7 @@ double get_filtered_output(ADIUltrasonic sensor, int check_count, uint16_t lower
   double filtered_output;
   wait_until(timer.get_time() > timeout || success_count > check_count){
     input = sensor.get_value();
-    if (inRange(input, lower_bound, upper_bound)){ //This used to be (lower_bound <= input <= upper_bound). I highly doubt that's what you wanted.
+    if (in_range(input, lower_bound, upper_bound)){ //This used to be (lower_bound <= input <= upper_bound). I highly doubt that's what you wanted.
 
       total_input += input;
       printf("input: %d\n", input);
@@ -29,12 +83,15 @@ double get_filtered_output(ADIUltrasonic sensor, int check_count, uint16_t lower
 void flatten_against_wall(bool front, int cycles){ 
   int safety_check = 0;
   //bool to + -
-  int direction = (static_cast<int>(front)*2)-1;
+  int direction = (static_cast<int>(front)*2)-1; //use okapi::boolToSign
   tracking_imp.print("%d|| Start wall allign\n", millis());
 
 	drivebase.move(50.0*direction,0.0);
 
-	wait_until((fabs(tracking.l_velo) >= 2.0 && fabs(tracking.r_velo) >= 2.0) || safety_check >= 12) safety_check++;
+	wait_until((fabs(tracking.l_velo) >= 2.0 && fabs(tracking.r_velo) >= 2.0) || safety_check >= 12){
+      safety_check++;
+      misc.print(" reset things %.2f, %.2f\n",fabs(tracking.l_velo), fabs(tracking.r_velo));
+    }
 	cycleCheck(fabs(tracking.l_velo) < 1.0 && fabs(tracking.r_velo) < 1.0, 4, 10);
 	drivebase.move(20.0*direction, 0.0);
 	printf("%d|| Done all align\n", millis());
@@ -61,13 +118,13 @@ void flatten_against_wall(bool front, int cycles){
 
 void b_detect_goal(){ 
   // cycleCheck(b_dist.get() > 80 && b_dist.get() < 90, 5, 33);
-  while(tracking.move_complete)delay(10);
+  wait_until(!tracking.move_complete);
   while(b_dist.get() > 70 && !tracking.move_complete){ 
     misc.print("looking for edge: %d\n", b_dist.get());
     delay(33);
   }
   int successCount = 0;
-    while (successCount < 2&& !tracking.move_complete){
+    while (successCount < 2 && !tracking.move_complete){
         if (b_dist.get() > 75 && b_dist.get() < 90) {
           successCount++;
           misc.print("found: %d count: %d\n", b_dist.get(), successCount);
@@ -95,12 +152,8 @@ void f_detect_goal(bool safety){
   //       misc.print("looking: %d\n", f_dist.get());
   //       delay(33);
   //   }
-  if(safety){ 
-    while(!f_touch.get_value()&& !tracking.move_complete)delay(10);
-  }
-  else{
-    while(!f_touch.get_value())delay(10);
-  }
+  if(safety) wait_until(f_touch.get_value() || tracking.move_complete);
+  else wait_until(f_touch.get_value());
   
   misc.print("Detected %d\n", f_dist.get());
   f_claw_p.set_value(HIGH);

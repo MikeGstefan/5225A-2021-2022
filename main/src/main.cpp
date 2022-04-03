@@ -2,6 +2,7 @@
 #include "drive.hpp"
 #include "controller.hpp"
 #include "Libraries/gui.hpp"
+#include "Libraries/printing.hpp"
 #include "pid.hpp"
 #include "Tracking.hpp"
 #include "task.hpp"
@@ -15,9 +16,8 @@
 #include "util.hpp"
 using namespace std;
 
-pros::Task *updt = nullptr;
+pros::Task *updt = nullptr; //What's this for
 const GUI* GUI::current_gui = &g_main;
-
 
 /**
  * Runs initialization code. This occurs as soon as the program is started.
@@ -29,29 +29,24 @@ const GUI* GUI::current_gui = &g_main;
 bool auton_run = false; // has auton run
 
 void initialize() {
-	gyro.calibrate();
+	// gyro.calibrate();
 	// front_l.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
 	// front_r.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
 	// back_l.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
 	// back_r.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
-	// Autons::file_read();
-	// autonFile_read();
-	f_lift.motor.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
-	b_lift.motor.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
 	drivebase.download_curve_data();
 	Data::init();
 	_Controller::init();
 	GUI::init();
-	f_lift.reset();
-	b_lift.reset();
 	delay(500);
-	
+	// tracking.x_coord = 26.0, tracking.y_coord = 11.75, tracking.global_angle = -90.0_deg;
 	// tracking.x_coord = 104.0, tracking.y_coord = 12.0, tracking.global_angle = -30.0_deg;
 	// tracking.x_coord = 24.5, tracking.y_coord = 15.0, tracking.global_angle = 9.0_deg;
 	// tracking.x_coord = 0.0, tracking.y_coord = 0.0, tracking.global_angle = 0.0_deg;
+	tracking.x_coord = 108.0, tracking.y_coord = 16.0, tracking.global_angle = 0.0_deg;
 	update_t.start();
 	// master.print(2, 0, "Driver: %s", drivebase.drivers[drivebase.cur_driver].name);
-	gyro.finish_calibrating(); //Finishes calibrating gyro before program starts
+	// gyro.finish_calibrating(); //Finishes calibrating gyro before program starts
 }
 
 /**
@@ -84,48 +79,50 @@ void competition_initialize() {}
  * from where it left off.
  */
 void autonomous() {
+  // load_positions();
+  // load_auton();
+  // run_auton();
 }
 
 void opcontrol() {
+	move_stop();
+	// while(true){
+	// 	printf("%d\n", b_dist.get());
+	// 	delay(10);
+	// }
+	// f_lift_m.move(40);
+	pros::Task intk_task(intk_c);
+  drivebase.driver_practice();
+  
+	master.clear();
+	// b_lift.reset();
+	// Task([](){ 
+	// 	f_lift.reset();
+	// });
+	// f_claw_p.set_value(0);
+	// b_claw_p.set_value(0);
+	// skills();
+	// skills2();
 
-	wait_until(master.get_digital_new_press(DIGITAL_R1));
-	b_claw_p.set_value(HIGH);//locks in goals and raises lift
-	f_claw_p.set_value(HIGH);
-	// f_lift.move_absolute(600, 100, true, 100);
-	// b_lift.move_absolute(100);
+	//Intake Jam code
+	Task([](){
+		Timer intake_t ("intake jam", false);
+		intk.move(127);
+		while(true){
+			if(intake_jam.get_new_press()) intake_t.reset(); //Start timer when pressed
+			else if(!intake_jam.get_value()) intake_t.reset(false); //End timer when unpressed
+			if(intake_t.get_time() > 1000){ //If pressed for more than 1 sec, reverse intk
+				intk.move(-127);
+				wait_until(!intake_jam.get_value()); //Waits for unjam plus some time
+				delay(150);
+				intk.move(127);
+			}
+			delay(10);
+		}
+	});
 
-	// flatten_against_wall(true); //resets, change to dist sensor
-	// tracking.reset();
-  int start = millis();
-
-	// move_start(move_types::turn_angle, turn_angle_params(85.0)); //turns to goal
-	drivebase.set_state(HIGH);
-	b_lift.move_absolute(100); //lowers lifts
-	f_lift.move_absolute(0, 100, true, 50);
-	// f_lift.move(-10); //holds lift down
-
-	// // drivebase.move(0.0, 25, 0.0);
-	// // move_start(move_types::tank_point, tank_point_params({-5.0, 0.0, -90.0}, false, 127.0, 1.0, true, 6.5, 150.0, 0.0, 0, {6.0, 0.5}), false);
-	// // f_detect_goal(false);
-
-	// move_start(move_types::turn_angle, turn_angle_params(90.0)); //aligns to ramp
-
-	// wait_until(master.get_digital_new_press(DIGITAL_R1));
-	gyro.climb_ramp();
-  gyro.level(1.8, 650);
-	b_claw_p.set_value(LOW);
-	f_claw_p.set_value(LOW);
-  b_lift.move(-10);
-  f_lift.move(-10);
-
-  printf("\n\nStart: %d\n", start);
-  printf("\n\nEnd: %d\n", millis());
-  printf("\n\nTotal: %d\n", millis()-start);
-  master.clear();
-  master.print(0, 0, "Time:%d", millis()-start);
 
 	while(true){
-		GUI::update();
 		delay(10);
 	}
 }

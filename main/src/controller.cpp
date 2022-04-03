@@ -2,42 +2,21 @@
 
 // Buttons
 
-
-//aidan these ones
+// lift buttons
 controller_digital_e_t lift_up_button = DIGITAL_R1;
 controller_digital_e_t lift_down_button = DIGITAL_R2;
-controller_digital_e_t lift_release_button =  DIGITAL_L2;
-controller_digital_e_t lift_both_down_button = DIGITAL_A;
-
-
-controller_digital_e_t shift_button = DIGITAL_X;
-controller_digital_e_t intake_button = DIGITAL_B;
-controller_digital_e_t reverse_drive_button = DIGITAL_L1;
-controller_digital_e_t partner_intk_reverse = DIGITAL_B;
-controller_digital_e_t partner_intk_on = DIGITAL_X;
-
-controller_digital_e_t partner_f_up = DIGITAL_R1;
-controller_digital_e_t partner_f_down = DIGITAL_R2;
-controller_digital_e_t partner_b_up = DIGITAL_L1;
-controller_digital_e_t partner_b_down = DIGITAL_L2;
-
-
-// back lift buttons
-controller_digital_e_t b_lift_up_button = DIGITAL_R1;
-controller_digital_e_t b_lift_down_button = DIGITAL_R2;
-controller_digital_e_t b_lift_release_button = DIGITAL_DOWN;
-
-// front lift buttons
-controller_digital_e_t f_lift_up_button = DIGITAL_RIGHT;
-controller_digital_e_t f_lift_down_button = DIGITAL_L2;
-controller_digital_e_t f_lift_release_button = DIGITAL_UP;
-
-
+controller_digital_e_t lift_claw_toggle_button =  DIGITAL_L2;
+controller_digital_e_t lift_tilt_toggle_button =  DIGITAL_L1;
 
 // misc buttons
-controller_digital_e_t cancel_button = DIGITAL_L2;
-controller_digital_e_t ok_button = DIGITAL_LEFT;
-controller_digital_e_t tracking_button = DIGITAL_RIGHT;
+controller_digital_e_t intake_button = DIGITAL_Y;
+controller_digital_e_t ok_button = DIGITAL_A;
+
+controller_digital_e_t intake_reverse_button = DIGITAL_B;
+controller_digital_e_t shift_button = DIGITAL_DOWN;
+controller_digital_e_t hitch_toggle_button = DIGITAL_B;
+controller_digital_e_t b_claw_toggle_button = DIGITAL_X;
+
 
 
 std::array<_Controller*, num_controller> _Controller::objs; //= {nullptr};
@@ -46,11 +25,11 @@ _Task _Controller::controller_task = nullptr;
 int constructed = 0;
 
 _Controller::_Controller(pros::controller_id_e_t id): pros::Controller{id}
-  {
-      objs[constructed] = this;
-      this->controller_num = constructed+1;
-      constructed++;
-  }
+{
+  objs[constructed] = this;
+  this->controller_num = constructed+1;
+  constructed++;
+}
 
 void _Controller::print_queue(void* params){
   _Task* ptr = _Task::get_obj(params);
@@ -92,18 +71,28 @@ void _Controller::queue_handle(){
   }
 }
 
+//template this at some point
 void _Controller::print(std::uint8_t line, std::uint8_t col, const char* fmt, ... ){
   char buffer[19];
   std::va_list args;
   va_start(args, fmt);
-  vsnprintf(buffer,19,fmt,args);
+  vsnprintf(buffer, 19, fmt, args);
   va_end(args);
   std::function<void()> func = [=](){
-    pros::Controller::print(line,col,buffer);
-    controller_queue.print("%d| printing %s to %d\n",millis(), buffer, this->controller_num);
+    pros::Controller::print(line, col, buffer);
+    controller_queue.print("%d| printing %s to %d\n", millis(), buffer, this->controller_num);
   };
   this->add_to_queue(func);
-  controller_queue.print("%d| adding print to queue for controller %d\n",millis(), this->controller_num);
+  controller_queue.print("%d| adding print to queue for controller %d\n", millis(), this->controller_num);
+
+}
+void _Controller::print(std::uint8_t line, std::uint8_t col, std::string str){
+  std::function<void()> func = [=](){
+    pros::Controller::print(line, col, str.c_str());
+    controller_queue.print("%d| printing %s to %d\n", millis(), str.c_str(), this->controller_num);
+  };
+  this->add_to_queue(func);
+  controller_queue.print("%d| adding print to queue for controller %d\n", millis(), this->controller_num);
 
 }
 void _Controller::clear_line (std::uint8_t line){
@@ -142,7 +131,8 @@ bool _Controller::interrupt(bool analog, bool digital, bool OK_except){
     if (fabs(get_analog(ANALOG_RIGHT_Y)) > 15) return true;
   }
   if(digital){
-    if (!OK_except && get_digital(ok_button)) return true;
+    if (get_digital(ok_button)) return !OK_except;
+    if (get_digital(DIGITAL_A)) return true;
     if (get_digital(DIGITAL_B)) return true;
     if (get_digital(DIGITAL_Y)) return true;
     if (get_digital(DIGITAL_X)) return true;
@@ -159,5 +149,37 @@ bool _Controller::interrupt(bool analog, bool digital, bool OK_except){
   return false;
 }
 
+controller_digital_e_t _Controller::wait_for_press(std::vector<controller_digital_e_t> buttons, int timeout){
+  int start_time = millis();
+  controller_queue.print("%d| waiting for button press from controller %d\n", millis(), this->controller_num);
+  controller_digital_e_t button = static_cast<controller_digital_e_t>(0);
+  
+  wait_until(button != static_cast<controller_digital_e_t>(0)){
+    for(std::vector<controller_digital_e_t>::iterator it = buttons.begin(); it != buttons.end(); it++){
+      if(get_digital_new_press(*it)) button = *it;
+    }
+
+    if(timeout != 0 && millis() - start_time > timeout){
+      controller_queue.print("%d| timed out on waiting for button press from controller %d\n", millis(), this->controller_num);
+      return static_cast<controller_digital_e_t>(0);
+    }
+  }
+  controller_queue.print("%d| button %d pressed from controller %d\n", millis(), button, this->controller_num);
+
+  return button;
+}
 
 
+//create wait for press for multiple buttons and return the one that was pressed
+void _Controller::wait_for_press(controller_digital_e_t button, int timeout){
+  int start_time = millis();
+  controller_queue.print("%d| waiting for button %d from controller %d\n", millis(), button, this->controller_num);
+  
+  wait_until(get_digital_new_press(button)){
+    if(timeout != 0 && millis() - start_time > timeout){
+      controller_queue.print("%d| timed out on waiting for button %d press from controller %d\n", millis(), button, this->controller_num);
+      return;
+    }
+  }
+  controller_queue.print("%d| button %d pressed from controller %d\n", millis(), button, this->controller_num);
+}
