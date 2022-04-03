@@ -87,7 +87,6 @@ void autonomous() {
 void opcontrol() {
 	/* Nathan:
   check what actually kills the auto balance loop
-  integrate pneumatics
 	auton give up func - ask mike
   
 	lvgl images

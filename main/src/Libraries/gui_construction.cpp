@@ -1,7 +1,4 @@
 #include "gui.hpp"
-#include "pros/adi.h"
-#include "pros/ext_adi.h"
-#include <limits>
 
 /*Field array*/ static std::vector<std::bitset<200>> field (200, std::bitset<200>{}); //Initializes to 200 blank bitsets
 /*Temperature Alert Flag*/ static bool temp_flashed = false;
@@ -24,24 +21,24 @@ extern int elastic_f_up_time, elastic_f_down_time; //Declared in f_lift.cpp
 //1:temp(leave as 0), 2:long name, 3:short name
 std::array<std::tuple<pros::Motor*, int, std::string, std::string, Text_*>, 8> motors_for_gui = {
   std::make_tuple(&front_l, 0, "Front Left", "FL", nullptr),
-  std::make_tuple(&front_r, 0, "Front Right", "FR", nullptr),
+  std::make_tuple(&center_l, 0, "Center Left", "CL", nullptr),
   std::make_tuple(&back_l, 0, "Back Left", "BL", nullptr),
+  std::make_tuple(&front_r, 0, "Front Right", "FR", nullptr),
+  std::make_tuple(&center_r, 0, "Center Right", "CR", nullptr),
   std::make_tuple(&back_r, 0, "Back Right", "BR", nullptr),
   std::make_tuple(&f_lift_m, 0, "Front Lift", "F", nullptr),
   std::make_tuple(&b_lift_m, 0, "Back Lift", "B", nullptr),
-  std::make_tuple(nullptr, 0, "", "", nullptr),
-  std::make_tuple(nullptr, 0, "", "", nullptr),
 };//std::make_tuple(nullptr, 0, "", "", nullptr),
 
 Page temps ("Temperature"); //Motor temps
-Text mot_temp_1(75, 85, GUI::Style::CENTRE, TEXT_SMALL, temps, std::get<3>(motors_for_gui[0]) + ": %dC", std::get<1>(motors_for_gui[0]), COLOUR(BLACK));
-Text mot_temp_2(185, 85, GUI::Style::CENTRE, TEXT_SMALL, temps, std::get<3>(motors_for_gui[1]) + ": %dC", std::get<1>(motors_for_gui[1]), COLOUR(BLACK));
-Text mot_temp_3(295, 85, GUI::Style::CENTRE, TEXT_SMALL, temps, std::get<3>(motors_for_gui[2]) + ": %dC", std::get<1>(motors_for_gui[2]), COLOUR(BLACK));
-Text mot_temp_4(405, 85, GUI::Style::CENTRE, TEXT_SMALL, temps, std::get<3>(motors_for_gui[3]) + ": %dC", std::get<1>(motors_for_gui[3]), COLOUR(BLACK));
-Text mot_temp_5(75, 175, GUI::Style::CENTRE, TEXT_SMALL, temps, std::get<3>(motors_for_gui[4]) + ": %dC", std::get<1>(motors_for_gui[4]), COLOUR(BLACK));
-Text mot_temp_6(185, 175, GUI::Style::CENTRE, TEXT_SMALL, temps, std::get<3>(motors_for_gui[5]) + ": %dC", std::get<1>(motors_for_gui[5]), COLOUR(BLACK));
-Text mot_temp_7(295, 175, GUI::Style::CENTRE, TEXT_SMALL, temps, std::get<3>(motors_for_gui[6]) + ": %dC", std::get<1>(motors_for_gui[6]), COLOUR(BLACK));
-Text mot_temp_8(405, 175, GUI::Style::CENTRE, TEXT_SMALL, temps, std::get<3>(motors_for_gui[7]) + ": %dC", std::get<1>(motors_for_gui[7]), COLOUR(BLACK));
+Text mot_temp_1(90, 60, GUI::Style::CENTRE, TEXT_SMALL, temps, std::get<3>(motors_for_gui[0]) + ": %dC", std::get<1>(motors_for_gui[0]), COLOUR(BLACK));
+Text mot_temp_2(90, 125, GUI::Style::CENTRE, TEXT_SMALL, temps, std::get<3>(motors_for_gui[1]) + ": %dC", std::get<1>(motors_for_gui[1]), COLOUR(BLACK));
+Text mot_temp_3(90, 190, GUI::Style::CENTRE, TEXT_SMALL, temps, std::get<3>(motors_for_gui[2]) + ": %dC", std::get<1>(motors_for_gui[2]), COLOUR(BLACK));
+Text mot_temp_4(390, 60, GUI::Style::CENTRE, TEXT_SMALL, temps, std::get<3>(motors_for_gui[3]) + ": %dC", std::get<1>(motors_for_gui[3]), COLOUR(BLACK));
+Text mot_temp_5(390, 125, GUI::Style::CENTRE, TEXT_SMALL, temps, std::get<3>(motors_for_gui[4]) + ": %dC", std::get<1>(motors_for_gui[4]), COLOUR(BLACK));
+Text mot_temp_6(390, 190, GUI::Style::CENTRE, TEXT_SMALL, temps, std::get<3>(motors_for_gui[5]) + ": %dC", std::get<1>(motors_for_gui[5]), COLOUR(BLACK));
+Text mot_temp_7(240, 90, GUI::Style::CENTRE, TEXT_SMALL, temps, std::get<3>(motors_for_gui[6]) + ": %dC", std::get<1>(motors_for_gui[6]), COLOUR(BLACK));
+Text mot_temp_8(240, 160, GUI::Style::CENTRE, TEXT_SMALL, temps, std::get<3>(motors_for_gui[7]) + ": %dC", std::get<1>(motors_for_gui[7]), COLOUR(BLACK));
 
 Page checks("System Checks");
 Button drive_motors (15, 45, 100, 75, GUI::Style::SIZE, Button::SINGLE, checks, "Drive Motors");
@@ -51,7 +48,7 @@ Button pneums (360, 45, 100, 75, GUI::Style::SIZE, Button::SINGLE, checks, "Pneu
 Button save_pos (15, 140, 100, 75, GUI::Style::SIZE, Button::SINGLE, checks, "Save Position");
 Button misc_checks (130, 140, 100, 75, GUI::Style::SIZE, Button::SINGLE, checks, "Misc");
 Button auton_selector (245, 140, 100, 75, GUI::Style::SIZE, Button::SINGLE, checks, "Select Autons");
-// Button placeholder (360, 140, 100, 75, GUI::Style::SIZE, Button::SINGLE, checks, "Misc");
+Button placeholder (360, 140, 100, 75, GUI::Style::SIZE, Button::SINGLE, checks, "Placeholder");
 
 Page track ("Tracking"); //Display tracking vals and reset btns
 Text track_x(50, 45, GUI::Style::CENTRE, TEXT_SMALL, track, "X:%.1f", tracking.x_coord);
@@ -102,7 +99,7 @@ Button perpendicular_error (245, 75, 225, 70, GUI::Style::SIZE, Button::SINGLE, 
 Button grid (10, 155, 225, 70, GUI::Style::SIZE, Button::SINGLE, tuning, "Grid");
 Button spin360 (245, 155, 225, 70, GUI::Style::SIZE, Button::SINGLE, tuning, "360 Spin");
 
-Page motors ("Motor Control");
+Page motors ("Motor Control"); //Motor Control for known ports
 Slider mot_speed_set (MID_X, 60, 180 , 15, GUI::Style::CENTRE, Slider::HORIZONTAL, -127, 127, motors, "Speed");
 Text mot_1_text (65, 115, GUI::Style::CENTRE, TEXT_SMALL, motors, std::get<2>(motors_for_gui[0]));
 Text mot_2_text (180, 115, GUI::Style::CENTRE, TEXT_SMALL, motors, std::get<2>(motors_for_gui[1]));
@@ -130,15 +127,22 @@ Button mot_7_stop (300, 190, 45, 30, GUI::Style::SIZE, Button::SINGLE, motors, "
 Button mot_8_stop (415, 190, 45, 30, GUI::Style::SIZE, Button::SINGLE, motors, "Stop");
 
 Page pneumatics ("Pneumatics"); //Pneumatic testing page for known ports
-Button pneum_1 (15, 45, 100, 75, GUI::Style::SIZE, Button::TOGGLE, pneumatics, (Piston::list_for_gui[0] ? Piston::list_for_gui[0]->get_name() : ""));
-Button pneum_2 (130, 45, 100, 75, GUI::Style::SIZE, Button::TOGGLE, pneumatics, (Piston::list_for_gui[1] ? Piston::list_for_gui[1]->get_name() : ""));
-Button pneum_3 (245, 45, 100, 75, GUI::Style::SIZE, Button::TOGGLE, pneumatics, (Piston::list_for_gui[2] ? Piston::list_for_gui[2]->get_name() : ""));
-Button pneum_4 (360, 45, 100, 75, GUI::Style::SIZE, Button::TOGGLE, pneumatics, (Piston::list_for_gui[3] ? Piston::list_for_gui[3]->get_name() : ""));
-Button pneum_5 (15, 140, 100, 75, GUI::Style::SIZE, Button::TOGGLE, pneumatics, (Piston::list_for_gui[4] ? Piston::list_for_gui[4]->get_name() : ""));
-Button pneum_6 (130, 140, 100, 75, GUI::Style::SIZE, Button::TOGGLE, pneumatics, (Piston::list_for_gui[5] ? Piston::list_for_gui[5]->get_name() : ""));
-Button pneum_7 (245, 140, 100, 75, GUI::Style::SIZE, Button::TOGGLE, pneumatics, (Piston::list_for_gui[6] ? Piston::list_for_gui[6]->get_name() : ""));
-Button pneum_8 (360, 140, 100, 75, GUI::Style::SIZE, Button::TOGGLE, pneumatics, (Piston::list_for_gui[7] ? Piston::list_for_gui[7]->get_name() : ""));
-
+Button pneum_1 (15, 45, 100, 75, GUI::Style::SIZE, Button::TOGGLE, pneumatics);
+Button pneum_2 (130, 45, 100, 75, GUI::Style::SIZE, Button::TOGGLE, pneumatics);
+Button pneum_3 (245, 45, 100, 75, GUI::Style::SIZE, Button::TOGGLE, pneumatics);
+Button pneum_4 (360, 45, 100, 75, GUI::Style::SIZE, Button::TOGGLE, pneumatics);
+Button pneum_5 (15, 140, 100, 75, GUI::Style::SIZE, Button::TOGGLE, pneumatics);
+Button pneum_6 (130, 140, 100, 75, GUI::Style::SIZE, Button::TOGGLE, pneumatics);
+Button pneum_7 (245, 140, 100, 75, GUI::Style::SIZE, Button::TOGGLE, pneumatics);
+Button pneum_8 (360, 140, 100, 75, GUI::Style::SIZE, Button::TOGGLE, pneumatics);
+Text pneum_1_text (0, 0, GUI::Style::CENTRE, TEXT_SMALL, pneumatics, "%s", std::function([](){return Piston::get_name(1);}));
+Text pneum_2_text (0, 0, GUI::Style::CENTRE, TEXT_SMALL, pneumatics, "%s", std::function([](){return Piston::get_name(2);}));
+Text pneum_3_text (0, 0, GUI::Style::CENTRE, TEXT_SMALL, pneumatics, "%s", std::function([](){return Piston::get_name(3);}));
+Text pneum_4_text (0, 0, GUI::Style::CENTRE, TEXT_SMALL, pneumatics, "%s", std::function([](){return Piston::get_name(4);}));
+Text pneum_5_text (0, 0, GUI::Style::CENTRE, TEXT_SMALL, pneumatics, "%s", std::function([](){return Piston::get_name(5);}));
+Text pneum_6_text (0, 0, GUI::Style::CENTRE, TEXT_SMALL, pneumatics, "%s", std::function([](){return Piston::get_name(6);}));
+Text pneum_7_text (0, 0, GUI::Style::CENTRE, TEXT_SMALL, pneumatics, "%s", std::function([](){return Piston::get_name(7);}));
+Text pneum_8_text (0, 0, GUI::Style::CENTRE, TEXT_SMALL, pneumatics, "%s", std::function([](){return Piston::get_name(8);}));
 
 Page ports ("Ports"); //Shows what ports to use on builder util
 Text mot (10, 50, GUI::Style::CORNER, TEXT_MEDIUM, ports, "Motors: %s", motor_port_nums);
@@ -215,14 +219,23 @@ void main_setup(){
   std::get<4>(motors_for_gui[6]) = &mot_temp_7;
   std::get<4>(motors_for_gui[7]) = &mot_temp_8;
 
-  for (int i = 0; i < 7; i++){
+  pneum_1.add_text(pneum_1_text);
+  pneum_2.add_text(pneum_2_text);
+  pneum_3.add_text(pneum_3_text);
+  pneum_4.add_text(pneum_4_text);
+  pneum_5.add_text(pneum_5_text);
+  pneum_6.add_text(pneum_6_text);
+  pneum_7.add_text(pneum_7_text);
+  pneum_8.add_text(pneum_8_text);
+
+  for (int i = 0; i < 8; i++){
     std::get<1>(motors_for_gui[i]) = std::get<0>(motors_for_gui[i]) ? std::get<0>(motors_for_gui[i])->get_temperature() : std::numeric_limits<int>::max();
     if(std::get<1>(motors_for_gui[i]) == std::numeric_limits<int>::max()) std::get<4>(motors_for_gui[i])->set_active(false);
-    std::get<4>(motors_for_gui[i])->set_background(40, 30);
+    std::get<4>(motors_for_gui[i])->set_background(40, 20);
   }
 
   temps.set_loop_func([](){
-    for (int i = 0; i < 7; i++){
+    for (int i = 0; i < 8; i++){
       Text_* text = std::get<4>(motors_for_gui[i]);
       if (text){
         switch(std::get<1>(motors_for_gui[i])){
@@ -358,10 +371,10 @@ void main_setup(){
     std::string coord = coord_c;
     if (GUI::prompt("Move back lift to" + coord, "Press to move back lift to" + coord, 1000)) b_lift.move_absolute(b_lift_val.get_value());
   });
-  // front_claw.set_func([](){f_claw.set_value(HIGH);});
-  // front_claw.set_off_func([](){f_claw.set_value(LOW);});
-  // back_claw.set_func([](){b_claw.set_value(HIGH);});
-  // back_claw.set_off_func([](){b_claw.set_value(LOW);});
+  front_claw.set_func([](){f_claw_o.set_value(HIGH); f_claw_c.set_value(LOW);});
+  front_claw.set_off_func([](){f_claw_o.set_value(LOW); f_claw_c.set_value(HIGH);});
+  back_claw.set_func([](){b_claw.set_value(HIGH);});
+  back_claw.set_off_func([](){b_claw.set_value(LOW);});
 
   //Known Pneumatics Port Setup
   if(Piston::list_for_gui[0]){

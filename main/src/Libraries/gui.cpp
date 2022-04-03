@@ -546,7 +546,10 @@ void Button::draw() const{
   screen::set_eraser(b_col);
   screen::print(TEXT_SMALL, text_x, text_y, label.c_str());
   screen::print(TEXT_SMALL, text_x1, text_y1, label1.c_str());
-  if(title) title->draw();
+  if(title){
+    title->b_col = b_col;
+    title->draw();
+  }
 }
 
 void Button::draw_pressed() const{
@@ -557,12 +560,14 @@ void Button::draw_pressed() const{
   screen::set_pen(b_col_dark);
   screen::set_eraser(GUI::current_page->b_col);
   GUI::draw_oblong(x1, y1, x2, y2, 0.04, 0.2);
-
   screen::set_pen(l_col);
   screen::set_eraser(b_col_dark);
   screen::print(TEXT_SMALL, text_x, text_y, label.c_str());
   screen::print(TEXT_SMALL, text_x1, text_y1, label1.c_str());
-  if(title) title->draw();
+  if(title){
+    title->b_col = b_col_dark;
+    title->draw();
+  }
 }
 
 void Slider::draw() const{
