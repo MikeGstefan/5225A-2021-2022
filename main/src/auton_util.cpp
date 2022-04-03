@@ -4,6 +4,14 @@
 Reset_dist reset_dist_r(&r_dist, 7.5);
 Reset_dist reset_dist_l(&l_dist, 7.5);
 
+
+void f_claw(bool state){
+  f_claw_o.set_state(state);
+  f_claw_c.set_state(state);
+}
+
+
+
 double get_filtered_output(ADIUltrasonic sensor, int check_count, uint16_t lower_bound, uint16_t upper_bound, int timeout){
   Timer timer{"Timer"};
   int success_count = 0;
@@ -81,7 +89,7 @@ void b_detect_goal(){
         delay(33);
     }
   misc.print("Detected %d\n", b_dist.get());
-  b_claw_p.set_value(1);
+  // b_claw_p.set_value(1);
 }
 
 
@@ -108,7 +116,7 @@ void f_detect_goal(bool safety){
   }
   
   misc.print("Detected %d\n", f_dist.get());
-  f_claw.set_state(1);
+  // f_claw.set_state(1);
 }
 
 

@@ -366,7 +366,7 @@ bool Drivebase::get_state(){
 
 void Drivebase::set_state(bool state){
   this->state = state;
-  trans_p.set_value(state);
+  // trans_p.set_value(state);
 }
 
 

@@ -17,6 +17,9 @@ using namespace pros;
 #define front_dist_dist 3.85
 
 
+void f_claw(bool state);
+
+
 double get_filtered_output(ADIUltrasonic sensor, int check_count, uint16_t lower_bound, uint16_t upper_bound, int timeout); // is blocking code
 
 

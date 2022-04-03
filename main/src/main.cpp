@@ -97,6 +97,9 @@ void autonomous() {
 // extern Slider mot_speed_set;
 
 void opcontrol() {
+	bool claw_state = false;
+	int f_claw_t = 0, b_claw_t = 0;
+
 	while(true){
 		if(master.get_digital_new_press(DIGITAL_A)){
 			drivebase.move(0,0);
@@ -123,14 +126,32 @@ void opcontrol() {
 			while(fabs(b_lift.motor.get_target_position() - b_lift.motor.get_position()) >10)delay(10);
 			// b_lift.move(0);
 		}
-		if(master.get_digital_new_press(DIGITAL_X))b_claw.toggle_state();
+		if(master.get_digital_new_press(DIGITAL_X)){
+			b_claw.toggle_state();
+			b_claw_t = millis();
+		}
+		if(master.get_digital_new_press(DIGITAL_Y)){
+			claw_state = !claw_state;
+			f_claw(claw_state);
+			f_claw_t = millis();
+		}
 
-		if(abs(master.get_analog(ANALOG_LEFT_Y)) > 30)b_lift.move(master.get_analog(ANALOG_LEFT_Y));
+		if(abs(master.get_analog(ANALOG_RIGHT_Y)) > 30)b_lift.move(master.get_analog(ANALOG_RIGHT_Y));
 		else b_lift_m.move_velocity(0);
 
-
+		if(f_dist.get() < 30 && (millis()- f_claw_t) >3000){
+			claw_state = 0;
+			f_claw(1);
+			f_claw_t = millis();
+		}
+		if(b_dist.get() < 40 && (millis() - b_claw_t) > 3000){
+			b_claw.set_value(1);
+			b_claw_t = millis();
+			printf("CLOSING %d\n", b_dist.get());
+		}
 		drivebase.handle_input();
 		delay(10);
+		printf("sensor %d\n", b_dist.get());
 	}
 	while(!master.get_digital_new_press(DIGITAL_A))delay(10);
 	drivebase.move(0.0, 127.0);
