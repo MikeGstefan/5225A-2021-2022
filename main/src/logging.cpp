@@ -20,20 +20,22 @@ Data::Data(const char* obj_name, const char* id_code, log_types log_type_param, 
 
 
 
-Data task_log("tasks.txt","$01", general, log_locations::both);
-Data controller_queue("controller.txt","$02", general,log_locations::none);
-Data tracking_data("tracking.txt","$03",general,log_locations::both);
-Data tracking_imp("tracking.txt","$03",general,log_locations::both);
-Data misc("misc.txt", "$04",general,log_locations::both);
-Data drivers_data("driver.txt", "$05", general,log_locations::none);
-Data motion_i("motion.txt","$06",general,log_locations::both);
-Data motion_d("motion.txt", "$06", general,log_locations::both);
-Data term("terminal.txt","$07",general,log_locations::t);
-Data log_d("log.txt","$08",general,log_locations::both);
-Data graph("graph.txt","$09",general,log_locations::sd);
-Data events("events.txt", "$10", general,log_locations::both);
-Data skills_d("skills.txt", "$11", general, log_locations::both);
+Data task_log("tasks.txt","$01", debug, log_locations::both);
+Data controller_queue("controller.txt","$02", debug,log_locations::none);
+Data tracking_data("tracking.txt","$03",debug,log_locations::sd);
+Data tracking_imp("tracking.txt","$03",debug,log_locations::both);
+Data misc("misc.txt", "$04",debug,log_locations::both);
+Data drivers_data("driver.txt", "$05", debug,log_locations::none);
+Data motion_i("motion.txt","$06",debug,log_locations::both);
+Data motion_d("motion.txt", "$06", debug,log_locations::sd);
+Data term("terminal.txt","$07",debug,log_locations::t);
+Data log_d("log.txt","$08",debug,log_locations::both);
+Data graph("graph.txt","$09",debug,log_locations::sd);
+Data events("events.txt", "$10", debug,log_locations::sd);
+Data state_log("state.txt", "$11", debug,log_locations::both);
 Data ERROR("error.txt", "$12", error, log_locations::both);
+Data skills_d("skills.txt", "$11", general, log_locations::both);
+
 
 vector<Data*> Data::get_objs(){
   return obj_list;
@@ -81,9 +83,6 @@ void Data::print(const char* format,...){
   va_start(args, format);
   int buffer_len = vsnprintf(buffer,256,format,args) + 3;
   va_end(args);
-
-  //Events log gets special formatting
-  if(this == &events) buffer_len = snprintf(buffer,256,"\n\n%s\n\n",buffer) + 3;
 
   if(int(this->log_type) !=0){
     switch(log_location){
@@ -178,10 +177,10 @@ uintptr_t data_size(){//returns the number of characters needed to be printed fr
 
 
 char* Data::to_char(const char* fmt, ...){
-    va_list args;
-    va_start(args, fmt);
-    char* buffer = new char[256];
-    vsnprintf(buffer, 256, fmt, args);
-    va_end(args);
-    return buffer;
+  va_list args;
+  va_start(args, fmt);
+  char* buffer = new char[256];
+  vsnprintf(buffer, 256, fmt, args);
+  va_end(args);
+  return buffer;
 }

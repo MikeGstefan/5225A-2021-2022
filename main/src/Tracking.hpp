@@ -5,7 +5,6 @@
 #include "geometry.hpp"
 #include "pid.hpp"
 #include "drive.hpp"
-#include "geometry.hpp"
 #include "task.hpp"
 #include "Libraries/gui.hpp"
 #include <iostream>
@@ -26,24 +25,24 @@ extern _Task move_t;
 // Back: get_pitch, 1
 // Front: get_pitch, -1
 #define GYRO_AXIS get_roll
-#define GYRO_SIDE 1
+#define GYRO_SIDE -1
 
 
 #define DIST_BACK 8.5
 #define DIST_FRONT 8.5
 
 
-const int min_move_power_a = 30;
-const int min_move_power_x = 40;
-const int min_move_power_y = 16;
+constexpr int min_move_power_a = 30;
+constexpr int min_move_power_x = 40;
+constexpr int min_move_power_y = 16;
 
 
 void update(void* params);
 
 
 class Tracking{
-
-public:
+  public:
+    //Can we make x_coord, y_coord, global_angle a Position
     double x_coord = 0.0; double y_coord = 0.0; double global_angle = 0.0; //double target_x = 0.0;
     double power_x, power_y, power_a;
     double l_velo, r_velo, b_velo;
@@ -52,12 +51,12 @@ public:
     bool move_complete = true, move_started = false;
     int movetime = 0;
 
-
-    Position g_velocity;   // global g_velocity stores x, y and angular velocities
+    //global g_velocity stores x, y and angular velocities
+    Position g_velocity;
     void wait_for_dist(double distance, int timeout = 0);
     double get_angle_in_deg();
     void reset(double x=0.0, double y=0.0, double a=0.0);
-
+    void reset(Position position);
 };
 
 
@@ -65,6 +64,7 @@ class Gyro{
   private:
     Imu& inertial;
     double angle, last_angle;
+    int time;
 
   public:
     Gyro(Imu& imu);

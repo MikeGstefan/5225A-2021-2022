@@ -1,8 +1,8 @@
-
 #include "config.hpp"
 #include "drive.hpp"
 #include "controller.hpp"
 #include "Libraries/gui.hpp"
+#include "Libraries/printing.hpp"
 #include "pid.hpp"
 #include "Tracking.hpp"
 #include "task.hpp"
@@ -12,17 +12,12 @@
 #include "Subsystems/b_lift.hpp"
 #include "distance.hpp"
 
-// using namespace std;
 #include "task.hpp"
 #include "util.hpp"
-
-#include <fstream>
-#include <sys/wait.h>
 using namespace std;
 
-pros::Task *updt = nullptr;
+pros::Task *updt = nullptr; //What's this for
 const GUI* GUI::current_gui = &g_main;
-
 
 /**
  * Runs initialization code. This occurs as soon as the program is started.
@@ -30,8 +25,8 @@ const GUI* GUI::current_gui = &g_main;
  * All other competition modes are blocked by initialize; it is recommended
  * to keep execution time for this mode under a few seconds.
  */
-//  pros::Task *updt = nullptr;
- bool auton_run = false; // has auton run
+
+bool auton_run = false; // has auton run
 
 void initialize() {
 	// gyro.calibrate();
@@ -39,10 +34,6 @@ void initialize() {
 	// front_r.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
 	// back_l.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
 	// back_r.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
-	// Autons::file_read();
-	autonFile_read();
-	f_lift.motor.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
-	b_lift.motor.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
 	drivebase.download_curve_data();
 	Data::init();
 	_Controller::init();
@@ -88,55 +79,22 @@ void competition_initialize() {}
  * from where it left off.
  */
 void autonomous() {
-	// skills();
-	
-
+  load_positions();
+  load_auton();
+  run_auton();
 }
 
-
-// extern Slider mot_speed_set;
-
 void opcontrol() {
-	while(!master.get_digital_new_press(DIGITAL_A))delay(10);
-	drivebase.move(0.0, 127.0);
-	Timer timer{"timer"};
-	// while(!master.get_digital_new_press(DIGITAL_A) && timer.get_time() < 500){
-	// 	// printf("vel: %lf\n", (tracking.l_velo + tracking.r_velo) / 2);
-	// 	printf("vel:%lf\n", rad_to_deg(tracking.g_velocity.angle));
-	// 	delay(10);
-	// }
-	//power | velocity
-	// 60 | 200
-	// 80 | 274
-	// 100 | 370
-	// 127 | 418
-	// ratio is 3.29
+	/* Nathan:
+  check what actually kills the auto balance loop
+	auton give up func - ask mike
+  
+	lvgl images
+  2d sliders
+	*/
 
-	// move_start(move_types::tank_point, tank_point_params({0.0,60.0,0.0},false, 127.0,1.0,true,2.0,25.0));
-	// move_start(move_types::turn_angle, turn_angle_params(90.0, true,true, 5.0, 0.0));
-	// delay(5000);
-
-	// move_start(move_types::turn_angle, turn_angle_params(90.0, true,true, 0.0, 0.0));
-	move_start(move_types::tank_arc, tank_arc_params({0.0, 0.0}, {-12,12, -90.0}));
-
-	drivebase.move(0.0,0.0);
-	// int speed = 0;
 	while(true){
-		// drivebase.handle_input();
-		// if(master.get_digital_new_press(DIGITAL_A)){
-		// 	speed+=2;
-		// 	master.print(0,0,"%d", speed);
-		// }
-		// drivebase.move(0.0,speed);
-		GUI::update();
 		// drivebase.non_blocking_driver_practice();
-		
-		// if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_A)){
-		// 	int speed = mot_speed_set.get_value();
-		// 	move_start(move_types::line, line_params({0.0, 0.0}, {0.0, 24.0, 0.0}, speed));
-		// 	move_start(move_types::turn_angle, turn_angle_params(45.0, speed));
-		// 	move_start(move_types::line, line_params({0.0, 0.0}, {0.0, 24.0, 0.0}, speed));
-		// }
 		delay(10);
 	}
 }

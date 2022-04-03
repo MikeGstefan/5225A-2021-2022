@@ -9,14 +9,14 @@
 using namespace pros;
 
 enum class Distance_States{
-    stable,
-    turn_left,
-    turn_right,
+  stable,
+  turn_left,
+  turn_right,
 };
 
 class cDistance{
   public:
-      double last_distance = 0;
+    double last_distance = 0;
 };
 
 void distance_loop(double distance, int timeout = 0);

@@ -218,22 +218,22 @@ void Drivebase::update_lookup_table_util(){
 void Drivebase::handle_input(){
   // tracking.power_x = drivers[cur_driver].custom_drives[0].lookup(master.get_analog(drivers[cur_driver].joy_sticks[0]));
   tracking.power_y = drivers[cur_driver].custom_drives[1].lookup(master.get_analog(ANALOG_LEFT_Y));
-  tracking.power_a = 0.8 * drivers[cur_driver].custom_drives[2].lookup(master.get_analog(ANALOG_LEFT_X));
+  tracking.power_a = 0.7 * drivers[cur_driver].custom_drives[2].lookup(master.get_analog(ANALOG_LEFT_X));
 
   if(fabs(tracking.power_x) < deadzone) tracking.power_x = 0.0;
   if(fabs(tracking.power_y) < deadzone) tracking.power_y = 0.0;
   if(fabs(tracking.power_a) < deadzone) tracking.power_a = 0.0;
 
-  if(master.get_digital_new_press(reverse_drive_button)){
-    master.rumble("-");
-    reversed = !reversed;
-    if(reversed) master.print(0, 0, "Reverse");
-    else master.print(0, 0, "Forward");
-  }
-  if (reversed){
-    tracking.power_y *= -1;
-    tracking.power_x *= -1;
-  }
+  // if(master.get_digital_new_press(reverse_drive_button)){
+  //   master.rumble("-");
+  //   reversed = !reversed;
+  //   if(reversed) master.print(0, 0, "Reverse");
+  //   else master.print(0, 0, "Forward");
+  // }
+  // if (reversed){
+  //   tracking.power_y *= -1;
+  //   tracking.power_x *= -1;
+  // }
 
   if(this->state && (fabs(tracking.power_y) <deadzone && fabs(tracking.power_a) <deadzone)){
     // velo_brake();
@@ -268,7 +268,7 @@ void Drivebase::driver_practice(){
   // });
   
   // f_claw_p.set_value(LOW);
-  // b_claw_p.set_value(LOW);
+  b_claw.set_value(LOW);
   // lift.move(-10); // gives holding power
   bool intake_on = false;
   bool intake_reverse = false;
@@ -276,24 +276,24 @@ void Drivebase::driver_practice(){
   // master.print(2, 0, "Driver: %s", driver_name());
   while(true){
     while(true){
-      if(master.get_digital_new_press(tracking_button)){
-        master.print(1,1,"%.2f, %.2f, %.2f", tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle));
-      }
+      // if(master.get_digital_new_press(tracking_button)){
+      //   master.print(1,1,"%.2f, %.2f, %.2f", tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle));
+      // }
       if(master.get_digital_new_press(ok_button)){
-        // Autons::selector();
-        master.print(1,1,"HERE");
-        auto_select();
+        // auton_selector(); //talk to nathan if you're uncommenting this line
+        // master.print(1,1,"HERE");
         delay(2000);
       }
       drivebase.handle_input();
       // b_lift.handle();
-      handle_lifts();
-      // f_lift.handle();
+      // handle_lifts();
+      f_lift.handle(true);
+      // f_claw.handle();
+      // b_claw.handle();
+      // intake.handle();
      
 
       handle_trans();
-
-      GUI::update();
 
       // prints motor temps every second
       if(screen_timer.get_time() > 1000){
@@ -302,7 +302,7 @@ void Drivebase::driver_practice(){
         screen_timer.reset();
       }
       // takes away control from driver when motors overheat
-      if(front_l.get_temperature() >= 55 || front_r.get_temperature() >= 55 || back_r.get_temperature() >= 55 || back_l.get_temperature() >= 55 || b_lift_m.get_temperature() >= 55|| f_lift_m.get_temperature() >= 55|| intk.get_temperature() >= 55){
+      if(front_l.get_temperature() >= 55 || front_r.get_temperature() >= 55 || back_r.get_temperature() >= 55 || back_l.get_temperature() >= 55 || b_lift_m.get_temperature() >= 55|| f_lift_m.get_temperature() >= 55){
         master.rumble("- - - "); // rumbles controller if motors are hot to warn driver
         // move(0, 0, 0);  // stops movement
         // return;
@@ -327,19 +327,6 @@ void Drivebase::non_blocking_driver_practice(){
 
   // actual drive code
   drivebase.handle_input();
-
-  // takes away control from driver when motors overheat
-  if(inRange(front_l.get_temperature(), 55, std::numeric_limits<double>::max()-1) || inRange(front_r.get_temperature(), 55, std::numeric_limits<double>::max()-1) || inRange(back_l.get_temperature(), 55, std::numeric_limits<double>::max()-1) || inRange(back_r.get_temperature(), 55, std::numeric_limits<double>::max()-1)){
-    move(0, 0, 0);
-    master.print(0, 0, "fl%.0f r%.0f bl%.0f r%.0f\n", front_l.get_temperature(), front_r.get_temperature(), back_l.get_temperature(), back_r.get_temperature());
-    return;
-  }
-  // // prints motor temps every second
-  // if(screen_timer.get_time() > 1000){
-  //   drivers_data.print("fl%.0f r%.0f bl%.0f r%.0f\n", front_l.get_temperature(), front_r.get_temperature(), back_l.get_temperature(), back_r.get_temperature());
-  //   master.print(0, 0, "fl%.0f r%.0f bl%.0f r%.0f\n", front_l.get_temperature(), front_r.get_temperature(), back_l.get_temperature(), back_r.get_temperature());
-  //   screen_timer.reset();
-  // }
 }
 
 void Drivebase::next_driver(){
@@ -366,7 +353,7 @@ bool Drivebase::get_state(){
 
 void Drivebase::set_state(bool state){
   this->state = state;
-  trans_p.set_value(state);
+  drive_t.set_value(state);
 }
 
 

@@ -1,5 +1,10 @@
 #include "Tracking.hpp"
 #include "config.hpp"
+#include "drive.hpp"
+#include "logging.hpp"
+#include "pros/motors.h"
+#include "util.hpp"
+#include "geometry.hpp"
 
 Tracking tracking;
 
@@ -28,6 +33,15 @@ void Tracking::reset(double x, double y, double a){
   update_t.done_update();
 }
 
+void Tracking::reset(Position position){
+  update_t.data_update();
+  tracking_imp.print("resetting tracking from %.2f, %.2f, %.2f to %.2f, %.2f, %.2f\n", tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle), position.x, position.y, position.angle);
+  tracking.x_coord = position.x;
+  tracking.y_coord = position.y;
+  tracking.global_angle = deg_to_rad(position.angle);
+  update_t.done_update();
+}
+
 // gets angle closest to 360 degrees
 double Tracking::get_angle_in_deg(){
   return fmod(rad_to_deg(global_angle), 360);
@@ -35,12 +49,10 @@ double Tracking::get_angle_in_deg(){
 // waits until the distance from current position to starting position is greater than the specified amount
 void Tracking::wait_for_dist(double distance, int timeout){
   const Point start_pos = {tracking.x_coord, tracking.y_coord};
-  double delta_dist = 0.0;
   int start_time = millis();
-  while(distance >= delta_dist){
-    delta_dist = sqrt(pow(tracking.x_coord -start_pos.x,2) + pow(tracking.y_coord - start_pos.y,2));
-    delay(10);
-    if(timeout != 0 && millis() - start_time > timeout)break;
+
+  wait_until(sqrt(pow(tracking.x_coord - start_pos.x, 2) + pow(tracking.y_coord - start_pos.y, 2)) > distance){
+    if(timeout != 0 && millis() - start_time > timeout) break;
   }
 }
 
@@ -354,17 +366,17 @@ void tank_rush_goal(void* params){
       motion_d.print(" %d || error y : %.2f error a : %.2f pow y : %.2f, pow a : %.2f\n ", millis(), local_error.y, rad_to_deg(error.angle), tracking.power_y, tracking.power_a);
       graph.print("%d, %f\n", millis()-time, tracking.l_velo);
       // exits movement once the target has been overshot (if the sign of y error along the line has flipped)
-      if(f_touch.get_value()){
-        f_claw.set_state(1);
-        if (brake) drivebase.brake();
-        tracking.move_complete = true;
-        motion_i.print("%d || Ending tank rush goal target X: %f Y: %f A: %f at X: %f Y: %f A: %f time: %d\n", millis(), target.x, target.y, target.angle, tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle), millis()- time);
-        //log_time("ending starting time: %d, delta time: %d X: %f Y: %f A: %f from X: %f Y: %f A: %f \n", millis(),millis() -starttime, target_x, target_y, target_a, tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle));
-        // tracking.move_stop_task();
-        break;
-      }
+      // if(f_touch.get_value()){
+      //   f_claw.set_state(1);
+      //   if (brake) drivebase.brake();
+      //   tracking.move_complete = true;
+      //   motion_i.print("%d || Ending tank rush goal target X: %f Y: %f A: %f at X: %f Y: %f A: %f time: %d\n", millis(), target.x, target.y, target.angle, tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle), millis()- time);
+      //   //log_time("ending starting time: %d, delta time: %d X: %f Y: %f A: %f from X: %f Y: %f A: %f \n", millis(),millis() -starttime, target_x, target_y, target_a, tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle));
+      //   // tracking.move_stop_task();
+      //   break;
+      // }
       if(orig_sgn_line_y != sgn_line_y){
-        f_claw.set_state(1);
+        // f_claw.set_state(1);
         if (brake) drivebase.brake();
         tracking.move_complete = true;
         motion_i.print("%d || MISSED GOAL tank rush goal target X: %f Y: %f A: %f at X: %f Y: %f A: %f time: %d\n", millis(), target.x, target.y, target.angle, tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle), millis()- time);
@@ -452,7 +464,7 @@ void move_start(move_types type, std::variant<arc_params, line_params, tank_arc_
 }
 
 bool move_wait_for_complete(){
-  waitUntil(move_t.get_task_ptr()->get_state() == 4);
+  wait_until(move_t.get_task_ptr()->get_state() == 4);
   return tracking.move_complete;
 }
 
@@ -1568,17 +1580,19 @@ void move_on_line_old(void* params){
 //Constructor
 Gyro::Gyro(Imu& imu): inertial(imu){}
 
-double Gyro::get_angle() {
-  last_angle = angle;
+//Updates last/cur angle
+double Gyro::get_angle(){
   angle = GYRO_SIDE*inertial.GYRO_AXIS();
   return fabs(angle);
 }
 
+// Updates last/cur angle
 double Gyro::get_angle_dif(){
-  get_angle();
-  double diff = last_angle-angle;
+  double da = angle - last_angle;
+  int dt = millis() - time;
+  time = millis();
   last_angle = angle;
-  return fabs(diff);
+  return da/dt;
 }
 
 void Gyro::calibrate(){
@@ -1587,13 +1601,10 @@ void Gyro::calibrate(){
 
 void Gyro::finish_calibrating(){
   if(inertial.is_calibrating()){
-    while (inertial.is_calibrating()){
-      motion_d.print("Calibrating Gyro...\n");
-      delay(10);
-    }
+    wait_until(!inertial.is_calibrating()) motion_d.print("Calibrating Gyro...\n");
     motion_i.print("Done Calibrating Gyro\n");
   }
-  motion_i.print("Already Calibrated Gyro\n");
+  else motion_i.print("Already Calibrated Gyro\n");
 }
 
 void Gyro::climb_ramp(){
@@ -1601,83 +1612,52 @@ void Gyro::climb_ramp(){
   finish_calibrating(); //Makes sure it's calibrated before starting (should already be)
   inertial.tare_roll();
   inertial.tare_pitch();
-  Task([](){
-    int time = millis();
-    double last = gyro.get_angle();
-    double velo = 0.0;
-    while(true){
-      velo = (gyro.get_angle() - last)/(millis() - time);
-      time = millis();
-      last = gyro.get_angle();
-      motion_i.print("%d || Angle_v: %f, Angle: %f dist %d\n", millis(), velo, gyro.angle, r_reset_dist.get());
-      delay(10);
+
+  drivebase.move(0.0, -GYRO_SIDE*127, 0.0);
+  Task([this](){
+    wait_until(false){
+      get_angle();
+      // motion_i.print("%d | Angle:%f Angle_v:%f, L_v:%f, R_v:%f, Dist:%f\n", millis(), angle, get_angle_dif(), tracking.l_velo, tracking.r_velo, tracking.x_coord);
+      // motion_i.print("%d | Angle:%f\n", millis(), angle);
     }
-    
   });
+  wait_until(angle > 22);
+  motion_i.print("ON RAMP: %f\n", angle);
+  screen_flash::start("On Ramp", term_colours::NOTIF);
 
-  get_angle();
-  drivebase.move(127, 0);
-  waitUntil(get_angle() > 22)
-  motion_i.print("ON RAMP: %f\n", get_angle());
-  waitUntil(!inRange(r_reset_dist.get(), 0, 200));
-  GUI::flash("Saw wall\n");
-  Led1.set_value(0);
-  drivebase.move(60.0,0.0);
+  tracking.reset();
 
-  int left_pos = LeftEncoder.get_value(), right_pos = RightEncoder.get_value();
+	f_lift.move_absolute(100); //Lowers lift
 
-  // while()
-
-  // double pos = tracking.x_coord;
-  // while(tracking.x_coord > pos - 8.0)delay(10);
-  // tracking.wait_for_dist(8.5);
-  Task([&](){ 
-    while(true){ 
-      misc.print(" angle: %f\n", get_angle());
-      delay(10);
-    }
-    // Led2.set_value(0);
-  });
-
-  Task([&](){ 
-    while(get_angle() > 20)delay(10);
-    Led2.set_value(0);
-  });
-
-  cycleCheck(get_angle() < 20, 3, 10);
-  drivebase.move(-40.0,0.0);
-  tracking.wait_for_dist(0.5);
-
-  // cycleCheck(get_angle() < 18, 3, 10);
-  // drivebase.move(-40.0,0.0);
-  // tracking.wait_for_dist(1.5);
-
-  drivebase.brake();
-  GUI::flash("Braked\n");
-  
+  drivebase.move(0.0, -GYRO_SIDE*127, 0.0); //Can probably get rid of this
+  tracking.wait_for_dist(18);
 }
 
 void Gyro::level(double kP, double kD){
-	double last_angle=0;
 	PID gyro_p(kP, 0, kD, 0);
-  Timer gyro_steady ("Gyro", &motion_d);
+  Timer gyro_steady ("Gyro", &motion_i);
   int speed;
+  bool neg = false;
 
-	while(true){
-    get_angle();
-    speed = gyro_p.compute(-angle, 0);
-		drivebase.move(speed, 0);
-    gyro_steady.print("Angle: %f | Speed: %d\n", angle, speed);
+  screen_flash::start("PID", term_colours::NOTIF);
+
+	wait_until(gyro_steady.get_time() > 500 || master.interrupt(true, true)){
+    gyro_p.compute(-angle, 0);
+		drivebase.move(0.0, gyro_p.get_output(), 0.0);
+    // gyro_steady.print("Angle: %f | Speed: %f\n", angle, gyro_p.get_output());
     
-		if (fabs(angle-last_angle) > 0.6) gyro_steady.reset(); //Unsteady, Resets the steady timer
-		else if (fabs(angle) < 6 && gyro_steady.get_time() > 450) break; //If within range to be level and steady on ramp
+		if (fabs(angle) > 6 || get_angle_dif() > 0.06) gyro_steady.reset();
 
-		if (master.interrupt(true, false)) return;
+    if(speed < 0) neg = true;
+    if(neg && speed > 0) break;
+  }
 
-		last_angle = angle;
-		delay(10);
-	}
+	motion_i.print("\nLevelled on ramp\n\n");
+  front_l.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
+  front_r.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
+  back_l.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
+  back_r.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
+  drivebase.velo_brake();
 
-	motion_d.print("\nLevelled on ramp\n\n");
-	drivebase.brake();
+  screen_flash::start("Braked", term_colours::NOTIF);
 }

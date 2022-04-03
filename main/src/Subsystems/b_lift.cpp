@@ -20,12 +20,10 @@ B_Lift b_lift({{"B_Lift",
 }
 }, b_lift_m});
 
-B_Lift::B_Lift(Motorized_subsystem<b_lift_states, NUM_OF_B_LIFT_STATES, LIFT_MAX_VELOCITY> motorized_subsystem): Motorized_subsystem(motorized_subsystem){ // constructor
+B_Lift::B_Lift(Motorized_subsystem<b_lift_states, NUM_OF_B_LIFT_STATES, B_LIFT_MAX_VELOCITY> motorized_subsystem): Motorized_subsystem(motorized_subsystem){ // constructor
 
-  state = b_lift_states::search_lip;
-  last_state = state;
-  target = bottom_position;
-  last_target = target;
+  target_state = b_lift_states::search_lip;
+  state = target_state;
   held = false;
 }
 
@@ -86,7 +84,7 @@ void B_Lift::handle(){
 //       // grabs goal if up button is pressed
 //       if(master.get_digital_new_press(lift_up_button) && drivebase.get_lift_button(0)){
 //         master.rumble("-");
-//         b_claw_p.set_value(HIGH);
+//         b_claw.set_value(HIGH);
 //         held = true;
 //         master.clear_line(B_LIFT_STATE_LINE);
 
@@ -112,7 +110,7 @@ void B_Lift::handle(){
 
 //       if((drivebase.get_lift_button(0) && master.get_digital_new_press(lift_up_button)) || search_cycle_check_count >= 2){
 //         master.rumble("-");
-//         b_claw_p.set_value(HIGH);
+//         b_claw.set_value(HIGH);
 //         held = true;
 //         master.clear_line(B_LIFT_STATE_LINE);
 
@@ -141,7 +139,7 @@ void B_Lift::handle(){
 //       }
 //       // releases goal and turns off intake if down button is pressed
 //       if(((master.get_digital_new_press(lift_down_button)&& drivebase.get_lift_button(0)) || (master.get_digital_new_press(lift_release_button)&& drivebase.get_lift_button(0))) && fabs(bottom_position - motor.get_position()) < end_error){
-//         b_claw_p.set_value(LOW);
+//         b_claw.set_value(LOW);
 //         held = false;
 //         // master.print(B_LIFT_STATE_LINE, 0, "B_Lift: Idle         ");
 //         release_timer.reset();
@@ -179,7 +177,7 @@ void B_Lift::handle(){
 //     case b_lift_states::platform:
 //       // drops off goal if up button is pressed and has reached platform height
 //       if(((drivebase.get_lift_button(0) && master.get_digital_new_press(lift_up_button)) || (master.get_digital_new_press(lift_release_button)&& drivebase.get_lift_button(0))) && fabs(motor.get_position() - platform_position) < end_error){
-//         b_claw_p.set_value(LOW);
+//         b_claw.set_value(LOW);
 //         held = false;
 
 //         set_state(b_lift_states::dropoff);
@@ -200,7 +198,7 @@ void B_Lift::handle(){
 //       }
 //       // releases goal if release button is pressed
 //       if((master.get_digital_new_press(lift_release_button)&& drivebase.get_lift_button(0)) && fabs(motor.get_position() - tall_dropoff_position) < end_error){
-//         b_claw_p.set_value(LOW);
+//         b_claw.set_value(LOW);
 //         held = false;
 
 //         set_state(b_lift_states::dropoff);
@@ -295,7 +293,7 @@ void B_Lift::handle(){
 //       // toggles state of lift pneumatic if lift up button is pressed
 //       if(drivebase.get_lift_button(0) && master.get_digital_new_press(lift_up_button)){
 //         held = !held;
-//         b_claw_p.set_value(held);
+//         b_claw.set_value(held);
 //       }
 //       break;
 
@@ -310,26 +308,26 @@ double B_Lift::height_to_pos(double height){
   return gear_ratio * (rad_to_deg(asin((height - offset_h) / (arm_len)))) + offset_a;
 }
 
-extern int elastic_b_up_time, elastic_b_down_time; //from gui_construction.cpp
+int elastic_b_up_time, elastic_b_down_time;
 
 void B_Lift::elastic_util(){
   reset();
   motor.move(-10);
-  GUI::go("Start Elastic Utility", "Press to start the elastic utility.", 500);
-  b_claw_p.set_value(HIGH);
+  GUI::prompt("Start Elastic Utility", "Press to start the elastic utility.", 500);
+  b_claw.set_value(HIGH);
   held = true;
   Timer move_timer{"move"};
-  move_absolute(top_position);
+  move_absolute(top_position); //move_absolute(top_position, 100, true);
   // // intake_piston.set_value(HIGH);  // raises intake
-  waitUntil(fabs(motor.get_position() - top_position) < end_error);
+  wait_until(fabs(motor.get_position() - top_position) < end_error);
   move_timer.print();
   elastic_b_up_time = move_timer.get_time();
-  master.print(1, 0, "up time: %d", elastic_b_up_time);
+  master.print(1, 0, "Up Time: %d", elastic_b_up_time);
 
   move_timer.reset();
-  move_absolute(bottom_position);
-  waitUntil(fabs(motor.get_position() - bottom_position) < end_error);
+  move_absolute(bottom_position); //move_absolute(bottom_position, 100, true);
+  wait_until(fabs(motor.get_position() - bottom_position) < end_error);
   move_timer.print();
   elastic_b_down_time = move_timer.get_time();
-  master.print(2, 0, "down time: %d", elastic_b_down_time);
+  master.print(2, 0, "Down Time: %d", elastic_b_down_time);
 }

@@ -50,22 +50,22 @@ PID f_pid(5.0,0.0,0.0,0.0);
 int timer = millis();
 
 void intk_c(void* params){
-  Timer intake_t ("intake jam", false);
-		// intk.move(127);
-		while(true){
-      if(intk_state){
-        if(intake_jam.get_new_press()) intake_t.reset(); //Start timer when pressed
-			  else if(!intake_jam.get_value()) intake_t.reset(false); //End timer when unpressed
-			  if(intake_t.get_time() > 500){ //If pressed for more than 1 sec, reverse intk
-				  intk.move(-127);
-				  waitUntil(!intake_jam.get_value()); //Waits for unjam plus some time
-				  delay(150);
-				  intk.move(127);
-			  }
-      }
+  // Timer intake_t ("intake jam", false);
+	// 	// intk.move(127);
+	// 	while(true){
+  //     if(intk_state){
+  //       if(intake_jam.get_new_press()) intake_t.reset(); //Start timer when pressed
+  //       else if(!intake_jam.get_value()) intake_t.reset(false); //End timer when unpressed
+  //       if(intake_t.get_time() > 500){ //If pressed for more than 0.5 sec, reverse intk
+	// 			  // intk.move(-127);
+	// 			  wait_until(!intake_jam.get_value()); //Waits for unjam plus some time
+	// 			  delay(150);
+	// 			  // intk.move(127);
+	// 		  }
+  //     }
 
-			delay(10);
-		}
+	// 		delay(10);
+	// 	}
 }
 
 void f_lift_inc(){
@@ -80,7 +80,7 @@ void f_lift_dec(){
     f_lift_index--;
      if(f_lift_index == 0){
         intk_state = 0;
-        intk.move(127*intk_state);
+        // intk.move(127*intk_state);
         master.print(0,0,"INTAKE");
         intk_pos = false;
      }
@@ -106,6 +106,7 @@ void b_lift_dec(){
 }
 
 void handle_lifts(){
+/*
     // doesn't turn on intake if it's at the bottom
     if(f_lift_index != 0 && (master.get_digital_new_press(intake_button) || partner.get_digital_new_press(partner_intk_on))){
         intk_state = !intk_state;
@@ -256,7 +257,7 @@ void handle_lifts(){
            f_lift_time = millis();
         }
         else{
-          b_claw_p.set_value(0);
+          b_claw.set_value(0);
         }
 
       }
@@ -281,7 +282,7 @@ void handle_lifts(){
         }
 
         if(find_count >= 2 && !found){
-          b_claw_p.set_value(1);
+          b_claw.set_value(1);
           // looking = false;
           find_count = 0;
           found = true;
@@ -356,7 +357,7 @@ void handle_lifts(){
         timer = millis();
       }
 
-
+*/
 }
 
 
