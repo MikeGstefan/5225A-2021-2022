@@ -1621,7 +1621,7 @@ void Gyro::climb_ramp(){
   motion_i.print("ON RAMP: %f\n", get_angle());
   waitUntil(!inRange(r_reset_dist.get(), 0, 200));
   GUI::flash("Saw wall\n");
-  Led1.set_value(0);
+  // Led1.set_value(0);
   drivebase.move(60.0,0.0);
 
   int left_pos = LeftEncoder.get_value(), right_pos = RightEncoder.get_value();
@@ -1641,7 +1641,7 @@ void Gyro::climb_ramp(){
 
   Task([&](){ 
     while(get_angle() > 20)delay(10);
-    Led2.set_value(0);
+    // Led2.set_value(0);
   });
 
   cycleCheck(get_angle() < 20, 3, 10);

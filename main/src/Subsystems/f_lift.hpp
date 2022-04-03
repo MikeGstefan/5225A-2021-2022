@@ -3,7 +3,7 @@
 #include "../drive.hpp"
 #include "../pid.hpp"
 
-#define NUM_OF_F_LIFT_STATES 5
+#define NUM_OF_F_LIFT_STATES 6
 #define F_LIFT_MAX_VELOCITY 100
 
 enum class f_lift_states{

@@ -167,7 +167,11 @@ void F_Lift::set_state(const f_lift_states next_state, const double index){  // 
     target_state = next_state;
     this->index = index;
   }
-  else state_log.print("%s | INVALID move to target State change requested from %s to %s, index is: %d\n", index, name, state_names[static_cast<int>(state)], state_names[static_cast<int>(next_state)], index);
+  else{
+    printf("POSSIBLE FAIL cur_state:%d, target_state: %d, index: %d \n", static_cast<int>(state), static_cast<int>(next_state), index);
+    delay(10);
+    state_log.print("%s | INVALID move to target State change requested from %s to %s, index is: %d\n", name, state_names[static_cast<int>(state)], state_names[static_cast<int>(next_state)], index);
+  }
 }
 
 extern int elastic_f_up_time, elastic_f_down_time; //from gui_construction.cpp
@@ -270,3 +274,28 @@ void F_Claw::handle_state_change(){
   }
   log_state_change();  
 }
+
+// stack trace stuff
+
+/*
+CURRENT TASK: User Operator Control (PROS)
+REGISTERS AT ABORT
+ r0: 0x00000000  r1: 0x3ff00000  r2: 0x0781bde9  r3: 0x03ae2b8c  r4: 0x038000dc  r5: 0x00000000  r6: 0x3ff00000  r7: 0x0000002b 
+ r8: 0x00000000  r9: 0x03ae2924 r10: 0x00000073 r11: 0x00000000 r12: 0x01010101  sp: 0x03ae2868  lr: 0x038fd475  pc: 0x038fa998
+
+BEGIN STACK TRACE
+        0x38fa998
+        0x38fd474
+        0x39025fe
+        0x3902648
+        0x7816a7c
+        0x780ee04
+        0x78175e8
+        0x38498b8
+        0x3847fd0
+        0x3842704
+END OF TRACE
+HEAP USED: 22232 bytes
+STACK REMAINING AT ABORT: 4250096881 bytes
+*/
+

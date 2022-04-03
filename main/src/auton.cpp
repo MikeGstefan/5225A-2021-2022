@@ -34,7 +34,7 @@ void skills(){
   f_lift.move_absolute(500,100);
   move_start(move_types::tank_point, tank_point_params({58.0,115.0,  20.0},false, 60.0,1.0,true,6.4,150.0));
   while(f_lift.motor.get_position() >510)delay(10);
-  f_claw.set_state(0);
+  // f_claw.set_state(0);
   skills_d.print("First neutral on plat %d\n", millis() - time);
   master.print(1,1,"goal %d", millis() - time);
   time = millis();

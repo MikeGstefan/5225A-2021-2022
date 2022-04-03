@@ -130,7 +130,26 @@ void autonomous() {
 // extern Slider mot_speed_set;
 
 void opcontrol() {
-	drivebase.driver_practice();
+	// while(true){
+	pros::Task task{[=] {
+		while(true){
+			// f_lift.handle_buttons();
+			f_lift.handle(true);
+			delay(10);
+		}
+	}};
+	delay(5000);
+	f_lift.set_state(f_lift_states::move_to_target, 0);
+	delay(1000);
+	f_lift.set_state(f_lift_states::move_to_target, 1);
+	// delay(1000);
+	// f_lift.set_state(f_lift_states::move_to_target, 2);
+	// delay(1000);
+	// f_lift.set_state(f_lift_states::move_to_target, 3);
+	// delay(10);
+	// f_lift.set_state(f_lift_states::move_to_target, 0);
+
+	// drivebase.driver_practice();
 	// pros::Task task{[=] {
 	// 	while(true){
 	// 		f_lift.handle(true);
@@ -148,6 +167,7 @@ void opcontrol() {
 		printf("f:%d b: %d\n", f_lift_pot.get_value(), b_lift_pot.get_value());
 
 		delay(10);
+		printf("sensor %d\n", b_dist.get());
 	}
 // BACK bottom 1030 top 2754
 // FRONT bottom 1190 top 2778
