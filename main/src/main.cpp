@@ -85,16 +85,30 @@ void autonomous() {
 }
 
 void opcontrol() {
-	/* Nathan:
-  check what actually kills the auto balance loop
-	auton give up func - ask mike
-  
-	lvgl images
-  2d sliders
-	*/
+  master.wait_for_press(DIGITAL_A);
+	drivebase.move(0.0, 127.0);
+	Timer timer{"timer"};
+	// while(!master.get_digital_new_press(DIGITAL_A) && timer.get_time() < 500){
+	// 	// printf("vel: %lf\n", (tracking.l_velo + tracking.r_velo) / 2);
+	// 	printf("vel:%lf\n", rad_to_deg(tracking.g_velocity.angle));
+	// 	delay(10);
+	// }
+	//power | velocity
+	// 60 | 200
+	// 80 | 274
+	// 100 | 370
+	// 127 | 418
+	// ratio is 3.29
 
+	// move_start(move_types::tank_point, tank_point_params({0.0,60.0,0.0},false, 127.0,1.0,true,2.0,25.0));
+	// move_start(move_types::turn_angle, turn_angle_params(90.0, true,true, 5.0, 0.0));
+	// delay(5000);
+
+	// move_start(move_types::turn_angle, turn_angle_params(90.0, true,true, 0.0, 0.0));
+	move_start(move_types::tank_arc, tank_arc_params({0.0, 0.0}, {-12,12, -90.0}));
+
+	drivebase.move(0.0,0.0);
 	while(true){
-		// drivebase.non_blocking_driver_practice();
 		delay(10);
 	}
 }

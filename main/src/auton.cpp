@@ -12,7 +12,7 @@ static const std::string auton_file_name = "/usd/auton.txt";
 
 void skills(){
   int time = millis();
-   f_lift.move_absolute(10); 
+  f_lift.move_absolute(10); 
   b_lift.move_absolute(10); 
   move_start(move_types::tank_point, tank_point_params({36.0,11.75,-90.0},false),false); // grabs blue on platform 
 	b_detect_goal(); 
