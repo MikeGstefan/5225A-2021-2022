@@ -431,9 +431,7 @@ void handle_lifts(){
     b_lift.set_state(b_lift_states::move_to_target, 0);
   }
   // lift handlers
-  f_lift.handle_buttons();
   f_lift.handle(true);
-  b_lift.handle_buttons();
   b_lift.handle(true);
 }
 

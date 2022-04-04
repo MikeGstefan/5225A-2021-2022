@@ -99,6 +99,8 @@ void Intake::handle_state_change(){
   // shifts the transmission before activating intake in desired state
   if(target_state != intake_states::off && lift_t.get_state()){
     after_switch_state = target_state;  // the state to reach after switching the transmission to intake mode
+    // deactivates back lift if it's moving
+    if(b_lift.get_state() == b_lift_states::move_to_target) b_lift.set_state(b_lift_states::idle);
     set_state(intake_states::shifting_to_intake_up);
   }
   switch(target_state){

@@ -28,50 +28,6 @@ B_Lift::B_Lift(Motorized_subsystem<b_lift_states, NUM_OF_B_LIFT_STATES, B_LIFT_M
   down_press.pause();
 }
 
-void B_Lift::handle_buttons(){
-  // index incrementing and decrementing
-  if(master.get_digital_new_press(lift_up_button) && !get_lift()){
-    up_press.reset();
-    // if state is manual, go to the closest position that's higher than the current position
-    if(state == b_lift_states::manual){
-      int i = 0;
-      while (i < driver_positions.size()){
-        if(driver_positions[i] > b_lift_pot.get_value()){
-          set_state(b_lift_states::move_to_target, i);
-          break;
-        }
-        i++;
-      }
-    }
-    // otherwise just go to the next highest position, but doesn't increment index if it's out of bounds
-    else if(index < driver_positions.size() - 1)  set_state(b_lift_states::move_to_target, ++index);
-  }
-  if(master.get_digital_new_press(lift_down_button) && !get_lift()){
-    down_press.reset();
-    // if state is manual, go to the closest position that's lower than the current position
-    if(state == b_lift_states::manual){
-      int i = driver_positions.size() - 1;
-      while (i > -1){
-        if(driver_positions[i] < b_lift_pot.get_value()){
-          set_state(b_lift_states::move_to_target, i);
-          break;
-        }
-        i--;
-      }
-    }
-    // otherwise just go to the next lowest position, but doesn't decrement index if it's out of bounds
-    else if(index > 0)  set_state(b_lift_states::move_to_target, --index);
-  }
-  // resets and pauses the timers if driver releases button
-  if(!master.get_digital(lift_up_button)) up_press.reset(false);
-  if(!master.get_digital(lift_down_button)) down_press.reset(false);
-
-  // goes to top position if up button is held
-  if(up_press.get_time() > 300) set_state(b_lift_states::move_to_target, driver_positions.size() - 1);
-  // goes to bottom position of down button is held
-  if(down_press.get_time() > 300) set_state(b_lift_states::move_to_target, 0);
-}
-
 void B_Lift::handle(bool driver_array){
   // decides which position vector to use
   std::vector<int>& positions = driver_array? driver_positions: prog_positions;
@@ -147,9 +103,12 @@ void B_Lift::handle_state_change(){
   // if state has changed, performs the necessary cleanup operation before entering next state
 
   // if intake/lift transmission is in intake mode, shift the transmission to the lift
+  // next time check if removing the second condition affects anything
   if(!lift_t.get_state() && state != b_lift_states::shifting_to_lift_up){
     after_switch_state = target_state;
     printf("after_switch_state:%s", b_lift.state_names[(int)after_switch_state]);
+    // deactivates intake if its running
+    if(intake.get_state() != intake_states::off)  intake.set_state(intake_states::off);
     set_state(b_lift_states::shifting_to_lift_up);
   }
 
@@ -176,9 +135,7 @@ void B_Lift::handle_state_change(){
     case b_lift_states::manual:
       master.rumble("-");
       // we don't want the b_claw in search mode while the lift is in manual
-      if(b_claw_obj.get_state() == b_claw_states::searching){
-        b_claw_obj.set_state(b_claw_states::idle);
-      }
+      if(b_claw_obj.get_state() == b_claw_states::searching)  b_claw_obj.set_state(b_claw_states::idle);
       break;
 
     case b_lift_states::shifting_to_lift_up:
@@ -249,26 +206,6 @@ B_Claw::B_Claw(Subsystem<b_claw_states, NUM_OF_B_CLAW_STATES> subsystem): Subsys
   // state setup
   target_state = b_claw_states::searching;
   state = b_claw_states::managed;
-}
-
-void B_Claw::handle_buttons(){
-  // resets the press timer if toggle button is pressed
-  if(master.get_digital_new_press(claw_toggle_button) && !get_lift()){
-    toggle_press_timer.reset();
-    // grabs goal if toggle button is pressed and claw is open
-    if(state == b_claw_states::idle) set_state(b_claw_states::tilted);
-  }
-
-  if(toggle_press_timer.get_time() > 300){  // toggles tilt state if claw button was held
-    if(state == b_claw_states::tilted) set_state(b_claw_states::flat);
-    else if(state == b_claw_states::flat) set_state(b_claw_states::tilted);
-    toggle_press_timer.reset(false); // resets and pauses the timer 
-  }
-  // releases goal if toggle button is released before the button hold timeout triggers
-  else if(!master.get_digital(claw_toggle_button)){
-    toggle_press_timer.reset(false);  // resets and pauses the timer 
-    if(state == b_claw_states::tilted || state == b_claw_states::flat)  set_state(b_claw_states::idle);
-  }
 }
 
 void B_Claw::handle(){

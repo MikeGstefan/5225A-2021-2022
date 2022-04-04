@@ -26,50 +26,6 @@ F_Lift::F_Lift(Motorized_subsystem<f_lift_states, NUM_OF_F_LIFT_STATES, F_LIFT_M
   down_press.pause();
 }
 
-void F_Lift::handle_buttons(){
-  // index incrementing and decrementing
-  if(master.get_digital_new_press(lift_up_button) && get_lift()){
-    up_press.reset();
-    // if state is manual, go to the closest position that's higher than the current position
-    if(state == f_lift_states::manual){
-      int i = 0;
-      while (i < driver_positions.size()){
-        if(driver_positions[i] > f_lift_pot.get_value()){
-          set_state(f_lift_states::move_to_target, i);
-          break;
-        }
-        i++;
-      }
-    }
-    // otherwise just go to the next highest position, but doesn't increment index if it's out of bounds
-    else if(index < driver_positions.size() - 1)  set_state(f_lift_states::move_to_target, ++index);
-  }
-  if(master.get_digital_new_press(lift_down_button) && get_lift()){
-    down_press.reset();
-    // if state is manual, go to the closest position that's lower than the current position
-    if(state == f_lift_states::manual){
-      int i = driver_positions.size() - 1;
-      while (i > -1){
-        if(driver_positions[i] < f_lift_pot.get_value()){
-          set_state(f_lift_states::move_to_target, i);
-          break;
-        }
-        i--;
-      }
-    }
-    // otherwise just go to the next lowest position, but doesn't decrement index if it's out of bounds
-    else if(index > 0)  set_state(f_lift_states::move_to_target, --index);
-  }
-  // resets and pauses the timers if driver releases button
-  if(!master.get_digital(lift_up_button)) up_press.reset(false);
-  if(!master.get_digital(lift_down_button)) down_press.reset(false);
-
-  // goes to top position if up button is held
-  if(up_press.get_time() > 300) set_state(f_lift_states::move_to_target, driver_positions.size() - 1);
-  // goes to bottom position of down button is held
-  if(down_press.get_time() > 300) set_state(f_lift_states::move_to_target, 0);
-}
-
 void F_Lift::handle(bool driver_array){
   // decides which position vector to use
   std::vector<int>& positions = driver_array? driver_positions: prog_positions;
@@ -220,19 +176,6 @@ F_Claw::F_Claw(Subsystem<f_claw_states, NUM_OF_F_CLAW_STATES> subsystem): Subsys
   // state setup
   target_state = f_claw_states::searching;
   state = f_claw_states::managed;
-}
-
-void F_Claw::handle_buttons(){
-  if(master.get_digital_new_press(claw_toggle_button) && get_lift()){
-    switch(state){
-      case f_claw_states::idle:
-        set_state(f_claw_states::grabbed);
-        break;
-      case f_claw_states::grabbed:
-        set_state(f_claw_states::idle);
-        break;
-    }
-  }
 }
 
 void F_Claw::handle(){

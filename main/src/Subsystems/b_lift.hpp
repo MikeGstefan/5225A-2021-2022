@@ -38,7 +38,6 @@ public:
   
   void handle(bool driver_array);  // contains state machine code, (if driver_array is false, uses prog_array)
   void handle_state_change(); // cleans up and preps the machine to be in the target state
-  void handle_buttons(); // handles driver button input
   void set_state(const b_lift_states next_state);  // requests a state change and logs it (NORMAL set state)
   // THIS IS AN OVERLOAD for the existing set state function, accepts an index for the lift
   void set_state(const b_lift_states next_state, const double index);  // requests a state change and logs it
@@ -74,7 +73,6 @@ class B_Claw: public Subsystem<b_claw_states, NUM_OF_B_CLAW_STATES> {
 
 public:
   B_Claw(Subsystem<b_claw_states, NUM_OF_B_CLAW_STATES> subsystem);  // constructor
-  void handle_buttons(); // handles driver button input
   void handle();  // contains state machine code
   void handle_state_change(); // cleans up and preps the machine to be in the target state
 };
