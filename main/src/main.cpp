@@ -86,8 +86,9 @@ void autonomous() {
 
 void opcontrol() {
   master.wait_for_press(DIGITAL_A);
-	drivebase.move(0.0, 127.0);
+	// drivebase.move(0.0, 127.0);
 	Timer timer{"timer"};
+	while(!master.get_digital(DIGITAL_A))delay(10);
 	// while(!master.get_digital_new_press(DIGITAL_A) && timer.get_time() < 500){
 	// 	// printf("vel: %lf\n", (tracking.l_velo + tracking.r_velo) / 2);
 	// 	printf("vel:%lf\n", rad_to_deg(tracking.g_velocity.angle));
@@ -105,7 +106,8 @@ void opcontrol() {
 	// delay(5000);
 
 	// move_start(move_types::turn_angle, turn_angle_params(90.0, true,true, 0.0, 0.0));
-	move_start(move_types::tank_arc, tank_arc_params({0.0, 0.0}, {24.0,-24.0, -90.0}, -127.0));
+	// move_start(move_types::tank_arc, tank_arc_params({0.0, 0.0}, {24.0,-24.0, -90.0}, -127.0));
+	move_start(move_types::tank_point, tank_point_params({0.0, 30.0,0.0}));
 	drivebase.brake();
 	// drivebase.move(0.0,0.0);
 }
