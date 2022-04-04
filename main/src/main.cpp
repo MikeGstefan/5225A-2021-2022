@@ -85,33 +85,91 @@ void autonomous() {
 }
 
 void opcontrol() {
-  master.wait_for_press(DIGITAL_A);
-	// drivebase.move(0.0, 127.0);
-	Timer timer{"timer"};
-	f_claw(0);
-	while(!master.get_digital(DIGITAL_A))delay(10);
-	f_claw(1);
-	f_lift.move_absolute(150,200);
-	while(!master.get_digital_new_press(DIGITAL_A))delay(10);
-	// while(!master.get_digital_new_press(DIGITAL_A) && timer.get_time() < 500){
-	// 	// printf("vel: %lf\n", (tracking.l_velo + tracking.r_velo) / 2);
-	// 	printf("vel:%lf\n", rad_to_deg(tracking.g_velocity.angle));
+	// b_lift.set_state(b_lift_states::move_to_target, 0);
+	while(true){
+		// printf("%d\n", get_lift());
+		// drivebase handlers
+		drivebase.handle_input();
+		drivebase.handle_trans();
+
+		// intake handlers
+		intake.handle_buttons();
+		intake.handle();
+		
+		// lift handlers
+		handle_lift_buttons();
+		b_lift.handle(true);
+		f_lift.handle(true);
+
+		// claw handlers
+		handle_claw_buttons();
+		b_claw_obj.handle();
+		f_claw_obj.handle();
+		delay(10);
+	}
+
+	lift_t.set_state(HIGH);
+	b_lift_m.move_relative(30, 100);
+	while(fabs(b_lift_m.get_position() - b_lift_m.get_position()) > 15) delay(10);
+	b_lift_m.move_relative(-30, 100);
+	while(fabs(b_lift_m.get_position() - b_lift_m.get_position()) > 15) delay(10);
+	// b_lift.
+
+	// while(true){
+	// 	b_lift.handle_buttons();
+	// 	b_lift.handle(true);
+	// 	f_lift.handle_buttons();
+	// 	f_lift.handle(true);
 	// 	delay(10);
 	// }
-	//power | velocity
-	// 60 | 200
-	// 80 | 274
-	// 100 | 370
-	// 127 | 418
-	// ratio is 3.29
 
-	// move_start(move_types::tank_point, tank_point_params({0.0,60.0,0.0},false, 127.0,1.0,true,2.0,25.0));
-	// move_start(move_types::turn_angle, turn_angle_params(90.0, true,true, 5.0, 0.0));
-	// delay(5000);
+	// while(true){
+	pros::Task task{[=] {
+		while(true){
+			// f_lift.handle_buttons();
+			f_lift.handle(true);
+			delay(10);
+		}
+	}};
+	delay(5000);
+	f_lift.set_state(f_lift_states::move_to_target, 0);
+	delay(1000);
+	f_lift.set_state(f_lift_states::move_to_target, 1);
 
-	// move_start(move_types::turn_angle, turn_angle_params(90.0, true,true, 0.0, 0.0));
-	// move_start(move_types::tank_arc, tank_arc_params({0.0, 0.0}, {24.0,-24.0, -90.0}, -127.0));
-	move_start(move_types::tank_point, tank_point_params({0.0, 60.0,0.0}, false, 28.0, 74.0,127.0,1.0,true,2.0, 25.0,90.0,0.0,0,{0.5, 0.5}));
-	drivebase.brake();
-	// drivebase.move(0.0,0.0);
+
+
+	// delay(1000);
+	// f_lift.set_state(f_lift_states::move_to_target, 2);
+	// delay(1000);
+	// f_lift.set_state(f_lift_states::move_to_target, 3);
+	// delay(10);
+	// f_lift.set_state(f_lift_states::move_to_target, 0);
+
+	// drivebase.driver_practice();
+	// pros::Task task{[=] {
+	// 	while(true){
+	// 		f_lift.handle(true);
+	// 		b_lift.handle(true);
+	// 		delay(10);
+	// 	}
+	// }};
+  // f_lift.set_state(f_lift_states::move_to_target, 2); // moves to top
+
+	// f_lift.elastic_util();
+// BACK bottom 1030 top 2754
+// FRONT bottom 1190 top 2778
+
+	// pros::Task task{[=] {
+	// 	while(true){
+	// 		b_claw.handle();
+	// 		delay(10);
+	// 	}
+	// }};
+	// delay(2000);
+	// b_claw.set_state(b_claw_states::grabbed);
+	// delay(3000);
+	// b_claw.set_state(b_claw_states::search_lip);
+	// while(true) delay(10);
+
+	// drivebase.driver_practice();
 }

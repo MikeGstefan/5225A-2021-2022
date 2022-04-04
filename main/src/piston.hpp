@@ -20,7 +20,7 @@ class Piston : public ADIDigitalOut{
     Piston(ext_adi_port_pair_t port_pair, std::string name, bool open_state = 0, bool init_state = LOW);
 
     void set_state(bool state);
-    bool get_state() const;
+    bool get_state();
     bool toggle_state();
 
     int get_state_time() const;

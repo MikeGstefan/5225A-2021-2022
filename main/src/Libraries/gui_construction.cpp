@@ -76,8 +76,8 @@ Button go_home(320, 110, 150, 40, GUI::Style::SIZE, Button::SINGLE, moving, "Hom
 Button go_centre(320, 175, 150, 40, GUI::Style::SIZE, Button::SINGLE, moving, "Centre");
 
 Page lift_move ("Motorized Subsystems"); //Moving the lift
-Slider f_lift_val(30, 45, 300, 35, GUI::Style::SIZE, Slider::HORIZONTAL, 0, f_lift.top_position, lift_move, "Front Lift", 10);
-Slider b_lift_val(30, 110, 300, 40, GUI::Style::SIZE, Slider::HORIZONTAL, 0, b_lift.top_position, lift_move, "Back Lift", 10);
+Slider f_lift_val(30, 45, 300, 35, GUI::Style::SIZE, Slider::HORIZONTAL, 0, 0, lift_move, "Front Lift", 10);
+Slider b_lift_val(30, 110, 300, 40, GUI::Style::SIZE, Slider::HORIZONTAL, 0, 0, lift_move, "Back Lift", 10);
 Button f_lift_move(470, 45, -100, 40, GUI::Style::SIZE, Button::SINGLE, lift_move, "Move Front Lift");
 Button b_lift_move(470, 95, -100, 40, GUI::Style::SIZE, Button::SINGLE, lift_move, "Move Back Lift");
 Button front_claw(470, 145, -100, 40, GUI::Style::SIZE, Button::TOGGLE, lift_move, "Front Claw");
@@ -86,10 +86,10 @@ Button back_claw(470, 195, -100, 40, GUI::Style::SIZE, Button::TOGGLE, lift_move
 Page elastic ("Elastic Test"); //Testing the elastics on the lift
 Button check_b_elastic(145, 70, 70, 30, GUI::Style::CENTRE, Button::SINGLE, elastic, "Run Back Elastic Test");
 Button check_f_elastic(335, 70, 70, 30, GUI::Style::CENTRE, Button::SINGLE, elastic, "Run Front Elastic Test");
-Text elastic_b_up (145, 160, GUI::Style::CENTRE, TEXT_SMALL, elastic, "Up Time: %d", elastic_b_up_time);
-Text elastic_b_down(145, 180, GUI::Style::CENTRE, TEXT_SMALL, elastic, "Down Time: %d", elastic_b_down_time);
-Text elastic_f_up (335, 160, GUI::Style::CENTRE, TEXT_SMALL, elastic, "Up Time: %d", elastic_f_up_time);
-Text elastic_f_down(335, 180, GUI::Style::CENTRE, TEXT_SMALL, elastic, "Down Time: %d", elastic_f_down_time);
+// Text elastic_b_up (145, 160, GUI::Style::CENTRE, TEXT_SMALL, elastic, "Up Time: %d", elastic_b_up_time);
+// Text elastic_b_down(145, 180, GUI::Style::CENTRE, TEXT_SMALL, elastic, "Down Time: %d", elastic_b_down_time);
+// Text elastic_f_up (335, 160, GUI::Style::CENTRE, TEXT_SMALL, elastic, "Up Time: %d", elastic_f_up_time);
+// Text elastic_f_down(335, 180, GUI::Style::CENTRE, TEXT_SMALL, elastic, "Down Time: %d", elastic_f_down_time);
 
 Page tuning ("Tuning Tracking"); //Tests to tune tracking when on new base
 Text tuning_instructions_1(MID_X, 35, GUI::Style::CENTRE, TEXT_SMALL, tuning, "Press your desired tracking test");
@@ -295,13 +295,7 @@ void main_setup(){
   });
   lifts.set_func([](){
     if(GUI::prompt("Test lifts", "Press to check lifts", 1000)){
-      f_lift.reset();
-      b_lift.reset();
-      f_lift.move_absolute(f_lift.top_position, F_LIFT_MAX_VELOCITY, true);
-      b_lift.move_absolute(b_lift.top_position, B_LIFT_MAX_VELOCITY, true);
-      delay(1000);
-      f_lift.move_absolute(f_lift.bottom_position, F_LIFT_MAX_VELOCITY, true);
-      b_lift.move_absolute(b_lift.bottom_position, B_LIFT_MAX_VELOCITY, true);
+      printf("sorry nathan");
     }
   });
   pneums.set_func([](){

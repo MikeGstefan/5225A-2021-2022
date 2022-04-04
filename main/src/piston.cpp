@@ -30,8 +30,8 @@ void Piston::set_state(bool state){
 }
 
 
-bool Piston::get_state() const{
-  return this->state;
+bool Piston::get_state(){
+    return this->state != open_state;
 }
 
 bool Piston::toggle_state(){

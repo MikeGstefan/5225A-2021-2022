@@ -34,7 +34,8 @@ Data graph("graph.txt","$09",general,log_locations::sd);
 Data events("events.txt", "$10", general,log_locations::both);
 Data state_log("state.txt", "$11", debug,log_locations::both);
 Data ERROR("error.txt", "$12", error, log_locations::both);
-Data skills_d("skills.txt", "$11", general, log_locations::both);
+// Data state_log("log.txt","$13",general,log_locations::both);
+Data skills_d("skills.txt", "$13", general, log_locations::both);
 
 
 vector<Data*> Data::get_objs(){

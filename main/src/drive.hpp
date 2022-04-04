@@ -6,11 +6,17 @@
 #include "logging.hpp"
 #include "auton_util.hpp"
 #include "Libraries/gui.hpp"
-#include "lift.hpp"
 
 #include "Subsystems/b_lift.hpp"
 #include "Subsystems/f_lift.hpp"
+#include "Subsystems/intake.hpp"
 
+// what the right joystick currently does
+enum class joy_modes{
+  lift_select, // the right joystick selects which lift is active
+  manual // the right joystick operates the lifts manually
+};
+extern joy_modes joy_mode;
 
 using namespace pros;
 using namespace std;
@@ -99,9 +105,17 @@ public:
   // bool get_lift_button(int side = 0);
 };
 
-
-
-
-
-
 extern Drivebase drivebase;
+
+// returns true if using front lift and false if using back lift
+bool get_lift();
+
+void handle_lifts();
+
+void handle_lift_buttons();
+void handle_claw_buttons();
+
+extern Timer up_press;
+extern Timer down_press;
+extern Timer toggle_press_timer;
+
