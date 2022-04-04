@@ -16,3 +16,4 @@ extern pros::Imu ramp_imu;
 extern pros::Distance r_dist, l_dist, b_dist, f_dist, r_reset_dist, l_reset_dist;
 
 extern pros::ADIAnalogIn f_lift_pot, b_lift_pot;
+extern Piston f_claw_c, f_claw_o, drive_t, b_claw;

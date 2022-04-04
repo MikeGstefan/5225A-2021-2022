@@ -159,6 +159,7 @@ struct tank_arc_params{
 struct tank_point_params{ 
   Position target = {0.0,0.0,0.0};
   bool turn_dir_if_0 = false;
+  double max_velo_dist = 22.0; 
   double max_velo = 74.0;
   double max_power = 127.0;
   double min_angle_percent = 1.0;
@@ -169,10 +170,10 @@ struct tank_point_params{
   double kd_a = 0.0;
   int timeout = 0;
   Point end_error = {0.5, 0.5};
-  double max_velo_dist = 25.0; 
+  
   double end_velo =0.0;
   tank_point_params() = default;
-  tank_point_params(const Position target, const bool turn_dir_if_0 = false, double max_velo = 74.0, const double max_power = 127.0, const double min_angle_percent = 1.0, const bool brake = true, double kp_y = 2.0, double kd_y = 25.0, double kp_a = 90.0, double kd_a = 0.0, int timeout = 0, Point end_error = {0.5, 0.5}, double max_velo_dist = 25.0, double end_velo = 0.0);
+  tank_point_params(const Position target, const bool turn_dir_if_0 = false, double max_velo_dist = 22.0, double max_velo = 74.0, const double max_power = 127.0, const double min_angle_percent = 1.0, const bool brake = true, double kp_y = 2.0, double kd_y = 25.0, double kp_a = 140.0, double kd_a = 0.0, int timeout = 0, Point end_error = {0.5, 0.5},  double end_velo = 0.0);
 };
 
 struct tank_rush_params{ 

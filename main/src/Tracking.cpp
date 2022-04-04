@@ -407,7 +407,7 @@ point_params::point_params(const Position target, const double max_power, const 
 tank_arc_params::tank_arc_params(const Point start_pos, Position target, const double power, const double max_power, const bool brake, double decel_start, double decel_end, double decel_target_speed):
   start_pos{start_pos}, target{target}, power{power}, max_power{max_power}, brake{brake}, decel_start{decel_start}, decel_end{decel_end}, decel_target_speed{decel_target_speed}{}
 
-tank_point_params::tank_point_params(const Position target, const bool turn_dir_if_0, double max_velo, const double max_power, const double min_angle_percent, const bool brake, double kp_y, double kd_y, double kp_a, double kd_a, int timeout, Point end_error, double max_velo_dist, double end_velo):
+tank_point_params::tank_point_params(const Position target, const bool turn_dir_if_0, double max_velo_dist, double max_velo, const double max_power, const double min_angle_percent, const bool brake, double kp_y, double kd_y, double kp_a, double kd_a, int timeout, Point end_error, double end_velo):
   target{target}, turn_dir_if_0{turn_dir_if_0}, max_velo{max_velo}, max_power{max_power}, min_angle_percent{min_angle_percent}, brake{brake}, kp_y{kp_y}, kd_y{kd_y}, kp_a{kp_a}, kd_a{kd_a}, timeout{timeout}, end_error{end_error}, max_velo_dist{max_velo_dist}, end_velo{end_velo}{}
 
 tank_rush_params::tank_rush_params(const Position target, const bool turn_dir_if_0, const double max_power, const double min_angle_percent, const bool brake, double kp_a, double kd_a, double dist_past): 
@@ -976,7 +976,7 @@ void tank_move_to_target(void* params){
     // this distance at which the robot is travelling at max vel (decreasing it is like increasing the kp)
     double max_vel_dist = tank_point_params_g.max_velo_dist; // Mike this is a parameter
     double max_velo = tank_point_params_g.max_velo;
-    double min_velo = 3.0;
+    double min_velo = 7.0;
     // double end_velo = tank_point_params_g.end_velo;
     // Pid angle(kp.a);
     
@@ -1000,7 +1000,8 @@ void tank_move_to_target(void* params){
 
     double end_y_velocity = tank_point_params_g.end_velo;  // defaults to 0.0
     // double deriv_a = 0.0;
-    PID angle(kp_a, 0.0, kd_a, 0.0);
+    // PID angle(kp_a, 0.0, kd_a, 0.0);
+    PID angle(140, 0.0001, kd_a, 0.0);
     // PID y_pid(6.4,0.0,350.0,0.0);
     // PID y_pid(6.4,0.0,0.0,0.0);
     double kB = 1.9;  // the ratio of motor power to local y velocity (inches/sec)
@@ -1074,7 +1075,7 @@ void tank_move_to_target(void* params){
 
       // tracking.power_y = kp_y * line_y_local_y;
       // tracking.power_a = angle.compute(error.angle, 0.0);
-      if( end_dist > end_error.x ){
+      if( (end_dist > end_error.x  || local_error.y > 10.0) && local_error.y > 4.0){
 
         if(!last_state){
           last_state = true;
