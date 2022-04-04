@@ -86,6 +86,7 @@ void autonomous() {
 
 void opcontrol() {
 	// b_lift.set_state(b_lift_states::move_to_target, 0);
+	lift_handle_t.start();
 	while(true){
 		// printf("%d\n", get_lift());
 		// drivebase handlers
@@ -98,13 +99,13 @@ void opcontrol() {
 		
 		// lift handlers
 		handle_lift_buttons();
-		b_lift.handle(true);
-		f_lift.handle(true);
+		// b_lift.handle(true);
+		// f_lift.handle(true);
 
 		// claw handlers
 		handle_claw_buttons();
-		b_claw_obj.handle();
-		f_claw_obj.handle();
+		// b_claw_obj.handle();
+		// f_claw_obj.handle();
 		delay(10);
 	}
 

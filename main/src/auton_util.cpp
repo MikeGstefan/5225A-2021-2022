@@ -205,3 +205,19 @@ double Reset_dist::get_dist(){
   misc.print("%d || reset %f\n",millis(), (avg/count)/25.4);
   return ((avg/count)/25.4) + this->dist_from_center;
 }
+
+
+
+
+void subsystem_handle_t(void*params){
+  _Task* ptr = _Task::get_obj(params);
+
+  while(true){ 
+    b_lift.handle(true);
+		f_lift.handle(true);
+    b_claw_obj.handle();
+		f_claw_obj.handle();
+    if(ptr->notify_handle())return;
+    delay(10);
+  }
+}
