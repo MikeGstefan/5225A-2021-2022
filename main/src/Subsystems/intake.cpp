@@ -8,7 +8,8 @@ Intake intake({{"Intake",
   "on",
   "reversed",
   "unjamming",
-  "shifting_to_lift"
+  "shifting_to_lift_up",
+  "shifting_to_lift_down",
 }
 }, b_lift_m});
 
@@ -26,6 +27,7 @@ void Intake::handle_buttons(){
     // doesn't allow driver to turn on intake if lift is at bottom
     if(f_lift.get_state() != f_lift_states::bottom){
       if(state == intake_states::off)  set_state(intake_states::on);
+      else if(state == intake_states::reversed)  set_state(intake_states::on);
       else if(state == intake_states::on)  set_state(intake_states::off);
       else if(state == intake_states::unjamming)  set_state(intake_states::on);
     }
@@ -35,6 +37,7 @@ void Intake::handle_buttons(){
     // doesn't allow driver to turn on intake if lift is at bottom
     if(f_lift.get_state() != f_lift_states::bottom){
       if(state == intake_states::off)  set_state(intake_states::reversed);
+      else if(state == intake_states::on)  set_state(intake_states::reversed);
       else if(state == intake_states::reversed)  set_state(intake_states::off);
       else if(state == intake_states::unjamming)  set_state(intake_states::off);
     }
@@ -55,12 +58,12 @@ void Intake::handle(){
 
     case intake_states::on:
       // Intake jam handling
-      if(intake_jam.get_new_press()) jam_timer.reset(); // Start timer when pressed
-      else if(!intake_jam.get_value()) jam_timer.reset(false); // End timer when unpressed
-      if(jam_timer.get_time() > 500){ // If pressed for more than 1 sec, reverse intk
-        jam_timer.reset(false);
-        set_state(intake_states::unjamming);
-      }
+      // if(intake_jam.get_new_press()) jam_timer.reset(); // Start timer when pressed
+      // else if(!intake_jam.get_value()) jam_timer.reset(false); // End timer when unpressed
+      // if(jam_timer.get_time() > 500){ // If pressed for more than 1 sec, reverse intk
+      //   jam_timer.reset(false);
+      //   set_state(intake_states::unjamming);
+      // }
       break;
 
     case intake_states::reversed:
@@ -68,12 +71,18 @@ void Intake::handle(){
 
     case intake_states::unjamming:
       // if the jam limit switch isn't triggered turn intake back on
-      if(!intake_jam.get_value()) set_state(intake_states::on);
+      // if(!intake_jam.get_value()) set_state(intake_states::on);
       break;
 
-    case intake_states::shifting_to_intake:
-      // switches to desired state after the transmission
-      if(shift_timer.get_time() > 200){
+    case intake_states::shifting_to_intake_up:
+      if(fabs(b_lift_m.get_target_position() - b_lift_m.get_position()) < 15){
+        set_state(intake_states::shifting_to_intake_down);
+      }
+      break;
+
+    case intake_states::shifting_to_intake_down:
+      // switches to desired state after transmission
+      if(fabs(b_lift_m.get_target_position() - b_lift_m.get_position()) < 15){
         set_state(after_switch_state);
       }
       break;
@@ -88,9 +97,9 @@ void Intake::handle_state_change(){
   // if state has changed, performs the necessary cleanup operation before entering next state
 
   // shifts the transmission before activating intake in desired state
-  if(target_state != intake_states::off && b_lift.trans_p_state){
+  if(target_state != intake_states::off && lift_t.get_state()){
     after_switch_state = target_state;  // the state to reach after switching the transmission to intake mode
-    set_state(intake_states::shifting_to_intake);
+    set_state(intake_states::shifting_to_intake_up);
   }
   switch(target_state){
     case intake_states::managed:
@@ -112,12 +121,15 @@ void Intake::handle_state_change(){
       motor.move(-127);
       break;
     
-    case intake_states::shifting_to_intake:
-      shift_timer.reset();
-      motor.move(30);
-      lift_t.set_value(LOW);
-      b_lift.trans_p_state = LOW;
+    case intake_states::shifting_to_intake_up:
+      lift_t.set_state(LOW);
+      motor.move_relative(-30, 100);
       break;
+    
+    case intake_states::shifting_to_intake_down:
+      motor.move_relative(-30, 100);
+      break;
+
   }
   log_state_change();  
 }

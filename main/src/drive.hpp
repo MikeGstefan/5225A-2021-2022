@@ -111,3 +111,11 @@ extern Drivebase drivebase;
 bool get_lift();
 
 void handle_lifts();
+
+void handle_lift_buttons();
+void handle_claw_buttons();
+
+extern Timer up_press;
+extern Timer down_press;
+extern Timer toggle_press_timer;
+

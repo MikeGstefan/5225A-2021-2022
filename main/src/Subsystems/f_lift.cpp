@@ -83,7 +83,11 @@ void F_Lift::handle(bool driver_array){
       break;
 
     case f_lift_states::move_to_target: // moving to target
-      motor.move(pid.compute(f_lift_pot.get_value(), positions[index]));
+      // printf("target: %d, pos:%d \n", positions[index], f_lift_pot.get_value());
+
+      // move slowly if going down to the bottom with a goal
+      if(index == 0 && f_lift_pot.get_value() < 1500 && f_claw_obj.get_state() == f_claw_states::grabbed)  motor.move(-50);
+      else motor.move(pid.compute(f_lift_pot.get_value(), positions[index]));
       
       // moves to next state if the lift has reached its target
       if(fabs(pid.get_error()) < end_error){
@@ -137,6 +141,7 @@ void F_Lift::handle_state_change(){
       break;
 
     case f_lift_states::bottom:
+      motor.move(-10); // slight down holding power
       break;
 
     case f_lift_states::idle:
@@ -161,8 +166,9 @@ void F_Lift::set_state(const f_lift_states next_state){  // requests a state cha
 }
 // accepts an index argument used specifically for a move to target
 void F_Lift::set_state(const f_lift_states next_state, const double index){  // requests a state change and logs it
+  // state_mutex.take();
   // confirms state change only if the state is actually move to target
-  if (target_state == f_lift_states::move_to_target){
+  if (next_state == f_lift_states::move_to_target){
     state_log.print("%s | State change requested from %s to %s, index is: %d\n", name, state_names[static_cast<int>(state)], state_names[static_cast<int>(next_state)], index);
     target_state = next_state;
     this->index = index;
@@ -172,6 +178,7 @@ void F_Lift::set_state(const f_lift_states next_state, const double index){  // 
     delay(10);
     state_log.print("%s | INVALID move to target State change requested from %s to %s, index is: %d\n", name, state_names[static_cast<int>(state)], state_names[static_cast<int>(next_state)], index);
   }
+  // state_mutex.give();
 }
 
 extern int elastic_f_up_time, elastic_f_down_time; //from gui_construction.cpp
@@ -237,7 +244,7 @@ void F_Claw::handle(){
       break;
 
     case f_claw_states::searching:
-      if(f_dist.get() < 50)  set_state(f_claw_states::grabbed);  // grabs goal if mogo is detected
+      if(f_dist.get() < 30)  set_state(f_claw_states::grabbed);  // grabs goal if mogo is detected
       break;
 
     case f_claw_states::grabbed:
@@ -275,27 +282,4 @@ void F_Claw::handle_state_change(){
   log_state_change();  
 }
 
-// stack trace stuff
-
-/*
-CURRENT TASK: User Operator Control (PROS)
-REGISTERS AT ABORT
- r0: 0x00000000  r1: 0x3ff00000  r2: 0x0781bde9  r3: 0x03ae2b8c  r4: 0x038000dc  r5: 0x00000000  r6: 0x3ff00000  r7: 0x0000002b 
- r8: 0x00000000  r9: 0x03ae2924 r10: 0x00000073 r11: 0x00000000 r12: 0x01010101  sp: 0x03ae2868  lr: 0x038fd475  pc: 0x038fa998
-
-BEGIN STACK TRACE
-        0x38fa998
-        0x38fd474
-        0x39025fe
-        0x3902648
-        0x7816a7c
-        0x780ee04
-        0x78175e8
-        0x38498b8
-        0x3847fd0
-        0x3842704
-END OF TRACE
-HEAP USED: 22232 bytes
-STACK REMAINING AT ABORT: 4250096881 bytes
-*/
 

@@ -3,7 +3,7 @@
 #include "../drive.hpp"
 #include "../pid.hpp"
 
-#define NUM_OF_B_LIFT_STATES 6
+#define NUM_OF_B_LIFT_STATES 7
 #define B_LIFT_MAX_VELOCITY 100
 
 enum class b_lift_states{
@@ -12,12 +12,12 @@ enum class b_lift_states{
   idle,  // not doing anything
   move_to_target,  // moving to target position
   manual,  // controlled by joystick
-  shifting_to_lift // lift/intake transmission switching to lift mode
+  shifting_to_lift_up, // lift/intake transmission switching to lift mode, moving up
+  shifting_to_lift_down // lift/intake transmission switching to lift mode, moving down
 };
 
 class B_Lift: public Motorized_subsystem<b_lift_states, NUM_OF_B_LIFT_STATES, B_LIFT_MAX_VELOCITY> {
   Timer up_press{"Up_press"}, down_press{"Down_press"};
-  Timer shift_timer{"b_lift_shift_timer"};  // how long since back lift was set to shift
   b_lift_states after_switch_state; // the state the lift will go to after transmission switches to lift
   int search_cycle_check_count = 0, bad_count = 0; // cycle check for safeties
   PID pid = PID(1.0,0.0,0.0,0.0);
@@ -27,13 +27,12 @@ class B_Lift: public Motorized_subsystem<b_lift_states, NUM_OF_B_LIFT_STATES, B_
   double offset_a = 365.0, offset_h = 9.75;
   double arm_len = 8.0;
   double gear_ratio = 5.0;
-  int index, last_index;
 
 public:
+  int index, last_index;
   vector<int> driver_positions = {1042, 1500, 2050, 2750};
   vector<int> prog_positions = {1042, 1500, 2050, 2750};
 
-  bool trans_p_state = LOW; // HIGH is lift LOW is intake
 
   B_Lift(Motorized_subsystem<b_lift_states, NUM_OF_B_LIFT_STATES, B_LIFT_MAX_VELOCITY> motorized_subsystem);  // constructor
   

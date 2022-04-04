@@ -16,6 +16,7 @@ protected:
   state_type target_state, state;
   const char* name;
   std::array<const char*, num_of_states> state_names;
+  // Mutex state_mutex;
 
 public:
 

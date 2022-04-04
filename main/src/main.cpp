@@ -130,6 +130,44 @@ void autonomous() {
 // extern Slider mot_speed_set;
 
 void opcontrol() {
+	// b_lift.set_state(b_lift_states::move_to_target, 0);
+	while(true){
+		// printf("%d\n", get_lift());
+		// drivebase handlers
+		drivebase.handle_input();
+		drivebase.handle_trans();
+
+		// intake handlers
+		intake.handle_buttons();
+		intake.handle();
+		
+		// lift handlers
+		handle_lift_buttons();
+		b_lift.handle(true);
+		f_lift.handle(true);
+
+		// claw handlers
+		handle_claw_buttons();
+		b_claw_obj.handle();
+		f_claw_obj.handle();
+		delay(10);
+	}
+
+	lift_t.set_state(HIGH);
+	b_lift_m.move_relative(30, 100);
+	while(fabs(b_lift_m.get_position() - b_lift_m.get_position()) > 15) delay(10);
+	b_lift_m.move_relative(-30, 100);
+	while(fabs(b_lift_m.get_position() - b_lift_m.get_position()) > 15) delay(10);
+	// b_lift.
+
+	// while(true){
+	// 	b_lift.handle_buttons();
+	// 	b_lift.handle(true);
+	// 	f_lift.handle_buttons();
+	// 	f_lift.handle(true);
+	// 	delay(10);
+	// }
+
 	// while(true){
 	pros::Task task{[=] {
 		while(true){
@@ -142,6 +180,9 @@ void opcontrol() {
 	f_lift.set_state(f_lift_states::move_to_target, 0);
 	delay(1000);
 	f_lift.set_state(f_lift_states::move_to_target, 1);
+
+
+
 	// delay(1000);
 	// f_lift.set_state(f_lift_states::move_to_target, 2);
 	// delay(1000);
@@ -160,15 +201,6 @@ void opcontrol() {
   // f_lift.set_state(f_lift_states::move_to_target, 2); // moves to top
 
 	// f_lift.elastic_util();
-
-	b_lift.motor.move(0);
-	f_lift.motor.move(0);
-	while(true){
-		printf("f:%d b: %d\n", f_lift_pot.get_value(), b_lift_pot.get_value());
-
-		delay(10);
-		printf("sensor %d\n", b_dist.get());
-	}
 // BACK bottom 1030 top 2754
 // FRONT bottom 1190 top 2778
 
@@ -184,5 +216,5 @@ void opcontrol() {
 	// b_claw.set_state(b_claw_states::search_lip);
 	// while(true) delay(10);
 
-	drivebase.driver_practice();
+	// drivebase.driver_practice();
 }

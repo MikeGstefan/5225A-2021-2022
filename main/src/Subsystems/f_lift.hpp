@@ -3,7 +3,7 @@
 #include "../drive.hpp"
 #include "../pid.hpp"
 
-#define NUM_OF_F_LIFT_STATES 6
+#define NUM_OF_F_LIFT_STATES 5
 #define F_LIFT_MAX_VELOCITY 100
 
 enum class f_lift_states{
@@ -24,9 +24,9 @@ class F_Lift: public Motorized_subsystem<f_lift_states, NUM_OF_F_LIFT_STATES, F_
   double offset_a = 365.0, offset_h = 9.75;
   double arm_len = 8.0;
   double gear_ratio = 5.0;
-  int index, last_index;
 
 public:
+  uint8_t index, last_index;
   vector<int> driver_positions = {1200, 1500, 2050, 2750};
   vector<int> prog_positions = {1200, 1500, 2050, 2750};
 

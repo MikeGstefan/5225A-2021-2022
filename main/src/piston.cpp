@@ -13,7 +13,7 @@ void Piston::set_state(bool state){
 
 
 bool Piston::get_state(){
-    return this->state;
+    return this->state != open_state;
 }
 
 bool Piston::toggle_state(){

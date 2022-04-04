@@ -10,7 +10,8 @@ B_Lift b_lift({{"B_Lift",
   "idle",
   "move_to_target",
   "manual",
-  "shifting_to_lift"
+  "shifting_to_lift_up",
+  "shifting_to_lift_down",
 }
 }, b_lift_m});
 
@@ -124,8 +125,15 @@ void B_Lift::handle(bool driver_array){
       // exits manual state if up or down button is pressed or held
       break;
 
-    case b_lift_states::shifting_to_lift:
-      if(shift_timer.get_time() > 200){
+    case b_lift_states::shifting_to_lift_up:
+      if(fabs(b_lift_m.get_target_position() - b_lift_m.get_position()) < 15){
+        set_state(b_lift_states::shifting_to_lift_down);
+      }
+      break;
+
+    case b_lift_states::shifting_to_lift_down:
+      // switches to desired state after transmission
+      if(fabs(b_lift_m.get_target_position() - b_lift_m.get_position()) < 15){
         set_state(after_switch_state);
       }
       break;
@@ -138,6 +146,13 @@ void B_Lift::handle_state_change(){
   if(target_state == state) return;
   // if state has changed, performs the necessary cleanup operation before entering next state
 
+  // if intake/lift transmission is in intake mode, shift the transmission to the lift
+  if(!lift_t.get_state() && state != b_lift_states::shifting_to_lift_up){
+    after_switch_state = target_state;
+    printf("after_switch_state:%s", b_lift.state_names[(int)after_switch_state]);
+    set_state(b_lift_states::shifting_to_lift_up);
+  }
+
   if(state == b_lift_states::bottom){ // if lift is leaving the bottom state, turn off the intake
     // b_lock_p.set_value(HIGH);  // unlock the lift
     intake.set_state(intake_states::off);
@@ -148,6 +163,7 @@ void B_Lift::handle_state_change(){
       break;
 
     case b_lift_states::bottom:
+      motor.move(-10); // slight down holding power
       // b_lock_p.set_value(HIGH);  // lock the lift
       break;
 
@@ -165,21 +181,17 @@ void B_Lift::handle_state_change(){
       }
       break;
 
-    case b_lift_states::shifting_to_lift:
-      shift_timer.reset();
-      motor.move(30);
-      lift_t.set_value(HIGH);
-      trans_p_state = HIGH;
+    case b_lift_states::shifting_to_lift_up:
+      lift_t.set_state(HIGH);
+      motor.move_relative(30, 100);
+      break;
+    
+    case b_lift_states::shifting_to_lift_down:
+      motor.move_relative(-30, 100);
       break;
 
   }
   log_state_change();  
-
-  // if intake/lift transmission is in intake mode, shift the transmission to the lift
-  if(!trans_p_state){
-    after_switch_state = target_state;
-    set_state(b_lift_states::shifting_to_lift);
-  }
 }
 
 // regular set state method (common to all subsystems)
@@ -190,12 +202,12 @@ void B_Lift::set_state(const b_lift_states next_state){  // requests a state cha
 // accepts an index argument used specifically for a move to target
 void B_Lift::set_state(const b_lift_states next_state, const double index){  // requests a state change and logs it
   // confirms state change only if the state is actually move to target
-  if (target_state == b_lift_states::move_to_target){
+  if (next_state == b_lift_states::move_to_target){
     state_log.print("%s | State change requested from %s to %s, index is: %d\n", name, state_names[static_cast<int>(state)], state_names[static_cast<int>(next_state)], index);
     target_state = next_state;
     this->index = index;
   }
-  else state_log.print("%s | INVALID move to target State change requested from %s to %s, index is: %d\n", index, name, state_names[static_cast<int>(state)], state_names[static_cast<int>(next_state)], index);
+  else state_log.print("%s | INVALID move to target State change requested from %s to %s, index is: %d\n", name, state_names[static_cast<int>(state)], state_names[static_cast<int>(next_state)], index);
 }
 
 extern int elastic_f_up_time, elastic_f_down_time; //from gui_construction.cpp
@@ -235,7 +247,7 @@ B_Claw b_claw_obj({"B_Claw",
 B_Claw::B_Claw(Subsystem<b_claw_states, NUM_OF_B_CLAW_STATES> subsystem): Subsystem(subsystem)  // constructor
 {
   // state setup
-  target_state = b_claw_states::idle;
+  target_state = b_claw_states::searching;
   state = b_claw_states::managed;
 }
 
@@ -260,6 +272,7 @@ void B_Claw::handle_buttons(){
 }
 
 void B_Claw::handle(){
+
   switch(state){
     case b_claw_states::managed:
       break;
@@ -269,7 +282,7 @@ void B_Claw::handle(){
 
     case b_claw_states::searching:
       // grabs goal if bowl is detected
-      if(b_dist.get() < 50) set_state(b_claw_states::tilted);
+      if(b_dist.get() < 40) set_state(b_claw_states::tilted);
       break;
 
     case b_claw_states::tilted:
@@ -290,21 +303,21 @@ void B_Claw::handle_state_change(){
 
     case b_claw_states::idle:
       master.rumble("-");
-      b_claw.set_value(LOW);
+      b_claw.set_state(LOW);
       break;
 
     case b_claw_states::searching:
-      b_claw.set_value(LOW);
+      b_claw.set_state(LOW);
       search_cycle_check_count = 0; // resets search cycle count
       break;
 
     case b_claw_states::tilted:
       master.rumble("-");
-      b_claw.set_value(HIGH); // grabs mogo
+      b_claw.set_state(HIGH); // grabs mogo
       break;
 
     case b_claw_states::flat:
-      b_claw.set_value(HIGH); // grabs mogo
+      b_claw.set_state(HIGH); // grabs mogo
       break;
   }
   log_state_change();  

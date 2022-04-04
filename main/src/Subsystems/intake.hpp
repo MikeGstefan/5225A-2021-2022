@@ -11,13 +11,12 @@ enum class intake_states{
   on, // spinning forward
   reversed,  // spinning backwards
   unjamming, // spinning backwards until jam has stopped
-  shifting_to_intake, // lift/intake transmission switching to intake mode
-  wait_for_lift_lowering, // waits for lift to reach bottom before switching into on or reverse state
+  shifting_to_intake_up, // lift/intake transmission switching to intake mode, moving up
+  shifting_to_intake_down, // lift/intake transmission switching to intake mode, moving down
 };
 
 class Intake: public Motorized_subsystem<intake_states, NUM_OF_INTAKE_STATES, INTAKE_MAX_VELOCITY> {
   Timer jam_timer{"jam_timer"};
-  Timer shift_timer{"intake_lift_shift_timer"};  // how long since intake was set to shift
   intake_states after_switch_state; // the state the intake will go to after transmission switches to intake
 
 public:
