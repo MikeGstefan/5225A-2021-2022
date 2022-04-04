@@ -186,7 +186,7 @@ class Text: public Text_{
     int update_val(char* const buffer) override {
       if(value){
         prev_value = value();
-        return snprintf(buffer, 100, label.c_str(), screen::convert_args(prev_value));
+        return snprintf(buffer, 100, label.c_str(), convert_all_args(prev_value));
       }
       return snprintf(buffer, 100, label.c_str());
     }
@@ -361,21 +361,21 @@ namespace screen_flash{
 
   template <typename... Params> //text+cols+time
   void start(term_colours colour, std::uint32_t time, const char* fmt, Params... args){
-    start(printf_to_string(fmt, screen::convert_args(args)...), colour, time);
+    start(printf_to_string(fmt, args...), colour, time);
   }
 
   template <typename... Params> //text+col+time
   void start(Colour colour, std::uint32_t time, const char* fmt, Params... args){
-    start(printf_to_string(fmt, screen::convert_args(args)...), colour, 1000);
+    start(printf_to_string(fmt, args...), colour, 1000);
   }
 
   template <typename... Params> //text+red+time
   void start(std::uint32_t time, const char* fmt, Params... args){
-    start(printf_to_string(fmt, screen::convert_args(args)...), term_colours::ERROR, time);
+    start(printf_to_string(fmt, args...), term_colours::ERROR, time);
   }
 
   template <typename... Params> //text+col+1000
   void start(term_colours colour, const char* fmt, Params... args){
-    start(printf_to_string(fmt, screen::convert_args(args)...), colour, 1000);
+    start(printf_to_string(fmt, args...), colour, 1000);
   }
 }

@@ -834,7 +834,7 @@ void move_on_line(void* params){
     double power_xy;
     double total_power;
     double min_power_a = max_power * min_angle_percent;
-    const double x_multiplier = 2.0; // how much slower the robot strafes than moves forwards
+    constexpr double x_multiplier = 2.0; // how much slower the robot strafes than moves forwards
     // PID'S
 
     PID x_line_pid(23.0, 0.000, 0.0, 0.0, true, 0.2, 3.0);
@@ -1275,10 +1275,10 @@ void tank_move_on_arc(void* params){
   // from power to velocity * 1.6
   // from velocity to power / 1.6 or * 0.625
   // const double pwm_to_vel = 1.6;
-  const double pwm_to_vel = 0.05814;
-  const double kR = 30.0; // multiplier on radial error
+  constexpr double pwm_to_vel = 0.05814;
+  constexpr double kR = 30.0; // multiplier on radial error
 
-  const double kA = pwm_to_vel * 90.0, kB = 1 / pwm_to_vel, kP = 35.0, kD = 0.0;
+  constexpr double kA = pwm_to_vel * 90.0, kB = 1 / pwm_to_vel, kP = 35.0, kD = 0.0;
   const double final_angle = atan2(target.y - centre.y, target.x - centre.x); // angle of final position to centre at end of move
 
   uint32_t last_d_update_time = millis();  // for derivative

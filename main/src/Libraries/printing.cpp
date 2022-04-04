@@ -1,14 +1,17 @@
 #include "printing.hpp"
 
-std::string printf_to_string(const char* fmt, ...){
-  char buffer[150];
+const char* convert_all_args(const std::string& arg){
+	return arg.c_str();
+}
 
-  std::va_list args;
-  va_start(args, fmt);
-  vsnprintf(buffer, 150, fmt, args);
-  va_end(args);
-  
-  return buffer;
+const char* convert_all_args(const Position& arg){
+  std::string str = '(' + std::to_string(arg.x) + ", " + std::to_string(arg.y) + ", " + std::to_string(arg.angle) + ")";
+	return convert_all_args(str);
+}
+
+const char* convert_all_args(const Point& arg){
+  std::string str = '(' + std::to_string(arg.x) + ", " + std::to_string(arg.y) + ")";
+	return convert_all_args(str);
 }
 
 void newline(int count){
