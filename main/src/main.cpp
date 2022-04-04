@@ -105,10 +105,7 @@ void opcontrol() {
 	// delay(5000);
 
 	// move_start(move_types::turn_angle, turn_angle_params(90.0, true,true, 0.0, 0.0));
-	move_start(move_types::tank_arc, tank_arc_params({0.0, 0.0}, {-12,12, -90.0}));
-
-	drivebase.move(0.0,0.0);
-	while(true){
-		delay(10);
-	}
+	move_start(move_types::tank_arc, tank_arc_params({0.0, 0.0}, {24.0,-24.0, -90.0}, -127.0));
+	drivebase.brake();
+	// drivebase.move(0.0,0.0);
 }

@@ -1275,10 +1275,11 @@ void tank_move_on_arc(void* params){
   // from power to velocity * 1.6
   // from velocity to power / 1.6 or * 0.625
   // const double pwm_to_vel = 1.6;
-  const double pwm_to_vel = 0.05814;
+  const double pwm_to_vel = 0.05814; // ratio of angular motor power to angular velocity(in radians)
   const double kR = 30.0; // multiplier on radial error
-
-  const double kA = pwm_to_vel * 90.0, kB = 1 / pwm_to_vel, kP = 35.0, kD = 0.0;
+  // kA is the multiplier of angular error, kB is the ratio of angular velocity(in radians) to angular motor power
+  // kP and kD are P and D constants acting on the angular velocity PID
+  const double kA = pwm_to_vel * 90.0, kB = 1 / pwm_to_vel, kP = 50.0, kD = 30.0;
   const double final_angle = atan2(target.y - centre.y, target.x - centre.x); // angle of final position to centre at end of move
 
   uint32_t last_d_update_time = millis();  // for derivative
