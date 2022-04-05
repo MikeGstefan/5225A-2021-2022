@@ -39,11 +39,12 @@ void initialize() {
 	_Controller::init();
 	GUI::init();
 	delay(500);
-	
+	tracking.x_coord = 28.5, tracking.y_coord = 11.75, tracking.global_angle = -90.0_deg;
+
 	
 	// tracking.x_coord = 104.0, tracking.y_coord = 12.0, tracking.global_angle = -30.0_deg;
 	// tracking.x_coord = 24.5, tracking.y_coord = 15.0, tracking.global_angle = 9.0_deg;
-	tracking.x_coord = 0.0, tracking.y_coord = 0.0, tracking.global_angle = 0.0_deg;
+	// tracking.x_coord = 0.0, tracking.y_coord = 0.0, tracking.global_angle = 0.0_deg;
 	update_t.start();
 	// master.print(2, 0, "Driver: %s", drivebase.drivers[drivebase.cur_driver].name);
 	// gyro.finish_calibrating(); //Finishes calibrating gyro before program starts
@@ -87,7 +88,25 @@ void autonomous() {
 void opcontrol() {
 	// b_lift.set_state(b_lift_states::move_to_target, 0);
 	lift_handle_t.start();
+	while(!master.get_digital_new_press(DIGITAL_A))delay(10);
+	skills();
+	while(true)delay(10);
+	// b_lift.move(-70);
+	// Task([](){
+	// 	while(true){ 
+	// 		b_lift.handle(true);
+	// 		f_lift.handle(true);
+	// 		b_claw_obj.handle();
+	// 		f_claw_obj.handle();
+	// 	// if(ptr->notify_handle())return;
+	// 		delay(10);
+  	// 	}
+	// });
 	while(true){
+		// b_lift.set_state(b_lift_states::move_to_target, 0);
+		// delay(1500);
+		// b_lift.set_state(b_lift_states::move_to_target, 1);
+		// delay(10000);
 		// printf("%d\n", get_lift());
 		// drivebase handlers
 		drivebase.handle_input();
@@ -104,8 +123,8 @@ void opcontrol() {
 
 		// claw handlers
 		handle_claw_buttons();
-		// b_claw_obj.handle();
-		// f_claw_obj.handle();
+		b_claw_obj.handle();
+		f_claw_obj.handle();
 		delay(10);
 	}
 
