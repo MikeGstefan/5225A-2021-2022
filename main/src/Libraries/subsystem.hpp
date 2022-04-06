@@ -10,24 +10,38 @@ using namespace pros;
 // non-motorized subsystem
 template <typename state_type, int num_of_states>
 class Subsystem{
+private:
+  state_type target_state;
+
 protected:
   // target state is what the subsystem is trying to reach 
   // state is the current state
-  state_type target_state, state;
+  state_type state;
   const char* name;
   std::array<const char*, num_of_states> state_names;
-  // Mutex state_mutex;
+  Mutex target_state_mutex;
 
 public:
 
   // constructor for non-motorized subsystem
-  Subsystem(const char* name, std::array<const char*, num_of_states> state_names):
-    name(name), state_names(state_names)
+  Subsystem(const char* name, std::array<const char*, num_of_states> state_names,
+    state_type starting_state, state_type base_state):
+
+    name(name), state_names(state_names), state(starting_state), target_state(base_state) 
   {}
 
   void set_state(const state_type next_state){  // requests a state change and logs it
     state_log.print("%s | State change requested from %s to %s\n", name, state_names[static_cast<int>(state)], state_names[static_cast<int>(next_state)]);
+    target_state_mutex.take(TIMEOUT_MAX);
     target_state = next_state;
+    target_state_mutex.give();
+  }
+
+  state_type get_target_state(){
+    target_state_mutex.take(TIMEOUT_MAX);
+    state_type temp_state = target_state;
+    target_state_mutex.give();
+    return temp_state;
   }
 
   void log_state_change(){  // confirms state change, logs it, and updates state to be the target state

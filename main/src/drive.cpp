@@ -402,8 +402,8 @@ void handle_lifts(){
     if(joy_mode == joy_modes::lift_select){
       printf("joy mode now manual\n");
       joy_mode == joy_modes::manual;
-      b_lift.set_state(b_lift_states::manual);
-      f_lift.set_state(f_lift_states::manual);
+      b_lift.Subsystem::set_state(b_lift_states::manual);
+      f_lift.Subsystem::set_state(f_lift_states::manual);
     }
     else{
       joy_mode = joy_modes::lift_select;
@@ -416,7 +416,7 @@ void handle_lifts(){
     b_lift.set_state(b_lift_states::move_to_target, 0);
   }
   // lift handlers
-  f_lift.handle_buttons();
+  // f_lift.handle_buttons();
   f_lift.handle(true);
   b_lift.handle_buttons();
   b_lift.handle(true);
@@ -429,33 +429,29 @@ void handle_lift_buttons(){
       up_press.reset();
       // if state is manual, go to the closest position that's higher than the current position
       if(f_lift.get_state() == f_lift_states::manual){
-        int i = 0;
-        while (i < f_lift.driver_positions.size()){
+        for (size_t i = 0; i < f_lift.driver_positions.size(); i++){
           if(f_lift.driver_positions[i] > f_lift_pot.get_value()){
             f_lift.set_state(f_lift_states::move_to_target, i);
             break;
           }
-          i++;
         }
       }
       // otherwise just go to the next highest position, but doesn't increment index if it's out of bounds
-      else if(f_lift.index < f_lift.driver_positions.size() - 1)  f_lift.set_state(f_lift_states::move_to_target, ++f_lift.index);
+      else if(f_lift.get_index() < f_lift.driver_positions.size() - 1)  f_lift.set_state(f_lift_states::move_to_target, f_lift.get_index() + 1);
     }
     else{
       up_press.reset();
       // if state is manual, go to the closest position that's higher than the current position
       if(b_lift.get_state() == b_lift_states::manual){
-        int i = 0;
-        while (i < b_lift.driver_positions.size()){
+        for (size_t i = 0; i < b_lift.driver_positions.size(); i++){
           if(b_lift.driver_positions[i] > b_lift_pot.get_value()){
             b_lift.set_state(b_lift_states::move_to_target, i);
             break;
           }
-          i++;
         }
       }
       // otherwise just go to the next highest position, but doesn't increment index if it's out of bounds
-      else if(b_lift.index < b_lift.driver_positions.size() - 1)  b_lift.set_state(b_lift_states::move_to_target, ++b_lift.index);
+      else if(b_lift.get_index() < b_lift.driver_positions.size() - 1)  b_lift.set_state(b_lift_states::move_to_target, b_lift.get_index() + 1);
     }
   }
   if(master.get_digital_new_press(lift_down_button)){
@@ -463,33 +459,29 @@ void handle_lift_buttons(){
       down_press.reset();
       // if state is manual, go to the closest position that's lower than the current position
       if(f_lift.get_state() == f_lift_states::manual){
-        int i = f_lift.driver_positions.size() - 1;
-        while (i > -1){
+        for (size_t i = f_lift.driver_positions.size() - 1; i >= 0; i--){
           if(f_lift.driver_positions[i] < f_lift_pot.get_value()){
             f_lift.set_state(f_lift_states::move_to_target, i);
             break;
           }
-          i--;
         }
       }
       // otherwise just go to the next lowest position, but doesn't decrement index if it's out of bounds
-      else if(f_lift.index > 0)  f_lift.set_state(f_lift_states::move_to_target, --f_lift.index);
+      else if(f_lift.get_index() > 0)  f_lift.set_state(f_lift_states::move_to_target, f_lift.get_index() - 1);
     }
     else{
       down_press.reset();
       // if state is manual, go to the closest position that's lower than the current position
       if(b_lift.get_state() == b_lift_states::manual){
-        int i = b_lift.driver_positions.size() - 1;
-        while (i > -1){
+        for (size_t i = b_lift.driver_positions.size() - 1; i >= 0; i--){
           if(b_lift.driver_positions[i] < b_lift_pot.get_value()){
             b_lift.set_state(b_lift_states::move_to_target, i);
             break;
           }
-          i--;
         }
       }
       // otherwise just go to the next lowest position, but doesn't decrement index if it's out of bounds
-      else if(b_lift.index > 0)  b_lift.set_state(b_lift_states::move_to_target, --b_lift.index);
+      else if(b_lift.get_index() > 0)  b_lift.set_state(b_lift_states::move_to_target, b_lift.get_index() - 1);
     }
   }
   // resets and pauses the timers if driver releases button
@@ -501,7 +493,7 @@ void handle_lift_buttons(){
     if(get_lift())  f_lift.set_state(f_lift_states::move_to_target, f_lift.driver_positions.size() - 1);
     else  b_lift.set_state(b_lift_states::move_to_target, b_lift.driver_positions.size() - 1);
   }
-  // goes to bottom position of down button is held
+  // goes to bottom position if down button is held
   if(down_press.get_time() > 300){
     if(get_lift())  f_lift.set_state(f_lift_states::move_to_target, 0);
     else  b_lift.set_state(b_lift_states::move_to_target, 0);

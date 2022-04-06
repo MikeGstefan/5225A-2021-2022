@@ -23,7 +23,7 @@ pros::Motor b_lift_m(5, pros::E_MOTOR_GEARSET_36, false,pros::E_MOTOR_ENCODER_DE
 Piston f_claw_c(7,"",1,0);
 Piston f_claw_o(6,"",0,0);
 Piston drive_t({20,7},"",0,0);
-Piston lift_t(4,"",0,0);
+Piston lift_t(4,"",1,0);
 Piston b_claw(5,"",0,0);
 
 pros::Distance b_dist(11), f_dist(6);

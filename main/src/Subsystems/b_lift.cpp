@@ -12,15 +12,11 @@ B_Lift b_lift({{"B_Lift",
   "manual",
   "shifting_to_lift_up",
   "shifting_to_lift_down",
-}
+},  b_lift_states::managed, b_lift_states::idle // goes from managed to idle upon startup
 }, b_lift_m});
 
 
 B_Lift::B_Lift(Motorized_subsystem<b_lift_states, NUM_OF_B_LIFT_STATES, B_LIFT_MAX_VELOCITY> motorized_subsystem): Motorized_subsystem(motorized_subsystem){ // constructor
-
-  // state setup
-  target_state = b_lift_states::move_to_target; // sends lift to bottom upon startup
-  state = b_lift_states::managed;
 
   index = 0;
 
@@ -34,7 +30,7 @@ void B_Lift::handle_buttons(){
     up_press.reset();
     // if state is manual, go to the closest position that's higher than the current position
     if(state == b_lift_states::manual){
-      int i = 0;
+      size_t i = 0;
       while (i < driver_positions.size()){
         if(driver_positions[i] > b_lift_pot.get_value()){
           set_state(b_lift_states::move_to_target, i);
@@ -93,10 +89,10 @@ void B_Lift::handle(bool driver_array){
         // switches to idle by default or special case depending on current target
         switch(index){
           case 0: // lift is at bottom position, this state is used by intake 
-            set_state(b_lift_states::bottom);
+            Subsystem::set_state(b_lift_states::bottom);
             break;
           default:
-            set_state(b_lift_states::idle);
+            Subsystem::set_state(b_lift_states::idle);
             break;
         }
       }
@@ -127,14 +123,14 @@ void B_Lift::handle(bool driver_array){
 
     case b_lift_states::shifting_to_lift_up:
       if(fabs(b_lift_m.get_target_position() - b_lift_m.get_position()) < 15){
-        set_state(b_lift_states::shifting_to_lift_down);
+        Subsystem::set_state(b_lift_states::shifting_to_lift_down);
       }
       break;
 
     case b_lift_states::shifting_to_lift_down:
       // switches to desired state after transmission
       if(fabs(b_lift_m.get_target_position() - b_lift_m.get_position()) < 15){
-        set_state(after_switch_state);
+        Subsystem::set_state(after_switch_state);
       }
       break;
 
@@ -143,14 +139,14 @@ void B_Lift::handle(bool driver_array){
 }
 
 void B_Lift::handle_state_change(){
-  if(target_state == state) return;
+  if(get_target_state() == state) return;
   // if state has changed, performs the necessary cleanup operation before entering next state
 
   // if intake/lift transmission is in intake mode, shift the transmission to the lift
   if(!lift_t.get_state() && state != b_lift_states::shifting_to_lift_up){
-    after_switch_state = target_state;
+    after_switch_state = get_target_state();
     printf("after_switch_state:%s", b_lift.state_names[(int)after_switch_state]);
-    set_state(b_lift_states::shifting_to_lift_up);
+    Subsystem::set_state(b_lift_states::shifting_to_lift_up);
   }
 
   if(state == b_lift_states::bottom){ // if lift is leaving the bottom state, turn off the intake
@@ -158,7 +154,7 @@ void B_Lift::handle_state_change(){
     intake.set_state(intake_states::off);
   }
 
-  switch(target_state){
+  switch(get_target_state()){
     case b_lift_states::managed:
       break;
 
@@ -168,6 +164,7 @@ void B_Lift::handle_state_change(){
       break;
 
     case b_lift_states::idle:
+      motor.move_velocity(0); // applies holding power
       break;
 
     case b_lift_states::move_to_target:
@@ -194,18 +191,13 @@ void B_Lift::handle_state_change(){
   log_state_change();  
 }
 
-// regular set state method (common to all subsystems)
-void B_Lift::set_state(const b_lift_states next_state){  // requests a state change and logs it (NORMAL set state)
-  state_log.print("%s | State change requested from %s to %s, index is: %d\n", name, state_names[static_cast<int>(state)], state_names[static_cast<int>(next_state)], index);
-  target_state = next_state;
-}
 // accepts an index argument used specifically for a move to target
-void B_Lift::set_state(const b_lift_states next_state, const double index){  // requests a state change and logs it
+void B_Lift::set_state(const b_lift_states next_state, const uint8_t index){  // requests a state change and logs it
   // confirms state change only if the state is actually move to target
   if (next_state == b_lift_states::move_to_target){
-    state_log.print("%s | State change requested from %s to %s, index is: %d\n", name, state_names[static_cast<int>(state)], state_names[static_cast<int>(next_state)], index);
-    target_state = next_state;
     this->index = index;
+    state_log.print("%s | State change requested index is: %d \t", name, index);
+    Subsystem::set_state(next_state);
   }
   else state_log.print("%s | INVALID move to target State change requested from %s to %s, index is: %d\n", name, state_names[static_cast<int>(state)], state_names[static_cast<int>(next_state)], index);
 }
@@ -241,15 +233,11 @@ B_Claw b_claw_obj({"B_Claw",
   "searching",
   "tilted",
   "flat"
-}
+}, b_claw_states::managed, b_claw_states::idle // goes from managed to idle upon startup
 });
 
 B_Claw::B_Claw(Subsystem<b_claw_states, NUM_OF_B_CLAW_STATES> subsystem): Subsystem(subsystem)  // constructor
-{
-  // state setup
-  target_state = b_claw_states::searching;
-  state = b_claw_states::managed;
-}
+{}
 
 void B_Claw::handle_buttons(){
   // resets the press timer if toggle button is pressed
@@ -295,9 +283,9 @@ void B_Claw::handle(){
 }
 
 void B_Claw::handle_state_change(){
-  if(target_state == state) return;
+  if(get_target_state() == state) return;
   // if state has changed, performs the necessary cleanup operation before entering next state
-  switch(target_state){
+  switch(get_target_state()){
     case b_claw_states::managed:
       break;
 

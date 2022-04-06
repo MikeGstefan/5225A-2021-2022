@@ -40,6 +40,8 @@ void initialize() {
 	GUI::init();
 	delay(500);
 	
+	b_lift.motor.set_brake_mode(E_MOTOR_BRAKE_HOLD);
+	f_lift.motor.set_brake_mode(E_MOTOR_BRAKE_HOLD);
 	
 	// tracking.x_coord = 104.0, tracking.y_coord = 12.0, tracking.global_angle = -30.0_deg;
 	// tracking.x_coord = 24.5, tracking.y_coord = 15.0, tracking.global_angle = 9.0_deg;
@@ -85,7 +87,8 @@ void autonomous() {
 }
 
 void opcontrol() {
-	// b_lift.set_state(b_lift_states::move_to_target, 0);
+	// b)
+	b_lift.Subsystem::set_state(b_lift_states::move_to_target);
 	lift_handle_t.start();
 	while(true){
 		// printf("%d\n", get_lift());

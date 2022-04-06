@@ -10,16 +10,12 @@ Intake intake({{"Intake",
   "unjamming",
   "shifting_to_lift_up",
   "shifting_to_lift_down",
-}
+}, intake_states::managed, intake_states::off // goes from managed to off upon startup
 }, b_lift_m});
 
 
 Intake::Intake(Motorized_subsystem<intake_states, NUM_OF_INTAKE_STATES, INTAKE_MAX_VELOCITY> motorized_subsystem): Motorized_subsystem(motorized_subsystem)  // constructor
-{
-  // state setup
-  target_state = intake_states::off;
-  state = intake_states::managed;
-}
+{}
 
 void Intake::handle_buttons(){
   // toggles intake state if intake button is pressed
@@ -93,15 +89,15 @@ void Intake::handle(){
 }
 
 void Intake::handle_state_change(){
-  if(target_state == state) return;
+  if(get_target_state() == state) return;
   // if state has changed, performs the necessary cleanup operation before entering next state
 
   // shifts the transmission before activating intake in desired state
-  if(target_state != intake_states::off && lift_t.get_state()){
-    after_switch_state = target_state;  // the state to reach after switching the transmission to intake mode
+  if(get_target_state() != intake_states::off && lift_t.get_state()){
+    after_switch_state = get_target_state();  // the state to reach after switching the transmission to intake mode
     set_state(intake_states::shifting_to_intake_up);
   }
-  switch(target_state){
+  switch(get_target_state()){
     case intake_states::managed:
       break;
 

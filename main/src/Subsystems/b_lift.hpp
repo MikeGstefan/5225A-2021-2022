@@ -2,6 +2,7 @@
 #include "../Libraries/subsystem.hpp"
 #include "../drive.hpp"
 #include "../pid.hpp"
+#include <atomic>
 
 #define NUM_OF_B_LIFT_STATES 7
 #define B_LIFT_MAX_VELOCITY 100
@@ -27,9 +28,9 @@ class B_Lift: public Motorized_subsystem<b_lift_states, NUM_OF_B_LIFT_STATES, B_
   double offset_a = 365.0, offset_h = 9.75;
   double arm_len = 8.0;
   double gear_ratio = 5.0;
+  std::atomic<uint8_t> index{0}; // to avoid race conditions this is atomic
 
 public:
-  int index, last_index;
   vector<int> driver_positions = {1042, 1500, 2050, 2750};
   vector<int> prog_positions = {1042, 1500, 2050, 2750};
 
@@ -39,18 +40,13 @@ public:
   void handle(bool driver_array);  // contains state machine code, (if driver_array is false, uses prog_array)
   void handle_state_change(); // cleans up and preps the machine to be in the target state
   void handle_buttons(); // handles driver button input
-  void set_state(const b_lift_states next_state);  // requests a state change and logs it (NORMAL set state)
   // THIS IS AN OVERLOAD for the existing set state function, accepts an index for the lift
-  void set_state(const b_lift_states next_state, const double index);  // requests a state change and logs it
+  void set_state(const b_lift_states next_state, const uint8_t index);  // requests a state change and logs it
   
   // getters because index is private
-  int get_index() const{
-    return index;
+  uint8_t get_index() const{
+    return index.load();
   }
-  int get_last_index()  const{
-    return last_index;
-  }
-  
   void elastic_util(); // up time should be about 1100mms (ignore this time, it was on the old lift), down time should be slightly slower than that
 };
 
