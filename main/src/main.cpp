@@ -90,7 +90,8 @@ void opcontrol() {
 	// lift_handle_t.start();
 	while(!master.get_digital_new_press(DIGITAL_A))delay(10);
 	// skills();
-	move_start(move_types::tank_point, tank_point_params({0.0, 30.0,0.0}));
+	b_claw.set_state(1);
+	move_start(move_types::tank_point, tank_point_params({0.0, 4.0,0.0}, false,127.0,1.0,true));
 	while(true)delay(10);
 	// b_lift.move(-70);
 	// Task([](){

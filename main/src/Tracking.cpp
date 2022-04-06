@@ -407,8 +407,8 @@ point_params::point_params(const Position target, const double max_power, const 
 tank_arc_params::tank_arc_params(const Point start_pos, Position target, const double power, const double max_power, const bool brake, double decel_start, double decel_end, double decel_target_speed):
   start_pos{start_pos}, target{target}, power{power}, max_power{max_power}, brake{brake}, decel_start{decel_start}, decel_end{decel_end}, decel_target_speed{decel_target_speed}{}
 
-tank_point_params::tank_point_params(const Position target, const bool turn_dir_if_0, double max_velo_dist, double max_velo, const double max_power, const double min_angle_percent, const bool brake, double kp_y, double kd_y, double kp_a, double kd_a, int timeout, Point end_error, double end_velo, double min_velo):
-  target{target}, turn_dir_if_0{turn_dir_if_0}, max_velo{max_velo}, max_power{max_power}, min_angle_percent{min_angle_percent}, brake{brake}, kp_y{kp_y}, kd_y{kd_y}, kp_a{kp_a}, kd_a{kd_a}, timeout{timeout}, end_error{end_error}, max_velo_dist{max_velo_dist}, end_velo{end_velo}, min_velo{min_velo}{}
+tank_point_params::tank_point_params(const Position target, const bool turn_dir_if_0, const double max_power, const double min_angle_percent, const bool brake, double kp_y, double kp_a, double kd_a, int timeout, Point end_error):
+  target{target}, turn_dir_if_0{turn_dir_if_0}, max_power{max_power}, min_angle_percent{min_angle_percent}, brake{brake}, kp_y{kp_y}, kp_a{kp_a}, kd_a{kd_a}, timeout{timeout}, end_error{end_error}{}
 
 tank_rush_params::tank_rush_params(const Position target, const bool turn_dir_if_0, const double max_power, const double min_angle_percent, const bool brake, double kp_a, double kd_a, double dist_past): 
   target{target}, turn_dir_if_0{turn_dir_if_0}, max_power{max_power}, min_angle_percent{min_angle_percent}, brake{brake}, kp_a{kp_a}, kd_a{kd_a}, dist_past{dist_past}{}
@@ -960,7 +960,7 @@ void move_on_line(void* params){
 // TANK MOVE ALGORITHMS
 
 void tank_move_to_target(void* params){
-    _Task* ptr = _Task::get_obj(params);
+     _Task* ptr = _Task::get_obj(params);
     // tank_point_params* param_ptr = static_cast<tank_point_params*>(_Task::get_params(params));
     const Position target = tank_point_params_g.target;
     const bool turn_dir_if_0 = tank_point_params_g.turn_dir_if_0;
@@ -968,17 +968,10 @@ void tank_move_to_target(void* params){
     const double min_angle_percent = tank_point_params_g.min_angle_percent;
     const bool brake = tank_point_params_g.brake;
     double kp_y = tank_point_params_g.kp_y;
-    double kd_y = tank_point_params_g.kd_y;
     double kp_a =tank_point_params_g.kp_a;
     double kd_a = tank_point_params_g.kd_a;
     int timeout = tank_point_params_g.timeout;
     Point end_error = tank_point_params_g.end_error;
-    // this distance at which the robot is travelling at max vel (decreasing it is like increasing the kp)
-    double max_vel_dist = tank_point_params_g.max_velo_dist; // Mike this is a parameter
-    double max_velo = tank_point_params_g.max_velo;
-    // double min_velo = tank_point_params_g.min_velo;
-    double min_velo = 0;
-    // double end_velo = tank_point_params_g.end_velo;
     // Pid angle(kp.a);
     
     tracking.move_complete = false;
@@ -998,21 +991,9 @@ void tank_move_to_target(void* params){
     // double end_error = 0.5, end_error_x = 0.5;
     double end_dist;
 
-
-    double end_y_velocity = tank_point_params_g.end_velo;  // defaults to 0.0
     // double deriv_a = 0.0;
-    // PID angle(kp_a, 0.0, kd_a, 0.0);
-    PID angle(140, 0.0001, kd_a, 0.0);
-    // PID y_pid(6.4,0.0,350.0,0.0);
-    // PID y_pid(6.4,0.0,0.0,0.0);
-    double kB = 1.9;  // the ratio of motor power to local y velocity (inches/sec)
-    PID pos_pid(3.1,0.0,10.0,0.0,0.0);
-    PID y_vel_pid(kp_y, 0.0000, kd_y, 0.0);
-    double target_y_velocity; // what the y_vel_pid is trying to reach
-    double cur_y_velocity;
-    double max_y_velocity = 74.0; // the robot can travel at 60 inches/sec at its fastest
-    int sgn_y_error; // sign of local y error
-    double correction_power = 0.0;
+    PID angle(kp_a, 0.0, kd_a, 0.0);
+    PID y_pid(kp_y,0.0,350.0,0.0);
 
     // move on line variables
     Vector follow_line(target.y - tracking.y_coord, target.x - tracking.x_coord); // used to keep track of angle of follow_line relative to the vertical
@@ -1029,16 +1010,9 @@ void tank_move_to_target(void* params){
     orig_sgn_line_y = sgn(line_disp.get_y()); // used to calculate if the robot has overshot
     // END OF MOTION FIX
 
-    double last_velocity = 0.0;
     int start_time = millis();
     bool last_state= false;
     motion_i.print("%d|| Starting tank move to point from (%.2f, %.2f, %.2f) to (%.2f, %.2f, %.2f)\n", millis(), tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle),target.x, target.y, target.angle);
-    // velocity relation testing
-    // power - > velocity (inches/sec)
-    // 50 -> 23 = 0.46
-    // 75 -> 37 = 0.49
-    // 100 -> 50 = 0.5
-    // 127 -> 65 = 0.51
     while(true){
       // global displacement of robot and target
       line_disp = Vector(target.x - tracking.x_coord, target.y - tracking.y_coord);
@@ -1066,24 +1040,11 @@ void tank_move_to_target(void* params){
       end_dist = sqrt(pow(hypotenuse,2) + pow(local_error.y,2) - (2* hypotenuse * local_error.y * cos(tracking.global_angle - atan2(target.x - tracking.x_coord,target.y - tracking.y_coord))));  
       motion_d.print("%d|| end_dist: %.2f, hypotenuse: %.2f, local %.2f, angle: %.2f\n",millis(), end_dist,hypotenuse, local_error.y,rad_to_deg(tracking.global_angle - atan2(target.x - tracking.x_coord,target.y - tracking.y_coord)));
 
-      // calculating target velocity
-      cur_y_velocity = 0.2 * last_velocity + 0.8 * ((tracking.l_velo + tracking.r_velo) / 2); // average of side encoders is approximately the local_y_velocity
-      last_velocity = cur_y_velocity;
-      sgn_y_error = sgn(local_error.y);
-      // target_y_velocity = map(local_error.y, sgn_y_error * 0.0, sgn_y_error * max_vel_dist, sgn_y_error * end_y_velocity, sgn_y_error * max_y_velocity);
-      target_y_velocity = pos_pid.compute(-local_error.y, 0.0);
-      if(fabs(target_y_velocity) > max_velo) target_y_velocity = max_velo * sgn(target_y_velocity);
-      if(fabs(target_y_velocity) < min_velo) target_y_velocity = min_velo * sgn(target_y_velocity);
-
-      correction_power = y_vel_pid.compute(cur_y_velocity, target_y_velocity);
-      if(fabs(target_y_velocity - cur_y_velocity) < 4.0) correction_power = 0;
-      tracking.power_y = kB * target_y_velocity + correction_power;
-      printf("error: %lf, power_y: %lf, cur_vel: %lf, target_vel: %lf, base: %lf, diff_vel:%lf, L encoder %f, R encoder %f\n", local_error.y, tracking.power_y, cur_y_velocity, target_y_velocity, kB * target_y_velocity, target_y_velocity - cur_y_velocity, tracking.l_velo, tracking.r_velo);
-      // tracking.power_y = kB * target_y_velocity;
-
+      // tracking.power_y = kp_y * local_error.y;
+      tracking.power_y = y_pid.compute(-local_error.y,0.0);
       // tracking.power_y = kp_y * line_y_local_y;
       // tracking.power_a = angle.compute(error.angle, 0.0);
-      if( (fabs(end_dist) > end_error.x  || fabs(local_error.y) > 10.0) && fabs(local_error.y) > 4.0){
+      if( fabs(end_dist) > end_error.x && fabs(local_error.y) > 4.0 ){
 
         if(!last_state){
           last_state = true;
