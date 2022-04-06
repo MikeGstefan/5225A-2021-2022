@@ -88,8 +88,9 @@ void autonomous() {
 
 void opcontrol() {
 	// b)
-	b_lift.Subsystem::set_state(b_lift_states::move_to_target);
+	// b_lift.Subsystem::set_state(b_lift_states::move_to_target);
 	lift_handle_t.start();
+	// /*
 	while(true){
 		// printf("%d\n", get_lift());
 		// drivebase handlers
@@ -111,6 +112,32 @@ void opcontrol() {
 		// f_claw_obj.handle();
 		delay(10);
 	}
+	// */
+	master.clear();
+	b_lift.set_state(b_lift_states::move_to_target, 3);
+	wait_until(b_lift.get_state() == b_lift_states::idle);
+	master.rumble("-");
+	master.print(0,0,"reached 4");
+	delay(1000);
+
+	b_lift.set_state(b_lift_states::move_to_target, 1);
+	wait_until(b_lift.get_state() == b_lift_states::idle);
+	master.rumble("-");
+	master.print(0,0,"reached 1");
+	delay(1000);
+
+	b_lift.set_state(b_lift_states::move_to_target, 2);
+	wait_until(b_lift.get_state() == b_lift_states::idle);
+	master.rumble("-");
+	master.print(0,0,"reached 1");
+	delay(1000);
+
+
+	while(true) delay(10); // don't exucute anything beyond this line
+
+	b_lift.set_state(b_lift_states::move_to_target, 3);
+	b_lift.Subsystem::set_state(b_lift_states::idle);
+
 
 	lift_t.set_state(HIGH);
 	b_lift_m.move_relative(30, 100);

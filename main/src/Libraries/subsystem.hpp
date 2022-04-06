@@ -11,15 +11,14 @@ using namespace pros;
 template <typename state_type, int num_of_states>
 class Subsystem{
 private:
-  state_type target_state;
+  state_type target_state, state;
 
 protected:
   // target state is what the subsystem is trying to reach 
   // state is the current state
-  state_type state;
   const char* name;
   std::array<const char*, num_of_states> state_names;
-  Mutex target_state_mutex;
+  Mutex target_state_mutex, state_mutex; // mutexes to hold target_state and state, respectively
 
 public:
 
@@ -37,16 +36,12 @@ public:
     target_state_mutex.give();
   }
 
-  state_type get_target_state(){
-    target_state_mutex.take(TIMEOUT_MAX);
-    state_type temp_state = target_state;
-    target_state_mutex.give();
-    return temp_state;
-  }
 
   void log_state_change(){  // confirms state change, logs it, and updates state to be the target state
     state_log.print("%s | State change confirmed from %s to %s\n", name, state_names[static_cast<int>(state)], state_names[static_cast<int>(target_state)]);
+    state_mutex.take(TIMEOUT_MAX);
     state = target_state;  
+    state_mutex.give();
   }
   
   //shouldn't handle be a virtual function
@@ -54,12 +49,18 @@ public:
   void handle_state_change(); // cleans up and preps the machine to be in the target state
 
   // public getters for accessing 
-  state_type get_target_state() const{
-    return target_state;
+  state_type get_state() {
+    state_mutex.take(TIMEOUT_MAX);
+    state_type temp_state = state;
+    state_mutex.give();
+    return state;
   }
 
-  state_type get_state() const{
-    return state;
+  state_type get_target_state(){
+    target_state_mutex.take(TIMEOUT_MAX);
+    state_type temp_state = target_state;
+    target_state_mutex.give();
+    return temp_state;
   }
 
 };

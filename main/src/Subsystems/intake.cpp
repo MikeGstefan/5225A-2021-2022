@@ -22,30 +22,50 @@ void Intake::handle_buttons(){
   if(master.get_digital_new_press(intake_button)){
     // doesn't allow driver to turn on intake if lift is at bottom
     if(f_lift.get_state() != f_lift_states::bottom){
-      if(state == intake_states::off)  set_state(intake_states::on);
-      else if(state == intake_states::reversed)  set_state(intake_states::on);
-      else if(state == intake_states::on)  set_state(intake_states::off);
-      else if(state == intake_states::unjamming)  set_state(intake_states::on);
+      switch(get_state()){
+        case intake_states::off:
+          set_state(intake_states::on);
+          break;
+        case intake_states::reversed:
+          set_state(intake_states::on);
+          break;
+        case intake_states::on:
+          set_state(intake_states::off);
+          break;
+        case intake_states::unjamming:
+          set_state(intake_states::on);
+          break;
+      }
     }
   }
   // toggles intake reverse state if intake reverse button is pressed
   if(master.get_digital_new_press(intake_reverse_button)){
     // doesn't allow driver to turn on intake if lift is at bottom
     if(f_lift.get_state() != f_lift_states::bottom){
-      if(state == intake_states::off)  set_state(intake_states::reversed);
-      else if(state == intake_states::on)  set_state(intake_states::reversed);
-      else if(state == intake_states::reversed)  set_state(intake_states::off);
-      else if(state == intake_states::unjamming)  set_state(intake_states::off);
+      switch(get_state()){
+        case intake_states::off:
+          set_state(intake_states::reversed);
+          break;
+        case intake_states::on:
+          set_state(intake_states::reversed);
+          break;
+        case intake_states::reversed:
+          set_state(intake_states::off);
+          break;
+        case intake_states::unjamming:
+          set_state(intake_states::off);
+          break;
+      }
     }
   }
 }
 
 void Intake::handle(){
   // turns intake off if front lift is too low
-  if(f_lift_pot.get_value() < f_lift.driver_positions[1] - 50 && state != intake_states::off){
+  if(f_lift_pot.get_value() < f_lift.driver_positions[1] - 50 && get_state() != intake_states::off){
     set_state(intake_states::off);
   }
-  switch(state){
+  switch(get_state()){
     case intake_states::managed:
       break;
       
@@ -89,7 +109,7 @@ void Intake::handle(){
 }
 
 void Intake::handle_state_change(){
-  if(get_target_state() == state) return;
+  if(get_target_state() == get_state()) return;
   // if state has changed, performs the necessary cleanup operation before entering next state
 
   // shifts the transmission before activating intake in desired state

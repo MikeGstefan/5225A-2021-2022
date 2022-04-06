@@ -29,7 +29,7 @@ void B_Lift::handle_buttons(){
   if(master.get_digital_new_press(lift_up_button) && !get_lift()){
     up_press.reset();
     // if state is manual, go to the closest position that's higher than the current position
-    if(state == b_lift_states::manual){
+    if(get_state() == b_lift_states::manual){
       size_t i = 0;
       while (i < driver_positions.size()){
         if(driver_positions[i] > b_lift_pot.get_value()){
@@ -45,7 +45,7 @@ void B_Lift::handle_buttons(){
   if(master.get_digital_new_press(lift_down_button) && !get_lift()){
     down_press.reset();
     // if state is manual, go to the closest position that's lower than the current position
-    if(state == b_lift_states::manual){
+    if(get_state() == b_lift_states::manual){
       int i = driver_positions.size() - 1;
       while (i > -1){
         if(driver_positions[i] < b_lift_pot.get_value()){
@@ -72,7 +72,7 @@ void B_Lift::handle(bool driver_array){
   // decides which position vector to use
   std::vector<int>& positions = driver_array? driver_positions: prog_positions;
 
-  switch(state){
+  switch(get_state()){
     case b_lift_states::managed:  // being controlled externally
       break;
     case b_lift_states::bottom: // at lowest position, this state is used by the intake and f_claw
@@ -139,17 +139,17 @@ void B_Lift::handle(bool driver_array){
 }
 
 void B_Lift::handle_state_change(){
-  if(get_target_state() == state) return;
+  if(get_target_state() == get_state()) return;
   // if state has changed, performs the necessary cleanup operation before entering next state
 
   // if intake/lift transmission is in intake mode, shift the transmission to the lift
-  if(!lift_t.get_state() && state != b_lift_states::shifting_to_lift_up){
+  if(!lift_t.get_state() && get_state() != b_lift_states::shifting_to_lift_up){
     after_switch_state = get_target_state();
     printf("after_switch_state:%s", b_lift.state_names[(int)after_switch_state]);
     Subsystem::set_state(b_lift_states::shifting_to_lift_up);
   }
 
-  if(state == b_lift_states::bottom){ // if lift is leaving the bottom state, turn off the intake
+  if(get_state() == b_lift_states::bottom){ // if lift is leaving the bottom state, turn off the intake
     // b_lock_p.set_value(HIGH);  // unlock the lift
     intake.set_state(intake_states::off);
   }
@@ -199,7 +199,7 @@ void B_Lift::set_state(const b_lift_states next_state, const uint8_t index){  //
     state_log.print("%s | State change requested index is: %d \t", name, index);
     Subsystem::set_state(next_state);
   }
-  else state_log.print("%s | INVALID move to target State change requested from %s to %s, index is: %d\n", name, state_names[static_cast<int>(state)], state_names[static_cast<int>(next_state)], index);
+  else state_log.print("%s | INVALID move to target State change requested from %s to %s, index is: %d\n", name, state_names[static_cast<int>(get_state())], state_names[static_cast<int>(next_state)], index);
 }
 
 extern int elastic_f_up_time, elastic_f_down_time; //from gui_construction.cpp
@@ -211,14 +211,14 @@ void B_Lift::elastic_util(){
   Timer move_timer{"move"};
   set_state(b_lift_states::move_to_target, driver_positions.size() - 1); // moves to top
   // // intake_piston.set_value(HIGH);  // raises intake
-  wait_until(state == b_lift_states::idle);
+  wait_until(get_state() == b_lift_states::idle);
   move_timer.print();
   elastic_f_up_time = move_timer.get_time();
   master.print(1, 0, "up time: %d", elastic_f_up_time);
 
   move_timer.reset();
   set_state(b_lift_states::move_to_target, 0); // moves to bottom
-  wait_until(state == b_lift_states::bottom);
+  wait_until(get_state() == b_lift_states::bottom);
   move_timer.print();
   elastic_f_down_time = move_timer.get_time();
   master.print(2, 0, "down time: %d", elastic_f_up_time);
@@ -244,24 +244,24 @@ void B_Claw::handle_buttons(){
   if(master.get_digital_new_press(claw_toggle_button) && !get_lift()){
     toggle_press_timer.reset();
     // grabs goal if toggle button is pressed and claw is open
-    if(state == b_claw_states::idle) set_state(b_claw_states::tilted);
+    if(get_state() == b_claw_states::idle) set_state(b_claw_states::tilted);
   }
 
   if(toggle_press_timer.get_time() > 300){  // toggles tilt state if claw button was held
-    if(state == b_claw_states::tilted) set_state(b_claw_states::flat);
-    else if(state == b_claw_states::flat) set_state(b_claw_states::tilted);
+    if(get_state() == b_claw_states::tilted) set_state(b_claw_states::flat);
+    else if(get_state() == b_claw_states::flat) set_state(b_claw_states::tilted);
     toggle_press_timer.reset(false); // resets and pauses the timer 
   }
   // releases goal if toggle button is released before the button hold timeout triggers
   else if(!master.get_digital(claw_toggle_button)){
     toggle_press_timer.reset(false);  // resets and pauses the timer 
-    if(state == b_claw_states::tilted || state == b_claw_states::flat)  set_state(b_claw_states::idle);
+    if(get_state() == b_claw_states::tilted || get_state() == b_claw_states::flat)  set_state(b_claw_states::idle);
   }
 }
 
 void B_Claw::handle(){
 
-  switch(state){
+  switch(get_state()){
     case b_claw_states::managed:
       break;
 
@@ -283,7 +283,7 @@ void B_Claw::handle(){
 }
 
 void B_Claw::handle_state_change(){
-  if(get_target_state() == state) return;
+  if(get_target_state() == get_state()) return;
   // if state has changed, performs the necessary cleanup operation before entering next state
   switch(get_target_state()){
     case b_claw_states::managed:

@@ -21,7 +21,7 @@ class B_Lift: public Motorized_subsystem<b_lift_states, NUM_OF_B_LIFT_STATES, B_
   Timer up_press{"Up_press"}, down_press{"Down_press"};
   b_lift_states after_switch_state; // the state the lift will go to after transmission switches to lift
   int search_cycle_check_count = 0, bad_count = 0; // cycle check for safeties
-  PID pid = PID(1.0,0.0,0.0,0.0);
+  PID pid = PID(2.0,0.0,0.0,0.0);
   int lift_power; // for manual control
 
   // height conversion constants

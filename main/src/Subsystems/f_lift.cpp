@@ -27,7 +27,7 @@ void F_Lift::handle(bool driver_array){
   // decides which position vector to use
   std::vector<int>& positions = driver_array? driver_positions: prog_positions;
 
-  switch(state){
+  switch(get_state()){
     case f_lift_states::managed:  // being controlled externally
       break;
     case f_lift_states::bottom: // at lowest position, this state is used by the intake and f_claw
@@ -86,7 +86,7 @@ void F_Lift::handle(bool driver_array){
 }
 
 void F_Lift::handle_state_change(){
-  if(get_target_state() == state) return;
+  if(get_target_state() == get_state()) return;
   // if state has changed, performs the necessary cleanup operation before entering next state
 
   switch(get_target_state()){
@@ -121,7 +121,7 @@ void F_Lift::set_state(const f_lift_states next_state, const uint8_t index){  //
     state_log.print("%s | State change requested index is: %d \t", name, index);
     Subsystem::set_state(next_state);
   }
-  else state_log.print("%s | INVALID move to target State change requested from %s to %s, index is: %d\n", name, state_names[static_cast<int>(state)], state_names[static_cast<int>(next_state)], index);
+  else state_log.print("%s | INVALID move to target State change requested from %s to %s, index is: %d\n", name, state_names[static_cast<int>(get_state())], state_names[static_cast<int>(next_state)], index);
 }
 
 int elastic_f_up_time, elastic_f_down_time; //from gui_construction.cpp
@@ -133,14 +133,14 @@ void F_Lift::elastic_util(){
   Timer move_timer{"move"};
   set_state(f_lift_states::move_to_target, driver_positions.size() - 1); // moves to top
   // // intake_piston.set_value(HIGH);  // raises intake
-  wait_until(state == f_lift_states::idle);
+  wait_until(get_state() == f_lift_states::idle);
   move_timer.print();
   elastic_f_up_time = move_timer.get_time();
   master.print(1, 0, "up time: %d", elastic_f_up_time);
 
   move_timer.reset();
   set_state(f_lift_states::move_to_target, 0); // moves to bottom
-  wait_until(state == f_lift_states::bottom);
+  wait_until(get_state() == f_lift_states::bottom);
   move_timer.print();
   elastic_f_down_time = move_timer.get_time();
   master.print(2, 0, "down time: %d", elastic_f_up_time);
@@ -163,7 +163,7 @@ F_Claw::F_Claw(Subsystem<f_claw_states, NUM_OF_F_CLAW_STATES> subsystem): Subsys
 
 void F_Claw::handle_buttons(){
   if(master.get_digital_new_press(claw_toggle_button) && get_lift()){
-    switch(state){
+    switch(get_state()){
       case f_claw_states::idle:
         set_state(f_claw_states::grabbed);
         break;
@@ -175,7 +175,7 @@ void F_Claw::handle_buttons(){
 }
 
 void F_Claw::handle(){
-  switch(state){
+  switch(get_state()){
     case f_claw_states::managed:
       break;
 
@@ -193,7 +193,7 @@ void F_Claw::handle(){
 }
 
 void F_Claw::handle_state_change(){
-  if(get_target_state() == state) return;
+  if(get_target_state() == get_state()) return;
   // if state has changed, performs the necessary cleanup operation before entering next state
 
   switch(get_target_state()){
