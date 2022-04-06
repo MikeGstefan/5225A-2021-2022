@@ -90,7 +90,7 @@ void update(void* params){
 
 
     velocity_update_time = millis() - last_velocity_time;
-    if(velocity_update_time > 20){  // velocity is updated every 20 ms
+    if(velocity_update_time > 10){  // velocity is updated every 20 ms
         tracking.l_velo = (NewLeft - last_vel_l) / velocity_update_time * 1000; // velocities are in inches per second
         tracking.r_velo = (NewRight - last_vel_r) / velocity_update_time * 1000;
         tracking.b_velo = (NewBack - last_vel_b) / velocity_update_time * 1000;
@@ -976,7 +976,8 @@ void tank_move_to_target(void* params){
     // this distance at which the robot is travelling at max vel (decreasing it is like increasing the kp)
     double max_vel_dist = tank_point_params_g.max_velo_dist; // Mike this is a parameter
     double max_velo = tank_point_params_g.max_velo;
-    double min_velo = tank_point_params_g.min_velo;
+    // double min_velo = tank_point_params_g.min_velo;
+    double min_velo = 0;
     // double end_velo = tank_point_params_g.end_velo;
     // Pid angle(kp.a);
     
@@ -1005,11 +1006,13 @@ void tank_move_to_target(void* params){
     // PID y_pid(6.4,0.0,350.0,0.0);
     // PID y_pid(6.4,0.0,0.0,0.0);
     double kB = 1.9;  // the ratio of motor power to local y velocity (inches/sec)
+    PID pos_pid(3.1,0.0,10.0,0.0,0.0);
     PID y_vel_pid(kp_y, 0.0000, kd_y, 0.0);
     double target_y_velocity; // what the y_vel_pid is trying to reach
     double cur_y_velocity;
     double max_y_velocity = 74.0; // the robot can travel at 60 inches/sec at its fastest
     int sgn_y_error; // sign of local y error
+    double correction_power = 0.0;
 
     // move on line variables
     Vector follow_line(target.y - tracking.y_coord, target.x - tracking.x_coord); // used to keep track of angle of follow_line relative to the vertical
@@ -1026,6 +1029,7 @@ void tank_move_to_target(void* params){
     orig_sgn_line_y = sgn(line_disp.get_y()); // used to calculate if the robot has overshot
     // END OF MOTION FIX
 
+    double last_velocity = 0.0;
     int start_time = millis();
     bool last_state= false;
     motion_i.print("%d|| Starting tank move to point from (%.2f, %.2f, %.2f) to (%.2f, %.2f, %.2f)\n", millis(), tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle),target.x, target.y, target.angle);
@@ -1063,14 +1067,18 @@ void tank_move_to_target(void* params){
       motion_d.print("%d|| end_dist: %.2f, hypotenuse: %.2f, local %.2f, angle: %.2f\n",millis(), end_dist,hypotenuse, local_error.y,rad_to_deg(tracking.global_angle - atan2(target.x - tracking.x_coord,target.y - tracking.y_coord)));
 
       // calculating target velocity
-      cur_y_velocity = (tracking.l_velo + tracking.r_velo) / 2; // average of side encoders is approximately the local_y_velocity
+      cur_y_velocity = 0.2 * last_velocity + 0.8 * ((tracking.l_velo + tracking.r_velo) / 2); // average of side encoders is approximately the local_y_velocity
+      last_velocity = cur_y_velocity;
       sgn_y_error = sgn(local_error.y);
-      target_y_velocity = map(local_error.y, sgn_y_error * 0.0, sgn_y_error * max_vel_dist, sgn_y_error * end_y_velocity, sgn_y_error * max_y_velocity);
-      
+      // target_y_velocity = map(local_error.y, sgn_y_error * 0.0, sgn_y_error * max_vel_dist, sgn_y_error * end_y_velocity, sgn_y_error * max_y_velocity);
+      target_y_velocity = pos_pid.compute(-local_error.y, 0.0);
       if(fabs(target_y_velocity) > max_velo) target_y_velocity = max_velo * sgn(target_y_velocity);
       if(fabs(target_y_velocity) < min_velo) target_y_velocity = min_velo * sgn(target_y_velocity);
-      tracking.power_y = kB * target_y_velocity + y_vel_pid.compute(cur_y_velocity, target_y_velocity);
-      printf("error: %lf, power_y: %lf, cur_vel: %lf, target_vel: %lf, base: %lf, diff_vel:%lf\n", local_error.y, tracking.power_y, cur_y_velocity, target_y_velocity, kB * target_y_velocity, target_y_velocity - cur_y_velocity);
+
+      correction_power = y_vel_pid.compute(cur_y_velocity, target_y_velocity);
+      if(fabs(target_y_velocity - cur_y_velocity) < 4.0) correction_power = 0;
+      tracking.power_y = kB * target_y_velocity + correction_power;
+      printf("error: %lf, power_y: %lf, cur_vel: %lf, target_vel: %lf, base: %lf, diff_vel:%lf, L encoder %f, R encoder %f\n", local_error.y, tracking.power_y, cur_y_velocity, target_y_velocity, kB * target_y_velocity, target_y_velocity - cur_y_velocity, tracking.l_velo, tracking.r_velo);
       // tracking.power_y = kB * target_y_velocity;
 
       // tracking.power_y = kp_y * line_y_local_y;

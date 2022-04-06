@@ -39,12 +39,12 @@ void initialize() {
 	_Controller::init();
 	GUI::init();
 	delay(500);
-	tracking.x_coord = 28.5, tracking.y_coord = 11.75, tracking.global_angle = -90.0_deg;
+	// tracking.x_coord = 28.5, tracking.y_coord = 11.75, tracking.global_angle = -90.0_deg;
 
 	
 	// tracking.x_coord = 104.0, tracking.y_coord = 12.0, tracking.global_angle = -30.0_deg;
 	// tracking.x_coord = 24.5, tracking.y_coord = 15.0, tracking.global_angle = 9.0_deg;
-	// tracking.x_coord = 0.0, tracking.y_coord = 0.0, tracking.global_angle = 0.0_deg;
+	tracking.x_coord = 0.0, tracking.y_coord = 0.0, tracking.global_angle = 0.0_deg;
 	update_t.start();
 	// master.print(2, 0, "Driver: %s", drivebase.drivers[drivebase.cur_driver].name);
 	// gyro.finish_calibrating(); //Finishes calibrating gyro before program starts
@@ -87,9 +87,10 @@ void autonomous() {
 
 void opcontrol() {
 	// b_lift.set_state(b_lift_states::move_to_target, 0);
-	lift_handle_t.start();
+	// lift_handle_t.start();
 	while(!master.get_digital_new_press(DIGITAL_A))delay(10);
-	skills();
+	// skills();
+	move_start(move_types::tank_point, tank_point_params({0.0, 30.0,0.0}));
 	while(true)delay(10);
 	// b_lift.move(-70);
 	// Task([](){
