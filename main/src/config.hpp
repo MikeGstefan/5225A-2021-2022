@@ -20,4 +20,4 @@ extern pros::Distance r_dist, l_dist, b_dist, f_dist, r_reset_dist, l_reset_dist
 extern pros::ADIDigitalIn f_touch;
 extern pros::ADIDigitalIn intake_jam;
 extern pros::ADIAnalogIn f_lift_pot, b_lift_pot;
-extern Piston drive_t, lift_t, b_claw, f_claw_o, f_claw_c;
+extern Piston drive_t, lift_t, b_claw, f_claw_o, f_claw_c, tilt_lock;

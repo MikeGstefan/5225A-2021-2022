@@ -135,6 +135,9 @@ void opcontrol() {
 			f_claw(claw_state);
 			f_claw_t = millis();
 		}
+		if(master.get_digital_new_press(DIGITAL_LEFT)){
+			tilt_lock.toggle_state();
+		}
 
 		if(abs(master.get_analog(ANALOG_RIGHT_Y)) > 30)b_lift.move(master.get_analog(ANALOG_RIGHT_Y));
 		else b_lift_m.move_velocity(0);
