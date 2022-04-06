@@ -37,7 +37,13 @@ void skills2(){
   while(!master.get_digital_new_press(DIGITAL_A))delay(10);
   f_claw(1);
   f_lift.set_state(f_lift_states::move_to_target,f_level);
-
+  while(f_lift.get_target_state() != f_lift_states::idle)delay(10);
+  move_start(move_types::tank_point, tank_point_params({0.0,21.0,0.0}));
+  f_lift.set_state(f_lift_states::move_to_target, f_plat);
+  while(f_lift.get_target_state() != f_lift_states::idle)delay(10);
+  f_claw(0);
+  move_start(move_types::tank_point, tank_point_params({0.0,19.0,0.0}));
+  f_lift.set_state(f_lift_states::move_to_target, f_backup);
 }
 
 
