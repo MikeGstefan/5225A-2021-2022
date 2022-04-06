@@ -28,7 +28,8 @@ class F_Lift: public Motorized_subsystem<f_lift_states, NUM_OF_F_LIFT_STATES, F_
 public:
   uint8_t index, last_index;
   vector<int> driver_positions = {1200, 1500, 2050, 2750};
-  vector<int> prog_positions = {1200, 1500, 2050, 2750};
+  //                            btm   carry plat  clear level top
+  vector<int> prog_positions = {1170, 1350, 1950, 2020, 2300, 2750};
 
   F_Lift(Motorized_subsystem<f_lift_states, NUM_OF_F_LIFT_STATES, F_LIFT_MAX_VELOCITY> motorized_subsystem);  // constructor
   

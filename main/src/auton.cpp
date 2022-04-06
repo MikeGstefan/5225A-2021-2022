@@ -29,6 +29,17 @@ void skills(){
 
 }
 
+void skills2(){
+  int time = millis();
+  b_lift.set_state(b_lift_states::move_to_target,0);
+  f_lift.set_state(f_lift_states::move_to_target,0);
+  f_claw(0);
+  while(!master.get_digital_new_press(DIGITAL_A))delay(10);
+  f_claw(1);
+  f_lift.set_state(f_lift_states::move_to_target,f_level);
+
+}
+
 
 
 
