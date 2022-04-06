@@ -10,15 +10,11 @@ F_Lift f_lift({{"F_Lift",
   "idle",
   "move_to_target",
   "manual",
-}
+}, f_lift_states::managed, f_lift_states::idle // goes from managed to idle upon startup
 }, f_lift_m});
 
 
 F_Lift::F_Lift(Motorized_subsystem<f_lift_states, NUM_OF_F_LIFT_STATES, F_LIFT_MAX_VELOCITY> motorized_subsystem): Motorized_subsystem(motorized_subsystem){ // constructor
-
-  // state setup
-  target_state = f_lift_states::move_to_target;  // sends lift to bottom upon startup
-  state = f_lift_states::managed;
 
   index = 0;
 
@@ -26,55 +22,12 @@ F_Lift::F_Lift(Motorized_subsystem<f_lift_states, NUM_OF_F_LIFT_STATES, F_LIFT_M
   down_press.pause();
 }
 
-void F_Lift::handle_buttons(){
-  // index incrementing and decrementing
-  if(master.get_digital_new_press(lift_up_button) && get_lift()){
-    up_press.reset();
-    // if state is manual, go to the closest position that's higher than the current position
-    if(state == f_lift_states::manual){
-      int i = 0;
-      while (i < driver_positions.size()){
-        if(driver_positions[i] > f_lift_pot.get_value()){
-          set_state(f_lift_states::move_to_target, i);
-          break;
-        }
-        i++;
-      }
-    }
-    // otherwise just go to the next highest position, but doesn't increment index if it's out of bounds
-    else if(index < driver_positions.size() - 1)  set_state(f_lift_states::move_to_target, ++index);
-  }
-  if(master.get_digital_new_press(lift_down_button) && get_lift()){
-    down_press.reset();
-    // if state is manual, go to the closest position that's lower than the current position
-    if(state == f_lift_states::manual){
-      int i = driver_positions.size() - 1;
-      while (i > -1){
-        if(driver_positions[i] < f_lift_pot.get_value()){
-          set_state(f_lift_states::move_to_target, i);
-          break;
-        }
-        i--;
-      }
-    }
-    // otherwise just go to the next lowest position, but doesn't decrement index if it's out of bounds
-    else if(index > 0)  set_state(f_lift_states::move_to_target, --index);
-  }
-  // resets and pauses the timers if driver releases button
-  if(!master.get_digital(lift_up_button)) up_press.reset(false);
-  if(!master.get_digital(lift_down_button)) down_press.reset(false);
-
-  // goes to top position if up button is held
-  if(up_press.get_time() > 300) set_state(f_lift_states::move_to_target, driver_positions.size() - 1);
-  // goes to bottom position of down button is held
-  if(down_press.get_time() > 300) set_state(f_lift_states::move_to_target, 0);
-}
 
 void F_Lift::handle(bool driver_array){
   // decides which position vector to use
   std::vector<int>& positions = driver_array? driver_positions: prog_positions;
 
-  switch(state){
+  switch(get_state()){
     case f_lift_states::managed:  // being controlled externally
       break;
     case f_lift_states::bottom: // at lowest position, this state is used by the intake and f_claw
@@ -95,10 +48,10 @@ void F_Lift::handle(bool driver_array){
         // switches to idle by default or special case depending on current target
         switch(index){
           case 0: // lift is at bottom position, this state is used by intake 
-            set_state(f_lift_states::bottom);
+            Subsystem::set_state(f_lift_states::bottom);
             break;
           default:
-            set_state(f_lift_states::idle);
+            Subsystem::set_state(f_lift_states::idle);
             break;
         }
       }
@@ -133,10 +86,10 @@ void F_Lift::handle(bool driver_array){
 }
 
 void F_Lift::handle_state_change(){
-  if(target_state == state) return;
+  if(get_target_state() == get_state()) return;
   // if state has changed, performs the necessary cleanup operation before entering next state
 
-  switch(target_state){
+  switch(get_target_state()){
     case f_lift_states::managed:
       break;
 
@@ -145,6 +98,7 @@ void F_Lift::handle_state_change(){
       break;
 
     case f_lift_states::idle:
+      motor.move_velocity(0); // applies holding power
       break;
 
     case f_lift_states::move_to_target:
@@ -159,26 +113,15 @@ void F_Lift::handle_state_change(){
   log_state_change();  
 }
 
-// regular set state method (common to all subsystems)
-void F_Lift::set_state(const f_lift_states next_state){  // requests a state change and logs it (NORMAL set state)
-  state_log.print("%s | State change requested from %s to %s, index is: %d\n", name, state_names[static_cast<int>(state)], state_names[static_cast<int>(next_state)], index);
-  target_state = next_state;
-}
 // accepts an index argument used specifically for a move to target
-void F_Lift::set_state(const f_lift_states next_state, const double index){  // requests a state change and logs it
-  // state_mutex.take();
+void F_Lift::set_state(const f_lift_states next_state, const uint8_t index){  // requests a state change and logs it
   // confirms state change only if the state is actually move to target
   if (next_state == f_lift_states::move_to_target){
-    state_log.print("%s | State change requested from %s to %s, index is: %d\n", name, state_names[static_cast<int>(state)], state_names[static_cast<int>(next_state)], index);
-    target_state = next_state;
     this->index = index;
+    state_log.print("%s | State change requested index is: %d \t", name, index);
+    Subsystem::set_state(next_state);
   }
-  else{
-    printf("POSSIBLE FAIL cur_state:%d, target_state: %d, index: %d \n", static_cast<int>(state), static_cast<int>(next_state), index);
-    delay(10);
-    state_log.print("%s | INVALID move to target State change requested from %s to %s, index is: %d\n", name, state_names[static_cast<int>(state)], state_names[static_cast<int>(next_state)], index);
-  }
-  // state_mutex.give();
+  else state_log.print("%s | INVALID move to target State change requested from %s to %s, index is: %d\n", name, state_names[static_cast<int>(get_state())], state_names[static_cast<int>(next_state)], index);
 }
 
 int elastic_f_up_time, elastic_f_down_time; //from gui_construction.cpp
@@ -190,14 +133,14 @@ void F_Lift::elastic_util(){
   Timer move_timer{"move"};
   set_state(f_lift_states::move_to_target, driver_positions.size() - 1); // moves to top
   // // intake_piston.set_value(HIGH);  // raises intake
-  wait_until(state == f_lift_states::idle);
+  wait_until(get_state() == f_lift_states::idle);
   move_timer.print();
   elastic_f_up_time = move_timer.get_time();
   master.print(1, 0, "up time: %d", elastic_f_up_time);
 
   move_timer.reset();
   set_state(f_lift_states::move_to_target, 0); // moves to bottom
-  wait_until(state == f_lift_states::bottom);
+  wait_until(get_state() == f_lift_states::bottom);
   move_timer.print();
   elastic_f_down_time = move_timer.get_time();
   master.print(2, 0, "down time: %d", elastic_f_up_time);
@@ -212,19 +155,15 @@ F_Claw f_claw_obj({"F_Claw",
   "idle",
   "searching",
   "grabbed",
-}
+}, f_claw_states::managed, f_claw_states::idle // goes from managed to idle upon startup
 });
 
 F_Claw::F_Claw(Subsystem<f_claw_states, NUM_OF_F_CLAW_STATES> subsystem): Subsystem(subsystem)  // constructor
-{
-  // state setup
-  target_state = f_claw_states::searching;
-  state = f_claw_states::managed;
-}
+{}
 
 void F_Claw::handle_buttons(){
   if(master.get_digital_new_press(claw_toggle_button) && get_lift()){
-    switch(state){
+    switch(get_state()){
       case f_claw_states::idle:
         set_state(f_claw_states::grabbed);
         break;
@@ -236,7 +175,7 @@ void F_Claw::handle_buttons(){
 }
 
 void F_Claw::handle(){
-  switch(state){
+  switch(get_state()){
     case f_claw_states::managed:
       break;
 
@@ -254,10 +193,10 @@ void F_Claw::handle(){
 }
 
 void F_Claw::handle_state_change(){
-  if(target_state == state) return;
+  if(get_target_state() == get_state()) return;
   // if state has changed, performs the necessary cleanup operation before entering next state
 
-  switch(target_state){
+  switch(get_target_state()){
     case f_claw_states::managed:
       break;
 
