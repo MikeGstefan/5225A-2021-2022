@@ -560,7 +560,7 @@ void move_to_point(void* params){
         if(decel_dist){
           printf("DECEL\n");
           if(d < decel_dist){ // robot is past decel dist
-            decel_power = constrain(map(d, decel_dist, max_power / decel_start, decel_speed, max_power), decel_speed, max_power);
+            decel_power = std::clamp(map(d, decel_dist, max_power / decel_start, decel_speed, max_power), decel_speed, max_power);
             if (decel_power < decel_speed) decel_power = decel_speed;
             decel_power_scale = decel_power / h;
             tracking.power_x *= decel_power_scale;
@@ -736,7 +736,7 @@ void move_on_arc(void* params) {
     // deceleration code
     if(decel_dist){
       if(h < decel_dist){ // robot is past decel dist
-        decel_power = constrain(map(h, decel_dist, max_power / kp.y, decel_speed, max_power), decel_speed, max_power);
+        decel_power = std::clamp(map(h, decel_dist, max_power / kp.y, decel_speed, max_power), decel_speed, max_power);
         if (decel_power < decel_speed) decel_power = decel_speed;
         decel_power_scale = decel_power / h;
         tracking.power_x = decel_power_scale * error.x;
@@ -880,7 +880,7 @@ void move_on_line(void* params){
         // deceleration code
         if(decel_dist){
           if(d < decel_dist){ // robot is past decel dist
-            decel_power = constrain(map(d, decel_dist, max_power / y_line_pid.get_proportional(), decel_speed, max_power), decel_speed, max_power);
+            decel_power = std::clamp(map(d, decel_dist, max_power / y_line_pid.get_proportional(), decel_speed, max_power), decel_speed, max_power);
             if (decel_power < decel_speed) decel_power = decel_speed;
             decel_power_scale = decel_power / h;
             tracking.power_x *= decel_power_scale;

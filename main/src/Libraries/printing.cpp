@@ -1,21 +1,26 @@
 #include "printing.hpp"
 
-const char* convert_all_args(const std::string& arg){
-	return arg.c_str();
+std::string convert_all_args(const std::string& fmt, const std::string& arg){
+  if(fmt.back() == 'p') return convert_all_args(fmt, arg.data());
+  return arg;
 }
 
-const char* convert_all_args(const Position& arg){
-  std::string str = '(' + std::to_string(arg.x) + ", " + std::to_string(arg.y) + ", " + std::to_string(arg.angle) + ")";
-	return convert_all_args(str);
+std::string convert_all_args(const std::string& fmt, const Position& arg){
+  return '(' + convert_all_args(fmt, arg.x) + ", " + convert_all_args(fmt, arg.y) + ", " + convert_all_args(fmt, arg.angle) + ")";
 }
 
-const char* convert_all_args(const Point& arg){
-  std::string str = '(' + std::to_string(arg.x) + ", " + std::to_string(arg.y) + ")";
-	return convert_all_args(str);
+std::string convert_all_args(const std::string& fmt, const Point& arg){
+  return '(' + convert_all_args(fmt, arg.x) + ", " + convert_all_args(fmt, arg.y) + ")";
+}
+
+//Template Recursion Base case
+std::string printf_to_string(const std::string& fmt){
+  return fmt;
 }
 
 void newline(int count){
   std::cout << std::string (count , '\n');
+  // printf("%*c", count, '\n');
 }
 
 const char* get_term_colour(term_colours colour){

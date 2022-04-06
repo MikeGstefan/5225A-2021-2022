@@ -86,12 +86,7 @@ double near_angle(double angle, double reference);
 //Not a template because that won't allow implicit lambda
 std::function<long double (long double)> func_scale(std::function<long double(long double)> f, Point p1, Point p2 = {0.0, 0.0}, double control = 1.0);
 
-//std::clamp already exists
-// restricts a value to a range
-template <typename T>
-T constrain(T value, T min, T max){
-  return value > min ? value < max ? value : max : min;
-}
+//removed constrain because std::clamp already exists
 
 // gets the sign of a value (0, 1 or -1)
 template <typename T>
@@ -114,7 +109,7 @@ T map(T x, T in_min, T in_max, T out_min, T out_max){
 }
 // base case for recrusive function map_set
 template <typename T>
-T map_set(T input, T in_min, T in_max, T out_min, T out_max, T range, T val) {
+T map_set(T input, T in_min, T in_max, T out_min, T out_max, T range, T val){
   if (input <= range) return map(input, in_min, range, out_min, val);
   else {
     printf("%d || INVALID INPUT IN MAP FUNCTION\n", millis());
@@ -123,33 +118,58 @@ T map_set(T input, T in_min, T in_max, T out_min, T out_max, T range, T val) {
 }
 // maps a values to a set of maps (a piecewise function)
 template <typename T, typename... Ts>
-T map_set(T input, T in_min, T in_max, T out_min, T out_max, T range1, T val_1, Ts... args) {
+T map_set(T input, T in_min, T in_max, T out_min, T out_max, T range1, T val_1, Ts... args){
   if (input <= range1) return map(input, in_min, range1, out_min, val_1);
   else return map_set(input, range1, in_max, val_1, out_max, args...);
 }
 
 //ENUM HELPERS
-
 //Assumes enum values are consecutive
-template <typename T, typename = typename std::enable_if_t<std::is_enum_v<T>, void>>
-T operator++ (T enum_type, int) {
-  return static_cast<T>(static_cast<int>(enum_type) + 1);
+
+template <typename E, typename = typename std::enable_if_t<std::is_enum_v<E>, void>>
+E next_enum_value(E enum_value){
+  int value = static_cast<int>(enum_value);
+
+  if (value < static_cast<int>(E::NUM_OF_ELEMENTS) - 1) value++;
+  else value = 0;
+
+  return static_cast<E>(value);
 }
 
-//Assumes enum values are consecutive
-template <typename T, typename = typename std::enable_if_t<std::is_enum_v<T>, void>>
-T operator-- (T enum_type, int) {
-  return static_cast<T>(static_cast<int>(enum_type) - 1);
+template <typename E, typename = typename std::enable_if_t<std::is_enum_v<E>, void>>
+E previous_enum_value(E enum_value){
+  int value = static_cast<int>(enum_value);
+  
+  if (value > 0) value--;
+  else value = static_cast<int>(E::NUM_OF_ELEMENTS) - 1;
+
+  return static_cast<E>(value);
 }
 
-template <typename T, typename = typename std::enable_if_t<std::is_enum_v<T>, void>>
-T next_enum_value(T enum_type) {
-  if (static_cast<int>(enum_type) < static_cast<int>(T::NUM_OF_ELEMENTS) - 1) return enum_type++;
-  else return static_cast<T>(0);
+//prefix increment
+template <typename E, typename = typename std::enable_if_t<std::is_enum_v<E>, void>>
+E operator++ (const E& enum_value){
+  return next_enum_value(enum_value);
 }
 
-template <typename T, typename = typename std::enable_if_t<std::is_enum_v<T>, void>>
-T previous_enum_value(T enum_type) {
-  if (static_cast<int>(enum_type) > static_cast<int>(static_cast<T>(0))) return enum_type--;
-  else return static_cast<T>(static_cast<int>(T::NUM_OF_ELEMENTS) - 1);
+//prefix decrement
+template <typename E, typename = typename std::enable_if_t<std::is_enum_v<E>, void>>
+E operator-- (const E& enum_value){
+  return prev_enum_value(enum_value);
+}
+
+//postfix increment
+template <typename E, typename = typename std::enable_if_t<std::is_enum_v<E>, void>>
+E operator++ (const E& enum_value, int){
+  E old = enum_value;
+  ++enum_value;
+  return old;
+}
+
+//postfix decrement
+template <typename E, typename = typename std::enable_if_t<std::is_enum_v<E>, void>>
+E operator-- (const E& enum_value, int){
+  E old = enum_value;
+  --enum_value;
+  return old;
 }
