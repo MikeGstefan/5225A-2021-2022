@@ -3,7 +3,9 @@
 #include "../timer.hpp"
 #include <bitset>
 
-//feel free to rename term_colours to something shorter
+constexpr int n_printf_max = 50;
+
+//feel free to suggest shorter names for term_colours
 enum class term_colours{
   BLACK,
   RED,
@@ -22,8 +24,8 @@ enum class term_colours{
 
 template <typename T, typename = typename std::enable_if_t<!(std::is_integral_v<T> || std::is_floating_point_v<T>), void>> //Forces double/int overload instead
 std::string convert_all_args(const std::string& fmt, const T& arg){
-  char buffer[150];
-  snprintf(buffer, 150, fmt.c_str(), arg);
+  char buffer[n_printf_max];
+  snprintf(buffer, n_printf_max, fmt.c_str(), arg);
   return buffer;
 }
 
@@ -31,31 +33,31 @@ template <typename T, typename = typename std::enable_if_t<std::is_floating_poin
 std::string convert_all_args(const std::string& fmt, T arg){
   const char* format = fmt.c_str();
   std::string fmt_safe = "   " + fmt;
-  char buffer[150];
+  char buffer[n_printf_max];
   char end[3] = {static_cast<char>(tolower(*(fmt.end()-1))), static_cast<char>(*(fmt.end()-2)), static_cast<char>(*(fmt.end()-3))};
 
-  if(end[1] == 'L') snprintf(buffer, 150, format, static_cast<long double>(arg));
-  else if(end[0] == 'f' || end[0] == 'e' || end[0] == 'g' || end[0] == 'a') snprintf(buffer, 150, format, static_cast<double>(arg));
+  if(end[1] == 'L') snprintf(buffer, n_printf_max, format, static_cast<long double>(arg));
+  else if(end[0] == 'f' || end[0] == 'e' || end[0] == 'g' || end[0] == 'a') snprintf(buffer, n_printf_max, format, static_cast<double>(arg));
   else if(end[0] == 'd' || end[0] == 'i'){
-    if(end[2] == 'h') snprintf(buffer, 150, format, static_cast<signed char>(arg));
-    else if(end[2] == 'l') snprintf(buffer, 150, format, static_cast<long long int>(arg));
-    else if(end[1] == 'h') snprintf(buffer, 150, format, static_cast<short int>(arg));
-    else if(end[1] == 'l') snprintf(buffer, 150, format, static_cast<long int>(arg));
-    else if(end[1] == 'j') snprintf(buffer, 150, format, static_cast<intmax_t>(arg));
-    else snprintf(buffer, 150, format, static_cast<int>(arg));
+    if(end[2] == 'h') snprintf(buffer, n_printf_max, format, static_cast<signed char>(arg));
+    else if(end[2] == 'l') snprintf(buffer, n_printf_max, format, static_cast<long long int>(arg));
+    else if(end[1] == 'h') snprintf(buffer, n_printf_max, format, static_cast<short int>(arg));
+    else if(end[1] == 'l') snprintf(buffer, n_printf_max, format, static_cast<long int>(arg));
+    else if(end[1] == 'j') snprintf(buffer, n_printf_max, format, static_cast<intmax_t>(arg));
+    else snprintf(buffer, n_printf_max, format, static_cast<int>(arg));
   }
   else if(end[0] == 'u' || end[0] == 'o' || end[0] == 'x'){
-    if(end[2] == 'h') snprintf(buffer, 150, format, static_cast<unsigned char>(arg));
-    else if(end[2] == 'l') snprintf(buffer, 150, format, static_cast<unsigned long long int>(arg));
-    else if(end[1] == 'h') snprintf(buffer, 150, format, static_cast<unsigned short int>(arg));
-    else if(end[1] == 'l') snprintf(buffer, 150, format, static_cast<unsigned long int>(arg));
-    else if(end[1] == 'j') snprintf(buffer, 150, format, static_cast<uintmax_t>(arg));
-    else snprintf(buffer, 150, format, static_cast<unsigned int>(arg));
+    if(end[2] == 'h') snprintf(buffer, n_printf_max, format, static_cast<unsigned char>(arg));
+    else if(end[2] == 'l') snprintf(buffer, n_printf_max, format, static_cast<unsigned long long int>(arg));
+    else if(end[1] == 'h') snprintf(buffer, n_printf_max, format, static_cast<unsigned short int>(arg));
+    else if(end[1] == 'l') snprintf(buffer, n_printf_max, format, static_cast<unsigned long int>(arg));
+    else if(end[1] == 'j') snprintf(buffer, n_printf_max, format, static_cast<uintmax_t>(arg));
+    else snprintf(buffer, n_printf_max, format, static_cast<unsigned int>(arg));
   }
-  else if(end[1] == 'z') snprintf(buffer, 150, format, static_cast<size_t>(arg));
-  else if(end[1] == 't') snprintf(buffer, 150, format, static_cast<ptrdiff_t>(arg));
+  else if(end[1] == 'z') snprintf(buffer, n_printf_max, format, static_cast<size_t>(arg));
+  else if(end[1] == 't') snprintf(buffer, n_printf_max, format, static_cast<ptrdiff_t>(arg));
 
-  else snprintf(buffer, 150, format, arg);
+  else snprintf(buffer, n_printf_max, format, arg);
   return buffer;
 }
 
@@ -162,13 +164,13 @@ void set_length(T ptr, const std::string& start, const std::string& converted){
  * @param args Rest of the arguments
  * @return std::string
  */
-//No support for %n, *, and .* formats
+//No support for %n format
 template <typename Param, typename... Params>
 std::string printf_to_string(std::string fmt, const Param& arg, const Params&... args){
   std::string::iterator first = fmt.begin(), second;
 
   first = std::find(first, fmt.end(), '%');
-  second = fmt.begin() + fmt.find_first_of("diuoxXfFeEgGaAcspn%", first-fmt.begin()+1) + 1;
+  second = fmt.begin() + fmt.find_first_of("diuoxXfFeEgGaAcspn%*", first-fmt.begin()+1) + 1;
   
   if(second == fmt.begin()) return fmt; //No valid format specifier found
 
@@ -181,9 +183,13 @@ std::string printf_to_string(std::string fmt, const Param& arg, const Params&...
     converted = "%";
     rest = printf_to_string(rest, arg, args...);
   }
+  else if(format_specifier.back() == '*'){
+    format_specifier.pop_back();
+    format_specifier += convert_all_args("%d", arg);
+    rest = printf_to_string(format_specifier + rest, args...);
+  }
   else if(format_specifier.back() == 'n'){
     converted = "";
-    printf("S:%s, C:%s\n", start.c_str(), converted.c_str());
     set_length(arg, start, converted);
     rest = printf_to_string(rest, args...);
   }
