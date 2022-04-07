@@ -14,6 +14,10 @@
 #include "Subsystems/f_lift.hpp"
 #include <fstream>
 
+void rush_high();
+void rush_tall();
+void rush_low();
+
 void skills();
 
 

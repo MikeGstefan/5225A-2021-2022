@@ -19,16 +19,16 @@ extern int elastic_b_up_time, elastic_b_down_time; //Declared in b_lift.cpp
 extern int elastic_f_up_time, elastic_f_down_time; //Declared in f_lift.cpp
 
 //1:temp(leave as 0), 2:long name, 3:short name
-std::array<std::tuple<pros::Motor*, int, std::string, std::string, Text_*>, 8> motors_for_gui = {
-  std::make_tuple(&front_l, 0, "Front Left", "FL", nullptr),
-  std::make_tuple(&center_l, 0, "Center Left", "CL", nullptr),
-  std::make_tuple(&back_l, 0, "Back Left", "BL", nullptr),
-  std::make_tuple(&front_r, 0, "Front Right", "FR", nullptr),
-  std::make_tuple(&center_r, 0, "Center Right", "CR", nullptr),
-  std::make_tuple(&back_r, 0, "Back Right", "BR", nullptr),
-  std::make_tuple(&f_lift_m, 0, "Front Lift", "F", nullptr),
-  std::make_tuple(&b_lift_m, 0, "Back Lift", "B", nullptr),
-};//std::make_tuple(nullptr, 0, "", "", nullptr),
+std::array<std::tuple<pros::Motor*, int, std::string, std::string, Text_*>, 8> motors_for_gui {{
+  {&front_l, 0, "Front Left", "FL", nullptr},
+  {&center_l, 0, "Center Left", "CL", nullptr},
+  {&back_l, 0, "Back Left", "BL", nullptr},
+  {&front_r, 0, "Front Right", "FR", nullptr},
+  {&center_r, 0, "Center Right", "CR", nullptr},
+  {&back_r, 0, "Back Right", "BR", nullptr},
+  {&f_lift_m, 0, "Front Lift", "F", nullptr},
+  {&b_lift_m, 0, "Back Lift", "B", nullptr},
+}};//{nullptr, 0, "", "", nullptr},
 
 Page temps ("Temperature"); //Motor temps
 Text mot_temp_1(90, 60, GUI::Style::CENTRE, TEXT_SMALL, temps, std::get<3>(motors_for_gui[0]) + ": %dC", std::get<1>(motors_for_gui[0]), COLOUR(BLACK));
@@ -86,10 +86,10 @@ Button back_claw(470, 195, -100, 40, GUI::Style::SIZE, Button::TOGGLE, lift_move
 Page elastic ("Elastic Test"); //Testing the elastics on the lift
 Button check_b_elastic(145, 70, 70, 30, GUI::Style::CENTRE, Button::SINGLE, elastic, "Run Back Elastic Test");
 Button check_f_elastic(335, 70, 70, 30, GUI::Style::CENTRE, Button::SINGLE, elastic, "Run Front Elastic Test");
-// Text elastic_b_up (145, 160, GUI::Style::CENTRE, TEXT_SMALL, elastic, "Up Time: %d", elastic_b_up_time);
-// Text elastic_b_down(145, 180, GUI::Style::CENTRE, TEXT_SMALL, elastic, "Down Time: %d", elastic_b_down_time);
-// Text elastic_f_up (335, 160, GUI::Style::CENTRE, TEXT_SMALL, elastic, "Up Time: %d", elastic_f_up_time);
-// Text elastic_f_down(335, 180, GUI::Style::CENTRE, TEXT_SMALL, elastic, "Down Time: %d", elastic_f_down_time);
+Text elastic_b_up (145, 160, GUI::Style::CENTRE, TEXT_SMALL, elastic, "Up Time: %d", elastic_b_up_time);
+Text elastic_b_down(145, 180, GUI::Style::CENTRE, TEXT_SMALL, elastic, "Down Time: %d", elastic_b_down_time);
+Text elastic_f_up (335, 160, GUI::Style::CENTRE, TEXT_SMALL, elastic, "Up Time: %d", elastic_f_up_time);
+Text elastic_f_down(335, 180, GUI::Style::CENTRE, TEXT_SMALL, elastic, "Down Time: %d", elastic_f_down_time);
 
 Page tuning ("Tuning Tracking"); //Tests to tune tracking when on new base
 Text tuning_instructions_1(MID_X, 35, GUI::Style::CENTRE, TEXT_SMALL, tuning, "Press your desired tracking test");
@@ -365,8 +365,8 @@ void main_setup(){
     std::string coord = coord_c;
     if (GUI::prompt("Move back lift to" + coord, "Press to move back lift to" + coord, 1000)) b_lift.move_absolute(b_lift_val.get_value());
   });
-  front_claw.set_func([](){f_claw_o.set_value(HIGH); f_claw_c.set_value(LOW);});
-  front_claw.set_off_func([](){f_claw_o.set_value(LOW); f_claw_c.set_value(HIGH);});
+  front_claw.set_func([](){f_claw(HIGH);});
+  front_claw.set_off_func([](){f_claw(LOW);});
   back_claw.set_func([](){b_claw.set_value(HIGH);});
   back_claw.set_off_func([](){b_claw.set_value(LOW);});
 
