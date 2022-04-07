@@ -7,6 +7,14 @@ static const std::string start_pos_file_name ="/usd/start_position.txt";
 Reset_dist reset_dist_r(&r_dist, 7.5);
 Reset_dist reset_dist_l(&l_dist, 7.5);
 
+
+void f_claw(bool state){
+  f_claw_o.set_state(state);
+  f_claw_c.set_state(state);
+}
+
+
+
 void save_positions(){
   if(GUI::prompt("Reset position", "Press to reset the position, then move the robot.")){
     Position pos1 (141.0-8.75, 15.5, 0.0), pos2 (8.75, 15.5, 0);
@@ -135,6 +143,7 @@ void b_detect_goal(){
     }
   misc.print("Detected %d\n", b_dist.get());
   b_claw.set_value(1);
+  // b_claw_p.set_value(1);
 }
 
 
@@ -154,7 +163,7 @@ void f_detect_goal(bool safety){
   //   }
   if(safety){ 
     wait_until(!tracking.move_complete);
-    // wait_until(f_touch.get_value() ||tracking.move_complete);
+    // wait_until(f_touch.get_value() || tracking.move_complete);
   }
   // else wait_until(f_touch.get_value());
   
@@ -195,4 +204,20 @@ double Reset_dist::get_dist(){
   //find averaeg, convert to inches
   misc.print("%d || reset %f\n",millis(), (avg/count)/25.4);
   return ((avg/count)/25.4) + this->dist_from_center;
+}
+
+
+
+
+void subsystem_handle_t(void*params){
+  _Task* ptr = _Task::get_obj(params);
+
+  while(true){ 
+    b_lift.handle(true);
+		f_lift.handle(true);
+    b_claw_obj.handle();
+		f_claw_obj.handle();
+    if(ptr->notify_handle())return;
+    delay(10);
+  }
 }
