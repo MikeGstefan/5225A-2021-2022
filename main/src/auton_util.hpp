@@ -11,7 +11,7 @@ void load_positions();
 
 using namespace pros;
 
-
+#define b_lift_hitch_pos 3
 
 #define front_dist_dist 3.85
 

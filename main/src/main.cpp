@@ -39,6 +39,8 @@ void initialize() {
 	_Controller::init();
 	GUI::init();
 	delay(500);
+	// tracking.x_coord = 28.5, tracking.y_coord = 11.75, tracking.global_angle = -90.0_deg;
+
 
   b_lift.motor.set_brake_mode(E_MOTOR_BRAKE_HOLD);
   f_lift.motor.set_brake_mode(E_MOTOR_BRAKE_HOLD);
@@ -87,13 +89,13 @@ void autonomous() {
 }
 
 void opcontrol() {
-	/* Nathan:
+  /* Nathan:
   check what actually kills the auto balance loop
-	auton give up func - ask mike
+  auton give up func - ask mike
   
-	lvgl images
+  lvgl images
   2d sliders
-	*/
+  */
 
 	while(true){
 		// drivebase.non_blocking_driver_practice();
