@@ -1588,40 +1588,23 @@ void Gyro::climb_ramp(){
   inertial.tare_roll();
   inertial.tare_pitch();
 
-  get_angle();
-  drivebase.move(127, 0);
-  // waitUntil(get_angle() > 22)
-  // motion_i.print("ON RAMP: %f\n", get_angle());
-  // waitUntil(!inRange(r_reset_dist.get(), 0, 200));
-  // GUI::flash("Saw wall\n");
-  // Led1.set_value(0);
-  drivebase.move(60.0,0.0);
-
-  int left_pos = LeftEncoder.get_value(), right_pos = RightEncoder.get_value();
-
-  // while()
-
-  // double pos = tracking.x_coord;
-  // while(tracking.x_coord > pos - 8.0)delay(10);
-  // tracking.wait_for_dist(8.5);
-  Task([&](){ 
-    while(true){ 
-      misc.print(" angle: %f\n", get_angle());
-      delay(10);
+  drivebase.move(-GYRO_SIDE*127, 0.0);
+  Task([this](){
+    wait_until(false){
+      get_angle();
+      // motion_i.print("%d | Angle:%f Angle_v:%f, L_v:%f, R_v:%f, Dist:%f\n", millis(), angle, get_angle_dif(), tracking.l_velo, tracking.r_velo, tracking.x_coord);
+      // motion_i.print("%d | Angle:%f\n", millis(), angle);
     }
   });
   wait_until(angle > 22);
   motion_i.print("ON RAMP: %f\n", angle);
   screen_flash::start("On Ramp", term_colours::NOTIF);
 
-  Task([&](){ 
-    while(get_angle() > 20)delay(10);
-    // Led2.set_value(0);
-  });
+  tracking.reset();
 
 	f_lift.move_absolute(100); //Lowers lift
 
-  drivebase.move( -GYRO_SIDE*127, 0.0); //Can probably get rid of this
+  drivebase.move(-GYRO_SIDE*127, 0.0); //Can probably get rid of this
   tracking.wait_for_dist(18);
 }
 
@@ -1635,7 +1618,7 @@ void Gyro::level(double kP, double kD){
 
 	wait_until(gyro_steady.get_time() > 500 || master.interrupt(true, true)){
     gyro_p.compute(-angle, 0);
-		drivebase.move(gyro_p.get_output(), 0.0);
+    drivebase.move(gyro_p.get_output(), 0.0);
     // gyro_steady.print("Angle: %f | Speed: %f\n", angle, gyro_p.get_output());
     
 		if (fabs(angle) > 6 || get_angle_dif() > 0.06) gyro_steady.reset();

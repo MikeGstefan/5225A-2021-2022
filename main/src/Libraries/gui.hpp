@@ -12,7 +12,8 @@ class GUI;
 class Page;
 class Button;
 class Slider;
-template <typename V=std::nullptr_t> class Text;
+class Text_; //parent (interface)
+template <typename V=std::nullptr_t> class Text; //child (used)
 
 //For main.cpp to switch between
 extern GUI g_main, g_util;

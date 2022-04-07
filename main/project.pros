@@ -1,7 +1,7 @@
 {
   "py/object": "pros.conductor.project.Project",
   "py/state": {
-    "project_name": "GUI",
+    "project_name": "Auto Balance",
     "target": "v5",
     "templates": {
       "kernel": {
@@ -303,7 +303,7 @@
       }
     },
     "upload_options": {
-      "slot": 1
+      "slot": 3
     }
   }
 }

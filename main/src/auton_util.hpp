@@ -47,5 +47,5 @@ extern Reset_dist reset_dist_l;
 
 
 
-void subsystem_handle_t(void*params);
+void subsystem_handle_t(void* params);
 inline _Task lift_handle_t(subsystem_handle_t, "LIFT task");

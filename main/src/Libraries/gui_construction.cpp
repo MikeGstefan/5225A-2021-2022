@@ -40,7 +40,7 @@ Text mot_temp_6(390, 190, GUI::Style::CENTRE, TEXT_SMALL, temps, std::get<3>(mot
 Text mot_temp_7(240, 90, GUI::Style::CENTRE, TEXT_SMALL, temps, std::get<3>(motors_for_gui[6]) + ": %dC", std::get<1>(motors_for_gui[6]), COLOUR(BLACK));
 Text mot_temp_8(240, 160, GUI::Style::CENTRE, TEXT_SMALL, temps, std::get<3>(motors_for_gui[7]) + ": %dC", std::get<1>(motors_for_gui[7]), COLOUR(BLACK));
 
-Page checks("System Checks");
+Page checks("Competition");
 Button drive_motors (15, 45, 100, 75, GUI::Style::SIZE, Button::SINGLE, checks, "Drive Motors");
 Button intakes (130, 45, 100, 75, GUI::Style::SIZE, Button::SINGLE, checks, "Intake Uptake");
 Button lifts (245, 45, 100, 75, GUI::Style::SIZE, Button::SINGLE, checks, "Lifts");
@@ -76,8 +76,8 @@ Button go_home(320, 110, 150, 40, GUI::Style::SIZE, Button::SINGLE, moving, "Hom
 Button go_centre(320, 175, 150, 40, GUI::Style::SIZE, Button::SINGLE, moving, "Centre");
 
 Page lift_move ("Motorized Subsystems"); //Moving the lift
-Slider f_lift_val(30, 45, 300, 35, GUI::Style::SIZE, Slider::HORIZONTAL, 0, 0, lift_move, "Front Lift", 10);
-Slider b_lift_val(30, 110, 300, 40, GUI::Style::SIZE, Slider::HORIZONTAL, 0, 0, lift_move, "Back Lift", 10);
+Slider f_lift_val(30, 45, 300, 35, GUI::Style::SIZE, Slider::HORIZONTAL, 1170, 2750, lift_move, "Front Lift", 10);
+Slider b_lift_val(30, 110, 300, 40, GUI::Style::SIZE, Slider::HORIZONTAL, 1042, 2750, lift_move, "Back Lift", 10);
 Button f_lift_move(470, 45, -100, 40, GUI::Style::SIZE, Button::SINGLE, lift_move, "Move Front Lift");
 Button b_lift_move(470, 95, -100, 40, GUI::Style::SIZE, Button::SINGLE, lift_move, "Move Back Lift");
 Button front_claw(470, 145, -100, 40, GUI::Style::SIZE, Button::TOGGLE, lift_move, "Front Claw");

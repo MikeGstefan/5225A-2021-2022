@@ -4,7 +4,6 @@
 #include "piston.hpp"
 
 class _Controller;
-class Text_;
 
 extern _Controller master;
 extern _Controller partner;
