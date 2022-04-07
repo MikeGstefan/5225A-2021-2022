@@ -83,3 +83,5 @@ extern Data log_d;
 extern Data events;
 extern Data graph;
 extern Data state_log;
+extern Data skills_d;
+extern Data ERROR;

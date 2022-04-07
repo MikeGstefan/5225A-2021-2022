@@ -1,7 +1,7 @@
 #include "util.hpp"
 
 double operator "" _deg(long double degree){
-  return degree/180 *M_PI; //aren't these switched? (this should be radians/M_PI *180)
+  return degree/180 *M_PI;
 }
 double operator "" _rad(long double radians){
   return radians/M_PI *180;

@@ -32,9 +32,9 @@ extern _Task move_t;
 #define DIST_FRONT 8.5
 
 
-constexpr int min_move_power_a = 35;
+constexpr int min_move_power_a = 30;
 constexpr int min_move_power_x = 40;
-constexpr int min_move_power_y = 25;
+constexpr int min_move_power_y = 16;
 
 
 void update(void* params);
@@ -161,13 +161,13 @@ struct tank_point_params{
   bool turn_dir_if_0 = false;
   double max_power = 127.0, min_angle_percent = 1.0;
   bool brake= true;
-  double kp_y = 9.0;
-  double kp_a = 150.0;
+  double kp_y = 6.4;
+  double kp_a = 70.0;
   double kd_a = 0.0;
   int timeout = 0;
   Point end_error = {0.5, 0.5};
   tank_point_params() = default;
-  tank_point_params(const Position target, const bool turn_dir_if_0 = false, const double max_power = 127.0, const double min_angle_percent = 1.0, const bool brake = true, double kp_y = 9.0, double kp_a =150.0, double kd_a = 0.0, int timeout = 0, Point end_error = {0.5, 0.5});
+  tank_point_params(const Position target, const bool turn_dir_if_0 = false, const double max_power = 127.0, const double min_angle_percent = 1.0, const bool brake = true, double kp_y = 6.4, double kp_a =70.0, double kd_a = 0.0, int timeout = 0, Point end_error = {0.5, 0.5});
 };
 
 struct tank_rush_params{ 
@@ -187,13 +187,14 @@ struct turn_angle_params{
   double target_a = 0.0;
   bool brake = true;
   bool near = true;
-  double kp = 160.0, kd = 0.0;
+  double kp = 5.0, kd = 0.0;
+  double kp_v = 10.0, kd_v = 20.0;
   double max_speed = 127;
   int timeout = 0;
   double min_power_a = min_move_power_a;
   double end_error = 5.0;
   turn_angle_params() = default;
-  turn_angle_params(const double target_a, const bool brake = true, bool near = true, double kp = 160.0, double kd = 0.0, double max_speed = 127.0, int timeout = 0, double min_power_a = min_move_power_a, double end_error = 5.0);
+  turn_angle_params(const double target_a, const bool brake = true, bool near = true, double kp = 5.0, double kd = 0.0, double kp_v = 10.0, double kd_v = 20.0, double max_speed = 127.0, int timeout = 0, double min_power_a = min_move_power_a, double end_error = 5.0);
 };
 
 struct turn_point_params{ 
@@ -261,3 +262,5 @@ void turn_to_point(void* params);
 #define polar_to_vector_point(start_x, start_y, magnitude, theta, angle)\
   {start_x + sin(deg_to_rad(theta)) * magnitude, start_y + cos(deg_to_rad(theta)) * magnitude, angle}\
 
+#define angle_to_point(x, y)\
+  rad_to_deg(atan2(x - tracking.x_coord, y - tracking.y_coord))

@@ -7,6 +7,14 @@ static const std::string start_pos_file_name ="/usd/start_position.txt";
 Reset_dist reset_dist_r(&r_dist, 7.5);
 Reset_dist reset_dist_l(&l_dist, 7.5);
 
+
+void f_claw(bool state){
+  f_claw_o.set_state(state);
+  f_claw_c.set_state(state);
+}
+
+
+
 void save_positions(){
   if(GUI::prompt("Reset position", "Press to reset the position, then move the robot.")){
     Position pos1 (141.0-8.75, 15.5, 0.0), pos2 (8.75, 15.5, 0);
@@ -117,46 +125,27 @@ void flatten_against_wall(bool front, int cycles){
 // }
 
 void b_detect_goal(){ 
-  // cycleCheck(b_dist.get() > 80 && b_dist.get() < 90, 5, 33);
   wait_until(!tracking.move_complete);
-  while(b_dist.get() > 70 && !tracking.move_complete){ 
-    misc.print("looking for edge: %d\n", b_dist.get());
+  while(b_dist.get() > 40 && !tracking.move_complete){ 
+    misc.print("looking for goal: %d\n", b_dist.get());
     delay(33);
-  }
-  int successCount = 0;
-    while (successCount < 2 && !tracking.move_complete){
-        if (b_dist.get() > 75 && b_dist.get() < 90) {
-          successCount++;
-          misc.print("found: %d count: %d\n", b_dist.get(), successCount);
-        }
-        else successCount = 0;
-        misc.print("looking: %d\n", b_dist.get());
-        delay(33);
-    }
+}
   misc.print("Detected %d\n", b_dist.get());
-  b_claw_p.set_value(1);
+  b_claw.set_state(1);
 }
 
 
 
 void f_detect_goal(bool safety){ 
-  // cycleCheck(b_dist.get() > 80 && b_dist.get() < 90, 5, 33);
-  // while(f_dist.get() > 70){ 
-  //   misc.print("looking for edge: %d\n", f_dist.get());
-  //   delay(33);
-  // }
-  // int successCount = 0;
-  //   while (successCount < 2){
-  //       if (f_dist.get() > 70 && f_dist.get() < 90) successCount++;
-  //       else successCount = 0;
-  //       misc.print("looking: %d\n", f_dist.get());
-  //       delay(33);
-  //   }
-  if(safety) wait_until(f_touch.get_value() || tracking.move_complete);
-  else wait_until(f_touch.get_value());
+
+  if(safety) wait_until(!tracking.move_complete);
+  while(f_dist.get() > 30 && !tracking.move_complete){
+    misc.print("looking for goal front: %d\n", f_dist.get());
+    delay(33);
+  }
   
   misc.print("Detected %d\n", f_dist.get());
-  f_claw_p.set_value(HIGH);
+  f_claw(1);
 }
 
 
@@ -192,4 +181,20 @@ double Reset_dist::get_dist(){
   //find averaeg, convert to inches
   misc.print("%d || reset %f\n",millis(), (avg/count)/25.4);
   return ((avg/count)/25.4) + this->dist_from_center;
+}
+
+
+
+
+void subsystem_handle_t(void*params){
+  _Task* ptr = _Task::get_obj(params);
+
+  while(true){ 
+    b_lift.handle(false);
+		f_lift.handle(false);
+    // b_claw_obj.handle();
+		// f_claw_obj.handle();
+    if(ptr->notify_handle())return;
+    delay(10);
+  }
 }

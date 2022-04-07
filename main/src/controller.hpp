@@ -15,17 +15,19 @@ using namespace pros;
 // lift buttons
 extern controller_digital_e_t lift_up_button;
 extern controller_digital_e_t lift_down_button;
-extern controller_digital_e_t lift_claw_toggle_button;
-extern controller_digital_e_t lift_tilt_toggle_button;
 
-// misc buttons
+extern controller_digital_e_t reverse_drive_button;
+extern controller_digital_e_t claw_toggle_button;
+
+// intake buttons
 extern controller_digital_e_t intake_button;
 extern controller_digital_e_t intake_reverse_button;
-extern controller_digital_e_t shift_button;
-extern controller_digital_e_t hitch_toggle_button;
-extern controller_digital_e_t ok_button;
-extern controller_digital_e_t b_claw_toggle_button;
 
+// misc buttons
+extern controller_digital_e_t ok_button;
+extern controller_digital_e_t both_lifts_down_button;
+extern controller_digital_e_t joy_mode_switch_button;
+extern controller_digital_e_t shift_button;
 
 #define num_controller 2
 

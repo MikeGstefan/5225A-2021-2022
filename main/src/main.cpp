@@ -40,11 +40,15 @@ void initialize() {
 	_Controller::init();
 	GUI::init();
 	delay(500);
-	// tracking.x_coord = 26.0, tracking.y_coord = 11.75, tracking.global_angle = -90.0_deg;
+	// tracking.x_coord = 28.5, tracking.y_coord = 11.75, tracking.global_angle = -90.0_deg;
+
+
+  b_lift.motor.set_brake_mode(E_MOTOR_BRAKE_HOLD);
+  f_lift.motor.set_brake_mode(E_MOTOR_BRAKE_HOLD);
+	
 	// tracking.x_coord = 104.0, tracking.y_coord = 12.0, tracking.global_angle = -30.0_deg;
 	// tracking.x_coord = 24.5, tracking.y_coord = 15.0, tracking.global_angle = 9.0_deg;
-	// tracking.x_coord = 0.0, tracking.y_coord = 0.0, tracking.global_angle = 0.0_deg;
-	tracking.x_coord = 108.0, tracking.y_coord = 16.0, tracking.global_angle = 0.0_deg;
+	tracking.x_coord = 0.0, tracking.y_coord = 0.0, tracking.global_angle = 0.0_deg;
 	update_t.start();
 	// master.print(2, 0, "Driver: %s", drivebase.drivers[drivebase.cur_driver].name);
 	gyro.finish_calibrating(); //Finishes calibrating gyro before program starts
@@ -87,8 +91,9 @@ void autonomous() {
 
 void opcontrol() {
 	master.wait_for_press(DIGITAL_R1);
-	b_claw_p.set_value(HIGH);//locks in goals and raises lift
-	f_claw_p.set_value(HIGH);
+	b_claw.set_value(HIGH);//locks in goals and raises lift
+	f_claw(HIGH);
+  //Hitch
 	// f_lift.move_absolute(600, 100, true, 100);
 	// b_lift.move_absolute(100);
 
@@ -111,8 +116,8 @@ void opcontrol() {
   master.wait_for_press(DIGITAL_R1);
   gyro.climb_ramp();
   gyro.level(1.8, 650);
-  b_claw_p.set_value(LOW);
-  f_claw_p.set_value(LOW);
+  b_claw.set_value(LOW);
+  f_claw(LOW);
   b_lift.move(-10);
   f_lift.move(-10);
 

@@ -1,5 +1,13 @@
 #include "drive.hpp"
 
+// for lifts
+Timer up_press{"up_press"};
+Timer down_press{"down_press"};
+
+Timer toggle_press_timer{"toggle_press_timer"}; // for back claw
+
+joy_modes joy_mode = joy_modes::lift_select;
+
 // array<int, 7> f_lift_pos= {10, 150, 300, 475, 630, 665, 675};
 // int f_lift_index = 0;
 // int f_lift_time = 0;
@@ -76,10 +84,11 @@ name(name), joy_sticks{joy_sticks[0], joy_sticks[1], joy_sticks[2]}, custom_driv
 Drivebase::Drivebase(std::array<driver, num_of_drivers> drivers) : drivers(drivers) {}
 
 void Drivebase::move(double x, double y, double a){
-  front_l.move(x + y + a);
-  front_r.move(-x + y - a);
-  back_l.move(-x + y + a);
-  back_r.move(x + y - a);
+  ERROR.print("you called the wrong function");
+  // front_l.move(x + y + a);
+  // front_r.move(-x + y - a);
+  // back_l.move(-x + y + a);
+  // back_r.move(x + y - a);
 }
 
 void Drivebase::move(double y, double a){
@@ -87,19 +96,20 @@ void Drivebase::move(double y, double a){
   front_r.move(y-a);
   back_l.move(y+a);
   back_r.move(y-a);
+  center_l.move(y+a);
+  center_r.move(y-a);
   // back_l.move(0);
   // back_r.move(0);
 }
 
-void Drivebase::move_tank(double y, double a){
-  move(0.0, y, a);
-}
 
 void Drivebase::move_side(double l, double r){
   front_l.move(l);
   front_r.move(r);
   back_l.move(l);
   back_r.move(r);
+  center_l.move(l);
+  center_r.move(r);
 }
 
 void Drivebase::brake(){
@@ -107,6 +117,8 @@ void Drivebase::brake(){
   front_r.move_relative(0, 200);
   back_l.move_relative(0, 200);
   back_r.move_relative(0, 200);
+  center_l.move_relative(0,200);
+  center_r.move_relative(0,200);
 }
 
 void Drivebase::velo_brake(){
@@ -114,6 +126,8 @@ void Drivebase::velo_brake(){
   front_r.move_velocity(0);
   back_l.move_velocity(0);
   back_r.move_velocity(0);
+  center_l.move_velocity(0);
+  center_r.move_velocity(0);
 }
 
 void Drivebase::update_screen(){
@@ -218,16 +232,16 @@ void Drivebase::handle_input(){
   if(fabs(tracking.power_y) < deadzone) tracking.power_y = 0.0;
   if(fabs(tracking.power_a) < deadzone) tracking.power_a = 0.0;
 
-  // if(master.get_digital_new_press(reverse_drive_button)){
-  //   master.rumble("-");
-  //   reversed = !reversed;
-  //   if(reversed) master.print(0, 0, "Reverse");
-  //   else master.print(0, 0, "Forward");
-  // }
-  // if (reversed){
-  //   tracking.power_y *= -1;
-  //   tracking.power_x *= -1;
-  // }
+  if(master.get_digital_new_press(reverse_drive_button)){
+    master.rumble("-");
+    reversed = !reversed;
+    if(reversed) master.print(0, 0, "Reverse");
+    else master.print(0, 0, "Forward");
+  }
+  if (reversed){
+    tracking.power_y *= -1;
+    tracking.power_x *= -1;
+  }
 
   if(this->state && (fabs(tracking.power_y) <deadzone && fabs(tracking.power_a) <deadzone)){
     // velo_brake();
@@ -255,17 +269,13 @@ void Drivebase::driver_practice(){
 
   // moves motors to necessary positions / speeds
   // Task([](){ 
-    b_lift.reset();
-    b_lift.move_absolute(b_lift.bottom_position);
-    f_lift.reset();
-    f_lift.move_absolute(f_lift.bottom_position);
+    // b_lift.reset();
+    // f_lift.reset();
   // });
   
   // f_claw_p.set_value(LOW);
-  // b_claw_p.set_value(LOW);
+  b_claw.set_value(LOW);
   // lift.move(-10); // gives holding power
-  bool intake_on = false;
-  bool intake_reverse = false;
   cur_driver = 0; // defaults driver to Nikhil
   // master.print(2, 0, "Driver: %s", driver_name());
   while(true){
@@ -279,12 +289,13 @@ void Drivebase::driver_practice(){
         delay(2000);
       }
       drivebase.handle_input();
-      // b_lift.handle();
-      // handle_lifts();
-      f_lift.handle(true);
-      f_claw.handle();
-      b_claw.handle();
-      intake.handle();
+      // intake.handle();
+
+      handle_lifts();
+      f_claw_obj.handle();
+      b_claw_obj.handle();
+      // intake.handle_buttons();
+      // intake.handle();
      
 
       handle_trans();
@@ -296,7 +307,7 @@ void Drivebase::driver_practice(){
         screen_timer.reset();
       }
       // takes away control from driver when motors overheat
-      if(front_l.get_temperature() >= 55 || front_r.get_temperature() >= 55 || back_r.get_temperature() >= 55 || back_l.get_temperature() >= 55 || b_lift_m.get_temperature() >= 55|| f_lift_m.get_temperature() >= 55|| intk.get_temperature() >= 55){
+      if(front_l.get_temperature() >= 55 || front_r.get_temperature() >= 55 || back_r.get_temperature() >= 55 || back_l.get_temperature() >= 55 || b_lift_m.get_temperature() >= 55|| f_lift_m.get_temperature() >= 55){
         master.rumble("- - - "); // rumbles controller if motors are hot to warn driver
         // move(0, 0, 0);  // stops movement
         // return;
@@ -347,7 +358,7 @@ bool Drivebase::get_state(){
 
 void Drivebase::set_state(bool state){
   this->state = state;
-  trans_p.set_value(state);
+  drive_t.set_value(state);
 }
 
 
@@ -378,5 +389,141 @@ int Drivebase::get_deadzone(){
 //   return (!this->reversed ==  master.get_analog(ANALOG_RIGHT_Y) > -1*deadzone);
 // }
 
+bool get_lift(){
+  // if in lift select mode, compute the lift, otherwise return last value of cur lift
+  // static bool cur_lift = (joy_mode == joy_modes::lift_select) ? (!drivebase.get_reverse() == master.get_analog(ANALOG_RIGHT_Y) > -1* drivebase.get_deadzone()) : cur_lift;
+  // return cur_lift;
+  return !drivebase.get_reverse() == master.get_analog(ANALOG_RIGHT_Y) > -1* drivebase.get_deadzone();
+}
 
+void handle_lifts(){      
+  // toggles the state of the joystick mode if the joy mode switch button is pressed
+  if(master.get_digital_new_press(joy_mode_switch_button)){
+    if(joy_mode == joy_modes::lift_select){
+      printf("joy mode now manual\n");
+      joy_mode == joy_modes::manual;
+      b_lift.Subsystem::set_state(b_lift_states::manual);
+      f_lift.Subsystem::set_state(f_lift_states::manual);
+    }
+    else{
+      joy_mode = joy_modes::lift_select;
+      printf("joy mode now in lift select\n");
+    }
+  }
+  // moves both lifts to bottom if both_lifts_down_button is pressed
+  if(master.get_digital_new_press(both_lifts_down_button)){
+    f_lift.set_state(f_lift_states::move_to_target, 0);
+    b_lift.set_state(b_lift_states::move_to_target, 0);
+  }
+  // lift handlers
+  // f_lift.handle_buttons();
+  f_lift.handle(true);
+  b_lift.handle_buttons();
+  b_lift.handle(true);
+}
+
+void handle_lift_buttons(){
+  // index incrementing and decrementing
+  if(master.get_digital_new_press(lift_up_button)){
+    if(get_lift()){
+      up_press.reset();
+      // if state is manual, go to the closest position that's higher than the current position
+      if(f_lift.get_state() == f_lift_states::manual){
+        for (size_t i = 0; i < f_lift.driver_positions.size(); i++){
+          if(f_lift.driver_positions[i] > f_lift_pot.get_value()){
+            f_lift.set_state(f_lift_states::move_to_target, i);
+            break;
+          }
+        }
+      }
+      // otherwise just go to the next highest position, but doesn't increment index if it's out of bounds
+      else if(f_lift.get_index() < f_lift.driver_positions.size() - 1)  f_lift.set_state(f_lift_states::move_to_target, f_lift.get_index() + 1);
+    }
+    else{
+      up_press.reset();
+      // if state is manual, go to the closest position that's higher than the current position
+      if(b_lift.get_state() == b_lift_states::manual){
+        for (size_t i = 0; i < b_lift.driver_positions.size(); i++){
+          if(b_lift.driver_positions[i] > b_lift_pot.get_value()){
+            b_lift.set_state(b_lift_states::move_to_target, i);
+            break;
+          }
+        }
+      }
+      // otherwise just go to the next highest position, but doesn't increment index if it's out of bounds
+      else if(b_lift.get_index() < b_lift.driver_positions.size() - 1)  b_lift.set_state(b_lift_states::move_to_target, b_lift.get_index() + 1);
+    }
+  }
+  if(master.get_digital_new_press(lift_down_button)){
+    if(get_lift()){
+      down_press.reset();
+      // if state is manual, go to the closest position that's lower than the current position
+      if(f_lift.get_state() == f_lift_states::manual){
+        for (size_t i = f_lift.driver_positions.size() - 1; i >= 0; i--){
+          if(f_lift.driver_positions[i] < f_lift_pot.get_value()){
+            f_lift.set_state(f_lift_states::move_to_target, i);
+            break;
+          }
+        }
+      }
+      // otherwise just go to the next lowest position, but doesn't decrement index if it's out of bounds
+      else if(f_lift.get_index() > 0)  f_lift.set_state(f_lift_states::move_to_target, f_lift.get_index() - 1);
+    }
+    else{
+      down_press.reset();
+      // if state is manual, go to the closest position that's lower than the current position
+      if(b_lift.get_state() == b_lift_states::manual){
+        for (size_t i = b_lift.driver_positions.size() - 1; i >= 0; i--){
+          if(b_lift.driver_positions[i] < b_lift_pot.get_value()){
+            b_lift.set_state(b_lift_states::move_to_target, i);
+            break;
+          }
+        }
+      }
+      // otherwise just go to the next lowest position, but doesn't decrement index if it's out of bounds
+      else if(b_lift.get_index() > 0)  b_lift.set_state(b_lift_states::move_to_target, b_lift.get_index() - 1);
+    }
+  }
+  // resets and pauses the timers if driver releases button
+  if(!master.get_digital(lift_up_button)) up_press.reset(false);
+  if(!master.get_digital(lift_down_button)) down_press.reset(false);
+
+  // goes to top position if up button is held
+  if(up_press.get_time() > 300){
+    if(get_lift())  f_lift.set_state(f_lift_states::move_to_target, f_lift.driver_positions.size() - 1);
+    else  b_lift.set_state(b_lift_states::move_to_target, b_lift.driver_positions.size() - 1);
+  }
+  // goes to bottom position if down button is held
+  if(down_press.get_time() > 300){
+    if(get_lift())  f_lift.set_state(f_lift_states::move_to_target, 0);
+    else  b_lift.set_state(b_lift_states::move_to_target, 0);
+  }
+}
+
+void handle_claw_buttons(){
+  if(master.get_digital_new_press(claw_toggle_button)){
+    if(get_lift()){ // if front claw
+      if(f_claw_obj.get_state() == f_claw_states::idle)  f_claw_obj.set_state(f_claw_states::grabbed);
+      else f_claw_obj.set_state(f_claw_states::idle);
+    }
+    else{ // if back claw
+      toggle_press_timer.reset();
+      // grabs goal if toggle button is pressed and claw is open
+      if(b_claw_obj.get_state() == b_claw_states::idle) b_claw_obj.set_state(b_claw_states::tilted);
+      else b_claw_obj.set_state(b_claw_states::idle);
+    }
+  }
+// b claw tilting toggle stuff
+
+  // if(toggle_press_timer.get_time() > 300){  // toggles tilt state if claw button was held
+  //   if(b_claw_obj.get_state() == b_claw_states::tilted) b_claw_obj.set_state(b_claw_states::flat);
+  //   else if(b_claw_obj.get_state() == b_claw_states::flat) b_claw_obj.set_state(b_claw_states::tilted);
+  //   toggle_press_timer.reset(false); // resets and pauses the timer 
+  // }
+  // // releases goal if toggle button is released before the button hold timeout triggers
+  // else if(!master.get_digital(claw_toggle_button)){
+  //   toggle_press_timer.reset(false);  // resets and pauses the timer 
+  //   if(b_claw_obj.get_state() == b_claw_states::tilted || b_claw_obj.get_state() == b_claw_states::flat)  b_claw_obj.set_state(b_claw_states::idle);
+  // }
+}
 

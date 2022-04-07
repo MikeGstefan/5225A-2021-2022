@@ -11,9 +11,12 @@ void load_positions();
 
 using namespace pros;
 
-
+#define b_lift_hitch_pos 3
 
 #define front_dist_dist 3.85
+
+
+void f_claw(bool state);
 
 
 double get_filtered_output(ADIUltrasonic sensor, int check_count, uint16_t lower_bound, uint16_t upper_bound, int timeout); // is blocking code
@@ -41,3 +44,8 @@ class Reset_dist{
 extern Reset_dist reset_dist_r;
 extern Reset_dist reset_dist_l;
 
+
+
+
+void subsystem_handle_t(void* params);
+inline _Task lift_handle_t(subsystem_handle_t, "LIFT task");
