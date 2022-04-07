@@ -54,6 +54,10 @@ std::string convert_all_args(const std::string& fmt, T arg){
     else if(end[1] == 'j') snprintf(buffer, n_printf_max, format, static_cast<uintmax_t>(arg));
     else snprintf(buffer, n_printf_max, format, static_cast<unsigned int>(arg));
   }
+  else if(end[0] == 'c'){
+    if(end[1] == 'l') snprintf(buffer, n_printf_max, format, static_cast<wint_t>(arg));
+    else snprintf(buffer, n_printf_max, format, static_cast<int>(arg));
+  }
   else if(end[1] == 'z') snprintf(buffer, n_printf_max, format, static_cast<size_t>(arg));
   else if(end[1] == 't') snprintf(buffer, n_printf_max, format, static_cast<ptrdiff_t>(arg));
 

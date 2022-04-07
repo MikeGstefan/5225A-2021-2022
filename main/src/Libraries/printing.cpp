@@ -20,7 +20,6 @@ std::string printf_to_string(const std::string& fmt){
 
 void newline(int count){
   std::cout << std::string (count , '\n');
-  // printf("%*c", count, '\n');
 }
 
 const char* get_term_colour(term_colours colour){

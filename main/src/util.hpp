@@ -148,19 +148,21 @@ E previous_enum_value(E enum_value){
 
 //prefix increment
 template <typename E, typename = typename std::enable_if_t<std::is_enum_v<E>, void>>
-E operator++ (const E& enum_value){
-  return next_enum_value(enum_value);
+E& operator++ (E& enum_value){
+  enum_value = next_enum_value(enum_value);
+  return enum_value;
 }
 
 //prefix decrement
 template <typename E, typename = typename std::enable_if_t<std::is_enum_v<E>, void>>
-E operator-- (const E& enum_value){
-  return prev_enum_value(enum_value);
+E& operator-- (E& enum_value){
+  enum_value = previous_enum_value(enum_value);
+  return enum_value;
 }
 
 //postfix increment
 template <typename E, typename = typename std::enable_if_t<std::is_enum_v<E>, void>>
-E operator++ (const E& enum_value, int){
+E operator++ (E& enum_value, int){
   E old = enum_value;
   ++enum_value;
   return old;
@@ -168,7 +170,7 @@ E operator++ (const E& enum_value, int){
 
 //postfix decrement
 template <typename E, typename = typename std::enable_if_t<std::is_enum_v<E>, void>>
-E operator-- (const E& enum_value, int){
+E operator-- (E& enum_value, int){
   E old = enum_value;
   --enum_value;
   return old;
