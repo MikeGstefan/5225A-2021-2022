@@ -186,7 +186,7 @@ class Text: public Text_{
     int update_val(char* const buffer) override {
       if(value){
         prev_value = value();
-        return snprintf(buffer, 100, label.c_str(), convert_all_args(prev_value));
+        return snprintf(buffer, 100, "%s", convert_all_args(label, prev_value));
       }
       return snprintf(buffer, 100, label.c_str());
     }

@@ -544,7 +544,7 @@ void run_auton(){
   for(int i = 0; i+1 < selected_positions.size(); i++){
     current = targets[selected_positions[i]];
     target = targets[selected_positions[i+1]];
-    angle = std::get<3>(target);
+    angle = std::get<double>(target);
 
     if(!run_defined_auton(selected_positions[i], selected_positions[i+1])){
       move_start(move_types::tank_point, tank_point_params({std::get<1>(current), weighted_avg(angle, tracking.get_angle_in_deg(), 0.3)}, false, 127.0, 1.0, false));

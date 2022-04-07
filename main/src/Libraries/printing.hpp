@@ -22,15 +22,16 @@ enum class term_colours{
 };
 
 
-template <typename T, typename = typename std::enable_if_t<!(std::is_integral_v<T> || std::is_floating_point_v<T>), void>> //Forces double/int overload instead
+template <typename T, typename = typename std::enable_if_t<!std::is_arithmetic_v<T>, void>> //Forces double/int overload instead
 std::string convert_all_args(const std::string& fmt, const T& arg){
   char buffer[n_printf_max];
   snprintf(buffer, n_printf_max, fmt.c_str(), arg);
   return buffer;
 }
 
-template <typename T, typename = typename std::enable_if_t<std::is_floating_point_v<T> || std::is_integral_v<T>, void>>
-std::string convert_all_args(const std::string& fmt, T arg){
+//For arithmetic types
+template <typename T, typename = typename std::enable_if_t<std::is_arithmetic_v<T>, void>>
+std::string convert_all_args(const std::string& fmt, T arg){ //Not const T& because that duplicates against the non-arithmetic template overload
   const char* format = fmt.c_str();
   std::string fmt_safe = "   " + fmt;
   char buffer[n_printf_max];
@@ -148,7 +149,7 @@ std::string convert_all_args(const std::string& fmt, const Position& arg);
 std::string convert_all_args(const std::string& fmt, const Point& arg);
 
 
-//For %n, doesn't work yet.
+//set_length for %n, doesn't work yet.
 template <typename T, typename = typename std::enable_if_t<std::is_integral<T>::value && std::is_signed<T>::value, void>>
 void set_length(T* ptr, const std::string& start, const std::string& converted){
   *ptr = start.length() + converted.length();
@@ -159,6 +160,10 @@ void set_length(T ptr, const std::string& start, const std::string& converted){
   //Only exists for compile time overload resolution. Should never be called
   throw std::invalid_argument("Cannot use \%n on non signed integer * type.");
 }
+
+
+//Template Recursion Base case
+std::string printf_to_string(const std::string& fmt);
 
 /**
  * @brief Formats a printf-style function call into an std::string with more safety
@@ -205,9 +210,6 @@ std::string printf_to_string(std::string fmt, const Param& arg, const Params&...
   return start + converted + rest;
 }
 
-//Template Recursion Base case
-std::string printf_to_string(const std::string& fmt);
-
 /**
  * @brief Get the terminal control string to modify its printing colour 
  * 
@@ -230,7 +232,7 @@ void newline(int count = 1);
  * @param args printf args
  */
 template <typename... Params>
-void printf2(const char* fmt, Params... args){
+void printf2(std::string fmt, Params... args){
   printf("%s\n", printf_to_string(fmt, args...).c_str());
 }
 
@@ -246,7 +248,7 @@ void printf2(const char* fmt, Params... args){
  * @param args printf args
  */
 template <typename... Params>
-void printf2(term_colours colour, int time_type, const char* fmt, Params... args){
+void printf2(term_colours colour, int time_type, std::string fmt, Params... args){
   if(time_type) printf("%s | %s%s\033[0m\n", Timer::to_string(millis(), timing_units::millis, 0, time_type-1).c_str(), get_term_colour(colour), printf_to_string(fmt, args...).c_str());
   else printf("%s%s\033[0m\n", get_term_colour(colour), printf_to_string(fmt, args...).c_str());
 }
