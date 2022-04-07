@@ -27,7 +27,9 @@ class F_Lift: public Motorized_subsystem<f_lift_states, NUM_OF_F_LIFT_STATES, F_
   double arm_len = 8.0;
   double gear_ratio = 5.0;
 
-  std::atomic<uint8_t> index{0}; // to avoid race conditions this is atomic
+  // to avoid race conditions these are atomic
+  std::atomic<uint8_t> index{0};
+  std::atomic<int32_t> speed{127}; // max pwm applied to the lifts during a move to target
 
 public:
 
@@ -40,7 +42,7 @@ public:
   void handle_state_change(); // cleans up and preps the machine to be in the target state
   // void handle_buttons(); // handles driver button input
   // THIS IS AN OVERLOAD for the existing set state function, accepts an index for the lift
-  void set_state(const f_lift_states next_state, const uint8_t index);  // requests a state change and logs it
+  void set_state(const f_lift_states next_state, const uint8_t index, const int32_t speed = 127);  // requests a state change and logs it
   
   // getter because index is private
   int get_index() const{

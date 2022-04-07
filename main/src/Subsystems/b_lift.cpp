@@ -81,8 +81,12 @@ void B_Lift::handle(bool driver_array){
       break;
 
     case b_lift_states::move_to_target: // moving to target
-      motor.move(pid.compute(b_lift_pot.get_value(), positions[index]));
-      
+      // output is scoped below to prevent other states from accessing it 
+      {
+        int output = pid.compute(b_lift_pot.get_value(), positions[index]);
+        if (abs(output) > speed) output = speed * sgn(output); // cap the output at speed  
+        motor.move(output);
+      }
       // moves to next state if the lift has reached its target
       if(fabs(pid.get_error()) < end_error){
         motor.move_velocity(0); // holds motor
@@ -192,10 +196,11 @@ void B_Lift::handle_state_change(){
 }
 
 // accepts an index argument used specifically for a move to target
-void B_Lift::set_state(const b_lift_states next_state, const uint8_t index){  // requests a state change and logs it
+void B_Lift::set_state(const b_lift_states next_state, const uint8_t index, const int32_t speed){  // requests a state change and logs it
   // confirms state change only if the state is actually move to target
   if (next_state == b_lift_states::move_to_target){
     this->index = index;
+    this->speed = speed;
     state_log.print("%s | State change requested index is: %d \t", name, index);
     Subsystem::set_state(next_state);
   }

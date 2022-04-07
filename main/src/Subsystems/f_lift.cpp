@@ -40,11 +40,13 @@ void F_Lift::handle(bool driver_array){
 
       // move slowly if going down to the bottom with a goal
       if(index == 0 && f_lift_pot.get_value() < 1500 && f_claw_obj.get_state() == f_claw_states::grabbed)  motor.move(-50);
-      else motor.move(pid.compute(f_lift_pot.get_value(), positions[index]));
-      
+      else{ // otherwise calculate output with a pid as usual
+        int output = pid.compute(f_lift_pot.get_value(), positions[index]);
+        if (abs(output) > speed) output = speed * sgn(output); // cap the output at speed  
+        motor.move(output);
+      }
       // moves to next state if the lift has reached its target
       if(fabs(pid.get_error()) < end_error){
-        motor.move_velocity(0); // holds motor
         // switches to idle by default or special case depending on current target
         switch(index){
           case 0: // lift is at bottom position, this state is used by intake 
@@ -114,10 +116,11 @@ void F_Lift::handle_state_change(){
 }
 
 // accepts an index argument used specifically for a move to target
-void F_Lift::set_state(const f_lift_states next_state, const uint8_t index){  // requests a state change and logs it
+void F_Lift::set_state(const f_lift_states next_state, const uint8_t index, const int32_t speed){  // requests a state change and logs it
   // confirms state change only if the state is actually move to target
   if (next_state == f_lift_states::move_to_target){
     this->index = index;
+    this->speed = speed;
     state_log.print("%s | State change requested index is: %d \t", name, index);
     Subsystem::set_state(next_state);
   }
