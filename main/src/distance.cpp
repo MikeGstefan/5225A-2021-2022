@@ -218,23 +218,27 @@ Position distance_reset_center(int cycles){
 			delay(33);
 		}
 		misc.print("values collected");
-		for(int i = 0; i < cycles; i++){
-			l_average += left.at(i);
-			r_average += right.at(i);
-			l_side_average += l_side.at(i);
-			r_side_average += r_side.at(i);
-		}
+		// for(int i = 0; i < cycles; i++){
+		// 	l_average += left.at(i);
+		// 	r_average += right.at(i);
+		// 	l_side_average += l_side.at(i);
+		// 	r_side_average += r_side.at(i);
+		// }
+		l_average = std::accumulate(left.begin(), left.end(), 0.0)/left.size();
+		r_average = std::accumulate(right.begin(), right.end(), 0.0)/right.size();
+		l_side_average = std::accumulate(l_side.begin(), l_side.end(), 0.0)/l_side.size();
+		r_side_average = std::accumulate(r_side.begin(), r_side.end(), 0.0)/r_side.size();
 
-		l_average = l_average/left.size();
-		r_average = r_average/right.size();
-		l_side_average /= l_side.size();
-		r_side_average /= r_side.size();
+		// l_average = l_average/left.size();
+		// r_average = r_average/right.size();
+		// l_side_average /= l_side.size();
+		// r_side_average /= r_side.size();
 		misc.print("average collected");
 		for(int i = 0; i< cycles; i++){
-			if(abs(left.at(i) - l_average) > 50) left.erase(left.begin()+i);
-			if(abs(right.at(i) - r_average) > 50) right.erase(right.begin()+i);
-			if(abs(l_side.at(i) - l_side_average) > 50) l_side.erase(l_side.begin()+i);
-			if(abs(r_side.at(i) - r_side_average) > 50) r_side.erase(r_side.begin()+i);
+			if(i < left.size() && abs(left.at(i) - l_average) > 50) left.erase(left.begin()+i);
+			if(i < right.size() && abs(right.at(i) - r_average) > 50) right.erase(right.begin()+i);
+			if(i < l_side.size() && abs(l_side.at(i) - l_side_average) > 50) l_side.erase(l_side.begin()+i);
+			if(i < r_side.size() && abs(r_side.at(i) - r_side_average) > 50) r_side.erase(r_side.begin()+i);
 		}
 
 			sort(left.begin(), left.end());
@@ -242,10 +246,10 @@ Position distance_reset_center(int cycles){
 			sort(r_side.begin(), r_side.end());
 			sort(l_side.begin(), l_side.end());
 
-			averageleft = left.at(left. size() / 2);
-			averageright = right.at(right.size() / 2);
-			average_r_side = r_side.at(r_side.size() / 2);
-			average_l_side = l_side.at(l_side.size() / 2);
+			averageleft = left.at(int(left. size() / 2));
+			averageright = right.at(int(right.size() / 2));
+			average_r_side = r_side.at(int(r_side.size() / 2));
+			average_l_side = l_side.at(int(l_side.size() / 2));
 
 			printf("Average: Left:%f Right:%f\n", averageleft, averageright);
 			printf("Average Side: Left:%f Right:%f\n", average_l_side, average_r_side);

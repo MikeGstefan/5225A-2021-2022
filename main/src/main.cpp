@@ -89,10 +89,24 @@ void autonomous() {
 }
 
 void opcontrol() {
-	lift_handle_t.start();
-	while(!master.get_digital_new_press(DIGITAL_A))delay(10);
-	skills2();
-	while(true)delay(10);
+	// lift_handle_t.start();
+	while(!master.get_digital_new_press(DIGITAL_A)){
+		// gui_handle(); //
+		delay(10);
+	}
+	// skills2();
+	// skills();
+	// move_start(move_types::tank_point, tank_point_params({0.0, 20.0,0.0}));
+	// move_start(move_types::turn_angle, turn_angle_params(90.0));
+	// move_start(move_types::tank_point, tank_point_params({20.0, 20.0,0.0}));
+	// // move_start(move_types::tank_arc, tank_arc_params({0.0,0.0}, {20.0,20.0,90.0}, 70.0));
+	// flatten_against_wall();
+	// // move_start(move_types::tank_arc, tank_arc_params({8.5,8.5}, {20.0,20.0,90.0}));
+	// move_start(move_types::tank_point, tank_point_params({30.0, 20.0,0.0}));
+	while(true){
+		delay(10);
+		drivebase.handle_input();
+	}
 	while(true){
 		// b_lift.set_state(b_lift_states::move_to_target, 0);
 		// delay(1500);
