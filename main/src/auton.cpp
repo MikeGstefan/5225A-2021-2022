@@ -14,18 +14,21 @@ void skills(){
   int time = millis();
   // f_lift.move_absolute(10); 
   // b_lift.move_absolute(10); 
-  // b_lift.set_state(b_lift_states::move_to_target,0);
-  // f_lift.set_state(f_lift_states::move_to_target,0);
+  b_lift.set_state(b_lift_states::move_to_target,0);
+  f_lift.set_state(f_lift_states::move_to_target,0);
   // move_start(move_types::tank_point, tank_point_params({36.0,11.75,-90.0},false),false); // grabs blue on platform 
 	// b_detect_goal(); 
   // skills_d.print("FIRST GOAL GOt %d\n", millis() - time);
 	// move_stop(); 
   // drivebase.move(0.0,0.0);
-  // move_start(move_types::tank_arc, tank_arc_params({tracking.x_coord, tracking.y_coord},{26.0, 41.0, 50.0}, 127.0,127.0,false));
-  // move_start(move_types::tank_point, tank_point_params({80.0,45.0,90.0}, false,22.0, 74.0, 127.0, 1.0, true, 2.0,25.0,110.0,0.0,0,{0.75,0.5}, 0.0,10.0));
+  move_start(move_types::tank_arc, tank_arc_params({tracking.x_coord, tracking.y_coord},{26.0, 41.0, 50.0}, 127.0,127.0,false));
+
+  move_start(move_types::tank_point, tank_point_params({35.0,41.0,90.0}));
+  // move_start(move_types::tank_point, tank_point_params({80.0,45.0,90.0}));
   // move_start(move_types::turn_angle, turn_angle_params(-70.0));
   // b_lift.set_state(b_lift_states::move_to_target,b_lift_hitch_pos);
-  // move_start(move_types::tank_point, tank_point_params({120.0,36.0,-70.0}, false, 30.0,40.0,127.0,1.0,true,2.0,25.0,140.0,0.0,0,{0.5,0.5}, 0.0,15.0));
+  // move_start(move_types::tank_point, tank_point_params({120.0,36.0,-70.0}));
+
 }
 
 void skills2(){
@@ -41,8 +44,13 @@ void skills2(){
   f_lift.set_state(f_lift_states::move_to_target, f_plat);
   while(f_lift.get_target_state() != f_lift_states::idle)delay(10);
   f_claw(0);
-  move_start(move_types::tank_point, tank_point_params({0.0,19.0,0.0}));
+  Position reset = distance_reset_center();
+  tracking.reset(141.0- reset.x, 141.0 - reset.y, reset.angle);
+  while(!master.get_digital_new_press(DIGITAL_A))delay(10);
+  move_start(move_types::tank_point, tank_point_params({71.0,109.0,0.0}));
   f_lift.set_state(f_lift_states::move_to_target, f_backup);
+  move_start(move_types::tank_arc, tank_arc_params({71.0, 109.0}, {85.0, 111.0, -180.0,},-127.0, 127.0,true,7.0,0.0,40.0));
+  
 }
 
 void rush_high(){

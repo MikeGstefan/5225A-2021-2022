@@ -60,7 +60,7 @@ void update(void* params){
   _Task* ptr = _Task::get_obj(params);
   Timer data_timer{"tracking logs"};
   // LeftEncoder.reset(); RightEncoder.reset(); BackEncoder.reset();
-  double DistanceLR = 9.85, DistanceB = 0.85;
+  double DistanceLR = 9.851, DistanceB = 0.85; //shouldn't this be const
   double Left, Right, Back, NewLeft, NewRight, NewBack, LastLeft = LeftEncoder.get_value()/360.0 *(2.75*M_PI), LastRight =  RightEncoder.get_value()/360.0 *(2.75*M_PI), LastBack = BackEncoder.get_value()/360.0 *(2.77*M_PI);
   double Theta = 0.0, Beta = 0.0, Alpha = 0.0;
   double RadiusR, RadiusB, h, h2;
@@ -74,7 +74,7 @@ void update(void* params){
 
 
   while(true){
-    NewLeft = LeftEncoder.get_value()/360.0 *(2.75*M_PI);
+    NewLeft = LeftEncoder.get_value()/360.0 *(2.75*M_PI); //make 2.75 a constant
     NewRight = RightEncoder.get_value()/360.0 *(2.75*M_PI);
     NewBack = BackEncoder.get_value()/360.0 *(2.75*M_PI);
 
@@ -87,6 +87,7 @@ void update(void* params){
     Left = NewLeft - LastLeft;
     Right = NewRight - LastRight;
     Back = NewBack - LastBack;
+    // Back = 0;
 
 
     velocity_update_time = millis() - last_velocity_time;
@@ -1092,7 +1093,8 @@ void tank_move_to_target(void* params){
       motion_d.print(" %d || error y : %.2f error a : %.2f, end con: %.2f, end clause %.2f, end dist: %.2f, pow y : %.2f, pow a : %.2f\n ", millis(), local_error.y, rad_to_deg(error.angle), fabs(line_disp.get_y()), end_error.y, end_dist, tracking.power_y, tracking.power_a);
       motion_d.print("%d|| sng: %d, orig sgn: %d\n",millis(), sgn_line_y, orig_sgn_line_y);
       // exits movement once the target has been overshot (if the sign of y error along the line has flipped)
-      if(fabs(line_disp.get_y()) < end_error.y || sgn_line_y != orig_sgn_line_y){
+      // if(fabs(line_disp.get_y()) < end_error.y || sgn_line_y != orig_sgn_line_y){
+      if((fabs(local_error.y) < end_error.y && fabs(line_disp.get_y()) < 4)|| sgn_line_y != orig_sgn_line_y){
         if (brake) drivebase.brake();
         tracking.move_complete = true;
         motion_i.print("%d || Ending move to target X: %f Y: %f A: %f at X: %f Y: %f A: %f time: %d\n", millis(), target.x, target.y, target.angle, tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle), millis()- time);
