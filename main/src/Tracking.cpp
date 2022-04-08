@@ -181,7 +181,7 @@ void rush_goal(double target_x, double target_y, double target_a){
         tracking.power_x = local_error_x * kp_x;
         tracking.power_a = error_a * kp_a;
         total_power = fabs(tracking.power_x) + fabs(tracking.power_a);
-        if (total_power > max_power) {
+        if (total_power > max_power){
             scale = max_power / total_power;
             tracking.power_x *= scale;
             tracking.power_a *= scale;
@@ -229,7 +229,7 @@ void rush_goal2(double target_x, double target_y, double target_a){
         tracking.power_x = local_error_x * kp_x;
         tracking.power_a = error_a * kp_a;
         total_power = fabs(tracking.power_x) + fabs(tracking.power_a);
-        if (total_power > max_power) {
+        if (total_power > max_power){
             scale = max_power / total_power;
             tracking.power_x *= scale;
             tracking.power_a *= scale;
@@ -644,7 +644,7 @@ void move_to_point(void* params){
 }
 
 // this is 150-200 ms slower than tank move on arc on 24 radius 90 degree turn
-void move_on_arc(void* params) {
+void move_on_arc(void* params){
   _Task* ptr = _Task::get_obj(params);
   // arc_params* param_ptr = static_cast<arc_params*>(_Task::get_params(params));
   const Point start = arc_params_g.start;

@@ -91,6 +91,7 @@ void opcontrol() {
   check what actually kills the auto balance loop
   file writing functions
   proper text wrapping
+  snprintf2 and then have printf2 just call it
   auton give up func - ask mike
   
   lvgl images

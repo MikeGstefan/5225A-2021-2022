@@ -27,7 +27,7 @@ using namespace std;
 // enum class drivers{Nikhil = 0, Emily = 1, Sarah = 2};
 
 // wait until at least 50 ms since the last reset
-// #define WAIT_FOR_SCREEN_REFRESH() {\
+// #define WAIT_FOR_SCREEN_REFRESH(){\
 //   delay(drivebase.screen_timer.get_time() < 50 ? 50 - drivebase.screen_timer.get_time() : 0);\
 //   drivebase.screen_timer.reset();\
 // }

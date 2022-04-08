@@ -71,7 +71,7 @@ void _Controller::queue_handle(){
   }
 }
 
-//template this at some point
+//template this at some point (done in header_clean)
 void _Controller::print(std::uint8_t line, std::uint8_t col, const char* fmt, ... ){
   char buffer[19];
   std::va_list args;

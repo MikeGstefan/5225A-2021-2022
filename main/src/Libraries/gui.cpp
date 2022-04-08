@@ -1,10 +1,9 @@
 #include "gui.hpp"
-#include "printing.hpp"
 
-//Static Variable Declarations
+//GUI:: Static Variable Declarations
 const Page* GUI::current_page = nullptr;
 bool GUI::touched = false;
-int GUI::x = 0, GUI::y = 0;
+int GUI::x = 0, GUI::y = 0; //try making a point again
 _Task GUI::task(update, "GUI");
 
 //Text Vars
@@ -27,7 +26,7 @@ Slider testing_slider (MID_X, 200, 200, 20, GUI::Style::CENTRE, Slider::HORIZONT
 Page prompt_sequence ("Prompt");
 Button prompt_button (300, MID_Y, 160, 90, GUI::Style::CENTRE, Button::SINGLE, prompt_sequence);
 Button prompt_back_button (20, USER_UP, 100, 50, GUI::Style::SIZE, Button::SINGLE, prompt_sequence, "BACK");
-Text prompt_button_text (300, 140, GUI::Style::CENTRE, TEXT_SMALL, prompt_sequence, "%s", prompt_string, COLOUR(BLACK));
+Text prompt_button_text (0, 0, GUI::Style::CENTRE, TEXT_SMALL, prompt_sequence, "%s", prompt_string);
 
 Page terminal ("Screen Printing");
 
@@ -352,7 +351,7 @@ void GUI::go_prev(){
   (*it)->go_to();
 }
 
-void GUI::go_to(int page_num) {Page::page_id(page_num)->go_to();}
+void GUI::go_to(int page_num){Page::page_id(page_num)->go_to();}
 
 void Page::go_to() const{
   if(!page_num(this)) return;
@@ -386,7 +385,7 @@ void Button::create_options(std::vector<Button*> buttons){
   }
 }
 
-void Button::add_text(Text_& text_ref, bool overwrite) {
+void Button::add_text(Text_& text_ref, bool overwrite){
   if(page != text_ref.page){
     char error [120];
     snprintf(error, 120, "Text can only be linked to a button on the same page! Failed on \"%s\" button and \"%s\" text.\n", label.c_str(), text_ref.label.c_str());
@@ -398,28 +397,28 @@ void Button::add_text(Text_& text_ref, bool overwrite) {
   text_ref.b_col = b_col;
   text_ref.active = active;
   text_ref.type = GUI::Style::CENTRE;
-  text_ref.x = (x1+x2)/2;
-  if (overwrite){
-    text_ref.y = (y1+y2)/2;
-    label = "";
-    label1 = "";
-  }
-  else{
-    text_ref.y = (y1+y2)/2 + GUI::get_height(text_ref.txt_size);
-    text_y -= GUI::get_height(text_ref.txt_size);
-  }
   text_ref.y = (y1+y2)/2;
+  text_ref.x = (x1+x2)/2;
   text_ref.x1=USER_RIGHT;
   text_ref.y1=USER_DOWN;
   text_ref.x2=USER_LEFT;
   text_ref.y2=USER_UP;
+
+  if (overwrite){
+    label = "";
+    label1 = "";
+  }
+  else{
+    text_ref.y += GUI::get_height(text_ref.txt_size);
+    text_y -= GUI::get_height(text_ref.txt_size);
+  }
 }
 
 void Button::set_background (Colour colour){
   if (title) title->set_background(colour);
   if (b_col != colour){
     b_col = colour;
-    b_col_dark = RGB2COLOR(int(COLOR2R(b_col)*0.8), int(COLOR2G(b_col)*0.8), int(COLOR2B(b_col)*0.8));
+    b_col_dark = RGB2COLOR(static_cast<int>(COLOR2R(b_col)*0.8), static_cast<int>(COLOR2G(b_col)*0.8), static_cast<int>(COLOR2B(b_col)*0.8));
     draw();
   }
 }
@@ -449,13 +448,13 @@ void Text_::set_background (Colour colour){
   }
 }
 
-void Page::set_active(bool active) {
+void Page::set_active(bool active){
   this->active = active;
   if (active) go_to();
   else if (this == GUI::current_page) GUI::go_next();
 }
 
-void Button::set_active(bool active) {
+void Button::set_active(bool active){
   this->active = active;
   if (title) title->set_active(active);
   if (active) draw();
@@ -465,7 +464,7 @@ void Button::set_active(bool active) {
   }
 }
 
-void Text_::set_active(bool active) {
+void Text_::set_active(bool active){
   this->active = active;
   if (active) draw();
   else if (page == GUI::current_page){
@@ -474,7 +473,7 @@ void Text_::set_active(bool active) {
   }
 }
 
-void Slider::set_active(bool active) {
+void Slider::set_active(bool active){
   this->active = active;
   if (active) draw();
   else if (page == GUI::current_page){
@@ -501,7 +500,7 @@ void Page::draw() const{
 
 void Button::draw() const{
   if (!(active && (page == GUI::current_page || page == &perm))) return;
-  if (on) { //on buttons must be drawn in a pressed state
+  if (on){ //on buttons must be drawn in a pressed state
     draw_pressed();
     return;
   }
@@ -579,13 +578,13 @@ void Text_::draw(){
 
 //Function Handling
 
-void Page::set_setup_func(std::function <void()> function) {setup_func = function;}
+void Page::set_setup_func(std::function <void()> function){setup_func = function;}
 
-void Page::set_loop_func(std::function <void()> function) {loop_func = function;}
+void Page::set_loop_func(std::function <void()> function){loop_func = function;}
 
-void Button::set_func(std::function <void()> function) {func = function;}
+void Button::set_func(std::function <void()> function){func = function;}
 
-void Button::set_off_func(std::function <void()> function) {off_func = function;}
+void Button::set_off_func(std::function <void()> function){off_func = function;}
 
 void Button::run_func() const {if (func) func();}
 
@@ -857,7 +856,7 @@ void GUI::update(void* params){
     update_screen_status();
     const Page& cur_p = *current_page;
     /*Page*/cur_p.update();
-    /*Button*/for (std::vector<Button*>::const_iterator it = cur_p.buttons.begin(); it != cur_p.buttons.end(); it++) {(*it)->update(); if(&cur_p != current_page) continue;}
+    /*Button*/for (std::vector<Button*>::const_iterator it = cur_p.buttons.begin(); it != cur_p.buttons.end(); it++){(*it)->update(); if(&cur_p != current_page) continue;}
     /*Slider*/for (std::vector<Slider*>::const_iterator it = cur_p.sliders.begin(); it != cur_p.sliders.end(); it++) (*it)->update();
     /*Text*/for (std::vector<Text_*>::const_iterator it = cur_p.texts.begin(); it != cur_p.texts.end(); it++) (*it)->update();
     /*Flash*/screen_flash::end();

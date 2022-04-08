@@ -8,7 +8,7 @@ bool ram = false;
 
 double d_offset = 0.0;//depth of the funny wall thing
 
-void setVisionState(Distance_States state) {
+void setVisionState(Distance_States state){
 	Last_Distance_State = Distance_State;
 	Distance_State = state;
 }
@@ -293,7 +293,7 @@ void distance_loop(double distance, int timeout){
 
 		misc.print("Left:%d Right: %d\n",r_reset_dist.get(), l_reset_dist.get());
 
-		switch (Distance_State) {
+		switch (Distance_State){
 			case Distance_States::stable:
 				printf("stable\n");
 				drivebase.move(-y_speed,0);

@@ -362,22 +362,22 @@ namespace screen_flash{
   void start(std::string, term_colours = term_colours::ERROR, std::uint32_t = 1000); //text+cols+time / text+cols / text
 
   template <typename... Params> //text+cols+time
-  void start(term_colours colour, std::uint32_t time, const char* fmt, Params... args){
+  void start(term_colours colour, std::uint32_t time, std::string fmt, Params... args){
     start(printf_to_string(fmt, args...), colour, time);
   }
 
   template <typename... Params> //text+col+time
-  void start(Colour colour, std::uint32_t time, const char* fmt, Params... args){
+  void start(Colour colour, std::uint32_t time, std::string fmt, Params... args){
     start(printf_to_string(fmt, args...), colour, 1000);
   }
 
   template <typename... Params> //text+red+time
-  void start(std::uint32_t time, const char* fmt, Params... args){
+  void start(std::uint32_t time, std::string fmt, Params... args){
     start(printf_to_string(fmt, args...), term_colours::ERROR, time);
   }
 
   template <typename... Params> //text+col+1000
-  void start(term_colours colour, const char* fmt, Params... args){
+  void start(term_colours colour, std::string fmt, Params... args){
     start(printf_to_string(fmt, args...), colour, 1000);
   }
 }

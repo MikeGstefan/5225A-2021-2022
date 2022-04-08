@@ -81,7 +81,7 @@ name(name), joy_sticks{joy_sticks[0], joy_sticks[1], joy_sticks[2]}, custom_driv
 {}
 
 // Drivebase class constructor
-Drivebase::Drivebase(std::array<driver, num_of_drivers> drivers) : drivers(drivers) {}
+Drivebase::Drivebase(std::array<driver, num_of_drivers> drivers) : drivers(drivers){}
 
 void Drivebase::move(double x, double y, double a){
   ERROR.print("you called the wrong function");
@@ -142,7 +142,7 @@ void Drivebase::download_curve_data(){
   curve_file = nullptr;
   curve_file = fopen("/usd/curve_file.txt", "r");
   curve_file_exists = curve_file != NULL;
-  if(!curve_file_exists) {
+  if(!curve_file_exists){
     drivers_data.print("WARNING: curve_file not found, using default data\n");
   }
   // reads data for each driver from file
@@ -161,66 +161,66 @@ void Drivebase::download_curve_data(){
 }
 
 void Drivebase::update_lookup_table_util(){
-    download_curve_data();
+  download_curve_data();
 
-    master.clear();
-    update_screen();
+  master.clear();
+  update_screen();
 
-    while (!master.get_digital_new_press(E_CONTROLLER_DIGITAL_B)){  // user presses b to save and exit utility
-      if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_A)){  // moves to next driver
-        cur_driver++;
-        cur_driver %= num_of_drivers;
-        update_screen();
-      }
-      else if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_Y)){  // moves to previous driver
-        if (cur_driver == 0)  cur_driver = num_of_drivers - 1;
-        else cur_driver--;
-        update_screen();
-      }
-
-      if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_RIGHT)){ // moves to next screen
-        cur_screen++;
-        cur_screen %= 3; // to create rollover
-        update_screen();
-      }
-      else if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_LEFT)){  // moves to previous screen
-        // rollover but without mod because c++ handles negative mods differently :(
-        if (cur_screen == 0)  cur_screen = 2;
-        else cur_screen--;
-        update_screen();
-      }
-
-      if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_UP)){  // increase curvature
-        if (drivers[cur_driver].custom_drives[cur_screen].curvature < 9.9)  drivers[cur_driver].custom_drives[cur_screen].curvature += 0.1;
-        master.print(2, 0, "Curvature: %lf", drivers[cur_driver].custom_drives[cur_screen].curvature);  // updates curvature
-      }
-      else if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_DOWN)){  // decrease curvature
-        printf("pressed down\n");
-        if (drivers[cur_driver].custom_drives[cur_screen].curvature > 0.1)  drivers[cur_driver].custom_drives[cur_screen].curvature -= 0.1;
-        master.print(2, 0, "Curvature: %lf", drivers[cur_driver].custom_drives[cur_screen].curvature);  // updates curvature
-      }
-
-      delay(10);
+  while (!master.get_digital_new_press(E_CONTROLLER_DIGITAL_B)){  // user presses b to save and exit utility
+    if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_A)){  // moves to next driver
+      cur_driver++;
+      cur_driver %= num_of_drivers;
+      update_screen();
     }
-    master.clear();
-    if(!curve_file_exists) {
-      drivers_data.print("WARNING: curve_file not found, not writing to SD card\n");
+    else if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_Y)){  // moves to previous driver
+      if (cur_driver == 0)  cur_driver = num_of_drivers - 1;
+      else cur_driver--;
+      update_screen();
     }
-    else {
-      Data::log_t.data_update();
-      curve_file = fopen("/usd/curve_file.txt", "w");
 
-      for (short driver = 0; driver < num_of_drivers; driver++){  // uploads curve data to curve file
-        for (short curvature = 0; curvature < 3; curvature++){
-          fprintf(curve_file, "curvature:%lf\n", drivers[driver].custom_drives[curvature].curvature);
-          drivers_data.print("curvature:%lf\n", drivers[driver].custom_drives[curvature].curvature);
-        }
-      }
-      fclose(curve_file);
-      Data::log_t.done_update();
+    if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_RIGHT)){ // moves to next screen
+      cur_screen++;
+      cur_screen %= 3; // to create rollover
+      update_screen();
     }
-    master.print(0, 0, "Saved.");
-    delay(200);
+    else if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_LEFT)){  // moves to previous screen
+      // rollover but without mod because c++ handles negative mods differently :(
+      if (cur_screen == 0)  cur_screen = 2;
+      else cur_screen--;
+      update_screen();
+    }
+
+    if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_UP)){  // increase curvature
+      if (drivers[cur_driver].custom_drives[cur_screen].curvature < 9.9)  drivers[cur_driver].custom_drives[cur_screen].curvature += 0.1;
+      master.print(2, 0, "Curvature: %lf", drivers[cur_driver].custom_drives[cur_screen].curvature);  // updates curvature
+    }
+    else if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_DOWN)){  // decrease curvature
+      printf("pressed down\n");
+      if (drivers[cur_driver].custom_drives[cur_screen].curvature > 0.1)  drivers[cur_driver].custom_drives[cur_screen].curvature -= 0.1;
+      master.print(2, 0, "Curvature: %lf", drivers[cur_driver].custom_drives[cur_screen].curvature);  // updates curvature
+    }
+
+    delay(10);
+  }
+  master.clear();
+  if(!curve_file_exists){
+    drivers_data.print("WARNING: curve_file not found, not writing to SD card\n");
+  }
+  else {
+    Data::log_t.data_update();
+    curve_file = fopen("/usd/curve_file.txt", "w");
+
+    for (short driver = 0; driver < num_of_drivers; driver++){  // uploads curve data to curve file
+      for (short curvature = 0; curvature < 3; curvature++){
+        fprintf(curve_file, "curvature:%lf\n", drivers[driver].custom_drives[curvature].curvature);
+        drivers_data.print("curvature:%lf\n", drivers[driver].custom_drives[curvature].curvature);
+      }
+    }
+    fclose(curve_file);
+    Data::log_t.done_update();
+  }
+  master.print(0, 0, "Saved.");
+  delay(200);
 }
 
 void Drivebase::handle_input(){
@@ -243,7 +243,7 @@ void Drivebase::handle_input(){
     tracking.power_x *= -1;
   }
 
-  if(this->state && (fabs(tracking.power_y) <deadzone && fabs(tracking.power_a) <deadzone)){
+  if(this->state && (fabs(tracking.power_y) < deadzone && fabs(tracking.power_a) < deadzone)){
     // velo_brake();
     brake();
   }
@@ -401,7 +401,7 @@ void handle_lifts(){
   if(master.get_digital_new_press(joy_mode_switch_button)){
     if(joy_mode == joy_modes::lift_select){
       printf("joy mode now manual\n");
-      joy_mode == joy_modes::manual;
+      joy_mode = joy_modes::manual; //used to be joy_mode == joy_modes::manual; Probably didn't want an unused comparison
       b_lift.Subsystem::set_state(b_lift_states::manual);
       f_lift.Subsystem::set_state(f_lift_states::manual);
     }

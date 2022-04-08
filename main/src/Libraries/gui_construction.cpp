@@ -1,7 +1,6 @@
 #include "gui.hpp"
-#include "printing.hpp"
-#include <string>
 
+//Can probably get rid of static since not being included anywhere. Or make everything static
 /*Field array*/ static std::vector<std::bitset<200>> field (200, std::bitset<200>{}); //Initializes to 200 blank bitsets
 /*Temperature Alert Flag*/ static bool temp_flashed = false;
 
