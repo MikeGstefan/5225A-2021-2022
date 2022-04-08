@@ -89,6 +89,8 @@ void autonomous() {
 void opcontrol() {
   /* Nathan:
   check what actually kills the auto balance loop
+  file writing functions
+  proper text wrapping
   auton give up func - ask mike
   
   lvgl images

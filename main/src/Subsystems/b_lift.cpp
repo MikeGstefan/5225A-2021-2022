@@ -211,7 +211,7 @@ int elastic_b_up_time, elastic_b_down_time; //for gui_construction.cpp
 
 void B_Lift::elastic_util(){
   motor.move(-10);
-  GUI::prompt("Start Elastic Utility", "Press to start the elastic utility.", 500);
+  GUI::prompt("Press to start back elastic test", "", 500);
   Timer move_timer{"move"};
   set_state(b_lift_states::move_to_target, driver_positions.size() - 1); // moves to top
   // // intake_piston.set_value(HIGH);  // raises intake

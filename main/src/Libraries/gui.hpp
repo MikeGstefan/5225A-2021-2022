@@ -47,6 +47,8 @@ typedef std::uint32_t Colour;
 #define CHAR_HEIGHT_LARGE 32
 #define CHAR_WIDTH_LARGE 19
 
+//All constructor args are in the format points, format, page, Text, Colour
+
 class GUI{
   friend class Page;
   friend class Button;
@@ -93,14 +95,13 @@ class GUI{
     static void clear_screen(Colour=GREY);
     static void init(), update(void* = nullptr);
     static void go_to(int);
-    static bool prompt(std::string, std::string, std::uint32_t=0), prompt_end(std::string, std::uint32_t=0);
+    static bool prompt(std::string, std::string="", std::uint32_t=0); //Also prompts to controller
     static bool is_touched();
     static const Page* const get_current_page();
     static const GUI* const get_current_gui();
     bool pressed() const;
 };
 
-//All constructor args are in the format points, format, page, Text, Colour
 class Page{
   friend class GUI;
   friend class Button;

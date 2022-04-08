@@ -16,39 +16,39 @@ void f_claw(bool state){
 
 
 void save_positions(){
-  if(GUI::prompt("Reset position", "Press to reset the position, then move the robot.")){
-    Position pos1 (141.0-8.75, 15.5, 0.0), pos2 (8.75, 15.5, 0);
-    master.clear();
-    master.print(0, 0, "L1:(%.1f, %.1f, %.1f)", pos1.x, pos1.y , pos1.angle);
-    master.print(1, 0, "R1:(%.1f, %.1f, %.1f)", pos2.x, pos2.y , pos2.angle);
+  Position pos1 (141.0-8.75, 15.5, 0.0), pos2 (8.75, 15.5, 0);
+  master.clear();
+  master.print(0, 0, "L1:(%.1f, %.1f, %.1f)", pos1.x, pos1.y , pos1.angle);
+  master.print(1, 0, "R1:(%.1f, %.1f, %.1f)", pos2.x, pos2.y , pos2.angle);
 
-    wait_until(false){
-      if(master.get_digital_new_press(DIGITAL_L1)){
-        tracking.reset(pos1);
-        break;
-      }
-      if(master.get_digital_new_press(DIGITAL_R1)){
-        tracking.reset(pos2);
-        break;
-      }
+  wait_until(false){
+    if(master.get_digital_new_press(DIGITAL_L1)){
+      tracking.reset(pos1);
+      break;
     }
-
-    printf("\nMove the robot to its new position.\n");
-
-    //move the robot
-
-    if(GUI::prompt_end("Save Positions")){
-      tracking_imp.print("Saving X: %f, Y:%f, A:%f\n", tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle));
-      
-      ofstream file;
-      Data::log_t.data_update();
-      file.open(start_pos_file_name, fstream::out | fstream::trunc);
-      file << tracking.x_coord << endl;
-      file << tracking.y_coord << endl;
-      file << rad_to_deg(tracking.global_angle) << endl;
-      file.close();
-      Data::log_t.done_update();
+    if(master.get_digital_new_press(DIGITAL_R1)){
+      tracking.reset(pos2);
+      break;
     }
+  }
+
+  master.clear();
+  master.print(0, 0, "Move to new start");
+  printf("\nMove the robot to its new position.\n");
+
+  //move the robot
+
+  if(GUI::prompt("Press to save position", "Press to save the current position to a file.")){
+    tracking_imp.print("Saving X: %f, Y:%f, A:%f\n", tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle));
+    
+    ofstream file;
+    Data::log_t.data_update();
+    file.open(start_pos_file_name, fstream::out | fstream::trunc);
+    file << tracking.x_coord << endl;
+    file << tracking.y_coord << endl;
+    file << rad_to_deg(tracking.global_angle) << endl;
+    file.close();
+    Data::log_t.done_update();
   }
 }
 
@@ -97,9 +97,9 @@ void flatten_against_wall(bool front, int cycles){
 	drivebase.move(50.0*direction,0.0);
 
 	wait_until((fabs(tracking.l_velo) >= 2.0 && fabs(tracking.r_velo) >= 2.0) || safety_check >= 12){
-      safety_check++;
-      misc.print(" reset things %.2f, %.2f\n",fabs(tracking.l_velo), fabs(tracking.r_velo));
-    }
+    safety_check++;
+    misc.print(" reset things %.2f, %.2f\n",fabs(tracking.l_velo), fabs(tracking.r_velo));
+  }
 	cycleCheck(fabs(tracking.l_velo) < 1.0 && fabs(tracking.r_velo) < 1.0, 4, 10);
 	drivebase.move(20.0*direction, 0.0);
 	printf("%d|| Done all align\n", millis());

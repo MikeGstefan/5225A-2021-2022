@@ -131,7 +131,7 @@ int elastic_f_up_time, elastic_f_down_time; //for gui_construction.cpp
 
 void F_Lift::elastic_util(){
   motor.move(-10);
-  GUI::prompt("Start Elastic Utility", "Press to start the elastic utility.", 500);
+  GUI::prompt("Press to start front elastic test", "", 500);
   Timer move_timer{"move"};
   set_state(f_lift_states::move_to_target, driver_positions.size() - 1); // moves to top
   // // intake_piston.set_value(HIGH);  // raises intake

@@ -1,4 +1,6 @@
 #include "gui.hpp"
+#include "printing.hpp"
+#include <string>
 
 /*Field array*/ static std::vector<std::bitset<200>> field (200, std::bitset<200>{}); //Initializes to 200 blank bitsets
 /*Temperature Alert Flag*/ static bool temp_flashed = false;
@@ -266,7 +268,7 @@ void main_setup(){
   });
 
   drive_motors.set_func([](){
-    if(GUI::prompt("Check drive motors", "Press to check the drive motors", 1000)){
+    if(GUI::prompt("Press to check drive motors", "", 1000)){
       drivebase.move(60, 0);
       delay(1000);
 
@@ -280,7 +282,7 @@ void main_setup(){
     }
   });
   intakes.set_func([](){
-    if(GUI::prompt("Check intake", "Press to check the intake", 1000)){
+    if(GUI::prompt("Press to check intake", "", 1000)){
       // intake.set_state(intake_states::on);
       // delay(1000);
 
@@ -294,14 +296,14 @@ void main_setup(){
     }
   });
   lifts.set_func([](){
-    if(GUI::prompt("Test lifts", "Press to check lifts", 1000)){
+    if(GUI::prompt("Press to check lifts", "", 1000)){
       printf("sorry nathan");
     }
   });
   pneums.set_func([](){
     for(std::array<Piston*, 8>::iterator it = Piston::list_for_gui.begin(); it != Piston::list_for_gui.begin(); it++){
       Piston* piston = *it;
-      if (GUI::prompt("Check" + std::string(piston->get_name()), "Press to check" + std::string(piston->get_name()))){
+      if (GUI::prompt("Press to check " + piston->get_name())){
         piston->toggle_state();
         delay(500);
         piston->toggle_state();
@@ -313,6 +315,7 @@ void main_setup(){
   auton_selector.set_func(select_auton);
   misc_checks.set_func([](){
     if (!pros::usd::is_installed()) screen_flash::start("No SD Card!");
+    else(screen_flash::start("No Errors Found", term_colours::GREEN));
   });
 
   prev_drivr.set_func([](){drivebase.prev_driver();});
@@ -341,29 +344,21 @@ void main_setup(){
 
   go_to_xya.set_func([&](){
     int x = x_val.get_value(), y = y_val.get_value(), a = a_val.get_value();
-    char coord_c[17];
-    snprintf(coord_c, 17, " (%d, %d, %d)", x, y, a);
-    std::string coord = coord_c;
-    if (GUI::prompt("GO TO" + coord, "Press to move to target selected by sliders" + coord, 1000)) move_start(move_types::point, point_params({double(x), double(y), double(a)}));
+    Position target (x_val.get_value(), y_val.get_value(), a_val.get_value());
+    if (GUI::prompt("Press to go to" + convert_all_args("%d", target), "", 1000)) move_start(move_types::point, point_params(target));
   });
   go_home.set_func([](){
-    if (GUI::prompt("GO TO (0, 0, 0)", "Press to prompt to starting point (0, 0, 0)", 1000)) move_start(move_types::point, point_params({0.0, 0.0, 0.0}));
+    if (GUI::prompt("Press to go to (0, 0, 0)", "", 1000)) move_start(move_types::point, point_params({0.0, 0.0, 0.0}));
   });
   go_centre.set_func([](){
-    if (GUI::prompt("GO TO (72, 72, 0)", "Press to prompt to centre field (72, 72, 0)", 1000)) move_start(move_types::point, point_params({72.0, 72.0, 72.0}));
+    if (GUI::prompt("Press to go to (72, 72, 0)", "", 1000)) move_start(move_types::point, point_params({72.0, 72.0, 72.0}));
   });
 
   f_lift_move.set_func([&](){
-    char coord_c[20];
-    snprintf(coord_c, 20, " %d", f_lift_val.get_value());
-    std::string coord = coord_c;
-    if (GUI::prompt("Move front lift to" + coord, "Press to move front lift to" + coord, 1000)) f_lift.move_absolute(f_lift_val.get_value());
+    if (GUI::prompt("Press to move front lift to" + std::to_string(f_lift_val.get_value()), "", 1000)) f_lift.move_absolute(f_lift_val.get_value());
   });
   b_lift_move.set_func([&](){
-    char coord_c[20];
-    snprintf(coord_c, 20, " %d", b_lift_val.get_value());
-    std::string coord = coord_c;
-    if (GUI::prompt("Move back lift to" + coord, "Press to move back lift to" + coord, 1000)) b_lift.move_absolute(b_lift_val.get_value());
+    if (GUI::prompt("Press to move back lift to" + std::to_string(b_lift_val.get_value()), "", 1000)) b_lift.move_absolute(b_lift_val.get_value());
   });
   front_claw.set_func([](){f_claw(HIGH);});
   front_claw.set_off_func([](){f_claw(LOW);});
@@ -495,12 +490,12 @@ void main_setup(){
   }
 
   turn_encoder.set_func([](){ //Turn the encoder
-    if (GUI::prompt("START, THEN SPIN THE ENCODER", "Please spin the encoder any number of rotations.")){
+    if (GUI::prompt("Press, then spin the encoder", "Please spin the encoder any number of rotations.")){
       RightEncoder.reset();
       LeftEncoder.reset();
       BackEncoder.reset();
       tracking.reset();
-      if (GUI::prompt_end("WHEN STOPPED")){
+      if (GUI::prompt("Press when stopped")){
         printf("The left encoder found %d ticks\n", LeftEncoder.get_value() % 360);
         printf("The right encoder found %d ticks\n", RightEncoder.get_value() % 360);
         printf("The back encoder found %d ticks\n", BackEncoder.get_value() % 360);
@@ -508,12 +503,12 @@ void main_setup(){
     }
   });
   perpendicular_error.set_func([](){ //Perpendicular Error
-    if (GUI::prompt("START, THEN MOVE FORWARD ALONG Y", "Please run the robot along a known straight line in the y-axis.")){
+    if (GUI::prompt("Press, then move forward along y", "Please run the robot forward along a known straight line in the y-axis.")){
       RightEncoder.reset();
       LeftEncoder.reset();
       BackEncoder.reset();
       tracking.reset();
-      if (GUI::prompt_end("WHEN STOPPED")){
+      if (GUI::prompt("Press when stopped")){
         if (tracking.x_coord < 0) printf("The robot thinks it strafed %.2f inches to the left.\nConsider turning the back tracking wheel counter-clockwise\n", tracking.x_coord);
         else if (tracking.x_coord > 0) printf("The robot thinks it strafed %.2f inches to the right.\nConsider turning the back tracking wheel clockwise\n", tracking.x_coord);
         else printf("The robot knows it strafed a perfect %.2f inches\n", tracking.x_coord); //Printing the tracking val just in case something went wrong. But it should always be 0
@@ -521,12 +516,12 @@ void main_setup(){
     }
   });
   grid.set_func([](){ //Move in a random motion
-    if (GUI::prompt("START, THEN MOVE RANDOMLY", "Please move the robot haphazardly around the field. Then return it back to the starting point.")){
+    if (GUI::prompt("Press, then move randomly", "Please move the robot haphazardly around the field. Then return it back to the starting point.")){
       RightEncoder.reset();
       LeftEncoder.reset();
       BackEncoder.reset();
       tracking.reset();
-      if (GUI::prompt_end("WHEN STOPPED")){
+      if (GUI::prompt("Press when back at start position")){
         printf("The robot thinks it deviated %.2f inches to the %s\n", fabs(tracking.x_coord), (tracking.x_coord < 0 ? "left" : "right"));
         printf("The robot thinks it deviated %.2f inches %s\n", fabs(tracking.y_coord), (tracking.y_coord < 0 ? "back" : "forward"));
         printf("The robot thinks it deviated %.2f degrees %s\n", fabs(rad_to_deg(tracking.global_angle)), (tracking.global_angle < 0 ? "counter-clockwise" : "clockwise"));
@@ -534,17 +529,17 @@ void main_setup(){
     }
   });
   spin360.set_func([](){ //Robot turn accuracy
-    if (GUI::prompt("START, THEN SPIN THE ROBOT", "Please spin the robot any number of rotations. Then return it back to the starting point")){
+    if (GUI::prompt("Press, then spin the robot", "Please spin the robot any number of rotations. Then return it back to the starting point")){
       RightEncoder.reset();
       LeftEncoder.reset();
       BackEncoder.reset();
       tracking.reset();
-      if(GUI::prompt_end("WHEN STOPPED")){
+      if(GUI::prompt("Press when back at start position")){
         printf("The robot is %.2f inches %s and %.2f inches %s off the starting point.\n", fabs(tracking.x_coord), (tracking.x_coord < 0 ? "left" : "right"), fabs(tracking.y_coord), (tracking.y_coord < 0 ? "back" : "forward"));
 
         int turned = tracking.get_angle_in_deg();
         int lost = 360-turned;
-        float rotations = round(rad_to_deg(tracking.global_angle)/180)/2.0;
+        double rotations = round(rad_to_deg(tracking.global_angle)/180)/2.0;
         if (180 < turned && turned < 355) printf("However, the robot lost %d degrees over %.1f rotations.\n Consider increasing the DistanceLR.\n", lost, rotations);
         else if (5 < turned && turned < 180) printf("However, The robot gained %d degrees over %.1f rotations.\n Consider decreasing the DistanceLR.\n", turned, rotations);
         else printf("This seems pretty accurate. It's %d degrees off of %.1f rotations.\n", turned >= fmod(rotations*360, 360) ? turned : lost, rotations);

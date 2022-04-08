@@ -1,4 +1,5 @@
 #include "gui.hpp"
+#include "printing.hpp"
 
 //Static Variable Declarations
 const Page* GUI::current_page = nullptr;
@@ -7,7 +8,7 @@ int GUI::x = 0, GUI::y = 0;
 _Task GUI::task(update, "GUI");
 
 //Text Vars
-char* const prompt_string = (char*)malloc(90*sizeof(char));
+std::string prompt_string;
 
 //Default pages
 
@@ -24,7 +25,7 @@ Button testing_button_2 (250, 70, 200, 80, GUI::Style::SIZE, Button::SINGLE, tes
 Slider testing_slider (MID_X, 200, 200, 20, GUI::Style::CENTRE, Slider::HORIZONTAL, -100, 100, testing, "BLANK SLIDER");
 
 Page prompt_sequence ("Prompt");
-Button prompt_button (300, MID_Y, 160, 90, GUI::Style::CENTRE, Button::SINGLE, prompt_sequence, "PRESS TO");
+Button prompt_button (300, MID_Y, 160, 90, GUI::Style::CENTRE, Button::SINGLE, prompt_sequence);
 Button prompt_back_button (20, USER_UP, 100, 50, GUI::Style::SIZE, Button::SINGLE, prompt_sequence, "BACK");
 Text prompt_button_text (300, 140, GUI::Style::CENTRE, TEXT_SMALL, prompt_sequence, "%s", prompt_string, COLOUR(BLACK));
 
@@ -113,24 +114,25 @@ void GUI::aligned_coords (int x_objects, int y_objects, int x_size, int y_size, 
   newline(2);
   for (int y = 0; y < y_objects; y++){
     for (int x = 0; x < x_objects; x++){
-      printf("(%d, %d, %d, %d, GUI::Style::SIZE)\n", int(x_space)*(x+1) + x_size*x, int(y_space)*(y+1) + y_size*y + 20, x_size, y_size);
+      printf2("(%d, %d, %d, %d, GUI::Style::SIZE)", (x_space)*(x+1) + x_size*x, (y_space)*(y+1) + y_size*y + 20, x_size, y_size);
     }
     newline();
   }
-  printf("\nScreen Size: %d x %d\n", x_range, y_range);
-  if ((x_space+x_size)*(x_objects) > 480) printf("X out of bounds\n");
-  if ((y_space+y_size)*(y_objects) > 220) printf("Y out of bounds\n");
+  printf2("\nScreen Size: %d x %d", x_range, y_range);
+  if ((x_space+x_size)*(x_objects) > 480) printf2("X out of bounds");
+  if ((y_space+y_size)*(y_objects) > 220) printf2("Y out of bounds");
   newline(2);
 }
 
-bool GUI::prompt(std::string short_msg, std::string long_msg, std::uint32_t delay_time){
+bool GUI::prompt(std::string screen, std::string term, std::uint32_t delay_time){
  if(!prompt_enabled) return true;
+  prompt_string = screen;
+  if(term == "") term = screen;
+  printf2(term_colours::GREEN, 0, "\n\n%s\nPress the screen big button or the controller OK button when ready.", term);
   master.clear();
   master.print(0, 0, "Press OK btn");
-  printf2("\n\n%s\nPress the screen big button or the controller OK button when ready.", long_msg);
-  snprintf(prompt_string, 90, "%s", short_msg.c_str());
 
-  bool pressed = false, interrupted = false;
+  bool interrupted = false;
   const Page* page = GUI::current_page;
   prompt_sequence.go_to();
 
@@ -157,46 +159,11 @@ bool GUI::prompt(std::string short_msg, std::string long_msg, std::uint32_t dela
       printf2("\nWaiting for %s before running.\n", Timer::to_string(delay_time, timing_units::millis, 2, true));
       delay(delay_time);
     }
-    printf("\nRunning\n\n");
+    printf2("\nRunning\n");
   }
   else printf2(term_colours::ERROR, 0, "Interrupted\n");
 
   page->go_to();
-  master.clear();
-  return !interrupted;
-}
-
-bool GUI::prompt_end(std::string msg, std::uint32_t delay_time){
-  if(!prompt_enabled) return true;
-  master.clear();
-  master.print(0, 0, "Press OK btn");
-  printf("\nPress Again when done.\n\n");
-  snprintf(prompt_string, 90, "END %s", msg.c_str());
-
-  bool pressed = false, interrupted = false;
-  const Page* page = GUI::current_page;
-  prompt_sequence.go_to();
-
-  wait_until(!(prompt_button.pressed() || master.get_digital(ok_button) || master.interrupt(false, true, false)) || interrupted){ //Wait for Release
-    if (prompt_back_button.pressed()) interrupted = true;
-  }
-  wait_until((prompt_button.pressed() || master.get_digital(ok_button)) || interrupted){ //Wait for Press
-    if (prompt_back_button.pressed() || master.interrupt(false)) interrupted = true;
-  }
-  wait_until(!(prompt_button.pressed() || master.get_digital(ok_button) || master.interrupt(false, true, false)) || interrupted){ //Wait for Release
-    if (prompt_back_button.pressed()) interrupted = true;
-  }
-
-  page->go_to();
-
-  if (!interrupted){
-    if(delay_time){
-      printf2("\nWaiting for %s before running.\n", Timer::to_string(delay_time, timing_units::millis, 2, true));
-      delay(delay_time);
-    }
-    printf("\nRunning\n\n");
-  }
-  else printf2(term_colours::ERROR, 0, "Interrupted\n");
   master.clear();
   return !interrupted;
 }
