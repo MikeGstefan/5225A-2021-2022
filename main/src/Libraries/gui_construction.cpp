@@ -21,12 +21,12 @@ extern int elastic_f_up_time, elastic_f_down_time; //Declared in f_lift.cpp
 
 //1:temp(leave as 0), 2:long name, 3:short name
 std::array<std::tuple<pros::Motor*, int, std::string, std::string, Text_*>, 8> motors_for_gui {{
-  {&front_l, 0, "Front Left", "FL", nullptr},
-  {&center_l, 0, "Center Left", "CL", nullptr},
   {&back_l, 0, "Back Left", "BL", nullptr},
-  {&front_r, 0, "Front Right", "FR", nullptr},
-  {&center_r, 0, "Center Right", "CR", nullptr},
+  {&center_l, 0, "Center Left", "CL", nullptr},
+  {&front_l, 0, "Front Left", "FL", nullptr},
   {&back_r, 0, "Back Right", "BR", nullptr},
+  {&center_r, 0, "Center Right", "CR", nullptr},
+  {&front_r, 0, "Front Right", "FR", nullptr},
   {&f_lift_m, 0, "Front Lift", "F", nullptr},
   {&b_lift_m, 0, "Back Lift", "B", nullptr},
 }};//{nullptr, 0, "", "", nullptr},
@@ -349,7 +349,7 @@ void main_setup(){
   go_to_xya.set_func([&](){
     int x = x_val.get_value(), y = y_val.get_value(), a = a_val.get_value();
     Position target (x_val.get_value(), y_val.get_value(), a_val.get_value());
-    if (GUI::prompt("Press to go to" + convert_all_args("%d", target), "", 1000)) move_start(move_types::point, point_params(target));
+    if (GUI::prompt("Press to go to " + convert_all_args("%d", target), "", 1000)) move_start(move_types::point, point_params(target));
   });
   go_home.set_func([](){
     if (GUI::prompt("Press to go to (0, 0, 0)", "", 1000)) move_start(move_types::point, point_params({0.0, 0.0, 0.0}));
