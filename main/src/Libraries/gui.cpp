@@ -53,7 +53,7 @@ namespace screen_flash{
     for(int i=1; i <= spaces; i++){ //make the printing actually look good
       space = text.find(' ', text.length()*i/spaces);
       sub = text.substr(last_space, space-last_space);
-      screen::print(TEXT_LARGE, (480-sub.length()*CHAR_WIDTH_LARGE)/2, (CHAR_HEIGHT_LARGE+5)*i, sub.c_str());
+      screen::print(TEXT_LARGE, (480-sub.length()*CHAR_WIDTH_LARGE)/2, (CHAR_HEIGHT_LARGE+5)*i, "%s", sub);
       last_space = space+1;
     }
 
@@ -80,7 +80,7 @@ namespace screen_flash{
     for(int i=1; i <= spaces; i++){ //make the printing actually look good
       space = text.find(' ', text.length()*i/spaces);
       sub = text.substr(last_space, space-last_space);
-      screen::print(TEXT_LARGE, (480-sub.length()*CHAR_WIDTH_LARGE)/2, (CHAR_HEIGHT_LARGE+5)*i, sub.c_str());
+      screen::print(TEXT_LARGE, (480-sub.length()*CHAR_WIDTH_LARGE)/2, (CHAR_HEIGHT_LARGE+5)*i, "%s", sub);
       last_space = space+1;
     }
 
@@ -325,9 +325,7 @@ Page* Page::page_id(int page_num){
 int Page::page_num(const Page* page_id){
   std::vector<Page*>::const_iterator it = std::find(GUI::current_gui->pages.begin(), GUI::current_gui->pages.end(), page_id);
     if (it == GUI::current_gui->pages.end()){
-    char error [35];
-    snprintf(error, 35, "Page %p does not exist!\n", page_id);
-    throw std::domain_error(error);
+    throw std::domain_error(convert_all_args("Page %p does not exist!\n", page_id));
     return 0;
   }
   return it-GUI::current_gui->pages.begin();
@@ -371,9 +369,7 @@ void Button::create_options(std::vector<Button*> buttons){
   for (it = buttons.begin(); it != buttons.end(); it++){
     Button* btn_id= *it;
     if (btn_id->form != LATCH && btn_id->form != TOGGLE){
-      char error [100];
-      snprintf(error, 100, "Option Feature is only available for latch and toggle buttons! Failed on \"%s\" button.\n", btn_id->label.c_str());
-      throw std::invalid_argument(error);
+      throw std::invalid_argument(convert_all_args("Option Feature is only available for latch and toggle buttons! Failed on \"%s\" button.\n", btn_id->label));
       return;
     }
   }
@@ -505,13 +501,13 @@ void Button::draw() const{
     return;
   }
   screen::set_pen(b_col);
-  screen::set_eraser(GUI::current_page->b_col); //at some point figure out why this isn't (page->b_col)
+  screen::set_eraser(GUI::current_page->b_col); //It's current_page not just page because perm has a different colour
   screen::fill_rect(x1, y1, x2, y2);
   GUI::draw_oblong(x1, y1, x2, y2, 0, 0.15);
   screen::set_pen(l_col);
   screen::set_eraser(b_col);
-  screen::print(TEXT_SMALL, text_x, text_y, label.c_str());
-  screen::print(TEXT_SMALL, text_x1, text_y1, label1.c_str());
+  screen::print(TEXT_SMALL, text_x, text_y, "%s", label);
+  screen::print(TEXT_SMALL, text_x1, text_y1, "%s", label1);
   if(title){
     title->b_col = b_col;
     title->draw();
@@ -528,8 +524,8 @@ void Button::draw_pressed() const{
   GUI::draw_oblong(x1, y1, x2, y2, 0.04, 0.2);
   screen::set_pen(l_col);
   screen::set_eraser(b_col_dark);
-  screen::print(TEXT_SMALL, text_x, text_y, label.c_str());
-  screen::print(TEXT_SMALL, text_x1, text_y1, label1.c_str());
+  screen::print(TEXT_SMALL, text_x, text_y, "%s", label);
+  screen::print(TEXT_SMALL, text_x1, text_y1, "%s", label1);
   if(title){
     title->b_col = b_col_dark;
     title->draw();
@@ -547,8 +543,7 @@ void Slider::draw() const{
 
 void Text_::draw(){
   if (!(active && (page == GUI::current_page || page == &perm))) return;
-  char buffer [100];
-  int length = update_val(buffer);
+  update_val();
 
   if (x2 != 0 && y2 != 0){ //If background box exists. Should be able to get rid of this as now it always exists
     screen::set_eraser(page->b_col);
@@ -562,17 +557,17 @@ void Text_::draw(){
 
   int x_coord = x, y_coord = y;
   if (type == GUI::Style::CENTRE){
-    x_coord -= GUI::get_width(txt_size)/2.0*length;
+    x_coord -= GUI::get_width(txt_size)/2.0*text.length();
     y_coord -= GUI::get_height(txt_size)/2.0;
   }
   
   //Resizes the background so it won't have overwriting issues
-  x1 = min(x1, x_coord);
-  x2 = max(x2, x_coord + (GUI::get_width(txt_size)+1)*length);
-  y1 = min(y1, y_coord);
-  y2 = max(y2, y_coord + GUI::get_height(txt_size));
+  x1 = std::min(x1, x_coord);
+  x2 = std::max(x2, x_coord + (GUI::get_width(txt_size)+1)*static_cast<int>(text.length()));
+  y1 = std::min(y1, y_coord);
+  y2 = std::max(y2, y_coord + GUI::get_height(txt_size));
 
-  screen::print(txt_size, x_coord, y_coord, "%s", buffer);
+  screen::print(txt_size, x_coord, y_coord, "%s", text);
 }
 
 

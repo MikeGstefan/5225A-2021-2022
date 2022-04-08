@@ -149,7 +149,7 @@ class Text_{
     //Vars
     int x, y;
     text_format_e_t txt_size;
-    std::string label;
+    std::string label, text;
     Colour l_col, b_col=GREY;
     GUI::Style type;
     Page* page;
@@ -157,7 +157,7 @@ class Text_{
 
     //Functions
     virtual void update() = 0;
-    virtual int update_val(char* const buffer) = 0;
+    virtual void update_val() = 0;
     void draw();
 
   public:
@@ -185,12 +185,12 @@ class Text: public Text_{
     void update() override {
       if (active && value && prev_value != value()) draw();
     }
-    int update_val(char* const buffer) override {
+    void update_val() override {
       if(value){
         prev_value = value();
-        return snprintf(buffer, 100, "%s", convert_all_args(label, prev_value));
+        text = convert_all_args(label, prev_value);
       }
-      return snprintf(buffer, 100, label.c_str());
+      else text = label;
     }
     void construct (int x, int y, GUI::Style type, text_format_e_t txt_size, Page* page, std::string label, std::function<V()> value, Colour l_col){
       // static_assert(!std::is_same_v<V, std::string>, "Text variable cannot be std::string, it causes unknown failures"); //Keep this for memories

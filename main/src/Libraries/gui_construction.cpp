@@ -47,8 +47,8 @@ Button intakes (130, 45, 100, 75, GUI::Style::SIZE, Button::SINGLE, checks, "Int
 Button lifts (245, 45, 100, 75, GUI::Style::SIZE, Button::SINGLE, checks, "Lifts");
 Button pneums (360, 45, 100, 75, GUI::Style::SIZE, Button::SINGLE, checks, "Pneumatics");
 Button save_pos (15, 140, 100, 75, GUI::Style::SIZE, Button::SINGLE, checks, "Save Position");
-Button misc_checks (130, 140, 100, 75, GUI::Style::SIZE, Button::SINGLE, checks, "Misc");
-Button auton_selector (245, 140, 100, 75, GUI::Style::SIZE, Button::SINGLE, checks, "Select Autons");
+Button auton_selector (130, 140, 100, 75, GUI::Style::SIZE, Button::SINGLE, checks, "Select Autons");
+Button misc_checks (245, 140, 100, 75, GUI::Style::SIZE, Button::SINGLE, checks, "Misc");
 Button placeholder (360, 140, 100, 75, GUI::Style::SIZE, Button::SINGLE, checks, "Placeholder");
 
 Page track ("Tracking"); //Display tracking vals and reset btns
@@ -326,7 +326,12 @@ void main_setup(){
   res_x.set_func([](){tracking.reset(0.0, tracking.y_coord, rad_to_deg(tracking.global_angle));});
   res_y.set_func([](){tracking.reset(tracking.x_coord, 0.0, rad_to_deg(tracking.global_angle));});
   res_a.set_func([](){tracking.reset(tracking.x_coord, tracking.y_coord, 0.0);});
-  res_all.set_func([](){tracking.reset();});
+  res_all.set_func([](){
+    RightEncoder.reset();
+    LeftEncoder.reset();
+    BackEncoder.reset();
+    tracking.reset();
+  });
   track.set_setup_func([](){
     screen::set_pen(COLOUR(WHITE));
     screen::draw_rect(270, 30, 470, 230);
