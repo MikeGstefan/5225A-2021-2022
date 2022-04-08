@@ -40,26 +40,19 @@ Position distance_reset_left(int cycles){
 		delay(33);
 	}
 
-	for(int i = 0; i < cycles; i++){
-		l_average += left.at(i);
-		r_average += right.at(i);
-		s_average += side.at(i);
-	}
+	l_average = std::accumulate(left.begin(), left.end(), 0.0)/left.size();
+	r_average = std::accumulate(right.begin(), right.end(), 0.0)/right.size();
+	s_average = std::accumulate(side.begin(), side.end(), 0.0)/side.size();
 
-	l_average = l_average/cycles;
-	r_average = r_average/cycles;
-	s_average = s_average/cycles;
-
+	// l_average = l_average/left.size();
+	// r_average = r_average/right.size();
+	// l_side_average /= l_side.size();
+	// r_side_average /= r_side.size();
+	misc.print("average collected");
 	for(int i = 0; i< cycles; i++){
-		if(abs(left.at(i) - l_average) > 50){
-			left.erase(left.begin()+i); error_count++;
-		}
-		if(abs(right.at(i) - r_average) > 50){
-			right.erase(right.begin()+i);error_count++;
-		}
-		if(abs(side.at(i) - s_average) > 50){
-			side.erase(side.begin()+i);error_count++;
-		}
+		if(i < left.size() && abs(left.at(i) - l_average) > 50) left.erase(left.begin()+i);
+		if(i < right.size() && abs(right.at(i) - r_average) > 50) right.erase(right.begin()+i);
+		if(i < side.size() && abs(side.at(i) - s_average) > 50) side.erase(side.begin()+i);
 	}
 
 
@@ -127,26 +120,19 @@ Position distance_reset_right(int cycles){
 		delay(33);
 	}
 
-	for(int i = 0; i < cycles; i++){
-		l_average += left.at(i);
-		r_average += right.at(i);
-		s_average += side.at(i);
-	}
+	l_average = std::accumulate(left.begin(), left.end(), 0.0)/left.size();
+	r_average = std::accumulate(right.begin(), right.end(), 0.0)/right.size();
+	s_average = std::accumulate(side.begin(), side.end(), 0.0)/side.size();
 
-	l_average = l_average/cycles;
-	r_average = r_average/cycles;
-	s_average = s_average/cycles;
-
+	// l_average = l_average/left.size();
+	// r_average = r_average/right.size();
+	// l_side_average /= l_side.size();
+	// r_side_average /= r_side.size();
+	misc.print("average collected");
 	for(int i = 0; i< cycles; i++){
-		if(abs(left.at(i) - l_average) > 50){
-			left.erase(left.begin()+i); error_count++;
-		}
-		if(abs(right.at(i) - r_average) > 50){
-			right.erase(right.begin()+i);error_count++;
-		}
-		if(abs(side.at(i) - s_average) > 50){
-			side.erase(side.begin()+i);error_count++;
-		}
+		if(i < left.size() && abs(left.at(i) - l_average) > 50) left.erase(left.begin()+i);
+		if(i < right.size() && abs(right.at(i) - r_average) > 50) right.erase(right.begin()+i);
+		if(i < side.size() && abs(side.at(i) - s_average) > 50) side.erase(side.begin()+i);
 	}
 
 	if(error_count < 8){
