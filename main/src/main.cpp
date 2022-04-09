@@ -34,9 +34,11 @@ void initialize() {
 	// front_r.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
 	// back_l.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
 	// back_r.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
+
+
 	drivebase.download_curve_data();
 	Data::init();
-	_Controller::init();
+	// _Controller::init();
 	GUI::init();
 	delay(500);
 	// tracking.x_coord = 28.5, tracking.y_coord = 11.75, tracking.global_angle = -90.0_deg;
@@ -90,10 +92,11 @@ void autonomous() {
 
 void opcontrol() {
 	// lift_handle_t.start();
-	while(!master.get_digital_new_press(DIGITAL_A)){
-		// gui_handle(); //
-		delay(10);
-	}
+	// while(true){
+	// 	// gui_handle(); //
+	// 	// printf("%d || opcontrol ENCODER L: %d, R: %d, B:%d \n", millis(), LeftEncoder.get_value(), RightEncoder.get_value(), BackEncoder.get_value());
+	// 	delay(10);
+	// }
 	// skills2();
 	// skills();
 	// move_start(move_types::tank_point, tank_point_params({0.0, 20.0,0.0}));
