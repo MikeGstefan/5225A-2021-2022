@@ -311,6 +311,7 @@ class Button{
     //Functions
     static void create_options(std::vector<Button*>);
     bool pressed() const;
+    bool is_on() const;
     void set_func(std::function <void()>), set_off_func(std::function <void()>);
     void set_active(bool=true);
     void set_background (Colour);

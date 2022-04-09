@@ -639,6 +639,10 @@ bool GUI::is_touched(){
   return touched;
 }
 
+bool Button::is_on() const{
+  return on;
+}
+
 
 //Data Updates
 void GUI::update_screen_status(){

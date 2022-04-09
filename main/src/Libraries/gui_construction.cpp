@@ -145,6 +145,9 @@ Text pneum_6_text (0, 0, GUI::Style::CENTRE, TEXT_SMALL, pneumatics, "%s", std::
 Text pneum_7_text (0, 0, GUI::Style::CENTRE, TEXT_SMALL, pneumatics, "%s", std::function([](){return Piston::get_name(7);}));
 Text pneum_8_text (0, 0, GUI::Style::CENTRE, TEXT_SMALL, pneumatics, "%s", std::function([](){return Piston::get_name(8);}));
 
+
+//Utility
+
 Page ports ("Ports"); //Shows what ports to use on builder util
 Text mot (10, 50, GUI::Style::CORNER, TEXT_MEDIUM, ports, "Motors: %s", motor_port_nums);
 Text expanders (10, 100, GUI::Style::CORNER, TEXT_MEDIUM, ports, "Expanders: %s", expander_port_nums);
@@ -171,6 +174,7 @@ Text mot_text_5 (65, 180, GUI::Style::CENTRE, TEXT_SMALL, motor, "Port %s", std:
 Text mot_text_6 (180, 180, GUI::Style::CENTRE, TEXT_SMALL, motor, "Port %s", std::get<5>(motor_ports[5]));
 Text mot_text_7 (295, 180, GUI::Style::CENTRE, TEXT_SMALL, motor, "Port %s", std::get<5>(motor_ports[6]));
 Text mot_text_8 (410, 180, GUI::Style::CENTRE, TEXT_SMALL, motor, "Port %s", std::get<5>(motor_ports[7]));
+Button mot_jam_detect (USER_LEFT, USER_UP, 45, 30, GUI::Style::SIZE, Button::TOGGLE, motor, "Jam");
 Button mot_update_1 (15, 125, 45, 30, GUI::Style::SIZE, Button::SINGLE, motor, "Run");
 Button mot_update_2 (130, 125, 45, 30, GUI::Style::SIZE, Button::SINGLE, motor, "Run");
 Button mot_update_3 (245, 125, 45, 30, GUI::Style::SIZE, Button::SINGLE, motor, "Run");
@@ -696,16 +700,20 @@ void util_setup(){
 void util_background(){
   //Motor Stalled
   for (std::array<std::tuple<int, Button*, Button*, Text_*, int, std::string>, 8>::iterator it = motor_ports.begin(); it != motor_ports.end(); it++){
-    std::tuple<int, Button*, Button*, Text_*, int, std::string>& mot_arr = *it;
-    int port = std::get<0>(mot_arr);
+    int port = std::get<0>(*it);
+    int& stall_count = std::get<4>(*it);
+    std::string& label = std::get<5>(*it);
     if (port != std::numeric_limits<int>::max()){
-      std::get<5>(mot_arr) = std::to_string(port) + ": " + std::to_string((int)c::motor_get_actual_velocity(port));
-      if (fabs(c::motor_get_actual_velocity(port)) < fabs(c::motor_get_target_velocity(port))/4) std::get<4>(mot_arr) += 1;
-      else std::get<4>(mot_arr) = 0;
-      if (std::get<4>(mot_arr) > 10){
-        std::get<4>(mot_arr) = 0;
-        screen_flash::start(term_colours::ERROR, "Stopping Motor %d\n", port);
-        c::motor_move(port, 0);
+      // sprintf_to_string("%d: %d", port, c::motor_get_actual_velocity(port));
+      label = std::to_string(port) + ": " + std::to_string((int)c::motor_get_actual_velocity(port));
+      if(mot_jam_detect.is_on()){
+        if (fabs(c::motor_get_actual_velocity(port)) < fabs(c::motor_get_target_velocity(port))/4) stall_count++;
+        else stall_count = 0;
+        if (stall_count > 10){
+          stall_count = 0;
+          screen_flash::start(term_colours::ERROR, "Stopping Motor %d\n", port);
+          c::motor_move(port, 0);
+        }
       }
     }
   }
