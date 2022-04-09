@@ -5,6 +5,7 @@
 #include "controller.hpp"
 #include "geometry.hpp"
 #include "logging.hpp"
+#include "pros/misc.h"
 #include "util.hpp"
 #include <map>
 
@@ -103,9 +104,9 @@ void rush_low(){
 //name, target, common point, task at target, angle to go to target
 std::vector<std::string> selected_positions;
 std::map<std::string, std::tuple<Point, Point, std::string, double>> targets = {
-  {"Right", {{108.0, 16.0}, {104.0, 12.0}, "None", 0.0}},
+  {"Right", {{110.0, 14.0}, {110.0, 16.0}, "None", 0.0}},
   {"Left", {{30.0, 12.0}, {36.0, 24.0}, "None", 0.0}},
-  {"Tall", {{73.0, 71.0}, {72.0, 60.0}, "Front", 30.0}},
+  {"Tall", {{73.0, 71.0}, {72.0, 60.0}, "Front", -30.0}},
   {"High", {{107.0, 71.0}, {107.0, 60.0}, "Front", 0.0}},
   {"Low", {{34.5, 72.0}, {36.0, 60.0}, "Front", 45.0}},
   {"AWP", {{130.0, 36.0}, {125.0, 30.0}, "Back", -90.0}},
@@ -262,14 +263,17 @@ void run_auton(){
     target = targets[selected_positions[i+1]];
     angle = std::get<double>(target);
 
-    if(!run_defined_auton(selected_positions[i], selected_positions[i+1])){
-      move_start(move_types::tank_point, tank_point_params({std::get<1>(current), weighted_avg(angle, tracking.get_angle_in_deg(), 0.3)}, false, 127.0, 1.0, false));
-      move_start(move_types::tank_point, tank_point_params({std::get<1>(target), weighted_avg(angle, tracking.get_angle_in_deg(), 0.7)}, false, 127.0, 1.0, false));
-      move_start(move_types::tank_rush, tank_rush_params({std::get<0>(target), angle}, false));
+    printf2("\nStarting move to %s\n", std::get<std::string>(target));
 
-      run_auton_task(std::get<std::string>(target));
+    if(!run_defined_auton(selected_positions[i], selected_positions[i+1])){
+      move_start(move_types::tank_rush, tank_rush_params({std::get<0>(target), angle}, false));
+      printf2("\n\n\nMovement Over\n\n");
+
+      // run_auton_task(std::get<std::string>(target));
     }
 
     master.wait_for_press(DIGITAL_R1); //Just to wait between routes to see
+
   }
+  printf2("Done Autons");
 }

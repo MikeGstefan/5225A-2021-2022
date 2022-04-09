@@ -62,7 +62,7 @@ void load_positions(){
   file.close();
   Data::log_t.done_update();
 
-  tracking_imp.print("Loading X: %f, Y:%f, A:%f from file\n", x, y, a);
+  tracking_imp.print("\n\nLoading X: %f, Y:%f, A:%f from file\n\n\n\n", x, y, a);
   tracking.reset(x, y, a);
 }
 

@@ -46,12 +46,22 @@ void Tracking::reset(Position position){
 double Tracking::get_angle_in_deg(){
   return fmod(rad_to_deg(global_angle), 360);
 }
+
+double Tracking::get_dist(Position pos1, Position pos2){
+  return sqrt(pow(pos1.x - pos2.x, 2) + pow(pos1.y - pos2.y, 2));
+}
+
+double Tracking::get_dist(Position pos1){
+  return sqrt(pow(tracking.x_coord - pos1.x, 2) + pow(tracking.y_coord - pos1.y, 2));
+}
+
+
 // waits until the distance from current position to starting position is greater than the specified amount
 void Tracking::wait_for_dist(double distance, int timeout){
   const Point start_pos = {tracking.x_coord, tracking.y_coord};
   int start_time = millis();
 
-  wait_until(sqrt(pow(tracking.x_coord - start_pos.x, 2) + pow(tracking.y_coord - start_pos.y, 2)) > distance){
+  wait_until(get_dist(start_pos) > distance){
     if(timeout != 0 && millis() - start_time > timeout) break;
   }
 }
