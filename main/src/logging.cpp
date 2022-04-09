@@ -85,6 +85,8 @@ void Data::print(const char* format,...){
   int buffer_len = vsnprintf(buffer,256,format,args) + 3;
   va_end(args);
 
+  //please let me do special printing for certain logs like events, ERROR...
+
   if(int(this->log_type) !=0){
     switch(log_location){
       case log_locations::t:

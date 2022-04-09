@@ -47,6 +47,8 @@ typedef std::uint32_t Colour;
 #define CHAR_HEIGHT_LARGE 32
 #define CHAR_WIDTH_LARGE 19
 
+//All constructor args are in the format points, format, page, Text, Colour
+
 class GUI{
   friend class Page;
   friend class Button;
@@ -93,14 +95,13 @@ class GUI{
     static void clear_screen(Colour=GREY);
     static void init(), update(void* = nullptr);
     static void go_to(int);
-    static bool prompt(std::string, std::string, std::uint32_t=0), prompt_end(std::string, std::uint32_t=0);
+    static bool prompt(std::string, std::string="", std::uint32_t=0); //Also prompts to controller
     static bool is_touched();
     static const Page* const get_current_page();
     static const GUI* const get_current_gui();
     bool pressed() const;
 };
 
-//All constructor args are in the format points, format, page, Text, Colour
 class Page{
   friend class GUI;
   friend class Button;
@@ -148,7 +149,7 @@ class Text_{
     //Vars
     int x, y;
     text_format_e_t txt_size;
-    std::string label;
+    std::string label, text;
     Colour l_col, b_col=GREY;
     GUI::Style type;
     Page* page;
@@ -156,7 +157,7 @@ class Text_{
 
     //Functions
     virtual void update() = 0;
-    virtual int update_val(char* const buffer) = 0;
+    virtual void update_val() = 0;
     void draw();
 
   public:
@@ -184,12 +185,12 @@ class Text: public Text_{
     void update() override {
       if (active && value && prev_value != value()) draw();
     }
-    int update_val(char* const buffer) override {
+    void update_val() override {
       if(value){
         prev_value = value();
-        return snprintf(buffer, 100, "%s", convert_all_args(label, prev_value));
+        text = convert_all_args(label, prev_value);
       }
-      return snprintf(buffer, 100, label.c_str());
+      else text = label;
     }
     void construct (int x, int y, GUI::Style type, text_format_e_t txt_size, Page* page, std::string label, std::function<V()> value, Colour l_col){
       // static_assert(!std::is_same_v<V, std::string>, "Text variable cannot be std::string, it causes unknown failures"); //Keep this for memories
@@ -310,6 +311,7 @@ class Button{
     //Functions
     static void create_options(std::vector<Button*>);
     bool pressed() const;
+    bool is_on() const;
     void set_func(std::function <void()>), set_off_func(std::function <void()>);
     void set_active(bool=true);
     void set_background (Colour);
@@ -361,22 +363,22 @@ namespace screen_flash{
   void start(std::string, term_colours = term_colours::ERROR, std::uint32_t = 1000); //text+cols+time / text+cols / text
 
   template <typename... Params> //text+cols+time
-  void start(term_colours colour, std::uint32_t time, const char* fmt, Params... args){
+  void start(term_colours colour, std::uint32_t time, std::string fmt, Params... args){
     start(printf_to_string(fmt, args...), colour, time);
   }
 
   template <typename... Params> //text+col+time
-  void start(Colour colour, std::uint32_t time, const char* fmt, Params... args){
+  void start(Colour colour, std::uint32_t time, std::string fmt, Params... args){
     start(printf_to_string(fmt, args...), colour, 1000);
   }
 
   template <typename... Params> //text+red+time
-  void start(std::uint32_t time, const char* fmt, Params... args){
+  void start(std::uint32_t time, std::string fmt, Params... args){
     start(printf_to_string(fmt, args...), term_colours::ERROR, time);
   }
 
   template <typename... Params> //text+col+1000
-  void start(term_colours colour, const char* fmt, Params... args){
+  void start(term_colours colour, std::string fmt, Params... args){
     start(printf_to_string(fmt, args...), colour, 1000);
   }
 }

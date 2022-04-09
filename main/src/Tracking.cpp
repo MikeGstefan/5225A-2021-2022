@@ -35,7 +35,7 @@ void Tracking::reset(double x, double y, double a){
 
 void Tracking::reset(Position position){
   update_t.data_update();
-  tracking_imp.print("resetting tracking from %.2f, %.2f, %.2f to %.2f, %.2f, %.2f\n", tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle), position.x, position.y, position.angle);
+  tracking_imp.print("resetting tracking from %.2f, %.2f, %.2f to %s\n", tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle), convert_all_args("%.2f", position).c_str());
   tracking.x_coord = position.x;
   tracking.y_coord = position.y;
   tracking.global_angle = deg_to_rad(position.angle);
@@ -60,8 +60,8 @@ void update(void* params){
   _Task* ptr = _Task::get_obj(params);
   Timer data_timer{"tracking logs"};
   // LeftEncoder.reset(); RightEncoder.reset(); BackEncoder.reset();
-  double DistanceLR = 9.85, DistanceB = 0.85;
-  double Left, Right, Back, NewLeft, NewRight, NewBack, LastLeft = LeftEncoder.get_value()/360.0 *(2.75*M_PI), LastRight =  RightEncoder.get_value()/360.0 *(2.75*M_PI), LastBack = BackEncoder.get_value()/360.0 *(2.77*M_PI);
+  double DistanceLR = 9.83, DistanceB = 0.85; //shouldn't this be const
+  double Left, Right, Back, NewLeft, NewRight, NewBack, LastLeft = LeftEncoder.get_value()/360.0 *(2.75*M_PI), LastRight =  RightEncoder.get_value()/360.0 *(2.75*M_PI), LastBack = BackEncoder.get_value()/360.0 *(2.75*M_PI);
   double Theta = 0.0, Beta = 0.0, Alpha = 0.0;
   double RadiusR, RadiusB, h, h2;
   double Xx, Xy, Yy, Yx;
@@ -74,7 +74,7 @@ void update(void* params){
 
 
   while(true){
-    NewLeft = LeftEncoder.get_value()/360.0 *(2.75*M_PI);
+    NewLeft = LeftEncoder.get_value()/360.0 *(2.75*M_PI); //make 2.75 a constant
     NewRight = RightEncoder.get_value()/360.0 *(2.75*M_PI);
     NewBack = BackEncoder.get_value()/360.0 *(2.75*M_PI);
 
@@ -87,6 +87,7 @@ void update(void* params){
     Left = NewLeft - LastLeft;
     Right = NewRight - LastRight;
     Back = NewBack - LastBack;
+    // Back = 0;
 
 
     velocity_update_time = millis() - last_velocity_time;
@@ -141,7 +142,7 @@ void update(void* params){
     tracking_data.print(&data_timer, 150, {
       [=](){return Data::to_char("%d || x: %.2lf, y: %.2lf, a: %.2lf\n", millis(), tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle));},
       // [=](){return Data::to_char("%d || GLOBAL VELOCITY| x: %.2f, y: %.2f a: %.2f\n", millis(), tracking.g_velocity.x, tracking.g_velocity.y, rad_to_deg(tracking.g_velocity.angle));},
-      // [=](){return Data::to_char("%d || ENCODER L: %d, R: %d, B:%d \n", millis(), LeftEncoder.get_value(), RightEncoder.get_value(), BackEncoder.get_value());},
+      [=](){return Data::to_char("%d || ENCODER L: %d, R: %d, B:%d \n", millis(), LeftEncoder.get_value(), RightEncoder.get_value(), BackEncoder.get_value());},
       // [=](){return Data::to_char("%d || ENCODER VELO| l: %.2f, r: %.2f, b: %.2f\n", millis(), tracking.l_velo, tracking.r_velo, tracking.b_velo);}
     });
 
@@ -181,7 +182,7 @@ void rush_goal(double target_x, double target_y, double target_a){
         tracking.power_x = local_error_x * kp_x;
         tracking.power_a = error_a * kp_a;
         total_power = fabs(tracking.power_x) + fabs(tracking.power_a);
-        if (total_power > max_power) {
+        if (total_power > max_power){
             scale = max_power / total_power;
             tracking.power_x *= scale;
             tracking.power_a *= scale;
@@ -229,7 +230,7 @@ void rush_goal2(double target_x, double target_y, double target_a){
         tracking.power_x = local_error_x * kp_x;
         tracking.power_a = error_a * kp_a;
         total_power = fabs(tracking.power_x) + fabs(tracking.power_a);
-        if (total_power > max_power) {
+        if (total_power > max_power){
             scale = max_power / total_power;
             tracking.power_x *= scale;
             tracking.power_a *= scale;
@@ -644,7 +645,7 @@ void move_to_point(void* params){
 }
 
 // this is 150-200 ms slower than tank move on arc on 24 radius 90 degree turn
-void move_on_arc(void* params) {
+void move_on_arc(void* params){
   _Task* ptr = _Task::get_obj(params);
   // arc_params* param_ptr = static_cast<arc_params*>(_Task::get_params(params));
   const Point start = arc_params_g.start;
@@ -1092,7 +1093,8 @@ void tank_move_to_target(void* params){
       motion_d.print(" %d || error y : %.2f error a : %.2f, end con: %.2f, end clause %.2f, end dist: %.2f, pow y : %.2f, pow a : %.2f\n ", millis(), local_error.y, rad_to_deg(error.angle), fabs(line_disp.get_y()), end_error.y, end_dist, tracking.power_y, tracking.power_a);
       motion_d.print("%d|| sng: %d, orig sgn: %d\n",millis(), sgn_line_y, orig_sgn_line_y);
       // exits movement once the target has been overshot (if the sign of y error along the line has flipped)
-      if(fabs(line_disp.get_y()) < end_error.y || sgn_line_y != orig_sgn_line_y){
+      // if(fabs(line_disp.get_y()) < end_error.y || sgn_line_y != orig_sgn_line_y){
+      if((fabs(local_error.y) < end_error.y && fabs(line_disp.get_y()) < 4)|| sgn_line_y != orig_sgn_line_y){
         if (brake) drivebase.brake();
         tracking.move_complete = true;
         motion_i.print("%d || Ending move to target X: %f Y: %f A: %f at X: %f Y: %f A: %f time: %d\n", millis(), target.x, target.y, target.angle, tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle), millis()- time);

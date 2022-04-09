@@ -3,6 +3,7 @@
 #include "config.hpp"
 #include <iostream>
 #include <cmath>
+#include <numeric> 
 #include "drive.hpp"
 #include "geometry.hpp"
 #include "auton_util.hpp"

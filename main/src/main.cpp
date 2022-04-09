@@ -11,9 +11,6 @@
 #include "Subsystems/f_lift.hpp"
 #include "Subsystems/b_lift.hpp"
 #include "distance.hpp"
-
-#include "pros/misc.h"
-#include "task.hpp"
 #include "util.hpp"
 using namespace std;
 
@@ -30,14 +27,16 @@ const GUI* GUI::current_gui = &g_main;
 bool auton_run = false; // has auton run
 
 void initialize() {
-	gyro.calibrate();
+	// gyro.calibrate();
 	// front_l.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
 	// front_r.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
 	// back_l.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
 	// back_r.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
+
+
 	drivebase.download_curve_data();
 	Data::init();
-	_Controller::init();
+	// _Controller::init();
 	GUI::init();
 	delay(500);
 	// tracking.x_coord = 28.5, tracking.y_coord = 11.75, tracking.global_angle = -90.0_deg;
@@ -51,7 +50,7 @@ void initialize() {
 	tracking.x_coord = 0.0, tracking.y_coord = 0.0, tracking.global_angle = 0.0_deg;
 	update_t.start();
 	// master.print(2, 0, "Driver: %s", drivebase.drivers[drivebase.cur_driver].name);
-	gyro.finish_calibrating(); //Finishes calibrating gyro before program starts
+	// gyro.finish_calibrating(); //Finishes calibrating gyro before program starts
 }
 
 /**
@@ -90,41 +89,19 @@ void autonomous() {
 }
 
 void opcontrol() {
-	master.wait_for_press(DIGITAL_R1);
-	b_claw.set_value(HIGH);//locks in goals and raises lift
-	f_claw(HIGH);
-  //Hitch
-	// f_lift.move_absolute(600, 100, true, 100);
-	// b_lift.move_absolute(100);
+  /* Nathan:
+  check what actually kills the auto balance loop
+  file writing functions
+  proper text wrapping
+  snprintf2 and then have printf2 just call it
+  auton give up func - ask mike
+  
+  lvgl images
+  2d sliders
+  */
 
-	// flatten_against_wall(true); //resets, change to dist sensor
-	// tracking.reset();
-  int start = millis();
-
-	// move_start(move_types::turn_angle, turn_angle_params(85.0)); //turns to goal
-	drivebase.set_state(HIGH);
-	b_lift.move_absolute(100); //lowers lifts
-	f_lift.move_absolute(0, 100, true, 50);
-	// f_lift.move(-10); //holds lift down
-
-	// // drivebase.move(0.0, 25, 0.0);
-	// // move_start(move_types::tank_point, tank_point_params({-5.0, 0.0, -90.0}, false, 127.0, 1.0, true, 6.5, 150.0, 0.0, 0, {6.0, 0.5}), false);
-	// // f_detect_goal(false);
-
-	// move_start(move_types::turn_angle, turn_angle_params(90.0)); //aligns to ramp
-
-  master.wait_for_press(DIGITAL_R1);
-  gyro.climb_ramp();
-  gyro.level(1.8, 650);
-  b_claw.set_value(LOW);
-  f_claw(LOW);
-  b_lift.move(-10);
-  f_lift.move(-10);
-
-  printf("\n\nStart: %d\n", start);
-  printf("\n\nEnd: %d\n", millis());
-  printf("\n\nTotal: %d\n", millis()-start);
-  master.clear();
-  master.print(0, 0, "Time:%d", millis()-start);
-
+	while(true){
+		// drivebase.non_blocking_driver_practice();
+		delay(10);
+	}
 }

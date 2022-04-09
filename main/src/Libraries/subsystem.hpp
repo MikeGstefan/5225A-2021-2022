@@ -49,7 +49,7 @@ public:
   void handle_state_change(); // cleans up and preps the machine to be in the target state
 
   // public getters for accessing 
-  state_type get_state() {
+  state_type get_state(){
     state_mutex.take(TIMEOUT_MAX);
     state_type temp_state = state;
     state_mutex.give();

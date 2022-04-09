@@ -21,7 +21,7 @@ enum class term_colours{
   NOTIF,
 };
 
-
+//General case
 template <typename T, typename = typename std::enable_if_t<!std::is_arithmetic_v<T>, void>> //Forces double/int overload instead
 std::string convert_all_args(const std::string& fmt, const T& arg){
   char buffer[n_printf_max];
@@ -66,6 +66,7 @@ std::string convert_all_args(const std::string& fmt, T arg){ //Not const T& beca
   return buffer;
 }
 
+//Vectors
 template <typename _Tp>
 std::string convert_all_args(const std::string& fmt, const std::vector<_Tp>& arg){
   if(fmt.back() == 'p') return convert_all_args(fmt, arg.data());
@@ -79,9 +80,11 @@ std::string convert_all_args(const std::string& fmt, const std::vector<_Tp>& arg
   return str;
 }
 
+//Arrays (C++)
 template <typename _Tp, std::size_t _Nm>
 std::string convert_all_args(const std::string& fmt, const std::array<_Tp, _Nm>& arg){
   if(fmt.back() == 'p') return convert_all_args(fmt, arg.data());
+  else if(std::is_same<_Tp, char>::value && fmt.back() == 's') return convert_all_args(fmt, arg.data());
   std::string str;
 	str += '{';
   for (typename std::array<_Tp, _Nm>::const_iterator it = arg.begin(); it != arg.end(); it++){
@@ -92,6 +95,22 @@ std::string convert_all_args(const std::string& fmt, const std::array<_Tp, _Nm>&
   return str;
 }
 
+//Arrays (C)
+template <typename _Tp, std::size_t _Nm>
+std::string convert_all_args(const std::string& fmt, const _Tp (&arg)[_Nm]){
+  if(fmt.back() == 'p') return convert_all_args(fmt, const_cast<_Tp*>(arg));
+  else if(std::is_same<_Tp, char>::value && fmt.back() == 's') return convert_all_args(fmt, const_cast<_Tp*>(arg));
+  std::string str;
+	str += '{';
+  for (int i = 0; i < _Nm; i++){
+    str += convert_all_args(fmt, arg[i]);
+    if (i+1 != _Nm) str += ", ";
+  }
+  str += '}';
+  return str;
+}
+
+//Initializer lists
 template <typename _Tp>
 std::string convert_all_args(const std::string& fmt, const std::initializer_list<_Tp>& arg){
   std::string str;
@@ -104,19 +123,7 @@ std::string convert_all_args(const std::string& fmt, const std::initializer_list
   return str;
 }
 
-template <typename _Tp, std::size_t _Nm>
-std::string convert_all_args(const std::string& fmt, const _Tp (&arg)[_Nm]){
-  if(fmt.back() == 'p') return convert_all_args(fmt, const_cast<_Tp*>(arg));
-  std::string str;
-	str += '{';
-  for (int i = 0; i < _Nm; i++){
-    str += convert_all_args(fmt, arg[i]);
-    if (i+1 != _Nm) str += ", ";
-  }
-  str += '}';
-  return str;
-}
-
+//Bitsets
 template <size_t _Nb>
 std::string convert_all_args(const std::string& fmt, const std::bitset<_Nb>& arg){
   std::string str;
@@ -147,20 +154,6 @@ std::string convert_all_args(const std::string& fmt, const std::tuple<Args...>& 
 std::string convert_all_args(const std::string& fmt, const std::string& arg);
 std::string convert_all_args(const std::string& fmt, const Position& arg);
 std::string convert_all_args(const std::string& fmt, const Point& arg);
-
-
-//set_length for %n, doesn't work yet.
-template <typename T, typename = typename std::enable_if_t<std::is_integral<T>::value && std::is_signed<T>::value, void>>
-void set_length(T* ptr, const std::string& start, const std::string& converted){
-  *ptr = start.length() + converted.length();
-}
-
-template <typename T>
-void set_length(T ptr, const std::string& start, const std::string& converted){
-  //Only exists for compile time overload resolution. Should never be called
-  throw std::invalid_argument("Cannot use \%n on non signed integer * type.");
-}
-
 
 //Template Recursion Base case
 std::string printf_to_string(const std::string& fmt);
@@ -199,7 +192,7 @@ std::string printf_to_string(std::string fmt, const Param& arg, const Params&...
   }
   else if(format_specifier.back() == 'n'){
     converted = "";
-    set_length(arg, start, converted);
+    // set_length(arg, start, converted);
     rest = printf_to_string(rest, args...);
   }
   else{
