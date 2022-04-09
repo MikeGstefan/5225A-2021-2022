@@ -110,7 +110,6 @@ extern Drivebase drivebase;
 // returns true if using front lift and false if using back lift
 bool get_lift();
 
-void handle_lifts();
 
 void handle_lift_buttons();
 void handle_claw_buttons();

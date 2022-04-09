@@ -5,7 +5,7 @@
 #include <atomic>
 
 
-#define NUM_OF_F_LIFT_STATES 5
+#define NUM_OF_F_LIFT_STATES 6
 #define F_LIFT_MAX_VELOCITY 100
 
 enum class f_lift_states{
@@ -13,6 +13,7 @@ enum class f_lift_states{
   bottom, // at lowest position
   idle,  // not doing anything
   move_to_target,  // moving to target position
+  between_positions,  // not moving, but in between positions in the array
   manual  // controlled by joystick
 };
 
@@ -55,22 +56,22 @@ public:
 
 extern F_Lift f_lift;
 
-#define NUM_OF_F_CLAW_STATES 4
+#define NUM_OF_F_CLAW_STATES 5
 
 // FRONT CLAW SUBSYSTEM
 
 enum class f_claw_states{
   managed, // being managed externally (NOT DOING ANYTHING)
   idle, // claw is open and NOT waiting to detect mogo
+  about_to_search, // claw is open and will search in 2 seconds
   searching,  // claw is open and waiting to detect mogo
   grabbed, // holding mogo
 };
 
 class F_Claw: public Subsystem<f_claw_states, NUM_OF_F_CLAW_STATES> {
-
+  Timer search_timer{"Search_timer"};
 public:
   F_Claw(Subsystem<f_claw_states, NUM_OF_F_CLAW_STATES> subsystem);  // constructor
-  void handle_buttons();  // handles driver button input
   void handle();  // contains state machine code
   void handle_state_change(); // cleans up and preps the machine to be in the target state
 };

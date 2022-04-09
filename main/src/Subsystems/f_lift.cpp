@@ -9,8 +9,9 @@ F_Lift f_lift({{"F_Lift",
   "bottom",
   "idle",
   "move_to_target",
+  "between_positions",
   "manual",
-}, f_lift_states::managed, f_lift_states::idle // goes from managed to idle upon startup
+}, f_lift_states::managed, f_lift_states::between_positions // goes from managed to between_states upon startup
 }, f_lift_m});
 
 
@@ -74,6 +75,9 @@ void F_Lift::handle(bool driver_array){
       */
       break;
 
+    case f_lift_states::between_positions:
+      break;
+
     case f_lift_states::manual:
       lift_power = master.get_analog(ANALOG_RIGHT_Y);
       // holds motor if joystick is within deadzone or lift is out of range
@@ -104,6 +108,9 @@ void F_Lift::handle_state_change(){
       break;
 
     case f_lift_states::move_to_target:
+      break;
+    
+    case f_lift_states::between_positions:
       break;
 
     case f_lift_states::manual:
@@ -155,6 +162,7 @@ F_Claw f_claw_obj({"F_Claw",
 {
   "managed",
   "idle",
+  "about_to_search",
   "searching",
   "grabbed",
 }, f_claw_states::managed, f_claw_states::idle // goes from managed to idle upon startup
@@ -163,18 +171,6 @@ F_Claw f_claw_obj({"F_Claw",
 F_Claw::F_Claw(Subsystem<f_claw_states, NUM_OF_F_CLAW_STATES> subsystem): Subsystem(subsystem)  // constructor
 {}
 
-void F_Claw::handle_buttons(){
-  if(master.get_digital_new_press(claw_toggle_button) && get_lift()){
-    switch(get_state()){
-      case f_claw_states::idle:
-        set_state(f_claw_states::grabbed);
-        break;
-      case f_claw_states::grabbed:
-        set_state(f_claw_states::idle);
-        break;
-    }
-  }
-}
 
 void F_Claw::handle(){
   switch(get_state()){
@@ -182,10 +178,23 @@ void F_Claw::handle(){
       break;
 
     case f_claw_states::idle:
+      // forces claw into searching if lift is at bottom
+      if(f_lift.get_state() == f_lift_states::bottom) set_state(f_claw_states::searching);
+      break;
+    
+    case f_claw_states::about_to_search:
+      // start searching again after 2 seconds
+      if(search_timer.get_time() > 2000) set_state(f_claw_states::searching);
+      
+      // doesn't let driver search if lift isn't at bottom
+      if(f_lift.get_state() != f_lift_states::bottom) set_state(f_claw_states::idle);
       break;
 
     case f_claw_states::searching:
       if(f_dist.get() < 30)  set_state(f_claw_states::grabbed);  // grabs goal if mogo is detected
+      
+      // doesn't let driver search if lift isn't at bottom
+      if(f_lift.get_state() != f_lift_states::bottom) set_state(f_claw_states::idle);
       break;
 
     case f_claw_states::grabbed:
@@ -207,7 +216,12 @@ void F_Claw::handle_state_change(){
       f_claw(LOW);
       break;
 
+    case f_claw_states::about_to_search:
+      search_timer.reset();
+      break;
+
     case f_claw_states::searching:
+      master.rumble("-");
       f_claw(LOW);
       break;
 

@@ -165,6 +165,7 @@ controller_digital_e_t _Controller::wait_for_press(std::vector<controller_digita
     }
   }
   controller_queue.print("%d| button %d pressed from controller %d\n", millis(), button, this->controller_num);
+// button handling methods
 
   return button;
 }
@@ -183,3 +184,32 @@ void _Controller::wait_for_press(controller_digital_e_t button, int timeout){
   }
   controller_queue.print("%d| button %d pressed from controller %d\n", millis(), button, this->controller_num);
 }
+
+void _Controller::update_buttons(){
+  for(int i = 0; i < 12; i++){
+    last_press_arr[i] = cur_press_arr[i];
+    // + 6 because controller_digital_e_t starts with 6 instead of 0
+    cur_press_arr[i] = this->get_digital(static_cast<pros::controller_digital_e_t>(i + 6));
+    // printf("%d, %d \n", i, cur_press_arr[i]);
+  }
+  // printf("\n");
+}
+
+bool _Controller::get_button_state(pros::controller_digital_e_t button){
+  return cur_press_arr[static_cast<int>(button) - 6];
+}
+
+bool _Controller::get_button_last_state(pros::controller_digital_e_t button){
+  return cur_press_arr[static_cast<int>(button) - 6];
+}
+
+bool _Controller::is_rising(pros::controller_digital_e_t button){
+  int index = static_cast<int>(button) - 6;
+  return !last_press_arr[index] && cur_press_arr[index];
+}
+
+bool _Controller::is_falling(pros::controller_digital_e_t button){
+  int index = static_cast<int>(button) - 6;
+  return last_press_arr[index] && !cur_press_arr[index];
+}
+
