@@ -233,6 +233,15 @@ void main_setup(){
   pneum_7.add_text(pneum_7_text);
   pneum_8.add_text(pneum_8_text);
 
+  if(Piston::list_for_gui[0] && Piston::list_for_gui[0]->get_state()) pneum_1.select();
+  if(Piston::list_for_gui[1] && Piston::list_for_gui[1]->get_state()) pneum_2.select();
+  if(Piston::list_for_gui[2] && Piston::list_for_gui[2]->get_state()) pneum_3.select();
+  if(Piston::list_for_gui[3] && Piston::list_for_gui[3]->get_state()) pneum_4.select();
+  if(Piston::list_for_gui[4] && Piston::list_for_gui[4]->get_state()) pneum_5.select();
+  if(Piston::list_for_gui[5] && Piston::list_for_gui[5]->get_state()) pneum_6.select();
+  if(Piston::list_for_gui[6] && Piston::list_for_gui[6]->get_state()) pneum_7.select();
+  if(Piston::list_for_gui[7] && Piston::list_for_gui[7]->get_state()) pneum_8.select();
+
   for (int i = 0; i < 8; i++){
     std::get<1>(motors_for_gui[i]) = std::get<0>(motors_for_gui[i]) ? std::get<0>(motors_for_gui[i])->get_temperature() : std::numeric_limits<int>::max();
     if(std::get<1>(motors_for_gui[i]) == std::numeric_limits<int>::max()) std::get<4>(motors_for_gui[i])->set_active(false);
@@ -286,21 +295,30 @@ void main_setup(){
   });
   intakes.set_func([](){
     if(GUI::prompt("Press to check intake", "", 1000)){
-      // intake.set_state(intake_states::on);
-      // delay(1000);
+      intake.set_state(intake_states::on);
+      delay(1000);
 
-      // intake.set_state(intake_states::off);
-      // delay(250);
+      intake.set_state(intake_states::off);
+      delay(250);
 
-      // intake.set_state(intake_states::reversed);
-      // delay(1000);
+      intake.set_state(intake_states::reversed);
+      delay(1000);
 
-      // intake.set_state(intake_states::off);
+      intake.set_state(intake_states::off);
     }
   });
   lifts.set_func([](){
     if(GUI::prompt("Press to check lifts", "", 1000)){
-      printf("sorry nathan");
+      b_lift.set_state(b_lift_states::move_to_target, 0);
+      f_lift.set_state(f_lift_states::move_to_target, 0);
+      delay(1000);
+
+      b_lift.set_state(b_lift_states::move_to_target, b_lift.driver_positions.size() - 1);
+      f_lift.set_state(f_lift_states::move_to_target, f_lift.driver_positions.size() - 1);
+      delay(1000);
+
+      b_lift.set_state(b_lift_states::move_to_target, 0);
+      f_lift.set_state(f_lift_states::move_to_target, 0);
     }
   });
   pneums.set_func([](){
@@ -341,8 +359,8 @@ void main_setup(){
     screen::draw_rect(270, 30, 470, 230);
     screen::draw_line(370, 30, 370, 230);
     screen::draw_line(270, 130, 470, 130);
-    for (int x = 0; x<200; x++){
-      for (int y = 0; y<200; y++) if(field[x].test(y)) screen::draw_pixel(270+x, 230-y); //Draws saved tracking values
+    for (int x = 0; x < 200; x++){
+      for (int y = 0; y < 200; y++) if(field[x].test(y)) screen::draw_pixel(270+x, 230-y); //Draws saved tracking values
     }
   });
   track.set_loop_func([](){
@@ -372,6 +390,8 @@ void main_setup(){
   front_claw.set_off_func([](){f_claw(LOW);});
   back_claw.set_func([](){b_claw.set_value(HIGH);});
   back_claw.set_off_func([](){b_claw.set_value(LOW);});
+  f_lift_val.val = f_lift_pot.get_value();
+  b_lift_val.val = b_lift_pot.get_value();
 
   //Known Pneumatics Port Setup
   if(Piston::list_for_gui[0]){

@@ -90,9 +90,5 @@ void autonomous() {
 }
 
 void opcontrol() {
-  // static constexpr in .hpp
-  //initialize lift slider to pot
-  //lift slider
-  //init piston btns to piston state
-  
+  //get rid of some gui getters now that main_setup is a friend
 }

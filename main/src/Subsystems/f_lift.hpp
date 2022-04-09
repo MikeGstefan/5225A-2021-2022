@@ -18,40 +18,43 @@ enum class f_lift_states{
 };
 
 class F_Lift: public Motorized_subsystem<f_lift_states, NUM_OF_F_LIFT_STATES, F_LIFT_MAX_VELOCITY> {
-  Timer up_press{"Up_press"}, down_press{"Down_press"};
-  int search_cycle_check_count = 0, bad_count = 0; // cycle check for safeties
-  PID pid = PID(1.0,0.0,0.0,0.0);
-  int lift_power; // for manual control
+    Timer up_press{"Up_press"}, down_press{"Down_press"};
+    int search_cycle_check_count = 0, bad_count = 0; // cycle check for safeties
+    PID pid = PID(1.0,0.0,0.0,0.0);
+    int lift_power; // for manual control
 
-  // height conversion constants
-  double offset_a = 365.0, offset_h = 9.75;
-  double arm_len = 8.0;
-  double gear_ratio = 5.0;
+    // height conversion constants
+    double offset_a = 365.0, offset_h = 9.75;
+    double arm_len = 8.0;
+    double gear_ratio = 5.0;
 
-  // to avoid race conditions these are atomic
-  std::atomic<uint8_t> index{0};
-  std::atomic<int32_t> speed{127}; // max pwm applied to the lifts during a move to target
+    // to avoid race conditions these are atomic
+    std::atomic<uint8_t> index{0};
+    std::atomic<int32_t> speed{127}; // max pwm applied to the lifts during a move to target
 
-public:
+  public:
 
-  vector<int> driver_positions = {1200, 1500, 2050, 2750};
-  //                            btm   carry plat  clear level top
-  vector<int> prog_positions = {1170, 1350, 1950, 2020, 2300, 2750};
+    vector<int> driver_positions = {1200, 1500, 2050, 2750};
+    //                            btm   carry plat  clear level top
+    vector<int> prog_positions = {1170, 1350, 1950, 2020, 2300, 2750};
 
-  F_Lift(Motorized_subsystem<f_lift_states, NUM_OF_F_LIFT_STATES, F_LIFT_MAX_VELOCITY> motorized_subsystem);  // constructor
-  
-  void handle(bool driver_array);  // contains state machine code, (if driver_array is false, uses prog_array)
-  void handle_state_change(); // cleans up and preps the machine to be in the target state
-  // void handle_buttons(); // handles driver button input
-  // THIS IS AN OVERLOAD for the existing set state function, accepts an index for the lift
-  void set_state(const f_lift_states next_state, const uint8_t index, const int32_t speed = 127);  // requests a state change and logs it
-  
-  // getter because index is private
-  int get_index() const{
-    return index.load();
-  }
-  
-  void elastic_util(); // up time should be about 1100mms (ignore this time, it was on the old lift), down time should be slightly slower than that
+    F_Lift(Motorized_subsystem<f_lift_states, NUM_OF_F_LIFT_STATES, F_LIFT_MAX_VELOCITY> motorized_subsystem);  // constructor
+    
+    void handle(bool driver_array);  // contains state machine code, (if driver_array is false, uses prog_array)
+    void handle_state_change(); // cleans up and preps the machine to be in the target state
+    // void handle_buttons(); // handles driver button input
+    // THIS IS AN OVERLOAD for the existing set state function, accepts an index for the lift
+    void set_state(const f_lift_states next_state, const uint8_t index, const int32_t speed = 127);  // requests a state change and logs it
+    
+    // getter because index is private
+    int get_index() const{
+      return index.load();
+    }
+    
+    void elastic_util(); // up time should be about 1100mms (ignore this time, it was on the old lift), down time should be slightly slower than that
+
+    //overlad to use pot. always waits for complete. the param does nothing
+    void move_absolute(double position, double velocity = F_LIFT_MAX_VELOCITY, bool wait_for_comp = true, double end_error = 0.0);
 };
 
 extern F_Lift f_lift;
