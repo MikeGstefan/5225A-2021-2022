@@ -47,7 +47,7 @@ public:
   void set_state(const b_lift_states next_state, const uint8_t index, const int32_t speed = 127);  // requests a state change and logs it
   
   // getters because index is private
-  uint8_t get_index() const{
+  uint8_t get_index() const{ //don't declare this here
     return index.load();
   }
   void elastic_util(); // up time should be about 1100mms (ignore this time, it was on the old lift), down time should be slightly slower than that

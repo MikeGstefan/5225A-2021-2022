@@ -20,13 +20,13 @@ pros::Motor b_lift_m(5, pros::E_MOTOR_GEARSET_36, false,pros::E_MOTOR_ENCODER_DE
 
 Piston f_claw_c(7, "F Claw C", 1, 0);
 Piston f_claw_o(6, "F Claw O", 0, 0);
-Piston drive_t(2, "Drive Trans", 0, 0);
+Piston drive_t({e_port, 7}, "Drive Trans", 0, 0);
 Piston lift_t(4, "Lift Trans", 1, 0);
 Piston b_claw(5, "B Claw", 0, 0);
 Piston tilt_lock(3, "Tilt Lock", 0, 0);
 
 
-pros::ADIAnalogIn f_lift_pot(8), b_lift_pot({e_port, 8});
+pros::ADIAnalogIn f_lift_pot(8), b_lift_pot(2);
 
 pros::Distance b_dist(11), f_dist(6);
 pros::Distance r_reset_dist(14), l_reset_dist(19);
