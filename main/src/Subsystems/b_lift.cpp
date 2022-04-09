@@ -9,10 +9,11 @@ B_Lift b_lift({{"B_Lift",
   "bottom",
   "idle",
   "move_to_target",
+  "between_positions",
   "manual",
   "shifting_to_lift_up",
   "shifting_to_lift_down",
-},  b_lift_states::managed, b_lift_states::idle // goes from managed to idle upon startup
+},  b_lift_states::managed, b_lift_states::between_positions // goes from managed to between_states upon startup
 }, b_lift_m});
 
 
@@ -22,50 +23,6 @@ B_Lift::B_Lift(Motorized_subsystem<b_lift_states, NUM_OF_B_LIFT_STATES, B_LIFT_M
 
   up_press.pause();
   down_press.pause();
-}
-
-void B_Lift::handle_buttons(){
-  // index incrementing and decrementing
-  if(master.get_digital_new_press(lift_up_button) && !get_lift()){
-    up_press.reset();
-    // if state is manual, go to the closest position that's higher than the current position
-    if(get_state() == b_lift_states::manual){
-      size_t i = 0;
-      while (i < driver_positions.size()){
-        if(driver_positions[i] > b_lift_pot.get_value()){
-          set_state(b_lift_states::move_to_target, i);
-          break;
-        }
-        i++;
-      }
-    }
-    // otherwise just go to the next highest position, but doesn't increment index if it's out of bounds
-    else if(index < driver_positions.size() - 1)  set_state(b_lift_states::move_to_target, ++index);
-  }
-  if(master.get_digital_new_press(lift_down_button) && !get_lift()){
-    down_press.reset();
-    // if state is manual, go to the closest position that's lower than the current position
-    if(get_state() == b_lift_states::manual){
-      int i = driver_positions.size() - 1;
-      while (i > -1){
-        if(driver_positions[i] < b_lift_pot.get_value()){
-          set_state(b_lift_states::move_to_target, i);
-          break;
-        }
-        i--;
-      }
-    }
-    // otherwise just go to the next lowest position, but doesn't decrement index if it's out of bounds
-    else if(index > 0)  set_state(b_lift_states::move_to_target, --index);
-  }
-  // resets and pauses the timers if driver releases button
-  if(!master.get_digital(lift_up_button)) up_press.reset(false);
-  if(!master.get_digital(lift_down_button)) down_press.reset(false);
-
-  // goes to top position if up button is held
-  if(up_press.get_time() > 300) set_state(b_lift_states::move_to_target, driver_positions.size() - 1);
-  // goes to bottom position of down button is held
-  if(down_press.get_time() > 300) set_state(b_lift_states::move_to_target, 0);
 }
 
 void B_Lift::handle(bool driver_array){
@@ -117,8 +74,12 @@ void B_Lift::handle(bool driver_array){
       */
       break;
 
+    case b_lift_states::between_positions:
+      break;
+
     case b_lift_states::manual:
       lift_power = master.get_analog(ANALOG_RIGHT_X);
+      printf("lift_power:%d, pos:%d\n", lift_power, b_lift_pot.get_value());
       // holds motor if joystick is within deadzone or lift is out of range
       if (fabs(lift_power) < 10 || (lift_power < 0 && b_lift_pot.get_value() <= driver_positions[0]) || (lift_power > 0 && b_lift_pot.get_value() >= driver_positions[driver_positions.size() - 1])) motor.move_velocity(0);
       else motor.move(lift_power);
@@ -151,6 +112,7 @@ void B_Lift::handle_state_change(){
     after_switch_state = get_target_state();
     printf("after_switch_state:%s", b_lift.state_names[(int)after_switch_state]);
     Subsystem::set_state(b_lift_states::shifting_to_lift_up);
+    intake.set_state(intake_states::off);
   }
 
   if(get_state() == b_lift_states::bottom){ // if lift is leaving the bottom state, turn off the intake
@@ -172,6 +134,9 @@ void B_Lift::handle_state_change(){
       break;
 
     case b_lift_states::move_to_target:
+      break;
+
+    case b_lift_states::between_positions:
       break;
 
     case b_lift_states::manual:
@@ -235,6 +200,7 @@ B_Claw b_claw_obj({"B_Claw",
 {
   "managed",
   "idle",
+  "about_to_search",
   "searching",
   "tilted",
   "flat"
@@ -244,26 +210,6 @@ B_Claw b_claw_obj({"B_Claw",
 B_Claw::B_Claw(Subsystem<b_claw_states, NUM_OF_B_CLAW_STATES> subsystem): Subsystem(subsystem)  // constructor
 {}
 
-void B_Claw::handle_buttons(){
-  // resets the press timer if toggle button is pressed
-  if(master.get_digital_new_press(claw_toggle_button) && !get_lift()){
-    toggle_press_timer.reset();
-    // grabs goal if toggle button is pressed and claw is open
-    if(get_state() == b_claw_states::idle) set_state(b_claw_states::tilted);
-  }
-
-  if(toggle_press_timer.get_time() > 300){  // toggles tilt state if claw button was held
-    if(get_state() == b_claw_states::tilted) set_state(b_claw_states::flat);
-    else if(get_state() == b_claw_states::flat) set_state(b_claw_states::tilted);
-    toggle_press_timer.reset(false); // resets and pauses the timer 
-  }
-  // releases goal if toggle button is released before the button hold timeout triggers
-  else if(!master.get_digital(claw_toggle_button)){
-    toggle_press_timer.reset(false);  // resets and pauses the timer 
-    if(get_state() == b_claw_states::tilted || get_state() == b_claw_states::flat)  set_state(b_claw_states::idle);
-  }
-}
-
 void B_Claw::handle(){
 
   switch(get_state()){
@@ -271,11 +217,24 @@ void B_Claw::handle(){
       break;
 
     case b_claw_states::idle:
+      // forces claw into searching if lift is at bottom
+      if(b_lift.get_state() == b_lift_states::bottom) set_state(b_claw_states::searching);
+      break;
+
+    case b_claw_states::about_to_search:
+      // start searching again after 2 seconds
+      if(search_timer.get_time() > 2000) set_state(b_claw_states::searching);
+
+      // doesn't let driver search if lift isn't at bottom
+      if(b_lift.get_state() != b_lift_states::bottom) set_state(b_claw_states::idle);
       break;
 
     case b_claw_states::searching:
       // grabs goal if bowl is detected
       if(b_dist.get() < 40) set_state(b_claw_states::tilted);
+
+      // doesn't let driver search if lift isn't at bottom
+      if(b_lift.get_state() != b_lift_states::bottom) set_state(b_claw_states::idle);
       break;
 
     case b_claw_states::tilted:
@@ -296,21 +255,31 @@ void B_Claw::handle_state_change(){
 
     case b_claw_states::idle:
       master.rumble("-");
+      tilt_lock.set_state(HIGH);
       b_claw.set_state(LOW);
       break;
 
-    case b_claw_states::searching:
+    case b_claw_states::about_to_search:
+      tilt_lock.set_state(HIGH);
       b_claw.set_state(LOW);
-      search_cycle_check_count = 0; // resets search cycle count
+      search_timer.reset(); // to wait 2 seconds before entering search
+      break;
+
+    case b_claw_states::searching:
+      master.rumble("-");
+      b_claw.set_state(LOW);
       break;
 
     case b_claw_states::tilted:
       master.rumble("-");
+      tilt_lock.set_state(HIGH);
       b_claw.set_state(HIGH); // grabs mogo
       break;
 
     case b_claw_states::flat:
-      b_claw.set_state(HIGH); // grabs mogo
+      master.rumble("-");
+      tilt_lock.set_state(LOW);
+      b_claw.set_state(LOW);
       break;
   }
   log_state_change();  

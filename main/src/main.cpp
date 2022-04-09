@@ -87,11 +87,18 @@ void autonomous() {
 }
 
 void opcontrol() {
+	
 	// b)
 	// b_lift.Subsystem::set_state(b_lift_states::move_to_target);
-	lift_handle_t.start();
-	/*
+	// lift_handle_t.start();
+	// /*
+
+
+	// wait_until(false);
+	tilt_lock.set_state(HIGH);
 	while(true){
+		master.update_buttons();
+		partner.update_buttons();
 		// printf("%d\n", get_lift());
 		// drivebase handlers
 		drivebase.handle_input();
@@ -103,16 +110,16 @@ void opcontrol() {
 		
 		// lift handlers
 		handle_lift_buttons();
-		// b_lift.handle(true);
-		// f_lift.handle(true);
+		b_lift.handle(true);
+		f_lift.handle(true);
 
 		// claw handlers
 		handle_claw_buttons();
-		// b_claw_obj.handle();
-		// f_claw_obj.handle();
+		b_claw_obj.handle();
+		f_claw_obj.handle();
 		delay(10);
 	}
-	*/
+	// */
 	master.clear();
 	f_lift.set_state(f_lift_states::move_to_target, 3);
 	wait_until(f_lift.get_state() == f_lift_states::idle);

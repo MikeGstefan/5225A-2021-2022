@@ -15,8 +15,8 @@ std::array<int, 21> expander_ports;
 std::array<Button*, 8> expander_btns;
 
 //For gui to use
-extern int elastic_b_up_time, elastic_b_down_time; //Declared in b_lift.cpp
-extern int elastic_f_up_time, elastic_f_down_time; //Declared in f_lift.cpp
+// extern int elastic_b_up_time, elastic_b_down_time; //Declared in b_lift.cpp
+// extern int elastic_f_up_time, elastic_f_down_time; //Declared in f_lift.cpp
 
 //1:temp(leave as 0), 2:long name, 3:short name
 std::array<std::tuple<pros::Motor*, int, std::string, std::string, Text_*>, 8> motors_for_gui = {
@@ -53,10 +53,10 @@ Button placeholder (360, 140, 100, 75, GUI::Style::SIZE, Button::SINGLE, checks,
 Page track ("Tracking"); //Display tracking vals and reset btns
 Text track_x(50, 45, GUI::Style::CENTRE, TEXT_SMALL, track, "X:%.1f", tracking.x_coord);
 Text track_y(135, 45, GUI::Style::CENTRE, TEXT_SMALL, track, "Y:%.1f", tracking.y_coord);
-Text track_a(220, 45, GUI::Style::CENTRE, TEXT_SMALL, track, "A:%.1f", std::function([](){return tracking.get_angle_in_deg();}));
-Text enc_l(50, 130, GUI::Style::CENTRE, TEXT_SMALL, track, "L:%d", std::function([](){return LeftEncoder.get_value() != std::numeric_limits<int32_t>::max() ? LeftEncoder.get_value() : 0;}));
-Text enc_r(135, 130, GUI::Style::CENTRE, TEXT_SMALL, track, "R:%d", std::function([](){return RightEncoder.get_value() != std::numeric_limits<int32_t>::max() ? RightEncoder.get_value() : 0;}));
-Text enc_b(220, 130, GUI::Style::CENTRE, TEXT_SMALL, track, "B:%d", std::function([](){return BackEncoder.get_value() != std::numeric_limits<int32_t>::max() ? BackEncoder.get_value() : 0;}));
+// Text track_a(220, 45, GUI::Style::CENTRE, TEXT_SMALL, track, "A:%.1f", std::function([](){return tracking.get_angle_in_deg();}));
+// Text enc_l(50, 130, GUI::Style::CENTRE, TEXT_SMALL, track, "L:%d", std::function([](){return LeftEncoder.get_value() != std::numeric_limits<int32_t>::max() ? LeftEncoder.get_value() : 0;}));
+// Text enc_r(135, 130, GUI::Style::CENTRE, TEXT_SMALL, track, "R:%d", std::function([](){return RightEncoder.get_value() != std::numeric_limits<int32_t>::max() ? RightEncoder.get_value() : 0;}));
+// Text enc_b(220, 130, GUI::Style::CENTRE, TEXT_SMALL, track, "B:%d", std::function([](){return BackEncoder.get_value() != std::numeric_limits<int32_t>::max() ? BackEncoder.get_value() : 0;}));
 Button res_x(15, 60, 70, 55, GUI::Style::SIZE, Button::SINGLE, track, "Reset X");
 Button res_y(100, 60, 70, 55, GUI::Style::SIZE, Button::SINGLE, track, "Reset Y");
 Button res_a(185, 60, 70, 55, GUI::Style::SIZE, Button::SINGLE, track, "Reset A");
@@ -64,7 +64,7 @@ Button res_all(15, 160, 240, 60, GUI::Style::SIZE, Button::SINGLE, track, "Reset
 
 Page driver_curve ("Drivers"); //Select a driver and their exp curve
 Button prev_drivr(20, 70, 110, 120, GUI::Style::SIZE, Button::SINGLE, driver_curve, "Prev Driver");
-Text drivr_name(MID_X, MID_Y, GUI::Style::CENTRE, TEXT_LARGE, driver_curve, "%s", std::function([](){return drivebase.driver_name();}));
+// Text drivr_name(MID_X, MID_Y, GUI::Style::CENTRE, TEXT_LARGE, driver_curve, "%s", std::function([](){return drivebase.driver_name();}));
 Button next_drivr(350, 70, 110, 120, GUI::Style::SIZE, Button::SINGLE, driver_curve, "Next Driver");
 
 Page moving ("Moving"); //Moves to target, home, or centre
@@ -318,8 +318,8 @@ void main_setup(){
   prev_drivr.set_func([](){drivebase.prev_driver();});
   next_drivr.set_func([](){drivebase.next_driver();});
 
-  check_b_elastic.set_func([](){b_lift.elastic_util();});
-  check_f_elastic.set_func([](){f_lift.elastic_util();});
+  // check_b_elastic.set_func([](){b_lift.elastic_util();});
+  // check_f_elastic.set_func([](){f_lift.elastic_util();});
   
   res_x.set_func([](){tracking.reset(0.0, tracking.y_coord, rad_to_deg(tracking.global_angle));});
   res_y.set_func([](){tracking.reset(tracking.x_coord, 0.0, rad_to_deg(tracking.global_angle));});

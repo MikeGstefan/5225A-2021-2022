@@ -22,13 +22,14 @@ pros::Motor b_lift_m(5, pros::E_MOTOR_GEARSET_36, false,pros::E_MOTOR_ENCODER_DE
 // pros::Imu imu_sensor(4);
 Piston f_claw_c(7,"",1,0);
 Piston f_claw_o(6,"",0,0);
-Piston drive_t({20,7},"",0,0);
+Piston drive_t({e_port, 7},"",0,0);
 Piston lift_t(4,"",1,0);
 Piston b_claw(5,"",0,0);
+Piston tilt_lock(3,"",0,0);
 
 pros::Distance b_dist(11), f_dist(6);
 
-pros::ADIAnalogIn f_lift_pot(8), b_lift_pot({e_port, 8});
+pros::ADIAnalogIn f_lift_pot(8), b_lift_pot(2);
 // pros::ADIDigitalIn intake_jam({{16, 7}});
 
 pros::Distance l_dist(18);

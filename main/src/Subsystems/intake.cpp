@@ -19,7 +19,7 @@ Intake::Intake(Motorized_subsystem<intake_states, NUM_OF_INTAKE_STATES, INTAKE_M
 
 void Intake::handle_buttons(){
   // toggles intake state if intake button is pressed
-  if(master.get_digital_new_press(intake_button)){
+  if(master.is_rising(intake_button)){
     // doesn't allow driver to turn on intake if lift is at bottom
     if(f_lift.get_state() != f_lift_states::bottom){
       switch(get_state()){
@@ -39,7 +39,7 @@ void Intake::handle_buttons(){
     }
   }
   // toggles intake reverse state if intake reverse button is pressed
-  if(master.get_digital_new_press(intake_reverse_button)){
+  if(master.is_rising(intake_reverse_button)){
     // doesn't allow driver to turn on intake if lift is at bottom
     if(f_lift.get_state() != f_lift_states::bottom){
       switch(get_state()){
@@ -116,6 +116,8 @@ void Intake::handle_state_change(){
   if(get_target_state() != intake_states::off && lift_t.get_state()){
     after_switch_state = get_target_state();  // the state to reach after switching the transmission to intake mode
     set_state(intake_states::shifting_to_intake_up);
+    // stops back lift if it's moving
+    if(b_lift.get_state() == b_lift_states::move_to_target) b_lift.Subsystem::set_state(b_lift_states::between_positions);
   }
   switch(get_target_state()){
     case intake_states::managed:
