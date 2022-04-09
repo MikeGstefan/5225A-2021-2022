@@ -8,6 +8,7 @@ Vector Point::operator -(const Point& p2) const{
   return Vector(x - p2.x, y - p2.y, vector_types::CARTESIAN);
 }
 
+// point constructors
 Point::Point(): x(0.0), y(0.0){}
 Point::Point(Position position): x(position.x), y(position.y){}
 Point::Point(double x, double y): x(x), y(y){}
@@ -19,7 +20,6 @@ Position::Position(Point point, double angle): x(point.x), y(point.y), angle(ang
 Position::Position(double x, double y, double angle): x(x), y(y), angle(angle){}
 
 // vector methods
-
 Vector::Vector(const double param_1, const double param_2, vector_types type){
   if (type == vector_types::POLAR)  set_polar(param_1, param_2);
   else  set_cartesian(param_1, param_2);
