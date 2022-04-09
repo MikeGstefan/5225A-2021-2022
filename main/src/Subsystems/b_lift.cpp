@@ -273,6 +273,7 @@ void B_Claw::handle_state_change(){
     case b_claw_states::tilted:
       master.rumble("-");
       tilt_lock.set_state(HIGH);
+      delay(50);
       b_claw.set_state(HIGH); // grabs mogo
       break;
 
