@@ -97,6 +97,7 @@ void opcontrol() {
 	// wait_until(false);
 	tilt_lock.set_state(HIGH);
 	while(true){
+		// printf("b:%d, f:%d\n", b_lift_pot.get_value(), f_lift_pot.get_value());
 		master.update_buttons();
 		partner.update_buttons();
 		// printf("%d\n", get_lift());

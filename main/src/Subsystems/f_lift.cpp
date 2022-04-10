@@ -80,6 +80,8 @@ void F_Lift::handle(bool driver_array){
 
     case f_lift_states::manual:
       lift_power = master.get_analog(ANALOG_RIGHT_Y);
+      // if master controller joystick isn't active, take partner input instead
+      if(fabs(lift_power) < 10) lift_power = partner.get_analog(ANALOG_LEFT_Y);
       // holds motor if joystick is within deadzone or lift is out of range
       if (fabs(lift_power) < 10 || (lift_power < 0 && f_lift_pot.get_value() <= driver_positions[0]) || (lift_power > 0 && f_lift_pot.get_value() >= driver_positions[driver_positions.size() - 1])){
         motor.move_velocity(0);

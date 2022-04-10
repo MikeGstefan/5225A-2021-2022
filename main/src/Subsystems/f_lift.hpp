@@ -33,9 +33,9 @@ class F_Lift: public Motorized_subsystem<f_lift_states, NUM_OF_F_LIFT_STATES, F_
   std::atomic<int32_t> speed{127}; // max pwm applied to the lifts during a move to target
 
 public:
-
-  vector<int> driver_positions = {1200, 1500, 2050, 2750};
-  vector<int> prog_positions = {1200, 1500, 2050, 2750};
+  // bottom is 1162
+  vector<int> driver_positions = {1130, 1500, 2050, 2750};
+  vector<int> prog_positions = {1130, 1500, 2050, 2750};
 
   F_Lift(Motorized_subsystem<f_lift_states, NUM_OF_F_LIFT_STATES, F_LIFT_MAX_VELOCITY> motorized_subsystem);  // constructor
   

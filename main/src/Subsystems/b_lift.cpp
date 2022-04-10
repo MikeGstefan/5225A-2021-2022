@@ -79,7 +79,8 @@ void B_Lift::handle(bool driver_array){
 
     case b_lift_states::manual:
       lift_power = master.get_analog(ANALOG_RIGHT_X);
-      printf("lift_power:%d, pos:%d\n", lift_power, b_lift_pot.get_value());
+      // if master controller joystick isn't active, take partner input instead
+      if(fabs(lift_power) < 10) lift_power = partner.get_analog(ANALOG_RIGHT_Y);
       // holds motor if joystick is within deadzone or lift is out of range
       if (fabs(lift_power) < 10 || (lift_power < 0 && b_lift_pot.get_value() <= driver_positions[0]) || (lift_power > 0 && b_lift_pot.get_value() >= driver_positions[driver_positions.size() - 1])) motor.move_velocity(0);
       else motor.move(lift_power);
@@ -272,14 +273,15 @@ void B_Claw::handle_state_change(){
 
     case b_claw_states::tilted:
       master.rumble("-");
-      tilt_lock.set_state(HIGH);
-      delay(50);
       b_claw.set_state(HIGH); // grabs mogo
+      // delay(100);
+      // tilt_lock.set_state(HIGH);
       break;
 
     case b_claw_states::flat:
       master.rumble("-");
       tilt_lock.set_state(LOW);
+      delay(100);
       b_claw.set_state(LOW);
       break;
   }
