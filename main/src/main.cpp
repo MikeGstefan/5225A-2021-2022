@@ -36,7 +36,7 @@ void initialize() {
 
 	drivebase.download_curve_data();
 	Data::init();
-	// _Controller::init();
+	_Controller::init();
 	GUI::init();
 	delay(500);
 	// tracking.x_coord = 28.5, tracking.y_coord = 11.75, tracking.global_angle = -90.0_deg;
@@ -49,6 +49,7 @@ void initialize() {
 	// tracking.x_coord = 24.5, tracking.y_coord = 15.0, tracking.global_angle = 9.0_deg;
 	tracking.x_coord = 0.0, tracking.y_coord = 0.0, tracking.global_angle = 0.0_deg;
 	update_t.start();
+  lift_handle_t.start();
 	// master.print(2, 0, "Driver: %s", drivebase.drivers[drivebase.cur_driver].name);
 	// gyro.finish_calibrating(); //Finishes calibrating gyro before program starts
 }
@@ -83,25 +84,11 @@ void competition_initialize() {}
  * from where it left off.
  */
 void autonomous() {
-  // load_positions();
-  // load_auton();
-  // run_auton();
+  load_positions();
+  load_auton();
+  run_auton();
 }
 
 void opcontrol() {
-  /* Nathan:
-  check what actually kills the auto balance loop
-  file writing functions
-  proper text wrapping
-  snprintf2 and then have printf2 just call it
-  auton give up func - ask mike
-  
-  lvgl images
-  2d sliders
-  */
-
-	while(true){
-		// drivebase.non_blocking_driver_practice();
-		delay(10);
-	}
+  //get rid of some gui getters now that main_setup is a friend
 }

@@ -25,7 +25,7 @@ extern _Task move_t;
 // Back: get_pitch, 1
 // Front: get_pitch, -1
 #define GYRO_AXIS get_roll
-#define GYRO_SIDE 1
+#define GYRO_SIDE -1
 
 
 #define DIST_BACK 8.5
@@ -57,6 +57,8 @@ class Tracking{
     double get_angle_in_deg();
     void reset(double x=0.0, double y=0.0, double a=0.0);
     void reset(Position position);
+    double get_dist(Position pos1);
+    static double get_dist(Position pos1, Position pos2);
 };
 
 

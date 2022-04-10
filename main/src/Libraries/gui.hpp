@@ -55,6 +55,10 @@ class GUI{
   friend class Slider;
   friend class Text_;
   template <typename V> friend class Text;
+  friend void main_setup();
+  friend void main_background();
+  friend void util_setup();
+  friend void util_background();
 
   public:
     enum class Style{ //how the rect coords get evaluated
@@ -108,6 +112,10 @@ class Page{
   friend class Slider;
   friend class Text_;
   template <typename V> friend class Text;
+  friend void main_setup();
+  friend void main_background();
+  friend void util_setup();
+  friend void util_background();
   private:
 
     //Vars
@@ -142,6 +150,10 @@ class Text_{
   friend class GUI;
   friend class Page;
   friend class Button;
+  friend void main_setup();
+  friend void main_background();
+  friend void util_setup();
+  friend void util_background();
   private:
   int x1=USER_RIGHT, y1=USER_DOWN, x2=USER_LEFT, y2=USER_UP;
 
@@ -174,6 +186,10 @@ template <typename V>
 class Text: public Text_{
   friend class Button;
   friend class Slider;
+  friend void main_setup();
+  friend void main_background();
+  friend void util_setup();
+  friend void util_background();
   private:
     Text(){};
 
@@ -269,6 +285,10 @@ class Button{
   friend class GUI;
   friend class Page;
   friend class Slider;
+  friend void main_setup();
+  friend void main_background();
+  friend void util_setup();
+  friend void util_background();
   public: enum press_type{
       SINGLE,
       LATCH,
@@ -322,6 +342,10 @@ class Button{
 class Slider{
   friend class GUI;
   friend class Page;
+  friend void main_setup();
+  friend void main_background();
+  friend void util_setup();
+  friend void util_background();
   public: enum direction{
       VERTICAL,
       HORIZONTAL

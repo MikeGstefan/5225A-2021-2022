@@ -46,12 +46,22 @@ void Tracking::reset(Position position){
 double Tracking::get_angle_in_deg(){
   return fmod(rad_to_deg(global_angle), 360);
 }
+
+double Tracking::get_dist(Position pos1, Position pos2){
+  return sqrt(pow(pos1.x - pos2.x, 2) + pow(pos1.y - pos2.y, 2));
+}
+
+double Tracking::get_dist(Position pos1){
+  return sqrt(pow(tracking.x_coord - pos1.x, 2) + pow(tracking.y_coord - pos1.y, 2));
+}
+
+
 // waits until the distance from current position to starting position is greater than the specified amount
 void Tracking::wait_for_dist(double distance, int timeout){
   const Point start_pos = {tracking.x_coord, tracking.y_coord};
   int start_time = millis();
 
-  wait_until(sqrt(pow(tracking.x_coord - start_pos.x, 2) + pow(tracking.y_coord - start_pos.y, 2)) > distance){
+  wait_until(get_dist(start_pos) > distance){
     if(timeout != 0 && millis() - start_time > timeout) break;
   }
 }
@@ -1594,7 +1604,7 @@ void Gyro::climb_ramp(){
   Task([this](){
     wait_until(false){
       get_angle();
-      // motion_i.print("%d | Angle:%f Angle_v:%f, L_v:%f, R_v:%f, Dist:%f\n", millis(), angle, get_angle_dif(), tracking.l_velo, tracking.r_velo, tracking.x_coord);
+      motion_i.print("%d | Angle:%f Angle_v:%f, L_v:%f, R_v:%f, Dist:%f\n", millis(), angle, get_angle_dif(), tracking.l_velo, tracking.r_velo, tracking.x_coord);
       // motion_i.print("%d | Angle:%f\n", millis(), angle);
     }
   });
@@ -1604,7 +1614,7 @@ void Gyro::climb_ramp(){
 
   tracking.reset();
 
-	f_lift.move_absolute(100); //Lowers lift
+	// f_lift.move_absolute(100); //Lowers lift
 
   drivebase.move(-GYRO_SIDE*127, 0.0); //Can probably get rid of this
   tracking.wait_for_dist(18);
@@ -1613,8 +1623,8 @@ void Gyro::climb_ramp(){
 void Gyro::level(double kP, double kD){
 	PID gyro_p(kP, 0, kD, 0);
   Timer gyro_steady ("Gyro", &motion_i);
-  int speed;
-  bool neg = false;
+  // int speed;
+  // bool neg = false;
 
   screen_flash::start("PID", term_colours::NOTIF);
 
@@ -1625,8 +1635,8 @@ void Gyro::level(double kP, double kD){
     
 		if (fabs(angle) > 6 || get_angle_dif() > 0.06) gyro_steady.reset();
 
-    if(speed < 0) neg = true;
-    if(neg && speed > 0) break;
+    // if(speed < 0) neg = true;
+    // if(neg && speed > 0) break;
   }
 
 	motion_i.print("\nLevelled on ramp\n\n");
