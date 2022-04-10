@@ -39,10 +39,10 @@ void initialize() {
 	_Controller::init();
 	GUI::init();
 	delay(500);
-	
-	b_lift.motor.set_brake_mode(E_MOTOR_BRAKE_HOLD);
-	f_lift.motor.set_brake_mode(E_MOTOR_BRAKE_HOLD);
-	
+
+	b_lift.motor.set_brake_mode(E_MOTOR_BRAKE_COAST);
+	f_lift.motor.set_brake_mode(E_MOTOR_BRAKE_COAST);
+
 	// tracking.x_coord = 104.0, tracking.y_coord = 12.0, tracking.global_angle = -30.0_deg;
 	// tracking.x_coord = 24.5, tracking.y_coord = 15.0, tracking.global_angle = 9.0_deg;
 	tracking.x_coord = 0.0, tracking.y_coord = 0.0, tracking.global_angle = 0.0_deg;
@@ -87,13 +87,16 @@ void autonomous() {
 }
 
 void opcontrol() {
-	
+	while (true) {
+		printf("B: %f\n", b_lift_m.get_position());
+		printf("F: %f\n", f_lift_m.get_position());
+		delay(10);
+	}
 	// b)
 	// b_lift.Subsystem::set_state(b_lift_states::move_to_target);
 	// lift_handle_t.start();
 	// /*
-
-
+	b_lift.elastic_util(1029);
 	// wait_until(false);
 	tilt_lock.set_state(HIGH);
 	while(true){
@@ -108,7 +111,7 @@ void opcontrol() {
 		// intake handlers
 		intake.handle_buttons();
 		intake.handle();
-		
+
 		// lift handlers
 		handle_lift_buttons();
 		b_lift.handle(true);

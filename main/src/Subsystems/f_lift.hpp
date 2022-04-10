@@ -50,7 +50,7 @@ public:
     return index.load();
   }
   
-  void elastic_util(); // up time should be about 1100mms (ignore this time, it was on the old lift), down time should be slightly slower than that
+  void elastic_util(int high); // up time should be about 1100mms (ignore this time, it was on the old lift), down time should be slightly slower than that
 };
 
 extern F_Lift f_lift;
