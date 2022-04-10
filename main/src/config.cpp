@@ -28,7 +28,7 @@ Piston b_claw(5,"",0,0);
 Piston tilt_lock(3,"",0,0);
 
 pros::ADIAnalogIn f_lift_pot(8), b_lift_pot({e_port, 8});
-pros::Distance b_dist(11), f_dist(6);
+pros::Distance b_dist(11), r_goal_dist(1), f_dist(6);
 pros::Distance r_reset_dist(14), l_reset_dist(19);
 // pros::ADIDigitalIn intake_jam({{16, 7}});
 
