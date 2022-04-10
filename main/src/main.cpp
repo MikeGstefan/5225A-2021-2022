@@ -51,8 +51,10 @@ void initialize() {
 	// tracking.x_coord = 24.5, tracking.y_coord = 15.0, tracking.global_angle = 9.0_deg;
 	tracking.x_coord = 0.0, tracking.y_coord = 0.0, tracking.global_angle = 0.0_deg;
 	update_t.start();
+	printf("inti AHHHHHHHHH\n");
 	// master.print(2, 0, "Driver: %s", drivebase.drivers[drivebase.cur_driver].name);
 	// gyro.finish_calibrating(); //Finishes calibrating gyro before program starts
+	GUI::go_to(3);
 }
 
 /**
@@ -92,21 +94,28 @@ void autonomous() {
 
 void opcontrol() {
 	// lift_handle_t.start();
-	// while(true){
+	// while(!master.get_digital(DIGITAL_A)){
 	// 	// gui_handle(); //
 	// 	// printf("%d || opcontrol ENCODER L: %d, R: %d, B:%d \n", millis(), LeftEncoder.get_value(), RightEncoder.get_value(), BackEncoder.get_value());
 	// 	delay(10);
 	// }
-	// skills2();
-	// skills();
-	// move_start(move_types::tank_point, tank_point_params({0.0, 20.0,0.0}));
+	// // skills2();
+	// // skills();
+	// move_start(move_types::tank_point, tank_point_params({5.0, 100.0,0.0},false,50));
 	// move_start(move_types::turn_angle, turn_angle_params(90.0));
 	// move_start(move_types::tank_point, tank_point_params({20.0, 20.0,0.0}));
 	// // move_start(move_types::tank_arc, tank_arc_params({0.0,0.0}, {20.0,20.0,90.0}, 70.0));
 	// flatten_against_wall();
 	// // move_start(move_types::tank_arc, tank_arc_params({8.5,8.5}, {20.0,20.0,90.0}));
 	// move_start(move_types::tank_point, tank_point_params({30.0, 20.0,0.0}));
+	// int diff = LeftEncoder.get_value() - RightEncoder.get_value();
+	// int last_diff = diff;
 	while(true){
+	// 	diff = LeftEncoder.get_value() - RightEncoder.get_value();
+	// 	if(diff != last_diff){
+	// 		printf("%d|| diff: %d\n", millis(), diff);
+	// 		last_diff = diff;
+	// 	}
 		delay(10);
 		drivebase.handle_input();
 	}
