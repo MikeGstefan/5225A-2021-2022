@@ -5,7 +5,6 @@
 #include "controller.hpp"
 #include "geometry.hpp"
 #include "logging.hpp"
-#include "pros/misc.h"
 #include "util.hpp"
 #include <map>
 

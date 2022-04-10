@@ -1,6 +1,5 @@
 #pragma once
 #include "main.h"
-#include "pros/adi.hpp"
 
 using namespace std;
 using namespace pros;

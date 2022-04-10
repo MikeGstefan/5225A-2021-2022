@@ -47,18 +47,51 @@ typedef std::uint32_t Colour;
 #define CHAR_HEIGHT_LARGE 32
 #define CHAR_WIDTH_LARGE 19
 
+
+namespace screen_flash{
+  extern Timer timer;
+
+  void end();
+  void start(std::string, Colour, std::uint32_t = 1000); //text+col+time / text+col
+  void start(std::string, term_colours = term_colours::ERROR, std::uint32_t = 1000); //text+cols+time / text+cols / text
+
+  template <typename... Params> //text+cols+time
+  void start(term_colours colour, std::uint32_t time, std::string fmt, Params... args){
+    start(printf_to_string(fmt, args...), colour, time);
+  }
+
+  template <typename... Params> //text+col+time
+  void start(Colour colour, std::uint32_t time, std::string fmt, Params... args){
+    start(printf_to_string(fmt, args...), colour, 1000);
+  }
+
+  template <typename... Params> //text+red+time
+  void start(std::uint32_t time, std::string fmt, Params... args){
+    start(printf_to_string(fmt, args...), term_colours::ERROR, time);
+  }
+
+  template <typename... Params> //text+col+1000
+  void start(term_colours colour, std::string fmt, Params... args){
+    start(printf_to_string(fmt, args...), colour, 1000);
+  }
+}
+
 //All constructor args are in the format points, format, page, Text, Colour
 
 class GUI{
+  template <typename V> friend class Text;
+  friend class GUI;
   friend class Page;
   friend class Button;
   friend class Slider;
   friend class Text_;
-  template <typename V> friend class Text;
   friend void main_setup();
   friend void main_background();
   friend void util_setup();
   friend void util_background();
+  friend void screen_flash::end();
+  friend void screen_flash::start(std::string, Colour, std::uint32_t);
+  friend void screen_flash::start(std::string, term_colours, std::uint32_t);
 
   public:
     enum class Style{ //how the rect coords get evaluated
@@ -70,23 +103,27 @@ class GUI{
 
   private:
     //Vars
+    static constexpr bool prompt_enabled = true;
+    static constexpr bool testing_page_active = false;
+    static const Page* current_page;
+    static const GUI* current_gui;
     static _Task task;
     static bool touched;
     static int x, y;
-    static const Page* current_page;
-    static const GUI* current_gui;
-    static constexpr bool prompt_enabled = true;
-    static constexpr bool testing_page_active = false;
     std::vector<Page*> pages;
     std::function <void()> setup, background;
 
     //Functions
+    static void update(void* = nullptr);
     static void update_screen_status();
     static void go_next(), go_prev();
     static void screen_terminal_fix();
+    static void clear_screen(Colour=GREY);
     static void draw_oblong(int, int, int, int, double, double);
     static int get_height(text_format_e_t), get_width(text_format_e_t);
     static std::tuple<int, int, int, int> fix_points(int, int, int, int, Style);
+
+    bool pressed() const;
 
   public:
     //Pages in the gui, init function, loop function
@@ -96,14 +133,9 @@ class GUI{
     static Colour get_colour(term_colours);
 
     static void aligned_coords (int, int, int, int, int = 480, int = 220);
-    static void clear_screen(Colour=GREY);
-    static void init(), update(void* = nullptr);
+    static void init();
     static void go_to(int);
     static bool prompt(std::string, std::string="", std::uint32_t=0); //Also prompts to controller
-    static bool is_touched();
-    static const Page* const get_current_page();
-    static const GUI* const get_current_gui();
-    bool pressed() const;
 };
 
 class Page{
@@ -116,6 +148,7 @@ class Page{
   friend void main_background();
   friend void util_setup();
   friend void util_background();
+  friend void screen_flash::end();
   private:
 
     //Vars
@@ -133,14 +166,14 @@ class Page{
     static int page_num(const Page*);
     void draw() const;
     void update() const;
+    void go_to() const;
+    bool pressed() const;
 
   public:
     //Title, Bcolour
     explicit Page(std::string, Colour = GREY);
 
     //Functions
-    bool pressed() const;
-    void go_to() const;
     void set_setup_func(std::function <void()>), set_loop_func(std::function <void()>);
     void set_active(bool=true);
 };
@@ -281,6 +314,7 @@ class Text: public Text_{
     }
 
 };
+
 class Button{
   friend class GUI;
   friend class Page;
@@ -315,14 +349,16 @@ class Button{
     std::vector<Button*> options;
 
     //Functions
-    void update();
     void construct (int, int, int, int, GUI::Style, press_type, Page*, std::string, Colour, Colour);
+    void update();
+    void add_text (Text_&, bool=true);
     void run_func() const;
     void run_off_func() const;
     void draw() const;
     void draw_pressed()  const;
     bool new_press();
     bool new_release();
+    bool pressed() const;
 
   public:
     //Points, Format, Page, Label, Bcolour, Lcolour
@@ -330,12 +366,9 @@ class Button{
 
     //Functions
     static void create_options(std::vector<Button*>);
-    bool pressed() const;
-    bool is_on() const;
     void set_func(std::function <void()>), set_off_func(std::function <void()>);
     void set_active(bool=true);
     void set_background (Colour);
-    void add_text (Text_&, bool=true);
     void select(), deselect();
 };
 
@@ -367,6 +400,7 @@ class Slider{
     //Functions
     void update();
     void draw() const;
+    bool pressed() const;
 
   public:
     //Points, Format, Min, Max, Page, Label, Bcolour, Lcolour
@@ -375,34 +409,4 @@ class Slider{
     //Functions
     void set_active(bool=true);
     int get_value() const;
-    bool pressed() const;
-
 };
-
-namespace screen_flash{
-  extern Timer timer;
-
-  void end();
-  void start(std::string, Colour, std::uint32_t = 1000); //text+col+time / text+col
-  void start(std::string, term_colours = term_colours::ERROR, std::uint32_t = 1000); //text+cols+time / text+cols / text
-
-  template <typename... Params> //text+cols+time
-  void start(term_colours colour, std::uint32_t time, std::string fmt, Params... args){
-    start(printf_to_string(fmt, args...), colour, time);
-  }
-
-  template <typename... Params> //text+col+time
-  void start(Colour colour, std::uint32_t time, std::string fmt, Params... args){
-    start(printf_to_string(fmt, args...), colour, 1000);
-  }
-
-  template <typename... Params> //text+red+time
-  void start(std::uint32_t time, std::string fmt, Params... args){
-    start(printf_to_string(fmt, args...), term_colours::ERROR, time);
-  }
-
-  template <typename... Params> //text+col+1000
-  void start(term_colours colour, std::string fmt, Params... args){
-    start(printf_to_string(fmt, args...), colour, 1000);
-  }
-}

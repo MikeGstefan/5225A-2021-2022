@@ -36,7 +36,7 @@ namespace screen_flash{
   bool touched;
 
   void start(std::string text, Colour colour, std::uint32_t time){
-    touched = GUI::is_touched();
+    touched = GUI::touched;
     GUI::clear_screen(colour);
     screen::set_pen(~colour&0xFFFFFF); //Makes text inverted colour of background so it is always visible
     screen::set_eraser(colour);
@@ -63,7 +63,7 @@ namespace screen_flash{
   }
 
   void start(std::string text, term_colours colour, std::uint32_t time){
-    touched = GUI::is_touched();
+    touched = GUI::touched;
     GUI::clear_screen(GUI::get_colour(colour));
     screen::set_pen(~GUI::get_colour(colour)&0xFFFFFF); //Makes text inverted colour of background so it is always visible
     screen::set_eraser(GUI::get_colour(colour));
@@ -92,9 +92,9 @@ namespace screen_flash{
   //rest are templates, so defined in header
 
   void end(){
-    if (timer.playing() && (timer.get_time() >= end_time || (!touched && GUI::is_touched()))){
+    if (timer.playing() && (timer.get_time() >= end_time || (!touched && GUI::touched))){
       timer.reset(false);
-      GUI::get_current_page()->go_to();
+      GUI::current_page->go_to();
     }
   }
 
@@ -626,22 +626,18 @@ Colour GUI::get_colour(term_colours colour){
   return GREY;
 }
 
-const Page* const GUI::get_current_page(){
-  return current_page;
-}
+// const Page* const GUI::get_current_page(){
+//   return current_page;
+// }
 
-const GUI* const GUI::get_current_gui(){
-  return current_gui;
-}
+// const GUI* const GUI::get_current_gui(){
+//   return current_gui;
+// }
 
-bool GUI::is_touched(){
-  update_screen_status();
-  return touched;
-}
-
-bool Button::is_on() const{
-  return on;
-}
+// bool GUI::is_touched(){
+//   update_screen_status();
+//   return touched;
+// }
 
 
 //Data Updates

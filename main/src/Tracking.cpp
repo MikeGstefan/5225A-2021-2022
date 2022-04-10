@@ -2,7 +2,6 @@
 #include "config.hpp"
 #include "drive.hpp"
 #include "logging.hpp"
-#include "pros/motors.h"
 #include "util.hpp"
 #include "geometry.hpp"
 

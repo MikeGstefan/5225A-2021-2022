@@ -726,7 +726,7 @@ void util_background(){
     if (port != std::numeric_limits<int>::max()){
       // sprintf_to_string("%d: %d", port, c::motor_get_actual_velocity(port));
       label = std::to_string(port) + ": " + std::to_string((int)c::motor_get_actual_velocity(port));
-      if(mot_jam_detect.is_on()){
+      if(mot_jam_detect.on){
         if (fabs(c::motor_get_actual_velocity(port)) < fabs(c::motor_get_target_velocity(port))/4) stall_count++;
         else stall_count = 0;
         if (stall_count > 10){
