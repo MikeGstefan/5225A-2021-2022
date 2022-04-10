@@ -231,6 +231,8 @@ void Drivebase::update_lookup_table_util(){
 void Drivebase::handle_input(){
   // tracking.power_x = drivers[cur_driver].custom_drives[0].lookup(master.get_analog(drivers[cur_driver].joy_sticks[0]));
   tracking.power_y = drivers[cur_driver].custom_drives[1].lookup(master.get_analog(ANALOG_LEFT_Y));
+  // caps drive speed at 80 if intake is on
+  if(intake.get_state() == intake_states::on && fabs(tracking.power_y) > 80) tracking.power_y = sgn(tracking.power_y) * 80;
   tracking.power_a = 0.7 * drivers[cur_driver].custom_drives[2].lookup(master.get_analog(ANALOG_LEFT_X));
 
   if(fabs(tracking.power_x) < deadzone) tracking.power_x = 0.0;
