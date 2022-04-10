@@ -174,10 +174,10 @@ Position distance_reset_right(int cycles){
 
 
 Position distance_reset_center(int cycles){
-		double dist_corner = 6; //Front Distance sensor to side of robot
-		double side_length = 86; //Front distance sensor to side distance sensor (Parrallel to the side of the robot not the h value)
-		double dist_to_centre = 196; //Side distance sensor to tracking centre
-		double dist_sensor = 429; //Distance between Front Sensors
+		double dist_corner = -25; //Front Distance sensor to side of robot
+		double side_length = 15; //Front distance sensor to side distance sensor (Parrallel to the side of the robot not the h value)
+		double dist_to_centre = 180; //Side distance sensor to tracking centre
+		double dist_sensor = 400; //Distance between Front Sensors
 		double local_y = 0, l_local_x = 0, r_local_x = 0, angle = 0, local_x;
 		double averageleft = 0, averageright = 0, average_l_side = 0, average_r_side = 0;
 		double l_average, r_average, l_side_average, r_side_average;

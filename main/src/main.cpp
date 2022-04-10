@@ -43,10 +43,10 @@ void initialize() {
 	delay(500);
 	// tracking.x_coord = 28.5, tracking.y_coord = 11.75, tracking.global_angle = -90.0_deg;
 
-	
+
 	b_lift.motor.set_brake_mode(E_MOTOR_BRAKE_HOLD);
 	f_lift.motor.set_brake_mode(E_MOTOR_BRAKE_HOLD);
-	
+
 	// tracking.x_coord = 104.0, tracking.y_coord = 12.0, tracking.global_angle = -30.0_deg;
 	// tracking.x_coord = 24.5, tracking.y_coord = 15.0, tracking.global_angle = 9.0_deg;
 	tracking.x_coord = 0.0, tracking.y_coord = 0.0, tracking.global_angle = 0.0_deg;
@@ -93,8 +93,10 @@ void autonomous() {
 }
 
 void opcontrol() {
-
 	Position start = distance_reset_center();
+	//goal_line_up(2000);
+
+
 	// update_t.kill();
 	// tracking.x_coord = start.x, tracking.y_coord = start.y, tracking.global_angle = deg_to_rad(start.angle);
 	// update_t.start();
@@ -102,9 +104,7 @@ void opcontrol() {
 	// printf("x:%lf, y: %lf, a:%lf\n", start.x, start.y, start.angle);
 	// x:69.576370, y: 26.728601, a:-3.335143
 	// 81 back
-	// tracking.reset(start.x, start.y, start.angle +180);
-	flatten_against_wall(true);
-	tracking.reset(70.0, 27.0, 180.0);
+	tracking.reset(start.x, start.y, start.angle +180);
 
 	// x: 36.47, y: 102.75, a: 105.66
 	// x: 37.86, y: 103.60, a: 102.11
@@ -151,7 +151,7 @@ void opcontrol() {
 		// intake handlers
 		intake.handle_buttons();
 		intake.handle();
-		
+
 		// lift handlers
 		handle_lift_buttons();
 		// b_lift.handle(true);
