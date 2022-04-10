@@ -138,24 +138,15 @@ void F_Lift::set_state(const f_lift_states next_state, const uint8_t index, cons
 
 int elastic_f_up_time, elastic_f_down_time; //from gui_construction.cpp
 
-void F_Lift::elastic_util(){
-  motor.move(-10);
-  // GUI::go("Start Elastic Utility", "Press to start the elastic utility.", 500);
+void F_Lift::elastic_util(int high){ //935 as of April 10th
   master.get_digital_new_press(DIGITAL_A);
   Timer move_timer{"move"};
-  set_state(f_lift_states::move_to_target, driver_positions.size() - 1); // moves to top
-  // // intake_piston.set_value(HIGH);  // raises intake
-  wait_until(get_state() == f_lift_states::idle);
+  while(abs(f_lift_m.get_position() - high) > 15) f_lift_m.move(127);
   move_timer.print();
-  elastic_f_up_time = move_timer.get_time();
-  master.print(1, 0, "up time: %d", elastic_f_up_time);
-
   move_timer.reset();
-  set_state(f_lift_states::move_to_target, 0); // moves to bottom
-  wait_until(get_state() == f_lift_states::bottom);
+  while(abs(f_lift_m.get_position() - 0) > 15) f_lift_m.move(-127);
   move_timer.print();
-  elastic_f_down_time = move_timer.get_time();
-  master.print(2, 0, "down time: %d", elastic_f_up_time);
+  f_lift_m.move(0);
 }
 
 

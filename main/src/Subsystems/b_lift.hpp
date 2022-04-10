@@ -50,7 +50,7 @@ public:
   uint8_t get_index() const{
     return index.load();
   }
-  void elastic_util(); // up time should be about 1100mms (ignore this time, it was on the old lift), down time should be slightly slower than that
+  void elastic_util(int high); // up time should be about 1100mms (ignore this time, it was on the old lift), down time should be slightly slower than that
 };
 
 extern B_Lift b_lift;
