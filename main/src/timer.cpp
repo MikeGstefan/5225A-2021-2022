@@ -1,4 +1,5 @@
 #include "timer.hpp"
+#include "logging.hpp"
 
 Timer::Timer(const char* name, const bool& play, timing_units timing_unit, Data* data_obj_ptr):
 name(name), timing_unit(timing_unit)
@@ -83,32 +84,41 @@ bool Timer::playing(){
 }
 
 std::string Timer::to_string(std::uint64_t time, timing_units unit, int long_names, bool unit_conversion){
-  const char* millis;
-  const char* micros;
-  const char* sec;
-  const char* min;
-  const char* plural;
+  std::string millis;
+  std::string micros;
+  std::string sec;
+  std::string min;
+  std::string plural;
 
-  if (long_names==0){
-    millis = "ms";
-    micros = "us";
-    sec = "s";
-    min = "m";
-    plural = "";
-  }
-  else if (long_names==1){
-    millis = " millis";
-    micros = " micros";
-    sec = " sec";
-    min = " min";
-    plural = "";
-  }
-  else if (long_names==2){
-    millis = " millisecond";
-    micros = " microsecond";
-    sec = " second";
-    min = " minute";
-    plural = "s";
+  switch(long_names){
+    case 0:
+      millis = "ms";
+      micros = "us";
+      sec = "s";
+      min = "m";
+      plural = "";
+      break;
+    case 1:
+      millis = " millis";
+      micros = " micros";
+      sec = " sec";
+      min = " min";
+      plural = "";
+      break;
+    case 2:
+      millis = " millisecond";
+      micros = " microsecond";
+      sec = " second";
+      min = " minute";
+      plural = "s";
+      break;
+    default:
+      millis = "";
+      micros = "";
+      sec = "";
+      min = "";
+      plural = "";
+      break;
   }
 
   std::string buffer;

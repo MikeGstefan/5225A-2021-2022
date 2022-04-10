@@ -16,7 +16,7 @@ class Text_; //parent (interface)
 template <typename V=std::nullptr_t> class Text; //child (used)
 
 //For main.cpp to switch between
-extern GUI g_main, g_util;
+extern GUI main_obj, util_obj;
 
 //From gui.cpp
 extern Page terminal, testing;
@@ -27,25 +27,25 @@ extern Slider testing_slider;
 typedef std::uint32_t Colour;
 #define COLOUR(NAME) (Colour)COLOR_##NAME
 
-#define ORANGE (Colour)0x00F36421
-#define GREY (Colour)0x00202020
+constexpr Colour ORANGE = 0x00F36421;
+constexpr Colour GREY = 0x00202020;
 
-#define PAGE_LEFT 0
-#define PAGE_UP 0
-#define PAGE_RIGHT 480
-#define PAGE_DOWN 240
-#define USER_LEFT 0
-#define USER_UP 25
-#define USER_RIGHT 479
-#define USER_DOWN 239
-#define MID_X 240
-#define MID_Y 120
-#define CHAR_HEIGHT_SMALL 12
-#define CHAR_WIDTH_SMALL 7
-#define CHAR_HEIGHT_MEDIUM 16
-#define CHAR_WIDTH_MEDIUM 9
-#define CHAR_HEIGHT_LARGE 32
-#define CHAR_WIDTH_LARGE 19
+constexpr int PAGE_LEFT = 0;
+constexpr int PAGE_UP = 0;
+constexpr int PAGE_RIGHT = 480;
+constexpr int PAGE_DOWN = 240;
+constexpr int USER_LEFT = 0;
+constexpr int USER_UP = 25;
+constexpr int USER_RIGHT = 479;
+constexpr int USER_DOWN = 239;
+constexpr int MID_X = 240;
+constexpr int MID_Y = 120;
+constexpr int CHAR_HEIGHT_SMALL = 12;
+constexpr int CHAR_WIDTH_SMALL = 7;
+constexpr int CHAR_HEIGHT_MEDIUM = 16;
+constexpr int CHAR_WIDTH_MEDIUM = 9;
+constexpr int CHAR_HEIGHT_LARGE = 32;
+constexpr int CHAR_WIDTH_LARGE = 19;
 
 
 namespace screen_flash{
@@ -57,30 +57,30 @@ namespace screen_flash{
 
   template <typename... Params> //text+cols+time
   void start(term_colours colour, std::uint32_t time, std::string fmt, Params... args){
-    start(printf_to_string(fmt, args...), colour, time);
+    start(sprintf2(fmt, args...), colour, time);
   }
 
   template <typename... Params> //text+col+time
   void start(Colour colour, std::uint32_t time, std::string fmt, Params... args){
-    start(printf_to_string(fmt, args...), colour, 1000);
+    start(sprintf2(fmt, args...), colour, 1000);
   }
 
   template <typename... Params> //text+red+time
   void start(std::uint32_t time, std::string fmt, Params... args){
-    start(printf_to_string(fmt, args...), term_colours::ERROR, time);
+    start(sprintf2(fmt, args...), term_colours::ERROR, time);
   }
 
   template <typename... Params> //text+col+1000
   void start(term_colours colour, std::string fmt, Params... args){
-    start(printf_to_string(fmt, args...), colour, 1000);
+    start(sprintf2(fmt, args...), colour, 1000);
   }
 }
+
 
 //All constructor args are in the format points, format, page, Text, Colour
 
 class GUI{
   template <typename V> friend class Text;
-  friend class GUI;
   friend class Page;
   friend class Button;
   friend class Slider;
@@ -130,25 +130,26 @@ class GUI{
     GUI(std::vector<Page*>, std::function <void()>, std::function <void()>);
 
     //Functions
-    static Colour get_colour(term_colours);
-
     static void aligned_coords (int, int, int, int, int = 480, int = 220);
     static void init();
     static void go_to(int);
     static bool prompt(std::string, std::string="", std::uint32_t=0); //Also prompts to controller
+    static Colour get_colour(term_colours);
 };
 
 class Page{
+  template <typename V> friend class Text;
   friend class GUI;
   friend class Button;
   friend class Slider;
   friend class Text_;
-  template <typename V> friend class Text;
   friend void main_setup();
   friend void main_background();
   friend void util_setup();
   friend void util_background();
   friend void screen_flash::end();
+  friend void screen_flash::start(std::string, Colour, std::uint32_t);
+  friend void screen_flash::start(std::string, term_colours, std::uint32_t);
   private:
 
     //Vars
@@ -180,13 +181,18 @@ class Page{
 
 //Text parent class
 class Text_{
+  template <typename V> friend class Text;
   friend class GUI;
   friend class Page;
   friend class Button;
+  friend class Slider;
   friend void main_setup();
   friend void main_background();
   friend void util_setup();
   friend void util_background();
+  friend void screen_flash::end();
+  friend void screen_flash::start(std::string, Colour, std::uint32_t);
+  friend void screen_flash::start(std::string, term_colours, std::uint32_t);
   private:
   int x1=USER_RIGHT, y1=USER_DOWN, x2=USER_LEFT, y2=USER_UP;
 
@@ -217,12 +223,18 @@ class Text_{
 
 template <typename V>
 class Text: public Text_{
+  friend class GUI;
+  friend class Page;
   friend class Button;
   friend class Slider;
+  friend class Text_;
   friend void main_setup();
   friend void main_background();
   friend void util_setup();
   friend void util_background();
+  friend void screen_flash::end();
+  friend void screen_flash::start(std::string, Colour, std::uint32_t);
+  friend void screen_flash::start(std::string, term_colours, std::uint32_t);
   private:
     Text(){};
 
@@ -316,13 +328,18 @@ class Text: public Text_{
 };
 
 class Button{
+  template <typename V> friend class Text;
   friend class GUI;
   friend class Page;
   friend class Slider;
+  friend class Text_;
   friend void main_setup();
   friend void main_background();
   friend void util_setup();
   friend void util_background();
+  friend void screen_flash::end();
+  friend void screen_flash::start(std::string, Colour, std::uint32_t);
+  friend void screen_flash::start(std::string, term_colours, std::uint32_t);
   public: enum press_type{
       SINGLE,
       LATCH,
@@ -373,12 +390,18 @@ class Button{
 };
 
 class Slider{
+  template <typename V> friend class Text;
   friend class GUI;
   friend class Page;
+  friend class Button;
+  friend class Text_;
   friend void main_setup();
   friend void main_background();
   friend void util_setup();
   friend void util_background();
+  friend void screen_flash::end();
+  friend void screen_flash::start(std::string, Colour, std::uint32_t);
+  friend void screen_flash::start(std::string, term_colours, std::uint32_t);
   public: enum direction{
       VERTICAL,
       HORIZONTAL

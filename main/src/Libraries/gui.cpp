@@ -383,9 +383,7 @@ void Button::create_options(std::vector<Button*> buttons){
 
 void Button::add_text(Text_& text_ref, bool overwrite){
   if(page != text_ref.page){
-    char error [120];
-    snprintf(error, 120, "Text can only be linked to a button on the same page! Failed on \"%s\" button and \"%s\" text.\n", label.c_str(), text_ref.label.c_str());
-    throw std::invalid_argument(error);
+    throw std::invalid_argument(sprintf2("Text can only be linked to a button on the same page! Failed on \"%s\" button and \"%s\" text.", label, text_ref.label));
     return;
   }
   title = &text_ref;
@@ -446,35 +444,40 @@ void Text_::set_background (Colour colour){
 
 void Page::set_active(bool active){
   this->active = active;
-  if (active) go_to();
-  else if (this == GUI::current_page) GUI::go_next();
+  if (!active && this == GUI::current_page) GUI::go_next();
 }
 
 void Button::set_active(bool active){
   this->active = active;
   if (title) title->set_active(active);
-  if (active) draw();
-  else if (page == GUI::current_page){
-    screen::set_pen(page->b_col);
-    screen::fill_rect(x1, y1, x2, y2);
+  if (page == GUI::current_page){
+    if (active) draw();
+    else{
+      screen::set_pen(page->b_col);
+      screen::fill_rect(x1, y1, x2, y2);
+    }
   }
 }
 
 void Text_::set_active(bool active){
   this->active = active;
-  if (active) draw();
-  else if (page == GUI::current_page){
-    screen::set_pen(page->b_col);
-    screen::fill_rect(x1, y1, x2, y2);
+  if (page == GUI::current_page){
+    if (active) draw();
+    else{
+      screen::set_pen(page->b_col);
+      screen::fill_rect(x1, y1, x2, y2);
+    }
   }
 }
 
 void Slider::set_active(bool active){
   this->active = active;
-  if (active) draw();
-  else if (page == GUI::current_page){
-    screen::set_pen(page->b_col);
-    screen::fill_rect(x1, y1, x2, y2);
+  if (page == GUI::current_page){
+    if (active) draw();
+    else{
+      screen::set_pen(page->b_col);
+      screen::fill_rect(x1, y1, x2, y2);
+    }
   }
 }
 

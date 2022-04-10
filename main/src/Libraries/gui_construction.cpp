@@ -158,7 +158,7 @@ Slider expander_1 (30, 90, 30, 100, GUI::Style::SIZE, Slider::VERTICAL, 0, 21, e
 Slider port_1 (115, 90, 30, 100, GUI::Style::SIZE, Slider::VERTICAL, 1, 8, encoders, "P1");
 Slider port_2 (200, 90, 30, 100, GUI::Style::SIZE, Slider::VERTICAL, 1, 8, encoders, "P2");
 Button enc_set (350, 60, 50, 20, GUI::Style::CENTRE, Button::SINGLE, encoders, "Set");
-Text enc (350, 100, GUI::Style::CENTRE, TEXT_SMALL, encoders, "%s", std::function([](){return std::to_string(expander_1.get_value()) + ':' + char(port_1.get_value()+64) + char(port_2.get_value()+64);}));
+Text enc (350, 100, GUI::Style::CENTRE, TEXT_SMALL, encoders, "%s", std::function([](){return sprintf2("%d:%c%c", expander_1.get_value(), port_1.get_value()+64, port_2.get_value()+64);}));
 Text enc_degs (350, 120, GUI::Style::CENTRE, TEXT_SMALL, encoders, "Degs: %d", enc_val);
 Text enc_rots (350, 140, GUI::Style::CENTRE, TEXT_SMALL, encoders, "Rots: %d", std::function([](){return int(enc_val/360);}));
 Text enc_remain (350, 160, GUI::Style::CENTRE, TEXT_SMALL, encoders, "Remaining: %d", std::function([](){return abs(enc_val-360*int(round((enc_val+sgn(enc_val)*180)/360)));}));
@@ -687,7 +687,7 @@ void util_setup(){
   enc_set.set_func([](){
     int port = expander_1.get_value();
     if(abs(port_1.get_value()-port_2.get_value()) != 1 || std::min(port_1.get_value(), port_2.get_value()) % 2 == 0){
-      screen_flash::start(term_colours::ERROR, "Invalid Ports %c%c", char(port_1.get_value()+64), char(port_2.get_value()+64));
+      screen_flash::start(term_colours::ERROR, "Invalid Ports %c%c", port_1.get_value()+64, port_2.get_value()+64);
       return;
     }
     if(port){
@@ -724,8 +724,7 @@ void util_background(){
     int& stall_count = std::get<4>(*it);
     std::string& label = std::get<5>(*it);
     if (port != std::numeric_limits<int>::max()){
-      // sprintf_to_string("%d: %d", port, c::motor_get_actual_velocity(port));
-      label = std::to_string(port) + ": " + std::to_string((int)c::motor_get_actual_velocity(port));
+      label = sprintf2("%d: %d", port, c::motor_get_actual_velocity(port));
       if(mot_jam_detect.on){
         if (fabs(c::motor_get_actual_velocity(port)) < fabs(c::motor_get_target_velocity(port))/4) stall_count++;
         else stall_count = 0;
@@ -739,6 +738,6 @@ void util_background(){
   }
 }
 
-GUI g_main ({&temps, &checks, &track, &moving, &lift_move,  &driver_curve, &elastic, &tuning, &motors, &pneumatics}, &main_setup, &main_background);
+GUI main_obj ({&temps, &checks, &track, &moving, &lift_move,  &driver_curve, &elastic, &tuning, &motors, &pneumatics}, &main_setup, &main_background);
 
-GUI g_util ({&ports, &encoders, &motor, &pneumatic}, &util_setup, &util_background);
+GUI util_obj ({&ports, &encoders, &motor, &pneumatic}, &util_setup, &util_background);
