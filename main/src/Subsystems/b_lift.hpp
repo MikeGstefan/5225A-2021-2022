@@ -1,6 +1,5 @@
 #pragma once
 #include "../Libraries/subsystem.hpp"
-#include "../timer.hpp"
 #include "../pid.hpp"
 
 #define NUM_OF_B_LIFT_STATES 8

@@ -1,7 +1,10 @@
 #pragma once
 #include "main.h"
 #include "../timer.hpp"
-#include "geometry.hpp"
+
+
+struct Point;
+struct Position;
 
 using namespace pros;
 

@@ -1,6 +1,7 @@
 #pragma once
 #include "main.h"
-#include "Libraries/geometry.hpp"
+
+struct Position;
 
 enum class Distance_States{
   stable,

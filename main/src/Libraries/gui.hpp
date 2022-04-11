@@ -1,9 +1,9 @@
 #pragma once
 #include "main.h"
-#include "../task.hpp"
 #include "printing.hpp"
 
 // Forward-Declaration
+class _Task;
 class GUI;
 class Page;
 class Button;

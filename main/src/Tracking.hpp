@@ -1,7 +1,9 @@
 #pragma once
 #include "main.h"
 #include "Libraries/geometry.hpp"
-#include "task.hpp"
+// #include "task.hpp"
+
+class _Task;
 
 extern _Task update_t;
 extern _Task move_t;

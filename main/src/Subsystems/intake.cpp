@@ -1,6 +1,5 @@
 #include "intake.hpp"
 #include "../config.hpp"
-#include "../controller.hpp"
 #include "f_lift.hpp"
 #include "b_lift.hpp"
 

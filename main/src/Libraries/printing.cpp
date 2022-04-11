@@ -1,4 +1,5 @@
 #include "printing.hpp"
+#include "geometry.hpp"
 
 std::string convert_all_args(const std::string& fmt, const std::string& arg){
   if(fmt.back() == 'p') return convert_all_args(fmt, arg.data());

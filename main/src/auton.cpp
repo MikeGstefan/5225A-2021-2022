@@ -1,11 +1,9 @@
 #include "auton.hpp"
 #include "auton_util.hpp"
 #include "config.hpp"
-#include "controller.hpp"
 #include "distance.hpp"
 #include "Subsystems/b_lift.hpp"
 #include "Subsystems/f_lift.hpp"
-#include "Libraries/printing.hpp"
 #include "tracking.hpp"
 #include <map> //Not put in main.h because util.hpp cannot include <map>
 

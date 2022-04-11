@@ -1,8 +1,5 @@
 #include "f_lift.hpp"
 #include "../config.hpp"
-#include "../controller.hpp"
-#include "../logging.hpp"
-#include "../util.hpp"
 #include "../Libraries/gui.hpp"
 #include "../auton_util.hpp"
 

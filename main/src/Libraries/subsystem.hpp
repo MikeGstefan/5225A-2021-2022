@@ -1,6 +1,5 @@
 #pragma once
 #include "main.h"
-#include "../timer.hpp"
 #include "../logging.hpp"
 #include "../util.hpp"
 

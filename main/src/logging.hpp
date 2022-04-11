@@ -48,7 +48,6 @@ public:
   log_locations log_location;
   static vector<Data*> get_objs();
 
-  void print(Timer* tmr,int freq, vector<function<char*()>> str) const; //How is this used?
   void log_print(char* buffer, int buffer_len) const;
   void set_print(term_colours print_colour, int time_type);
 
@@ -93,6 +92,9 @@ public:
       }
     }
   }
+
+
+  void print(Timer* tmr,int freq, vector<function<char*()>> str) const; //How is this used?
 };
 
 

@@ -1,5 +1,4 @@
 #include "logging.hpp"
-#include "timer.hpp"
 #include "task.hpp"
 
 const char* file_name= "/usd/data.txt";

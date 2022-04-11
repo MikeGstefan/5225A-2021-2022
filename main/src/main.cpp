@@ -2,14 +2,11 @@
 #include "Libraries/gui.hpp"
 #include "auton.hpp"
 #include "auton_util.hpp"
-#include "controller.hpp"
-#include "logging.hpp"
+#include "config.hpp"
 #include "drive.hpp"
 #include "tracking.hpp"
 #include "Subsystems/f_lift.hpp"
 #include "Subsystems/b_lift.hpp"
-#include "distance.hpp"
-#include "util.hpp"
 
 pros::Task *updt = nullptr; //What's this for
 const GUI* GUI::current_gui = &main_obj;
