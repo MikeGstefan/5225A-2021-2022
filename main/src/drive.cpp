@@ -376,6 +376,16 @@ int Drivebase::get_deadzone(){
   return this->deadzone;
 }
 
+void Drivebase::reset(){
+  RightEncoder.reset();
+  LeftEncoder.reset();
+  BackEncoder.reset();
+  tracking.reset();
+
+  drivebase.move(0.0, 0.0);
+  drivebase.set_state(HIGH);
+}
+
 
 // bool Drivebase::get_lift_button(int side){
 //   // bool front

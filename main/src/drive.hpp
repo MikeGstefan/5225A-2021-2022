@@ -103,6 +103,8 @@ public:
   bool get_reverse();
   int get_deadzone();
   // bool get_lift_button(int side = 0);
+
+  void reset();
 };
 
 extern Drivebase drivebase;
