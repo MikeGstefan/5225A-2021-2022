@@ -14,64 +14,20 @@
 #include "Subsystems/f_lift.hpp"
 #include <fstream>
 
+#define f_bottom 0
+#define f_carry 1 
+#define f_plat 2 
+#define f_backup 3 
+#define f_level 4 
+#define f_top 5
+
 void rush_high();
 void rush_tall();
 void rush_low();
 
 void skills();
 void skills2();
-void new_skills3();
 
-void skills3();
-void skills4();
-void skillsPark();
-
-void lrt_auton();
-
-void blue_highside();
-void blue_highside_tall();
-void blue_lowside();
-
-constexpr bool normal_auton = true;
-
-//alliances and goals really shouldn't be enums, but it makes my code more consistent
-enum class autons{
-  Skills,
-  AUTO2,
-  AUTO3,
-  NUM_OF_ELEMENTS,
-  DEFAULT = Skills,
-};
-
-enum class start_pos{
-  POS1,
-  POS2,
-  POS3,
-  NUM_OF_ELEMENTS,
-  DEFAULT = POS1,
-};
-
-enum class alliances{
-  RED,
-  BLUE,
-  NUM_OF_ELEMENTS,
-  DEFAULT = RED
-};
-
-enum class goals{
-  LEFT,
-  TALL,
-  RIGHT,
-  NUM_OF_ELEMENTS,
-  DEFAULT = TALL
-};
-
-extern autons cur_auton;
-extern start_pos cur_start_pos;
-extern alliances cur_alliance;
-extern goals cur_goal;
-
-void auton_file_read();
-void auton_file_update();
-void auton_give_up();
-void auton_selector();
+void select_auton();
+void run_auton();
+void load_auton();

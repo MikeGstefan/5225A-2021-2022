@@ -1,35 +1,37 @@
 #include "config.hpp"
 
-// NEW config
+static constexpr int e_port = 20;
+
+// 6 Motor config - Apr 3 2022
 _Controller master(pros::E_CONTROLLER_MASTER);
 _Controller partner(pros::E_CONTROLLER_PARTNER);
-pros::ADIEncoder LeftEncoder({16, 5, 6}, true), RightEncoder({16, 1, 2}, true), BackEncoder({16, 3, 4}, false);
+pros::ADIEncoder LeftEncoder({e_port, 5, 6}, false), RightEncoder({e_port, 1, 2}, true), BackEncoder({e_port, 3, 4}, false);
 
-pros::Motor front_l(2, pros::E_MOTOR_GEARSET_18, true, pros::E_MOTOR_ENCODER_DEGREES);
-pros::Motor front_r(4, pros::E_MOTOR_GEARSET_18, false, pros::E_MOTOR_ENCODER_DEGREES);
-pros::Motor back_l(1, pros::E_MOTOR_GEARSET_18, false, pros::E_MOTOR_ENCODER_DEGREES);
-pros::Motor back_r(3, pros::E_MOTOR_GEARSET_18, true, pros::E_MOTOR_ENCODER_DEGREES);
+pros::Motor front_l(10, pros::E_MOTOR_GEARSET_18, true, pros::E_MOTOR_ENCODER_DEGREES);
+pros::Motor center_l(9, pros::E_MOTOR_GEARSET_18, false, pros::E_MOTOR_ENCODER_DEGREES);
+pros::Motor back_l(8, pros::E_MOTOR_GEARSET_18, true, pros::E_MOTOR_ENCODER_DEGREES);
 
-pros::Motor f_lift_m(5, pros::E_MOTOR_GEARSET_36, false, pros::E_MOTOR_ENCODER_DEGREES), b_lift_m(7, pros::E_MOTOR_GEARSET_36, true, pros::E_MOTOR_ENCODER_DEGREES);
-pros::Motor intk(6, pros::E_MOTOR_GEARSET_06, true, pros::E_MOTOR_ENCODER_DEGREES);
-// tank drive config
-// pros::Motor front_l(19, pros::E_MOTOR_GEARSET_18, false, pros::E_MOTOR_ENCODER_DEGREES);
-// pros::Motor front_r(17, pros::E_MOTOR_GEARSET_18, true, pros::E_MOTOR_ENCODER_DEGREES);
-// pros::Motor back_l(20, pros::E_MOTOR_GEARSET_18, false, pros::E_MOTOR_ENCODER_DEGREES);
-// pros::Motor back_r(18, pros::E_MOTOR_GEARSET_18, true, pros::E_MOTOR_ENCODER_DEGREES);
+pros::Motor front_r(1, pros::E_MOTOR_GEARSET_18, false, pros::E_MOTOR_ENCODER_DEGREES);
+pros::Motor center_r(2, pros::E_MOTOR_GEARSET_18, true, pros::E_MOTOR_ENCODER_DEGREES);
+pros::Motor back_r(3, pros::E_MOTOR_GEARSET_18, false, pros::E_MOTOR_ENCODER_DEGREES);
 
-// pros::Imu imu_sensor(4);
-pros::Distance b_dist(9), f_dist(12), r_reset_dist(19), l_reset_dist(20);
-pros::ADIDigitalOut trans_p({{16, 8}}), b_claw_p(6), f_claw_p(8);
-pros::ADIDigitalOut Led1({{14, 7}});
-pros::ADIDigitalOut Led2({{14, 8}});
-pros::ADIDigitalIn intake_jam({{16, 7}});
-pros::ADIDigitalIn f_touch(7);
+pros::Motor f_lift_m(4, pros::E_MOTOR_GEARSET_18, false,pros::E_MOTOR_ENCODER_DEGREES);
+pros::Motor b_lift_m(5, pros::E_MOTOR_GEARSET_36, false,pros::E_MOTOR_ENCODER_DEGREES);
+
+Piston f_claw_c(7, "F Claw C", 1, 0);
+Piston f_claw_o(6, "F Claw O", 0, 0);
+Piston drive_t({e_port, 7}, "Drive Trans", 0, 0);
+Piston lift_t(4, "Lift Trans", 1, 0);
+Piston b_claw(5, "B Claw", 0, 0);
+Piston tilt_lock(3, "Tilt Lock", 0, 0);
+
+
+pros::ADIAnalogIn f_lift_pot(8), b_lift_pot(2);
+
+pros::Distance b_dist(11), f_dist(6);
+pros::Distance r_reset_dist(14), l_reset_dist(19);
+pros::Distance r_dist(12), l_dist(18);
+
 // pros::ADIDigitalIn intake_jam({{16, 7}});
 
-pros::Distance l_dist(18);
-pros::Distance r_dist(17);
-
-pros::Imu ramp_imu(8);
-
-// ADIDigitalOut f_claw_p({{16,1}});
+pros::Imu ramp_imu(17);

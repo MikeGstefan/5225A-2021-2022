@@ -6,13 +6,17 @@
 #include "logging.hpp"
 #include "auton_util.hpp"
 #include "Libraries/gui.hpp"
-#include "lift.hpp"
 
 #include "Subsystems/b_lift.hpp"
 #include "Subsystems/f_lift.hpp"
 #include "Subsystems/intake.hpp"
-#include "Subsystems/b_claw.hpp"
 
+// what the right joystick currently does
+enum class joy_modes{
+  lift_select, // the right joystick selects which lift is active
+  manual // the right joystick operates the lifts manually
+};
+extern joy_modes joy_mode;
 
 using namespace pros;
 using namespace std;
@@ -23,7 +27,7 @@ using namespace std;
 // enum class drivers{Nikhil = 0, Emily = 1, Sarah = 2};
 
 // wait until at least 50 ms since the last reset
-// #define WAIT_FOR_SCREEN_REFRESH() {\
+// #define WAIT_FOR_SCREEN_REFRESH(){\
 //   delay(drivebase.screen_timer.get_time() < 50 ? 50 - drivebase.screen_timer.get_time() : 0);\
 //   drivebase.screen_timer.reset();\
 // }
@@ -77,7 +81,6 @@ public:
   // 'set-drive' methods
   void move(double x, double y, double a);
   void move(double y, double a);
-  void move_tank(double y, double a);
   void move_side(double l, double r);
 
   void brake();
@@ -102,9 +105,16 @@ public:
   // bool get_lift_button(int side = 0);
 };
 
-
-
-
-
-
 extern Drivebase drivebase;
+
+// returns true if using front lift and false if using back lift
+bool get_lift();
+
+
+void handle_lift_buttons();
+void handle_claw_buttons();
+
+extern Timer up_press;
+extern Timer down_press;
+extern Timer toggle_press_timer;
+

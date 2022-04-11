@@ -1,8 +1,6 @@
 #include "gui.hpp"
-#include "pros/adi.h"
-#include "pros/ext_adi.h"
-#include <limits>
 
+//Can probably get rid of static since not being included anywhere. Or make everything static
 /*Field array*/ static std::vector<std::bitset<200>> field (200, std::bitset<200>{}); //Initializes to 200 blank bitsets
 /*Temperature Alert Flag*/ static bool temp_flashed = false;
 
@@ -15,41 +13,43 @@ std::string expander_port_nums;
 std::string no_pneumatic_port_nums;
 std::array<std::tuple<int, Button*, Button*, Text_*, int, std::string>, 8> motor_ports; //util: port, run, stop, stall counter, port and rpm
 std::array<int, 21> expander_ports;
-std::array<Button*, 8> expander_btns;
+std::array<Button*, 8> exp_pneum_btns;
 
 //For gui to use
 extern int elastic_b_up_time, elastic_b_down_time; //Declared in b_lift.cpp
 extern int elastic_f_up_time, elastic_f_down_time; //Declared in f_lift.cpp
 
 //1:temp(leave as 0), 2:long name, 3:short name
-std::array<std::tuple<pros::Motor*, int, std::string, std::string, Text_*>, 8> motors_for_gui = {
-  std::make_tuple(&front_l, 0, "Front Left", "FL", nullptr),
-  std::make_tuple(&front_r, 0, "Front Right", "FR", nullptr),
-  std::make_tuple(&back_l, 0, "Back Left", "BL", nullptr),
-  std::make_tuple(&back_r, 0, "Back Right", "BR", nullptr),
-  std::make_tuple(&f_lift_m, 0, "Front Lift", "F", nullptr),
-  std::make_tuple(&b_lift_m, 0, "Back Lift", "B", nullptr),
-  std::make_tuple(&intk, 0, "Intake", "IN", nullptr),
-  std::make_tuple(nullptr, 0, "", "", nullptr),
-};//std::make_tuple(nullptr, 0, "", "", nullptr),
+std::array<std::tuple<pros::Motor*, int, std::string, std::string, Text_*>, 8> motors_for_gui {{ //put btn* here
+  {&back_l, 0, "Back Left", "BL", nullptr},
+  {&center_l, 0, "Center Left", "CL", nullptr},
+  {&front_l, 0, "Front Left", "FL", nullptr},
+  {&back_r, 0, "Back Right", "BR", nullptr},
+  {&center_r, 0, "Center Right", "CR", nullptr},
+  {&front_r, 0, "Front Right", "FR", nullptr},
+  {&f_lift_m, 0, "Front Lift", "F", nullptr},
+  {&b_lift_m, 0, "Back Lift", "B", nullptr},
+}};//{nullptr, 0, "", "", nullptr},
 
 Page temps ("Temperature"); //Motor temps
-Text mot_temp_1(75, 85, GUI::Style::CENTRE, TEXT_SMALL, temps, std::get<3>(motors_for_gui[0]) + ": %dC", std::get<1>(motors_for_gui[0]), COLOUR(BLACK));
-Text mot_temp_2(185, 85, GUI::Style::CENTRE, TEXT_SMALL, temps, std::get<3>(motors_for_gui[1]) + ": %dC", std::get<1>(motors_for_gui[1]), COLOUR(BLACK));
-Text mot_temp_3(295, 85, GUI::Style::CENTRE, TEXT_SMALL, temps, std::get<3>(motors_for_gui[2]) + ": %dC", std::get<1>(motors_for_gui[2]), COLOUR(BLACK));
-Text mot_temp_4(405, 85, GUI::Style::CENTRE, TEXT_SMALL, temps, std::get<3>(motors_for_gui[3]) + ": %dC", std::get<1>(motors_for_gui[3]), COLOUR(BLACK));
-Text mot_temp_5(75, 175, GUI::Style::CENTRE, TEXT_SMALL, temps, std::get<3>(motors_for_gui[4]) + ": %dC", std::get<1>(motors_for_gui[4]), COLOUR(BLACK));
-Text mot_temp_6(185, 175, GUI::Style::CENTRE, TEXT_SMALL, temps, std::get<3>(motors_for_gui[5]) + ": %dC", std::get<1>(motors_for_gui[5]), COLOUR(BLACK));
-Text mot_temp_7(295, 175, GUI::Style::CENTRE, TEXT_SMALL, temps, std::get<3>(motors_for_gui[6]) + ": %dC", std::get<1>(motors_for_gui[6]), COLOUR(BLACK));
-Text mot_temp_8(405, 175, GUI::Style::CENTRE, TEXT_SMALL, temps, std::get<3>(motors_for_gui[7]) + ": %dC", std::get<1>(motors_for_gui[7]), COLOUR(BLACK));
+Text mot_temp_1(90, 60, GUI::Style::CENTRE, TEXT_SMALL, temps, std::get<3>(motors_for_gui[0]) + ": %dC", std::get<1>(motors_for_gui[0]), COLOUR(BLACK));
+Text mot_temp_2(90, 125, GUI::Style::CENTRE, TEXT_SMALL, temps, std::get<3>(motors_for_gui[1]) + ": %dC", std::get<1>(motors_for_gui[1]), COLOUR(BLACK));
+Text mot_temp_3(90, 190, GUI::Style::CENTRE, TEXT_SMALL, temps, std::get<3>(motors_for_gui[2]) + ": %dC", std::get<1>(motors_for_gui[2]), COLOUR(BLACK));
+Text mot_temp_4(390, 60, GUI::Style::CENTRE, TEXT_SMALL, temps, std::get<3>(motors_for_gui[3]) + ": %dC", std::get<1>(motors_for_gui[3]), COLOUR(BLACK));
+Text mot_temp_5(390, 125, GUI::Style::CENTRE, TEXT_SMALL, temps, std::get<3>(motors_for_gui[4]) + ": %dC", std::get<1>(motors_for_gui[4]), COLOUR(BLACK));
+Text mot_temp_6(390, 190, GUI::Style::CENTRE, TEXT_SMALL, temps, std::get<3>(motors_for_gui[5]) + ": %dC", std::get<1>(motors_for_gui[5]), COLOUR(BLACK));
+Text mot_temp_7(240, 90, GUI::Style::CENTRE, TEXT_SMALL, temps, std::get<3>(motors_for_gui[6]) + ": %dC", std::get<1>(motors_for_gui[6]), COLOUR(BLACK));
+Text mot_temp_8(240, 160, GUI::Style::CENTRE, TEXT_SMALL, temps, std::get<3>(motors_for_gui[7]) + ": %dC", std::get<1>(motors_for_gui[7]), COLOUR(BLACK));
 
-Page checks("System Checks");
-Button drive_motors (30, 40, 120, 75, GUI::Style::SIZE, Button::SINGLE, checks, "Drive Motors");
-Button intakes (180, 40, 120, 75, GUI::Style::SIZE, Button::SINGLE, checks, "Intake/Uptake");
-Button lifts (330, 40, 120, 75, GUI::Style::SIZE, Button::SINGLE, checks, "Lifts");
-Button pneums (30, 135, 120, 75, GUI::Style::SIZE, Button::SINGLE, checks, "Pneumatics");
-Button save_pos (180, 135, 120, 75, GUI::Style::SIZE, Button::SINGLE, checks, "Save Position");
-Button misc_checks (330, 135, 120, 75, GUI::Style::SIZE, Button::SINGLE, checks, "Misc");
+Page checks("Competition");
+Button drive_motors (15, 45, 100, 75, GUI::Style::SIZE, Button::SINGLE, checks, "Drive Motors");
+Button intakes (130, 45, 100, 75, GUI::Style::SIZE, Button::SINGLE, checks, "Intake Uptake");
+Button lifts (245, 45, 100, 75, GUI::Style::SIZE, Button::SINGLE, checks, "Lifts");
+Button pneums (360, 45, 100, 75, GUI::Style::SIZE, Button::SINGLE, checks, "Pneumatics");
+Button save_pos (15, 140, 100, 75, GUI::Style::SIZE, Button::SINGLE, checks, "Save Position");
+Button auton_selector (130, 140, 100, 75, GUI::Style::SIZE, Button::SINGLE, checks, "Select Autons");
+Button misc_checks (245, 140, 100, 75, GUI::Style::SIZE, Button::SINGLE, checks, "Misc");
+Button placeholder (360, 140, 100, 75, GUI::Style::SIZE, Button::SINGLE, checks, "Placeholder");
 
 Page track ("Tracking"); //Display tracking vals and reset btns
 Text track_x(50, 45, GUI::Style::CENTRE, TEXT_SMALL, track, "X:%.1f", tracking.x_coord);
@@ -77,8 +77,8 @@ Button go_home(320, 110, 150, 40, GUI::Style::SIZE, Button::SINGLE, moving, "Hom
 Button go_centre(320, 175, 150, 40, GUI::Style::SIZE, Button::SINGLE, moving, "Centre");
 
 Page lift_move ("Motorized Subsystems"); //Moving the lift
-Slider f_lift_val(30, 45, 300, 35, GUI::Style::SIZE, Slider::HORIZONTAL, 0, f_lift.top_position, lift_move, "Front Lift", 10);
-Slider b_lift_val(30, 110, 300, 40, GUI::Style::SIZE, Slider::HORIZONTAL, 0, b_lift.top_position, lift_move, "Back Lift", 10);
+Slider f_lift_val(30, 45, 300, 35, GUI::Style::SIZE, Slider::HORIZONTAL, 1000, 2750, lift_move, "Front Lift", 10);
+Slider b_lift_val(30, 110, 300, 40, GUI::Style::SIZE, Slider::HORIZONTAL, 1000, 2750, lift_move, "Back Lift", 10);
 Button f_lift_move(470, 45, -100, 40, GUI::Style::SIZE, Button::SINGLE, lift_move, "Move Front Lift");
 Button b_lift_move(470, 95, -100, 40, GUI::Style::SIZE, Button::SINGLE, lift_move, "Move Back Lift");
 Button front_claw(470, 145, -100, 40, GUI::Style::SIZE, Button::TOGGLE, lift_move, "Front Claw");
@@ -95,12 +95,16 @@ Text elastic_f_down(335, 180, GUI::Style::CENTRE, TEXT_SMALL, elastic, "Down Tim
 Page tuning ("Tuning Tracking"); //Tests to tune tracking when on new base
 Text tuning_instructions_1(MID_X, 35, GUI::Style::CENTRE, TEXT_SMALL, tuning, "Press your desired tracking test");
 Text tuning_instructions_2(MID_X, 50, GUI::Style::CENTRE, TEXT_SMALL, tuning, "and follow the terminal for instructions");
-Button turn_encoder (10, 75, 225, 70, GUI::Style::SIZE, Button::SINGLE, tuning, "10 Turns");
-Button perpendicular_error (245, 75, 225, 70, GUI::Style::SIZE, Button::SINGLE, tuning, "Perpendicular Error");
-Button grid (10, 155, 225, 70, GUI::Style::SIZE, Button::SINGLE, tuning, "Grid");
-Button spin360 (245, 155, 225, 70, GUI::Style::SIZE, Button::SINGLE, tuning, "360 Spin");
+Button encoder_direction (15, 70, 100, 70, GUI::Style::SIZE, Button::SINGLE, tuning, "Encoder Direction");
+Button side_corkscrew (130, 70, 100, 70, GUI::Style::SIZE, Button::SINGLE, tuning, "Side Corkscrew");
+Button back_corkscrew (245, 70, 100, 70, GUI::Style::SIZE, Button::SINGLE, tuning, "Back Corkcrew");
+Button spin360 (360, 70, 100, 70, GUI::Style::SIZE, Button::SINGLE, tuning, "Spins");
+Button wheel_size (15, 155, 100, 75, GUI::Style::SIZE, Button::SINGLE, tuning, "Wheel Size");
+Button random_move (130, 155, 100, 70, GUI::Style::SIZE, Button::SINGLE, tuning, "Random Move");
+Button encoder_ticks (245, 155, 100, 70, GUI::Style::SIZE, Button::SINGLE, tuning, "Encoder Ticks");
+Button manual (410, 190, 35, 20, GUI::Style::SIZE, Button::TOGGLE, tuning, "Manual");
 
-Page motors ("Motor Control");
+Page motors ("Motor Control"); //Motor Control for known ports
 Slider mot_speed_set (MID_X, 60, 180 , 15, GUI::Style::CENTRE, Slider::HORIZONTAL, -127, 127, motors, "Speed");
 Text mot_1_text (65, 115, GUI::Style::CENTRE, TEXT_SMALL, motors, std::get<2>(motors_for_gui[0]));
 Text mot_2_text (180, 115, GUI::Style::CENTRE, TEXT_SMALL, motors, std::get<2>(motors_for_gui[1]));
@@ -128,15 +132,25 @@ Button mot_7_stop (300, 190, 45, 30, GUI::Style::SIZE, Button::SINGLE, motors, "
 Button mot_8_stop (415, 190, 45, 30, GUI::Style::SIZE, Button::SINGLE, motors, "Stop");
 
 Page pneumatics ("Pneumatics"); //Pneumatic testing page for known ports
-Button pneum_1 (15, 45, 100, 75, GUI::Style::SIZE, Button::TOGGLE, pneumatics, (Piston::list_for_gui[0] ? Piston::list_for_gui[0]->get_name() : ""));
-Button pneum_2 (130, 45, 100, 75, GUI::Style::SIZE, Button::TOGGLE, pneumatics, (Piston::list_for_gui[1] ? Piston::list_for_gui[1]->get_name() : ""));
-Button pneum_3 (245, 45, 100, 80, GUI::Style::SIZE, Button::TOGGLE, pneumatics, (Piston::list_for_gui[2] ? Piston::list_for_gui[2]->get_name() : ""));
-Button pneum_4 (360, 45, 100, 75, GUI::Style::SIZE, Button::TOGGLE, pneumatics, (Piston::list_for_gui[3] ? Piston::list_for_gui[3]->get_name() : ""));
-Button pneum_5 (15, 140, 100, 75, GUI::Style::SIZE, Button::TOGGLE, pneumatics, (Piston::list_for_gui[4] ? Piston::list_for_gui[4]->get_name() : ""));
-Button pneum_6 (130, 140, 100, 75, GUI::Style::SIZE, Button::TOGGLE, pneumatics, (Piston::list_for_gui[5] ? Piston::list_for_gui[5]->get_name() : ""));
-Button pneum_7 (245, 140, 100, 75, GUI::Style::SIZE, Button::TOGGLE, pneumatics, (Piston::list_for_gui[6] ? Piston::list_for_gui[6]->get_name() : ""));
-Button pneum_8 (360, 140, 100, 75, GUI::Style::SIZE, Button::TOGGLE, pneumatics, (Piston::list_for_gui[7] ? Piston::list_for_gui[7]->get_name() : ""));
+Button pneum_1 (15, 45, 100, 75, GUI::Style::SIZE, Button::TOGGLE, pneumatics);
+Button pneum_2 (130, 45, 100, 75, GUI::Style::SIZE, Button::TOGGLE, pneumatics);
+Button pneum_3 (245, 45, 100, 75, GUI::Style::SIZE, Button::TOGGLE, pneumatics);
+Button pneum_4 (360, 45, 100, 75, GUI::Style::SIZE, Button::TOGGLE, pneumatics);
+Button pneum_5 (15, 140, 100, 75, GUI::Style::SIZE, Button::TOGGLE, pneumatics);
+Button pneum_6 (130, 140, 100, 75, GUI::Style::SIZE, Button::TOGGLE, pneumatics);
+Button pneum_7 (245, 140, 100, 75, GUI::Style::SIZE, Button::TOGGLE, pneumatics);
+Button pneum_8 (360, 140, 100, 75, GUI::Style::SIZE, Button::TOGGLE, pneumatics);
+Text pneum_1_text (0, 0, GUI::Style::CENTRE, TEXT_SMALL, pneumatics, "%s", std::function([](){return Piston::get_name(1);}));
+Text pneum_2_text (0, 0, GUI::Style::CENTRE, TEXT_SMALL, pneumatics, "%s", std::function([](){return Piston::get_name(2);}));
+Text pneum_3_text (0, 0, GUI::Style::CENTRE, TEXT_SMALL, pneumatics, "%s", std::function([](){return Piston::get_name(3);}));
+Text pneum_4_text (0, 0, GUI::Style::CENTRE, TEXT_SMALL, pneumatics, "%s", std::function([](){return Piston::get_name(4);}));
+Text pneum_5_text (0, 0, GUI::Style::CENTRE, TEXT_SMALL, pneumatics, "%s", std::function([](){return Piston::get_name(5);}));
+Text pneum_6_text (0, 0, GUI::Style::CENTRE, TEXT_SMALL, pneumatics, "%s", std::function([](){return Piston::get_name(6);}));
+Text pneum_7_text (0, 0, GUI::Style::CENTRE, TEXT_SMALL, pneumatics, "%s", std::function([](){return Piston::get_name(7);}));
+Text pneum_8_text (0, 0, GUI::Style::CENTRE, TEXT_SMALL, pneumatics, "%s", std::function([](){return Piston::get_name(8);}));
 
+
+//Utility
 
 Page ports ("Ports"); //Shows what ports to use on builder util
 Text mot (10, 50, GUI::Style::CORNER, TEXT_MEDIUM, ports, "Motors: %s", motor_port_nums);
@@ -148,14 +162,15 @@ Slider expander_1 (30, 90, 30, 100, GUI::Style::SIZE, Slider::VERTICAL, 0, 21, e
 Slider port_1 (115, 90, 30, 100, GUI::Style::SIZE, Slider::VERTICAL, 1, 8, encoders, "P1");
 Slider port_2 (200, 90, 30, 100, GUI::Style::SIZE, Slider::VERTICAL, 1, 8, encoders, "P2");
 Button enc_set (350, 60, 50, 20, GUI::Style::CENTRE, Button::SINGLE, encoders, "Set");
-Text enc (350, 100, GUI::Style::CENTRE, TEXT_SMALL, encoders, "%s", std::function([](){return std::to_string(expander_1.get_value()) + ':' + char(port_1.get_value()+64) + char(port_2.get_value()+64);}));
+Text enc (350, 100, GUI::Style::CENTRE, TEXT_SMALL, encoders, "%s", std::function([](){return sprintf2("%d:%c%c", expander_1.get_value(), port_1.get_value()+64, port_2.get_value()+64);}));
 Text enc_degs (350, 120, GUI::Style::CENTRE, TEXT_SMALL, encoders, "Degs: %d", enc_val);
 Text enc_rots (350, 140, GUI::Style::CENTRE, TEXT_SMALL, encoders, "Rots: %d", std::function([](){return int(enc_val/360);}));
 Text enc_remain (350, 160, GUI::Style::CENTRE, TEXT_SMALL, encoders, "Remaining: %d", std::function([](){return abs(enc_val-360*int(round((enc_val+sgn(enc_val)*180)/360)));}));
 Button enc_res (350, 200, 50, 20, GUI::Style::CENTRE, Button::SINGLE, encoders, "Reset");
 
 Page motor ("Motor Control");
-Slider mot_speed (MID_X, 60, 180 , 15, GUI::Style::CENTRE, Slider::HORIZONTAL, -127, 127, motor, "Speed");
+Slider mot_speed (60, 45, 300 , 30, GUI::Style::SIZE, Slider::HORIZONTAL, -127, 127, motor, "Speed");
+Button mot_jam_detect (USER_RIGHT-20, 45, -60, 30, GUI::Style::SIZE, Button::TOGGLE, motor, "Jam");
 Text mot_text_1 (65, 115, GUI::Style::CENTRE, TEXT_SMALL, motor, "Port %s", std::get<5>(motor_ports[0]));
 Text mot_text_2 (180, 115, GUI::Style::CENTRE, TEXT_SMALL, motor, "Port %s", std::get<5>(motor_ports[1]));
 Text mot_text_3 (295, 115, GUI::Style::CENTRE, TEXT_SMALL, motor, "Port %s", std::get<5>(motor_ports[2]));
@@ -213,14 +228,30 @@ void main_setup(){
   std::get<4>(motors_for_gui[6]) = &mot_temp_7;
   std::get<4>(motors_for_gui[7]) = &mot_temp_8;
 
-  for (int i = 0; i < 7; i++){
-    std::get<1>(motors_for_gui[i]) = std::get<0>(motors_for_gui[i]) ? std::get<0>(motors_for_gui[i])->get_temperature() : std::numeric_limits<int>::max();
-    if(std::get<1>(motors_for_gui[i]) == std::numeric_limits<int>::max()) std::get<4>(motors_for_gui[i])->set_active(false);
-    std::get<4>(motors_for_gui[i])->set_background(40, 30);
+  pneum_1.add_text(pneum_1_text);
+  pneum_2.add_text(pneum_2_text);
+  pneum_3.add_text(pneum_3_text);
+  pneum_4.add_text(pneum_4_text);
+  pneum_5.add_text(pneum_5_text);
+  pneum_6.add_text(pneum_6_text);
+  pneum_7.add_text(pneum_7_text);
+  pneum_8.add_text(pneum_8_text);
+
+  for(std::array<std::pair<Piston*, Button*>, 8>::iterator it = Piston::list_for_gui.begin(); it != Piston::list_for_gui.begin(); it++) if(it->first) it->second->select();
+
+  b_lift_val.min = b_lift.prog_positions.front();
+  b_lift_val.max = b_lift.prog_positions.back();
+  f_lift_val.min = f_lift.prog_positions.front();
+  f_lift_val.max = f_lift.prog_positions.back();
+
+  for (int i = 0; i < 8; i++){
+    std::get<int>(motors_for_gui[i]) = std::get<Motor*>(motors_for_gui[i]) ? std::get<Motor*>(motors_for_gui[i])->get_temperature() : std::numeric_limits<int>::max();
+    if(std::get<int>(motors_for_gui[i]) == std::numeric_limits<int>::max()) std::get<Text_*>(motors_for_gui[i])->set_active(false);
+    std::get<Text_*>(motors_for_gui[i])->set_background(40, 20);
   }
 
   temps.set_loop_func([](){
-    for (int i = 0; i < 7; i++){
+    for (int i = 0; i < 8; i++){
       Text_* text = std::get<4>(motors_for_gui[i]);
       if (text){
         switch(std::get<1>(motors_for_gui[i])){
@@ -251,7 +282,7 @@ void main_setup(){
   });
 
   drive_motors.set_func([](){
-    if(GUI::prompt("Check drive motors", "Press to check the drive motors", 1000)){
+    if(GUI::prompt("Press to check drive motors", "", 1000)){
       drivebase.move(60, 0);
       delay(1000);
 
@@ -265,7 +296,7 @@ void main_setup(){
     }
   });
   intakes.set_func([](){
-    if(GUI::prompt("Check intake", "Press to check the intake", 1000)){
+    if(GUI::prompt("Press to check intake", "", 1000)){
       intake.set_state(intake_states::on);
       delay(1000);
 
@@ -279,20 +310,23 @@ void main_setup(){
     }
   });
   lifts.set_func([](){
-    if(GUI::prompt("Test lifts", "Press to check lifts", 1000)){
-      f_lift.reset();
-      b_lift.reset();
-      f_lift.move_absolute(f_lift.top_position, F_LIFT_MAX_VELOCITY, true);
-      b_lift.move_absolute(b_lift.top_position, B_LIFT_MAX_VELOCITY, true);
+    if(GUI::prompt("Press to check lifts", "", 1000)){
+      b_lift.set_state(b_lift_states::move_to_target, 0);
+      f_lift.set_state(f_lift_states::move_to_target, 0);
       delay(1000);
-      f_lift.move_absolute(f_lift.bottom_position, F_LIFT_MAX_VELOCITY, true);
-      b_lift.move_absolute(b_lift.bottom_position, B_LIFT_MAX_VELOCITY, true);
+
+      b_lift.set_state(b_lift_states::move_to_target, b_lift.driver_positions.size() - 1);
+      f_lift.set_state(f_lift_states::move_to_target, f_lift.driver_positions.size() - 1);
+      delay(1000);
+
+      b_lift.set_state(b_lift_states::move_to_target, 0);
+      f_lift.set_state(f_lift_states::move_to_target, 0);
     }
   });
   pneums.set_func([](){
-    for(std::array<Piston*, 8>::iterator it = Piston::list_for_gui.begin(); it != Piston::list_for_gui.begin(); it++){
-      Piston* piston = *it;
-      if (GUI::prompt("Check" + std::string(piston->get_name()), "Press to check" + std::string(piston->get_name()))){
+    for(std::array<std::pair<Piston*, Button*>, 8>::iterator it = Piston::list_for_gui.begin(); it != Piston::list_for_gui.begin(); it++){
+      Piston* piston = it->first;
+      if (GUI::prompt("Press to check " + piston->get_name())){
         piston->toggle_state();
         delay(500);
         piston->toggle_state();
@@ -301,8 +335,10 @@ void main_setup(){
     }
   });
   save_pos.set_func(save_positions);
+  auton_selector.set_func(select_auton);
   misc_checks.set_func([](){
     if (!pros::usd::is_installed()) screen_flash::start("No SD Card!");
+    else(screen_flash::start("No Errors Found", term_colours::GREEN));
   });
 
   prev_drivr.set_func([](){drivebase.prev_driver();});
@@ -311,17 +347,27 @@ void main_setup(){
   check_b_elastic.set_func([](){b_lift.elastic_util();});
   check_f_elastic.set_func([](){f_lift.elastic_util();});
   
+  moving.set_setup_func([](){
+    x_val.val = tracking.x_coord;
+    y_val.val = tracking.y_coord;
+    a_val.val = tracking.get_angle_in_deg();
+  });
   res_x.set_func([](){tracking.reset(0.0, tracking.y_coord, rad_to_deg(tracking.global_angle));});
   res_y.set_func([](){tracking.reset(tracking.x_coord, 0.0, rad_to_deg(tracking.global_angle));});
   res_a.set_func([](){tracking.reset(tracking.x_coord, tracking.y_coord, 0.0);});
-  res_all.set_func([](){tracking.reset();});
+  res_all.set_func([](){
+    RightEncoder.reset();
+    LeftEncoder.reset();
+    BackEncoder.reset();
+    tracking.reset();
+  });
   track.set_setup_func([](){
     screen::set_pen(COLOUR(WHITE));
     screen::draw_rect(270, 30, 470, 230);
     screen::draw_line(370, 30, 370, 230);
     screen::draw_line(270, 130, 470, 130);
-    for (int x = 0; x<200; x++){
-      for (int y = 0; y<200; y++) if(field[x].test(y)) screen::draw_pixel(270+x, 230-y); //Draws saved tracking values
+    for (int x = 0; x < 200; x++){
+      for (int y = 0; y < 200; y++) if(field[x].test(y)) screen::draw_pixel(270+x, 230-y); //Draws saved tracking values
     }
   });
   track.set_loop_func([](){
@@ -331,76 +377,43 @@ void main_setup(){
 
   go_to_xya.set_func([&](){
     int x = x_val.get_value(), y = y_val.get_value(), a = a_val.get_value();
-    char coord_c[17];
-    snprintf(coord_c, 17, " (%d, %d, %d)", x, y, a);
-    std::string coord = coord_c;
-    if (GUI::prompt("GO TO" + coord, "Press to move to target selected by sliders" + coord, 1000)) move_start(move_types::point, point_params({double(x), double(y), double(a)}));
+    Position target (x_val.get_value(), y_val.get_value(), a_val.get_value());
+    if (GUI::prompt("Press to go to " + convert_all_args("%d", target), "", 1000)) move_start(move_types::point, point_params(target));
   });
   go_home.set_func([](){
-    if (GUI::prompt("GO TO (0, 0, 0)", "Press to prompt to starting point (0, 0, 0)", 1000)) move_start(move_types::point, point_params({0.0, 0.0, 0.0}));
+    if (GUI::prompt("Press to go to (0, 0, 0)", "", 1000)) move_start(move_types::point, point_params({0.0, 0.0, 0.0}));
   });
   go_centre.set_func([](){
-    if (GUI::prompt("GO TO (72, 72, 0)", "Press to prompt to centre field (72, 72, 0)", 1000)) move_start(move_types::point, point_params({72.0, 72.0, 72.0}));
+    if (GUI::prompt("Press to go to (72, 72, 0)", "", 1000)) move_start(move_types::point, point_params({72.0, 72.0, 72.0}));
   });
 
+  lift_move.set_setup_func([](){
+    b_lift_val.val = b_lift_pot.get_value();
+    f_lift_val.val = f_lift_pot.get_value();
+    if(f_claw_o.get_state()) front_claw.select();
+    if(b_claw.get_state()) back_claw.select();
+  });
   f_lift_move.set_func([&](){
-    char coord_c[20];
-    snprintf(coord_c, 20, " %d", f_lift_val.get_value());
-    std::string coord = coord_c;
-    if (GUI::prompt("Move front lift to" + coord, "Press to move front lift to" + coord, 1000)) f_lift.move_absolute(f_lift_val.get_value());
+    if (GUI::prompt("Press to move front lift to" + std::to_string(f_lift_val.get_value()), "", 1000)) f_lift.move_absolute(f_lift_val.get_value());
   });
   b_lift_move.set_func([&](){
-    char coord_c[20];
-    snprintf(coord_c, 20, " %d", b_lift_val.get_value());
-    std::string coord = coord_c;
-    if (GUI::prompt("Move back lift to" + coord, "Press to move back lift to" + coord, 1000)) b_lift.move_absolute(b_lift_val.get_value());
+    if (GUI::prompt("Press to move back lift to" + std::to_string(b_lift_val.get_value()), "", 1000)) b_lift.move_absolute(b_lift_val.get_value());
   });
-  front_claw.set_func([](){f_claw_p.set_value(HIGH);});
-  front_claw.set_off_func([](){f_claw_p.set_value(LOW);});
-  back_claw.set_func([](){b_claw_p.set_value(HIGH);});
-  back_claw.set_off_func([](){b_claw_p.set_value(LOW);});
+  front_claw.set_func([](){f_claw(HIGH);});
+  front_claw.set_off_func([](){f_claw(LOW);});
+  back_claw.set_func([](){b_claw.set_value(HIGH);});
+  back_claw.set_off_func([](){b_claw.set_value(LOW);});
+  f_lift_val.val = f_lift_pot.get_value();
+  b_lift_val.val = b_lift_pot.get_value();
 
   //Known Pneumatics Port Setup
-  if(Piston::list_for_gui[0]){
-    pneum_1.set_func([](){Piston::list_for_gui[0]->set_value(HIGH);});
-    pneum_1.set_off_func([](){Piston::list_for_gui[0]->set_value(LOW);});
+  for(std::array<std::pair<Piston*, Button*>, 8>::iterator it = Piston::list_for_gui.begin(); it != Piston::list_for_gui.begin(); it++){
+    if(it->first){
+      it->second->set_func([it](){it->first->set_value(HIGH);});
+      it->second->set_off_func([it](){it->first->set_value(LOW);});
+    }
+    else it->second->set_active(false);
   }
-  else pneum_1.set_active(false);
-  if(Piston::list_for_gui[1]){
-    pneum_2.set_func([](){Piston::list_for_gui[1]->set_value(HIGH);});
-    pneum_2.set_off_func([](){Piston::list_for_gui[1]->set_value(LOW);});
-  }
-  else pneum_2.set_active(false);
-  if(Piston::list_for_gui[2]){
-    pneum_3.set_func([](){Piston::list_for_gui[2]->set_value(HIGH);});
-    pneum_3.set_off_func([](){Piston::list_for_gui[2]->set_value(LOW);});
-  }
-  else pneum_3.set_active(false);
-  if(Piston::list_for_gui[3]){
-    pneum_4.set_func([](){Piston::list_for_gui[3]->set_value(HIGH);});
-    pneum_4.set_off_func([](){Piston::list_for_gui[3]->set_value(LOW);});
-  }
-  else pneum_4.set_active(false);
-  if(Piston::list_for_gui[4]){
-    pneum_5.set_func([](){Piston::list_for_gui[4]->set_value(HIGH);});
-    pneum_5.set_off_func([](){Piston::list_for_gui[4]->set_value(LOW);});
-  }
-  else pneum_5.set_active(false);
-  if(Piston::list_for_gui[5]){
-    pneum_6.set_func([](){Piston::list_for_gui[5]->set_value(HIGH);});
-    pneum_6.set_off_func([](){Piston::list_for_gui[5]->set_value(LOW);});
-  }
-  else pneum_6.set_active(false);
-  if(Piston::list_for_gui[6]){
-    pneum_7.set_func([](){Piston::list_for_gui[6]->set_value(HIGH);});
-    pneum_7.set_off_func([](){Piston::list_for_gui[6]->set_value(LOW);});
-  }
-  else pneum_7.set_active(false);
-  if(Piston::list_for_gui[7]){
-    pneum_8.set_func([](){Piston::list_for_gui[7]->set_value(HIGH);});
-    pneum_8.set_off_func([](){Piston::list_for_gui[7]->set_value(LOW);});
-  }
-  else pneum_8.set_active(false);
 
   //Known motors function setup
   if(std::get<0>(motors_for_gui[0])){
@@ -484,61 +497,109 @@ void main_setup(){
     mot_temp_8.set_active(false);
   }
 
-  turn_encoder.set_func([](){ //Turn the encoder
-    if (GUI::prompt("START, THEN SPIN THE ENCODER", "Please spin the encoder any number of rotations.")){
+  encoder_ticks.set_func([](){ //Encoder missing ticks
+    if (GUI::prompt("Press, then spin the encoder", "Start the encoder in a known position.\nPress then button, then spin it wildly, and then stop it in that position again.")){
       RightEncoder.reset();
       LeftEncoder.reset();
       BackEncoder.reset();
       tracking.reset();
-      if (GUI::prompt_end("WHEN STOPPED")){
-        printf("The left encoder found %d ticks\n", LeftEncoder.get_value() % 360);
-        printf("The right encoder found %d ticks\n", RightEncoder.get_value() % 360);
-        printf("The back encoder found %d ticks\n", BackEncoder.get_value() % 360);
+      if (GUI::prompt("Press when stopped")){
+        double left = LeftEncoder.get_value() / 360.0;
+        double right = RightEncoder.get_value() / 360.0;
+        double back = BackEncoder.get_value() / 360.0;
+        int left_rot = round(left);
+        int right_rot = round(right);
+        int back_rot = round(back);
+        left -= left_rot;
+        right -= right_rot;
+        back -= back_rot;
+        term_colours left_col = abs(left) <= 0.01 ? term_colours::GREEN : term_colours::RED;
+        term_colours right_col = abs(right) <= 0.01 ? term_colours::GREEN : term_colours::RED;
+        term_colours back_col = abs(back) <= 0.01 ? term_colours::GREEN : term_colours::RED;
+
+        if(left == 0) printf2(term_colours::GREEN, -1, "The left encoder was perfect over %d rotations", left_rot);
+        else printf2(left_col, -1, "The left encoder %s %d ticks over %d rotations", left > 0 ? "gained" : "lost", fabs(360.0*left), left_rot);
+
+        if(right == 0) printf2(term_colours::GREEN, -1, "The right encoder was perfect over %d rotations", right_rot);
+        else printf2(right_col, -1, "The right encoder %s %d ticks over %d rotations", right > 0 ? "gained" : "lost", fabs(360.0*right), right_rot);
+
+        if(back == 0) printf2(term_colours::GREEN, -1, "The back encoder was perfect over %d rotations", back_rot);
+        else printf2(back_col, -1, "The back encoder %s %d ticks over %d rotations", back > 0 ? "gained" : "lost", fabs(360.0*back), back_rot);
       }
     }
   });
-  perpendicular_error.set_func([](){ //Perpendicular Error
-    if (GUI::prompt("START, THEN MOVE FORWARD ALONG Y", "Please run the robot along a known straight line in the y-axis.")){
+  side_corkscrew.set_func([](){ //Left/Right Corkscrew
+    if (GUI::prompt("Press, then move along x", "Please slide the robot along a known surface in the x-direction", manual.on ? 0 : 1500)){
       RightEncoder.reset();
       LeftEncoder.reset();
       BackEncoder.reset();
       tracking.reset();
-      if (GUI::prompt_end("WHEN STOPPED")){
-        if (tracking.x_coord < 0) printf("The robot thinks it strafed %.2f inches to the left.\nConsider turning the back tracking wheel counter-clockwise\n", tracking.x_coord);
-        else if (tracking.x_coord > 0) printf("The robot thinks it strafed %.2f inches to the right.\nConsider turning the back tracking wheel clockwise\n", tracking.x_coord);
-        else printf("The robot knows it strafed a perfect %.2f inches\n", tracking.x_coord); //Printing the tracking val just in case something went wrong. But it should always be 0
+      if(!manual.on){
+
       }
+      else if (!GUI::prompt("Press when stopped")) return;
+
+      if (tracking.x_coord < -0.05) printf2(term_colours::RED, -1, "The robot thinks it strafed %.2f inches to the left.\nConsider turning the back tracking wheel counter-clockwise", fabs(tracking.x_coord));
+      else if (tracking.x_coord > 0.05) printf2(term_colours::RED, -1, "The robot thinks it strafed %.2f inches to the right.\nConsider turning the back tracking wheel clockwise", fabs(tracking.x_coord));
+      else printf2(term_colours::GREEN, -1, "The robot knows it strafed a perfect %.2f inches", tracking.x_coord);
     }
   });
-  grid.set_func([](){ //Move in a random motion
-    if (GUI::prompt("START, THEN MOVE RANDOMLY", "Please move the robot haphazardly around the field. Then return it back to the starting point.")){
+
+  //back conrkcrew //manual option
+  //wheel size //manual
+  //encoder direction //manual
+
+  //with manuals, unlock wheels and switch trans to easy
+
+  random_move.set_func([](){ //Move in a random motion
+    if (GUI::prompt("Press, then move randomly", "Please move the robot haphazardly around the field. Then return it back to the starting point.")){
       RightEncoder.reset();
       LeftEncoder.reset();
       BackEncoder.reset();
       tracking.reset();
-      if (GUI::prompt_end("WHEN STOPPED")){
-        printf("The robot thinks it deviated %.2f inches to the %s\n", fabs(tracking.x_coord), (tracking.x_coord < 0 ? "left" : "right"));
-        printf("The robot thinks it deviated %.2f inches %s\n", fabs(tracking.y_coord), (tracking.y_coord < 0 ? "back" : "forward"));
-        printf("The robot thinks it deviated %.2f degrees %s\n", fabs(rad_to_deg(tracking.global_angle)), (tracking.global_angle < 0 ? "counter-clockwise" : "clockwise"));
+      if (GUI::prompt("Press when back at start position")){
+        printf2("The robot thinks it deviated %.2f inches to the %s", fabs(tracking.x_coord), (tracking.x_coord < 0 ? "left" : "right"));
+        printf2("The robot thinks it deviated %.2f inches %s", fabs(tracking.y_coord), (tracking.y_coord < 0 ? "back" : "forward"));
+        printf2("The robot thinks it deviated %.2f degrees %s", fabs(rad_to_deg(tracking.global_angle)), (tracking.global_angle < 0 ? "counter-clockwise" : "clockwise"));
       }
     }
   });
   spin360.set_func([](){ //Robot turn accuracy
-    if (GUI::prompt("START, THEN SPIN THE ROBOT", "Please spin the robot any number of rotations. Then return it back to the starting point")){
+    if (GUI::prompt("Press, then spin the robot", "Place the robot's front against a known surface. Press the button, then spin the robot. Return it to the starting point.", manual.on ? 0 : 1500)){
+      flatten_against_wall();
       RightEncoder.reset();
       LeftEncoder.reset();
       BackEncoder.reset();
       tracking.reset();
-      if(GUI::prompt_end("WHEN STOPPED")){
-        printf("The robot is %.2f inches %s and %.2f inches %s off the starting point.\n", fabs(tracking.x_coord), (tracking.x_coord < 0 ? "left" : "right"), fabs(tracking.y_coord), (tracking.y_coord < 0 ? "back" : "forward"));
 
-        int turned = tracking.get_angle_in_deg();
-        int lost = 360-turned;
-        float rotations = round(rad_to_deg(tracking.global_angle)/180)/2.0;
-        if (180 < turned && turned < 355) printf("However, the robot lost %d degrees over %.1f rotations.\n Consider increasing the DistanceLR.\n", lost, rotations);
-        else if (5 < turned && turned < 180) printf("However, The robot gained %d degrees over %.1f rotations.\n Consider decreasing the DistanceLR.\n", turned, rotations);
-        else printf("This seems pretty accurate. It's %d degrees off of %.1f rotations.\n", turned >= fmod(rotations*360, 360) ? turned : lost, rotations);
+      if(!manual.on){
+        int dir = random_direction();
+        drivebase.move(-60.0, 0.0);
+        tracking.wait_for_dist(10);
+        drivebase.brake();
+        drivebase.move(0.0, dir*80.0);
+        wait_until(fabs(tracking.global_angle) > 9.0_rot);
+        drivebase.move(0.0, dir*40.0);
+        wait_until(fabs(tracking.global_angle) > 10.0_rot);
+        drivebase.brake();
+        drivebase.move(60.0, 0.0);
+        tracking.wait_for_dist(5);
+        flatten_against_wall();
       }
+      else if(!GUI::prompt("Press when back at start position")) return;
+      
+      printf2("The robot is %.2f inches %s and %.2f inches %s off the starting point.", fabs(tracking.x_coord), tracking.x_coord > 0 ? "right" : "left", fabs(tracking.y_coord), tracking.y_coord > 0 ? "forward" : "back");
+      
+      double turned = rad_to_deg(tracking.global_angle) / 180.0;
+      double rots = round(turned);
+      turned = 180*(turned-rots);
+      rots /= 2;
+
+      if(!manual.on) drivebase.brake();
+
+      if(fabs(turned) <= 0.05) printf2(term_colours::GREEN, -1, "This seems pretty accurate. It's %.4f degrees off over %.1f rotations.", turned, rots);
+      else if(turned > 0) printf2(term_colours::RED, -1, "However, the robot gained %.2f degrees over %.1f rotations. Consider decreasing the DistanceLR.", turned, rots);
+      else printf2(term_colours::RED, -1, "However, the robot lost %.2f degrees over %.1f rotations. Consider increasing the DistanceLR.", -turned, rots);
     }
   });
 }
@@ -562,7 +623,7 @@ void main_background(){
 }
 
 void util_setup(){
-  expander_btns = {&ADI_a, &ADI_b, &ADI_c, &ADI_d, &ADI_e, &ADI_f, &ADI_g, &ADI_h};
+  exp_pneum_btns = {&ADI_a, &ADI_b, &ADI_c, &ADI_d, &ADI_e, &ADI_f, &ADI_g, &ADI_h};
   motor_ports = {
     std::make_tuple(std::numeric_limits<int>::max(), &mot_update_1, &mot_stop_1, &mot_text_1, 0, ""),
     std::make_tuple(std::numeric_limits<int>::max(), &mot_update_2, &mot_stop_2, &mot_text_2, 0, ""),
@@ -617,7 +678,7 @@ void util_setup(){
       no_pneumatic_port_nums.push_back(char(i+64));
       no_pneumatic_port_nums.push_back(',');
     }
-    expander_btns[i-1]->set_func([i](){
+    exp_pneum_btns[i-1]->set_func([i](){
       int port = expander.get_value();
       if (port){
         if(c::registry_get_plugged_type(port-1) != c::E_DEVICE_ADI){
@@ -632,7 +693,7 @@ void util_setup(){
         c::adi_port_set_value(i, HIGH);
       }
     });
-    expander_btns[i-1]->set_off_func([i](){
+    exp_pneum_btns[i-1]->set_off_func([i](){
       int port = expander.get_value();
       if (port){
         if(c::registry_get_plugged_type(port-1) != c::E_DEVICE_ADI){
@@ -654,7 +715,7 @@ void util_setup(){
   enc_set.set_func([](){
     int port = expander_1.get_value();
     if(abs(port_1.get_value()-port_2.get_value()) != 1 || std::min(port_1.get_value(), port_2.get_value()) % 2 == 0){
-      screen_flash::start(term_colours::ERROR, "Invalid Ports %c%c", char(port_1.get_value()+64), char(port_2.get_value()+64));
+      screen_flash::start(term_colours::ERROR, "Invalid Ports %c%c", port_1.get_value()+64, port_2.get_value()+64);
       return;
     }
     if(port){
@@ -687,21 +748,24 @@ void util_setup(){
 void util_background(){
   //Motor Stalled
   for (std::array<std::tuple<int, Button*, Button*, Text_*, int, std::string>, 8>::iterator it = motor_ports.begin(); it != motor_ports.end(); it++){
-    std::tuple<int, Button*, Button*, Text_*, int, std::string>& mot_arr = *it;
-    int port = std::get<0>(mot_arr);
+    int port = std::get<0>(*it);
+    int& stall_count = std::get<4>(*it);
+    std::string& label = std::get<5>(*it);
     if (port != std::numeric_limits<int>::max()){
-      std::get<5>(mot_arr) = std::to_string(port) + ": " + std::to_string((int)c::motor_get_actual_velocity(port));
-      if (fabs(c::motor_get_actual_velocity(port)) < fabs(c::motor_get_target_velocity(port))/4) std::get<4>(mot_arr) += 1;
-      else std::get<4>(mot_arr) = 0;
-      if (std::get<4>(mot_arr) > 10){
-        std::get<4>(mot_arr) = 0;
-        screen_flash::start(term_colours::ERROR, "Stopping Motor %d\n", port);
-        c::motor_move(port, 0);
+      label = sprintf2("%d: %d", port, c::motor_get_actual_velocity(port));
+      if(mot_jam_detect.on){
+        if (fabs(c::motor_get_actual_velocity(port)) < fabs(c::motor_get_target_velocity(port))/4) stall_count++;
+        else stall_count = 0;
+        if (stall_count > 10){
+          stall_count = 0;
+          screen_flash::start(term_colours::ERROR, "Stopping Motor %d\n", port);
+          c::motor_move(port, 0);
+        }
       }
     }
   }
 }
 
-GUI g_main ({&temps, &checks, &track, &moving, &lift_move,  &driver_curve, &elastic, &tuning, &motors, &pneumatics}, &main_setup, &main_background);
+GUI main_obj ({&temps, &checks, &track, &moving, &lift_move,  &driver_curve, &elastic, &tuning, &motors, &pneumatics}, &main_setup, &main_background);
 
-GUI g_util ({&ports, &encoders, &motor, &pneumatic}, &util_setup, &util_background);
+GUI util_obj ({&ports, &encoders, &motor, &pneumatic}, &util_setup, &util_background);
