@@ -43,8 +43,14 @@ bool in_range(T value, T minimum, T maximum){
   return (minimum <= value && value <= maximum) || (maximum <= value && value <= minimum);
 }
 
+//degrees to radians
 double operator "" _deg(long double degree);
+
+//radians to degrees
 double operator "" _rad(long double radians);
+
+//rotations to radians
+double operator "" _rot(long double rotations);
 
 /**
  * @brief converts radians to degrees
@@ -86,6 +92,8 @@ double near_angle(double angle, double reference);
 std::function<long double (long double)> func_scale(std::function<long double(long double)> f, Point p1, Point p2 = {0.0, 0.0}, double control = 1.0);
 
 //removed constrain because std::clamp already exists
+
+int random_direction();
 
 // gets the sign of a value (0, 1 or -1)
 template <typename T>

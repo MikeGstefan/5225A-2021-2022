@@ -66,6 +66,7 @@ void load_positions(){
   tracking.reset(x, y, a);
 }
 
+//remove if unneeded
 double get_filtered_output(ADIUltrasonic sensor, int check_count, uint16_t lower_bound, uint16_t upper_bound, int timeout){
   Timer timer{"Timer"};
   int success_count = 0;
@@ -88,10 +89,10 @@ double get_filtered_output(ADIUltrasonic sensor, int check_count, uint16_t lower
   return filtered_output;
 }
 
-void flatten_against_wall(bool front, int cycles){ 
+void flatten_against_wall(bool front, int cycles){
   int safety_check = 0;
   //bool to + -
-  int direction = (static_cast<int>(front)*2)-1; //use okapi::boolToSign
+  int direction = (static_cast<int>(front)*2)-1;
   tracking_imp.print("%d|| Start wall allign\n", millis());
 
 	drivebase.move(50.0*direction,0.0);
@@ -127,9 +128,9 @@ void flatten_against_wall(bool front, int cycles){
 void b_detect_goal(){ 
   wait_until(!tracking.move_complete);
   while(b_dist.get() > 40 && !tracking.move_complete){ 
-    misc.print("looking for goal: %d\n", b_dist.get());
+    misc.print("looking for goal at back: %d\n", b_dist.get());
     delay(33);
-}
+  }
   misc.print("Detected %d\n", b_dist.get());
   b_claw.set_state(1);
 }
@@ -137,13 +138,11 @@ void b_detect_goal(){
 
 
 void f_detect_goal(bool safety){ 
-
   if(safety) wait_until(!tracking.move_complete);
   while(f_dist.get() > 30 && !tracking.move_complete){
-    misc.print("looking for goal front: %d\n", f_dist.get());
+    misc.print("looking for goal at front: %d\n", f_dist.get());
     delay(33);
   }
-  
   misc.print("Detected %d\n", f_dist.get());
   f_claw(1);
 }

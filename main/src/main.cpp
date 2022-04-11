@@ -91,10 +91,13 @@ void autonomous() {
 
 void opcontrol() {
   /* Nathan:
-  check what actually kills the auto balance loop
+  better tracking tests
+  reorganize gui setup function to match pages
+  put btn* in motors_for_gui
+  make flash its own page
   file writing functions
-  proper text wrapping
-  snprintf2 and then have printf2 just call it
+  proper text splitter for flash
+  get rid of add_text. just change the buttons text directly (will have to deal with changeing text length)
   auton give up func - ask mike
   
   lvgl images

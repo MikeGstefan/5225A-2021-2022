@@ -1,4 +1,5 @@
 #include "Tracking.hpp"
+#include "Libraries/printing.hpp"
 #include "config.hpp"
 #include "drive.hpp"
 #include "logging.hpp"
@@ -30,6 +31,7 @@ void Tracking::reset(double x, double y, double a){
   tracking.y_coord = y;
   tracking.global_angle = deg_to_rad(a);
   update_t.done_update();
+  screen_flash::start("Reset", term_colours::GREEN);
 }
 
 void Tracking::reset(Position position){
@@ -39,6 +41,7 @@ void Tracking::reset(Position position){
   tracking.y_coord = position.y;
   tracking.global_angle = deg_to_rad(position.angle);
   update_t.done_update();
+  screen_flash::start("Reset", term_colours::GREEN);
 }
 
 // gets angle closest to 360 degrees

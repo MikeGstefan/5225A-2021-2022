@@ -127,7 +127,7 @@ bool GUI::prompt(std::string screen, std::string term, std::uint32_t delay_time)
  if(!prompt_enabled) return true;
   prompt_string = screen;
   if(term == "") term = screen;
-  printf2(term_colours::GREEN, 0, "\n\n%s\nPress the screen big button or the controller OK button when ready.", term);
+  printf2(term_colours::BLUE, 0, "\n\n%s\nPress the screen big button or the controller OK button when ready.", term);
   master.clear();
   master.print(0, 0, "Press OK btn");
 
