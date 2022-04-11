@@ -1,7 +1,7 @@
 {
   "py/object": "pros.conductor.project.Project",
   "py/state": {
-    "project_name": "Autons",
+    "project_name": "Header File Clean",
     "target": "v5",
     "templates": {
       "kernel": {

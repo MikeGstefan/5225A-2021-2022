@@ -7,13 +7,13 @@ const char* file_meta= "/usd/meta_data.txt";
 char queue[queue_size];
 char* front = queue;
 char* back = queue;
-// char buffer[256];
+
 ofstream file;
 uintptr_t queue_start = reinterpret_cast<uintptr_t>(&queue);
 vector<Data*> Data::obj_list;
 _Task Data::log_t(queue_handle, "logging");
 
-Data::Data(const char* obj_name, const char* id_code, log_types log_type_param, log_locations log_location_param){
+Data::Data(const char* obj_name, const char* id_code, log_types log_type_param, log_locations log_location_param, term_colours print_colour, int print_type){
   if(id_code[0] != '$'){
     char error[60];
     snprintf(error, 50, "Data object %s failed with invalid ID code %s\n", obj_name, id_code);
@@ -23,11 +23,13 @@ Data::Data(const char* obj_name, const char* id_code, log_types log_type_param, 
   this->name = obj_name;
   this->log_type = log_type_param;
   this->log_location = log_location_param;
+  this->print_colour = print_colour;
+  this->print_type = print_type;
   obj_list.push_back(this);
 }
 
 Data task_log("tasks.txt","$01", debug, log_locations::both);
-Data controller_queue("controller.txt","$02", debug,log_locations::none);
+Data controller_queue("controller.txt","$02", debug,log_locations::t);
 Data tracking_data("tracking.txt","$03",debug,log_locations::sd);
 Data tracking_imp("tracking.txt","$03",debug,log_locations::both);
 Data misc("misc.txt", "$04",debug,log_locations::both);
@@ -37,8 +39,11 @@ Data motion_d("motion.txt", "$06", debug,log_locations::sd);
 Data term("terminal.txt","$07",debug,log_locations::t);
 Data log_d("log.txt","$08",debug,log_locations::both);
 Data graph("graph.txt","$09",debug,log_locations::sd);
-Data events("events.txt", "%10", debug,log_locations::sd);
-Data state_log("state.txt", "%11", debug,log_locations::both);
+Data events("events.txt", "$10", debug,log_locations::both, term_colours::BLUE);
+Data state_log("state.txt", "$11", debug,log_locations::both);
+Data ERROR("error.txt", "$12", error, log_locations::both, term_colours::ERROR);
+// Data state_log("log.txt","$13",debug,log_locations::both);
+Data skills_d("skills.txt", "$13", debug, log_locations::both);
 
 
 vector<Data*> Data::get_objs(){
@@ -78,46 +83,18 @@ void Data::init(){
   }
 }
 
-
-
-
-void Data::print(const char* format,...){
-  char buffer[256];
-  std::va_list args;
-  va_start(args, format);
-  int buffer_len = vsnprintf(buffer,256,format,args) + 3;
-  va_end(args);
-
-  if(int(this->log_type) !=0){
-    switch(log_location){
-      case log_locations::t:
-        printf("%s",buffer);
-      break;
-      case log_locations::sd:
-        this->log_print(buffer, buffer_len);
-      break;
-      case log_locations::none:
-      break;
-      case log_locations::both:
-        printf("%s",buffer);
-        this->log_print(buffer, buffer_len);
-      break;
-    }
-  }
-}
-
-void Data::print(Timer* tmr, int freq, std::vector<std::function<char*()>> str){
+void Data::print(Timer* tmr, int freq, std::vector<std::function<char*()>> str) const{
   if(tmr->get_time() > freq){
     for(int i = 0; i < str.size(); i++){
-        char* buffer = str[i]();
-        this->print(buffer);
-        delete[] buffer;
+      char* buffer = str[i]();
+      this->print(buffer);
+      delete[] buffer;
     }
     tmr->reset();
   }
 }
 
-void Data::log_print(char* buffer, int buffer_len){
+void Data::log_print(char* buffer, int buffer_len) const{
   memcpy(buffer+buffer_len -3, this->id,3);
   //copying the string uses memcpy instead of strcpy or strncpy to avoid copying the terminating character
 
@@ -179,7 +156,7 @@ uintptr_t data_size(){//returns the number of characters needed to be printed fr
 }
 
 
-
+//cam be replaced with something from printing.hpp
 char* Data::to_char(const char* fmt, ...){
   va_list args;
   va_start(args, fmt);

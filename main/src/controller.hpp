@@ -1,24 +1,26 @@
 #pragma once
 #include "main.h"
-#include "logging.hpp"
 #include "Libraries/printing.hpp"
+#include "logging.hpp"
 
 // Buttons
 
 // lift buttons
 extern controller_digital_e_t lift_up_button;
 extern controller_digital_e_t lift_down_button;
-extern controller_digital_e_t lift_claw_toggle_button;
-extern controller_digital_e_t lift_tilt_toggle_button;
 
-// misc buttons
+extern controller_digital_e_t reverse_drive_button;
+extern controller_digital_e_t claw_toggle_button;
+
+// intake buttons
 extern controller_digital_e_t intake_button;
 extern controller_digital_e_t intake_reverse_button;
-extern controller_digital_e_t shift_button;
-extern controller_digital_e_t hitch_toggle_button;
-extern controller_digital_e_t ok_button;
-extern controller_digital_e_t b_claw_toggle_button;
 
+// misc buttons
+extern controller_digital_e_t ok_button;
+extern controller_digital_e_t both_lifts_down_button;
+extern controller_digital_e_t joy_mode_switch_button;
+extern controller_digital_e_t shift_button;
 
 #define num_controller 2
 
@@ -32,6 +34,10 @@ private:
   void add_to_queue(std::function<void()>);
   void queue_handle();
   int controller_num;
+
+  // button handling data
+  bool cur_press_arr[12] = {0};
+  bool last_press_arr[12] = {0};
 
 public:
   _Controller(pros::controller_id_e_t id);
@@ -53,11 +59,21 @@ public:
    */
   controller_digital_e_t wait_for_press(std::vector<controller_digital_e_t> buttons, int timeout = 0);
 
+  // button handling methods
+  // NOTE: all the following methods are only updated every cycle as opposed to every function call, unlike the pros API
+
+  void update_buttons();  // called once every loop, updates current and last state for every button
+  bool get_button_state(pros::controller_digital_e_t button); // returns current state of desired button
+  bool get_button_last_state(pros::controller_digital_e_t button); // returns last state of desired button
+  bool is_rising(pros::controller_digital_e_t button); // if button wasn't pressed but now is
+  bool is_falling(pros::controller_digital_e_t button); // if button was pressed but now is not
+
+
   template <typename... Params>
   void print(std::uint8_t line, std::uint8_t col, const char* fmt, Params... args){
     std::function<void()> func = [=](){
       pros::Controller::print(line, col, fmt, args...);
-      controller_queue.print("%d| printing %s to %d\n", millis(), printf_to_string(fmt, convert_args(args)...).c_str(), this->controller_num);
+      controller_queue.print("%d| printing %s to %d\n", millis(), sprintf2(fmt, args...).c_str(), this->controller_num);
     };
     this->add_to_queue(func);
     controller_queue.print("%d| adding print to queue for controller %d\n", millis(), this->controller_num);

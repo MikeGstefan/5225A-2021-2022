@@ -78,6 +78,7 @@ void opcontrol(void);
  * You can add C++-only headers here
  */
 #include <array>
+#include <atomic>
 #include <bitset>
 #include <cmath>
 #include <cstdarg>
@@ -87,6 +88,7 @@ void opcontrol(void);
 #include <limits>
 // #include <map> //Cannot include here because util.hpp declares a function called map
 #include <memory>
+#include <numeric>
 #include <string>
 #include <tuple>
 #include <variant>

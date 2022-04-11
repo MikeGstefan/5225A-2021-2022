@@ -3,9 +3,16 @@
 #include "controller.hpp"
 #include "tracking.hpp"
 #include "Subsystems/intake.hpp"
-#include "Subsystems/b_claw.hpp"
 #include "Subsystems/b_lift.hpp"
 #include "Subsystems/f_lift.hpp"
+
+// for lifts
+Timer up_press{"up_press"};
+Timer down_press{"down_press"};
+
+Timer toggle_press_timer{"toggle_press_timer"}; // for back claw
+
+joy_modes joy_mode = joy_modes::lift_select;
 
 // array<int, 7> f_lift_pos= {10, 150, 300, 475, 630, 665, 675};
 // int f_lift_index = 0;
@@ -80,13 +87,14 @@ name(name), joy_sticks{joy_sticks[0], joy_sticks[1], joy_sticks[2]}, custom_driv
 {}
 
 // Drivebase class constructor
-Drivebase::Drivebase(std::array<driver, num_of_drivers> drivers) : drivers(drivers) {}
+Drivebase::Drivebase(std::array<driver, num_of_drivers> drivers) : drivers(drivers){}
 
 void Drivebase::move(double x, double y, double a){
-  front_l.move(x + y + a);
-  front_r.move(-x + y - a);
-  back_l.move(-x + y + a);
-  back_r.move(x + y - a);
+  ERROR.print("you called the wrong function");
+  // front_l.move(x + y + a);
+  // front_r.move(-x + y - a);
+  // back_l.move(-x + y + a);
+  // back_r.move(x + y - a);
 }
 
 void Drivebase::move(double y, double a){
@@ -94,19 +102,20 @@ void Drivebase::move(double y, double a){
   front_r.move(y-a);
   back_l.move(y+a);
   back_r.move(y-a);
+  center_l.move(y+a);
+  center_r.move(y-a);
   // back_l.move(0);
   // back_r.move(0);
 }
 
-void Drivebase::move_tank(double y, double a){
-  move(0.0, y, a);
-}
 
 void Drivebase::move_side(double l, double r){
   front_l.move(l);
   front_r.move(r);
   back_l.move(l);
   back_r.move(r);
+  center_l.move(l);
+  center_r.move(r);
 }
 
 void Drivebase::brake(){
@@ -114,6 +123,8 @@ void Drivebase::brake(){
   front_r.move_relative(0, 200);
   back_l.move_relative(0, 200);
   back_r.move_relative(0, 200);
+  center_l.move_relative(0,200);
+  center_r.move_relative(0,200);
 }
 
 void Drivebase::velo_brake(){
@@ -121,6 +132,8 @@ void Drivebase::velo_brake(){
   front_r.move_velocity(0);
   back_l.move_velocity(0);
   back_r.move_velocity(0);
+  center_l.move_velocity(0);
+  center_r.move_velocity(0);
 }
 
 void Drivebase::update_screen(){
@@ -135,7 +148,7 @@ void Drivebase::download_curve_data(){
   curve_file = nullptr;
   curve_file = fopen("/usd/curve_file.txt", "r");
   curve_file_exists = curve_file != NULL;
-  if(!curve_file_exists) {
+  if(!curve_file_exists){
     drivers_data.print("WARNING: curve_file not found, using default data\n");
   }
   // reads data for each driver from file
@@ -154,94 +167,95 @@ void Drivebase::download_curve_data(){
 }
 
 void Drivebase::update_lookup_table_util(){
-    download_curve_data();
+  download_curve_data();
 
-    master.clear();
-    update_screen();
+  master.clear();
+  update_screen();
 
-    while (!master.get_digital_new_press(E_CONTROLLER_DIGITAL_B)){  // user presses b to save and exit utility
-      if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_A)){  // moves to next driver
-        cur_driver++;
-        cur_driver %= num_of_drivers;
-        update_screen();
-      }
-      else if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_Y)){  // moves to previous driver
-        if (cur_driver == 0)  cur_driver = num_of_drivers - 1;
-        else cur_driver--;
-        update_screen();
-      }
-
-      if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_RIGHT)){ // moves to next screen
-        cur_screen++;
-        cur_screen %= 3; // to create rollover
-        update_screen();
-      }
-      else if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_LEFT)){  // moves to previous screen
-        // rollover but without mod because c++ handles negative mods differently :(
-        if (cur_screen == 0)  cur_screen = 2;
-        else cur_screen--;
-        update_screen();
-      }
-
-      if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_UP)){  // increase curvature
-        if (drivers[cur_driver].custom_drives[cur_screen].curvature < 9.9)  drivers[cur_driver].custom_drives[cur_screen].curvature += 0.1;
-        master.print(2, 0, "Curvature: %lf", drivers[cur_driver].custom_drives[cur_screen].curvature);  // updates curvature
-      }
-      else if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_DOWN)){  // decrease curvature
-        printf("pressed down\n");
-        if (drivers[cur_driver].custom_drives[cur_screen].curvature > 0.1)  drivers[cur_driver].custom_drives[cur_screen].curvature -= 0.1;
-        master.print(2, 0, "Curvature: %lf", drivers[cur_driver].custom_drives[cur_screen].curvature);  // updates curvature
-      }
-
-      delay(10);
+  while (!master.is_rising(E_CONTROLLER_DIGITAL_B)){  // user presses b to save and exit utility
+    if(master.is_rising(E_CONTROLLER_DIGITAL_A)){  // moves to next driver
+      cur_driver++;
+      cur_driver %= num_of_drivers;
+      update_screen();
     }
-    master.clear();
-    if(!curve_file_exists) {
-      drivers_data.print("WARNING: curve_file not found, not writing to SD card\n");
+    else if(master.is_rising(E_CONTROLLER_DIGITAL_Y)){  // moves to previous driver
+      if (cur_driver == 0)  cur_driver = num_of_drivers - 1;
+      else cur_driver--;
+      update_screen();
     }
-    else {
-      Data::log_t.data_update();
-      curve_file = fopen("/usd/curve_file.txt", "w");
 
-      for (short driver = 0; driver < num_of_drivers; driver++){  // uploads curve data to curve file
-        for (short curvature = 0; curvature < 3; curvature++){
-          fprintf(curve_file, "curvature:%lf\n", drivers[driver].custom_drives[curvature].curvature);
-          drivers_data.print("curvature:%lf\n", drivers[driver].custom_drives[curvature].curvature);
-        }
-      }
-      fclose(curve_file);
-      Data::log_t.done_update();
+    if(master.is_rising(E_CONTROLLER_DIGITAL_RIGHT)){ // moves to next screen
+      cur_screen++;
+      cur_screen %= 3; // to create rollover
+      update_screen();
     }
-    master.print(0, 0, "Saved.");
-    delay(200);
+    else if(master.is_rising(E_CONTROLLER_DIGITAL_LEFT)){  // moves to previous screen
+      // rollover but without mod because c++ handles negative mods differently :(
+      if (cur_screen == 0)  cur_screen = 2;
+      else cur_screen--;
+      update_screen();
+    }
+
+    if(master.is_rising(E_CONTROLLER_DIGITAL_UP)){  // increase curvature
+      if (drivers[cur_driver].custom_drives[cur_screen].curvature < 9.9)  drivers[cur_driver].custom_drives[cur_screen].curvature += 0.1;
+      master.print(2, 0, "Curvature: %lf", drivers[cur_driver].custom_drives[cur_screen].curvature);  // updates curvature
+    }
+    else if(master.is_rising(E_CONTROLLER_DIGITAL_DOWN)){  // decrease curvature
+      printf("pressed down\n");
+      if (drivers[cur_driver].custom_drives[cur_screen].curvature > 0.1)  drivers[cur_driver].custom_drives[cur_screen].curvature -= 0.1;
+      master.print(2, 0, "Curvature: %lf", drivers[cur_driver].custom_drives[cur_screen].curvature);  // updates curvature
+    }
+
+    delay(10);
+  }
+  master.clear();
+  if(!curve_file_exists){
+    drivers_data.print("WARNING: curve_file not found, not writing to SD card\n");
+  }
+  else {
+    Data::log_t.data_update();
+    curve_file = fopen("/usd/curve_file.txt", "w");
+
+    for (short driver = 0; driver < num_of_drivers; driver++){  // uploads curve data to curve file
+      for (short curvature = 0; curvature < 3; curvature++){
+        fprintf(curve_file, "curvature:%lf\n", drivers[driver].custom_drives[curvature].curvature);
+        drivers_data.print("curvature:%lf\n", drivers[driver].custom_drives[curvature].curvature);
+      }
+    }
+    fclose(curve_file);
+    Data::log_t.done_update();
+  }
+  master.print(0, 0, "Saved.");
+  delay(200);
 }
 
 void Drivebase::handle_input(){
   // tracking.power_x = drivers[cur_driver].custom_drives[0].lookup(master.get_analog(drivers[cur_driver].joy_sticks[0]));
   tracking.power_y = drivers[cur_driver].custom_drives[1].lookup(master.get_analog(ANALOG_LEFT_Y));
   tracking.power_a = 0.7 * drivers[cur_driver].custom_drives[2].lookup(master.get_analog(ANALOG_LEFT_X));
-
+  // printf("%d, %f, %f\n", master.get_analog(ANALOG_LEFT_Y), tracking.power_y, tracking.power_a );
   if(fabs(tracking.power_x) < deadzone) tracking.power_x = 0.0;
   if(fabs(tracking.power_y) < deadzone) tracking.power_y = 0.0;
   if(fabs(tracking.power_a) < deadzone) tracking.power_a = 0.0;
 
-  // if(master.get_digital_new_press(reverse_drive_button)){
-  //   master.rumble("-");
-  //   reversed = !reversed;
-  //   if(reversed) master.print(0, 0, "Reverse");
-  //   else master.print(0, 0, "Forward");
-  // }
-  // if (reversed){
-  //   tracking.power_y *= -1;
-  //   tracking.power_x *= -1;
-  // }
+  if(master.is_rising(reverse_drive_button)){
+    master.rumble("-");
+    reversed = !reversed;
+    if(reversed) master.print(0, 0, "Reverse");
+    else master.print(0, 0, "Forward");
+  }
+  if (reversed){
+    tracking.power_y *= -1;
+    tracking.power_x *= -1;
+  }
 
-  if(this->state && (fabs(tracking.power_y) <deadzone && fabs(tracking.power_a) <deadzone)){
+  if(this->state && (fabs(tracking.power_y) < deadzone && fabs(tracking.power_a) < deadzone)){
     // velo_brake();
     brake();
   }
   else{ 
     move(tracking.power_y, tracking.power_a);
+    
   }
 
   // move(tracking.power_y, tracking.power_a);
@@ -262,36 +276,32 @@ void Drivebase::driver_practice(){
 
   // moves motors to necessary positions / speeds
   // Task([](){ 
-    b_lift.reset();
-    b_lift.move_absolute(b_lift.bottom_position);
-    f_lift.reset();
-    f_lift.move_absolute(f_lift.bottom_position);
+    // b_lift.reset();
+    // f_lift.reset();
   // });
   
   // f_claw_p.set_value(LOW);
-  // b_claw_p.set_value(LOW);
+  b_claw.set_value(LOW);
   // lift.move(-10); // gives holding power
-  bool intake_on = false;
-  bool intake_reverse = false;
   cur_driver = 0; // defaults driver to Nikhil
   // master.print(2, 0, "Driver: %s", driver_name());
   while(true){
     while(true){
-      // if(master.get_digital_new_press(tracking_button)){
+      // if(master.is_rising(tracking_button)){
       //   master.print(1,1,"%.2f, %.2f, %.2f", tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle));
       // }
-      if(master.get_digital_new_press(ok_button)){
+      if(master.is_rising(ok_button)){
         // auton_selector(); //talk to nathan if you're uncommenting this line
         // master.print(1,1,"HERE");
         delay(2000);
       }
       drivebase.handle_input();
-      // b_lift.handle();
-      // handle_lifts();
-      f_lift.handle(true);
-      f_claw.handle();
-      b_claw.handle();
-      intake.handle();
+      // intake.handle();
+
+      f_claw_obj.handle();
+      b_claw_obj.handle();
+      // intake.handle_buttons();
+      // intake.handle();
      
 
       handle_trans();
@@ -303,7 +313,7 @@ void Drivebase::driver_practice(){
         screen_timer.reset();
       }
       // takes away control from driver when motors overheat
-      if(front_l.get_temperature() >= 55 || front_r.get_temperature() >= 55 || back_r.get_temperature() >= 55 || back_l.get_temperature() >= 55 || b_lift_m.get_temperature() >= 55|| f_lift_m.get_temperature() >= 55|| intk.get_temperature() >= 55){
+      if(front_l.get_temperature() >= 55 || front_r.get_temperature() >= 55 || back_r.get_temperature() >= 55 || back_l.get_temperature() >= 55 || b_lift_m.get_temperature() >= 55|| f_lift_m.get_temperature() >= 55){
         master.rumble("- - - "); // rumbles controller if motors are hot to warn driver
         // move(0, 0, 0);  // stops movement
         // return;
@@ -318,13 +328,13 @@ void Drivebase::driver_practice(){
 }
 
 void Drivebase::non_blocking_driver_practice(){
-  if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_B)){
+  if(master.is_rising(E_CONTROLLER_DIGITAL_B)){
     update_lookup_table_util();
     master.clear();
     master.print(2, 0, "Driver: %s", driver_name());
   }
-  else if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_UP)) next_driver();
-  else if (master.get_digital_new_press(E_CONTROLLER_DIGITAL_DOWN)) prev_driver();
+  else if (master.is_rising(E_CONTROLLER_DIGITAL_UP)) next_driver();
+  else if (master.is_rising(E_CONTROLLER_DIGITAL_DOWN)) prev_driver();
 
   // actual drive code
   drivebase.handle_input();
@@ -354,12 +364,12 @@ bool Drivebase::get_state(){
 
 void Drivebase::set_state(bool state){
   this->state = state;
-  trans_p.set_value(state);
+  drive_t.set_value(state);
 }
 
 
 void Drivebase::handle_trans(){
-  if(master.get_digital_new_press(shift_button)){
+  if(master.is_rising(shift_button)){
     this->set_state(!this->get_state());
   }
 }
@@ -385,5 +395,160 @@ int Drivebase::get_deadzone(){
 //   return (!this->reversed ==  master.get_analog(ANALOG_RIGHT_Y) > -1*deadzone);
 // }
 
+bool get_lift(){
+  // if in lift select mode, compute the lift, otherwise return last value of cur lift
+  // static bool cur_lift = (joy_mode == joy_modes::lift_select) ? (!drivebase.get_reverse() == master.get_analog(ANALOG_RIGHT_Y) > -1* drivebase.get_deadzone()) : cur_lift;
+  // return cur_lift;
+  return !drivebase.get_reverse() == master.get_analog(ANALOG_RIGHT_Y) > -1* drivebase.get_deadzone();
+}
 
+void handle_lift_buttons(){
+  if(master.is_rising(joy_mode_switch_button)){
+    // toggles joy_mode
+    if(joy_mode == joy_modes::lift_select)  joy_mode = joy_modes::manual;
+    else joy_mode = joy_modes::lift_select;
+
+    if(joy_mode == joy_modes::lift_select){
+      b_lift.Subsystem::set_state(b_lift_states::between_positions);
+      f_lift.Subsystem::set_state(f_lift_states::between_positions);
+    }
+    else{
+      b_lift.Subsystem::set_state(b_lift_states::manual);
+      f_lift.Subsystem::set_state(f_lift_states::manual); 
+    }
+  }
+
+
+  // index incrementing and decrementing
+  if(master.is_rising(lift_up_button) && joy_mode != joy_modes::manual){
+    up_press.reset();
+    if(get_lift()){
+      // if()
+      // if state is between_positions, go to the closest position that's higher than the current position
+      if(f_lift.get_state() == f_lift_states::between_positions){
+        for (size_t i = 0; i < f_lift.driver_positions.size(); i++){
+          if(f_lift.driver_positions[i] > f_lift_pot.get_value()){
+            f_lift.set_state(f_lift_states::move_to_target, i);
+            break;
+          }
+        }
+      }
+      // otherwise just go to the next highest position, but doesn't increment index if it's out of bounds
+      else if(f_lift.get_index() < f_lift.driver_positions.size() - 1)  f_lift.set_state(f_lift_states::move_to_target, f_lift.get_index() + 1);
+    }
+    else{
+      // if state is between_positions, go to the closest position that's higher than the current position
+      if(b_lift.get_state() == b_lift_states::between_positions){
+        for (size_t i = 0; i < b_lift.driver_positions.size(); i++){
+          if(b_lift.driver_positions[i] > b_lift_pot.get_value()){
+            b_lift.set_state(b_lift_states::move_to_target, i);
+            break;
+          }
+        }
+      }
+      // otherwise just go to the next highest position, but doesn't increment index if it's out of bounds
+      else if(b_lift.get_index() < b_lift.driver_positions.size() - 1)  b_lift.set_state(b_lift_states::move_to_target, b_lift.get_index() + 1);
+    }
+  }
+  if(master.is_rising(lift_down_button) && joy_mode != joy_modes::manual){
+    down_press.reset();
+    if(get_lift()){
+      // if state is between_positions, go to the closest position that's lower than the current position
+      if(f_lift.get_state() == f_lift_states::between_positions){
+        for (size_t i = f_lift.driver_positions.size() - 1; i >= 0; i--){
+          if(f_lift.driver_positions[i] < f_lift_pot.get_value()){
+            f_lift.set_state(f_lift_states::move_to_target, i);
+            break;
+          }
+        }
+      }
+      // otherwise just go to the next lowest position, but doesn't decrement index if it's out of bounds
+      else if(f_lift.get_index() > 0)  f_lift.set_state(f_lift_states::move_to_target, f_lift.get_index() - 1);
+    }
+    else{
+      // if state is manual, go to the closest position that's lower than the current position
+      if(b_lift.get_state() == b_lift_states::between_positions){
+        for (size_t i = b_lift.driver_positions.size() - 1; i >= 0; i--){
+          if(b_lift.driver_positions[i] < b_lift_pot.get_value()){
+            b_lift.set_state(b_lift_states::move_to_target, i);
+            break;
+          }
+        }
+      }
+      // otherwise just go to the next lowest position, but doesn't decrement index if it's out of bounds
+      else if(b_lift.get_index() > 0)  b_lift.set_state(b_lift_states::move_to_target, b_lift.get_index() - 1);
+    }
+  }
+  // resets and pauses the timers if driver releases button
+  if(!master.get_digital(lift_up_button)) up_press.reset(false);
+  if(!master.get_digital(lift_down_button)) down_press.reset(false);
+
+  // goes to top position if up button is held
+  if(up_press.get_time() > 300){
+    if(get_lift())  f_lift.set_state(f_lift_states::move_to_target, f_lift.driver_positions.size() - 1);
+    else  b_lift.set_state(b_lift_states::move_to_target, b_lift.driver_positions.size() - 1);
+  }
+  // goes to bottom position if down button is held
+  if(down_press.get_time() > 300){
+    if(get_lift())  f_lift.set_state(f_lift_states::move_to_target, 0);
+    else  b_lift.set_state(b_lift_states::move_to_target, 0);
+  }
+}
+
+void handle_claw_buttons(){
+  if(master.is_rising(claw_toggle_button)){
+    if(get_lift()){ // if front claw
+      switch(f_claw_obj.get_state()){
+        case f_claw_states::idle:
+          f_claw_obj.set_state(f_claw_states::grabbed);
+          break;
+
+        case f_claw_states::grabbed:
+          f_claw_obj.set_state(f_claw_states::about_to_search); // will resume search in 2 seconds
+          break;
+
+        default:
+          f_claw_obj.set_state(f_claw_states::grabbed);
+          break;
+      }
+    }
+    else{ // if back claw
+      toggle_press_timer.reset();
+      switch(b_claw_obj.get_state()){
+        case b_claw_states::idle:
+          b_claw_obj.set_state(b_claw_states::tilted);
+          break;
+
+        case b_claw_states::about_to_search:
+          b_claw_obj.set_state(b_claw_states::tilted);
+          break;
+
+        case b_claw_states::searching:
+          b_claw_obj.set_state(b_claw_states::tilted);
+          break;
+
+        default:
+          break;
+      }
+    }
+  }
+  if(master.is_falling(claw_toggle_button) && !get_lift()){
+    if(toggle_press_timer.get_time() < 300){  // toggles tilt state if claw button was held
+      if(b_claw_obj.get_state() == b_claw_states::tilted || b_claw_obj.get_state() == b_claw_states::flat){
+        if(b_lift.get_state() == b_lift_states::bottom) b_claw_obj.set_state(b_claw_states::about_to_search);
+        else b_claw_obj.set_state(b_claw_states::idle);
+      }
+    }
+  }
+  
+  // b claw tilting toggle code
+  if(!get_lift() && toggle_press_timer.get_time() > 300 && toggle_press_timer.playing()){  // toggles tilt state if claw button was held
+    if(b_claw_obj.get_state() == b_claw_states::tilted) b_claw_obj.set_state(b_claw_states::flat);
+    else if(b_claw_obj.get_state() == b_claw_states::flat) b_claw_obj.set_state(b_claw_states::tilted);
+    // toggle_press_timer.reset(false); // resets and pauses the timer 
+    toggle_press_timer.pause();
+  }
+
+
+}
 

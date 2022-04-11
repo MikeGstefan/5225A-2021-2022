@@ -9,19 +9,19 @@
 // lift buttons
 controller_digital_e_t lift_up_button = DIGITAL_R1;
 controller_digital_e_t lift_down_button = DIGITAL_R2;
-controller_digital_e_t lift_claw_toggle_button =  DIGITAL_L2;
-controller_digital_e_t lift_tilt_toggle_button =  DIGITAL_L1;
+
+controller_digital_e_t reverse_drive_button = DIGITAL_L1;
+controller_digital_e_t claw_toggle_button =  DIGITAL_L2;
+
+// intake buttons
+controller_digital_e_t intake_button = DIGITAL_B;
+controller_digital_e_t intake_reverse_button = DIGITAL_DOWN;
 
 // misc buttons
-controller_digital_e_t intake_button = DIGITAL_Y;
 controller_digital_e_t ok_button = DIGITAL_A;
-
-controller_digital_e_t intake_reverse_button = DIGITAL_B;
-controller_digital_e_t shift_button = DIGITAL_DOWN;
-controller_digital_e_t hitch_toggle_button = DIGITAL_B;
-controller_digital_e_t b_claw_toggle_button = DIGITAL_X;
-
-
+controller_digital_e_t both_lifts_down_button = DIGITAL_A;
+controller_digital_e_t joy_mode_switch_button = DIGITAL_Y;
+controller_digital_e_t shift_button = DIGITAL_X;
 
 std::array<_Controller*, num_controller> _Controller::objs; //= {nullptr};
 _Task _Controller::controller_task = nullptr;
@@ -144,6 +144,7 @@ controller_digital_e_t _Controller::wait_for_press(std::vector<controller_digita
     }
   }
   controller_queue.print("%d| button %d pressed from controller %d\n", millis(), button, this->controller_num);
+// button handling methods
 
   return button;
 }
@@ -162,3 +163,32 @@ void _Controller::wait_for_press(controller_digital_e_t button, int timeout){
   }
   controller_queue.print("%d| button %d pressed from controller %d\n", millis(), button, this->controller_num);
 }
+
+void _Controller::update_buttons(){
+  for(int i = 0; i < 12; i++){
+    last_press_arr[i] = cur_press_arr[i];
+    // + 6 because controller_digital_e_t starts with 6 instead of 0
+    cur_press_arr[i] = this->get_digital(static_cast<pros::controller_digital_e_t>(i + 6));
+    // printf("%d, %d \n", i, cur_press_arr[i]);
+  }
+  // printf("\n");
+}
+
+bool _Controller::get_button_state(pros::controller_digital_e_t button){
+  return cur_press_arr[static_cast<int>(button) - 6];
+}
+
+bool _Controller::get_button_last_state(pros::controller_digital_e_t button){
+  return cur_press_arr[static_cast<int>(button) - 6];
+}
+
+bool _Controller::is_rising(pros::controller_digital_e_t button){
+  int index = static_cast<int>(button) - 6;
+  return !last_press_arr[index] && cur_press_arr[index];
+}
+
+bool _Controller::is_falling(pros::controller_digital_e_t button){
+  int index = static_cast<int>(button) - 6;
+  return last_press_arr[index] && !cur_press_arr[index];
+}
+

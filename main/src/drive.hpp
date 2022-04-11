@@ -2,6 +2,13 @@
 #include "main.h"
 #include "timer.hpp"
 
+// what the right joystick currently does
+enum class joy_modes{
+  lift_select, // the right joystick selects which lift is active
+  manual // the right joystick operates the lifts manually
+};
+extern joy_modes joy_mode;
+
 #define game true
 
 // aliases to make code more readable, used to encode vales of drive.cur_driver
@@ -56,7 +63,6 @@ public:
   // 'set-drive' methods
   void move(double x, double y, double a);
   void move(double y, double a);
-  void move_tank(double y, double a);
   void move_side(double l, double r);
 
   void brake();
@@ -81,9 +87,16 @@ public:
   // bool get_lift_button(int side = 0);
 };
 
-
-
-
-
-
 extern Drivebase drivebase;
+
+// returns true if using front lift and false if using back lift
+bool get_lift();
+
+
+void handle_lift_buttons();
+void handle_claw_buttons();
+
+extern Timer up_press;
+extern Timer down_press;
+extern Timer toggle_press_timer;
+
