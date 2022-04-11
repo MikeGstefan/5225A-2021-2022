@@ -94,31 +94,38 @@ void autonomous() {
 
 void opcontrol() {
 
-	Position start = distance_reset_center();
-	// update_t.kill();
-	// tracking.x_coord = start.x, tracking.y_coord = start.y, tracking.global_angle = deg_to_rad(start.angle);
-	// update_t.start();
+	// Position start = distance_reset_center();
+	// // update_t.kill();
+	// // tracking.x_coord = start.x, tracking.y_coord = start.y, tracking.global_angle = deg_to_rad(start.angle);
+	// // update_t.start();
 
-	// printf("x:%lf, y: %lf, a:%lf\n", start.x, start.y, start.angle);
-	// x:69.576370, y: 26.728601, a:-3.335143
-	// 81 back
-	// tracking.reset(start.x, start.y, start.angle +180);
-	flatten_against_wall(true);
-	tracking.reset(70.0, 27.0, 180.0);
+	// // printf("x:%lf, y: %lf, a:%lf\n", start.x, start.y, start.angle);
+	// // x:69.576370, y: 26.728601, a:-3.335143
+	// // 81 back
+	// // tracking.reset(start.x, start.y, start.angle +180);
+	// flatten_against_wall(true);
+	// tracking.reset(70.0, 27.0, 180.0);
 
-	// x: 36.47, y: 102.75, a: 105.66
-	// x: 37.86, y: 103.60, a: 102.11
-	move_start(move_types::tank_point, tank_point_params({70.0, 102.0, 0.0}, false, 80.0));
-	move_start(move_types::turn_angle, turn_angle_params(90.0));
-	move_start(move_types::tank_point, tank_point_params({36.0, 105.0, 0.0}));
-	while(true) pros::delay(10);
-	// lift_handle_t.start();
-	// while(!master.get_digital(DIGITAL_A)){
-	// 	// gui_handle(); //
-	// 	// printf("%d || opcontrol ENCODER L: %d, R: %d, B:%d \n", millis(), LeftEncoder.get_value(), RightEncoder.get_value(), BackEncoder.get_value());
-	// 	delay(10);
-	// }
-	// // skills2();
+	// // x: 36.47, y: 102.75, a: 105.66
+	// // x: 37.86, y: 103.60, a: 102.11
+	// move_start(move_types::tank_point, tank_point_params({70.0, 102.0, 0.0}, false, 80.0));
+	// move_start(move_types::turn_angle, turn_angle_params(90.0));
+	// move_start(move_types::tank_point, tank_point_params({36.0, 105.0, 0.0}));
+	// while(true) pros::delay(10);
+	lift_handle_t.start();
+	int state = 0;
+	while(!master.get_digital(DIGITAL_A)){
+		if(master.get_digital_new_press(DIGITAL_B)){
+			state = !state;
+			f_claw_o.set_state(state);
+			f_claw_c.set_state(state);
+		}
+		
+		// gui_handle(); //
+		// printf("%d || opcontrol ENCODER L: %d, R: %d, B:%d \n", millis(), LeftEncoder.get_value(), RightEncoder.get_value(), BackEncoder.get_value());
+		delay(10);
+	}
+	skills2();
 	// // skills();
 	// move_start(move_types::tank_point, tank_point_params({5.0, 100.0,0.0},false,50));
 	// move_start(move_types::turn_angle, turn_angle_params(90.0));
@@ -136,7 +143,7 @@ void opcontrol() {
 	// 		last_diff = diff;
 	// 	}
 		delay(10);
-		drivebase.handle_input();
+		// drivebase.handle_input();
 	}
 	while(true){
 		// b_lift.set_state(b_lift_states::move_to_target, 0);
