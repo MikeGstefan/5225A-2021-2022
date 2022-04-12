@@ -35,3 +35,5 @@ pros::Distance r_dist(12), l_dist(18);
 // pros::ADIDigitalIn intake_jam({{16, 7}});
 
 pros::Imu ramp_imu(17);
+
+//Sorry motors_for_gui has been moved to gui_construction.cpp. If I keep it here that means 32 externs.

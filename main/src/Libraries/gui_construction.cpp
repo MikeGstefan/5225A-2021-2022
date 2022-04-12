@@ -2,7 +2,6 @@
 
 //DO NOT MESS WITH INDENTATION IN THIS FILE
 
-//Can probably get rid of static since not being included anywhere. Or make everything static
 /*Field array*/ static std::vector<std::bitset<200>> field (200, std::bitset<200>{}); //Initializes to 200 blank bitsets
 /*Temperature Alert Flag*/ static bool temp_flashed = false;
 
@@ -17,33 +16,33 @@
   std::array<int, 21> expander_ports;
   std::array<Button*, 8> exp_pneum_btns;
 
-  //1:temp(leave as 0), 2:long name, 3:short name
-  std::array<std::tuple<pros::Motor*, int, std::string, std::string, Text_*>, 8> motors_for_gui {{ //put btn* here
-    {&back_l, 0, "Back Left", "BL", nullptr},
-    {&center_l, 0, "Center Left", "CL", nullptr},
-    {&front_l, 0, "Front Left", "FL", nullptr},
-    {&back_r, 0, "Back Right", "BR", nullptr},
-    {&center_r, 0, "Center Right", "CR", nullptr},
-    {&front_r, 0, "Front Right", "FR", nullptr},
-    {&f_lift_m, 0, "Front Lift", "F", nullptr},
-    {&b_lift_m, 0, "Back Lift", "B", nullptr},
-  }};//{nullptr, 0, "", "", nullptr},
+  std::array<std::tuple<pros::Motor*, std::string, std::string, int, Text_*, Text_*, Button*, Button*>, 8> motors_for_gui {{
+    {&back_l, "Back Left", "BL", 0, nullptr, nullptr, nullptr, nullptr},
+    {&center_l, "Center Left", "CL", 0, nullptr, nullptr, nullptr, nullptr},
+    {&front_l, "Front Left", "FL", 0, nullptr, nullptr, nullptr, nullptr},
+    {&back_r, "Back Right", "BR", 0, nullptr, nullptr, nullptr, nullptr},
+    {&center_r, "Center Right", "CR", 0, nullptr, nullptr, nullptr, nullptr},
+    {&front_r, "Front Right", "FR", 0, nullptr, nullptr, nullptr, nullptr},
+    {&f_lift_m, "Front Lift", "F", 0, nullptr, nullptr, nullptr, nullptr},
+    {&b_lift_m, "Back Lift", "B", 0, nullptr, nullptr, nullptr, nullptr},
+  }}; //{nullptr, "", "", 0, nullptr, nullptr, nullptr, nullptr, nullptr},
+  //Motor*, Long name, Short Name, Temperature, Temperature Text, Name Text, On Button, Off button
 
-    //For gui to use
+  //For gui to use
   extern int elastic_b_up_time, elastic_b_down_time; //Declared in b_lift.cpp
   extern int elastic_f_up_time, elastic_f_down_time; //Declared in f_lift.cpp
 
 //Constructors
   //Main GUI
     Page temps ("Temperature"); //Motor temps
-      Text mot_temp_1(90, 60, GUI::Style::CENTRE, TEXT_SMALL, temps, std::get<3>(motors_for_gui[0]) + ": %dC", std::get<1>(motors_for_gui[0]), COLOUR(BLACK));
-      Text mot_temp_2(90, 125, GUI::Style::CENTRE, TEXT_SMALL, temps, std::get<3>(motors_for_gui[1]) + ": %dC", std::get<1>(motors_for_gui[1]), COLOUR(BLACK));
-      Text mot_temp_3(90, 190, GUI::Style::CENTRE, TEXT_SMALL, temps, std::get<3>(motors_for_gui[2]) + ": %dC", std::get<1>(motors_for_gui[2]), COLOUR(BLACK));
-      Text mot_temp_4(390, 60, GUI::Style::CENTRE, TEXT_SMALL, temps, std::get<3>(motors_for_gui[3]) + ": %dC", std::get<1>(motors_for_gui[3]), COLOUR(BLACK));
-      Text mot_temp_5(390, 125, GUI::Style::CENTRE, TEXT_SMALL, temps, std::get<3>(motors_for_gui[4]) + ": %dC", std::get<1>(motors_for_gui[4]), COLOUR(BLACK));
-      Text mot_temp_6(390, 190, GUI::Style::CENTRE, TEXT_SMALL, temps, std::get<3>(motors_for_gui[5]) + ": %dC", std::get<1>(motors_for_gui[5]), COLOUR(BLACK));
-      Text mot_temp_7(240, 90, GUI::Style::CENTRE, TEXT_SMALL, temps, std::get<3>(motors_for_gui[6]) + ": %dC", std::get<1>(motors_for_gui[6]), COLOUR(BLACK));
-      Text mot_temp_8(240, 160, GUI::Style::CENTRE, TEXT_SMALL, temps, std::get<3>(motors_for_gui[7]) + ": %dC", std::get<1>(motors_for_gui[7]), COLOUR(BLACK));
+      Text mot_temp_1(90, 60, GUI::Style::CENTRE, TEXT_SMALL, temps, std::get<2>(motors_for_gui[0]) + ": %dC", std::get<int>(motors_for_gui[0]), COLOUR(BLACK));
+      Text mot_temp_2(90, 125, GUI::Style::CENTRE, TEXT_SMALL, temps, std::get<2>(motors_for_gui[1]) + ": %dC", std::get<int>(motors_for_gui[1]), COLOUR(BLACK));
+      Text mot_temp_3(90, 190, GUI::Style::CENTRE, TEXT_SMALL, temps, std::get<2>(motors_for_gui[2]) + ": %dC", std::get<int>(motors_for_gui[2]), COLOUR(BLACK));
+      Text mot_temp_4(390, 60, GUI::Style::CENTRE, TEXT_SMALL, temps, std::get<2>(motors_for_gui[3]) + ": %dC", std::get<int>(motors_for_gui[3]), COLOUR(BLACK));
+      Text mot_temp_5(390, 125, GUI::Style::CENTRE, TEXT_SMALL, temps, std::get<2>(motors_for_gui[4]) + ": %dC", std::get<int>(motors_for_gui[4]), COLOUR(BLACK));
+      Text mot_temp_6(390, 190, GUI::Style::CENTRE, TEXT_SMALL, temps, std::get<2>(motors_for_gui[5]) + ": %dC", std::get<int>(motors_for_gui[5]), COLOUR(BLACK));
+      Text mot_temp_7(240, 90, GUI::Style::CENTRE, TEXT_SMALL, temps, std::get<2>(motors_for_gui[6]) + ": %dC", std::get<int>(motors_for_gui[6]), COLOUR(BLACK));
+      Text mot_temp_8(240, 160, GUI::Style::CENTRE, TEXT_SMALL, temps, std::get<2>(motors_for_gui[7]) + ": %dC", std::get<int>(motors_for_gui[7]), COLOUR(BLACK));
 
     Page checks("Competition");
       Button drive_motors (15, 45, 100, 75, GUI::Style::SIZE, Button::SINGLE, checks, "Drive Motors");
@@ -110,14 +109,14 @@
 
     Page motors ("Motor Control"); //Motor Control for known ports
       Slider mot_speed_set (MID_X, 60, 180 , 15, GUI::Style::CENTRE, Slider::HORIZONTAL, -127, 127, motors, "Speed");
-      Text mot_1_text (65, 115, GUI::Style::CENTRE, TEXT_SMALL, motors, std::get<2>(motors_for_gui[0]));
-      Text mot_2_text (180, 115, GUI::Style::CENTRE, TEXT_SMALL, motors, std::get<2>(motors_for_gui[1]));
-      Text mot_3_text (295, 115, GUI::Style::CENTRE, TEXT_SMALL, motors, std::get<2>(motors_for_gui[2]));
-      Text mot_4_text (410, 115, GUI::Style::CENTRE, TEXT_SMALL, motors, std::get<2>(motors_for_gui[3]));
-      Text mot_5_text (65, 180, GUI::Style::CENTRE, TEXT_SMALL, motors, std::get<2>(motors_for_gui[4]));
-      Text mot_6_text (180, 180, GUI::Style::CENTRE, TEXT_SMALL, motors, std::get<2>(motors_for_gui[5]));
-      Text mot_7_text (295, 180, GUI::Style::CENTRE, TEXT_SMALL, motors, std::get<2>(motors_for_gui[6]));
-      Text mot_8_text (410, 180, GUI::Style::CENTRE, TEXT_SMALL, motors, std::get<2>(motors_for_gui[7]));
+      Text mot_1_text (65, 115, GUI::Style::CENTRE, TEXT_SMALL, motors, std::get<1>(motors_for_gui[0]));
+      Text mot_2_text (180, 115, GUI::Style::CENTRE, TEXT_SMALL, motors, std::get<1>(motors_for_gui[1]));
+      Text mot_3_text (295, 115, GUI::Style::CENTRE, TEXT_SMALL, motors, std::get<1>(motors_for_gui[2]));
+      Text mot_4_text (410, 115, GUI::Style::CENTRE, TEXT_SMALL, motors, std::get<1>(motors_for_gui[3]));
+      Text mot_5_text (65, 180, GUI::Style::CENTRE, TEXT_SMALL, motors, std::get<1>(motors_for_gui[4]));
+      Text mot_6_text (180, 180, GUI::Style::CENTRE, TEXT_SMALL, motors, std::get<1>(motors_for_gui[5]));
+      Text mot_7_text (295, 180, GUI::Style::CENTRE, TEXT_SMALL, motors, std::get<1>(motors_for_gui[6]));
+      Text mot_8_text (410, 180, GUI::Style::CENTRE, TEXT_SMALL, motors, std::get<1>(motors_for_gui[7]));
       Button mot_1_update (15, 125, 45, 30, GUI::Style::SIZE, Button::SINGLE, motors, "Run");
       Button mot_2_update (130, 125, 45, 30, GUI::Style::SIZE, Button::SINGLE, motors, "Run");
       Button mot_3_update (245, 125, 45, 30, GUI::Style::SIZE, Button::SINGLE, motors, "Run");
@@ -221,7 +220,7 @@
 
 
 void main_setup(){
-  //Temperature
+  //Temperature & Motor Control
     std::get<4>(motors_for_gui[0]) = &mot_temp_1;
     std::get<4>(motors_for_gui[1]) = &mot_temp_2;
     std::get<4>(motors_for_gui[2]) = &mot_temp_3;
@@ -231,17 +230,56 @@ void main_setup(){
     std::get<4>(motors_for_gui[6]) = &mot_temp_7;
     std::get<4>(motors_for_gui[7]) = &mot_temp_8;
 
+    std::get<5>(motors_for_gui[0]) = &mot_1_text;
+    std::get<5>(motors_for_gui[1]) = &mot_2_text;
+    std::get<5>(motors_for_gui[2]) = &mot_3_text;
+    std::get<5>(motors_for_gui[3]) = &mot_4_text;
+    std::get<5>(motors_for_gui[4]) = &mot_5_text;
+    std::get<5>(motors_for_gui[5]) = &mot_6_text;
+    std::get<5>(motors_for_gui[6]) = &mot_7_text;
+    std::get<5>(motors_for_gui[7]) = &mot_8_text;
+
+    std::get<6>(motors_for_gui[0]) = &mot_1_update;
+    std::get<6>(motors_for_gui[1]) = &mot_2_update;
+    std::get<6>(motors_for_gui[2]) = &mot_3_update;
+    std::get<6>(motors_for_gui[3]) = &mot_4_update;
+    std::get<6>(motors_for_gui[4]) = &mot_5_update;
+    std::get<6>(motors_for_gui[5]) = &mot_6_update;
+    std::get<6>(motors_for_gui[6]) = &mot_7_update;
+    std::get<6>(motors_for_gui[7]) = &mot_8_update;
+
+    std::get<7>(motors_for_gui[0]) = &mot_1_stop;
+    std::get<7>(motors_for_gui[1]) = &mot_2_stop;
+    std::get<7>(motors_for_gui[2]) = &mot_3_stop;
+    std::get<7>(motors_for_gui[3]) = &mot_4_stop;
+    std::get<7>(motors_for_gui[4]) = &mot_5_stop;
+    std::get<7>(motors_for_gui[5]) = &mot_6_stop;
+    std::get<7>(motors_for_gui[6]) = &mot_7_stop;
+    std::get<7>(motors_for_gui[7]) = &mot_8_stop;
+
     for (int i = 0; i < 8; i++){
-      std::get<int>(motors_for_gui[i]) = std::get<Motor*>(motors_for_gui[i]) ? std::get<Motor*>(motors_for_gui[i])->get_temperature() : std::numeric_limits<int>::max();
-      if(std::get<int>(motors_for_gui[i]) == std::numeric_limits<int>::max()) std::get<Text_*>(motors_for_gui[i])->set_active(false);
-      std::get<Text_*>(motors_for_gui[i])->set_background(40, 20);
+      if(std::get<Motor*>(motors_for_gui[i])){
+        std::get<6>(motors_for_gui[0])->set_func([](){std::get<Motor*>(motors_for_gui[0])->move(mot_speed_set.get_value());});
+        std::get<7>(motors_for_gui[0])->set_func([](){std::get<Motor*>(motors_for_gui[0])->move(0);});
+
+        std::get<int>(motors_for_gui[i]) = std::get<Motor*>(motors_for_gui[i])->get_temperature();
+      }
+      else std::get<int>(motors_for_gui[i]) = std::numeric_limits<int>::max();
+
+      std::get<4>(motors_for_gui[i])->set_background(40, 20);
+      if(std::get<int>(motors_for_gui[i]) == std::numeric_limits<int>::max()){
+        std::get<4>(motors_for_gui[0])->set_active(false);
+        std::get<5>(motors_for_gui[0])->set_active(false);
+        std::get<6>(motors_for_gui[0])->set_active(false);
+        std::get<7>(motors_for_gui[0])->set_active(false);
+      }
     }
 
     temps.set_loop_func([](){
       for (int i = 0; i < 8; i++){
         Text_* text = std::get<4>(motors_for_gui[i]);
         if (text){
-          switch(std::get<1>(motors_for_gui[i])){
+          switch(std::get<int>(motors_for_gui[i])){
             case 0:
             case 5:
               text->set_background(COLOUR(WHITE)); break;
@@ -592,88 +630,6 @@ void main_setup(){
       }
     });
 
-  //Motor Control
-    if(std::get<0>(motors_for_gui[0])){
-      mot_1_update.set_func([](){std::get<0>(motors_for_gui[0])->move(mot_speed_set.get_value());});
-      mot_1_stop.set_func([](){std::get<0>(motors_for_gui[0])->move(0);});
-    }
-    else{
-      mot_1_text.set_active(false);
-      mot_1_update.set_active(false);
-      mot_1_stop.set_active(false);
-      mot_temp_1.set_active(false);
-    }
-    if(std::get<0>(motors_for_gui[1])){
-      mot_2_update.set_func([](){std::get<0>(motors_for_gui[1])->move(mot_speed_set.get_value());});
-      mot_2_stop.set_func([](){std::get<0>(motors_for_gui[1])->move(0);});
-    }
-    else{
-      mot_2_text.set_active(false);
-      mot_2_update.set_active(false);
-      mot_2_stop.set_active(false);
-      mot_temp_2.set_active(false);
-    }
-    if(std::get<0>(motors_for_gui[2])){
-      mot_3_update.set_func([](){std::get<0>(motors_for_gui[2])->move(mot_speed_set.get_value());});
-      mot_3_stop.set_func([](){std::get<0>(motors_for_gui[2])->move(0);});
-    }
-    else{
-      mot_3_text.set_active(false);
-      mot_3_update.set_active(false);
-      mot_3_stop.set_active(false);
-      mot_temp_3.set_active(false);
-    }
-    if(std::get<0>(motors_for_gui[3])){
-      mot_4_update.set_func([](){std::get<0>(motors_for_gui[3])->move(mot_speed_set.get_value());});
-      mot_4_stop.set_func([](){std::get<0>(motors_for_gui[3])->move(0);});
-    }
-    else{
-      mot_4_text.set_active(false);
-      mot_4_update.set_active(false);
-      mot_4_stop.set_active(false);
-      mot_temp_4.set_active(false);
-    }
-    if(std::get<0>(motors_for_gui[4])){
-      mot_5_update.set_func([](){std::get<0>(motors_for_gui[4])->move(mot_speed_set.get_value());});
-      mot_5_stop.set_func([](){std::get<0>(motors_for_gui[4])->move(0);});
-    }
-    else{
-      mot_5_text.set_active(false);
-      mot_5_update.set_active(false);
-      mot_5_stop.set_active(false);
-      mot_temp_5.set_active(false);
-    }
-    if(std::get<0>(motors_for_gui[5])){
-      mot_6_update.set_func([](){std::get<0>(motors_for_gui[5])->move(mot_speed_set.get_value());});
-      mot_6_stop.set_func([](){std::get<0>(motors_for_gui[5])->move(0);});
-    }
-    else{
-      mot_6_text.set_active(false);
-      mot_6_update.set_active(false);
-      mot_6_stop.set_active(false);
-      mot_temp_6.set_active(false);
-    }
-    if(std::get<0>(motors_for_gui[6])){
-      mot_7_update.set_func([](){std::get<0>(motors_for_gui[6])->move(mot_speed_set.get_value());});
-      mot_7_stop.set_func([](){std::get<0>(motors_for_gui[6])->move(0);});
-    }
-    else{
-      mot_7_text.set_active(false);
-      mot_7_update.set_active(false);
-      mot_7_stop.set_active(false);
-      mot_temp_7.set_active(false);
-    }
-    if(std::get<0>(motors_for_gui[7])){
-      mot_8_update.set_func([](){std::get<0>(motors_for_gui[7])->move(mot_speed_set.get_value());});
-      mot_8_stop.set_func([](){std::get<0>(motors_for_gui[7])->move(0);});
-    }
-    else{
-      mot_8_text.set_active(false);
-      mot_8_update.set_active(false);
-      mot_8_stop.set_active(false);
-      mot_temp_8.set_active(false);
-    }
-
   //Pneumatic Control
     pneum_1.add_text(pneum_1_text);
     pneum_2.add_text(pneum_2_text);
@@ -704,14 +660,14 @@ void main_background(){
   int x = 200*tracking.x_coord/144, y = 200*tracking.y_coord/144;
   if(in_range(x, 0, 199) && in_range(y, 0, 199)) field[x].set(y); //Saves position (x,y) to as tracked
 
-  for (std::array<std::tuple<Motor*, int, std::string, std::string, Text_*>, 8>::iterator it = motors_for_gui.begin(); it != motors_for_gui.end(); it++){
-    std::tuple<Motor*, int, std::string, std::string, Text_*>& mot_tup = *it;
-    std::get<1>(mot_tup) = std::get<0>(mot_tup) ? std::get<0>(mot_tup)->get_temperature() : std::numeric_limits<int>::max();
+  for (std::array<std::tuple<pros::Motor*, std::string, std::string, int, Text_*, Text_*, Button*, Button*>, 8>::iterator it = motors_for_gui.begin(); it != motors_for_gui.end(); it++){
+    std::tuple<pros::Motor*, std::string, std::string, int, Text_*, Text_*, Button*, Button*>& mot_tup = *it;
+    std::get<int>(mot_tup) = std::get<Motor*>(mot_tup) ? std::get<Motor*>(mot_tup)->get_temperature() : std::numeric_limits<int>::max();
 
-    if (!temp_flashed && std::get<0>(mot_tup) && in_range(std::get<1>(mot_tup), 55, std::numeric_limits<int>::max()-1) && screen_flash::timer.playing()){ //Overheating
+    if (!temp_flashed && std::get<Motor*>(mot_tup) && in_range(std::get<int>(mot_tup), 55, std::numeric_limits<int>::max()-1) && screen_flash::timer.playing()){ //Overheating
       temp_flashed = true;
       temps.go_to();
-      screen_flash::start(term_colours::ERROR, 10000, "%s motor is at %dC\n", std::get<2>(mot_tup).c_str(), std::get<1>(mot_tup));
+      screen_flash::start(term_colours::ERROR, 10000, "%s motor is at %dC\n", std::get<1>(mot_tup).c_str(), std::get<int>(mot_tup));
       break;
     }
   }

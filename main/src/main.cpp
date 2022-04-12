@@ -92,8 +92,7 @@ void autonomous() {
 void opcontrol() {
   /* Nathan:
   better tracking tests
-  reorganize gui setup function to match pages
-  put btn* in motors_for_gui
+  remove common point from auton selector
   make flash its own page
   file writing functions
   proper text splitter for flash
