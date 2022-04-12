@@ -94,6 +94,7 @@ void opcontrol() {
   make flash its own page
   file writing functions
   proper text splitter for flash
+  allow multiple text variables through tuple
   get rid of add_text. just change the buttons text directly (will have to deal with changeing text length)
   auton give up func - ask mike
   

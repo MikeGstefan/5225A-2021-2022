@@ -67,17 +67,11 @@ public:
   static char* to_char(const char* format, ...);
 
   /**
-  * @brief printf that handles strings and automatically newlines. Can print coloured and a timestamp
-  * 
-  * @param colour The colour to print in 
-  * @param time_type:
-  * -1: no timestamp
-  * 0: 1500
-  * 1: 1500ms
-  * 2: 1s 500ms
-  * @param fmt printf format string
-  * @param args printf args
-  */
+   * @brief 
+   * 
+   * @param format printf format string
+   * @param args printf args
+   */
   template <typename... Params>
   void print(std::string format, Params... args) const{
     std::string str = sprintf2(format, args...);
@@ -97,6 +91,38 @@ public:
           break;
         case log_locations::both:
           printf2(print_colour, print_type, "%s", str);
+          this->log_print(buffer, buffer_len);
+          break;
+      }
+    }
+  }
+
+  /**
+   * @brief 
+   * 
+   * @param colour term_colour to print in
+   * @param format printf format string
+   * @param args printf args
+   */
+  template <typename... Params>
+  void print(term_colours colour, std::string format, Params... args) const{
+    std::string str = sprintf2(format, args...);
+    int buffer_len = str.length() + 3;
+    char buffer[256];
+    snprintf(buffer, 256, str.c_str());
+
+    if(int(this->log_type) != 0){
+      switch(log_location){
+        case log_locations::t:
+          printf2(colour, print_type, "%s", str);
+          break;
+        case log_locations::sd:
+          this->log_print(buffer, buffer_len);
+          break;
+        case log_locations::none:
+          break;
+        case log_locations::both:
+          printf2(colour, print_type, "%s", str);
           this->log_print(buffer, buffer_len);
           break;
       }
