@@ -12,7 +12,7 @@
   std::string motor_port_nums;
   std::string expander_port_nums;
   std::string no_pneumatic_port_nums;
-  std::array<std::tuple<int, Button*, Button*, Text_*, int, std::string>, 8> motor_ports; //util: port, run, stop, stall counter, port and rpm
+  std::array<std::tuple<int, Button*, Button*, Text_*, int, std::string>, 8> motor_ports; //util: port, run, stop, stall counter, text(port and rpm)
   std::array<int, 21> expander_ports;
   std::array<Button*, 8> exp_pneum_btns;
 
@@ -459,8 +459,34 @@ void main_setup(){
 
   //Tuning Tracking
     manual.select();
-    //encoder in the right direction? //manual
-    //use encoders instead of tracking
+    //Figure out how to do these with the other left/right, front/back or moving in the other direction
+
+    wheel_size.set_func([](){ //Encoder Direction
+      if(manual.on){
+        if(GUI::prompt("Press, then move the robot forward and to the right", "")){
+          drivebase.reset();
+
+          if (GUI::prompt("Press when done movement")){
+            printf2("The left tracking wheel is in the %s direction", LeftEncoder.get_value() > 0 ? "right" : "wrong");
+            printf2("The right tracking wheel is in the %s direction", RightEncoder.get_value() > 0 ? "right" : "wrong");
+            printf2("The back tracking wheel is in the %s direction", BackEncoder.get_value() > 0 ? "right" : "wrong");
+          }
+        }
+      }
+      else{
+        if(GUI::prompt("Press, then clear the area", "", 1500)){
+          drivebase.reset();
+
+          drivebase.move(50.0, 20.0); // preferably strafe right instead of turning.
+          tracking.wait_for_dist(30);
+          drivebase.brake();
+
+          printf2("The left tracking wheel is in the %s direction", LeftEncoder.get_value() > 0 ? "right" : "wrong");
+            printf2("The right tracking wheel is in the %s direction", RightEncoder.get_value() > 0 ? "right" : "wrong");
+            printf2("The back tracking wheel is in the %s direction", BackEncoder.get_value() > 0 ? "right" : "wrong");
+        }
+      }
+    });
 
     encoder_ticks.set_func([](){ //Encoder missing ticks
       if(manual.on){
@@ -497,38 +523,36 @@ void main_setup(){
       }
     });
 
-    back_corkscrew.set_func([](){ //Left-Right Corkscrew //Figure out how to do this with the right side or moving backwards
+    back_corkscrew.set_func([](){ //Back Corkscrew
       if(manual.on){
-        if(GUI::prompt("Press, then move along y", "Please slide the robot forward along a known surface in the y-direction", 0)){
+        if(GUI::prompt("Press, then move along y", "Please slide the robot forward along a known surface in the y-direction")){
           drivebase.reset();
 
           if (GUI::prompt("Press when stopped")){
-            double strafe = tracking.x_coord;
-            if (strafe < -0.05) printf2(term_colours::RED, -1, "The robot thinks it strafed %.2f inches to the left.Consider turning the back tracking wheel counter-clockwise", fabs(strafe));
-            else if (strafe > 0.05) printf2(term_colours::RED, -1, "The robot thinks it strafed %.2f inches to the right.Consider turning the back tracking wheel clockwise", fabs(strafe));
-            else printf2(term_colours::GREEN, -1, "The robot thinks it strafed a perfect %.2f inches", strafe);
+            int back = BackEncoder.get_value();
+            if(abs(back) <= 2) printf2(term_colours::GREEN, -1, "The back wheel is pretty accurate, it is at %d ticks.", back);
+            else printf2(term_colours::RED, -1, "The back wheel is corkscrewing. It is at %d ticks. Consider turning it %sclockwise.", left, sgn(LeftEncoder.get_value()) == sgn(back) ? "" : "counter-");
           }
         }
       }
       else{
-        if(GUI::prompt("Press, then move along y", "Please press the robot's left side along a known surface", 1500)){
+        if(GUI::prompt("Push the left side against a surface", "Please push the robot's left side along a known surface, then press.", 1500)){
           drivebase.reset();
           
           drivebase.move(50.0, -20.0);
           tracking.wait_for_dist(25);
           drivebase.brake();
-          double strafe = tracking.x_coord;
 
-          if (strafe < -0.05) printf2(term_colours::RED, -1, "The robot thinks it strafed %.2f inches to the left.Consider turning the back tracking wheel counter-clockwise", fabs(strafe));
-          else if (strafe > 0.05) printf2(term_colours::RED, -1, "The robot thinks it strafed %.2f inches to the right.Consider turning the back tracking wheel clockwise", fabs(strafe));
-          else printf2(term_colours::GREEN, -1, "The robot thinks it strafed a perfect %.2f inches", strafe);
+          int back = BackEncoder.get_value();
+          if(abs(back) <= 2) printf2(term_colours::GREEN, -1, "The back wheel is pretty accurate, it is at %d ticks.", back);
+          else printf2(term_colours::RED, -1, "The back wheel is corkscrewing. It is at %d ticks. Consider turning it %sclockwise.", left, sgn(LeftEncoder.get_value()) == sgn(back) ? "" : "counter-");
         }
       }
     });
 
-    side_corkscrew.set_func([](){ //Back Corkscrew //Figure out how to do this for sliding on the back
+    side_corkscrew.set_func([](){ //Left-Right Corkscrew
       if(manual.on){
-        if(GUI::prompt("Press, then move along x", "Please slide the robot along a known surface in the x-direction", 0)){
+        if(GUI::prompt("Press, then move along x", "Please slide the robot along a known surface in the x-direction")){
           drivebase.reset();
 
           if(GUI::prompt("Press when stopped")){
@@ -548,14 +572,14 @@ void main_setup(){
       }
     });
 
-    wheel_size.set_func([](){ //Robot turn accuracy
+    wheel_size.set_func([](){ //Left-Right wheel size
       if(manual.on){
-        if(GUI::prompt("Press, then move the robot 30 inches", "Place the robot's side against a known surface. Press the button, then slide the robot exactly 30 inches. Return it to the starting point. (Half turns are ok)", 0)){
+        if(GUI::prompt("Press, then move the robot 30 inches", "Place the robot's side against a known surface. Press the button, then slide the robot forwards exactly 30 inches.")){
           drivebase.reset();
 
           if (GUI::prompt("Press when completed 30 inches")){
-            printf2("The left tracking wheel's diameter is ", 60.0/LeftEncoder.get_value());
-            printf2("The left tracking wheel's diameter is ", 60.0/LeftEncoder.get_value());
+            printf2("The left tracking wheel's diameter is %f", 60.0/LeftEncoder.get_value());
+            printf2("The right tracking wheel's diameter is %f", 60.0/RightEncoder.get_value());
           }
         }
       }
@@ -565,22 +589,44 @@ void main_setup(){
 
           int dir = random_direction();
           drivebase.move(dir*50.0, -dir*20.0);
-          tracking.wait_for_dist(30);
+          tracking.wait_for_dist(30); //This needs to brake at exactly 30, it can't just be past 30
           drivebase.brake();
 
           printf2("If the robot is far off of 30 inches, consider changing the wheel size constants.");
-          printf2("Multiply the actual travelled distance by %f to get the left wheel diameter", 2.0/LeftEncoder.get_value());
-          printf2("Multiply the actual travelled distance by %f to get the right wheel diameter", 2.0/RightEncoder.get_value());
+          printf2("Multiply the actual travelled distance by %f to get the left wheel diameter", fabs(2.0/LeftEncoder.get_value()));
+          printf2("Multiply the actual travelled distance by %f to get the right wheel diameter", fabs(2.0/RightEncoder.get_value()));
         }
       }
     });
 
     back_wheel_size.set_func([](){ //Back wheel size
+      if(manual.on){
+        if(GUI::prompt("Press, then move the robot 30 inches", "Place the robot's front against a known surface. Press the button, then slide the robot sideways exactly 30 inches.")){
+          drivebase.reset();
+
+          if (GUI::prompt("Press when completed 30 inches")){
+            printf2("The back tracking wheel's diameter is %f", 60.0/BackEncoder.get_value());
+          }
+        }
+      }
+      else{
+        if(GUI::prompt("Place the robot's side against a surface. Then press.", "", 1500)){
+          drivebase.reset();
+
+          int dir = random_direction();
+          drivebase.move(dir*50.0, -dir*20.0); //strafe
+          tracking.wait_for_dist(30); //This needs to brake at exactly 30, it can't just be past 30
+          drivebase.brake();
+
+          printf2("If the robot is far off of 30 inches, consider changing the wheel size constant.");
+          printf2("Multiply the actual travelled distance by %f to get the back wheel diameter", fabs(2.0/LeftEncoder.get_value()));
+        }
+      }
     });
 
     spin360.set_func([](){ //Robot turn accuracy
       if(manual.on){
-        if(GUI::prompt("Press, then spin the robot", "Place the robot's against a known surface. Press the button, then spin the robot. Return it to the starting point. (Half turns are ok)", 0)){
+        if(GUI::prompt("Press, then spin the robot", "Place the robot's against a known surface. Press the button, then spin the robot. Return it to the starting point. (Half turns are ok)")){
           flatten_against_wall();
           drivebase.reset();
 
@@ -592,9 +638,11 @@ void main_setup(){
             turned = 180*(turned-rots);
             rots /= 2;
 
+            double dist = rots*fabs(LeftEncoder.get_value()-RightEncoder.get_value())/360.0;
+
             if(fabs(turned) <= 0.05) printf2(term_colours::GREEN, -1, "This seems pretty accurate. It's %.4f degrees off over %.1f rotations.", turned, rots);
-            else if(turned > 0) printf2(term_colours::RED, -1, "However, the robot gained %.2f degrees over %.1f rotations. Consider decreasing the DistanceLR.", turned, rots);
-            else printf2(term_colours::RED, -1, "However, the robot lost %.2f degrees over %.1f rotations. Consider increasing the DistanceLR.", -turned, rots);
+            else if(turned > 0) printf2(term_colours::RED, -1, "However, the robot gained %.2f degrees over %.1f rotations. Consider decreasing the DistanceLR to %.3f.", turned, rots, dist);
+            else printf2(term_colours::RED, -1, "However, the robot lost %.2f degrees over %.1f rotations. Consider increasing the DistanceLR to %.3f.", -turned, rots, dist);
           }
         }
       }
@@ -623,9 +671,11 @@ void main_setup(){
           turned = 180*(turned-rots);
           rots /= 2;
 
+          double dist = rots*fabs(LeftEncoder.get_value()-RightEncoder.get_value())/360.0;
+
           if(fabs(turned) <= 0.05) printf2(term_colours::GREEN, -1, "This seems pretty accurate. It's %.4f degrees off over %.1f rotations.", turned, rots);
-          else if(turned > 0) printf2(term_colours::RED, -1, "However, the robot gained %.2f degrees over %.1f rotations. Consider decreasing the DistanceLR.", turned, rots);
-          else printf2(term_colours::RED, -1, "However, the robot lost %.2f degrees over %.1f rotations. Consider increasing the DistanceLR.", -turned, rots);
+          else if(turned > 0) printf2(term_colours::RED, -1, "However, the robot gained %.2f degrees over %.1f rotations. Consider decreasing the DistanceLR to %.3f.", turned, rots, dist);
+          else printf2(term_colours::RED, -1, "However, the robot lost %.2f degrees over %.1f rotations. Consider increasing the DistanceLR to %.3f.", -turned, rots, dist);
         }
       }
     });
@@ -801,9 +851,8 @@ void util_background(){
   for (std::array<std::tuple<int, Button*, Button*, Text_*, int, std::string>, 8>::iterator it = motor_ports.begin(); it != motor_ports.end(); it++){
     int port = std::get<0>(*it);
     int& stall_count = std::get<4>(*it);
-    std::string& label = std::get<5>(*it);
     if (port != std::numeric_limits<int>::max()){
-      label = sprintf2("%d: %d", port, c::motor_get_actual_velocity(port));
+      std::get<5>(*it) = sprintf2("%d: %d", port, c::motor_get_actual_velocity(port));
       if(mot_jam_detect.on){
         if (fabs(c::motor_get_actual_velocity(port)) < fabs(c::motor_get_target_velocity(port))/4) stall_count++;
         else stall_count = 0;

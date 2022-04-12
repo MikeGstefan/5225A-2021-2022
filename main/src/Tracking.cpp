@@ -6,6 +6,8 @@
 #include "util.hpp"
 #include "geometry.hpp"
 
+//Why is everything double indented in this file
+
 Tracking tracking;
 
 _Task update_t(update, "Tracking");
@@ -72,6 +74,8 @@ void update(void* params){
   _Task* ptr = _Task::get_obj(params);
   Timer data_timer{"tracking logs"};
   // LeftEncoder.reset(); RightEncoder.reset(); BackEncoder.reset();
+
+  // Make most of these constants in a header
   double DistanceLR = 9.84, DistanceB = 0.85;
   double Left, Right, Back, NewLeft, NewRight, NewBack, LastLeft = LeftEncoder.get_value()/360.0 *(2.75*M_PI), LastRight =  RightEncoder.get_value()/360.0 *(2.75*M_PI), LastBack = BackEncoder.get_value()/360.0 *(2.75*M_PI);
   double Theta = 0.0, Beta = 0.0, Alpha = 0.0;
@@ -86,7 +90,7 @@ void update(void* params){
 
 
   while(true){
-    NewLeft = LeftEncoder.get_value()/360.0 *(2.75*M_PI); //make 2.75 a constant
+    NewLeft = LeftEncoder.get_value()/360.0 *(2.75*M_PI);
     NewRight = RightEncoder.get_value()/360.0 *(2.75*M_PI);
     NewBack = BackEncoder.get_value()/360.0 *(2.75*M_PI);
 

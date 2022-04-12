@@ -2,10 +2,10 @@
 
 static constexpr int e_port = 20;
 
-// 6 Motor config - Apr 3 2022
+// 6 Motor config - Apr 12 2022
 _Controller master(pros::E_CONTROLLER_MASTER);
 _Controller partner(pros::E_CONTROLLER_PARTNER);
-pros::ADIEncoder LeftEncoder({e_port, 5, 6}, true), RightEncoder({e_port, 1, 2}, true), BackEncoder({e_port, 3, 4}, false);
+pros::ADIEncoder LeftEncoder({e_port, 5, 6}, false), RightEncoder({e_port, 1, 2}, true), BackEncoder({e_port, 3, 4}, false);
 
 pros::Motor front_l(10, pros::E_MOTOR_GEARSET_18, true, pros::E_MOTOR_ENCODER_DEGREES);
 pros::Motor center_l(9, pros::E_MOTOR_GEARSET_18, false, pros::E_MOTOR_ENCODER_DEGREES);
