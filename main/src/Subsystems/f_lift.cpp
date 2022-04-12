@@ -89,6 +89,8 @@ void F_Lift::handle(bool driver_array){
 
     case f_lift_states::manual:
       lift_power = master.get_analog(ANALOG_RIGHT_Y);
+      // if master controller joystick isn't active, take partner input instead
+      if(fabs(lift_power) < 10) lift_power = partner.get_analog(ANALOG_LEFT_Y);
       // holds motor if joystick is within deadzone or lift is out of range
       if (fabs(lift_power) < 10 || (lift_power < 0 && f_lift_pot.get_value() <= driver_positions[0]) || (lift_power > 0 && f_lift_pot.get_value() >= driver_positions[driver_positions.size() - 1])){
         motor.move_velocity(0);
@@ -145,23 +147,20 @@ void F_Lift::set_state(const f_lift_states next_state, const uint8_t index, cons
 
 int elastic_f_up_time, elastic_f_down_time; //for gui_construction.cpp
 
-void F_Lift::elastic_util(){
-  motor.move(-10);
+void F_Lift::elastic_util(int high){ //935 as of April 10th
   GUI::prompt("Press to start front elastic test", "", 500);
   Timer move_timer{"move"};
-  set_state(f_lift_states::move_to_target, driver_positions.size() - 1); // moves to top
-  // // intake_piston.set_value(HIGH);  // raises intake
-  wait_until(get_state() == f_lift_states::idle);
+  while(abs(f_lift_m.get_position() - high) > 15) f_lift_m.move(127);
   move_timer.print();
   elastic_f_up_time = move_timer.get_time();
-  master.print(1, 0, "up time: %d", elastic_f_up_time);
+  master.print(1, 0, "Up Time: %d", elastic_f_up_time);
 
   move_timer.reset();
-  set_state(f_lift_states::move_to_target, 0); // moves to bottom
-  wait_until(get_state() == f_lift_states::bottom);
+  while(abs(f_lift_m.get_position() - 0) > 15) f_lift_m.move(-127);
   move_timer.print();
   elastic_f_down_time = move_timer.get_time();
-  master.print(2, 0, "down time: %d", elastic_f_up_time);
+  master.print(2, 0, "Down Time: %d", elastic_f_up_time);
+  f_lift_m.move(0);
 }
 
 

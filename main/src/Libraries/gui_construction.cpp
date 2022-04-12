@@ -454,8 +454,8 @@ void main_setup(){
     });
 
   //Elastic Test
-    check_b_elastic.set_func([](){b_lift.elastic_util();});
-    check_f_elastic.set_func([](){f_lift.elastic_util();});
+    check_b_elastic.set_func([](){b_lift.elastic_util(1011);});
+    check_f_elastic.set_func([](){f_lift.elastic_util(935);});
 
   //Tuning Tracking
     manual.select();

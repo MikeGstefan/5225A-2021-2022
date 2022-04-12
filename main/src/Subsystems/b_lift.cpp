@@ -48,10 +48,10 @@ void B_Lift::handle(bool driver_array){
       break;
 
     case b_lift_states::move_to_target: // moving to target
-      // output is scoped below to prevent other states from accessing it 
+      // output is scoped below to prevent other states from accessing it
       {
         int output = pid.compute(b_lift_pot.get_value(), positions[index]);
-        if (abs(output) > speed) output = speed * sgn(output); // cap the output at speed  
+        if (abs(output) > speed) output = speed * sgn(output); // cap the output at speed
         motor.move(output);
       }
       // moves to next state if the lift has reached its target
@@ -59,7 +59,7 @@ void B_Lift::handle(bool driver_array){
         motor.move_velocity(0); // holds motor
         // switches to idle by default or special case depending on current target
         switch(index){
-          case 0: // lift is at bottom position, this state is used by intake 
+          case 0: // lift is at bottom position, this state is used by intake
             Subsystem::set_state(b_lift_states::bottom);
             break;
           default:
@@ -89,7 +89,8 @@ void B_Lift::handle(bool driver_array){
 
     case b_lift_states::manual:
       lift_power = master.get_analog(ANALOG_RIGHT_X);
-      printf("lift_power:%d, pos:%d\n", lift_power, b_lift_pot.get_value());
+      // if master controller joystick isn't active, take partner input instead
+      if(fabs(lift_power) < 10) lift_power = partner.get_analog(ANALOG_RIGHT_Y);
       // holds motor if joystick is within deadzone or lift is out of range
       if (fabs(lift_power) < 10 || (lift_power < 0 && b_lift_pot.get_value() <= driver_positions[0]) || (lift_power > 0 && b_lift_pot.get_value() >= driver_positions[driver_positions.size() - 1])) motor.move_velocity(0);
       else motor.move(lift_power);
@@ -161,13 +162,13 @@ void B_Lift::handle_state_change(){
       lift_t.set_state(HIGH);
       motor.move_relative(30, 100);
       break;
-    
+
     case b_lift_states::shifting_to_lift_down:
       motor.move_relative(-30, 100);
       break;
 
   }
-  log_state_change();  
+  log_state_change();
 }
 
 // accepts an index argument used specifically for a move to target
@@ -184,23 +185,20 @@ void B_Lift::set_state(const b_lift_states next_state, const uint8_t index, cons
 
 int elastic_b_up_time, elastic_b_down_time; //for gui_construction.cpp
 
-void B_Lift::elastic_util(){
-  motor.move(-10);
+void B_Lift::elastic_util(int high){ //1011 as of April 10th
   GUI::prompt("Press to start back elastic test", "", 500);
   Timer move_timer{"move"};
-  set_state(b_lift_states::move_to_target, driver_positions.size() - 1); // moves to top
-  // // intake_piston.set_value(HIGH);  // raises intake
-  wait_until(get_state() == b_lift_states::idle);
+  while(abs(b_lift_m.get_position() - high) > 15) b_lift_m.move(127);
   move_timer.print();
   elastic_b_up_time = move_timer.get_time();
   master.print(1, 0, "up time: %d", elastic_b_up_time);
 
   move_timer.reset();
-  set_state(b_lift_states::move_to_target, 0); // moves to bottom
-  wait_until(get_state() == b_lift_states::bottom);
+  while(abs(b_lift_m.get_position() - 0) > 15) b_lift_m.move(-127);
   move_timer.print();
   elastic_b_down_time = move_timer.get_time();
   master.print(2, 0, "down time: %d", elastic_b_up_time);
+  b_lift_m.move(0);
 }
 
 
@@ -281,16 +279,17 @@ void B_Claw::handle_state_change(){
 
     case b_claw_states::tilted:
       master.rumble("-");
-      tilt_lock.set_state(HIGH);
-      delay(50);
       b_claw.set_state(HIGH); // grabs mogo
+      // delay(100);
+      // tilt_lock.set_state(HIGH);
       break;
 
     case b_claw_states::flat:
       master.rumble("-");
       tilt_lock.set_state(LOW);
+      delay(100);
       b_claw.set_state(LOW);
       break;
   }
-  log_state_change();  
+  log_state_change();
 }

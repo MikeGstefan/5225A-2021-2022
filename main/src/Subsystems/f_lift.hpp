@@ -33,10 +33,9 @@ class F_Lift: public Motorized_subsystem<f_lift_states, NUM_OF_F_LIFT_STATES, F_
     std::atomic<int32_t> speed{127}; // max pwm applied to the lifts during a move to target
 
   public:
-
-    vector<int> driver_positions = {1200, 1500, 2050, 2750};
-    //                            btm   carry plat  clear level top
-    vector<int> prog_positions = {1170, 1350, 1950, 2020, 2300, 2750};
+    // bottom is 1162
+    vector<int> driver_positions = {1160, 1300, 2050, 2300, 2750};
+    vector<int> prog_positions = {1160, 1300, 2050, 2300, 2750};
 
     F_Lift(Motorized_subsystem<f_lift_states, NUM_OF_F_LIFT_STATES, F_LIFT_MAX_VELOCITY> motorized_subsystem);  // constructor
     
@@ -51,10 +50,8 @@ class F_Lift: public Motorized_subsystem<f_lift_states, NUM_OF_F_LIFT_STATES, F_
       return index.load();
     }
     
-    void elastic_util(); // up time should be about 1100mms (ignore this time, it was on the old lift), down time should be slightly slower than that
-
-    //overlad to use pot. always waits for complete. the param does nothing
-    void move_absolute(double position, double velocity = F_LIFT_MAX_VELOCITY, bool wait_for_comp = true, double end_error = 0.0);
+    void elastic_util(int high); // up time should be about 1100mms (ignore this time, it was on the old lift), down time should be slightly slower than that
+    void move_absolute(double position, double velocity = F_LIFT_MAX_VELOCITY, bool wait_for_comp = true, double end_error = 20);
 };
 
 extern F_Lift f_lift;

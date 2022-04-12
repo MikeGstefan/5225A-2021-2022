@@ -1,10 +1,11 @@
 #include "controller.hpp"
 
-// Buttons
+// master buttons
 
 // lift buttons
 controller_digital_e_t lift_up_button = DIGITAL_R1;
 controller_digital_e_t lift_down_button = DIGITAL_R2;
+controller_digital_e_t both_lifts_down_button = DIGITAL_A;
 
 controller_digital_e_t reverse_drive_button = DIGITAL_L1;
 controller_digital_e_t claw_toggle_button =  DIGITAL_L2;
@@ -15,9 +16,30 @@ controller_digital_e_t intake_reverse_button = DIGITAL_DOWN;
 
 // misc buttons
 controller_digital_e_t ok_button = DIGITAL_A;
-controller_digital_e_t both_lifts_down_button = DIGITAL_A;
 controller_digital_e_t joy_mode_switch_button = DIGITAL_Y;
 controller_digital_e_t shift_button = DIGITAL_X;
+
+// partner buttons
+
+// lift buttons
+
+controller_digital_e_t partner_back_lift_up_button = DIGITAL_R1;
+controller_digital_e_t partner_back_lift_down_button =  DIGITAL_R2;
+
+controller_digital_e_t partner_front_lift_up_button = DIGITAL_L1;
+controller_digital_e_t partner_front_lift_down_button = DIGITAL_L2;
+
+controller_digital_e_t partner_both_lifts_down_button = DIGITAL_DOWN;
+
+// intake buttons
+controller_digital_e_t partner_intake_button = DIGITAL_B;
+controller_digital_e_t partner_intake_reverse_button = DIGITAL_Y;
+
+// claw buttons
+controller_digital_e_t partner_back_claw_toggle_button = DIGITAL_A;
+controller_digital_e_t partner_front_claw_toggle_button = DIGITAL_LEFT;
+controller_digital_e_t partner_claw_tilt_button = DIGITAL_X;
+
 
 std::array<_Controller*, num_controller> _Controller::objs; //= {nullptr};
 _Task _Controller::controller_task = nullptr;
