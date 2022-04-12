@@ -9,20 +9,17 @@ B_Lift b_lift({{"B_Lift",
   "bottom",
   "idle",
   "move_to_target",
+  "top",
   "between_positions",
   "manual",
   "shifting_to_lift_up",
   "shifting_to_lift_down",
-},  b_lift_states::managed, b_lift_states::between_positions // goes from managed to between_states upon startup
+},  b_lift_states::managed, b_lift_states::move_to_target // goes from managed to move_to_target (bottom state) upon startup
 }, b_lift_m});
 
 
 B_Lift::B_Lift(Motorized_subsystem<b_lift_states, NUM_OF_B_LIFT_STATES, B_LIFT_MAX_VELOCITY> motorized_subsystem): Motorized_subsystem(motorized_subsystem){ // constructor
-
   index = 0;
-
-  up_press.pause();
-  down_press.pause();
 }
 
 void B_Lift::handle(bool driver_array){
@@ -52,6 +49,9 @@ void B_Lift::handle(bool driver_array){
           case 0: // lift is at bottom position, this state is used by intake
             Subsystem::set_state(b_lift_states::bottom);
             break;
+          case NUM_OF_B_LIFT_POSITIONS - 1:
+            Subsystem::set_state(b_lift_states::top);
+            break;
           default:
             Subsystem::set_state(b_lift_states::idle);
             break;
@@ -72,6 +72,9 @@ void B_Lift::handle(bool driver_array){
         set_state(b_lift_states::manual);
       }
       */
+      break;
+    
+    case b_lift_states::top: // at highest position
       break;
 
     case b_lift_states::between_positions:
@@ -137,6 +140,10 @@ void B_Lift::handle_state_change(){
     case b_lift_states::move_to_target:
       break;
 
+    case b_lift_states::top:
+      motor.move(10); // slight up holding power
+      break;
+
     case b_lift_states::between_positions:
       break;
 
@@ -200,7 +207,9 @@ B_Claw b_claw_obj({"B_Claw",
 });
 
 B_Claw::B_Claw(Subsystem<b_claw_states, NUM_OF_B_CLAW_STATES> subsystem): Subsystem(subsystem)  // constructor
-{}
+{
+  state_at_toggle_press = b_claw_states::idle; // don't change this
+}
 
 void B_Claw::handle(){
 
@@ -272,7 +281,7 @@ void B_Claw::handle_state_change(){
     case b_claw_states::flat:
       master.rumble("-");
       tilt_lock.set_state(LOW);
-      delay(100);
+      delay(300);
       b_claw.set_state(LOW);
       break;
   }

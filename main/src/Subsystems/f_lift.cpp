@@ -9,18 +9,15 @@ F_Lift f_lift({{"F_Lift",
   "bottom",
   "idle",
   "move_to_target",
+  "top",
   "between_positions",
   "manual",
-}, f_lift_states::managed, f_lift_states::between_positions // goes from managed to between_states upon startup
+}, f_lift_states::managed, f_lift_states::move_to_target // goes from managed to move_to_target (bottom state) upon startup
 }, f_lift_m});
 
 
 F_Lift::F_Lift(Motorized_subsystem<f_lift_states, NUM_OF_F_LIFT_STATES, F_LIFT_MAX_VELOCITY> motorized_subsystem): Motorized_subsystem(motorized_subsystem){ // constructor
-
   index = 0;
-
-  up_press.pause();
-  down_press.pause();
 }
 
 
@@ -40,8 +37,8 @@ void F_Lift::handle(bool driver_array){
       // printf("target: %d, pos:%d \n", positions[index], f_lift_pot.get_value());
 
       // move slowly if going down to the bottom with a goal
-      if(index == 0 && f_lift_pot.get_value() < 1500 && f_claw_obj.get_state() == f_claw_states::grabbed)  motor.move(-50);
-      else{ // otherwise calculate output with a pid as usual
+      // if(index == 0 && f_lift_pot.get_value() < 1500 && f_claw_obj.get_state() == f_claw_states::grabbed)  motor.move(-70);
+      { // otherwise calculate output with a pid as usual
         int output = pid.compute(f_lift_pot.get_value(), positions[index]);
         if (abs(output) > speed) output = speed * sgn(output); // cap the output at speed  
         motor.move(output);
@@ -52,6 +49,9 @@ void F_Lift::handle(bool driver_array){
         switch(index){
           case 0: // lift is at bottom position, this state is used by intake 
             Subsystem::set_state(f_lift_states::bottom);
+            break;
+          case NUM_OF_F_LIFT_POSITIONS - 1: // lift is at top position
+            Subsystem::set_state(f_lift_states::top);
             break;
           default:
             Subsystem::set_state(f_lift_states::idle);
@@ -73,6 +73,9 @@ void F_Lift::handle(bool driver_array){
         set_state(f_lift_states::manual);
       }
       */
+      break;
+
+    case f_lift_states::top: // at highest position
       break;
 
     case f_lift_states::between_positions:
@@ -112,6 +115,10 @@ void F_Lift::handle_state_change(){
     case f_lift_states::move_to_target:
       break;
     
+    case f_lift_states::top:
+      motor.move(10); // slight up holding power
+      break;
+
     case f_lift_states::between_positions:
       break;
 
@@ -159,7 +166,7 @@ F_Claw f_claw_obj({"F_Claw",
   "about_to_search",
   "searching",
   "grabbed",
-}, f_claw_states::managed, f_claw_states::idle // goes from managed to idle upon startup
+}, f_claw_states::managed, f_claw_states::searching // goes from managed to searching
 });
 
 F_Claw::F_Claw(Subsystem<f_claw_states, NUM_OF_F_CLAW_STATES> subsystem): Subsystem(subsystem)  // constructor
@@ -206,17 +213,18 @@ void F_Claw::handle_state_change(){
       break;
 
     case f_claw_states::idle:
-      master.rumble("-");
       f_claw(LOW);
+      master.rumble("-");
       break;
 
     case f_claw_states::about_to_search:
+      f_claw(LOW);
       search_timer.reset();
       break;
 
     case f_claw_states::searching:
-      master.rumble("-");
       f_claw(LOW);
+      master.rumble("-");
       break;
 
     case f_claw_states::grabbed:

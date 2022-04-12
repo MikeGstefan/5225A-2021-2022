@@ -1,15 +1,16 @@
 #include "drive.hpp"
 
+// NOTE: all timers start as paused
 // for lifts
-Timer up_press{"up_press"};
-Timer down_press{"down_press"};
+Timer up_press{"up_press", nullptr, false};
+Timer down_press{"down_press", nullptr, false};
 
-Timer f_lift_up_press{"f_lift_up_press"};
-Timer b_lift_up_press{"b_lift_up_press"};
-Timer f_lift_down_press{"f_lift_down_press"};
-Timer b_lift_down_press{"b_lift_down_press"};
+Timer f_lift_up_press{"f_lift_up_press", nullptr, false};
+Timer b_lift_up_press{"b_lift_up_press", nullptr, false};
+Timer f_lift_down_press{"f_lift_down_press", nullptr, false};
+Timer b_lift_down_press{"b_lift_down_press", nullptr, false};
 
-Timer toggle_press_timer{"toggle_press_timer"}; // for back claw
+Timer toggle_press_timer{"toggle_press_timer", nullptr, false}; // for back claw
 
 joy_modes joy_mode = joy_modes::lift_select;
 
@@ -232,7 +233,7 @@ void Drivebase::handle_input(){
   // tracking.power_x = drivers[cur_driver].custom_drives[0].lookup(master.get_analog(drivers[cur_driver].joy_sticks[0]));
   tracking.power_y = drivers[cur_driver].custom_drives[1].lookup(master.get_analog(ANALOG_LEFT_Y));
   // caps drive speed at 80 if intake is on
-  if(intake.get_state() == intake_states::on && fabs(tracking.power_y) > 80) tracking.power_y = sgn(tracking.power_y) * 80;
+  if(intake.get_state() == intake_states::on && fabs(tracking.power_y) > 50) tracking.power_y = sgn(tracking.power_y) * 50;
   tracking.power_a = 0.7 * drivers[cur_driver].custom_drives[2].lookup(master.get_analog(ANALOG_LEFT_X));
 
   if(fabs(tracking.power_x) < deadzone) tracking.power_x = 0.0;
@@ -403,16 +404,20 @@ bool get_lift(){
 }
 
 void handle_lift_buttons(){
-  if(master.is_rising(joy_mode_switch_button)){
+  if(master.is_rising(joy_mode_switch_button) || partner.is_rising(partner_joy_mode_switch_button)){
     // toggles joy_mode
     if(joy_mode == joy_modes::lift_select)  joy_mode = joy_modes::manual;
     else joy_mode = joy_modes::lift_select;
 
     if(joy_mode == joy_modes::lift_select){
+      master.print(0,0, "auto   ");
+      partner.print(0,0, "auto   ");
       b_lift.Subsystem::set_state(b_lift_states::between_positions);
       f_lift.Subsystem::set_state(f_lift_states::between_positions);
     }
     else{
+      master.print(0,0, "manual   ");
+      partner.print(0,0, "manual   ");
       b_lift.Subsystem::set_state(b_lift_states::manual);
       f_lift.Subsystem::set_state(f_lift_states::manual); 
     }
@@ -518,7 +523,7 @@ void handle_claw_buttons(){
       switch(f_claw_obj.get_state()){
         case f_claw_states::grabbed:
           if(f_lift.get_state() == f_lift_states::bottom) f_claw_obj.set_state(f_claw_states::about_to_search);
-          else f_claw_obj.set_state(f_claw_states::about_to_search);
+          else f_claw_obj.set_state(f_claw_states::idle);
           break;
 
         default:
@@ -528,6 +533,11 @@ void handle_claw_buttons(){
     }
     else{ // if back claw
       toggle_press_timer.reset();
+      b_claw_obj.state_at_toggle_press = b_claw_obj.get_state(); // used for tilt/flat toggle code
+      // logs state_at_toggle_press for debugging
+      state_log.print("state_at_toggle_press: %s\n", b_claw_obj.state_names[static_cast<int>(b_claw_obj.state_at_toggle_press)]);
+
+      // if back claw is in an open state, close it, otherwise, don't do anything
       switch(b_claw_obj.get_state()){
         case b_claw_states::idle:
           b_claw_obj.set_state(b_claw_states::tilted);
@@ -551,7 +561,7 @@ void handle_claw_buttons(){
     switch(f_claw_obj.get_state()){
       case f_claw_states::grabbed:
         if(f_lift.get_state() == f_lift_states::bottom) f_claw_obj.set_state(f_claw_states::about_to_search);
-        else f_claw_obj.set_state(f_claw_states::about_to_search);
+        else f_claw_obj.set_state(f_claw_states::idle);
         break;
 
       default:
@@ -568,22 +578,29 @@ void handle_claw_buttons(){
     }
     else  b_claw_obj.set_state(b_claw_states::tilted);
   }
-  // printf("%d\n", b_dist.get());
-  // releases if claw button WASN'T held
-  if(b_dist.get() > 25 && master.is_falling(claw_toggle_button) && !get_lift() && toggle_press_timer.get_time() < TILT_HOLD_TIME){ 
-    if(b_claw_obj.get_state() == b_claw_states::tilted || b_claw_obj.get_state() == b_claw_states::flat){
-      if(b_lift.get_state() == b_lift_states::bottom) b_claw_obj.set_state(b_claw_states::about_to_search);
-      else b_claw_obj.set_state(b_claw_states::idle);
+  // tilt code here
+
+  if(toggle_press_timer.get_time() > TILT_HOLD_TIME){ // if toggle button was held, toggle tilted/flat state
+    toggle_press_timer.reset(false);  // resets and pauses the timer
+    // only toggle the tilt state if the state was tilted or flat when the button was pressed
+    if(b_claw_obj.state_at_toggle_press == b_claw_states::tilted || b_claw_obj.state_at_toggle_press == b_claw_states::flat){
+      if(b_claw_obj.get_state() == b_claw_states::tilted) b_claw_obj.set_state(b_claw_states::flat);
+      else if(b_claw_obj.get_state() == b_claw_states::flat)  b_claw_obj.set_state(b_claw_states::tilted);
     }
+    b_claw_obj.state_at_toggle_press = b_claw_states::idle;  // resets state_at_toggle_press so this if isn't entered again
+    // printf("just_set: %s\n", b_claw_obj.state_names[(int)b_claw_obj.state_at_toggle_press]);
   }
-  
-  // b claw tilting toggle code
-  // toggles tilt state if claw button was held
-  if(!get_lift() && toggle_press_timer.get_time() > TILT_HOLD_TIME && toggle_press_timer.playing()){  
-    if(b_claw_obj.get_state() == b_claw_states::tilted) b_claw_obj.set_state(b_claw_states::flat);
-    else if(b_claw_obj.get_state() == b_claw_states::flat) b_claw_obj.set_state(b_claw_states::tilted);
-    toggle_press_timer.pause();
+  if(master.is_falling(claw_toggle_button)){
+    // if the button WASN'T held and the claw was closed when it was pressed, open the claw
+    if(toggle_press_timer.get_time() < TILT_HOLD_TIME && (b_claw_obj.state_at_toggle_press == b_claw_states::tilted || b_claw_obj.state_at_toggle_press == b_claw_states::flat)){
+      // printf("fail| state_at_toggle_press: %s, timer: %d\n", b_claw_obj.state_names[(int)b_claw_obj.state_at_toggle_press], toggle_press_timer.get_time());
+      if(b_lift.get_state() == b_lift_states::bottom) b_claw_obj.set_state(b_claw_states::about_to_search);
+      else b_claw_obj.set_state(b_claw_states::idle);     
+      b_claw_obj.state_at_toggle_press = b_claw_states::idle;  // resets state_at_toggle_press so this if isn't entered again
+    }
+    toggle_press_timer.reset(false); // resets and pauses timer now that button isn't pressed
   }
+
   // toggles tilt state if partner_claw_tilt button is pressed
   if(partner.is_rising(partner_claw_tilt_button)){
     if(b_claw_obj.get_state() == b_claw_states::tilted) b_claw_obj.set_state(b_claw_states::flat);

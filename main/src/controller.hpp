@@ -50,6 +50,9 @@ extern controller_digital_e_t partner_back_claw_toggle_button;
 extern controller_digital_e_t partner_front_claw_toggle_button;
 extern controller_digital_e_t partner_claw_tilt_button;
 
+extern controller_digital_e_t partner_joy_mode_switch_button;
+
+
 #define num_controller 2
 
 class _Task;

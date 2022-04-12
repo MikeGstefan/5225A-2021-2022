@@ -17,10 +17,10 @@ protected:
   // target state is what the subsystem is trying to reach 
   // state is the current state
   const char* name;
-  std::array<const char*, num_of_states> state_names;
   Mutex target_state_mutex, state_mutex; // mutexes to hold target_state and state, respectively
 
 public:
+  std::array<const char*, num_of_states> state_names; // an array containing the names of each state (used for debug)
 
   // constructor for non-motorized subsystem
   Subsystem(const char* name, std::array<const char*, num_of_states> state_names,

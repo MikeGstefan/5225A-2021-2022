@@ -4,8 +4,9 @@
 #include "../pid.hpp"
 #include <atomic>
 
+#define NUM_OF_F_LIFT_POSITIONS 5 // for driver array
 
-#define NUM_OF_F_LIFT_STATES 6
+#define NUM_OF_F_LIFT_STATES 7
 #define F_LIFT_MAX_VELOCITY 100
 
 enum class f_lift_states{
@@ -13,6 +14,7 @@ enum class f_lift_states{
   bottom, // at lowest position
   idle,  // not doing anything
   move_to_target,  // moving to target position
+  top, // at highest position
   between_positions,  // not moving, but in between positions in the array
   manual  // controlled by joystick
 };
@@ -20,7 +22,7 @@ enum class f_lift_states{
 class F_Lift: public Motorized_subsystem<f_lift_states, NUM_OF_F_LIFT_STATES, F_LIFT_MAX_VELOCITY> {
   Timer up_press{"Up_press"}, down_press{"Down_press"};
   int search_cycle_check_count = 0, bad_count = 0; // cycle check for safeties
-  PID pid = PID(1.0,0.0,0.0,0.0);
+  PID pid = PID(5.0,0.0,0.0,0.0);
   int lift_power; // for manual control
 
   // height conversion constants
@@ -34,8 +36,8 @@ class F_Lift: public Motorized_subsystem<f_lift_states, NUM_OF_F_LIFT_STATES, F_
 
 public:
   // bottom is 1162
-  vector<int> driver_positions = {1160, 1300, 2050, 2300, 2750};
-  vector<int> prog_positions = {1160, 1300, 2050, 2300, 2750};
+  vector<int> driver_positions = {1200, 1400, 1900, 2170, 2750};
+  vector<int> prog_positions = {1200, 1400, 1900, 2170, 2750};
 
   F_Lift(Motorized_subsystem<f_lift_states, NUM_OF_F_LIFT_STATES, F_LIFT_MAX_VELOCITY> motorized_subsystem);  // constructor
   

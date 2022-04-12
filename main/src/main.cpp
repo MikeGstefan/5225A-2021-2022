@@ -40,8 +40,8 @@ void initialize() {
 	GUI::init();
 	delay(500);
 
-	b_lift.motor.set_brake_mode(E_MOTOR_BRAKE_COAST);
-	f_lift.motor.set_brake_mode(E_MOTOR_BRAKE_COAST);
+	b_lift.motor.set_brake_mode(E_MOTOR_BRAKE_HOLD);
+	f_lift.motor.set_brake_mode(E_MOTOR_BRAKE_HOLD);
 
 	// tracking.x_coord = 104.0, tracking.y_coord = 12.0, tracking.global_angle = -30.0_deg;
 	// tracking.x_coord = 24.5, tracking.y_coord = 15.0, tracking.global_angle = 9.0_deg;
@@ -87,18 +87,57 @@ void autonomous() {
 }
 
 void opcontrol() {
-	while (true) {
-		printf("B: %f\n", b_lift_m.get_position());
-		printf("F: %f\n", f_lift_m.get_position());
-		delay(10);
-	}
+	// while (true) {
+	// 	printf("B: %f\n", b_lift_m.get_position());
+	// 	printf("F: %f\n", f_lift_m.get_position());
+	// 	delay(10);
+	// }
 	// b)
 	// b_lift.Subsystem::set_state(b_lift_states::move_to_target);
 	// lift_handle_t.start();
 	// /*
-	b_lift.elastic_util(1029);
+	// b_lift.elastic_util(1029);
 	// wait_until(false);
-	tilt_lock.set_state(HIGH);
+	// while(true){
+	// 	printf("b_pot_val: %d\n", b_lift_pot.get_value());
+	// 	delay(10);
+	// }
+	/*
+	tilt_lock.set_value(HIGH);
+	b_claw.set_value(HIGH);
+	wait_until(master.get_digital_new_press(DIGITAL_A));
+	tilt_lock.set_value(LOW);
+	delay(100);
+	b_claw.set_value(LOW);
+	wait_until(false);
+	*/
+	// 1035, 1820, 2000, 2760
+
+	// 1182, 2070, 1840
+	// bool b_claw_state = false;
+	// while(true){
+	// 	printf("%d\n", f_lift_pot.get_value());
+	// 	if(master.get_digital_new_press(DIGITAL_A)){
+	// 		b_claw_state = !b_claw_state;
+	// 		f_claw(b_claw_state);
+	// 	}
+	// 	delay(10);
+	// }
+	// bool transmission = false;
+	// while(true){
+	// 	if(master.get_digital_new_press(DIGITAL_X)){
+
+	// 		transmission = !transmission;
+	// 		trans_p.set_state();
+	// 	}
+	// 	delay(10);
+	// }
+	master.clear();
+	master.clear();
+
+	master.print(0,0, "auto      ");
+	partner.print(0,0, "auto     ");
+
 	while(true){
 		// printf("b:%d, f:%d\n", b_lift_pot.get_value(), f_lift_pot.get_value());
 		master.update_buttons();

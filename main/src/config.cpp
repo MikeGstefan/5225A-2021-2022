@@ -15,14 +15,14 @@ pros::Motor front_r(1, pros::E_MOTOR_GEARSET_18, false, pros::E_MOTOR_ENCODER_DE
 pros::Motor center_r(2, pros::E_MOTOR_GEARSET_18, true, pros::E_MOTOR_ENCODER_DEGREES);
 pros::Motor back_r(3, pros::E_MOTOR_GEARSET_18, false, pros::E_MOTOR_ENCODER_DEGREES);
 
-pros::Motor f_lift_m(4, pros::E_MOTOR_GEARSET_18, false,pros::E_MOTOR_ENCODER_DEGREES);
+pros::Motor f_lift_m(4, pros::E_MOTOR_GEARSET_36, false,pros::E_MOTOR_ENCODER_DEGREES);
 pros::Motor b_lift_m(5, pros::E_MOTOR_GEARSET_36, false,pros::E_MOTOR_ENCODER_DEGREES);
 
 
 // pros::Imu imu_sensor(4);
 Piston f_claw_c(7,"",1,0);
 Piston f_claw_o(6,"",0,0);
-Piston drive_t({e_port, 7},"",0,0);
+Piston drive_t({e_port, 8},"",0,0);
 Piston lift_t(4,"",1,0);
 Piston b_claw(5,"",0,0);
 Piston tilt_lock(3,"",0,0);
