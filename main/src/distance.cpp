@@ -174,10 +174,10 @@ Position distance_reset_right(int cycles){
 
 
 Position distance_reset_center(int cycles){
-		double dist_corner = 6; //Front Distance sensor to side of robot
-		double side_length = 86; //Front distance sensor to side distance sensor (Parrallel to the side of the robot not the h value)
-		double dist_to_centre = 196; //Side distance sensor to tracking centre
-		double dist_sensor = 429; //Distance between Front Sensors
+		double dist_corner = -25; //Front Distance sensor to side of robot
+		double side_length = 15; //Front distance sensor to side distance sensor (Parrallel to the side of the robot not the h value)
+		double dist_to_centre = 180; //Side distance sensor to tracking centre
+		double dist_sensor = 400; //Distance between Front Sensors
 		double local_y = 0, l_local_x = 0, r_local_x = 0, angle = 0, local_x;
 		double averageleft = 0, averageright = 0, average_l_side = 0, average_r_side = 0;
 		double l_average, r_average, l_side_average, r_side_average;
@@ -261,7 +261,7 @@ Position distance_reset_center(int cycles){
 
 
 //15
-void distance_loop(double distance, int timeout){
+void ramp_distance_line_up(double distance, int timeout){
 	double y_speed = 40;
 	double a_speed = 30;
 	int count = 0;
@@ -303,6 +303,45 @@ void distance_loop(double distance, int timeout){
 		if(timeout != 0 && millis() - start_time > timeout)break;
 		left_eye.last_distance = r_reset_dist.get();
 		right_eye.last_distance = l_reset_dist.get();
+		delay(33);
+  	}
+}
+
+void goal_line_up(int timeout){
+	double y_speed = 40;
+	double a_speed = 30;
+	const Point start_pos = {tracking.x_coord, tracking.y_coord};
+	double delta_dist = 0.0;
+	int start_time = millis();
+
+	while(true){ //When grabs goal idk figure this shit out
+		if(abs(b_dist.get() - r_goal_dist.get()) <= 75) setVisionState(Distance_States::stable); // 50 is a test value
+		else if (b_dist.get() > r_goal_dist.get()) setVisionState(Distance_States::turn_left);
+		else if (b_dist.get() < r_goal_dist.get()) setVisionState(Distance_States::turn_right);
+
+		if(b_dist.get() == 0) setVisionState(Distance_States::turn_left);
+		if(r_goal_dist.get() == 0) setVisionState(Distance_States::turn_right);
+		if(b_dist.get() == 0 && r_goal_dist.get() == 0) setVisionState(Distance_States::stable);
+
+		misc.print("Left:%d Right: %d\n",r_goal_dist.get(), b_dist.get());
+
+		switch (Distance_State) {
+			case Distance_States::stable:
+				printf("stable\n");
+				drivebase.move(-y_speed,0);
+				break;
+			case Distance_States::turn_left:
+				printf("Turn left\n");
+				drivebase.move(-y_speed, -a_speed);
+				break;
+			case Distance_States::turn_right:
+				drivebase.move(-y_speed, a_speed);
+				printf("Turn right\n");
+				break;
+		}
+		if(timeout != 0 && millis() - start_time > timeout)break;
+		left_eye.last_distance = r_goal_dist.get();
+		right_eye.last_distance = b_dist.get();
 		delay(33);
   	}
 }

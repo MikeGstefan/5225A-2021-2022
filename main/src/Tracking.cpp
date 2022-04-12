@@ -72,7 +72,7 @@ void update(void* params){
   _Task* ptr = _Task::get_obj(params);
   Timer data_timer{"tracking logs"};
   // LeftEncoder.reset(); RightEncoder.reset(); BackEncoder.reset();
-  double DistanceLR = 9.83, DistanceB = 0.85; //shouldn't this be const
+  double DistanceLR = 9.84, DistanceB = 0.85;
   double Left, Right, Back, NewLeft, NewRight, NewBack, LastLeft = LeftEncoder.get_value()/360.0 *(2.75*M_PI), LastRight =  RightEncoder.get_value()/360.0 *(2.75*M_PI), LastBack = BackEncoder.get_value()/360.0 *(2.75*M_PI);
   double Theta = 0.0, Beta = 0.0, Alpha = 0.0;
   double RadiusR, RadiusB, h, h2;
