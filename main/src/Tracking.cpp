@@ -61,7 +61,7 @@ void update(void* params){
   _Task* ptr = _Task::get_obj(params);
   Timer data_timer{"tracking logs"};
   // LeftEncoder.reset(); RightEncoder.reset(); BackEncoder.reset();
-  double DistanceLR = 9.84, DistanceB = 0.85;
+  double DistanceLR = 7, DistanceB = 0.85;
   double Left, Right, Back, NewLeft, NewRight, NewBack, LastLeft = LeftEncoder.get_value()/360.0 *(2.75*M_PI), LastRight =  RightEncoder.get_value()/360.0 *(2.75*M_PI), LastBack = BackEncoder.get_value()/360.0 *(2.75*M_PI);
   double Theta = 0.0, Beta = 0.0, Alpha = 0.0;
   double RadiusR, RadiusB, h, h2;
@@ -274,7 +274,7 @@ void rush_goal2(double target_x, double target_y, double target_a){
 
 }
 
-void tank_rush_goal(void* params){ 
+void tank_rush_goal(void* params){
   _Task* ptr = _Task::get_obj(params);
     // tank_point_params* param_ptr = static_cast<tank_point_params*>(_Task::get_params(params));
     const Position target = tank_rush_params_g.target;
@@ -286,7 +286,7 @@ void tank_rush_goal(void* params){
     double kd_a = tank_rush_params_g.kd_a;
     double dist_past = tank_rush_params_g.dist_past;
     // Pid angle(kp.a);
-    
+
     tracking.move_complete = false;
 
     Point local_error;
@@ -334,7 +334,7 @@ void tank_rush_goal(void* params){
       // difference in angle between angle to target and robot's local y axis
       difference_a = tracking.global_angle + atan2(target.y - tracking.y_coord, target.x - tracking.x_coord);
 
-      
+
       local_error.y = sin(difference_a) * hypotenuse; // local y displacement to target
       sgn_local_error_y = sgn(local_error.y);
       // printf("sgn_y: %d\n", sgn_local_error_y);
@@ -414,7 +414,7 @@ tank_arc_params::tank_arc_params(const Point start_pos, Position target, const d
 tank_point_params::tank_point_params(const Position target, const bool turn_dir_if_0, const double max_power, const double min_angle_percent, const bool brake, double kp_y, double kp_a, double kd_a, int timeout, Point end_error):
   target{target}, turn_dir_if_0{turn_dir_if_0}, max_power{max_power}, min_angle_percent{min_angle_percent}, brake{brake}, kp_y{kp_y}, kp_a{kp_a}, kd_a{kd_a}, timeout{timeout}, end_error{end_error}{}
 
-tank_rush_params::tank_rush_params(const Position target, const bool turn_dir_if_0, const double max_power, const double min_angle_percent, const bool brake, double kp_a, double kd_a, double dist_past): 
+tank_rush_params::tank_rush_params(const Position target, const bool turn_dir_if_0, const double max_power, const double min_angle_percent, const bool brake, double kp_a, double kd_a, double dist_past):
   target{target}, turn_dir_if_0{turn_dir_if_0}, max_power{max_power}, min_angle_percent{min_angle_percent}, brake{brake}, kp_a{kp_a}, kd_a{kd_a}, dist_past{dist_past}{}
 
 turn_angle_params::turn_angle_params(const double target_a, const bool brake, bool near, double kp, double kd, double kp_v, double kd_v, double max_speed, int timeout, double min_power_a, double end_error):
@@ -455,7 +455,7 @@ void move_start(move_types type, std::variant<arc_params, line_params, tank_arc_
       turn_point_params_g = std::get<turn_point_params>(params);
       move_t.rebind(turn_to_point);
     break;
-    case move_types::line_old: 
+    case move_types::line_old:
       line_old_params_g = std::get<line_old_params>(params);
       move_t.rebind(move_on_line_old);
     break;
@@ -476,7 +476,7 @@ bool get_move_state(){
   return move_t.get_task_ptr()->get_state()!=4;
 }
 
-void move_wait_for_error(double error){ 
+void move_wait_for_error(double error){
   while(fabs(tracking.drive_error) >error)delay(10);
 }
 
@@ -977,7 +977,7 @@ void tank_move_to_target(void* params){
     int timeout = tank_point_params_g.timeout;
     Point end_error = tank_point_params_g.end_error;
     // Pid angle(kp.a);
-    
+
     tracking.move_complete = false;
 
     Point local_error;
@@ -1002,7 +1002,7 @@ void tank_move_to_target(void* params){
     // move on line variables
     Vector follow_line(target.y - tracking.y_coord, target.x - tracking.x_coord); // used to keep track of angle of follow_line relative to the vertical
     Vector line_disp(target.x - tracking.x_coord, target.y - tracking.y_coord);  // displacements relative to line
-    int time = millis();    
+    int time = millis();
 
     // MOTION FIX
     // global displacement of robot and target
@@ -1041,7 +1041,7 @@ void tank_move_to_target(void* params){
       error.angle = near_angle(sgn_local_error_y * M_PI / 2, difference_a);
       // printf("Errors | y: %lf, a: %lf\n", local_error.y, rad_to_deg(error.angle));
 
-      end_dist = sqrt(pow(hypotenuse,2) + pow(local_error.y,2) - (2* hypotenuse * local_error.y * cos(tracking.global_angle - atan2(target.x - tracking.x_coord,target.y - tracking.y_coord))));  
+      end_dist = sqrt(pow(hypotenuse,2) + pow(local_error.y,2) - (2* hypotenuse * local_error.y * cos(tracking.global_angle - atan2(target.x - tracking.x_coord,target.y - tracking.y_coord))));
       motion_d.print("%d|| end_dist: %.2f, hypotenuse: %.2f, local %.2f, angle: %.2f\n",millis(), end_dist,hypotenuse, local_error.y,rad_to_deg(tracking.global_angle - atan2(target.x - tracking.x_coord,target.y - tracking.y_coord)));
 
       // tracking.power_y = kp_y * local_error.y;
@@ -1057,7 +1057,7 @@ void tank_move_to_target(void* params){
         motion_d.print("%d correcting\n", millis());
         tracking.power_a = kp_a * error.angle;
       }
-      else{ 
+      else{
         if(last_state){
           last_state = false;
           master.print(0,0,"vibing");
@@ -1065,7 +1065,7 @@ void tank_move_to_target(void* params){
         motion_d.print("%d vibing\n", millis());
         tracking.power_a = 0.0;
       }
-      
+
       // gives min power to local y if that is not satisfied
       if (fabs(tracking.power_y) < min_move_power_y && fabs(local_error.y) > 0.5) tracking.power_y = min_move_power_y * sgn(local_error.y);
 
@@ -1153,7 +1153,7 @@ void turn_to_angle(void* params){
     target_velocity = angle_pid.compute(tracking.global_angle, new_target_a);
     // target_velocity = new_target_a - tracking.global_angle;
 
-    power = kB * target_velocity + angle_velocity_pid.compute(tracking.g_velocity.angle, target_velocity); 
+    power = kB * target_velocity + angle_velocity_pid.compute(tracking.g_velocity.angle, target_velocity);
     motion_d.print("target_velocity[deg]: %lf, acc vel: %lf, vel_diff: %lf, power:%lf\n", rad_to_deg(target_velocity), rad_to_deg(tracking.g_velocity.angle), rad_to_deg(target_velocity - tracking.g_velocity.angle), power);
     if(fabs(power) > max_speed)power = max_speed*sgn(power);
     if(fabs(power) <min_power_a) power = sgn(power)*min_power_a;
@@ -1165,7 +1165,7 @@ void turn_to_angle(void* params){
       tracking.move_complete = true;
       return;
     }
-    if(timeout != 0 && millis() - start_time > timeout){ 
+    if(timeout != 0 && millis() - start_time > timeout){
       motion_i.print("%d|| TIMED OUT Ending turn to angle : %.2f at X: %.2f Y: %.2f A: %.2f, time: %d\n", millis(), rad_to_deg(target_a), tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle), millis() - start_time);
       drivebase.move(0, 0);
       if(brake) drivebase.brake();
@@ -1318,7 +1318,7 @@ void tank_move_on_arc(void* params){
 
     tracking.power_y = sgn(power)* map_set(dist, 0.0, std::numeric_limits<double>::max(), static_cast<double>(min_move_power_y), fabs(power),
       decel_end, decel_target_speed,
-      decel_start, fabs(power), 
+      decel_start, fabs(power),
       std::numeric_limits<double>::max(), fabs(power)
     );
     // printf("Angular displacement velocity: %lf", rad_to_deg(tracking.global_angle + disp.get_angle()));
@@ -1610,8 +1610,8 @@ void Gyro::climb_ramp(){
   // double pos = tracking.x_coord;
   // while(tracking.x_coord > pos - 8.0)delay(10);
   // tracking.wait_for_dist(8.5);
-  Task([&](){ 
-    while(true){ 
+  Task([&](){
+    while(true){
       misc.print(" angle: %f\n", get_angle());
       delay(10);
     }
@@ -1620,7 +1620,7 @@ void Gyro::climb_ramp(){
   motion_i.print("ON RAMP: %f\n", angle);
   screen_flash::start("On Ramp", term_colours::NOTIF);
 
-  Task([&](){ 
+  Task([&](){
     while(get_angle() > 20)delay(10);
     // Led2.set_value(0);
   });
@@ -1643,7 +1643,7 @@ void Gyro::level(double kP, double kD){
     gyro_p.compute(-angle, 0);
 		drivebase.move(gyro_p.get_output(), 0.0);
     // gyro_steady.print("Angle: %f | Speed: %f\n", angle, gyro_p.get_output());
-    
+
 		if (fabs(angle) > 6 || get_angle_dif() > 0.06) gyro_steady.reset();
 
     if(speed < 0) neg = true;

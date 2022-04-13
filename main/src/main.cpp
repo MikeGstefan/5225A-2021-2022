@@ -36,16 +36,13 @@ void initialize() {
 	// back_r.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
 
 
-	drivebase.download_curve_data();
-	Data::init();
+
 	// _Controller::init();
 	GUI::init();
 	delay(500);
 	// tracking.x_coord = 28.5, tracking.y_coord = 11.75, tracking.global_angle = -90.0_deg;
 
 
-	b_lift.motor.set_brake_mode(E_MOTOR_BRAKE_HOLD);
-	f_lift.motor.set_brake_mode(E_MOTOR_BRAKE_HOLD);
 
 	// tracking.x_coord = 104.0, tracking.y_coord = 12.0, tracking.global_angle = -30.0_deg;
 	// tracking.x_coord = 24.5, tracking.y_coord = 15.0, tracking.global_angle = 9.0_deg;
@@ -87,15 +84,21 @@ void competition_initialize() {}
  * from where it left off.
  */
 void autonomous() {
+	printf("I am not here");
+	delay(500);
   load_positions();
   load_auton();
   run_auton();
 }
 
 void opcontrol() {
-	Position start = distance_reset_center();
 	//goal_line_up(2000);
-
+	printf("start\n");
+	delay(500);
+	while(true){
+		//printf("Left: %d, Right: %d\n", LeftEncoder.get_value(), RightEncoder.get_value());
+		delay(10);
+	}
 
 	// update_t.kill();
 	// tracking.x_coord = start.x, tracking.y_coord = start.y, tracking.global_angle = deg_to_rad(start.angle);
@@ -104,14 +107,10 @@ void opcontrol() {
 	// printf("x:%lf, y: %lf, a:%lf\n", start.x, start.y, start.angle);
 	// x:69.576370, y: 26.728601, a:-3.335143
 	// 81 back
-	tracking.reset(start.x, start.y, start.angle +180);
 
 	// x: 36.47, y: 102.75, a: 105.66
 	// x: 37.86, y: 103.60, a: 102.11
-	move_start(move_types::tank_point, tank_point_params({70.0, 102.0, 0.0}, false, 80.0));
-	move_start(move_types::turn_angle, turn_angle_params(90.0));
-	move_start(move_types::tank_point, tank_point_params({36.0, 105.0, 0.0}));
-	while(true) pros::delay(10);
+
 	// lift_handle_t.start();
 	// while(!master.get_digital(DIGITAL_A)){
 	// 	// gui_handle(); //
@@ -129,15 +128,7 @@ void opcontrol() {
 	// move_start(move_types::tank_point, tank_point_params({30.0, 20.0,0.0}));
 	// int diff = LeftEncoder.get_value() - RightEncoder.get_value();
 	// int last_diff = diff;
-	while(true){
-	// 	diff = LeftEncoder.get_value() - RightEncoder.get_value();
-	// 	if(diff != last_diff){
-	// 		printf("%d|| diff: %d\n", millis(), diff);
-	// 		last_diff = diff;
-	// 	}
-		delay(10);
-		drivebase.handle_input();
-	}
+
 	while(true){
 		// b_lift.set_state(b_lift_states::move_to_target, 0);
 		// delay(1500);
