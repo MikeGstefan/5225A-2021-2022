@@ -52,7 +52,7 @@
       Button save_pos (15, 140, 100, 75, GUI::Style::SIZE, Button::SINGLE, checks, "Save Position");
       Button auton_selector (130, 140, 100, 75, GUI::Style::SIZE, Button::SINGLE, checks, "Select Autons");
       Button misc_checks (245, 140, 100, 75, GUI::Style::SIZE, Button::SINGLE, checks, "Misc");
-      Button placeholder (360, 140, 100, 75, GUI::Style::SIZE, Button::SINGLE, checks, "Placeholder");
+      Button distance (360, 140, 100, 75, GUI::Style::SIZE, Button::SINGLE, checks, "Distance");
 
     Page track ("Tracking"); //Display tracking vals and reset btns
       Text track_x(50, 45, GUI::Style::CENTRE, TEXT_SMALL, track, "X:%.1f", tracking.x_coord);
@@ -358,12 +358,10 @@ void main_setup(){
     });
 
     pneums.set_func([](){
-      printf2("Pneum test");
       for(std::array<std::pair<Piston*, Button*>, 8>::const_iterator it = Piston::list_for_gui.begin(); it != Piston::list_for_gui.end(); it++){
         Piston* piston = it->first;
         if (!piston) continue;
 
-        printf2("Pneum test: %s", it->first->get_name());
         if (GUI::prompt("Press to check " + piston->get_name())){
           piston->toggle_state();
           delay(500);

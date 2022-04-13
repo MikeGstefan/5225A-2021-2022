@@ -87,9 +87,6 @@ void autonomous() {
 void opcontrol() {
   /* Nathan
   distance sensor check
-  pad timestamp
-  all gui sprintf stuff
-  anything can print to the screen
   auton selector
   merge into headers
   merge in lift

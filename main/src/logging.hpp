@@ -14,6 +14,7 @@ using namespace pros;
 //forawrd declarations
 class _Task;
 class Timer;
+class Data;
 extern _Task log_t;
 /*
 1 is print, if there is no sd card, print to terminal
@@ -36,11 +37,21 @@ enum class log_locations
   none
 };
 
-// enum class term_colours;
-
-
-// void logging_task_start();
-// void logging_task_stop();
+extern Data task_log;
+extern Data controller_queue;
+extern Data tracking_data;
+extern Data tracking_imp;
+extern Data misc;
+extern Data drivers_data;
+extern Data term;
+extern Data motion_d;
+extern Data motion_i;
+extern Data log_d;
+extern Data events;
+extern Data graph;
+extern Data state_log;
+extern Data skills_d;
+extern Data ERROR;
 
 class Data{
 private:
@@ -61,10 +72,12 @@ public:
   void log_print(char* buffer, int buffer_len) const;
   void set_print(term_colours print_colour, int time_type);
 
-  Data(const char* obj_name, const char* id_code, log_types log_type_param, log_locations log_location_param, term_colours print_colour = term_colours::NONE, int print_type = 1);
+  Data(const char* obj_name, const char* id_code, log_types log_type_param, log_locations log_location_param, term_colours print_colour = term_colours::NONE, int print_type = 2);
   
   static void init();
   static char* to_char(const char* format, ...);
+
+  //figure out how to put nice timestamps for file logs
 
   /**
    * @brief 
@@ -76,6 +89,8 @@ public:
   template <typename... Params>
   void print(term_colours colour, std::string format, Params... args) const{
     std::string str = sprintf2(format, args...);
+    str = std::to_string(millis()) + " | ";
+
     int buffer_len = str.length() + 3;
     char buffer[256];
     snprintf(buffer, 256, str.c_str());
@@ -83,7 +98,7 @@ public:
     if(static_cast<int>(this->log_type) != 0){
       switch(log_location){
         case log_locations::t:
-          printf2(colour, print_type, "%s", str);
+          printf2(colour, print_type, format, args...);
           break;
         case log_locations::sd:
           this->log_print(buffer, buffer_len);
@@ -91,14 +106,15 @@ public:
         case log_locations::none:
           break;
         case log_locations::both:
-          printf2(colour, print_type, "%s", str);
+          printf2(colour, print_type, format, args...);
           this->log_print(buffer, buffer_len);
           break;
       }
     }
   }
 
-    /**
+
+  /**
    * @brief 
    * 
    * @param format printf format string
@@ -117,20 +133,3 @@ uintptr_t data_size();
 constexpr int queue_size = 1024;
 constexpr int print_point = 500;
 constexpr int print_max_time = 1500;
-
-
-extern Data task_log;
-extern Data controller_queue;
-extern Data tracking_data;
-extern Data tracking_imp;
-extern Data misc;
-extern Data drivers_data;
-extern Data term;
-extern Data motion_d;
-extern Data motion_i;
-extern Data log_d;
-extern Data events;
-extern Data graph;
-extern Data state_log;
-extern Data skills_d;
-extern Data ERROR;

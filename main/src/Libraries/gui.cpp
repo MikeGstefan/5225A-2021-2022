@@ -1,4 +1,5 @@
 #include "gui.hpp"
+#include <algorithm>
 
 //GUI:: Static Variable Declarations
   const Page* GUI::current_page = nullptr;
@@ -40,8 +41,7 @@ namespace screen_flash{
     screen::set_pen(~colour&0xFFFFFF); //Makes text inverted colour of background so it is always visible
     screen::set_eraser(colour);
 
-    // printf2("\n\n%s\n", text);
-    events.print("\n\n%d | %s\n\n", millis(), text.c_str());
+    events.print("\n\n\n%s\n", text);
 
     int spaces = int(CHAR_WIDTH_LARGE*text.length()/460)+1;
     std::size_t space, last_space=0;
@@ -58,7 +58,7 @@ namespace screen_flash{
 
     timer.reset(); //Starts counting
     end_time = time;
-    if(time) printf2("\nShowing for %s.\n", Timer::to_string(time, timing_units::millis, 1, true));
+    if(time) printf2("Showing for %s.\n\n", Timer::to_string(time, timing_units::millis, 1, true));
   }
 
   void start(std::string text, term_colours colour, std::uint32_t time){
@@ -67,8 +67,7 @@ namespace screen_flash{
     screen::set_pen(~GUI::get_colour(colour)&0xFFFFFF); //Makes text inverted colour of background so it is always visible
     screen::set_eraser(GUI::get_colour(colour));
 
-    // printf2(colour, 1, "%s\n", text);
-    events.print(colour, "\n\n%d | %s\n\n", millis(), text);
+    events.print(colour, "\n\n\n%s\n", text);
 
     int spaces = int(CHAR_WIDTH_LARGE*text.length()/460)+1;
     std::size_t space, last_space=0;
@@ -85,7 +84,7 @@ namespace screen_flash{
 
     timer.reset(); //Starts counting
     end_time = time;
-    if(time) printf2("\nShowing for %s.\n", Timer::to_string(time, timing_units::millis, 1, true));
+    if(time) printf2("Showing for %s.\n\n", Timer::to_string(time, timing_units::millis, 1, true));
   }
 
   //rest are templates, so defined in header
@@ -653,6 +652,7 @@ namespace screen_flash{
 
   void Slider::draw() const{
     if (!(active && (page == GUI::current_page || page == &perm))) return;
+    if(!in_range(val, min, max)) std::clamp(val, min, max);
     screen::set_pen(b_col);
     screen::fill_rect(x1, y1, x2, y2);
     screen::set_pen(l_col);

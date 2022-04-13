@@ -71,7 +71,7 @@ void custom_drive::fill_lookup_table(){
   for (short x = -127; x < 128; x++){ // fills lookup table with values from appropriate function
     lookup_table[(unsigned char)x] = exponential(x);
     // UNCOMMENT THESE FOR DEBUGGING, comment for performance
-    // printf("%d, %d\n", x, lookup_table[(unsigned char)x]);
+    // printf2("%d, %d", x, lookup_table[(unsigned char)x]);
     // delay(1);
   }
 }
@@ -148,15 +148,15 @@ void Drivebase::download_curve_data(){
   curve_file = fopen("/usd/curve_file.txt", "r");
   curve_file_exists = curve_file != NULL;
   if(!curve_file_exists){
-    drivers_data.print("WARNING: curve_file not found, using default data\n");
+    drivers_data.print("WARNING: curve_file not found, using default data");
   }
   // reads data for each driver from file
   for (short driver = 0; driver < num_of_drivers; driver++){  // reads curve curvature from curve file
-    drivers_data.print("num of drivers: %d\n", num_of_drivers);
-    drivers_data.print("\nDRIVER: %s\n", drivers[driver].name);
+    drivers_data.print("num of drivers: %d", num_of_drivers);
+    drivers_data.print("\nDRIVER: %s", drivers[driver].name);
     for (short curvature = 0; curvature < 3; curvature++){  // reads data for each axis of motion
       if (curve_file_exists)  fscanf(curve_file, "curvature:%lf\n", &drivers[driver].custom_drives[curvature].curvature);
-      drivers_data.print("curvature: %lf\n", drivers[driver].custom_drives[curvature].curvature);
+      drivers_data.print("curvature: %lf", drivers[driver].custom_drives[curvature].curvature);
       drivers[driver].custom_drives[curvature].fill_lookup_table();
       delay(1);
     }
@@ -200,7 +200,7 @@ void Drivebase::update_lookup_table_util(){
       master.print(2, 0, "Curvature: %lf", drivers[cur_driver].custom_drives[cur_screen].curvature);  // updates curvature
     }
     else if(master.is_rising(E_CONTROLLER_DIGITAL_DOWN)){  // decrease curvature
-      printf("pressed down\n");
+      printf2("pressed down");
       if (drivers[cur_driver].custom_drives[cur_screen].curvature > 0.1)  drivers[cur_driver].custom_drives[cur_screen].curvature -= 0.1;
       master.print(2, 0, "Curvature: %lf", drivers[cur_driver].custom_drives[cur_screen].curvature);  // updates curvature
     }
@@ -209,7 +209,7 @@ void Drivebase::update_lookup_table_util(){
   }
   master.clear();
   if(!curve_file_exists){
-    drivers_data.print("WARNING: curve_file not found, not writing to SD card\n");
+    drivers_data.print("WARNING: curve_file not found, not writing to SD card");
   }
   else {
     Data::log_t.data_update();
@@ -218,7 +218,7 @@ void Drivebase::update_lookup_table_util(){
     for (short driver = 0; driver < num_of_drivers; driver++){  // uploads curve data to curve file
       for (short curvature = 0; curvature < 3; curvature++){
         fprintf(curve_file, "curvature:%lf\n", drivers[driver].custom_drives[curvature].curvature);
-        drivers_data.print("curvature:%lf\n", drivers[driver].custom_drives[curvature].curvature);
+        drivers_data.print("curvature:%lf", drivers[driver].custom_drives[curvature].curvature);
       }
     }
     fclose(curve_file);
@@ -234,7 +234,7 @@ void Drivebase::handle_input(){
   // caps drive speed at 80 if intake is on
   if(intake.get_state() == intake_states::on && fabs(tracking.power_y) > 80) tracking.power_y = sgn(tracking.power_y) * 80;
   tracking.power_a = 0.7 * drivers[cur_driver].custom_drives[2].lookup(master.get_analog(ANALOG_LEFT_X));
-  // printf("%d, %f, %f\n", master.get_analog(ANALOG_LEFT_Y), tracking.power_y, tracking.power_a );
+  // printf2("%d, %f, %f", master.get_analog(ANALOG_LEFT_Y), tracking.power_y, tracking.power_a );
   if(fabs(tracking.power_x) < deadzone) tracking.power_x = 0.0;
   if(fabs(tracking.power_y) < deadzone) tracking.power_y = 0.0;
   if(fabs(tracking.power_a) < deadzone) tracking.power_a = 0.0;
@@ -309,7 +309,7 @@ void Drivebase::driver_practice(){
 
       // prints motor temps every second
       if(screen_timer.get_time() > 1000){
-        drivers_data.print("fl%.0f r%.0f bl%.0f r%.0f\n", front_l.get_temperature(), front_r.get_temperature(), back_l.get_temperature(), back_r.get_temperature());
+        drivers_data.print("fl%.0f r%.0f bl%.0f r%.0f", front_l.get_temperature(), front_r.get_temperature(), back_l.get_temperature(), back_r.get_temperature());
         // master.print(0, 0, "fl%.0f r%.0f bl%.0f r%.0f\n", front_l.get_temperature(), front_r.get_temperature(), back_l.get_temperature(), back_r.get_temperature());
         screen_timer.reset();
       }
@@ -402,7 +402,7 @@ void Drivebase::reset(){
 //   master.print(1,3,"%d",side);
 //   master.print(1,1,"%d",(!this->reversed &&  master.get_analog(ANALOG_RIGHT_Y) > deadzone)&& side);
 //   misc.print(" side :: %d",side);
-//   misc.print(" output :: %d\n",(!this->reversed &&  master.get_analog(ANALOG_RIGHT_Y) > deadzone)&& side);
+//   misc.print(" output :: %d",(!this->reversed &&  master.get_analog(ANALOG_RIGHT_Y) > deadzone)&& side);
 //   return (!this->reversed ==  master.get_analog(ANALOG_RIGHT_Y) > -1*deadzone);
 // }
 
@@ -579,7 +579,7 @@ void handle_claw_buttons(){
     }
     else  b_claw_obj.set_state(b_claw_states::tilted);
   }
-  // printf("%d\n", b_dist.get());
+  // printf2("%d", b_dist.get());
   // releases if claw button WASN'T held
   if(b_dist.get() > 25 && master.is_falling(claw_toggle_button) && !get_lift() && toggle_press_timer.get_time() < TILT_HOLD_TIME){ 
     if(b_claw_obj.get_state() == b_claw_states::tilted || b_claw_obj.get_state() == b_claw_states::flat){
@@ -604,7 +604,7 @@ void handle_claw_buttons(){
 }
 
 void f_lift_increment_index(){
-  printf("f_lift_increment\n");
+  printf2("f_lift_increment");
   // if state is between_positions, go to the closest position that's higher than the current position
   if(f_lift.get_state() == f_lift_states::between_positions){
     // if lift is above topmost position, go to top
@@ -625,7 +625,7 @@ void f_lift_increment_index(){
 }
 
 void b_lift_increment_index(){
-  printf("b_lift_increment\n");
+  printf2("b_lift_increment");
   // if state is between_positions, go to the closest position that's higher than the current position
   if(b_lift.get_state() == b_lift_states::between_positions){
     // if lift is above topmost position, go to top
@@ -646,7 +646,7 @@ void b_lift_increment_index(){
 }
 
 void f_lift_decrement_index(){
-  printf("f_lift_decrement\n");
+  printf2("f_lift_decrement");
   // if state is between_positions, go to the closest position that's lower than the current position
   if(f_lift.get_state() == f_lift_states::between_positions){
     // if lift is below bottommost position, go to bottom
@@ -667,7 +667,7 @@ void f_lift_decrement_index(){
 }
 
 void b_lift_decrement_index(){
-  printf("b_lift_decrement\n");
+  printf2("b_lift_decrement");
   // if state is between_positions, go to the closest position that's lower than the current position
   if(b_lift.get_state() == b_lift_states::between_positions){
     // if lift is below bottommost position, go to bottom

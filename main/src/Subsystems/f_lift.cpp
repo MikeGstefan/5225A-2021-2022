@@ -48,7 +48,7 @@ void F_Lift::handle(bool driver_array){
       break;
 
     case f_lift_states::move_to_target: // moving to target
-      // printf("target: %d, pos:%d \n", positions[index], f_lift_pot.get_value());
+      // printf2("target: %d, pos:%d ", positions[index], f_lift_pot.get_value());
 
       // move slowly if going down to the bottom with a goal
       if(index == 0 && f_lift_pot.get_value() < 1500 && f_claw_obj.get_state() == f_claw_states::grabbed)  motor.move(-50);
@@ -79,7 +79,7 @@ void F_Lift::handle(bool driver_array){
         motor.move(0);
         master.rumble("---");
         master.print(F_LIFT_STATE_LINE, 0, "F_Lift: Manual      ");
-        printf("LIFT SAFETY TRIGGERED %lf, %lf\n", target, f_lift_pot.get_value());
+        printf2("LIFT SAFETY TRIGGERED %lf, %lf", target, f_lift_pot.get_value());
 
         set_state(f_lift_states::manual);
       }
@@ -144,7 +144,7 @@ void F_Lift::set_state(const f_lift_states next_state, const uint8_t index, cons
     state_log.print("%s | State change requested index is: %d \t", name, index);
     Subsystem::set_state(next_state);
   }
-  else state_log.print("%s | INVALID move to target State change requested from %s to %s, index is: %d\n", name, state_names[static_cast<int>(get_state())], state_names[static_cast<int>(next_state)], index);
+  else state_log.print("%s | INVALID move to target State change requested from %s to %s, index is: %d", name, state_names[static_cast<int>(get_state())], state_names[static_cast<int>(next_state)], index);
 }
 
 int elastic_f_up_time, elastic_f_down_time; //for gui_construction.cpp

@@ -18,7 +18,7 @@ void skills(){
   f_lift.set_state(f_lift_states::move_to_target,0);
   // move_start(move_types::tank_point, tank_point_params({36.0,11.75,-90.0},false),false); // grabs blue on platform 
 	// b_detect_goal(); 
-  // skills_d.print("FIRST GOAL GOt %d\n", millis() - time);
+  // skills_d.print("FIRST GOAL GOt %d", millis() - time);
 	// move_stop(); 
   // drivebase.move(0.0,0.0);
   move_start(move_types::tank_arc, tank_arc_params({tracking.x_coord, tracking.y_coord},{26.0, 41.0, 50.0}, 127.0,127.0,false));
@@ -119,10 +119,10 @@ void load_auton(){
 
   ifstream file;
   Data::log_t.data_update();
-  printf("\n\nLoading Autons:\n");
+  printf2(term_colours::BLUE, -1, "\n\nLoading Autons:");
   file.open(auton_file_name, fstream::in);
   while(file >> target >> task){
-    printf2("%s: %s", target, task);
+    printf2(term_colours::BLUE, -1, "%s: %s", target, task);
     selected_positions.push_back(target);
   }
   newline();
@@ -133,7 +133,7 @@ void load_auton(){
 void save_auton(){
   ofstream file;
   Data::log_t.data_update();
-  printf("\n\nSaving Autons:\n");
+  printf2("\n\nSaving Autons:");
   file.open(auton_file_name, fstream::out | fstream::trunc);
   for(std::vector<std::string>::const_iterator it = selected_positions.begin(); it != selected_positions.end(); it++){
     file << *it << std::endl;

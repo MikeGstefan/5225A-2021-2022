@@ -30,10 +30,10 @@ Position distance_reset_left(int cycles){
 
 	int error_count = 0;
 
-	misc.print("Start Time: %d\n", start_time);
+	misc.print("Start Time: %d", start_time);
 	for(int i = 0; i < cycles; i++){
 		side_dist = l_dist.get();
-		misc.print("%d| Left:%d Right: %d, Side: %d\n", millis(), l_reset_dist.get(), r_reset_dist.get(), side_dist);
+		misc.print("Left:%d Right: %d, Side: %d", l_reset_dist.get(), r_reset_dist.get(), side_dist);
 		if(l_reset_dist.get() != 0) left.push_back(l_reset_dist.get()); else error_count++;
 		if(r_reset_dist.get() != 0)right.push_back(r_reset_dist.get());else error_count++;
 		if(side_dist != 0) side.push_back(side_dist); else error_count++;
@@ -65,11 +65,11 @@ Position distance_reset_left(int cycles){
 		averageright = right.at(right.size() / 2);
 		averageside = side.at(side.size() / 2);
 
-		printf("Average: Left:%f Right:%f\n", averageleft, averageright);
-		misc.print("End Time: %d\n", millis());
+		printf2("Average: Left:%f Right:%f", averageleft, averageright);
+		misc.print("End Time: %d", millis());
 	}
 	else{
-		misc.print("Reset Failed Error Count is %d", error_count);
+		misc.print(term_colours::RED, "Reset Failed Error Count is %d", error_count);
 		ram = true;
 	}
 	if(ram == 0){
@@ -78,11 +78,11 @@ Position distance_reset_left(int cycles){
 		// angle = near_angle(2*atan2(sqrt(pow(diff,2.0) + pow(dist_sensor, 2.0)- pow(d_offset, 2.0)) - dist_sensor, diff - d_offset),0.0);
 		angle = near_angle(2*atan2(sqrt(pow(dist_sensor,2.0) - pow(d_offset,2.0) + pow(averageleft,2.0) + pow(averageright,2.0) -( 2*averageleft*averageright))-dist_sensor, diff + d_offset), 0.0);
 
-		misc.print("Angle Reset to: %f\n", rad_to_deg(angle));
+		misc.print("Angle Reset to: %f", rad_to_deg(angle));
 		local_y = ((averageleft/25.4) - tan(angle) + (dist_to_centre/25.4) * tan(angle) + (side_length/25.4)) * cos(angle);
 		local_x = ((averageside/25.4) + (dist_to_centre/25.4)) * cos(angle);
 
-		misc.print("Front: %f, Side: %f, Side sensor: %f\n", local_y, local_x, averageside);
+		misc.print("Front: %f, Side: %f, Side sensor: %f", local_y, local_x, averageside);
 		Position Reset (local_x, local_y, angle);
 		return Reset;
 	}else{
@@ -110,10 +110,10 @@ Position distance_reset_right(int cycles){
 
 	int error_count = 0;
 
-	misc.print("Start Time: %d\n", start_time);
+	misc.print("Start Time: %d", start_time);
 	for(int i = 0; i < cycles; i++){
 		side_dist = r_dist.get();
-		misc.print("%d| Left:%d Right: %d, Side: %d\n", millis(), l_reset_dist.get(), r_reset_dist.get(), side_dist);
+		misc.print("Left:%d Right: %d, Side: %d", l_reset_dist.get(), r_reset_dist.get(), side_dist);
 		if(l_reset_dist.get() != 0) left.push_back(l_reset_dist.get()); else error_count++;
 		if(r_reset_dist.get() != 0)right.push_back(r_reset_dist.get());else error_count++;
 		if(side_dist != 0) side.push_back(side_dist); else error_count++;
@@ -144,11 +144,11 @@ Position distance_reset_right(int cycles){
 		averageright = right.at(right.size() / 2);
 		averageside = side.at(side.size() / 2);
 
-		printf("Average: Left:%f Right:%f\n", averageleft, averageright);
-		misc.print("End Time: %d\n", millis());
+		printf2("Average: Left:%f Right:%f", averageleft, averageright);
+		misc.print("End Time: %d", millis());
 	}
 	else{
-		misc.print("Reset Failed Error Count is %d", error_count);
+		misc.print(term_colours::RED, "Reset Failed Error Count is %d", error_count);
 		ram = true;
 	}
 	if(ram == 0){
@@ -156,11 +156,11 @@ Position distance_reset_right(int cycles){
 		// angle = atan(diff/dist_sensor);
 		angle = near_angle(2*atan2(sqrt(pow(diff,2.0) + pow(dist_sensor, 2.0)- pow(d_offset, 2.0)) - dist_sensor, diff - d_offset),0.0);
 
-		misc.print("Angle Reset to: %f\n", rad_to_deg(angle));
+		misc.print("Angle Reset to: %f", rad_to_deg(angle));
 		local_y = ((averageright/25.4) - tan(angle) + (dist_to_centre/25.4) * tan(angle) + (side_length/25.4)) * cos(angle);
 		local_x = ((averageside/25.4) + (dist_to_centre/25.4)) * cos(angle);
 
-		misc.print("Front: %f, Side: %f, Side sensor: %f\n", local_y, local_x, averageside);
+		misc.print("Front: %f, Side: %f, Side sensor: %f", local_y, local_x, averageside);
 		master.print(0,0," %.3f, %.3f", local_y, local_x);
 		Position Reset (local_x, local_y, rad_to_deg(angle));
 		return Reset;
@@ -193,9 +193,9 @@ Position distance_reset_center(int cycles){
 		int l_side_low = l_dist.get();
 
 
-		misc.print("Start Time: %d\n", start_time);
+		misc.print("Start Time: %d", start_time);
 		for(int i = 0; i < cycles; i++){
-			misc.print("%d| Left:%d Right: %d, r_Side: %d, l_side: %d\n", millis(), l_reset_dist.get(), r_reset_dist.get(), r_dist.get(), l_dist.get());
+			misc.print("Left:%d Right: %d, r_Side: %d, l_side: %d", l_reset_dist.get(), r_reset_dist.get(), r_dist.get(), l_dist.get());
 
 			if(l_reset_dist.get() != 0) left.push_back(l_reset_dist.get());
 			if(r_reset_dist.get() != 0)right.push_back(r_reset_dist.get());
@@ -237,21 +237,21 @@ Position distance_reset_center(int cycles){
 			average_r_side = r_side.at(int(r_side.size() / 2));
 			average_l_side = l_side.at(int(l_side.size() / 2));
 
-			printf("Average: Left:%f Right:%f\n", averageleft, averageright);
-			printf("Average Side: Left:%f Right:%f\n", average_l_side, average_r_side);
-			misc.print("End Time: %d\n", millis());
+			printf2("Average: Left:%f Right:%f", averageleft, averageright);
+			printf2("Average Side: Left:%f Right:%f", average_l_side, average_r_side);
+			misc.print("End Time: %d", millis());
 
 			int diff = averageleft-averageright;
 			// angle = atan(diff/dist_sensor);
 			angle = near_angle(2*atan2(sqrt(pow(diff,2.0) + pow(dist_sensor, 2.0)- pow(d_offset, 2.0)) - dist_sensor, diff - d_offset),0.0);
 
-			misc.print("Angle Reset to: %f\n", rad_to_deg(angle));
+			misc.print("Angle Reset to: %f", rad_to_deg(angle));
 			local_y = ((averageright/25.4) - tan(angle) + (dist_to_centre/25.4) * tan(angle) + (side_length/25.4)) * cos(angle);
 			l_local_x = ((average_l_side/25.4) + (dist_to_centre/25.4)) * cos(angle);
 			r_local_x = 141.0-(((average_r_side/25.4) + (dist_to_centre/25.4)) * cos(angle));
 			local_x = (r_local_x + l_local_x)/2;
 
-			misc.print("local_y: %f, l_Side: %f, r_Side: %f, local_x: %f\n", local_y, l_local_x, r_local_x, local_x);
+			misc.print("local_y: %f, l_Side: %f, r_Side: %f, local_x: %f", local_y, l_local_x, r_local_x, local_x);
 
 		// master.print(0,0," %.3f, %.3f", local_y, l_local_x, r_local_x);
  //delete expression
@@ -271,7 +271,7 @@ void ramp_distance_line_up(double distance, int timeout){
 
 	while(distance >= delta_dist){
 		delta_dist = sqrt(pow(tracking.x_coord -start_pos.x,2) + pow(tracking.y_coord - start_pos.y,2));
-		misc.print("Delta Dist: %f\n", delta_dist);
+		misc.print("Delta Dist: %f", delta_dist);
 
 		if(abs(l_reset_dist.get() - r_reset_dist.get()) <= 50) setVisionState(Distance_States::stable); // 50 is a test value
 		else if (l_reset_dist.get() > r_reset_dist.get()) setVisionState(Distance_States::turn_left);
@@ -281,23 +281,23 @@ void ramp_distance_line_up(double distance, int timeout){
 		if(r_reset_dist.get() == 0) setVisionState(Distance_States::turn_right);
 		if(l_reset_dist.get() == 0 && r_reset_dist.get() == 0) setVisionState(Distance_States::stable);
 
-		misc.print("Left:%d Right: %d\n",r_reset_dist.get(), l_reset_dist.get());
+		misc.print("Left:%d Right: %d",r_reset_dist.get(), l_reset_dist.get());
 
 		switch (Distance_State){
 			case Distance_States::stable:
-				printf("stable\n");
+				printf2("stable");
 				drivebase.move(-y_speed,0);
 				if(left_eye.last_distance == r_reset_dist.get()) count++;
 				if(count == 4) break;
 				else count = 0;
 				break;
 			case Distance_States::turn_left:
-				printf("Turn left\n");
+				printf2("Turn left");
 				drivebase.move(-y_speed, -a_speed);
 				break;
 			case Distance_States::turn_right:
 				drivebase.move(-y_speed, a_speed);
-				printf("Turn right\n");
+				printf2("Turn right");
 				break;
 		}
 		if(timeout != 0 && millis() - start_time > timeout)break;
@@ -323,20 +323,20 @@ void goal_line_up(int timeout){
 		if(r_goal_dist.get() == 0) setVisionState(Distance_States::turn_right);
 		if(b_dist.get() == 0 && r_goal_dist.get() == 0) setVisionState(Distance_States::stable);
 
-		misc.print("Left:%d Right: %d\n",r_goal_dist.get(), b_dist.get());
+		misc.print("Left:%d Right: %d",r_goal_dist.get(), b_dist.get());
 
 		switch (Distance_State) {
 			case Distance_States::stable:
-				printf("stable\n");
+				printf2("stable");
 				drivebase.move(-y_speed,0);
 				break;
 			case Distance_States::turn_left:
-				printf("Turn left\n");
+				printf2("Turn left");
 				drivebase.move(-y_speed, -a_speed);
 				break;
 			case Distance_States::turn_right:
 				drivebase.move(-y_speed, a_speed);
-				printf("Turn right\n");
+				printf2("Turn right");
 				break;
 		}
 		if(timeout != 0 && millis() - start_time > timeout)break;

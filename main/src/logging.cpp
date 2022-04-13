@@ -33,7 +33,7 @@ Data motion_i("motion.txt","$06",debug,log_locations::both);
 Data motion_d("motion.txt", "$06", debug,log_locations::sd);
 Data term("terminal.txt","$07",debug,log_locations::t);
 Data log_d("log.txt","$08",debug,log_locations::both);
-Data graph("graph.txt","$09",debug,log_locations::sd);
+Data graph("graph.txt","$09",debug,log_locations::sd, term_colours::BLUE);
 Data events("events.txt", "$10", debug,log_locations::both, term_colours::BLUE);
 Data state_log("state.txt", "$11", debug,log_locations::sd);
 Data ERROR("error.txt", "$12", error, log_locations::both, term_colours::ERROR);
@@ -49,7 +49,7 @@ vector<Data*> Data::get_objs(){
 void Data::init(){
   file.open(file_meta,ofstream::trunc | ofstream::out);
   if(!file.is_open()){
-    printf("Log File not found\n");
+    printf2(term_colours::RED, -1, "Log File not found");
     for(int i = 0; i< Data::obj_list.size(); i++){
       if(Data::obj_list[i]->log_location == log_locations::sd && int(Data::obj_list[i]->log_type) ==1)Data::obj_list[i]->log_location = log_locations::t;
       if(int(Data::obj_list[i]->log_type) ==2){

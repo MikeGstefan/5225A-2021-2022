@@ -221,16 +221,6 @@ const char* get_term_colour(term_colours colour);
  */
 void newline(int count = 1);
 
-/**
- * @brief printf that handles strings and automatically newlines.
- * 
- * @param fmt printf format string
- * @param args printf args
- */
-template <typename... Params>
-int printf2(std::string fmt, Params... args){
-  return printf("%s\n", sprintf2(fmt, args...).c_str());
-}
 
 /**
  * @brief printf that handles strings and automatically newlines. Can print coloured and a timestamp
@@ -246,8 +236,40 @@ int printf2(std::string fmt, Params... args){
  */
 template <typename... Params>
 int printf2(term_colours colour, int time_type, std::string fmt, Params... args){
-  if(time_type == 2) return printf("%-10s | %s%s\033[0m\n", Timer::to_string(millis(), timing_units::millis, 0, 1).c_str(), get_term_colour(colour), sprintf2(fmt, args...).c_str());
-  else if(time_type == 1) return printf("%-7s | %s%s\033[0m\n", Timer::to_string(millis(), timing_units::millis, -1, 1).c_str(), get_term_colour(colour), sprintf2(fmt, args...).c_str());
-  else if(time_type == 0) return printf("%-3s | %s%s\033[0m\n", Timer::to_string(millis(), timing_units::millis, -1, 0).c_str(), get_term_colour(colour), sprintf2(fmt, args...).c_str());
-  else return printf("%s%s\033[0m\n", get_term_colour(colour), sprintf2(fmt, args...).c_str());
+  std::string str = sprintf2(fmt, args...);
+  char timestamp[20];
+
+  int white_count = str.find_first_not_of(" \n");
+  std::string whitespace = std::string(str.begin(), str.begin()+white_count);
+  str.erase(str.begin(), str.begin()+white_count);
+
+  if(time_type == 2) snprintf(timestamp, 20, "%-13s|", Timer::to_string(millis(), timing_units::millis, 0, 1).c_str());
+  else if(time_type == 1) snprintf(timestamp, 20, "%-7s|", Timer::to_string(millis(), timing_units::millis, -1, 1).c_str());
+  else if(time_type == 0) snprintf(timestamp, 20, "%-4s|", Timer::to_string(millis(), timing_units::millis, -1, 0).c_str());
+  else snprintf(timestamp, 3, "");
+
+  return printf("%s%s %s%s\033[0m\n", whitespace.c_str(), timestamp, get_term_colour(colour), str.c_str());
+}
+
+// /**
+//  * @brief printf that handles strings and automatically newlines.
+//  * 
+//  * @param colour The colour to print in 
+//  * @param fmt printf format string
+//  * @param args printf args
+//  */
+// template <typename... Params>
+// int printf2(term_colours colour, std::string fmt, Params... args){
+//   return printf2(colour, -1, fmt, args...);
+// }
+
+/**
+ * @brief printf that handles strings and automatically newlines.
+ * 
+ * @param fmt printf format string
+ * @param args printf args
+ */
+template <typename... Params>
+int printf2(std::string fmt, Params... args){
+  return printf("%s\n", sprintf2(fmt, args...).c_str());
 }

@@ -79,7 +79,7 @@ void B_Lift::handle(bool driver_array){
         motor.move(0);
         master.rumble("---");
         master.print(B_LIFT_STATE_LINE, 0, "B_Lift: Manual      ");
-        printf("LIFT SAFETY TRIGGERED %lf, %lf\n", target, b_lift_pot.get_value());
+        printf2("LIFT SAFETY TRIGGERED %lf, %lf", target, b_lift_pot.get_value());
 
         set_state(b_lift_states::manual);
       }
@@ -182,7 +182,7 @@ void B_Lift::set_state(const b_lift_states next_state, const uint8_t index, cons
     state_log.print("%s | State change requested index is: %d \t", name, index);
     Subsystem::set_state(next_state);
   }
-  else state_log.print("%s | INVALID move to target State change requested from %s to %s, index is: %d\n", name, state_names[static_cast<int>(get_state())], state_names[static_cast<int>(next_state)], index);
+  else state_log.print("%s | INVALID move to target State change requested from %s to %s, index is: %d", name, state_names[static_cast<int>(get_state())], state_names[static_cast<int>(next_state)], index);
 }
 
 int elastic_b_up_time, elastic_b_down_time; //for gui_construction.cpp
