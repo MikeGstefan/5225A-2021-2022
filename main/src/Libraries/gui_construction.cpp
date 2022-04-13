@@ -17,12 +17,12 @@
   std::array<Button*, 8> exp_pneum_btns;
 
   std::array<std::tuple<pros::Motor*, std::string, std::string, int, Text_*, Text_*, Button*, Button*>, 8> motors_for_gui {{
-    {&back_l, "Back Left", "BL", 0, nullptr, nullptr, nullptr, nullptr},
-    {&center_l, "Center Left", "CL", 0, nullptr, nullptr, nullptr, nullptr},
-    {&front_l, "Front Left", "FL", 0, nullptr, nullptr, nullptr, nullptr},
     {&back_r, "Back Right", "BR", 0, nullptr, nullptr, nullptr, nullptr},
     {&center_r, "Center Right", "CR", 0, nullptr, nullptr, nullptr, nullptr},
     {&front_r, "Front Right", "FR", 0, nullptr, nullptr, nullptr, nullptr},
+    {&back_l, "Back Left", "BL", 0, nullptr, nullptr, nullptr, nullptr},
+    {&center_l, "Center Left", "CL", 0, nullptr, nullptr, nullptr, nullptr},
+    {&front_l, "Front Left", "FL", 0, nullptr, nullptr, nullptr, nullptr},
     {&f_lift_m, "Front Lift", "F", 0, nullptr, nullptr, nullptr, nullptr},
     {&b_lift_m, "Back Lift", "B", 0, nullptr, nullptr, nullptr, nullptr},
   }}; //{nullptr, "", "", 0, nullptr, nullptr, nullptr, nullptr, nullptr},
@@ -102,10 +102,10 @@
       Button side_corkscrew (130, 70, 100, 70, GUI::Style::SIZE, Button::SINGLE, tuning, "Side Corkscrew");
       Button back_corkscrew (245, 70, 100, 70, GUI::Style::SIZE, Button::SINGLE, tuning, "Back Corkcrew");
       Button spin360 (360, 70, 100, 70, GUI::Style::SIZE, Button::SINGLE, tuning, "Spins");
-      Button wheel_size (15, 155, 100, 75, GUI::Style::SIZE, Button::SINGLE, tuning, "Wheel Size");
+      Button wheel_size (15, 155, 100, 70, GUI::Style::SIZE, Button::SINGLE, tuning, "Wheel Size");
       Button back_wheel_size (130, 155, 100, 70, GUI::Style::SIZE, Button::SINGLE, tuning, "Back Wheel Size");
       Button encoder_ticks (245, 155, 100, 70, GUI::Style::SIZE, Button::SINGLE, tuning, "Encoder Ticks");
-      Button manual (410, 190, 35, 20, GUI::Style::SIZE, Button::TOGGLE, tuning, "Manual");
+      Button manual (410, 190, 35, 20, GUI::Style::CENTRE, Button::TOGGLE, tuning, "Manual");
 
     Page motors ("Motor Control"); //Motor Control for known ports
       Slider mot_speed_set (MID_X, 60, 180 , 15, GUI::Style::CENTRE, Slider::HORIZONTAL, -127, 127, motors, "Speed");
@@ -257,21 +257,21 @@ void main_setup(){
     std::get<7>(motors_for_gui[6]) = &mot_7_stop;
     std::get<7>(motors_for_gui[7]) = &mot_8_stop;
 
-    for (int i = 0; i < 8; i++){
-      if(std::get<Motor*>(motors_for_gui[i])){
-        std::get<6>(motors_for_gui[0])->set_func([](){std::get<Motor*>(motors_for_gui[0])->move(mot_speed_set.get_value());});
-        std::get<7>(motors_for_gui[0])->set_func([](){std::get<Motor*>(motors_for_gui[0])->move(0);});
+    for(std::array<std::tuple<pros::Motor *, std::string, std::string, int, Text_ *, Text_ *, Button *, Button *>, 8>::iterator it = motors_for_gui.begin(); it != motors_for_gui.end(); it++){
+      if(std::get<Motor*>(*it)){
+        std::get<6>(*it)->set_func([=](){std::get<Motor*>(*it)->move(mot_speed_set.get_value());});
+        std::get<7>(*it)->set_func([=](){std::get<Motor*>(*it)->move(0);});
 
-        std::get<int>(motors_for_gui[i]) = std::get<Motor*>(motors_for_gui[i])->get_temperature();
+        std::get<int>(*it) = std::get<Motor*>(*it)->get_temperature();
       }
-      else std::get<int>(motors_for_gui[i]) = std::numeric_limits<int>::max();
+      else std::get<int>(*it) = std::numeric_limits<int>::max();
 
-      std::get<4>(motors_for_gui[i])->set_background(40, 20);
-      if(std::get<int>(motors_for_gui[i]) == std::numeric_limits<int>::max()){
-        std::get<4>(motors_for_gui[0])->set_active(false);
-        std::get<5>(motors_for_gui[0])->set_active(false);
-        std::get<6>(motors_for_gui[0])->set_active(false);
-        std::get<7>(motors_for_gui[0])->set_active(false);
+      std::get<4>(*it)->set_background(40, 20);
+      if(std::get<int>(*it) == std::numeric_limits<int>::max()){
+        std::get<4>(*it)->set_active(false);
+        std::get<5>(*it)->set_active(false);
+        std::get<6>(*it)->set_active(false);
+        std::get<7>(*it)->set_active(false);
       }
     }
 
@@ -349,12 +349,21 @@ void main_setup(){
 
         b_lift.set_state(b_lift_states::move_to_target, 0);
         f_lift.set_state(f_lift_states::move_to_target, 0);
+
+        delay(250);
+
+        b_lift.set_state(b_lift_states::idle, 0);
+        f_lift.set_state(f_lift_states::idle, 0);
       }
     });
 
     pneums.set_func([](){
-      for(std::array<std::pair<Piston*, Button*>, 8>::iterator it = Piston::list_for_gui.begin(); it != Piston::list_for_gui.begin(); it++){
+      printf2("Pneum test");
+      for(std::array<std::pair<Piston*, Button*>, 8>::iterator it = Piston::list_for_gui.begin(); it != Piston::list_for_gui.end(); it++){
         Piston* piston = it->first;
+        if (!piston) continue;
+
+        printf2("Pneum test: %s", it->first->get_name());
         if (GUI::prompt("Press to check " + piston->get_name())){
           piston->toggle_state();
           delay(500);
@@ -443,12 +452,12 @@ void main_setup(){
     back_claw.set_off_func([](){b_claw.set_value(LOW);});
 
     f_lift_move.set_func([&](){
-      if (GUI::prompt("Press to move front lift to" + std::to_string(f_lift_val.get_value()), "", 1000)){
+      if (GUI::prompt("Press to move front lift to " + std::to_string(f_lift_val.get_value()), "", 1000)){
         f_lift.move_absolute(f_lift_val.get_value());
       }
     });
     b_lift_move.set_func([&](){
-      if (GUI::prompt("Press to move back lift to" + std::to_string(b_lift_val.get_value()), "", 1000)){
+      if (GUI::prompt("Press to move back lift to " + std::to_string(b_lift_val.get_value()), "", 1000)){
         b_lift.move_absolute(b_lift_val.get_value());
       }
     });
@@ -461,7 +470,7 @@ void main_setup(){
     manual.select();
     //Figure out how to do these with the other left/right, front/back or moving in the other direction
 
-    wheel_size.set_func([](){ //Encoder Direction
+    encoder_direction.set_func([](){ //Encoder Direction
       if(manual.on){
         if(GUI::prompt("Press, then move the robot forward and to the right", "")){
           drivebase.reset();
@@ -610,17 +619,7 @@ void main_setup(){
         }
       }
       else{
-        if(GUI::prompt("Place the robot's side against a surface. Then press.", "", 1500)){
-          drivebase.reset();
-
-          int dir = random_direction();
-          drivebase.move(dir*50.0, -dir*20.0); //strafe
-          tracking.wait_for_dist(30); //This needs to brake at exactly 30, it can't just be past 30
-          drivebase.brake();
-
-          printf2("If the robot is far off of 30 inches, consider changing the wheel size constant.");
-          printf2("Multiply the actual travelled distance by %f to get the back wheel diameter", fabs(2.0/LeftEncoder.get_value()));
-        }
+        screen_flash::start("I cannot strafe");
       }
     });
 
@@ -690,17 +689,17 @@ void main_setup(){
     pneum_7.add_text(pneum_7_text);
     pneum_8.add_text(pneum_8_text);
 
-    for(std::array<std::pair<Piston*, Button*>, 8>::iterator it = Piston::list_for_gui.begin(); it != Piston::list_for_gui.begin(); it++){
+    for(std::array<std::pair<Piston*, Button*>, 8>::iterator it = Piston::list_for_gui.begin(); it != Piston::list_for_gui.end(); it++){
       if(it->first){
-        it->second->set_func([it](){it->first->set_value(HIGH);});
-        it->second->set_off_func([it](){it->first->set_value(LOW);});
+        it->second->set_func([it](){it->first->set_state(HIGH);});
+        it->second->set_off_func([it](){it->first->set_state(LOW);});
       }
       else it->second->set_active(false);
     }
 
     pneumatics.set_setup_func([](){
-      for(std::array<std::pair<Piston*, Button*>, 8>::iterator it = Piston::list_for_gui.begin(); it != Piston::list_for_gui.begin(); it++){
-        if(it->first) it->second->select();
+      for(std::array<std::pair<Piston*, Button*>, 8>::iterator it = Piston::list_for_gui.begin(); it != Piston::list_for_gui.end(); it++){
+        if(it->first && it->first->get_state()) it->second->select();
       }
     });
 }

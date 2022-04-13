@@ -5,6 +5,7 @@
 #include "logging.hpp"
 #include "util.hpp"
 #include "geometry.hpp"
+#include <cmath>
 
 //Why is everything double indented in this file
 
@@ -63,10 +64,10 @@ double Tracking::get_dist(Position pos1){
 // waits until the distance from current position to starting position is greater than the specified amount
 void Tracking::wait_for_dist(double distance, int timeout){
   const Point start_pos = {tracking.x_coord, tracking.y_coord};
-  int start_time = millis();
+  Timer dist_time{"Wait For Dist"};
 
   wait_until(get_dist(start_pos) > distance){
-    if(timeout != 0 && millis() - start_time > timeout) break;
+    if(timeout != 0 && dist_time.get_time() > timeout) break;
   }
 }
 

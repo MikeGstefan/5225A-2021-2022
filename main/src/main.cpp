@@ -85,15 +85,32 @@ void autonomous() {
 }
 
 void opcontrol() {
-  /* Nathan - After Worlds:
+
+  f_lift.move_absolute(1500);
+  /* Nathan
+  pad timestamp
+  all gui sprintf stuff
+  anything can print to the screen
+  auton selector
+  headers
+  merge in lift
+  util
+  motor/pneumatic control for known ports
+  no pneum ports
+
+
+  auton give up func - ask mike
+
+  After Worlds:
   make flash its own page
   motor subclass
   file writing functions
   proper text splitter for flash
   allow multiple text variables through tuple
+  print stack trace
   get rid of add_text. just change the buttons text directly (will have to deal with changeing text length)
-  auton give up func - ask mike
-  
+  controller button class
+  skills recorder. Have the program record movements and write the skills route.
   lvgl images
   2d sliders
   */
