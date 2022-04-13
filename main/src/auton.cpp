@@ -135,7 +135,7 @@ void save_auton(){
   Data::log_t.data_update();
   printf("\n\nSaving Autons:\n");
   file.open(auton_file_name, fstream::out | fstream::trunc);
-  for(std::vector<std::string>::iterator it = selected_positions.begin(); it != selected_positions.end(); it++){
+  for(std::vector<std::string>::const_iterator it = selected_positions.begin(); it != selected_positions.end(); it++){
     file << *it << std::endl;
     file << std::get<std::string>(targets[*it]) << std::endl;
     printf2("%s: %s", *it, std::get<std::string>(targets[*it]));
@@ -198,14 +198,14 @@ bool select_auton_task(std::string target){
 
 void select_auton(){
   bool all_selected = false;
-  std::map<std::string, std::pair<Point, std::string>>::iterator selection = targets.find("Right");
+  std::map<std::string, std::pair<Point, std::string>>::const_iterator selection = targets.find("Right");
   selected_positions.clear();
 
   wait_until(all_selected){
     master.clear();
     master.print(0, 0, selection->first);
 
-    std::map<std::string, std::pair<Point, std::string>>::iterator og = selection;
+    const std::map<std::string, std::pair<Point, std::string>>::const_iterator og = selection;
 
     switch(master.wait_for_press({DIGITAL_X, DIGITAL_A, DIGITAL_RIGHT, DIGITAL_LEFT})){//see how to use ok_button
       case DIGITAL_X:

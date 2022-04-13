@@ -28,11 +28,13 @@ B_Lift::B_Lift(Motorized_subsystem<b_lift_states, NUM_OF_B_LIFT_STATES, B_LIFT_M
 void B_Lift::move_absolute(double position, double velocity, bool wait_for_comp, double end_error){ //blocking
   if (end_error == 0.0) end_error = this->end_error;
   int output;
+  pid.compute(b_lift_pot.get_value(), position);
   wait_until(fabs(pid.get_error()) < end_error){
-    output = pid.compute(f_lift_pot.get_value(), position);
+    output = pid.compute(b_lift_pot.get_value(), position);
     if (abs(output) > speed) output = speed * sgn(output); // cap the output at speed  
     motor.move(output);
   }
+  motor.move(0);
 }
 
 void B_Lift::handle(bool driver_array){

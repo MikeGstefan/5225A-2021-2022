@@ -45,8 +45,8 @@ enum class log_locations
 class Data{
 private:
   static vector<Data*> obj_list;
-  term_colours print_colour = term_colours::NONE;
-  int print_type = 0;
+  term_colours print_colour;
+  int print_type;
   
 public:
   static _Task log_t;
@@ -61,41 +61,10 @@ public:
   void log_print(char* buffer, int buffer_len) const;
   void set_print(term_colours print_colour, int time_type);
 
-  Data(const char* obj_name, const char* id_code, log_types log_type_param, log_locations log_location_param, term_colours print_colour = term_colours::NONE, int print_type = 0);
+  Data(const char* obj_name, const char* id_code, log_types log_type_param, log_locations log_location_param, term_colours print_colour = term_colours::NONE, int print_type = 1);
   
   static void init();
   static char* to_char(const char* format, ...);
-
-  /**
-   * @brief 
-   * 
-   * @param format printf format string
-   * @param args printf args
-   */
-  template <typename... Params>
-  void print(std::string format, Params... args) const{
-    std::string str = sprintf2(format, args...);
-    int buffer_len = str.length() + 3;
-    char buffer[256];
-    snprintf(buffer, 256, str.c_str());
-
-    if(int(this->log_type) != 0){
-      switch(log_location){
-        case log_locations::t:
-          printf2(print_colour, print_type, "%s", str);
-          break;
-        case log_locations::sd:
-          this->log_print(buffer, buffer_len);
-          break;
-        case log_locations::none:
-          break;
-        case log_locations::both:
-          printf2(print_colour, print_type, "%s", str);
-          this->log_print(buffer, buffer_len);
-          break;
-      }
-    }
-  }
 
   /**
    * @brief 
@@ -111,7 +80,7 @@ public:
     char buffer[256];
     snprintf(buffer, 256, str.c_str());
 
-    if(int(this->log_type) != 0){
+    if(static_cast<int>(this->log_type) != 0){
       switch(log_location){
         case log_locations::t:
           printf2(colour, print_type, "%s", str);
@@ -128,6 +97,18 @@ public:
       }
     }
   }
+
+    /**
+   * @brief 
+   * 
+   * @param format printf format string
+   * @param args printf args
+   */
+  template <typename... Params>
+  void print(std::string format, Params... args) const{
+    print(print_colour, format, args...);
+  }
+
 };
 
 

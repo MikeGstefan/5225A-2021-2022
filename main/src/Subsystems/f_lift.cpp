@@ -26,7 +26,6 @@ F_Lift::F_Lift(Motorized_subsystem<f_lift_states, NUM_OF_F_LIFT_STATES, F_LIFT_M
 void F_Lift::move_absolute(double position, double velocity, bool wait_for_comp, double end_error){ //blocking
   if (end_error == 0.0) end_error = this->end_error;
   int output;
-  printf2("End Error: %f", end_error);
   pid.compute(f_lift_pot.get_value(), position);
   wait_until(fabs(pid.get_error()) < end_error){
     output = pid.compute(f_lift_pot.get_value(), position);

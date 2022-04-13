@@ -5,7 +5,6 @@
 #include "logging.hpp"
 #include "util.hpp"
 #include "geometry.hpp"
-#include <cmath>
 
 //Why is everything double indented in this file
 

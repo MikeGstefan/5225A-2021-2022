@@ -177,7 +177,7 @@ controller_digital_e_t _Controller::wait_for_press(std::vector<controller_digita
   controller_digital_e_t button = static_cast<controller_digital_e_t>(0);
   
   wait_until(button != static_cast<controller_digital_e_t>(0)){
-    for(std::vector<controller_digital_e_t>::iterator it = buttons.begin(); it != buttons.end(); it++){
+    for(std::vector<controller_digital_e_t>::const_iterator it = buttons.begin(); it != buttons.end(); it++){
       if(get_digital_new_press(*it)) button = *it;
     }
 

@@ -40,7 +40,7 @@ namespace screen_flash{
     screen::set_pen(~colour&0xFFFFFF); //Makes text inverted colour of background so it is always visible
     screen::set_eraser(colour);
 
-    printf2("\n\n%s\n", text);
+    // printf2("\n\n%s\n", text);
     events.print("\n\n%d | %s\n\n", millis(), text.c_str());
 
     int spaces = int(CHAR_WIDTH_LARGE*text.length()/460)+1;
@@ -255,7 +255,7 @@ namespace screen_flash{
 
     //Sees how much space is user-requested
     int y = USER_UP;
-    for (std::vector<Text_*>::iterator it = terminal.texts.begin(); it != terminal.texts.end(); it++){
+    for (std::vector<Text_*>::const_iterator it = terminal.texts.begin(); it != terminal.texts.end(); it++){
       if ((*it)->txt_size != 4) y += get_height((*it)->txt_size) + 5;
       if(get_width(TEXT_SMALL) * (*it)->label.length() + 5 > 480){
           throw std::length_error("Item too long to print\n");
@@ -274,7 +274,7 @@ namespace screen_flash{
       return;
     }
 
-    for (std::vector<Text_*>::iterator it = terminal.texts.begin(); it != terminal.texts.end(); it++){
+    for (std::vector<Text_*>::const_iterator it = terminal.texts.begin(); it != terminal.texts.end(); it++){
       if (get_width(fmt) * (*it)->label.length() + 5 > 480){
         if(fmt == TEXT_LARGE){
           if(get_width(TEXT_MEDIUM) * (*it)->label.length() + 5 < 480) (*it)->txt_size = TEXT_MEDIUM;
@@ -287,7 +287,7 @@ namespace screen_flash{
 
     y = USER_UP;
     //Saves y-pos and txt_size
-    for (std::vector<Text_*>::iterator it = terminal.texts.begin(); it != terminal.texts.end(); it++){
+    for (std::vector<Text_*>::const_iterator it = terminal.texts.begin(); it != terminal.texts.end(); it++){
       (*it)->y = y;
       if ((*it)->txt_size == 4) (*it)->txt_size = fmt;
       y += get_height((*it)->txt_size) + 5;
@@ -405,7 +405,7 @@ namespace screen_flash{
   }
 
   int Page::page_num(const Page* page_id){
-    std::vector<Page*>::const_iterator it = std::find(GUI::current_gui->pages.begin(), GUI::current_gui->pages.end(), page_id);
+    const std::vector<Page*>::const_iterator it = std::find(GUI::current_gui->pages.begin(), GUI::current_gui->pages.end(), page_id);
       if (it == GUI::current_gui->pages.end()){
       throw std::domain_error(convert_all_args("Page %p does not exist!\n", page_id));
       return 0;

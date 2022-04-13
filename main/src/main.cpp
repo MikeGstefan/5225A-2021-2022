@@ -85,14 +85,13 @@ void autonomous() {
 }
 
 void opcontrol() {
-
-  f_lift.move_absolute(1500);
   /* Nathan
+  distance sensor check
   pad timestamp
   all gui sprintf stuff
   anything can print to the screen
   auton selector
-  headers
+  merge into headers
   merge in lift
   util
   motor/pneumatic control for known ports

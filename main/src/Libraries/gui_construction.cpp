@@ -359,7 +359,7 @@ void main_setup(){
 
     pneums.set_func([](){
       printf2("Pneum test");
-      for(std::array<std::pair<Piston*, Button*>, 8>::iterator it = Piston::list_for_gui.begin(); it != Piston::list_for_gui.end(); it++){
+      for(std::array<std::pair<Piston*, Button*>, 8>::const_iterator it = Piston::list_for_gui.begin(); it != Piston::list_for_gui.end(); it++){
         Piston* piston = it->first;
         if (!piston) continue;
 
@@ -448,8 +448,8 @@ void main_setup(){
 
     front_claw.set_func([](){f_claw(HIGH);});
     front_claw.set_off_func([](){f_claw(LOW);});
-    back_claw.set_func([](){b_claw.set_value(HIGH);});
-    back_claw.set_off_func([](){b_claw.set_value(LOW);});
+    back_claw.set_func([](){b_claw.set_state(HIGH);});
+    back_claw.set_off_func([](){b_claw.set_state(LOW);});
 
     f_lift_move.set_func([&](){
       if (GUI::prompt("Press to move front lift to " + std::to_string(f_lift_val.get_value()), "", 1000)){
@@ -689,7 +689,7 @@ void main_setup(){
     pneum_7.add_text(pneum_7_text);
     pneum_8.add_text(pneum_8_text);
 
-    for(std::array<std::pair<Piston*, Button*>, 8>::iterator it = Piston::list_for_gui.begin(); it != Piston::list_for_gui.end(); it++){
+    for(std::array<std::pair<Piston*, Button*>, 8>::const_iterator it = Piston::list_for_gui.begin(); it != Piston::list_for_gui.end(); it++){
       if(it->first){
         it->second->set_func([it](){it->first->set_state(HIGH);});
         it->second->set_off_func([it](){it->first->set_state(LOW);});
@@ -698,7 +698,7 @@ void main_setup(){
     }
 
     pneumatics.set_setup_func([](){
-      for(std::array<std::pair<Piston*, Button*>, 8>::iterator it = Piston::list_for_gui.begin(); it != Piston::list_for_gui.end(); it++){
+      for(std::array<std::pair<Piston*, Button*>, 8>::const_iterator it = Piston::list_for_gui.begin(); it != Piston::list_for_gui.end(); it++){
         if(it->first && it->first->get_state()) it->second->select();
       }
     });
@@ -775,8 +775,8 @@ void util_setup(){
       }
     }
 
-    for (std::array<std::tuple<int, Button*, Button*, Text_*, int, std::string>, 8>::iterator it = motor_ports.begin(); it != motor_ports.end(); it++){
-      std::tuple<int, Button*, Button*, Text_*, int, std::string>& mot_arr = *it;
+    for (std::array<std::tuple<int, Button*, Button*, Text_*, int, std::string>, 8>::const_iterator it = motor_ports.begin(); it != motor_ports.end(); it++){
+      const std::tuple<int, Button*, Button*, Text_*, int, std::string>& mot_arr = *it;
 
       if (std::get<0>(mot_arr) != std::numeric_limits<int>::max()) motor_port_nums.append(std::to_string(std::get<0>(mot_arr)) + ",");
       else{
@@ -798,7 +798,7 @@ void util_setup(){
       else expander_ports[port] = std::numeric_limits<int>::max();
     }
 
-    for (std::array<int, 21>::iterator it = expander_ports.begin(); it != expander_ports.end(); it++){
+    for (std::array<int, 21>::const_iterator it = expander_ports.begin(); it != expander_ports.end(); it++){
       if (*it != std::numeric_limits<int>::max()) expander_port_nums.append(std::to_string(*it) + ",");
     }
 
