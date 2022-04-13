@@ -35,7 +35,7 @@ class B_Lift: public Motorized_subsystem<b_lift_states, NUM_OF_B_LIFT_STATES, B_
     std::atomic<int32_t> speed{127}; // max pwm applied to the lifts during a move to target
 
   public:
-    vector<int> driver_positions = {1035, 1300, 2050, 2750};
+    vector<int> driver_positions = {1035, 1300, 2050, 2300, 2750};
     vector<int> prog_positions = {1035, 1300, 2050, 2750};
 
 
@@ -47,13 +47,11 @@ class B_Lift: public Motorized_subsystem<b_lift_states, NUM_OF_B_LIFT_STATES, B_
     void set_state(const b_lift_states next_state, const uint8_t index, const int32_t speed = 127);  // requests a state change and logs it
     
     // getters because index is private
-    uint8_t get_index() const{ //don't declare this here
+    uint8_t get_index() const{
       return index.load();
     }
-    void elastic_util(); // up time should be about 1100mms (ignore this time, it was on the old lift), down time should be slightly slower than that
-
-    //overlad to use pot. always waits for complete. the param does nothing
-    void move_absolute(double position, double velocity = B_LIFT_MAX_VELOCITY, bool wait_for_comp = true, double end_error = 0.0);
+    void elastic_util(int high); // up time should be about 1100mms (ignore this time, it was on the old lift), down time should be slightly slower than that
+    void move_absolute(double position, double velocity = B_LIFT_MAX_VELOCITY, bool wait_for_comp = true, double end_error = 20);
 };
 
 extern B_Lift b_lift;

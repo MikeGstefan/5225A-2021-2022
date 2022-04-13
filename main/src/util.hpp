@@ -4,6 +4,7 @@
 #include "timer.hpp"
 #include "geometry.hpp"
 #include "logging.hpp"
+#include "Libraries/printing.hpp"
 #include <array>
 #include <cmath>
 #include <iostream>
@@ -43,8 +44,14 @@ bool in_range(T value, T minimum, T maximum){
   return (minimum <= value && value <= maximum) || (maximum <= value && value <= minimum);
 }
 
+//degrees to radians
 double operator "" _deg(long double degree);
+
+//radians to degrees
 double operator "" _rad(long double radians);
+
+//rotations to radians
+double operator "" _rot(long double rotations);
 
 /**
  * @brief converts radians to degrees
@@ -87,6 +94,8 @@ std::function<long double (long double)> func_scale(std::function<long double(lo
 
 //removed constrain because std::clamp already exists
 
+int random_direction();
+
 // gets the sign of a value (0, 1 or -1)
 template <typename T>
 int sgn(T value){
@@ -119,7 +128,7 @@ template <typename T>
 T map_set(T input, T in_min, T in_max, T out_min, T out_max, T range, T val){
   if (input <= range) return map(input, in_min, range, out_min, val);
   else {
-    printf("%d || INVALID INPUT IN MAP FUNCTION\n", millis());
+    printf2("INVALID INPUT IN MAP FUNCTION");
     return static_cast<T>(0);
   }
 }

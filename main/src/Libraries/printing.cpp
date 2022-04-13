@@ -14,7 +14,7 @@ std::string convert_all_args(const std::string& fmt, const Point& arg){
 }
 
 //Template Recursion Base case
-std::string printf_to_string(const std::string& fmt){
+std::string sprintf2(const std::string& fmt){
   return fmt;
 }
 

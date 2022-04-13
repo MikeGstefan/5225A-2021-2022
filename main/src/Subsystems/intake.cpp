@@ -19,7 +19,7 @@ Intake::Intake(Motorized_subsystem<intake_states, NUM_OF_INTAKE_STATES, INTAKE_M
 
 void Intake::handle_buttons(){
   // toggles intake state if intake button is pressed
-  if(master.is_rising(intake_button)){
+  if(master.is_rising(intake_button) || partner.is_rising(partner_intake_button)){
     // doesn't allow driver to turn on intake if lift is at bottom
     if(f_lift.get_state() != f_lift_states::bottom){
       switch(get_state()){
@@ -39,7 +39,7 @@ void Intake::handle_buttons(){
     }
   }
   // toggles intake reverse state if intake reverse button is pressed
-  if(master.is_rising(intake_reverse_button)){
+  if(master.is_rising(intake_reverse_button) || partner.is_rising(partner_intake_reverse_button)){
     // doesn't allow driver to turn on intake if lift is at bottom
     if(f_lift.get_state() != f_lift_states::bottom){
       switch(get_state()){

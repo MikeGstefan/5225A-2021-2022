@@ -34,12 +34,12 @@ void save_positions(){
 
   master.clear();
   master.print(0, 0, "Move to new start");
-  printf("\nMove the robot to its new position.\n");
+  printf2("\nMove the robot to its new position.");
 
   //move the robot
 
   if(GUI::prompt("Press to save position", "Press to save the current position to a file.")){
-    tracking_imp.print("Saving X: %f, Y:%f, A:%f\n", tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle));
+    tracking_imp.print("Saving X: %f, Y:%f, A:%f", tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle));
     
     ofstream file;
     Data::log_t.data_update();
@@ -62,10 +62,11 @@ void load_positions(){
   file.close();
   Data::log_t.done_update();
 
-  tracking_imp.print("\n\nLoading X: %f, Y:%f, A:%f from file\n\n\n\n", x, y, a);
+  tracking_imp.print(term_colours::BLUE, "Loading X: %f, Y:%f, A:%f from file", x, y, a);
   tracking.reset(x, y, a);
 }
 
+//remove if unneeded
 double get_filtered_output(ADIUltrasonic sensor, int check_count, uint16_t lower_bound, uint16_t upper_bound, int timeout){
   Timer timer{"Timer"};
   int success_count = 0;
@@ -78,31 +79,31 @@ double get_filtered_output(ADIUltrasonic sensor, int check_count, uint16_t lower
     if (in_range(input, lower_bound, upper_bound)){ //This used to be (lower_bound <= input <= upper_bound). I highly doubt that's what you wanted.
 
       total_input += input;
-      printf("input: %d\n", input);
+      printf2("input: %d", input);
       success_count++;
     }
-    else printf("FAILED! input: %d\n", input);
+    else printf2(term_colours::RED, -1, "FAILED! input: %d", input);
   }
   filtered_output = total_input / success_count;
-  printf("filtered output: %lf\n", filtered_output);
+  printf2("filtered output: %lf", filtered_output);
   return filtered_output;
 }
 
-void flatten_against_wall(bool front, int cycles){ 
+void flatten_against_wall(bool front, int cycles){
   int safety_check = 0;
   //bool to + -
-  int direction = (static_cast<int>(front)*2)-1; //use okapi::boolToSign
-  tracking_imp.print("%d|| Start wall allign\n", millis());
+  int direction = (static_cast<int>(front)*2)-1;
+  tracking_imp.print("Start wall allign");
 
 	drivebase.move(50.0*direction,0.0);
 
 	wait_until((fabs(tracking.l_velo) >= 2.0 && fabs(tracking.r_velo) >= 2.0) || safety_check >= 12){
     safety_check++;
-    misc.print(" reset things %.2f, %.2f\n",fabs(tracking.l_velo), fabs(tracking.r_velo));
+    misc.print(" reset things %.2f, %.2f",fabs(tracking.l_velo), fabs(tracking.r_velo));
   }
 	cycleCheck(fabs(tracking.l_velo) < 1.0 && fabs(tracking.r_velo) < 1.0, 4, 10);
 	drivebase.move(20.0*direction, 0.0);
-	printf("%d|| Done all align\n", millis());
+	printf2("%d|| Done all align", millis());
 }
 
 // double get_front_dist(){
@@ -127,24 +128,22 @@ void flatten_against_wall(bool front, int cycles){
 void b_detect_goal(){ 
   wait_until(!tracking.move_complete);
   while(b_dist.get() > 40 && !tracking.move_complete){ 
-    misc.print("looking for goal: %d\n", b_dist.get());
+    misc.print("looking for goal at back: %d", b_dist.get());
     delay(33);
-}
-  misc.print("Detected %d\n", b_dist.get());
+  }
+  misc.print("Detected %d", b_dist.get());
   b_claw.set_state(1);
 }
 
 
 
 void f_detect_goal(bool safety){ 
-
   if(safety) wait_until(!tracking.move_complete);
   while(f_dist.get() > 30 && !tracking.move_complete){
-    misc.print("looking for goal front: %d\n", f_dist.get());
+    misc.print("looking for goal at front: %d", f_dist.get());
     delay(33);
   }
-  
-  misc.print("Detected %d\n", f_dist.get());
+  misc.print("Detected %d", f_dist.get());
   f_claw(1);
 }
 
@@ -156,7 +155,7 @@ void detect_interference(){
     if(millis()-time > 1500 && fabs(tracking.g_velocity.y) < 2.0){
       drivebase.set_state(1);
       master.print(1,1,"PULLING");
-      misc.print("%d || TUG DETECTED\n",millis());
+      misc.print("TUG DETECTED");
       break;
     }
     else if(millis()-time > 1500 && fabs(tracking.g_velocity.y) > 3.0){
@@ -174,12 +173,12 @@ double Reset_dist::get_dist(){
     if(this->sensor->get() > Reset_dist::thresh){
       count++;
       avg += this->sensor->get();
-      misc.print("%d || Dist in reset %f count %d\n", millis(), (double)this->sensor->get()/25.4, count);
+      misc.print("Dist in reset %f count %d", (double)this->sensor->get()/25.4, count);
     }
     delay(33);
   }
   //find averaeg, convert to inches
-  misc.print("%d || reset %f\n",millis(), (avg/count)/25.4);
+  misc.print("reset %f", (avg/count)/25.4);
   return ((avg/count)/25.4) + this->dist_from_center;
 }
 

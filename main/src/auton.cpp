@@ -5,7 +5,6 @@
 #include "controller.hpp"
 #include "geometry.hpp"
 #include "logging.hpp"
-#include "pros/misc.h"
 #include "util.hpp"
 #include <map>
 
@@ -19,16 +18,18 @@ void skills(){
   f_lift.set_state(f_lift_states::move_to_target,0);
   // move_start(move_types::tank_point, tank_point_params({36.0,11.75,-90.0},false),false); // grabs blue on platform 
 	// b_detect_goal(); 
-  // skills_d.print("FIRST GOAL GOt %d\n", millis() - time);
+  // skills_d.print("FIRST GOAL GOt %d", millis() - time);
 	// move_stop(); 
   // drivebase.move(0.0,0.0);
   move_start(move_types::tank_arc, tank_arc_params({tracking.x_coord, tracking.y_coord},{26.0, 41.0, 50.0}, 127.0,127.0,false));
 
-  move_start(move_types::tank_point, tank_point_params({35.0,41.0,90.0}));
+  // move_start(move_types::tank_point, tank_point_params({35.0,41.0,90.0}));
   // move_start(move_types::tank_point, tank_point_params({80.0,45.0,90.0}));
   // move_start(move_types::turn_angle, turn_angle_params(-70.0));
   // b_lift.set_state(b_lift_states::move_to_target,b_lift_hitch_pos);
   // move_start(move_types::tank_point, tank_point_params({120.0,36.0,-70.0}));
+  move_start(move_types::tank_point, tank_point_params({120.0,36.0,90.0}));
+
 
 }
 
@@ -118,10 +119,10 @@ void load_auton(){
 
   ifstream file;
   Data::log_t.data_update();
-  printf("\n\nLoading Autons:\n");
+  printf2(term_colours::BLUE, -1, "\n\nLoading Autons:");
   file.open(auton_file_name, fstream::in);
   while(file >> target >> task){
-    printf2("%s: %s", target, task);
+    printf2(term_colours::BLUE, -1, "%s: %s", target, task);
     selected_positions.push_back(target);
   }
   newline();
@@ -132,9 +133,9 @@ void load_auton(){
 void save_auton(){
   ofstream file;
   Data::log_t.data_update();
-  printf("\n\nSaving Autons:\n");
+  printf2("\n\nSaving Autons:");
   file.open(auton_file_name, fstream::out | fstream::trunc);
-  for(std::vector<std::string>::iterator it = selected_positions.begin(); it != selected_positions.end(); it++){
+  for(std::vector<std::string>::const_iterator it = selected_positions.begin(); it != selected_positions.end(); it++){
     file << *it << std::endl;
     file << std::get<std::string>(targets[*it]) << std::endl;
     printf2("%s: %s", *it, std::get<std::string>(targets[*it]));
@@ -197,14 +198,14 @@ bool select_auton_task(std::string target){
 
 void select_auton(){
   bool all_selected = false;
-  std::map<std::string, std::pair<Point, std::string>>::iterator selection = targets.find("Right");
+  std::map<std::string, std::pair<Point, std::string>>::const_iterator selection = targets.find("Right");
   selected_positions.clear();
 
   wait_until(all_selected){
     master.clear();
     master.print(0, 0, selection->first);
 
-    std::map<std::string, std::pair<Point, std::string>>::iterator og = selection;
+    const std::map<std::string, std::pair<Point, std::string>>::const_iterator og = selection;
 
     switch(master.wait_for_press({DIGITAL_X, DIGITAL_A, DIGITAL_RIGHT, DIGITAL_LEFT})){//see how to use ok_button
       case DIGITAL_X:
