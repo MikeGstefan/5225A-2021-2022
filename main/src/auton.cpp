@@ -89,10 +89,8 @@ void rush_tall(){
 
 void rush_low(){
   Task([](){
-    f_lift.reset();
-    b_lift.reset();
-    f_lift.move_absolute(10);
-    b_lift.move_absolute(10);
+    f_lift.set_state(f_lift_states::move_to_target, 0);
+    b_lift.set_state(b_lift_states::move_to_target, 0);
   });
   
 	move_start(move_types::tank_point, tank_point_params({34.5, 72.0, 45.0}, false, 80.0, 1.0, true, 9.0, 130.0), false);// drive throught neut goal
@@ -102,28 +100,28 @@ void rush_low(){
 }
 
 //name, target, common point, task at target, angle to go to target
+//current is still necessary to look for collisions
 std::vector<std::string> selected_positions;
-std::map<std::string, std::tuple<Point, Point, std::string, double>> targets = {
-  {"Right", {{110.0, 14.0}, {110.0, 16.0}, "None", 0.0}},
-  {"Left", {{30.0, 12.0}, {36.0, 24.0}, "None", 0.0}},
-  {"Tall", {{73.0, 71.0}, {72.0, 60.0}, "Front", -30.0}},
-  {"High", {{107.0, 71.0}, {107.0, 60.0}, "Front", 0.0}},
-  {"Low", {{34.5, 72.0}, {36.0, 60.0}, "Front", 45.0}},
-  {"AWP", {{130.0, 36.0}, {125.0, 30.0}, "Back", -90.0}},
-  {"Ramp", {{128.0, 36.0}, {30.0, 30.0}, "Back", -90.0}},
-};
+std::map<std::string, std::pair<Point, std::string>> targets = {
+  {"Right", {{110.0, 14.0}, "None"}},
+  {"Left", {{30.0, 12.0}, "None"}},
+  {"Tall", {{73.0, 71.0}, "Front"}},
+  {"High", {{107.0, 71.0}, "Front"}},
+  {"Low", {{34.5, 72.0}, "Front"}},
+  {"AWP", {{130.0, 36.0}, "Back"}},
+  {"Ramp", {{128.0, 36.0}, "Back"}},
+}; //see if we ever get a hitch
 
 void load_auton(){
   std::string target, task;
-  double angle;
   selected_positions.clear();
 
   ifstream file;
   Data::log_t.data_update();
   printf("\n\nLoading Autons:\n");
   file.open(auton_file_name, fstream::in);
-  while(file >> target >> task >> angle){
-    printf2("%s: %s at %.1f", target, task, angle);
+  while(file >> target >> task){
+    printf2("%s: %s", target, task);
     selected_positions.push_back(target);
   }
   newline();
@@ -139,19 +137,13 @@ void save_auton(){
   for(std::vector<std::string>::iterator it = selected_positions.begin(); it != selected_positions.end(); it++){
     file << *it << std::endl;
     file << std::get<std::string>(targets[*it]) << std::endl;
-    file << std::get<double>(targets[*it]) << std::endl;
-    printf2("%s: %s at %.1f", *it, std::get<std::string>(targets[*it]), std::get<double>(targets[*it]));
+    printf2("%s: %s", *it, std::get<std::string>(targets[*it]));
   }
   newline();
   file.close();
   Data::log_t.done_update();
   master.clear();
   master.print(0, 0, "Saved Autons");
-}
-
-void run_auton_task(std::string task){
-  if(task == "Front") f_detect_goal();
-  if(task == "Back") b_detect_goal();
 }
 
 bool run_defined_auton(std::string start, std::string target){
@@ -169,7 +161,6 @@ bool run_defined_auton(std::string start, std::string target){
 
 bool select_auton_task(std::string target){
   std::string choice = std::get<std::string>(targets[target]);
-  double angle = std::get<double>(targets[target]);
   bool selected = false;
 
   wait_until(selected){
@@ -179,12 +170,6 @@ bool select_auton_task(std::string target){
     switch(master.wait_for_press({DIGITAL_A, DIGITAL_RIGHT, DIGITAL_LEFT, DIGITAL_B})){ //see how to use ok_button
       case DIGITAL_B: return false; break;
       case DIGITAL_A:
-        if(choice == "Back" || "Front"){
-          master.print(2, 0, "%.1f", angle);
-          //angle selection
-          master.wait_for_press(DIGITAL_A);
-        }
-
         selected = true;
         break;
 
@@ -206,21 +191,20 @@ bool select_auton_task(std::string target){
 
   selected_positions.push_back(target);
   std::get<std::string>(targets[target]) = choice;
-  std::get<double>(targets[target]) = angle;
 
   return true;
 }
 
 void select_auton(){
   bool all_selected = false;
-  std::map<std::string, std::tuple<Point, Point, std::string, double>>::iterator selection = targets.find("Right");
+  std::map<std::string, std::pair<Point, std::string>>::iterator selection = targets.find("Right");
   selected_positions.clear();
 
   wait_until(all_selected){
     master.clear();
     master.print(0, 0, selection->first);
 
-    std::map<std::string, std::tuple<Point, Point, std::string, double>>::iterator og = selection;
+    std::map<std::string, std::pair<Point, std::string>>::iterator og = selection;
 
     switch(master.wait_for_press({DIGITAL_X, DIGITAL_A, DIGITAL_RIGHT, DIGITAL_LEFT})){//see how to use ok_button
       case DIGITAL_X:
@@ -256,24 +240,21 @@ void select_auton(){
 }
 
 void run_auton(){
-  std::tuple<Point, Point, std::string, double> current, target;
-  double angle;
+  std::pair<Point, std::string> current, target;
   for(int i = 0; i+1 < selected_positions.size(); i++){
-    current = targets[selected_positions[i]];
     target = targets[selected_positions[i+1]];
-    angle = std::get<double>(target);
 
-    printf2("\nStarting move to %s\n", std::get<std::string>(target));
+    screen_flash::start(term_colours::BLUE, "Starting move to %s", std::get<std::string>(target));
 
     if(!run_defined_auton(selected_positions[i], selected_positions[i+1])){
-      move_start(move_types::tank_rush, tank_rush_params({std::get<0>(target), angle}, false));
+      move_start(move_types::tank_rush, tank_rush_params({target.first, /*figure out angle based on front/back*/}, false));
       printf2("\n\n\nMovement Over\n\n");
 
-      // run_auton_task(std::get<std::string>(target));
+      if(target.second == "Front") f_detect_goal();
+      else if(target.second == "Back") b_detect_goal();
     }
 
     master.wait_for_press(DIGITAL_R1); //Just to wait between routes to see
-
   }
   printf2("Done Autons");
 }
