@@ -652,12 +652,11 @@ namespace screen_flash{
 
   void Slider::draw() const{
     if (!(active && (page == GUI::current_page || page == &perm))) return;
-    if(!in_range(val, min, max)) std::clamp(val, min, max);
     screen::set_pen(b_col);
     screen::fill_rect(x1, y1, x2, y2);
     screen::set_pen(l_col);
-    if(dir == HORIZONTAL) screen::fill_rect(x1+1, y1+1, map(val, min, max, x1, x2), y2-1);
-    else screen::fill_rect(x1+1, map(val, min, max, y2, y1), x2-1, y2-1);
+    if(dir == HORIZONTAL) screen::fill_rect(x1+1, y1+1, map(std::clamp(val, min, max), min, max, x1, x2), y2-1);
+    else screen::fill_rect(x1+1, map(std::clamp(val, min, max), min, max, y2, y1), x2-1, y2-1);
   }
 
   void Text_::draw(){
