@@ -20,10 +20,21 @@ F_Lift::F_Lift(Motorized_subsystem<f_lift_states, NUM_OF_F_LIFT_STATES, F_LIFT_M
   index = 0;
 }
 
+void F_Lift::move_absolute(double position, double velocity, bool wait_for_comp, double end_error){ //blocking
+  if (end_error == 0.0) end_error = this->end_error;
+  int output;
+  pid.compute(f_lift_pot.get_value(), position);
+  wait_until(fabs(pid.get_error()) < end_error){
+    output = pid.compute(f_lift_pot.get_value(), position);
+    if (abs(output) > speed) output = speed * sgn(output); // cap the output at speed  
+    motor.move(output);
+  }
+  motor.move(0);
+}
 
 void F_Lift::handle(bool driver_array){
   // decides which position vector to use
-  std::vector<int>& positions = driver_array? driver_positions: prog_positions;
+  std::vector<int>& positions = driver_array ? driver_positions : prog_positions;
 
   switch(get_state()){
     case f_lift_states::managed:  // being controlled externally
@@ -34,7 +45,7 @@ void F_Lift::handle(bool driver_array){
       break;
 
     case f_lift_states::move_to_target: // moving to target
-      // printf("target: %d, pos:%d \n", positions[index], f_lift_pot.get_value());
+      // printf2("target: %d, pos:%d ", positions[index], f_lift_pot.get_value());
 
       // move slowly if going down to the bottom with a goal
       // if(index == 0 && f_lift_pot.get_value() < 1500 && f_claw_obj.get_state() == f_claw_states::grabbed)  motor.move(-70);
@@ -68,7 +79,7 @@ void F_Lift::handle(bool driver_array){
         motor.move(0);
         master.rumble("---");
         master.print(F_LIFT_STATE_LINE, 0, "F_Lift: Manual      ");
-        printf("LIFT SAFETY TRIGGERED %lf, %lf\n", target, f_lift_pot.get_value());
+        printf2("LIFT SAFETY TRIGGERED %lf, %lf", target, f_lift_pot.get_value());
 
         set_state(f_lift_states::manual);
       }
@@ -140,19 +151,24 @@ void F_Lift::set_state(const f_lift_states next_state, const uint8_t index, cons
     state_log.print("%s | State change requested index is: %d \t", name, index);
     Subsystem::set_state(next_state);
   }
-  else state_log.print("%s | INVALID move to target State change requested from %s to %s, index is: %d\n", name, state_names[static_cast<int>(get_state())], state_names[static_cast<int>(next_state)], index);
+  else state_log.print("%s | INVALID move to target State change requested from %s to %s, index is: %d", name, state_names[static_cast<int>(get_state())], state_names[static_cast<int>(next_state)], index);
 }
 
-int elastic_f_up_time, elastic_f_down_time; //from gui_construction.cpp
+int elastic_f_up_time, elastic_f_down_time; //for gui_construction.cpp
 
 void F_Lift::elastic_util(int high){ //935 as of April 10th
-  master.get_digital_new_press(DIGITAL_A);
+  GUI::prompt("Press to start front elastic test", "", 500);
   Timer move_timer{"move"};
   while(abs(f_lift_m.get_position() - high) > 15) f_lift_m.move(127);
   move_timer.print();
+  elastic_f_up_time = move_timer.get_time();
+  master.print(1, 0, "Up Time: %d", elastic_f_up_time);
+
   move_timer.reset();
   while(abs(f_lift_m.get_position() - 0) > 15) f_lift_m.move(-127);
   move_timer.print();
+  elastic_f_down_time = move_timer.get_time();
+  master.print(2, 0, "Down Time: %d", elastic_f_up_time);
   f_lift_m.move(0);
 }
 
