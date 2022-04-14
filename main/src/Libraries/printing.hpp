@@ -243,12 +243,12 @@ int printf2(term_colours colour, int time_type, std::string fmt, Params... args)
   std::string whitespace = std::string(str.begin(), str.begin()+white_count);
   str.erase(str.begin(), str.begin()+white_count);
 
-  if(time_type == 2) snprintf(timestamp, 20, "%-13s|", Timer::to_string(millis(), timing_units::millis, 0, 1).c_str());
-  else if(time_type == 1) snprintf(timestamp, 20, "%-7s|", Timer::to_string(millis(), timing_units::millis, -1, 1).c_str());
-  else if(time_type == 0) snprintf(timestamp, 20, "%-4s|", Timer::to_string(millis(), timing_units::millis, -1, 0).c_str());
+  if(time_type == 2) snprintf(timestamp, 20, "%-13s| ", Timer::to_string(millis(), timing_units::millis, 0, 1).c_str());
+  else if(time_type == 1) snprintf(timestamp, 20, "%-6s| ", Timer::to_string(millis(), timing_units::millis, -1, 1).c_str());
+  else if(time_type == 0) snprintf(timestamp, 20, "%-3s| ", Timer::to_string(millis(), timing_units::millis, -1, 0).c_str());
   else snprintf(timestamp, 3, "");
 
-  return printf("%s%s %s%s\033[0m\n", whitespace.c_str(), timestamp, get_term_colour(colour), str.c_str());
+  return printf("%s%s%s%s\033[0m\n", whitespace.c_str(), timestamp, get_term_colour(colour), str.c_str());
 }
 
 // /**

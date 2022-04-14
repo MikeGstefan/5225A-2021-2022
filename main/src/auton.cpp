@@ -1,5 +1,6 @@
 #include "auton.hpp"
 #include "Libraries/printing.hpp"
+#include "Subsystems/f_lift.hpp"
 #include "Tracking.hpp"
 #include "config.hpp"
 #include "controller.hpp"
@@ -245,17 +246,25 @@ void run_auton(){
   for(int i = 0; i+1 < selected_positions.size(); i++){
     target = targets[selected_positions[i+1]];
 
-    screen_flash::start(term_colours::BLUE, "Starting move to %s", std::get<std::string>(target));
+    screen_flash::start(term_colours::BLUE, "Starting move to %s goal", selected_positions[i+1]);
 
     if(!run_defined_auton(selected_positions[i], selected_positions[i+1])){
-      move_start(move_types::tank_rush, tank_rush_params({target.first, /*figure out angle based on front/back*/}, false));
-      printf2("\n\n\nMovement Over\n\n");
+      if(target.second == "None"){
+        // move_start(move_types::tank_rush, tank_rush_params({target.first, /*figure out angle based on front/back*/}, false));
+      }
+      else if(target.second == "Front"){
+        f_lift.set_state(f_lift_states::move_to_target, 0);
+        // move_start(move_types::tank_rush, tank_rush_params({target.first, /*figure out angle based on front/back*/}, false));
+        // f_detect_goal();
+        f_lift.set_state(f_lift_states::move_to_target, 1);
+      }
+      else if(target.second == "Back"){
+        b_lift.set_state(b_lift_states::move_to_target, 0);
+        // move_start(move_types::tank_rush, tank_rush_params({target.first, /*figure out angle based on front/back*/}, true));
+        // b_detect_goal();
+        b_lift.set_state(b_lift_states::move_to_target, 1);
+      }
 
-      if(target.second == "Front") f_detect_goal();
-      else if(target.second == "Back") b_detect_goal();
     }
-
-    master.wait_for_press(DIGITAL_R1); //Just to wait between routes to see
   }
-  printf2("Done Autons");
 }
