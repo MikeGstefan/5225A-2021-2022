@@ -7,6 +7,7 @@
 // lift buttons
 extern controller_digital_e_t lift_up_button;
 extern controller_digital_e_t lift_down_button;
+extern controller_digital_e_t both_lifts_down_button;
 
 extern controller_digital_e_t reverse_drive_button;
 extern controller_digital_e_t claw_toggle_button;
@@ -17,9 +18,32 @@ extern controller_digital_e_t intake_reverse_button;
 
 // misc buttons
 extern controller_digital_e_t ok_button;
-extern controller_digital_e_t both_lifts_down_button;
 extern controller_digital_e_t joy_mode_switch_button;
 extern controller_digital_e_t shift_button;
+
+// partner buttons
+
+// lift buttons
+
+extern controller_digital_e_t partner_back_lift_up_button;
+extern controller_digital_e_t partner_back_lift_down_button;
+
+extern controller_digital_e_t partner_front_lift_up_button;
+extern controller_digital_e_t partner_front_lift_down_button;
+
+extern controller_digital_e_t partner_both_lifts_down_button;
+
+// intake buttons
+extern controller_digital_e_t partner_intake_button;
+extern controller_digital_e_t partner_intake_reverse_button;
+
+// claw buttons
+extern controller_digital_e_t partner_back_claw_toggle_button;
+extern controller_digital_e_t partner_front_claw_toggle_button;
+extern controller_digital_e_t partner_claw_tilt_button;
+
+extern controller_digital_e_t partner_joy_mode_switch_button;
+
 
 #define num_controller 2
 

@@ -3,13 +3,20 @@
 #include "tracking.hpp"
 #include "Subsystems/b_lift.hpp"
 #include "Subsystems/f_lift.hpp"
+#include "Subsystems/intake.hpp"
 #include "task.hpp"
 
+// NOTE: all timers start as paused
 // for lifts
-Timer up_press{"up_press"};
-Timer down_press{"down_press"};
+Timer up_press{"up_press", nullptr, false};
+Timer down_press{"down_press", nullptr, false};
 
-Timer toggle_press_timer{"toggle_press_timer"}; // for back claw
+Timer f_lift_up_press{"f_lift_up_press", nullptr, false};
+Timer b_lift_up_press{"b_lift_up_press", nullptr, false};
+Timer f_lift_down_press{"f_lift_down_press", nullptr, false};
+Timer b_lift_down_press{"b_lift_down_press", nullptr, false};
+
+Timer toggle_press_timer{"toggle_press_timer", nullptr, false}; // for back claw
 
 joy_modes joy_mode = joy_modes::lift_select;
 
@@ -71,7 +78,7 @@ void custom_drive::fill_lookup_table(){
   for (short x = -127; x < 128; x++){ // fills lookup table with values from appropriate function
     lookup_table[(unsigned char)x] = exponential(x);
     // UNCOMMENT THESE FOR DEBUGGING, comment for performance
-    // printf("%d, %d\n", x, lookup_table[(unsigned char)x]);
+    // printf2("%d, %d", x, lookup_table[(unsigned char)x]);
     // delay(1);
   }
 }
@@ -148,15 +155,15 @@ void Drivebase::download_curve_data(){
   curve_file = fopen("/usd/curve_file.txt", "r");
   curve_file_exists = curve_file != NULL;
   if(!curve_file_exists){
-    drivers_data.print("WARNING: curve_file not found, using default data\n");
+    drivers_data.print("WARNING: curve_file not found, using default data");
   }
   // reads data for each driver from file
   for (short driver = 0; driver < num_of_drivers; driver++){  // reads curve curvature from curve file
-    drivers_data.print("num of drivers: %d\n", num_of_drivers);
-    drivers_data.print("\nDRIVER: %s\n", drivers[driver].name);
+    drivers_data.print("num of drivers: %d", num_of_drivers);
+    drivers_data.print("\nDRIVER: %s", drivers[driver].name);
     for (short curvature = 0; curvature < 3; curvature++){  // reads data for each axis of motion
       if (curve_file_exists)  fscanf(curve_file, "curvature:%lf\n", &drivers[driver].custom_drives[curvature].curvature);
-      drivers_data.print("curvature: %lf\n", drivers[driver].custom_drives[curvature].curvature);
+      drivers_data.print("curvature: %lf", drivers[driver].custom_drives[curvature].curvature);
       drivers[driver].custom_drives[curvature].fill_lookup_table();
       delay(1);
     }
@@ -200,7 +207,7 @@ void Drivebase::update_lookup_table_util(){
       master.print(2, 0, "Curvature: %lf", drivers[cur_driver].custom_drives[cur_screen].curvature);  // updates curvature
     }
     else if(master.is_rising(E_CONTROLLER_DIGITAL_DOWN)){  // decrease curvature
-      printf("pressed down\n");
+      printf2("pressed down");
       if (drivers[cur_driver].custom_drives[cur_screen].curvature > 0.1)  drivers[cur_driver].custom_drives[cur_screen].curvature -= 0.1;
       master.print(2, 0, "Curvature: %lf", drivers[cur_driver].custom_drives[cur_screen].curvature);  // updates curvature
     }
@@ -209,7 +216,7 @@ void Drivebase::update_lookup_table_util(){
   }
   master.clear();
   if(!curve_file_exists){
-    drivers_data.print("WARNING: curve_file not found, not writing to SD card\n");
+    drivers_data.print("WARNING: curve_file not found, not writing to SD card");
   }
   else {
     Data::log_t.data_update();
@@ -218,7 +225,7 @@ void Drivebase::update_lookup_table_util(){
     for (short driver = 0; driver < num_of_drivers; driver++){  // uploads curve data to curve file
       for (short curvature = 0; curvature < 3; curvature++){
         fprintf(curve_file, "curvature:%lf\n", drivers[driver].custom_drives[curvature].curvature);
-        drivers_data.print("curvature:%lf\n", drivers[driver].custom_drives[curvature].curvature);
+        drivers_data.print("curvature:%lf", drivers[driver].custom_drives[curvature].curvature);
       }
     }
     fclose(curve_file);
@@ -231,8 +238,10 @@ void Drivebase::update_lookup_table_util(){
 void Drivebase::handle_input(){
   // tracking.power_x = drivers[cur_driver].custom_drives[0].lookup(master.get_analog(drivers[cur_driver].joy_sticks[0]));
   tracking.power_y = drivers[cur_driver].custom_drives[1].lookup(master.get_analog(ANALOG_LEFT_Y));
+  // caps drive speed at 80 if intake is on
+  if(intake.get_state() == intake_states::on && fabs(tracking.power_y) > MAX_DRIVE_SPEED) tracking.power_y = sgn(tracking.power_y) * MAX_DRIVE_SPEED;
   tracking.power_a = 0.7 * drivers[cur_driver].custom_drives[2].lookup(master.get_analog(ANALOG_LEFT_X));
-  // printf("%d, %f, %f\n", master.get_analog(ANALOG_LEFT_Y), tracking.power_y, tracking.power_a );
+  // printf2("%d, %f, %f", master.get_analog(ANALOG_LEFT_Y), tracking.power_y, tracking.power_a );
   if(fabs(tracking.power_x) < deadzone) tracking.power_x = 0.0;
   if(fabs(tracking.power_y) < deadzone) tracking.power_y = 0.0;
   if(fabs(tracking.power_a) < deadzone) tracking.power_a = 0.0;
@@ -307,7 +316,7 @@ void Drivebase::driver_practice(){
 
       // prints motor temps every second
       if(screen_timer.get_time() > 1000){
-        drivers_data.print("fl%.0f r%.0f bl%.0f r%.0f\n", front_l.get_temperature(), front_r.get_temperature(), back_l.get_temperature(), back_r.get_temperature());
+        drivers_data.print("fl%.0f r%.0f bl%.0f r%.0f", front_l.get_temperature(), front_r.get_temperature(), back_l.get_temperature(), back_r.get_temperature());
         // master.print(0, 0, "fl%.0f r%.0f bl%.0f r%.0f\n", front_l.get_temperature(), front_r.get_temperature(), back_l.get_temperature(), back_r.get_temperature());
         screen_timer.reset();
       }
@@ -381,6 +390,16 @@ int Drivebase::get_deadzone(){
   return this->deadzone;
 }
 
+void Drivebase::reset(){
+  RightEncoder.reset();
+  LeftEncoder.reset();
+  BackEncoder.reset();
+  tracking.reset();
+
+  drivebase.move(0.0, 0.0);
+  drivebase.set_state(HIGH);
+}
+
 
 // bool Drivebase::get_lift_button(int side){
 //   // bool front
@@ -390,7 +409,7 @@ int Drivebase::get_deadzone(){
 //   master.print(1,3,"%d",side);
 //   master.print(1,1,"%d",(!this->reversed &&  master.get_analog(ANALOG_RIGHT_Y) > deadzone)&& side);
 //   misc.print(" side :: %d",side);
-//   misc.print(" output :: %d\n",(!this->reversed &&  master.get_analog(ANALOG_RIGHT_Y) > deadzone)&& side);
+//   misc.print(" output :: %d",(!this->reversed &&  master.get_analog(ANALOG_RIGHT_Y) > deadzone)&& side);
 //   return (!this->reversed ==  master.get_analog(ANALOG_RIGHT_Y) > -1*deadzone);
 // }
 
@@ -402,108 +421,126 @@ bool get_lift(){
 }
 
 void handle_lift_buttons(){
-  if(master.is_rising(joy_mode_switch_button)){
+  if(master.is_rising(joy_mode_switch_button) || partner.is_rising(partner_joy_mode_switch_button)){
     // toggles joy_mode
     if(joy_mode == joy_modes::lift_select)  joy_mode = joy_modes::manual;
     else joy_mode = joy_modes::lift_select;
 
     if(joy_mode == joy_modes::lift_select){
+      master.print(0,0, "auto   ");
+      partner.print(0,0, "auto   ");
       b_lift.Subsystem::set_state(b_lift_states::between_positions);
       f_lift.Subsystem::set_state(f_lift_states::between_positions);
     }
     else{
+      master.print(0,0, "manual   ");
+      partner.print(0,0, "manual   ");
       b_lift.Subsystem::set_state(b_lift_states::manual);
       f_lift.Subsystem::set_state(f_lift_states::manual); 
     }
   }
 
 
-  // index incrementing and decrementing
-  if(master.is_rising(lift_up_button) && joy_mode != joy_modes::manual){
-    up_press.reset();
-    if(get_lift()){
-      // if()
-      // if state is between_positions, go to the closest position that's higher than the current position
-      if(f_lift.get_state() == f_lift_states::between_positions){
-        for (size_t i = 0; i < f_lift.driver_positions.size(); i++){
-          if(f_lift.driver_positions[i] > f_lift_pot.get_value()){
-            f_lift.set_state(f_lift_states::move_to_target, i);
-            break;
-          }
-        }
-      }
-      // otherwise just go to the next highest position, but doesn't increment index if it's out of bounds
-      else if(f_lift.get_index() < f_lift.driver_positions.size() - 1)  f_lift.set_state(f_lift_states::move_to_target, f_lift.get_index() + 1);
+  // front lift increment index
+  if(joy_mode != joy_modes::manual){
+    if(master.is_rising(lift_up_button) && get_lift()){
+      up_press.reset();
+      f_lift_increment_index();
     }
-    else{
-      // if state is between_positions, go to the closest position that's higher than the current position
-      if(b_lift.get_state() == b_lift_states::between_positions){
-        for (size_t i = 0; i < b_lift.driver_positions.size(); i++){
-          if(b_lift.driver_positions[i] > b_lift_pot.get_value()){
-            b_lift.set_state(b_lift_states::move_to_target, i);
-            break;
-          }
-        }
-      }
-      // otherwise just go to the next highest position, but doesn't increment index if it's out of bounds
-      else if(b_lift.get_index() < b_lift.driver_positions.size() - 1)  b_lift.set_state(b_lift_states::move_to_target, b_lift.get_index() + 1);
+    if(partner.is_rising(partner_front_lift_up_button)){
+      f_lift_up_press.reset();
+      f_lift_increment_index();
     }
   }
-  if(master.is_rising(lift_down_button) && joy_mode != joy_modes::manual){
-    down_press.reset();
-    if(get_lift()){
-      // if state is between_positions, go to the closest position that's lower than the current position
-      if(f_lift.get_state() == f_lift_states::between_positions){
-        for (size_t i = f_lift.driver_positions.size() - 1; i >= 0; i--){
-          if(f_lift.driver_positions[i] < f_lift_pot.get_value()){
-            f_lift.set_state(f_lift_states::move_to_target, i);
-            break;
-          }
-        }
-      }
-      // otherwise just go to the next lowest position, but doesn't decrement index if it's out of bounds
-      else if(f_lift.get_index() > 0)  f_lift.set_state(f_lift_states::move_to_target, f_lift.get_index() - 1);
+
+  // back lift increment index
+  if(joy_mode != joy_modes::manual){
+    if(master.is_rising(lift_up_button) && !get_lift()){
+      up_press.reset();
+      b_lift_increment_index();
     }
-    else{
-      // if state is manual, go to the closest position that's lower than the current position
-      if(b_lift.get_state() == b_lift_states::between_positions){
-        for (size_t i = b_lift.driver_positions.size() - 1; i >= 0; i--){
-          if(b_lift.driver_positions[i] < b_lift_pot.get_value()){
-            b_lift.set_state(b_lift_states::move_to_target, i);
-            break;
-          }
-        }
-      }
-      // otherwise just go to the next lowest position, but doesn't decrement index if it's out of bounds
-      else if(b_lift.get_index() > 0)  b_lift.set_state(b_lift_states::move_to_target, b_lift.get_index() - 1);
+    if(partner.is_rising(partner_back_lift_up_button)){
+      b_lift_up_press.reset();
+      b_lift_increment_index();
     }
   }
+
+  // front lift decrement index
+  if(joy_mode != joy_modes::manual){
+    if(master.is_rising(lift_down_button) && get_lift()){
+      down_press.reset();
+      f_lift_decrement_index();
+    }
+    if(partner.is_rising(partner_front_lift_down_button)){
+      f_lift_down_press.reset();
+      f_lift_decrement_index();
+    }
+  }
+
+  // back lift decrement index
+  if(joy_mode != joy_modes::manual){
+    if(master.is_rising(lift_down_button) && !get_lift()){
+      down_press.reset();
+      b_lift_decrement_index();
+    }
+    if(partner.is_rising(partner_back_lift_down_button)){
+      b_lift_down_press.reset();
+      b_lift_decrement_index();
+    }
+  }
+  // PARTNER STUFF
+
+
   // resets and pauses the timers if driver releases button
-  if(!master.get_digital(lift_up_button)) up_press.reset(false);
-  if(!master.get_digital(lift_down_button)) down_press.reset(false);
+  // for master
+  if(!master.get_digital(lift_up_button) && up_press.playing()) up_press.reset(false);
+  if(!master.get_digital(lift_down_button) && down_press.playing()) down_press.reset(false);
+  // for partner
+  if(!partner.get_digital(partner_front_lift_up_button) && f_lift_up_press.playing()) f_lift_up_press.reset(false);
+  if(!partner.get_digital(partner_back_lift_up_button) && b_lift_up_press.playing()) b_lift_up_press.reset(false);
+  if(!partner.get_digital(partner_front_lift_down_button) && f_lift_down_press.playing()) f_lift_down_press.reset(false);
+  if(!partner.get_digital(partner_back_lift_down_button) && b_lift_down_press.playing()) b_lift_down_press.reset(false);
 
   // goes to top position if up button is held
-  if(up_press.get_time() > 300){
+  // for master
+  if(up_press.get_time() > MASTER_HOLD_TIME){
     if(get_lift())  f_lift.set_state(f_lift_states::move_to_target, f_lift.driver_positions.size() - 1);
     else  b_lift.set_state(b_lift_states::move_to_target, b_lift.driver_positions.size() - 1);
   }
   // goes to bottom position if down button is held
-  if(down_press.get_time() > 300){
+  if(down_press.get_time() > MASTER_HOLD_TIME){
     if(get_lift())  f_lift.set_state(f_lift_states::move_to_target, 0);
     else  b_lift.set_state(b_lift_states::move_to_target, 0);
+  }
+  // for partner (if lift buttons are held go all the way up/down)
+  if(f_lift_up_press.get_time() > PARTNER_HOLD_TIME){
+    f_lift.set_state(f_lift_states::move_to_target, f_lift.driver_positions.size() - 1);
+  }
+  if(b_lift_up_press.get_time() > PARTNER_HOLD_TIME){
+    b_lift.set_state(b_lift_states::move_to_target, b_lift.driver_positions.size() - 1);
+  }
+  if(f_lift_down_press.get_time() > PARTNER_HOLD_TIME){
+    f_lift.set_state(f_lift_states::move_to_target, 0);
+  }
+  if(b_lift_down_press.get_time() > PARTNER_HOLD_TIME){
+    b_lift.set_state(b_lift_states::move_to_target, 0);
+  }
+
+
+  if(master.is_rising(both_lifts_down_button) || partner.is_rising(partner_both_lifts_down_button)){
+    f_lift.set_state(f_lift_states::move_to_target, 0);
+    b_lift.set_state(b_lift_states::move_to_target, 0);
   }
 }
 
 void handle_claw_buttons(){
   if(master.is_rising(claw_toggle_button)){
     if(get_lift()){ // if front claw
+      // toggles f_claw open/closed when claw toggle button is pressed
       switch(f_claw_obj.get_state()){
-        case f_claw_states::idle:
-          f_claw_obj.set_state(f_claw_states::grabbed);
-          break;
-
         case f_claw_states::grabbed:
-          f_claw_obj.set_state(f_claw_states::about_to_search); // will resume search in 2 seconds
+          if(f_lift.get_state() == f_lift_states::bottom) f_claw_obj.set_state(f_claw_states::about_to_search);
+          else f_claw_obj.set_state(f_claw_states::idle);
           break;
 
         default:
@@ -513,6 +550,11 @@ void handle_claw_buttons(){
     }
     else{ // if back claw
       toggle_press_timer.reset();
+      b_claw_obj.state_at_toggle_press = b_claw_obj.get_state(); // used for tilt/flat toggle code
+      // logs state_at_toggle_press for debugging
+      state_log.print("state_at_toggle_press: %s\n", b_claw_obj.state_names[static_cast<int>(b_claw_obj.state_at_toggle_press)]);
+
+      // if back claw is in an open state, close it, otherwise, don't do anything
       switch(b_claw_obj.get_state()){
         case b_claw_states::idle:
           b_claw_obj.set_state(b_claw_states::tilted);
@@ -531,23 +573,139 @@ void handle_claw_buttons(){
       }
     }
   }
-  if(master.is_falling(claw_toggle_button) && !get_lift()){
-    if(toggle_press_timer.get_time() < 300){  // toggles tilt state if claw button was held
-      if(b_claw_obj.get_state() == b_claw_states::tilted || b_claw_obj.get_state() == b_claw_states::flat){
-        if(b_lift.get_state() == b_lift_states::bottom) b_claw_obj.set_state(b_claw_states::about_to_search);
-        else b_claw_obj.set_state(b_claw_states::idle);
-      }
+  // toggles f_claw open/closed when claw toggle button is pressed
+  if(partner.is_rising(partner_front_claw_toggle_button)){
+    switch(f_claw_obj.get_state()){
+      case f_claw_states::grabbed:
+        if(f_lift.get_state() == f_lift_states::bottom) f_claw_obj.set_state(f_claw_states::about_to_search);
+        else f_claw_obj.set_state(f_claw_states::idle);
+        break;
+
+      default:
+        f_claw_obj.set_state(f_claw_states::grabbed);
+        break;
     }
   }
-  
-  // b claw tilting toggle code
-  if(!get_lift() && toggle_press_timer.get_time() > 300 && toggle_press_timer.playing()){  // toggles tilt state if claw button was held
-    if(b_claw_obj.get_state() == b_claw_states::tilted) b_claw_obj.set_state(b_claw_states::flat);
-    else if(b_claw_obj.get_state() == b_claw_states::flat) b_claw_obj.set_state(b_claw_states::tilted);
-    // toggle_press_timer.reset(false); // resets and pauses the timer 
-    toggle_press_timer.pause();
+
+  // toggles b_claw open/closed when claw toggle button is pressed
+  if(partner.is_rising(partner_back_claw_toggle_button)){
+    if(b_claw_obj.get_state() == b_claw_states::tilted || b_claw_obj.get_state() == b_claw_states::flat){
+      if(b_lift.get_state() == b_lift_states::bottom) b_claw_obj.set_state(b_claw_states::about_to_search);
+      else b_claw_obj.set_state(b_claw_states::idle);
+    }
+    else  b_claw_obj.set_state(b_claw_states::tilted);
+  }
+  // tilt code here
+
+  if(toggle_press_timer.get_time() > TILT_HOLD_TIME){ // if toggle button was held, toggle tilted/flat state
+    toggle_press_timer.reset(false);  // resets and pauses the timer
+    // only toggle the tilt state if the state was tilted or flat when the button was pressed
+    if(b_claw_obj.state_at_toggle_press == b_claw_states::tilted || b_claw_obj.state_at_toggle_press == b_claw_states::flat){
+      if(b_claw_obj.get_state() == b_claw_states::tilted) b_claw_obj.set_state(b_claw_states::flat);
+      else if(b_claw_obj.get_state() == b_claw_states::flat)  b_claw_obj.set_state(b_claw_states::tilted);
+    }
+    b_claw_obj.state_at_toggle_press = b_claw_states::idle;  // resets state_at_toggle_press so this if isn't entered again
+    // printf("just_set: %s\n", b_claw_obj.state_names[(int)b_claw_obj.state_at_toggle_press]);
+  }
+  if(master.is_falling(claw_toggle_button)){
+    // if the button WASN'T held and the claw was closed when it was pressed, open the claw
+    if(toggle_press_timer.get_time() < TILT_HOLD_TIME && (b_claw_obj.state_at_toggle_press == b_claw_states::tilted || b_claw_obj.state_at_toggle_press == b_claw_states::flat)){
+      // printf("fail| state_at_toggle_press: %s, timer: %d\n", b_claw_obj.state_names[(int)b_claw_obj.state_at_toggle_press], toggle_press_timer.get_time());
+      if(b_lift.get_state() == b_lift_states::bottom) b_claw_obj.set_state(b_claw_states::about_to_search);
+      else b_claw_obj.set_state(b_claw_states::idle);     
+      b_claw_obj.state_at_toggle_press = b_claw_states::idle;  // resets state_at_toggle_press so this if isn't entered again
+    }
+    toggle_press_timer.reset(false); // resets and pauses timer now that button isn't pressed
   }
 
+  // toggles tilt state if partner_claw_tilt button is pressed
+  if(partner.is_rising(partner_claw_tilt_button)){
+    if(b_claw_obj.get_state() == b_claw_states::tilted) b_claw_obj.set_state(b_claw_states::flat);
+    else if(b_claw_obj.get_state() == b_claw_states::flat) b_claw_obj.set_state(b_claw_states::tilted);
+  }
 
 }
 
+void f_lift_increment_index(){
+  printf2("f_lift_increment");
+  // if state is between_positions, go to the closest position that's higher than the current position
+  if(f_lift.get_state() == f_lift_states::between_positions){
+    // if lift is above topmost position, go to top
+    if(f_lift_pot.get_value() > f_lift.driver_positions[f_lift.driver_positions.size() - 1]){
+      f_lift.set_state(f_lift_states::move_to_target, f_lift.driver_positions.size() - 1);
+    }
+    else{
+      for (size_t i = 0; i < f_lift.driver_positions.size(); i++){
+        if(f_lift.driver_positions[i] > f_lift_pot.get_value()){
+          f_lift.set_state(f_lift_states::move_to_target, i);
+          break;
+        }
+      }
+    }
+  }
+  // otherwise just go to the next highest position, but doesn't increment index if it's out of bounds
+  else if(f_lift.get_index() < f_lift.driver_positions.size() - 1)  f_lift.set_state(f_lift_states::move_to_target, f_lift.get_index() + 1);
+}
+
+void b_lift_increment_index(){
+  printf2("b_lift_increment");
+  // if state is between_positions, go to the closest position that's higher than the current position
+  if(b_lift.get_state() == b_lift_states::between_positions){
+    // if lift is above topmost position, go to top
+    if(b_lift_pot.get_value() > b_lift.driver_positions[b_lift.driver_positions.size() - 1]){
+      b_lift.set_state(b_lift_states::move_to_target, b_lift.driver_positions.size() - 1);
+    }
+    else{
+      for (size_t i = 0; i < b_lift.driver_positions.size(); i++){
+        if(b_lift.driver_positions[i] > b_lift_pot.get_value()){
+          b_lift.set_state(b_lift_states::move_to_target, i);
+          break;
+        }
+      }
+    }
+  }
+  // otherwise just go to the next highest position, but doesn't increment index if it's out of bounds
+  else if(b_lift.get_index() < b_lift.driver_positions.size() - 1)  b_lift.set_state(b_lift_states::move_to_target, b_lift.get_index() + 1);
+}
+
+void f_lift_decrement_index(){
+  printf2("f_lift_decrement");
+  // if state is between_positions, go to the closest position that's lower than the current position
+  if(f_lift.get_state() == f_lift_states::between_positions){
+    // if lift is below bottommost position, go to bottom
+    if(f_lift_pot.get_value() < f_lift.driver_positions[0]){
+      f_lift.set_state(f_lift_states::move_to_target, 0);
+    }
+    else{
+      for (size_t i = f_lift.driver_positions.size() - 1; i >= 0; i--){
+        if(f_lift.driver_positions[i] < f_lift_pot.get_value()){
+          f_lift.set_state(f_lift_states::move_to_target, i);
+          break;
+        }
+      }
+    }
+  }
+  // otherwise just go to the next lowest position, but doesn't decrement index if it's out of bounds
+  else if(f_lift.get_index() > 0)  f_lift.set_state(f_lift_states::move_to_target, f_lift.get_index() - 1);
+}
+
+void b_lift_decrement_index(){
+  printf2("b_lift_decrement");
+  // if state is between_positions, go to the closest position that's lower than the current position
+  if(b_lift.get_state() == b_lift_states::between_positions){
+    // if lift is below bottommost position, go to bottom
+    if(b_lift_pot.get_value() < b_lift.driver_positions[0]){
+      b_lift.set_state(b_lift_states::move_to_target, 0);
+    }
+    else{
+      for (size_t i = b_lift.driver_positions.size() - 1; i >= 0; i--){
+        if(b_lift.driver_positions[i] < b_lift_pot.get_value()){
+          b_lift.set_state(b_lift_states::move_to_target, i);
+          break;
+        }
+      }
+    }
+  }
+  // otherwise just go to the next lowest position, but doesn't decrement index if it's out of bounds
+  else if(b_lift.get_index() > 0)  b_lift.set_state(b_lift_states::move_to_target, b_lift.get_index() - 1);
+}

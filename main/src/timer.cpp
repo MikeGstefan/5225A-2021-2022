@@ -6,7 +6,7 @@ name(name), timing_unit(timing_unit)
 {
   if(data_obj_ptr == nullptr) this->data_obj = &term;
   else this->data_obj = data_obj_ptr;
-  data_obj->print("%s's initialize time is: %lld\n", name, get_time_in_timing_unit());
+  data_obj->print("%s's initialize time is: %lld", name, get_time_in_timing_unit());
   reset(play);
 }
 
@@ -15,7 +15,7 @@ name(name), timing_unit(timing_unit)
 {
   if(data_obj_ptr == nullptr) this->data_obj = &term;
   else this->data_obj = data_obj_ptr;
-  data_obj->print("%s's initialize time is: %lld\n", name, get_time_in_timing_unit());
+  data_obj->print("%s's initialize time is: %lld", name, get_time_in_timing_unit());
   reset(play);
 }
 
@@ -42,7 +42,7 @@ void Timer::play(){
     last_play_time = get_time_in_timing_unit();
     paused = false;
   }
-  else data_obj->print("Timer \"%s\" is already playing.\n", name);
+  else data_obj->print("Timer \"%s\" is already playing.", name);
 }
 
 void Timer::pause(){
@@ -50,15 +50,15 @@ void Timer::pause(){
     time += get_time_in_timing_unit() - last_play_time;
     paused = true;
   }
-  else data_obj->print("Timer \"%s\" is already paused.\n", name);
+  else data_obj->print("Timer \"%s\" is already paused.", name);
 }
 
 void Timer::print(){
-  data_obj->print("%s's current time is: %lld\n", name, get_time());
+  data_obj->print("%s's current time is: %lld", name, get_time());
 }
 
 void Timer::print(const std::string str){
-  data_obj->print("%s's current time is: %lld | %s\n", name, get_time(), str.c_str());
+  data_obj->print("%s's current time is: %lld | %s", name, get_time(), str.c_str());
 }
 
 void Timer::print(const char* fmt, ...){
@@ -67,11 +67,11 @@ void Timer::print(const char* fmt, ...){
   char buffer[100];
   vsnprintf(buffer, 100, fmt, args);
   va_end(args);
-  data_obj->print("%s's current time is: %lld | %s\n", name, get_time(), buffer);
+  data_obj->print("%s's current time is: %lld | %s", name, get_time(), buffer);
 }
 
 void Timer::print_fancy(std::string str, int long_names, bool unit_conversion){
-  data_obj->print("%s's current time is: %s | %s\n", name, to_string(get_time(), timing_unit, long_names, unit_conversion).c_str(), str.c_str());
+  data_obj->print("%s's current time is: %s | %s", name, to_string(get_time(), timing_unit, long_names, unit_conversion).c_str(), str.c_str());
 }
 
 

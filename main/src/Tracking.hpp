@@ -43,8 +43,8 @@ class Tracking{
     Position g_velocity;
     void wait_for_dist(double distance, int timeout = 0);
     double get_angle_in_deg();
-    void reset(double x=0.0, double y=0.0, double a=0.0);
-    void reset(Position position);
+    void reset(double x, double y=0.0, double a=0.0);
+    void reset(Position position = {});
     double get_dist(Position pos1);
     static double get_dist(Position pos1, Position pos2);
 };

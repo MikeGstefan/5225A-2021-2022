@@ -2,8 +2,9 @@
 #include "../Libraries/subsystem.hpp"
 #include "../pid.hpp"
 
+#define NUM_OF_F_LIFT_POSITIONS 5 // for driver array
 
-#define NUM_OF_F_LIFT_STATES 6
+#define NUM_OF_F_LIFT_STATES 7
 #define F_LIFT_MAX_VELOCITY 100
 
 enum class f_lift_states{
@@ -11,6 +12,7 @@ enum class f_lift_states{
   bottom, // at lowest position
   idle,  // not doing anything
   move_to_target,  // moving to target position
+  top, // at highest position
   between_positions,  // not moving, but in between positions in the array
   manual  // controlled by joystick
 };
@@ -18,7 +20,7 @@ enum class f_lift_states{
 class F_Lift: public Motorized_subsystem<f_lift_states, NUM_OF_F_LIFT_STATES, F_LIFT_MAX_VELOCITY> {
     Timer up_press{"Up_press"}, down_press{"Down_press"};
     int search_cycle_check_count = 0, bad_count = 0; // cycle check for safeties
-    PID pid = PID(1.0,0.0,0.0,0.0);
+    PID pid = PID(5.0,0.0,0.0,0.0);
     int lift_power; // for manual control
 
     // height conversion constants
@@ -31,10 +33,9 @@ class F_Lift: public Motorized_subsystem<f_lift_states, NUM_OF_F_LIFT_STATES, F_
     std::atomic<int32_t> speed{127}; // max pwm applied to the lifts during a move to target
 
   public:
-
-    vector<int> driver_positions = {1200, 1500, 2050, 2750};
-    //                            btm   carry plat  clear level top
-    vector<int> prog_positions = {1170, 1350, 1950, 2020, 2300, 2750};
+    // bottom is 1162
+    vector<int> driver_positions = {1200, 1400, 1900, 2170, 2750};
+    vector<int> prog_positions = {1200, 1400, 1900, 2170, 2750};
 
     F_Lift(Motorized_subsystem<f_lift_states, NUM_OF_F_LIFT_STATES, F_LIFT_MAX_VELOCITY> motorized_subsystem);  // constructor
     
@@ -49,10 +50,8 @@ class F_Lift: public Motorized_subsystem<f_lift_states, NUM_OF_F_LIFT_STATES, F_
       return index.load();
     }
     
-    void elastic_util(); // up time should be about 1100mms (ignore this time, it was on the old lift), down time should be slightly slower than that
-
-    //overlad to use pot. always waits for complete. the param does nothing
-    void move_absolute(double position, double velocity = F_LIFT_MAX_VELOCITY, bool wait_for_comp = true, double end_error = 0.0);
+    void elastic_util(int high); // up time should be about 1100mms (ignore this time, it was on the old lift), down time should be slightly slower than that
+    void move_absolute(double position, double velocity = F_LIFT_MAX_VELOCITY, bool wait_for_comp = true, double end_error = 20);
 };
 
 extern F_Lift f_lift;
@@ -70,11 +69,11 @@ enum class f_claw_states{
 };
 
 class F_Claw: public Subsystem<f_claw_states, NUM_OF_F_CLAW_STATES> {
-  Timer search_timer{"Search_timer"};
-public:
-  F_Claw(Subsystem<f_claw_states, NUM_OF_F_CLAW_STATES> subsystem);  // constructor
-  void handle();  // contains state machine code
-  void handle_state_change(); // cleans up and preps the machine to be in the target state
+    Timer search_timer{"Search_timer"};
+  public:
+    F_Claw(Subsystem<f_claw_states, NUM_OF_F_CLAW_STATES> subsystem);  // constructor
+    void handle();  // contains state machine code
+    void handle_state_change(); // cleans up and preps the machine to be in the target state
 };
 
 extern F_Claw f_claw_obj;
