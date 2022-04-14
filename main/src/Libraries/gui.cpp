@@ -406,7 +406,7 @@ namespace screen_flash{
   int Page::page_num(const Page* page_id){
     const std::vector<Page*>::const_iterator it = std::find(GUI::current_gui->pages.begin(), GUI::current_gui->pages.end(), page_id);
       if (it == GUI::current_gui->pages.end()){
-      throw std::domain_error(convert_all_args("Page %p does not exist!\n", page_id));
+      throw std::domain_error(sprintf2("Page %p does not exist!\n", page_id));
       return 0;
     }
     return it-GUI::current_gui->pages.begin();
@@ -452,7 +452,7 @@ namespace screen_flash{
     for (it = buttons.begin(); it != buttons.end(); it++){
       Button* btn_id= *it;
       if (btn_id->form != LATCH && btn_id->form != TOGGLE){
-        throw std::invalid_argument(convert_all_args("Option Feature is only available for latch and toggle buttons! Failed on \"%s\" button.\n", btn_id->label));
+        throw std::invalid_argument(sprintf2("Option Feature is only available for latch and toggle buttons! Failed on \"%s\" button.\n", btn_id->label));
         return;
       }
     }

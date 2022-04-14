@@ -158,7 +158,7 @@
     Page ports ("Ports"); //Shows what ports to use on builder util
       Text mot (10, 50, GUI::Style::CORNER, TEXT_MEDIUM, ports, "Motors: %s", motor_port_nums);
       Text expanders (10, 100, GUI::Style::CORNER, TEXT_MEDIUM, ports, "Expanders: %s", expander_port_nums);
-      Text no_pneumatic (10, 150, GUI::Style::CORNER, TEXT_MEDIUM, ports, "No Pneumatics: %s", no_pneumatic_port_nums);
+      Text no_pneumatic (10, 150, GUI::Style::CORNER, TEXT_MEDIUM, ports, "No Pneumatics (Ignore): %s", no_pneumatic_port_nums);
 
     Page encoders ("Encoders"); //Display tracking vals and reset btns
       Slider expander_1 (30, 90, 30, 100, GUI::Style::SIZE, Slider::VERTICAL, 0, 21, encoders, "E1");
@@ -420,15 +420,15 @@ void main_setup(){
 
     go_to_xya.set_func([&](){
       Position target (x_val.get_value(), y_val.get_value(), a_val.get_value());
-      if (GUI::prompt("Press to go to " + convert_all_args("%d", target), "", 1000)) move_start(move_types::point, point_params(target));
+      if (GUI::prompt("Press to go to " + sprintf2("%d", target), "", 1000)) move_start(move_types::point, point_params(target));
     });
     go_home.set_func([](){
       Position target (0, 0, tracking.get_angle_in_deg());
-      if (GUI::prompt("Press to go to " + convert_all_args("%d", target), "", 1000)) move_start(move_types::point, point_params(target));
+      if (GUI::prompt("Press to go to " + sprintf2("%d", target), "", 1000)) move_start(move_types::point, point_params(target));
     });
     go_centre.set_func([](){
       Position target (72, 72, tracking.get_angle_in_deg());
-      if (GUI::prompt("Press to go to " + convert_all_args("%d", target), "", 1000)) move_start(move_types::point, point_params(target));
+      if (GUI::prompt("Press to go to " + sprintf2("%d", target), "", 1000)) move_start(move_types::point, point_params(target));
     });
 
   //Subsystems

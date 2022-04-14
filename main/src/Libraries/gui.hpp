@@ -249,7 +249,7 @@ class Text: public Text_{
     void update_val() override {
       if(value){
         prev_value = value();
-        text = convert_all_args(label, prev_value);
+        text = sprintf2(label, prev_value);
       }
       else text = label;
     }
