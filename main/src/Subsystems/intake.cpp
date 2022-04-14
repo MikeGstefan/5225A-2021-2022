@@ -19,30 +19,27 @@ Intake::Intake(Motorized_subsystem<intake_states, NUM_OF_INTAKE_STATES, INTAKE_M
 
 void Intake::handle_buttons(){
   // toggles intake state if intake button is pressed
-  if(master.get_digital_new_press(intake_button)){
+  if(master.is_rising(intake_button) || partner.is_rising(partner_intake_button)){
     // doesn't allow driver to turn on intake if lift is at bottom
-    if(f_lift.get_state() != f_lift_states::bottom){
-      switch(get_state()){
-        case intake_states::off:
-          set_state(intake_states::on);
-          break;
-        case intake_states::reversed:
-          set_state(intake_states::on);
-          break;
-        case intake_states::on:
-          set_state(intake_states::off);
-          break;
-        case intake_states::unjamming:
-          set_state(intake_states::on);
-          break;
-      }
+    switch(get_state()){
+      case intake_states::off:
+        set_state(intake_states::on);
+        break;
+      case intake_states::reversed:
+        set_state(intake_states::on);
+        break;
+      case intake_states::on:
+        set_state(intake_states::off);
+        break;
+      case intake_states::unjamming:
+        set_state(intake_states::on);
+        break;
     }
   }
   // toggles intake reverse state if intake reverse button is pressed
-  if(master.get_digital_new_press(intake_reverse_button)){
+  if(master.is_rising(intake_reverse_button) || partner.is_rising(partner_intake_reverse_button)){
     // doesn't allow driver to turn on intake if lift is at bottom
-    if(f_lift.get_state() != f_lift_states::bottom){
-      switch(get_state()){
+    switch(get_state()){
         case intake_states::off:
           set_state(intake_states::reversed);
           break;
@@ -55,16 +52,11 @@ void Intake::handle_buttons(){
         case intake_states::unjamming:
           set_state(intake_states::off);
           break;
-      }
     }
   }
 }
 
 void Intake::handle(){
-  // turns intake off if front lift is too low
-  if(f_lift_pot.get_value() < f_lift.driver_positions[1] - 50 && get_state() != intake_states::off){
-    set_state(intake_states::off);
-  }
   switch(get_state()){
     case intake_states::managed:
       break;
@@ -116,6 +108,8 @@ void Intake::handle_state_change(){
   if(get_target_state() != intake_states::off && lift_t.get_state()){
     after_switch_state = get_target_state();  // the state to reach after switching the transmission to intake mode
     set_state(intake_states::shifting_to_intake_up);
+    // stops back lift if it's moving
+    if(b_lift.get_state() == b_lift_states::move_to_target) b_lift.Subsystem::set_state(b_lift_states::between_positions);
   }
   switch(get_target_state()){
     case intake_states::managed:
@@ -126,11 +120,11 @@ void Intake::handle_state_change(){
       break;
     
     case intake_states::on:
-      motor.move(127);
+      motor.move(-127);
       break;
     
     case intake_states::reversed:
-      motor.move(-127);
+      motor.move(127);
       break;
     
     case intake_states::unjamming:
@@ -139,7 +133,7 @@ void Intake::handle_state_change(){
     
     case intake_states::shifting_to_intake_up:
       lift_t.set_state(LOW);
-      motor.move_relative(-30, 100);
+      motor.move_relative(30, 100);
       break;
     
     case intake_states::shifting_to_intake_down:
