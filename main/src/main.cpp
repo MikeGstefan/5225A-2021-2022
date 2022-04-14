@@ -85,23 +85,170 @@ void autonomous() {
 }
 
 void opcontrol() {
-  /* Nathan
-  distance sensor check
-  merge into headers
+	// while (true) {
+	// 	printf("B: %f\n", b_lift_m.get_position());
+	// 	printf("F: %f\n", f_lift_m.get_position());
+	// 	delay(10);
+	// }
+	// b)
+	// b_lift.Subsystem::set_state(b_lift_states::move_to_target);
+	// lift_handle_t.start();
+	// /*
+	// b_lift.elastic_util(1029);
+	// wait_until(false);
+	// while(true){
+	// 	printf("b_pot_val: %d\n", b_lift_pot.get_value());
+	// 	delay(10);
+	// }
+	/*
+	tilt_lock.set_value(HIGH);
+	b_claw.set_value(HIGH);
+	wait_until(master.get_digital_new_press(DIGITAL_A));
+	tilt_lock.set_value(LOW);
+	delay(100);
+	b_claw.set_value(LOW);
+	wait_until(false);
+	*/
+	// 1035, 1820, 2000, 2760
 
-  auton give up func - ask mike
+	// 1182, 2070, 1840
+	// bool b_claw_state = false;
+	// while(true){
+	// 	printf("%d\n", f_lift_pot.get_value());
+	// 	if(master.get_digital_new_press(DIGITAL_A)){
+	// 		b_claw_state = !b_claw_state;
+	// 		f_claw(b_claw_state);
+	// 	}
+	// 	delay(10);
+	// }
+	// bool transmission = false;
+	// while(true){
+	// 	if(master.get_digital_new_press(DIGITAL_X)){
 
-  After Worlds:
-  make flash its own page
-  motor subclass
-  file writing functions
-  proper text splitter for flash
-  allow multiple text variables through tuple
-  print stack trace
-  get rid of add_text. just change the buttons text directly (will have to deal with changeing text length)
-  controller button class
-  skills recorder. Have the program record movements and write the skills route.
-  lvgl images
-  2d sliders
-  */
+	// 		transmission = !transmission;
+	// 		trans_p.set_state();
+	// 	}
+	// 	delay(10);
+	// }
+	master.clear();
+	master.clear();
+
+	master.print(0,0, "auto      ");
+	partner.print(0,0, "auto     ");
+
+	while(true){
+		// printf("b:%d, f:%d\n", b_lift_pot.get_value(), f_lift_pot.get_value());
+		master.update_buttons();
+		partner.update_buttons();
+		// printf("%d\n", get_lift());
+		// drivebase handlers
+		drivebase.handle_input();
+		drivebase.handle_trans();
+
+		// intake handlers
+		intake.handle_buttons();
+		intake.handle();
+
+		// lift handlers
+		handle_lift_buttons();
+		b_lift.handle(true);
+		f_lift.handle(true);
+
+		// claw handlers
+		handle_claw_buttons();
+		b_claw_obj.handle();
+		f_claw_obj.handle();
+		delay(10);
+	}
+	// */
+	master.clear();
+	f_lift.set_state(f_lift_states::move_to_target, 3);
+	wait_until(f_lift.get_state() == f_lift_states::idle);
+	master.rumble("-");
+	master.print(0,0,"reached 4");
+	delay(1000);
+
+	f_lift.set_state(f_lift_states::move_to_target, 1);
+	wait_until(f_lift.get_state() == f_lift_states::idle);
+	master.rumble("-");
+	master.print(0,0,"reached 1");
+	delay(1000);
+
+	f_lift.set_state(f_lift_states::move_to_target, 2, 50);
+	wait_until(f_lift.get_state() == f_lift_states::idle);
+	master.rumble("-");
+	master.print(0,0,"reached 1");
+	delay(1000);
+
+
+	while(true) delay(10); // don't exucute anything beyond this line
+
+	b_lift.set_state(b_lift_states::move_to_target, 3);
+	b_lift.Subsystem::set_state(b_lift_states::idle);
+
+
+	lift_t.set_state(HIGH);
+	b_lift_m.move_relative(30, 100);
+	while(fabs(b_lift_m.get_position() - b_lift_m.get_position()) > 15) delay(10);
+	b_lift_m.move_relative(-30, 100);
+	while(fabs(b_lift_m.get_position() - b_lift_m.get_position()) > 15) delay(10);
+	// b_lift.
+
+	// while(true){
+	// 	b_lift.handle_buttons();
+	// 	b_lift.handle(true);
+	// 	f_lift.handle_buttons();
+	// 	f_lift.handle(true);
+	// 	delay(10);
+	// }
+
+	// while(true){
+	pros::Task task{[=] {
+		while(true){
+			// f_lift.handle_buttons();
+			f_lift.handle(true);
+			delay(10);
+		}
+	}};
+	delay(5000);
+	f_lift.set_state(f_lift_states::move_to_target, 0);
+	delay(1000);
+	f_lift.set_state(f_lift_states::move_to_target, 1);
+
+
+
+	// delay(1000);
+	// f_lift.set_state(f_lift_states::move_to_target, 2);
+	// delay(1000);
+	// f_lift.set_state(f_lift_states::move_to_target, 3);
+	// delay(10);
+	// f_lift.set_state(f_lift_states::move_to_target, 0);
+
+	// drivebase.driver_practice();
+	// pros::Task task{[=] {
+	// 	while(true){
+	// 		f_lift.handle(true);
+	// 		b_lift.handle(true);
+	// 		delay(10);
+	// 	}
+	// }};
+  // f_lift.set_state(f_lift_states::move_to_target, 2); // moves to top
+
+	// f_lift.elastic_util();
+  // BACK bottom 1030 top 2754
+  // FRONT bottom 1190 top 2778
+
+	// pros::Task task{[=] {
+	// 	while(true){
+	// 		b_claw.handle();
+	// 		delay(10);
+	// 	}
+	// }};
+	// delay(2000);
+	// b_claw.set_state(b_claw_states::grabbed);
+	// delay(3000);
+	// b_claw.set_state(b_claw_states::search_lip);
+	// while(true) delay(10);
+
+	// drivebase.driver_practice();
 }
