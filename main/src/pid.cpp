@@ -37,11 +37,11 @@ double PID::compute(double input, double target){
     last_update_timer.reset();
     last_error_sgn = sgn(error);
     last_error = error;
-    // motion_d.print("calculating derivative : %f\n", derivative);
+    // motion_d.print("calculating derivative : %f", derivative);
   }
     
   output = proportional + integral + derivative + bias;
 
-  // motion_i.print("%d |  P: %f, D:%f, In:%f, Out:%f\n", millis(), proportional, derivative, input, output);
+  // motion_i.print(" P: %f, D:%f, In:%f, Out:%f", proportional, derivative, input, output);
   return output;
 }

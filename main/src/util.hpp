@@ -4,6 +4,7 @@
 #include "timer.hpp"
 #include "geometry.hpp"
 #include "logging.hpp"
+#include "Libraries/printing.hpp"
 #include <array>
 #include <cmath>
 #include <iostream>
@@ -127,7 +128,7 @@ template <typename T>
 T map_set(T input, T in_min, T in_max, T out_min, T out_max, T range, T val){
   if (input <= range) return map(input, in_min, range, out_min, val);
   else {
-    printf("%d || INVALID INPUT IN MAP FUNCTION\n", millis());
+    printf2("INVALID INPUT IN MAP FUNCTION");
     return static_cast<T>(0);
   }
 }

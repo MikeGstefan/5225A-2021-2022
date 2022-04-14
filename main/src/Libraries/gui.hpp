@@ -119,6 +119,7 @@ class GUI{
     static void go_next(), go_prev();
     static void screen_terminal_fix();
     static void clear_screen(Colour=GREY);
+    static Colour get_colour(term_colours);
     static void draw_oblong(int, int, int, int, double, double);
     static int get_height(text_format_e_t), get_width(text_format_e_t);
     static std::tuple<int, int, int, int> fix_points(int, int, int, int, Style);
@@ -134,7 +135,6 @@ class GUI{
     static void init();
     static void go_to(int);
     static bool prompt(std::string, std::string="", std::uint32_t=0); //Also prompts to controller
-    static Colour get_colour(term_colours);
 };
 
 class Page{
@@ -169,14 +169,14 @@ class Page{
     void update() const;
     void go_to() const;
     bool pressed() const;
+    void set_setup_func(std::function <void()>), set_loop_func(std::function <void()>);
+    void set_active(bool=true);
 
   public:
     //Title, Bcolour
     explicit Page(std::string, Colour = GREY);
 
     //Functions
-    void set_setup_func(std::function <void()>), set_loop_func(std::function <void()>);
-    void set_active(bool=true);
 };
 
 //Text parent class
@@ -210,15 +210,15 @@ class Text_{
     virtual void update() = 0;
     virtual void update_val() = 0;
     void draw();
-
-  public:
-    //Functions
     void set_background(int, int, Colour); //Centre
     void set_background(int, int); //Centre
     void set_background(int, int, int, int, GUI::Style, Colour);
     void set_background(int, int, int, int, GUI::Style);
     void set_background(Colour);
     void set_active(bool=true);
+
+  public:
+    //Functions
 };
 
 template <typename V>
@@ -249,7 +249,7 @@ class Text: public Text_{
     void update_val() override {
       if(value){
         prev_value = value();
-        text = convert_all_args(label, prev_value);
+        text = sprintf2(label, prev_value);
       }
       else text = label;
     }
@@ -366,6 +366,7 @@ class Button{
     std::vector<Button*> options;
 
     //Functions
+    static void create_options(std::vector<Button*>);
     void construct (int, int, int, int, GUI::Style, press_type, Page*, std::string, Colour, Colour);
     void update();
     void add_text (Text_&, bool=true);
@@ -376,16 +377,15 @@ class Button{
     bool new_press();
     bool new_release();
     bool pressed() const;
+    void set_func(std::function <void()>), set_off_func(std::function <void()>);
+    void set_active(bool=true);
+    void set_background (Colour);
 
   public:
     //Points, Format, Page, Label, Bcolour, Lcolour
     Button (int, int, int, int, GUI::Style, press_type, Page&, std::string = "", Colour = ORANGE, Colour = COLOUR(BLACK));
 
     //Functions
-    static void create_options(std::vector<Button*>);
-    void set_func(std::function <void()>), set_off_func(std::function <void()>);
-    void set_active(bool=true);
-    void set_background (Colour);
     void select(), deselect();
 };
 
@@ -422,6 +422,7 @@ class Slider{
 
     //Functions
     void update();
+    void set_active(bool=true);
     void draw() const;
     bool pressed() const;
 
@@ -430,6 +431,5 @@ class Slider{
     Slider (int, int, int, int, GUI::Style, direction, int, int, Page&, std::string = "Value", int = 1, Colour = COLOUR(WHITE), Colour = ORANGE);
 
     //Functions
-    void set_active(bool=true);
     int get_value() const;
 };
