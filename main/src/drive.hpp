@@ -16,6 +16,8 @@
 
 #define TILT_HOLD_TIME 300
 
+#define MAX_DRIVE_SPEED 50
+
 // what the right joystick currently does
 enum class joy_modes{
   lift_select, // the right joystick selects which lift is active
