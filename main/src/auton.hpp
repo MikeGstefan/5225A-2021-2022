@@ -24,6 +24,8 @@
 void skills();
 void skills2();
 
+void skills4();
+
 void select_auton();
 void run_auton();
 void load_auton();
