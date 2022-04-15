@@ -7,7 +7,6 @@ Intake intake({{"Intake",
   "off",
   "on",
   "reversed",
-  "unjamming",
   "shifting_to_lift_up",
   "shifting_to_lift_down",
 }, intake_states::managed, intake_states::off // goes from managed to off upon startup
@@ -31,9 +30,6 @@ void Intake::handle_buttons(){
       case intake_states::on:
         set_state(intake_states::off);
         break;
-      case intake_states::unjamming:
-        set_state(intake_states::on);
-        break;
     }
   }
   // toggles intake reverse state if intake reverse button is pressed
@@ -49,14 +45,17 @@ void Intake::handle_buttons(){
         case intake_states::reversed:
           set_state(intake_states::off);
           break;
-        case intake_states::unjamming:
-          set_state(intake_states::off);
-          break;
     }
   }
 }
 
+Timer intktimer{"intktimer"};
+Timer intk_timer_2{"number2"};
 void Intake::handle(){
+  if(intk_timer_2.get_time() > 100){
+    printf("voltage: %d, b_lift_state:%s\n", motor.get_voltage(), b_lift.state_names[(int)b_lift.get_state()]);
+    intk_timer_2.reset();
+  }
   switch(get_state()){
     case intake_states::managed:
       break;
@@ -65,6 +64,7 @@ void Intake::handle(){
       break;
 
     case intake_states::on:
+      motor.move(-127);
       // Intake jam handling
       // if(intake_jam.get_new_press()) jam_timer.reset(); // Start timer when pressed
       // else if(!intake_jam.get_value()) jam_timer.reset(false); // End timer when unpressed
@@ -75,14 +75,14 @@ void Intake::handle(){
       break;
 
     case intake_states::reversed:
-      break;
-
-    case intake_states::unjamming:
-      // if the jam limit switch isn't triggered turn intake back on
-      // if(!intake_jam.get_value()) set_state(intake_states::on);
+      motor.move(127);
       break;
 
     case intake_states::shifting_to_intake_up:
+      if(intktimer.get_time() > 100){
+        printf("cur position: %lf, target_position: %lf, voltage:%d\n", b_lift_m.get_target_position(), b_lift_m.get_position(), b_lift_m.get_voltage());
+        intktimer.reset();
+      }
       if(fabs(b_lift_m.get_target_position() - b_lift_m.get_position()) < 15){
         set_state(intake_states::shifting_to_intake_down);
       }
@@ -107,9 +107,20 @@ void Intake::handle_state_change(){
   // shifts the transmission before activating intake in desired state
   if(get_target_state() != intake_states::off && lift_t.get_state()){
     after_switch_state = get_target_state();  // the state to reach after switching the transmission to intake mode
-    set_state(intake_states::shifting_to_intake_up);
     // stops back lift if it's moving
-    if(b_lift.get_state() == b_lift_states::move_to_target) b_lift.Subsystem::set_state(b_lift_states::between_positions);
+    if(b_lift.get_state() == b_lift_states::move_to_target){
+      b_lift.Subsystem::set_state(b_lift_states::between_positions);
+    } 
+    else if(b_lift.get_state() == b_lift_states::shifting_to_lift_up){
+      printf("*******CAUGHT*** b lift was shifting up");
+      // b_lift.Subsystem::set_state(b_lift_states::between_positions);
+    }
+    else if(b_lift.get_state() == b_lift_states::shifting_to_lift_down){
+      printf("*******CAUGHT*** b lift was shifting down");
+      // b_lift.Subsystem::set_state(b_lift_states::between_positions);
+    }
+    set_state(intake_states::shifting_to_intake_up);
+    printf("Just went to shifting up, b_lift_state name is: %s\n", b_lift.state_names[(int)b_lift.get_state()]);
   }
   switch(get_target_state()){
     case intake_states::managed:
@@ -125,10 +136,6 @@ void Intake::handle_state_change(){
     
     case intake_states::reversed:
       motor.move(127);
-      break;
-    
-    case intake_states::unjamming:
-      motor.move(-127);
       break;
     
     case intake_states::shifting_to_intake_up:

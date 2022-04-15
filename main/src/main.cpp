@@ -46,7 +46,7 @@ void initialize() {
 	// tracking.x_coord = 24.5, tracking.y_coord = 15.0, tracking.global_angle = 9.0_deg;
 	tracking.x_coord = 0.0, tracking.y_coord = 0.0, tracking.global_angle = 0.0_deg;
 	update_t.start();
-  lift_handle_t.start();
+  // lift_handle_t.start();
 
 	// gyro.finish_calibrating(); //Finishes calibrating gyro before program starts
 }
@@ -85,11 +85,62 @@ void autonomous() {
 }
 
 void opcontrol() {
-	// while (true) {
-	// 	printf("B: %f\n", b_lift_m.get_position());
-	// 	printf("F: %f\n", f_lift_m.get_position());
+	// while(true){
+	// 	b_lift_m.move(master.get_analog(ANALOG_RIGHT_Y));
+	// 	printf("%d\n", b_lift_m.get_voltage());
 	// 	delay(10);
 	// }
+	/*
+	lift_t.set_state(HIGH);
+	b_lift_m.move(-127);
+
+	wait_until(master.get_digital_new_press(DIGITAL_A));
+	lift_t.set_state(LOW);
+	b_lift_m.move_relative(30, 100);
+	wait_until(fabs(b_lift_m.get_target_position() - b_lift_m.get_position()) < 15);
+	b_lift_m.move_relative(-30, 100);
+	wait_until(fabs(b_lift_m.get_target_position() - b_lift_m.get_position()) < 15);
+	b_lift_m.move(0);
+	delay(100);
+	b_lift_m.move(50);
+	wait_until(false);
+	while(true){
+		printf("why are you printing dummy\n");
+		delay(10);
+	}
+	*/
+
+	/*
+	b_lift.motor.move(0);
+	f_lift.motor.move(0);
+	b_claw.set_value(0);
+
+	wait_until(master.get_digital_new_press(DIGITAL_B));
+	b_claw.set_value(1);
+	while(true){
+		if(master.get_digital_new_press(DIGITAL_A)){
+			if(lift_t.get_state()){	// in lift mode
+				lift_t.set_state(LOW);
+				b_lift_m.move_relative(30, 100);
+				wait_until(fabs(b_lift_m.get_target_position() - b_lift_m.get_position()) < 15);
+				b_lift_m.move_relative(-30, 100);
+				wait_until(fabs(b_lift_m.get_target_position() - b_lift_m.get_position()) < 15);
+				b_lift_m.move(0);
+			}
+			else{	// in intake mode
+				lift_t.set_state(HIGH);
+				b_lift_m.move_relative(30, 100);
+				wait_until(fabs(b_lift_m.get_target_position() - b_lift_m.get_position()) < 15);
+				b_lift_m.move_relative(-30, 100);
+				wait_until(fabs(b_lift_m.get_target_position() - b_lift_m.get_position()) < 15);
+				b_lift_m.move(0);
+
+			}
+		}
+		delay(10);
+	}
+	*/
+
 	// b)
 	// b_lift.Subsystem::set_state(b_lift_states::move_to_target);
 	// lift_handle_t.start();
@@ -121,21 +172,13 @@ void opcontrol() {
 	// 	}
 	// 	delay(10);
 	// }
-	// bool transmission = false;
-	// while(true){
-	// 	if(master.get_digital_new_press(DIGITAL_X)){
-
-	// 		transmission = !transmission;
-	// 		trans_p.set_state();
-	// 	}
-	// 	delay(10);
-	// }
 	master.clear();
 	master.clear();
 
 	master.print(0,0, "auto      ");
 	partner.print(0,0, "auto     ");
 
+	Timer print_timer{"print_timer"};
 	while(true){
 		// printf("b:%d, f:%d\n", b_lift_pot.get_value(), f_lift_pot.get_value());
 		master.update_buttons();
@@ -158,6 +201,12 @@ void opcontrol() {
 		handle_claw_buttons();
 		b_claw_obj.handle();
 		f_claw_obj.handle();
+		
+		if(print_timer.get_time() > 100){
+			printf("b_lift_pot_val:%d, f_lift_pot_val:%d\n", b_lift_pot.get_value(), f_lift_pot.get_value());
+			print_timer.reset();
+		}
+
 		delay(10);
 	}
 	// */
