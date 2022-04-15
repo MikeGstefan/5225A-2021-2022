@@ -21,6 +21,11 @@
 #define f_backup 3 
 #define f_level 4 
 #define f_top 5
+#define b_bottom 0
+#define b_plat 1
+#define b_backup 2 
+#define b_level 3
+#define b_top 4
 void skills();
 void skills2();
 

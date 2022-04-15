@@ -90,7 +90,7 @@ void skills4(){
   f_lift.set_state(f_lift_states::move_to_target,f_top);
   b_lift.set_state(b_lift_states::move_to_target,0);
   while(f_lift.get_target_state() != f_lift_states::idle);
-
+  time = millis();
 
 
   flatten_against_wall(true);
@@ -119,13 +119,35 @@ void skills4(){
   drivebase.brake();
   // move_start(move_types::tank_arc, tank_arc_params({tracking.x_coord, tracking.y_coord}, {120.5, 102.0,200.0},127.0,127.0,false));//arc to face neut goal
   // move_start(move_types::turn_angle, turn_angle_params(rad_to_deg(atan2(104.5 - tracking.x_coord, 72.0 - tracking.y_coord)) +180.0, true,true,140.0));
-  move_start(move_types::tank_point, tank_point_params({106.5,72.0,  45.0},false, 127.0,1.0,true,9.0,130.0));// drive throught neut goal
-  intake.set_state(intake_states::on);
+  move_start(move_types::tank_point, tank_point_params({106.5,73.0,  45.0},false, 127.0,1.0,true,9.0,130.0));// drive throught neut goal
+  // intake.set_state(intake_states::on);
   move_start(move_types::turn_angle, turn_angle_params(-90));
-  move_start(move_types::tank_point, tank_point_params({70.5,72.0,  45.0},false, 127.0,1.0,true), false);
+  move_start(move_types::tank_point, tank_point_params({70.5,73.0,  45.0},false, 60.0,1.0,true), false);
   f_detect_goal();
   move_stop();
   drivebase.brake();
+  Task([](){
+    delay(150);
+    f_lift.set_state(f_lift_states::move_to_target, f_carry);
+  });
+  move_start(move_types::tank_point, tank_point_params({50,73.0,  45.0},false, 60.0,1.0,true));
+  b_lift.set_state(b_lift_states::move_to_target, b_top);
+  move_start(move_types::turn_angle, turn_angle_params(angle_to_point(36.0, 107.0) + 180));
+  move_start(move_types::tank_point, tank_point_params({36.0,106.0, 30.0}, false, 80.0));
+  move_start(move_types::turn_angle, turn_angle_params(angle_to_point(12.0, 107.0) + 180));
+  move_start(move_types::tank_point, tank_point_params({16.0,106.0, 30.0}, false, 80.0));
+  move_start(move_types::tank_point, tank_point_params({22.0,106.0, 30.0}, false, 80.0));
+  move_start(move_types::turn_angle, turn_angle_params(180));
+  f_lift.set_state(f_lift_states::move_to_target, f_top);
+  move_start(move_types::tank_point, tank_point_params({24.0,10.0, 30.0}, false, 80.0));
+  flatten_against_wall();
+  master.clear();
+  master.print(0,0,"time %d", millis() - time);
+  master.print(1,1,"time %d", millis() - time);
+  
+  master.print(2,2,"time %d", millis() - time);
+
+  // move
 }
 
 
