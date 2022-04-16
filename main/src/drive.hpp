@@ -16,7 +16,7 @@
 
 #define TILT_HOLD_TIME 300
 
-#define MAX_DRIVE_SPEED 50
+#define MAX_DRIVE_SPEED 40
 
 // what the right joystick currently does
 enum class joy_modes{
@@ -34,7 +34,7 @@ using namespace std;
 // enum class drivers{Nikhil = 0, Emily = 1, Sarah = 2};
 
 // wait until at least 50 ms since the last reset
-// #define WAIT_FOR_SCREEN_REFRESH() {\
+// #define WAIT_FOR_SCREEN_REFRESH(){\
 //   delay(drivebase.screen_timer.get_time() < 50 ? 50 - drivebase.screen_timer.get_time() : 0);\
 //   drivebase.screen_timer.reset();\
 // }
@@ -110,6 +110,8 @@ public:
   bool get_reverse();
   int get_deadzone();
   // bool get_lift_button(int side = 0);
+
+  void reset();
 };
 
 extern Drivebase drivebase;

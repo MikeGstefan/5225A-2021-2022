@@ -1,18 +1,25 @@
 #include "printing.hpp"
 
-std::string printf_to_string(const char* fmt, ...){
-  char buffer[150];
+std::string convert_all_args(const std::string& fmt, const std::string& arg){
+  if(fmt.back() == 'p') return convert_all_args(fmt, arg.data());
+  return arg;
+}
 
-  std::va_list args;
-  va_start(args, fmt);
-  vsnprintf(buffer, 150, fmt, args);
-  va_end(args);
-  
-  return buffer;
+std::string convert_all_args(const std::string& fmt, const Position& arg){
+  return '(' + convert_all_args(fmt, arg.x) + ", " + convert_all_args(fmt, arg.y) + ", " + convert_all_args(fmt, arg.angle) + ")";
+}
+
+std::string convert_all_args(const std::string& fmt, const Point& arg){
+  return '(' + convert_all_args(fmt, arg.x) + ", " + convert_all_args(fmt, arg.y) + ")";
+}
+
+//Template Recursion Base case
+std::string sprintf2(const std::string& fmt){
+  return fmt;
 }
 
 void newline(int count){
-  std::cout << std::string (count , '\n');
+  std::cout << std::string (count-1 , '\n') << std::endl;
 }
 
 const char* get_term_colour(term_colours colour){

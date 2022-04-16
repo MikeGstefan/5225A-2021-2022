@@ -20,6 +20,19 @@ B_Lift b_lift({{"B_Lift",
 
 B_Lift::B_Lift(Motorized_subsystem<b_lift_states, NUM_OF_B_LIFT_STATES, B_LIFT_MAX_VELOCITY> motorized_subsystem): Motorized_subsystem(motorized_subsystem){ // constructor
   index = 0;
+  speed = 127;
+}
+
+void B_Lift::move_absolute(double position, double velocity, bool wait_for_comp, double end_error){ //blocking
+  if (end_error == 0.0) end_error = this->end_error;
+  int output;
+  pid.compute(b_lift_pot.get_value(), position);
+  wait_until(fabs(pid.get_error()) < end_error){
+    output = pid.compute(b_lift_pot.get_value(), position);
+    if (abs(output) > speed) output = speed * sgn(output); // cap the output at speed  
+    motor.move(output);
+  }
+  motor.move(0);
 }
 
 void B_Lift::handle(bool driver_array){
@@ -36,14 +49,14 @@ void B_Lift::handle(bool driver_array){
 
     case b_lift_states::move_to_target: // moving to target
       // output is scoped below to prevent other states from accessing it
-      {
+      if(get_target_state() == b_lift_states::move_to_target){ // don't power the motor if the state is no longer move to target
         int output = pid.compute(b_lift_pot.get_value(), positions[index]);
         if (abs(output) > speed) output = speed * sgn(output); // cap the output at speed
+        // if(abs(output) < 40) output = 40 * sgn(output); // enforces a minimum of 40 power
         motor.move(output);
       }
       // moves to next state if the lift has reached its target
       if(fabs(pid.get_error()) < end_error){
-        motor.move_velocity(0); // holds motor
         // switches to idle by default or special case depending on current target
         switch(index){
           case 0: // lift is at bottom position, this state is used by intake
@@ -67,7 +80,7 @@ void B_Lift::handle(bool driver_array){
         motor.move(0);
         master.rumble("---");
         master.print(B_LIFT_STATE_LINE, 0, "B_Lift: Manual      ");
-        printf("LIFT SAFETY TRIGGERED %lf, %lf\n", target, b_lift_pot.get_value());
+        printf2("LIFT SAFETY TRIGGERED %lf, %lf", target, b_lift_pot.get_value());
 
         set_state(b_lift_states::manual);
       }
@@ -112,7 +125,8 @@ void B_Lift::handle_state_change(){
   // if state has changed, performs the necessary cleanup operation before entering next state
 
   // if intake/lift transmission is in intake mode, shift the transmission to the lift
-  if(!lift_t.get_state() && get_state() != b_lift_states::shifting_to_lift_up){
+  // if(!lift_t.get_state() && get_state() != b_lift_states::shifting_to_lift_up){
+  if(!lift_t.get_state() && get_target_state() != b_lift_states::idle && get_target_state() != b_lift_states::between_positions){
     after_switch_state = get_target_state();
     printf("after_switch_state:%s", b_lift.state_names[(int)after_switch_state]);
     Subsystem::set_state(b_lift_states::shifting_to_lift_up);
@@ -177,19 +191,24 @@ void B_Lift::set_state(const b_lift_states next_state, const uint8_t index, cons
     state_log.print("%s | State change requested index is: %d \t", name, index);
     Subsystem::set_state(next_state);
   }
-  else state_log.print("%s | INVALID move to target State change requested from %s to %s, index is: %d\n", name, state_names[static_cast<int>(get_state())], state_names[static_cast<int>(next_state)], index);
+  else state_log.print("%s | INVALID move to target State change requested from %s to %s, index is: %d", name, state_names[static_cast<int>(get_state())], state_names[static_cast<int>(next_state)], index);
 }
 
-extern int elastic_f_up_time, elastic_f_down_time; //from gui_construction.cpp
+int elastic_b_up_time, elastic_b_down_time; //for gui_construction.cpp
 
 void B_Lift::elastic_util(int high){ //1011 as of April 10th
-  master.get_digital_new_press(DIGITAL_A);
+  GUI::prompt("Press to start back elastic test", "", 500);
   Timer move_timer{"move"};
   while(abs(b_lift_m.get_position() - high) > 15) b_lift_m.move(127);
   move_timer.print();
+  elastic_b_up_time = move_timer.get_time();
+  master.print(1, 0, "up time: %d", elastic_b_up_time);
+
   move_timer.reset();
   while(abs(b_lift_m.get_position() - 0) > 15) b_lift_m.move(-127);
   move_timer.print();
+  elastic_b_down_time = move_timer.get_time();
+  master.print(2, 0, "down time: %d", elastic_b_up_time);
   b_lift_m.move(0);
 }
 
