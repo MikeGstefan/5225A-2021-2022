@@ -18,6 +18,7 @@ F_Lift f_lift({{"F_Lift",
 
 F_Lift::F_Lift(Motorized_subsystem<f_lift_states, NUM_OF_F_LIFT_STATES, F_LIFT_MAX_VELOCITY> motorized_subsystem): Motorized_subsystem(motorized_subsystem){ // constructor
   index = 0;
+  speed = 127;
 }
 
 void F_Lift::move_absolute(double position, double velocity, bool wait_for_comp, double end_error){ //blocking
@@ -52,6 +53,7 @@ void F_Lift::handle(bool driver_array){
       { // otherwise calculate output with a pid as usual
         int output = pid.compute(f_lift_pot.get_value(), positions[index]);
         if (abs(output) > speed) output = speed * sgn(output); // cap the output at speed  
+        // if(abs(output) < 40) output = 40 * sgn(output); // enforces a minimum of 40 power
         motor.move(output);
       }
       // moves to next state if the lift has reached its target

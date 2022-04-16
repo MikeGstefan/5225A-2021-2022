@@ -232,9 +232,13 @@ void Drivebase::update_lookup_table_util(){
 void Drivebase::handle_input(){
   // tracking.power_x = drivers[cur_driver].custom_drives[0].lookup(master.get_analog(drivers[cur_driver].joy_sticks[0]));
   tracking.power_y = drivers[cur_driver].custom_drives[1].lookup(master.get_analog(ANALOG_LEFT_Y));
-  // caps drive speed at 80 if intake is on
-  if(intake.get_state() == intake_states::on && fabs(tracking.power_y) > MAX_DRIVE_SPEED) tracking.power_y = sgn(tracking.power_y) * MAX_DRIVE_SPEED;
-  tracking.power_a = 0.7 * drivers[cur_driver].custom_drives[2].lookup(master.get_analog(ANALOG_LEFT_X));
+  // caps drive speed at 40 if intake is on
+  if(intake.get_state() == intake_states::on){
+    if(fabs(tracking.power_y) > MAX_DRIVE_SPEED)  tracking.power_y = sgn(tracking.power_y) * MAX_DRIVE_SPEED;
+    // caps turns speed at 40% when intake is on
+    tracking.power_a = 0.4 * drivers[cur_driver].custom_drives[2].lookup(master.get_analog(ANALOG_LEFT_X));
+  } 
+  else tracking.power_a = 0.6 * drivers[cur_driver].custom_drives[2].lookup(master.get_analog(ANALOG_LEFT_X));
   // printf2("%d, %f, %f", master.get_analog(ANALOG_LEFT_Y), tracking.power_y, tracking.power_a );
   if(fabs(tracking.power_x) < deadzone) tracking.power_x = 0.0;
   if(fabs(tracking.power_y) < deadzone) tracking.power_y = 0.0;

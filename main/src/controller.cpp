@@ -40,7 +40,7 @@ controller_digital_e_t partner_back_claw_toggle_button = DIGITAL_A;
 controller_digital_e_t partner_front_claw_toggle_button = DIGITAL_LEFT;
 controller_digital_e_t partner_claw_tilt_button = DIGITAL_X;
 
-controller_digital_e_t partner_joy_mode_switch_button = DIGITAL_LEFT;
+controller_digital_e_t partner_joy_mode_switch_button = DIGITAL_RIGHT;
 
 std::array<_Controller*, num_controller> _Controller::objs; //= {nullptr};
 _Task _Controller::controller_task = nullptr;

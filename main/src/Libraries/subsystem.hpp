@@ -63,6 +63,10 @@ public:
     return temp_state;
   }
 
+  const char* get_state_name() const{
+    return state_names[static_cast<int>(get_state())];
+  }
+
 };
 
 template <typename state_type, int num_of_states, int default_velocity>
