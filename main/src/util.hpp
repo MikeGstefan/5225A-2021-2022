@@ -13,6 +13,8 @@
 #include <tuple>
 #include <vector>
 
+//just steal some functions from okapi/api/util/mathUtil.hpp
+
 using namespace pros;
 using namespace std;
 //forward declarations
@@ -94,7 +96,16 @@ std::function<long double (long double)> func_scale(std::function<long double(lo
 
 //removed constrain because std::clamp already exists
 
+/**
+ * @brief returns a random bool with probability of being true
+ * 
+ * @param ratio 1:ratio getting false. 1:1 is 50/50. 1:2 means true is twice as likely.
+ * @return true
+ */
+bool random_bool(int ratio = 1);
 int random_direction();
+int bool2sgn(bool boolean);
+bool sgn2bool(int sgn);
 
 // gets the sign of a value (0, 1 or -1)
 template <typename T>

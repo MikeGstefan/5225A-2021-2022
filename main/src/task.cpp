@@ -41,7 +41,7 @@ pros::Task* _Task::get_task_ptr()const{
 void _Task::start(void* params){
    task_log.print(term_colours::GREEN, "%s starting", this->name);
    if(this->task_ptr != NULL){
-     task_log.print(term_colours::RED, "%s was already started", this->name);
+     task_log.print(term_colours::ERROR, "%s was already started", this->name);
      this->kill();
    }
   //  printf2("before move: %f",static_cast<point_params*>(params)->target.x);
@@ -65,7 +65,7 @@ void _Task::kill(){
     task_log.print("%s killed", this->name);
   }
   else {
-    task_log.print(term_colours::RED, "%s kill failed: already dead", this->name);
+    task_log.print(term_colours::ERROR, "%s kill failed: already dead", this->name);
   }
 }
 

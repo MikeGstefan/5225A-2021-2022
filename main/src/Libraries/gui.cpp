@@ -1,4 +1,5 @@
 #include "gui.hpp"
+#include "printing.hpp"
 #include <algorithm>
 
 //GUI:: Static Variable Declarations
@@ -41,7 +42,7 @@ namespace screen_flash{
     screen::set_pen(~colour&0xFFFFFF); //Makes text inverted colour of background so it is always visible
     screen::set_eraser(colour);
 
-    events.print("\n\n\n%s\n", text);
+    misc.print(term_colours::BLUE, "\n\n\n%s\n", text);
 
     int spaces = int(CHAR_WIDTH_LARGE*text.length()/460)+1;
     std::size_t space, last_space=0;
@@ -67,7 +68,7 @@ namespace screen_flash{
     screen::set_pen(~GUI::get_colour(colour)&0xFFFFFF); //Makes text inverted colour of background so it is always visible
     screen::set_eraser(GUI::get_colour(colour));
 
-    events.print(colour, "\n\n\n%s\n", text);
+    misc.print(colour, "\n\n\n%s\n", text);
 
     int spaces = int(CHAR_WIDTH_LARGE*text.length()/460)+1;
     std::size_t space, last_space=0;
@@ -368,8 +369,8 @@ namespace screen_flash{
         inc.construct(this->x2+5, this->y1, this->x2+25, this->y2, GUI::Style::CORNER, Button::SINGLE, this->page, ">", l_col, b_col);
         dec.construct(this->x1-25, this->y1, this->x1-5, this->y2, GUI::Style::CORNER, Button::SINGLE, this->page, "<", l_col, b_col);
         title.construct(text_x, text_y, GUI::Style::CENTRE, TEXT_SMALL, this->page, label + ":%d", [&](){return val;}, l_col); //why not pass val by reference
-        min_title.construct(this->x1, text_y, GUI::Style::CENTRE, TEXT_SMALL, this->page, std::to_string(min), nullptr, l_col);
-        max_title.construct(this->x2, text_y, GUI::Style::CENTRE, TEXT_SMALL, this->page, std::to_string(max), nullptr, l_col);
+        min_title.construct(this->x1, text_y, GUI::Style::CENTRE, TEXT_SMALL, this->page, "%d", [&](){return this->min;}, l_col);
+        max_title.construct(this->x2, text_y, GUI::Style::CENTRE, TEXT_SMALL, this->page, "%d", [&](){return this->max;}, l_col);
         break;
 
       case VERTICAL:
@@ -378,8 +379,8 @@ namespace screen_flash{
         inc.construct(this->x1, this->y1-17, this->x2-this->x1, -20, GUI::Style::SIZE, Button::SINGLE, this->page, "^", l_col, b_col);
         dec.construct(this->x1, this->y2+17, this->x2-this->x1, 20, GUI::Style::SIZE, Button::SINGLE, this->page, "v", l_col, b_col);
         title.construct(text_x, this->y1-17-22-CHAR_HEIGHT_SMALL, GUI::Style::CENTRE, TEXT_SMALL, this->page, label + ":%d", [&](){return val;}, l_col);
-        min_title.construct(text_x, this->y2+(CHAR_HEIGHT_SMALL+3)/2, GUI::Style::CENTRE, TEXT_SMALL, this->page, std::to_string(min), nullptr, l_col);
-        max_title.construct(text_x, this->y1-(CHAR_HEIGHT_SMALL+3)/2, GUI::Style::CENTRE, TEXT_SMALL, this->page, std::to_string(max), nullptr, l_col);
+        min_title.construct(text_x, this->y2+(CHAR_HEIGHT_SMALL+3)/2, GUI::Style::CENTRE, TEXT_SMALL, this->page, "%d", [&](){return this->min;}, l_col);
+        max_title.construct(text_x, this->y1-(CHAR_HEIGHT_SMALL+3)/2, GUI::Style::CENTRE, TEXT_SMALL, this->page, "%d", [&](){return this->max;}, l_col);
         break;
     }
 
@@ -438,6 +439,7 @@ namespace screen_flash{
     if(!page_num(this)) return;
     GUI::current_page = this; //Saves new page then draws all the buttons on the page
     draw();
+    if(setup_func) setup_func();
     wait_until(!GUI::touched) GUI::update_screen_status();
   }
 
@@ -466,6 +468,12 @@ namespace screen_flash{
 
   int Slider::get_value() const{
     return val;
+  }
+
+  void Slider::set_value(int val){
+    int old_val = this->val;
+    this->val = std::clamp(val, min, max);
+    if(this->val != old_val) draw();
   }
 
   void Button::add_text(Text_& text_ref, bool overwrite){
@@ -609,7 +617,6 @@ namespace screen_flash{
     for (std::vector<Button*>::const_iterator it = buttons.begin(); it != buttons.end(); it++) (*it)->draw();
     for (std::vector<Slider*>::const_iterator it = sliders.begin(); it != sliders.end(); it++) (*it)->draw();
     for (std::vector<Text_*>::const_iterator it = texts.begin(); it != texts.end(); it++) (*it)->draw();
-    if(setup_func) setup_func();
   }
 
   void Button::draw() const{

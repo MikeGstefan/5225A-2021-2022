@@ -173,6 +173,10 @@ bool _Controller::interrupt(bool analog, bool digital, bool OK_except){
 }
 
 controller_digital_e_t _Controller::wait_for_press(std::vector<controller_digital_e_t> buttons, int timeout){
+  if(competition::is_autonomous()){
+    ERROR.print("Cannot get controller press in autonomous!");
+    return static_cast<controller_digital_e_t>(0);
+  }
   int start_time = millis();
   controller_queue.print("waiting for button press from controller %d", this->controller_num);
   controller_digital_e_t button = static_cast<controller_digital_e_t>(0);
@@ -188,14 +192,16 @@ controller_digital_e_t _Controller::wait_for_press(std::vector<controller_digita
     }
   }
   controller_queue.print("button %d pressed from controller %d", button, this->controller_num);
-// button handling methods
-
   return button;
 }
 
 
 //create wait for press for multiple buttons and return the one that was pressed
 void _Controller::wait_for_press(controller_digital_e_t button, int timeout){
+  if(competition::is_autonomous()){
+    ERROR.print("Cannot get controller press in autonomous!");
+    return;
+  }
   int start_time = millis();
   controller_queue.print("waiting for button %d from controller %d", button, this->controller_num);
   

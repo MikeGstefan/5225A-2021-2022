@@ -270,7 +270,7 @@ void rush_goal2(double target_x, double target_y, double target_a){
         if (fabs(tracking.y_coord) > fabs(target_y) + 10.0){
           printf2("target_y: %lf", target_y);
           printf2("x: %lf, y: %lf, a: %lf", tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle));
-          printf2(term_colours::RED, -1, "FAILED GETTING TO GOAL: %d");
+          printf2(term_colours::ERROR, "FAILED GETTING TO GOAL");
           drivebase.brake();
           return;
         }
@@ -396,7 +396,7 @@ void tank_rush_goal(void* params){
         // f_claw.set_state(1);
         if (brake) drivebase.brake();
         tracking.move_complete = true;
-        motion_i.print("MISSED GOAL tank rush goal target X: %f Y: %f A: %f at X: %f Y: %f A: %f time: %d", target.x, target.y, target.angle, tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle), millis()- time);
+        motion_i.print(term_colours::ERROR, "MISSED GOAL tank rush goal target X: %f Y: %f A: %f at X: %f Y: %f A: %f time: %d", target.x, target.y, target.angle, tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle), millis()-time);
         //log_time("ending starting time: %d, delta time: %d X: %f Y: %f A: %f from X: %f Y: %f A: %f \n", millis(),millis() -starttime, target_x, target_y, target_a, tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle));
         // tracking.move_stop_task();
         break;
