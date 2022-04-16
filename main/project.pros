@@ -1,7 +1,7 @@
 {
   "py/object": "pros.conductor.project.Project",
   "py/state": {
-    "project_name": "drive code",
+    "project_name": "Game",
     "target": "v5",
     "templates": {
       "kernel": {
