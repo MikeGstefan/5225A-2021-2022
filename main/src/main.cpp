@@ -11,11 +11,13 @@
 #include "Subsystems/f_lift.hpp"
 #include "Subsystems/b_lift.hpp"
 #include "distance.hpp"
+
+#include "task.hpp"
 #include "util.hpp"
 using namespace std;
 
 pros::Task *updt = nullptr; //What's this for
-const GUI* GUI::current_gui = &main_obj;
+const GUI* GUI::current_gui = &g_main;
 
 /**
  * Runs initialization code. This occurs as soon as the program is started.
@@ -28,15 +30,14 @@ bool auton_run = false; // has auton run
 
 void initialize() {
 	// gyro.calibrate();
-
+	// front_l.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
+	// front_r.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
+	// back_l.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
+	// back_r.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
 	drivebase.download_curve_data();
-  load_positions();
-  load_auton();
-
 	Data::init();
 	_Controller::init();
 	GUI::init();
-
 	delay(500);
 
 	b_lift.motor.set_brake_mode(E_MOTOR_BRAKE_HOLD);
@@ -46,8 +47,7 @@ void initialize() {
 	// tracking.x_coord = 24.5, tracking.y_coord = 15.0, tracking.global_angle = 9.0_deg;
 	tracking.x_coord = 0.0, tracking.y_coord = 0.0, tracking.global_angle = 0.0_deg;
 	update_t.start();
-  // lift_handle_t.start();
-
+	// master.print(2, 0, "Driver: %s", drivebase.drivers[drivebase.cur_driver].name);
 	// gyro.finish_calibrating(); //Finishes calibrating gyro before program starts
 }
 
@@ -81,66 +81,17 @@ void competition_initialize() {}
  * from where it left off.
  */
 void autonomous() {
+  load_positions();
+  load_auton();
   run_auton();
 }
 
 void opcontrol() {
-	// while(true){
-	// 	b_lift_m.move(master.get_analog(ANALOG_RIGHT_Y));
-	// 	printf("%d\n", b_lift_m.get_voltage());
+	// while (true) {
+	// 	printf("B: %f\n", b_lift_m.get_position());
+	// 	printf("F: %f\n", f_lift_m.get_position());
 	// 	delay(10);
 	// }
-	/*
-	lift_t.set_state(HIGH);
-	b_lift_m.move(-127);
-
-	wait_until(master.get_digital_new_press(DIGITAL_A));
-	lift_t.set_state(LOW);
-	b_lift_m.move_relative(30, 100);
-	wait_until(fabs(b_lift_m.get_target_position() - b_lift_m.get_position()) < 15);
-	b_lift_m.move_relative(-30, 100);
-	wait_until(fabs(b_lift_m.get_target_position() - b_lift_m.get_position()) < 15);
-	b_lift_m.move(0);
-	delay(100);
-	b_lift_m.move(50);
-	wait_until(false);
-	while(true){
-		printf("why are you printing dummy\n");
-		delay(10);
-	}
-	*/
-
-	/*
-	b_lift.motor.move(0);
-	f_lift.motor.move(0);
-	b_claw.set_value(0);
-
-	wait_until(master.get_digital_new_press(DIGITAL_B));
-	b_claw.set_value(1);
-	while(true){
-		if(master.get_digital_new_press(DIGITAL_A)){
-			if(lift_t.get_state()){	// in lift mode
-				lift_t.set_state(LOW);
-				b_lift_m.move_relative(30, 100);
-				wait_until(fabs(b_lift_m.get_target_position() - b_lift_m.get_position()) < 15);
-				b_lift_m.move_relative(-30, 100);
-				wait_until(fabs(b_lift_m.get_target_position() - b_lift_m.get_position()) < 15);
-				b_lift_m.move(0);
-			}
-			else{	// in intake mode
-				lift_t.set_state(HIGH);
-				b_lift_m.move_relative(30, 100);
-				wait_until(fabs(b_lift_m.get_target_position() - b_lift_m.get_position()) < 15);
-				b_lift_m.move_relative(-30, 100);
-				wait_until(fabs(b_lift_m.get_target_position() - b_lift_m.get_position()) < 15);
-				b_lift_m.move(0);
-
-			}
-		}
-		delay(10);
-	}
-	*/
-
 	// b)
 	// b_lift.Subsystem::set_state(b_lift_states::move_to_target);
 	// lift_handle_t.start();
@@ -172,13 +123,21 @@ void opcontrol() {
 	// 	}
 	// 	delay(10);
 	// }
+	// bool transmission = false;
+	// while(true){
+	// 	if(master.get_digital_new_press(DIGITAL_X)){
+
+	// 		transmission = !transmission;
+	// 		trans_p.set_state();
+	// 	}
+	// 	delay(10);
+	// }
 	master.clear();
 	master.clear();
 
 	master.print(0,0, "auto      ");
 	partner.print(0,0, "auto     ");
 
-	Timer print_timer{"print_timer"};
 	while(true){
 		// printf("b:%d, f:%d\n", b_lift_pot.get_value(), f_lift_pot.get_value());
 		master.update_buttons();
@@ -201,12 +160,6 @@ void opcontrol() {
 		handle_claw_buttons();
 		b_claw_obj.handle();
 		f_claw_obj.handle();
-		
-		if(print_timer.get_time() > 100){
-			printf("b_lift_pot_val:%d, f_lift_pot_val:%d\n", b_lift_pot.get_value(), f_lift_pot.get_value());
-			print_timer.reset();
-		}
-
 		delay(10);
 	}
 	// */
@@ -284,8 +237,8 @@ void opcontrol() {
   // f_lift.set_state(f_lift_states::move_to_target, 2); // moves to top
 
 	// f_lift.elastic_util();
-  // BACK bottom 1030 top 2754
-  // FRONT bottom 1190 top 2778
+// BACK bottom 1030 top 2754
+// FRONT bottom 1190 top 2778
 
 	// pros::Task task{[=] {
 	// 	while(true){

@@ -1,12 +1,11 @@
 #include "timer.hpp"
-#include "logging.hpp"
 
 Timer::Timer(const char* name, const bool& play, timing_units timing_unit, Data* data_obj_ptr):
 name(name), timing_unit(timing_unit)
 {
   if(data_obj_ptr == nullptr) this->data_obj = &term;
   else this->data_obj = data_obj_ptr;
-  data_obj->print("%s's initialize time is: %lld", name, get_time_in_timing_unit());
+  data_obj->print("%s's initialize time is: %lld\n", name, get_time_in_timing_unit());
   reset(play);
 }
 
@@ -15,7 +14,7 @@ name(name), timing_unit(timing_unit)
 {
   if(data_obj_ptr == nullptr) this->data_obj = &term;
   else this->data_obj = data_obj_ptr;
-  data_obj->print("%s's initialize time is: %lld", name, get_time_in_timing_unit());
+  data_obj->print("%s's initialize time is: %lld\n", name, get_time_in_timing_unit());
   reset(play);
 }
 
@@ -42,7 +41,7 @@ void Timer::play(){
     last_play_time = get_time_in_timing_unit();
     paused = false;
   }
-  else data_obj->print("Timer \"%s\" is already playing.", name);
+  else data_obj->print("Timer \"%s\" is already playing.\n", name);
 }
 
 void Timer::pause(){
@@ -50,15 +49,15 @@ void Timer::pause(){
     time += get_time_in_timing_unit() - last_play_time;
     paused = true;
   }
-  else data_obj->print("Timer \"%s\" is already paused.", name);
+  else data_obj->print("Timer \"%s\" is already paused.\n", name);
 }
 
 void Timer::print(){
-  data_obj->print("%s's current time is: %lld", name, get_time());
+  data_obj->print("%s's current time is: %lld\n", name, get_time());
 }
 
 void Timer::print(const std::string str){
-  data_obj->print("%s's current time is: %lld | %s", name, get_time(), str.c_str());
+  data_obj->print("%s's current time is: %lld | %s\n", name, get_time(), str.c_str());
 }
 
 void Timer::print(const char* fmt, ...){
@@ -67,11 +66,11 @@ void Timer::print(const char* fmt, ...){
   char buffer[100];
   vsnprintf(buffer, 100, fmt, args);
   va_end(args);
-  data_obj->print("%s's current time is: %lld | %s", name, get_time(), buffer);
+  data_obj->print("%s's current time is: %lld | %s\n", name, get_time(), buffer);
 }
 
 void Timer::print_fancy(std::string str, int long_names, bool unit_conversion){
-  data_obj->print("%s's current time is: %s | %s", name, to_string(get_time(), timing_unit, long_names, unit_conversion).c_str(), str.c_str());
+  data_obj->print("%s's current time is: %s | %s\n", name, to_string(get_time(), timing_unit, long_names, unit_conversion).c_str(), str.c_str());
 }
 
 
@@ -84,41 +83,32 @@ bool Timer::playing(){
 }
 
 std::string Timer::to_string(std::uint64_t time, timing_units unit, int long_names, bool unit_conversion){
-  std::string millis;
-  std::string micros;
-  std::string sec;
-  std::string min;
-  std::string plural;
+  const char* millis;
+  const char* micros;
+  const char* sec;
+  const char* min;
+  const char* plural;
 
-  switch(long_names){
-    case 0:
-      millis = "ms";
-      micros = "us";
-      sec = "s";
-      min = "m";
-      plural = "";
-      break;
-    case 1:
-      millis = " millis";
-      micros = " micros";
-      sec = " sec";
-      min = " min";
-      plural = "";
-      break;
-    case 2:
-      millis = " millisecond";
-      micros = " microsecond";
-      sec = " second";
-      min = " minute";
-      plural = "s";
-      break;
-    default:
-      millis = "";
-      micros = "";
-      sec = "";
-      min = "";
-      plural = "";
-      break;
+  if (long_names==0){
+    millis = "ms";
+    micros = "us";
+    sec = "s";
+    min = "m";
+    plural = "";
+  }
+  else if (long_names==1){
+    millis = " millis";
+    micros = " micros";
+    sec = " sec";
+    min = " min";
+    plural = "";
+  }
+  else if (long_names==2){
+    millis = " millisecond";
+    micros = " microsecond";
+    sec = " second";
+    min = " minute";
+    plural = "s";
   }
 
   std::string buffer;
