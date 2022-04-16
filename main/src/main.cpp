@@ -116,11 +116,13 @@ void opcontrol() {
 
 	int state = 0;
 	while(!master.get_digital(DIGITAL_A)){
-		if(master.get_digital_new_press(DIGITAL_B)){
-			state = !state;
-			f_claw_o.set_state(state);
-			f_claw_c.set_state(state);
-		}
+		// if(master.get_digital_new_press(DIGITAL_B)){
+		// 	printf("oogga booga\n");
+		// 	// state = !state;
+		// 	// f_claw_o.set_state(state);
+		// 	// f_claw_c.set_state(state);
+		// 	intake.set_state(intake_states::on);
+		// }
 		
 		// gui_handle(); //
 		// printf("%d || opcontrol ENCODER L: %d, R: %d, B:%d \n", millis(), LeftEncoder.get_value(), RightEncoder.get_value(), BackEncoder.get_value());

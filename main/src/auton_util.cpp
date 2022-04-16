@@ -137,7 +137,7 @@ void b_detect_goal(){
 
 void tilt_goal(){
   tilt_lock.set_state(1);
-  delay(200);
+  delay(300);
   b_claw.set_state(0);
 }
 
