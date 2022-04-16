@@ -63,7 +63,7 @@ public:
     return temp_state;
   }
 
-  const char* get_state_name() const{
+  const char* get_state_name(){
     return state_names[static_cast<int>(get_state())];
   }
 
