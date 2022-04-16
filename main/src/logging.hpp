@@ -86,7 +86,7 @@ public:
    */
   template <typename... Params>
   void print(term_colours colour, std::string format, Params... args) const{
-    std::string str = sprintf2_no_colour(print_type, format, args...);
+    std::string str = sprintf2_no_colour(print_type, format, args...) + '\n';
 
     int buffer_len = str.length() + 3;
     char buffer[256];
