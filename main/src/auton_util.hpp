@@ -24,6 +24,7 @@ double get_filtered_output(ADIUltrasonic sensor, int check_count, uint16_t lower
 void flatten_against_wall(bool front = true, int cycles = 4);
 
 void b_detect_goal();
+void tilt_goal();
 void f_detect_goal(bool safety = true);
 
 void detect_interference();

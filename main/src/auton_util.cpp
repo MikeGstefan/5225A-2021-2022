@@ -134,7 +134,11 @@ void b_detect_goal(){
   b_claw.set_state(1);
 }
 
-
+void tilt_goal(){
+  tilt_lock.set_state(1);
+  delay(200);
+  b_claw.set_state(0);
+}
 
 void f_detect_goal(bool safety){ 
 

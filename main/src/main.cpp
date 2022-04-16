@@ -41,7 +41,7 @@ void initialize() {
 	_Controller::init();
 	GUI::init();
 	delay(500);
-	// tracking.x_coord = 28.5, tracking.y_coord = 11.75, tracking.global_angle = -90.0_deg;
+	tracking.x_coord = 25.0, tracking.y_coord = 11.75, tracking.global_angle = -90.0_deg;
 
 	
 	b_lift.motor.set_brake_mode(E_MOTOR_BRAKE_HOLD);
@@ -49,12 +49,12 @@ void initialize() {
 	
 	// tracking.x_coord = 104.0, tracking.y_coord = 12.0, tracking.global_angle = -30.0_deg;
 	// tracking.x_coord = 24.5, tracking.y_coord = 15.0, tracking.global_angle = 9.0_deg;
-	tracking.x_coord = 0.0, tracking.y_coord = 0.0, tracking.global_angle = 0.0_deg;
+	// tracking.x_coord = 0.0, tracking.y_coord = 0.0, tracking.global_angle = 0.0_deg;
 	update_t.start();
 	printf("inti AHHHHHHHHH\n");
 	// master.print(2, 0, "Driver: %s", drivebase.drivers[drivebase.cur_driver].name);
 	// gyro.finish_calibrating(); //Finishes calibrating gyro before program starts
-	GUI::go_to(3);
+	// GUI::go_to(3);
 }
 
 /**
@@ -117,6 +117,9 @@ void opcontrol() {
 	// move_start(move_types::tank_point, tank_point_params({36.0, 105.0, 0.0}));
 	// while(true) pros::delay(10);
 	lift_handle_t.start();
+	// b_lift.set_state(b_lift_states::move_to_target,0);
+
+
 	int state = 0;
 	while(!master.get_digital(DIGITAL_A)){
 		if(master.get_digital_new_press(DIGITAL_B)){
@@ -129,7 +132,7 @@ void opcontrol() {
 		// printf("%d || opcontrol ENCODER L: %d, R: %d, B:%d \n", millis(), LeftEncoder.get_value(), RightEncoder.get_value(), BackEncoder.get_value());
 		delay(10);
 	}
-	skills4();
+	skills3();
 	// // skills();
 	// move_start(move_types::tank_point, tank_point_params({5.0, 100.0,0.0},false,50));
 	// move_start(move_types::turn_angle, turn_angle_params(90.0));
