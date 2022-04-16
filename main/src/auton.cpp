@@ -8,6 +8,9 @@
 #include "Libraries/gui.hpp"
 #include <map> //Not put in main.h because util.hpp cannot include <map>
 
+using namespace std;
+
+
 static const std::string auton_file_name = "/usd/auton.txt";
 
 void skills(){

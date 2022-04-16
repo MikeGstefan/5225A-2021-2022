@@ -5,7 +5,7 @@ int Piston::count = 0;
 
 extern Button pneum_1, pneum_2, pneum_3, pneum_4, pneum_5, pneum_6, pneum_7, pneum_8;
 
-array<std::pair<Piston*, Button*>, 8> Piston::list_for_gui {{
+std::array<std::pair<Piston*, Button*>, 8> Piston::list_for_gui {{
   {nullptr, &pneum_1},
   {nullptr, &pneum_2},
   {nullptr, &pneum_3},

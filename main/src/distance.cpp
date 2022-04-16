@@ -30,9 +30,9 @@ Position distance_reset_left(int cycles){
 	double dist_sensor = 429; //Distance between Front Sensors
 	double l_average, r_average, s_average;
 	int start_time = millis();
-	vector <int> left;
-	vector <int> right;
-	vector <int> side;
+	std::vector <int> left;
+	std::vector <int> right;
+	std::vector <int> side;
 	ram = false;
 	int side_dist = l_dist.get();
 
@@ -110,9 +110,9 @@ Position distance_reset_right(int cycles){
 	double dist_sensor = 429; //Distance between Front Sensors
 	double l_average, r_average, s_average;
 	int start_time = millis();
-	vector <int> left;
-	vector <int> right;
-	vector <int> side;
+	std::vector <int> left;
+	std::vector <int> right;
+	std::vector <int> side;
 	ram = false;
 	int side_dist = r_dist.get();
 
@@ -190,10 +190,10 @@ Position distance_reset_center(int cycles){
 		double averageleft = 0, averageright = 0, average_l_side = 0, average_r_side = 0;
 		double l_average, r_average, l_side_average, r_side_average;
 		int start_time = millis();
-		vector <int> left;
-		vector <int> right;
-		vector <int> r_side;
-		vector <int> l_side;
+		std::vector <int> left;
+		std::vector <int> right;
+		std::vector <int> r_side;
+		std::vector <int> l_side;
 		ram = false;
 		int left_low = l_reset_dist.get();
 		int right_low = r_reset_dist.get();

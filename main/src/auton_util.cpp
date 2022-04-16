@@ -8,6 +8,9 @@
 
 static const std::string start_pos_file_name ="/usd/start_position.txt";
 
+using namespace std;
+
+
 Reset_dist reset_dist_r(&r_dist, 7.5);
 Reset_dist reset_dist_l(&l_dist, 7.5);
 

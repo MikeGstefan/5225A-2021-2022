@@ -20,11 +20,11 @@ Timer toggle_press_timer{"toggle_press_timer", nullptr, false}; // for back claw
 
 joy_modes joy_mode = joy_modes::lift_select;
 
-// array<int, 7> f_lift_pos= {10, 150, 300, 475, 630, 665, 675};
+// std::array<int, 7> f_lift_pos= {10, 150, 300, 475, 630, 665, 675};
 // int f_lift_index = 0;
 // int f_lift_time = 0;
 
-// array<int, 7> b_lift_pos= {10, 400, 550, 660, 665, 665, 675};
+// std::array<int, 7> b_lift_pos= {10, 400, 550, 660, 665, 665, 675};
 // int b_lift_index = 0;
 // int b_lift_time = 0;
 // bool looking = false;

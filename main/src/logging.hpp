@@ -45,7 +45,7 @@ extern Data ERROR;
 
 class Data{
 private:
-  static vector<Data*> obj_list;
+  static std::vector<Data*> obj_list;
   term_colours print_colour;
   int print_type;
   
@@ -56,7 +56,7 @@ public:
   const char* name;
   log_types log_type;
   log_locations log_location;
-  static vector<Data*> get_objs();
+  static std::vector<Data*> get_objs();
 
   void log_print(char* buffer, int buffer_len) const;
   void set_print(term_colours print_colour, int time_type);
@@ -101,7 +101,7 @@ public:
   }
 
 
-  void print(Timer* tmr,int freq, vector<function<char*()>> str) const; //How is this used?
+  void print(Timer* tmr,int freq, std::vector<std::function<char*()>> str) const; //How is this used?
   /*
    * @brief 
    * 

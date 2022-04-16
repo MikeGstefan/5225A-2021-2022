@@ -1,6 +1,9 @@
 #include "logging.hpp"
 #include "task.hpp"
 
+using namespace std;
+
+
 const char* file_name= "/usd/data.txt";
 const char* file_meta= "/usd/meta_data.txt";
 char queue[queue_size];
@@ -9,7 +12,7 @@ char* back = queue;
 
 ofstream file;
 uintptr_t queue_start = reinterpret_cast<uintptr_t>(&queue);
-vector<Data*> Data::obj_list;
+std::vector<Data*> Data::obj_list;
 _Task Data::log_t(queue_handle, "logging");
 
 Data::Data(const char* obj_name, const char* id_code, log_types log_type_param, log_locations log_location_param, term_colours print_colour, int print_type){
@@ -46,7 +49,7 @@ Data ERROR("error.txt", "$12", error, log_locations::both, term_colours::ERROR);
 Data skills_d("skills.txt", "$13", general, log_locations::both);
 
 
-vector<Data*> Data::get_objs(){
+std::vector<Data*> Data::get_objs(){
   return obj_list;
 }
 

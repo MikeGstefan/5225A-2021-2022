@@ -9,6 +9,8 @@
 #include "../tracking.hpp"
 #include "../drive.hpp"
 
+using namespace std;
+
 //DO NOT MESS WITH INDENTATION IN THIS FILE
 
 /*Field array*/ static std::vector<std::bitset<200>> field (200, std::bitset<200>{}); //Initializes to 200 blank bitsets
