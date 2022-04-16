@@ -19,7 +19,7 @@ _Task::_Task(pros::task_fn_t function, const char* name, void* params, std::uint
 }
 
 _Task::~_Task(){
-  task_log.print(term_colours::RED, "%s entered destructor", this->name);
+  task_log.print("%d| %s entered deconstructor\n",millis(), this->name);
   this->kill();
 }
 
@@ -39,33 +39,33 @@ pros::Task* _Task::get_task_ptr()const{
 }
 
 void _Task::start(void* params){
-   task_log.print(term_colours::GREEN, "%s starting", this->name);
+   task_log.print("%d| %s starting\n", millis(), this->name);
    if(this->task_ptr != NULL){
-     task_log.print(term_colours::RED, "%s was already started", this->name);
+     task_log.print("%d| %s was already started\n", millis(), this->name);
      this->kill();
    }
-  //  printf2("before move: %f",static_cast<point_params*>(params)->target.x);
+  //  printf("before move: %f\n",static_cast<point_params*>(params)->target.x);
    this->params = std::make_tuple(this,std::move(params));
-  //  printf2("after move: %f",static_cast<point_params*>(_Task::get_params((void*)&this->params))->target.x);
+  //  printf("after move: %f\n",static_cast<point_params*>(_Task::get_params((void*)&this->params))->target.x);
    this->task_ptr = new pros::Task(this->function, &this->params, this->prio, this->stack_depth, this->name);
-   task_log.print(term_colours::GREEN, "%s started", this->name);
+   task_log.print("%d| %s started\n", millis(), this->name);
 }
 
 void _Task::kill(){
   if(this->task_ptr != NULL){
-    task_log.print("%s killing", this->name);
+    task_log.print("%d| %s killing\n", millis(), this->name);
     this->task_ptr->notify_ext((int)stop, E_NOTIFY_ACTION_OWRITE,NULL);
-    task_log.print("%s notified", this->name);
+    task_log.print("%d| %s notified\n", millis(), this->name);
     wait_until(this->task_ptr->get_state() == 4){
-      task_log.print("%s state %d", this->name, this->task_ptr->get_state());
+      task_log.print("%d| %s state %d\n", millis(), this->name, this->task_ptr->get_state());
     }
-    task_log.print("%s state check passed", this->name);
+    task_log.print("%d| %s state check passed\n", millis(), this->name);
     delete this->task_ptr;
     this->task_ptr = NULL;
-    task_log.print("%s killed", this->name);
+    task_log.print("%d| %s killed\n", millis(), this->name);
   }
   else {
-    task_log.print(term_colours::RED, "%s kill failed: already dead", this->name);
+    task_log.print("%d| %s kill failed: already dead\n", millis(), this->name);
   }
 }
 
@@ -75,7 +75,7 @@ bool _Task::notify_handle(){
       return true;
     break;
     case reset:
-      task_log.print("%s paused", this->name);
+      task_log.print("%d| %s paused\n", millis(), this->name);
       this->task_ptr->suspend();
 
     break;
@@ -88,7 +88,7 @@ bool _Task::notify_handle(){
 
 bool _Task::data_update(){
   if(this->task_ptr == NULL ||this->task_ptr->get_state() >=3)return false;
-  task_log.print("%s pausing for data", this->name);
+  task_log.print("%d| %s pausing for data\n", millis(), this->name);
   this->task_ptr->notify_ext((int)reset, E_NOTIFY_ACTION_OWRITE,NULL);
   wait_until (this->task_ptr->get_state()== 3);
   return true;
@@ -97,16 +97,16 @@ bool _Task::data_update(){
 bool _Task::done_update(){
   if(this->task_ptr == NULL || this->task_ptr->get_state() !=3)return false;
   this->task_ptr->resume();
-  task_log.print("%s done data update, resuming", this->name);
+  task_log.print("%d| %s done data update, resuming\n", millis(), this->name);
   return true;
 }
 
 
 
 void _Task::rebind(pros::task_fn_t function, void* params){
-  task_log.print("%s rebinding", this->name);
+  task_log.print("%d| %s rebinding\n", millis(), this->name);
   this->kill();
   this->function = function;
   this->start(params);
-  task_log.print("%s rebound", this->name);
+  task_log.print("%d| %s rebound\n", millis(), this->name);
 }
