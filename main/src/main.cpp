@@ -24,8 +24,6 @@ void initialize() {
 	// gyro.calibrate();
 
 	drivebase.download_curve_data();
-  load_positions();
-  load_auton();
 
 	Data::init();
 	_Controller::init();
@@ -40,7 +38,7 @@ void initialize() {
 	// tracking.x_coord = 24.5, tracking.y_coord = 15.0, tracking.global_angle = 9.0_deg;
 	tracking.x_coord = 0.0, tracking.y_coord = 0.0, tracking.global_angle = 0.0_deg;
 	update_t.start();
-  lift_handle_t.start();
+  // lift_handle_t.start();
 
 	// gyro.finish_calibrating(); //Finishes calibrating gyro before program starts
 }
@@ -75,6 +73,8 @@ void competition_initialize() {}
  * from where it left off.
  */
 void autonomous() {
+  load_positions();
+  load_auton();
   run_auton();
 }
 

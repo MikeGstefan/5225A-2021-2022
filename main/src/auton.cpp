@@ -119,10 +119,10 @@ void load_auton(){
 
   ifstream file;
   Data::log_t.data_update();
-  printf2(term_colours::BLUE, -1, "\n\nLoading Autons:");
+  printf2(term_colours::BLUE, "\n\nLoading Autons:");
   file.open(auton_file_name, fstream::in);
   while(file >> target >> task){
-    printf2(term_colours::BLUE, -1, "%s: %s", target, task);
+    printf2(term_colours::BLUE, "%s: %s", target, task);
     selected_positions.push_back(target);
   }
   newline();
@@ -207,7 +207,7 @@ void select_auton(){
 
     const std::map<std::string, std::pair<Point, std::string>>::const_iterator og = selection;
 
-    switch(master.wait_for_press({DIGITAL_X, DIGITAL_A, DIGITAL_RIGHT, DIGITAL_LEFT})){//see how to use ok_button
+    switch(master.wait_for_press({DIGITAL_X, DIGITAL_A, DIGITAL_RIGHT, DIGITAL_LEFT})){//see how to use ok_button here instead of A
       case DIGITAL_X:
         master.clear();
         save_auton();
@@ -249,18 +249,18 @@ void run_auton(){
 
     if(!run_defined_auton(selected_positions[i], selected_positions[i+1])){
       if(target.second == "None"){
-        // move_start(move_types::tank_rush, tank_rush_params({target.first, /*figure out angle based on front/back*/}, false));
+        move_start(move_types::tank_rush, tank_rush_params({target.first, /*figure out angle based on front/back*/}, false));
       }
       else if(target.second == "Front"){
         f_lift.set_state(f_lift_states::move_to_target, 0);
-        // move_start(move_types::tank_rush, tank_rush_params({target.first, /*figure out angle based on front/back*/}, false));
-        // f_detect_goal();
+        move_start(move_types::tank_rush, tank_rush_params({target.first, /*figure out angle based on front/back*/}, false));
+        f_detect_goal();
         f_lift.set_state(f_lift_states::move_to_target, 1);
       }
       else if(target.second == "Back"){
         b_lift.set_state(b_lift_states::move_to_target, 0);
-        // move_start(move_types::tank_rush, tank_rush_params({target.first, /*figure out angle based on front/back*/}, true));
-        // b_detect_goal();
+        move_start(move_types::tank_rush, tank_rush_params({target.first, /*figure out angle based on front/back*/}, true));
+        b_detect_goal();
         b_lift.set_state(b_lift_states::move_to_target, 1);
       }
 

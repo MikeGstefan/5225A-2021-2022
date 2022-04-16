@@ -413,8 +413,7 @@ class Slider{
     bool active=true;
     Page* page;
     Button dec, inc;
-    Text<int> title;
-    Text<> min_title, max_title;
+    Text<int> title, min_title, max_title;
 
     //Functions
     void update();
@@ -428,4 +427,5 @@ class Slider{
 
     //Functions
     int get_value() const;
+    void set_value(int);
 };

@@ -2,7 +2,7 @@
 #include "../Libraries/subsystem.hpp"
 #include "../timer.hpp"
 
-#define NUM_OF_INTAKE_STATES 7
+#define NUM_OF_INTAKE_STATES 6
 #define INTAKE_MAX_VELOCITY 600
 
 enum class intake_states{
@@ -10,7 +10,6 @@ enum class intake_states{
   off, // not spinning
   on, // spinning forward
   reversed,  // spinning backwards
-  unjamming, // spinning backwards until jam has stopped
   shifting_to_intake_up, // lift/intake transmission switching to intake mode, moving up
   shifting_to_intake_down, // lift/intake transmission switching to intake mode, moving down
 };

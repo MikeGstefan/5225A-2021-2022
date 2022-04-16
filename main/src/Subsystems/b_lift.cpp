@@ -24,6 +24,7 @@ B_Lift b_lift({{"B_Lift",
 
 B_Lift::B_Lift(Motorized_subsystem<b_lift_states, NUM_OF_B_LIFT_STATES, B_LIFT_MAX_VELOCITY> motorized_subsystem): Motorized_subsystem(motorized_subsystem){ // constructor
   index = 0;
+  speed = 127;
 }
 
 void B_Lift::move_absolute(double position, double velocity, bool wait_for_comp, double end_error){ //blocking
@@ -52,14 +53,14 @@ void B_Lift::handle(bool driver_array){
 
     case b_lift_states::move_to_target: // moving to target
       // output is scoped below to prevent other states from accessing it
-      {
+      if(get_target_state() == b_lift_states::move_to_target){ // don't power the motor if the state is no longer move to target
         int output = pid.compute(b_lift_pot.get_value(), positions[index]);
         if (abs(output) > speed) output = speed * sgn(output); // cap the output at speed
+        // if(abs(output) < 40) output = 40 * sgn(output); // enforces a minimum of 40 power
         motor.move(output);
       }
       // moves to next state if the lift has reached its target
       if(fabs(pid.get_error()) < end_error){
-        motor.move_velocity(0); // holds motor
         // switches to idle by default or special case depending on current target
         switch(index){
           case 0: // lift is at bottom position, this state is used by intake
@@ -128,7 +129,8 @@ void B_Lift::handle_state_change(){
   // if state has changed, performs the necessary cleanup operation before entering next state
 
   // if intake/lift transmission is in intake mode, shift the transmission to the lift
-  if(!lift_t.get_state() && get_state() != b_lift_states::shifting_to_lift_up){
+  // if(!lift_t.get_state() && get_state() != b_lift_states::shifting_to_lift_up){
+  if(!lift_t.get_state() && get_target_state() != b_lift_states::idle && get_target_state() != b_lift_states::between_positions){
     after_switch_state = get_target_state();
     printf("after_switch_state:%s", b_lift.state_names[(int)after_switch_state]);
     Subsystem::set_state(b_lift_states::shifting_to_lift_up);

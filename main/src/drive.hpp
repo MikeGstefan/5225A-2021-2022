@@ -7,7 +7,7 @@
 
 #define TILT_HOLD_TIME 300
 
-#define MAX_DRIVE_SPEED 50
+#define MAX_DRIVE_SPEED 40
 
 // what the right joystick currently does
 enum class joy_modes{
