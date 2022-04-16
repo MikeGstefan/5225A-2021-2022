@@ -11,6 +11,13 @@
 #include "Subsystems/f_lift.hpp"
 #include "Subsystems/intake.hpp"
 
+#define MASTER_HOLD_TIME 300
+#define PARTNER_HOLD_TIME 300
+
+#define TILT_HOLD_TIME 300
+
+#define MAX_DRIVE_SPEED 40
+
 // what the right joystick currently does
 enum class joy_modes{
   lift_select, // the right joystick selects which lift is active
@@ -27,7 +34,7 @@ using namespace std;
 // enum class drivers{Nikhil = 0, Emily = 1, Sarah = 2};
 
 // wait until at least 50 ms since the last reset
-// #define WAIT_FOR_SCREEN_REFRESH() {\
+// #define WAIT_FOR_SCREEN_REFRESH(){\
 //   delay(drivebase.screen_timer.get_time() < 50 ? 50 - drivebase.screen_timer.get_time() : 0);\
 //   drivebase.screen_timer.reset();\
 // }
@@ -103,6 +110,8 @@ public:
   bool get_reverse();
   int get_deadzone();
   // bool get_lift_button(int side = 0);
+
+  void reset();
 };
 
 extern Drivebase drivebase;
@@ -110,12 +119,23 @@ extern Drivebase drivebase;
 // returns true if using front lift and false if using back lift
 bool get_lift();
 
-void handle_lifts();
 
 void handle_lift_buttons();
 void handle_claw_buttons();
 
+void f_lift_increment_index();
+void b_lift_increment_index();
+void f_lift_decrement_index();
+void b_lift_decrement_index();
+
 extern Timer up_press;
 extern Timer down_press;
+
+extern Timer f_lift_up_press;
+extern Timer b_lift_up_press;
+extern Timer f_lift_down_press;
+extern Timer b_lift_down_press;
+
+
 extern Timer toggle_press_timer;
 
