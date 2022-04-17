@@ -41,7 +41,7 @@ void initialize() {
 	_Controller::init();
 	GUI::init();
 	delay(500);
-	tracking.x_coord = 25.0, tracking.y_coord = 11.75, tracking.global_angle = -90.0_deg;
+	// tracking.x_coord = 25.0, tracking.y_coord = 11.75, tracking.global_angle = -90.0_deg;
 
 	
 	b_lift.motor.set_brake_mode(E_MOTOR_BRAKE_HOLD);
@@ -49,7 +49,7 @@ void initialize() {
 	
 	// tracking.x_coord = 104.0, tracking.y_coord = 12.0, tracking.global_angle = -30.0_deg;
 	// tracking.x_coord = 24.5, tracking.y_coord = 15.0, tracking.global_angle = 9.0_deg;
-	// tracking.x_coord = 0.0, tracking.y_coord = 0.0, tracking.global_angle = 0.0_deg;
+	tracking.x_coord = 0.0, tracking.y_coord = 0.0, tracking.global_angle = 0.0_deg;
 	update_t.start();
 	printf("inti AHHHHHHHHH\n");
 	// master.print(2, 0, "Driver: %s", drivebase.drivers[drivebase.cur_driver].name);
@@ -117,15 +117,15 @@ void opcontrol() {
 	// move_start(move_types::tank_point, tank_point_params({36.0, 105.0, 0.0}));
 	// while(true) pros::delay(10);
 	lift_handle_t.start();
-	b_lift.set_state(b_lift_states::move_to_target,0);
-
+	f_lift.set_state(f_lift_states::move_to_target,0);
+	f_claw(0);
 
 	int state = 0;
 	while(!master.get_digital(DIGITAL_A)){
 		if(master.get_digital_new_press(DIGITAL_B)){
-			state = !state;
-			f_claw_o.set_state(state);
-			f_claw_c.set_state(state);
+			// state = !state;
+			// f_claw_o.set_state(state);
+			// f_claw_c.set_state(state);
 		}
 		
 		// gui_handle(); //
@@ -133,11 +133,13 @@ void opcontrol() {
 		delay(10);
 	}
 	int timer = millis();
-	skills();
-	skills2();
-	skills3();
-	skills4();
-	master.print(1,1,"total %d", millis() - timer);
+	move_start(move_types::tank_rush, tank_rush_params({0.0, 50.0,0.0}, false));
+	move_start(move_types::tank_point, tank_point_params({0.0,30.0,0.0}));
+	// skills();
+	// skills2();
+	// skills3();
+	// skills4();
+	// master.print(1,1,"total %d", millis() - timer);
 	// skills3();
 	// // skills();
 	// move_start(move_types::tank_point, tank_point_params({5.0, 100.0,0.0},false,50));
