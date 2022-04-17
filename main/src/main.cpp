@@ -86,9 +86,11 @@ void autonomous() {
 }
 
 void opcontrol() {
-	hitch.set_state(HIGH);
-	delay(200);
-	Timer hitch_timer{"hitch_timer", nullptr, false};
+	// wait_until(master.get_digital_new_press(DIGITAL_A));
+	// b_claw.set_state(HIGH);
+	// b_lift_m.move(50);
+	// wait_until(false);
+	// hitch.set_state(HIGH);
 /*
 	while(true){
 		if(master.get_digital_new_press(DIGITAL_A)){
@@ -229,6 +231,7 @@ void opcontrol() {
 		handle_claw_buttons();
 		b_claw_obj.handle();
 		f_claw_obj.handle();
+		hitch_obj.handle();
 		
 		if(print_timer.get_time() > 100){
 			printf("b_lift_pot_val:%d, f_lift_pot_val:%d\n", b_lift_pot.get_value(), f_lift_pot.get_value());

@@ -60,7 +60,7 @@ void B_Lift::handle(bool driver_array){
       { // don't power the motor if the state is no longer move to target
         int output = pid.compute(b_lift_pot.get_value(), positions[index]);
         if (abs(output) > speed) output = speed * sgn(output); // cap the output at speed
-        if(abs(output) < 30) output = 30 * sgn(output); // enforces a minimum of 30 power
+        if(abs(output) < 50) output = 50 * sgn(output); // enforces a minimum of 30 power
         motor.move(output);
       }
       // moves to next state if the lift has reached its target
@@ -94,7 +94,16 @@ void B_Lift::handle(bool driver_array){
       // holds motor if joystick is within deadzone or lift is out of range
       if (fabs(lift_power) < 10 || (lift_power < 0 && b_lift_pot.get_value() <= driver_positions[0]) || (lift_power > 0 && b_lift_pot.get_value() >= driver_positions[driver_positions.size() - 1])){
         lift_power = 0;
-      } 
+      }
+      // if back lift is below a threshold and the hitch is open, close it to not break it
+      if(b_lift_pot.get_value() < 1600 && lift_power < 0){
+        if(hitch_obj.get_state() != hitch_states::grabbed){
+          hitch_obj.set_state(hitch_states::grabbed);
+        }
+        // if the goal is detected, don't power the lift
+        if(hitch_dist.get() < 25) lift_power = 0;
+      }
+
       motor.move_velocity(lift_power);
       break;
 
@@ -186,10 +195,25 @@ void B_Lift::handle_state_change(){
 void B_Lift::set_state(const b_lift_states next_state, const uint8_t index, const int32_t speed){  // requests a state change and logs it
   // confirms state change only if the state is actually move to target
   if (next_state == b_lift_states::move_to_target){
-    this->index = index;
-    this->speed = speed;
-    state_log.print("%s | State change requested index is: %d \t", name, index);
-    Subsystem::set_state(next_state);
+    // if back lift is below a threshold and the hitch is open, close it to not break it
+    if(index == 0){
+      if(hitch_obj.get_state() != hitch_states::grabbed){
+        hitch_obj.set_state(hitch_states::grabbed);
+      }
+      // if the goal is detected, don't power the lift
+      if(hitch_dist.get() > 25){
+        this->index = index;
+        this->speed = speed;
+        state_log.print("%s | State change requested index is: %d \t", name, index);
+        Subsystem::set_state(next_state);
+      }
+    }
+    else{
+      this->index = index;
+      this->speed = speed;
+      state_log.print("%s | State change requested index is: %d \t", name, index);
+      Subsystem::set_state(next_state);
+    }
   }
   else state_log.print("%s | INVALID move to target State change requested from %s to %s, index is: %d", name, state_names[static_cast<int>(get_state())], state_names[static_cast<int>(next_state)], index);
 }

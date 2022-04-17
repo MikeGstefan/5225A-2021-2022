@@ -626,6 +626,7 @@ void handle_claw_buttons(){
 
   // toggles open/closed when hitch button is pressed
   if(master.is_rising(hitch_button) || partner.is_rising(partner_hitch_button)){
+    // hitch.toggle_state();
     if(hitch_obj.get_state() == hitch_states::grabbed) hitch_obj.set_state(hitch_states::about_to_search);
     else hitch_obj.set_state(hitch_states::grabbed);
   }
