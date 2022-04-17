@@ -5,10 +5,10 @@
 // lift buttons
 controller_digital_e_t lift_up_button = DIGITAL_R1;
 controller_digital_e_t lift_down_button = DIGITAL_R2;
-controller_digital_e_t both_lifts_down_button = DIGITAL_A;
 
 controller_digital_e_t reverse_drive_button = DIGITAL_L1;
 controller_digital_e_t claw_toggle_button =  DIGITAL_L2;
+controller_digital_e_t hitch_button = DIGITAL_A;
 
 // intake buttons
 controller_digital_e_t intake_button = DIGITAL_B;
@@ -39,6 +39,8 @@ controller_digital_e_t partner_intake_reverse_button = DIGITAL_Y;
 controller_digital_e_t partner_back_claw_toggle_button = DIGITAL_A;
 controller_digital_e_t partner_front_claw_toggle_button = DIGITAL_LEFT;
 controller_digital_e_t partner_claw_tilt_button = DIGITAL_X;
+
+controller_digital_e_t partner_hitch_button = DIGITAL_UP;
 
 controller_digital_e_t partner_joy_mode_switch_button = DIGITAL_RIGHT;
 

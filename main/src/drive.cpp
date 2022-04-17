@@ -233,7 +233,7 @@ void Drivebase::handle_input(){
   // tracking.power_x = drivers[cur_driver].custom_drives[0].lookup(master.get_analog(drivers[cur_driver].joy_sticks[0]));
   tracking.power_y = drivers[cur_driver].custom_drives[1].lookup(master.get_analog(ANALOG_LEFT_Y));
   // caps drive speed at 40 if intake is on
-  if(intake.get_state() == intake_states::on){
+  if(b_lift.get_state() == b_lift_states::intake_on){
     if(fabs(tracking.power_y) > MAX_DRIVE_SPEED)  tracking.power_y = sgn(tracking.power_y) * MAX_DRIVE_SPEED;
     // caps turns speed at 40% when intake is on
     tracking.power_a = 0.4 * drivers[cur_driver].custom_drives[2].lookup(master.get_analog(ANALOG_LEFT_X));
@@ -427,8 +427,8 @@ void handle_lift_buttons(){
     if(joy_mode == joy_modes::lift_select){
       master.print(0,0, "auto   ");
       partner.print(0,0, "auto   ");
-      b_lift.Subsystem::set_state(b_lift_states::between_positions);
-      f_lift.Subsystem::set_state(f_lift_states::between_positions);
+      b_lift.Subsystem::set_state(b_lift_states::idle);
+      f_lift.Subsystem::set_state(f_lift_states::idle);
     }
     else{
       master.print(0,0, "manual   ");
@@ -443,11 +443,11 @@ void handle_lift_buttons(){
   if(joy_mode != joy_modes::manual){
     if(master.is_rising(lift_up_button) && get_lift()){
       up_press.reset();
-      f_lift_increment_index();
+      f_lift.increment_index();
     }
     if(partner.is_rising(partner_front_lift_up_button)){
       f_lift_up_press.reset();
-      f_lift_increment_index();
+      f_lift.increment_index();
     }
   }
 
@@ -455,11 +455,11 @@ void handle_lift_buttons(){
   if(joy_mode != joy_modes::manual){
     if(master.is_rising(lift_up_button) && !get_lift()){
       up_press.reset();
-      b_lift_increment_index();
+      b_lift.increment_index();
     }
     if(partner.is_rising(partner_back_lift_up_button)){
       b_lift_up_press.reset();
-      b_lift_increment_index();
+      b_lift.increment_index();
     }
   }
 
@@ -467,11 +467,11 @@ void handle_lift_buttons(){
   if(joy_mode != joy_modes::manual){
     if(master.is_rising(lift_down_button) && get_lift()){
       down_press.reset();
-      f_lift_decrement_index();
+      f_lift.decrement_index();
     }
     if(partner.is_rising(partner_front_lift_down_button)){
       f_lift_down_press.reset();
-      f_lift_decrement_index();
+      f_lift.decrement_index();
     }
   }
 
@@ -479,11 +479,11 @@ void handle_lift_buttons(){
   if(joy_mode != joy_modes::manual){
     if(master.is_rising(lift_down_button) && !get_lift()){
       down_press.reset();
-      b_lift_decrement_index();
+      b_lift.decrement_index();
     }
     if(partner.is_rising(partner_back_lift_down_button)){
       b_lift_down_press.reset();
-      b_lift_decrement_index();
+      b_lift.decrement_index();
     }
   }
   // PARTNER STUFF
@@ -525,7 +525,7 @@ void handle_lift_buttons(){
   }
 
 
-  if(master.is_rising(both_lifts_down_button) || partner.is_rising(partner_both_lifts_down_button)){
+  if(partner.is_rising(partner_both_lifts_down_button)){
     f_lift.set_state(f_lift_states::move_to_target, 0);
     b_lift.set_state(b_lift_states::move_to_target, 0);
   }
@@ -537,7 +537,7 @@ void handle_claw_buttons(){
       // toggles f_claw open/closed when claw toggle button is pressed
       switch(f_claw_obj.get_state()){
         case f_claw_states::grabbed:
-          if(f_lift.get_state() == f_lift_states::bottom) f_claw_obj.set_state(f_claw_states::about_to_search);
+          if(F_LIFT_AT_BOTTOM) f_claw_obj.set_state(f_claw_states::about_to_search);
           else f_claw_obj.set_state(f_claw_states::idle);
           break;
 
@@ -575,7 +575,7 @@ void handle_claw_buttons(){
   if(partner.is_rising(partner_front_claw_toggle_button)){
     switch(f_claw_obj.get_state()){
       case f_claw_states::grabbed:
-        if(f_lift.get_state() == f_lift_states::bottom) f_claw_obj.set_state(f_claw_states::about_to_search);
+        if(F_LIFT_AT_BOTTOM) f_claw_obj.set_state(f_claw_states::about_to_search);
         else f_claw_obj.set_state(f_claw_states::idle);
         break;
 
@@ -609,7 +609,7 @@ void handle_claw_buttons(){
     // if the button WASN'T held and the claw was closed when it was pressed, open the claw
     if(toggle_press_timer.get_time() < TILT_HOLD_TIME && (b_claw_obj.state_at_toggle_press == b_claw_states::tilted || b_claw_obj.state_at_toggle_press == b_claw_states::flat)){
       // printf("fail| state_at_toggle_press: %s, timer: %d\n", b_claw_obj.state_names[(int)b_claw_obj.state_at_toggle_press], toggle_press_timer.get_time());
-      if(b_lift.get_state() == b_lift_states::bottom) b_claw_obj.set_state(b_claw_states::about_to_search);
+      if(B_LIFT_AT_BOTTOM) b_claw_obj.set_state(b_claw_states::about_to_search);
       else b_claw_obj.set_state(b_claw_states::idle);     
       b_claw_obj.state_at_toggle_press = b_claw_states::idle;  // resets state_at_toggle_press so this if isn't entered again
     }
@@ -622,88 +622,37 @@ void handle_claw_buttons(){
     else if(b_claw_obj.get_state() == b_claw_states::flat) b_claw_obj.set_state(b_claw_states::tilted);
   }
 
+  // HITCH CODE
+
+  // toggles open/closed when hitch button is pressed
+  if(master.is_rising(hitch_button) || partner.is_rising(partner_hitch_button)){
+    if(hitch_obj.get_state() == hitch_states::grabbed) hitch_obj.set_state(hitch_states::about_to_search);
+    else hitch_obj.set_state(hitch_states::grabbed);
+  }
+
 }
 
-void f_lift_increment_index(){
-  printf2("f_lift_increment");
-  // if state is between_positions, go to the closest position that's higher than the current position
-  if(f_lift.get_state() == f_lift_states::between_positions){
-    // if lift is above topmost position, go to top
-    if(f_lift_pot.get_value() > f_lift.driver_positions[f_lift.driver_positions.size() - 1]){
-      f_lift.set_state(f_lift_states::move_to_target, f_lift.driver_positions.size() - 1);
-    }
-    else{
-      for (size_t i = 0; i < f_lift.driver_positions.size(); i++){
-        if(f_lift.driver_positions[i] > f_lift_pot.get_value()){
-          f_lift.set_state(f_lift_states::move_to_target, i);
-          break;
-        }
-      }
+void handle_intake_buttons(){
+  // toggles intake state if intake button is pressed
+  if(master.is_rising(intake_button) || partner.is_rising(partner_intake_button)){
+    switch(b_lift.get_state()){
+      case b_lift_states::intake_on:
+        b_lift.Subsystem::set_state(b_lift_states::intake_off);
+        break;
+      default:
+        b_lift.Subsystem::set_state(b_lift_states::intake_on);
+        break;
     }
   }
-  // otherwise just go to the next highest position, but doesn't increment index if it's out of bounds
-  else if(f_lift.get_index() < f_lift.driver_positions.size() - 1)  f_lift.set_state(f_lift_states::move_to_target, f_lift.get_index() + 1);
-}
-
-void b_lift_increment_index(){
-  printf2("b_lift_increment");
-  // if state is between_positions, go to the closest position that's higher than the current position
-  if(b_lift.get_state() == b_lift_states::between_positions){
-    // if lift is above topmost position, go to top
-    if(b_lift_pot.get_value() > b_lift.driver_positions[b_lift.driver_positions.size() - 1]){
-      b_lift.set_state(b_lift_states::move_to_target, b_lift.driver_positions.size() - 1);
-    }
-    else{
-      for (size_t i = 0; i < b_lift.driver_positions.size(); i++){
-        if(b_lift.driver_positions[i] > b_lift_pot.get_value()){
-          b_lift.set_state(b_lift_states::move_to_target, i);
+  // toggles intake reverse state if intake reverse button is pressed
+  if(master.is_rising(intake_reverse_button) || partner.is_rising(partner_intake_reverse_button)){
+    switch(b_lift.get_state()){
+        case b_lift_states::intake_reversed:
+          b_lift.Subsystem::set_state(b_lift_states::intake_off);
           break;
-        }
-      }
+        default:
+          b_lift.Subsystem::set_state(b_lift_states::intake_reversed);
+          break;
     }
   }
-  // otherwise just go to the next highest position, but doesn't increment index if it's out of bounds
-  else if(b_lift.get_index() < b_lift.driver_positions.size() - 1)  b_lift.set_state(b_lift_states::move_to_target, b_lift.get_index() + 1);
-}
-
-void f_lift_decrement_index(){
-  printf2("f_lift_decrement");
-  // if state is between_positions, go to the closest position that's lower than the current position
-  if(f_lift.get_state() == f_lift_states::between_positions){
-    // if lift is below bottommost position, go to bottom
-    if(f_lift_pot.get_value() < f_lift.driver_positions[0]){
-      f_lift.set_state(f_lift_states::move_to_target, 0);
-    }
-    else{
-      for (size_t i = f_lift.driver_positions.size() - 1; i >= 0; i--){
-        if(f_lift.driver_positions[i] < f_lift_pot.get_value()){
-          f_lift.set_state(f_lift_states::move_to_target, i);
-          break;
-        }
-      }
-    }
-  }
-  // otherwise just go to the next lowest position, but doesn't decrement index if it's out of bounds
-  else if(f_lift.get_index() > 0)  f_lift.set_state(f_lift_states::move_to_target, f_lift.get_index() - 1);
-}
-
-void b_lift_decrement_index(){
-  printf2("b_lift_decrement");
-  // if state is between_positions, go to the closest position that's lower than the current position
-  if(b_lift.get_state() == b_lift_states::between_positions){
-    // if lift is below bottommost position, go to bottom
-    if(b_lift_pot.get_value() < b_lift.driver_positions[0]){
-      b_lift.set_state(b_lift_states::move_to_target, 0);
-    }
-    else{
-      for (size_t i = b_lift.driver_positions.size() - 1; i >= 0; i--){
-        if(b_lift.driver_positions[i] < b_lift_pot.get_value()){
-          b_lift.set_state(b_lift_states::move_to_target, i);
-          break;
-        }
-      }
-    }
-  }
-  // otherwise just go to the next lowest position, but doesn't decrement index if it's out of bounds
-  else if(b_lift.get_index() > 0)  b_lift.set_state(b_lift_states::move_to_target, b_lift.get_index() - 1);
 }

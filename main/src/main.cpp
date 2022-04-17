@@ -10,6 +10,7 @@
 #include "auton_util.hpp"
 #include "Subsystems/f_lift.hpp"
 #include "Subsystems/b_lift.hpp"
+#include "Subsystems/hitch.hpp"
 #include "distance.hpp"
 #include "util.hpp"
 using namespace std;
@@ -85,6 +86,26 @@ void autonomous() {
 }
 
 void opcontrol() {
+	hitch.set_state(HIGH);
+	delay(200);
+	Timer hitch_timer{"hitch_timer", nullptr, false};
+/*
+	while(true){
+		if(master.get_digital_new_press(DIGITAL_A)){
+			if(hitch.get_state()){
+				hitch.set_state(LOW);
+				hitch_timer.reset();
+			}
+			else{
+				hitch.set_state(HIGH);
+			}
+		}
+		if(hitch_timer.get_time() > 300 && hitch_dist.get() < 25){
+			hitch.set_state(HIGH);
+		}
+		delay(10);
+	}
+*/
 	// while(true){
 	// 	b_lift_m.move(master.get_analog(ANALOG_RIGHT_Y));
 	// 	printf("%d\n", b_lift_m.get_voltage());
@@ -172,6 +193,14 @@ void opcontrol() {
 	// 	}
 	// 	delay(10);
 	// }
+
+
+	// while(true){
+	// 	printf("b_lift_pot_val:%d, f_lift_pot_val:%d, b index:%d, f_index:%d\n", b_lift_pot.get_value(), f_lift_pot.get_value(), b_lift.find_index(), f_lift.find_index());
+
+	// 	delay(10);
+	// }
+
 	master.clear();
 	master.clear();
 
@@ -189,8 +218,7 @@ void opcontrol() {
 		drivebase.handle_trans();
 
 		// intake handlers
-		intake.handle_buttons();
-		intake.handle();
+		handle_intake_buttons();
 
 		// lift handlers
 		handle_lift_buttons();
