@@ -9,7 +9,7 @@
 
 #include "Subsystems/b_lift.hpp"
 #include "Subsystems/f_lift.hpp"
-#include "Subsystems/intake.hpp"
+#include "Subsystems/hitch.hpp"
 
 #define MASTER_HOLD_TIME 300
 #define PARTNER_HOLD_TIME 300
@@ -122,11 +122,10 @@ bool get_lift();
 
 void handle_lift_buttons();
 void handle_claw_buttons();
+void handle_intake_buttons();
 
 void f_lift_increment_index();
-void b_lift_increment_index();
 void f_lift_decrement_index();
-void b_lift_decrement_index();
 
 extern Timer up_press;
 extern Timer down_press;

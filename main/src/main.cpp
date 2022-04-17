@@ -10,6 +10,7 @@
 #include "auton_util.hpp"
 #include "Subsystems/f_lift.hpp"
 #include "Subsystems/b_lift.hpp"
+#include "Subsystems/hitch.hpp"
 #include "distance.hpp"
 #include "util.hpp"
 using namespace std;
@@ -112,7 +113,7 @@ void opcontrol() {
 	// while(true) pros::delay(10);
 	lift_handle_t.start();
 	b_lift.set_state(b_lift_states::move_to_target,0);
-
+	hitch.set_state(1);
 
 	int state = 0;
 	while(!master.get_digital(DIGITAL_A)){
@@ -164,8 +165,7 @@ void opcontrol() {
 		drivebase.handle_trans();
 
 		// intake handlers
-		intake.handle_buttons();
-		intake.handle();
+		handle_intake_buttons();
 
 		// lift handlers
 		handle_lift_buttons();

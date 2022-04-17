@@ -2,19 +2,21 @@
 
 // #define master partner
 
-// Front Lift object
+// Back Lift object
 B_Lift b_lift({{"B_Lift",
 {
   "managed",
   "bottom",
+  "top",
   "idle",
   "move_to_target",
-  "top",
-  "between_positions",
   "manual",
+  "intake_off",
+  "intake_on",
+  "intake_reversed",
   "shifting_to_lift_up",
-  "shifting_to_lift_down",
-},  b_lift_states::managed, b_lift_states::move_to_target // goes from managed to move_to_target (bottom state) upon startup
+  "shifting_to_lift_down"
+},  b_lift_states::managed, b_lift_states::idle // goes from managed to idle upon startup
 }, b_lift_m});
 
 
@@ -44,31 +46,29 @@ void B_Lift::handle(bool driver_array){
       break;
     case b_lift_states::bottom: // at lowest position, this state is used by the intake and f_claw
       break;
+    case b_lift_states::top: // at highest position
+      break;
     case b_lift_states::idle: // not doing anything
+      // if(fabs(b_lift_pot.get_value() - driver_positions[index]) > detection_end_error){
+      //   state_log.print("B_lift slipped out of position, index: %d, position: %d", index.load(), b_lift_pot.get_value());
+      //   set_state(b_lift_states::move_to_target, index);
+      // }
       break;
 
     case b_lift_states::move_to_target: // moving to target
       // output is scoped below to prevent other states from accessing it
-      if(get_target_state() == b_lift_states::move_to_target){ // don't power the motor if the state is no longer move to target
+      { // don't power the motor if the state is no longer move to target
         int output = pid.compute(b_lift_pot.get_value(), positions[index]);
         if (abs(output) > speed) output = speed * sgn(output); // cap the output at speed
-        // if(abs(output) < 40) output = 40 * sgn(output); // enforces a minimum of 40 power
+        if(abs(output) < 30) output = 30 * sgn(output); // enforces a minimum of 30 power
         motor.move(output);
       }
       // moves to next state if the lift has reached its target
       if(fabs(pid.get_error()) < end_error){
         // switches to idle by default or special case depending on current target
-        switch(index){
-          case 0: // lift is at bottom position, this state is used by intake
-            Subsystem::set_state(b_lift_states::bottom);
-            break;
-          case NUM_OF_B_LIFT_POSITIONS - 1:
-            Subsystem::set_state(b_lift_states::top);
-            break;
-          default:
-            Subsystem::set_state(b_lift_states::idle);
-            break;
-        }
+        if(index == 0)  Subsystem::set_state(b_lift_states::bottom);  // lift is at bottom position
+        else if(index == driver_positions.size() - 1) Subsystem::set_state(b_lift_states::top); // lift is at top position
+        else Subsystem::set_state(b_lift_states::idle);
       }
 
       // UNCOMMENT FOR LIFT SAFETY Handling
@@ -86,33 +86,38 @@ void B_Lift::handle(bool driver_array){
       }
       */
       break;
-    
-    case b_lift_states::top: // at highest position
-      break;
-
-    case b_lift_states::between_positions:
-      break;
 
     case b_lift_states::manual:
       lift_power = master.get_analog(ANALOG_RIGHT_X);
       // if master controller joystick isn't active, take partner input instead
       if(fabs(lift_power) < 10) lift_power = partner.get_analog(ANALOG_RIGHT_Y);
       // holds motor if joystick is within deadzone or lift is out of range
-      if (fabs(lift_power) < 10 || (lift_power < 0 && b_lift_pot.get_value() <= driver_positions[0]) || (lift_power > 0 && b_lift_pot.get_value() >= driver_positions[driver_positions.size() - 1])) motor.move_velocity(0);
-      else motor.move(lift_power);
-      // exits manual state if up or down button is pressed or held
+      if (fabs(lift_power) < 10 || (lift_power < 0 && b_lift_pot.get_value() <= driver_positions[0]) || (lift_power > 0 && b_lift_pot.get_value() >= driver_positions[driver_positions.size() - 1])){
+        lift_power = 0;
+      } 
+      motor.move_velocity(lift_power);
       break;
 
-    case b_lift_states::shifting_to_lift_up:
-      if(fabs(b_lift_m.get_target_position() - b_lift_m.get_position()) < 15){
-        Subsystem::set_state(b_lift_states::shifting_to_lift_down);
+    case b_lift_states::intake_off:
+      break;
+
+    case b_lift_states::intake_on:
+      printf("current:%lf\n", motor.get_actual_velocity());
+      break;
+
+    case b_lift_states::intake_reversed:
+      break;
+
+    case b_lift_states::shifting_up:
+      if(fabs(motor.get_target_position() - motor.get_position()) < 15){
+        Subsystem::set_state(b_lift_states::shifting_down);
       }
       break;
 
-    case b_lift_states::shifting_to_lift_down:
+    case b_lift_states::shifting_down:
       // switches to desired state after transmission
-      if(fabs(b_lift_m.get_target_position() - b_lift_m.get_position()) < 15){
-        Subsystem::set_state(after_switch_state);
+      if(fabs(motor.get_target_position() - motor.get_position()) < 15){
+        Subsystem::set_state(after_shift_state);
       }
       break;
 
@@ -124,19 +129,8 @@ void B_Lift::handle_state_change(){
   if(get_target_state() == get_state()) return;
   // if state has changed, performs the necessary cleanup operation before entering next state
 
-  // if intake/lift transmission is in intake mode, shift the transmission to the lift
-  // if(!lift_t.get_state() && get_state() != b_lift_states::shifting_to_lift_up){
-  if(!lift_t.get_state() && get_target_state() != b_lift_states::idle && get_target_state() != b_lift_states::between_positions){
-    after_switch_state = get_target_state();
-    printf("after_switch_state:%s", b_lift.state_names[(int)after_switch_state]);
-    Subsystem::set_state(b_lift_states::shifting_to_lift_up);
-    intake.set_state(intake_states::off);
-  }
-
-  if(get_state() == b_lift_states::bottom){ // if lift is leaving the bottom state, turn off the intake
-    // b_lock_p.set_value(HIGH);  // unlock the lift
-    intake.set_state(intake_states::off);
-  }
+  // if intake/lift transmission is in the wrong state, shift
+  handle_shift();
 
   switch(get_target_state()){
     case b_lift_states::managed:
@@ -144,7 +138,10 @@ void B_Lift::handle_state_change(){
 
     case b_lift_states::bottom:
       motor.move(-10); // slight down holding power
-      // b_lock_p.set_value(HIGH);  // lock the lift
+      break;
+
+    case b_lift_states::top:
+      motor.move(10); // slight up holding power
       break;
 
     case b_lift_states::idle:
@@ -154,27 +151,30 @@ void B_Lift::handle_state_change(){
     case b_lift_states::move_to_target:
       break;
 
-    case b_lift_states::top:
-      motor.move(10); // slight up holding power
-      break;
-
-    case b_lift_states::between_positions:
-      break;
-
     case b_lift_states::manual:
-      master.rumble("-");
       // we don't want the b_claw in search mode while the lift is in manual
       if(b_claw_obj.get_state() == b_claw_states::searching){
         b_claw_obj.set_state(b_claw_states::idle);
       }
       break;
 
-    case b_lift_states::shifting_to_lift_up:
-      lift_t.set_state(HIGH);
+    case b_lift_states::intake_off:
+      motor.move(0);
+      break;
+
+    case b_lift_states::intake_on:
+      motor.move(-127);
+      break;
+
+    case b_lift_states::intake_reversed:
+      motor.move(127);
+      break;
+
+    case b_lift_states::shifting_up:
       motor.move_relative(30, 100);
       break;
 
-    case b_lift_states::shifting_to_lift_down:
+    case b_lift_states::shifting_down:
       motor.move_relative(-30, 100);
       break;
 
@@ -192,6 +192,104 @@ void B_Lift::set_state(const b_lift_states next_state, const uint8_t index, cons
     Subsystem::set_state(next_state);
   }
   else state_log.print("%s | INVALID move to target State change requested from %s to %s, index is: %d", name, state_names[static_cast<int>(get_state())], state_names[static_cast<int>(next_state)], index);
+}
+
+int B_Lift::find_index(){
+  for(size_t i = 0; i < driver_positions.size(); i++){
+    // if the lift is at a position in the array, return that index
+    if(fabs(driver_positions[i] - b_lift_pot.get_value()) < detection_end_error)  return i;
+  }
+  return -1;
+}
+
+void B_Lift::handle_shift(){
+  // if the transmission is in intake mode and the target state is a lift state, shift
+  if(lift_t.get_state() == TRANS_INTAKE_STATE){
+    switch(get_target_state()){
+      case b_lift_states::bottom:
+        shift(TRANS_LIFT_STATE);
+        break;
+      case b_lift_states::top:
+        shift(TRANS_LIFT_STATE);
+        break;
+      case b_lift_states::idle:
+        shift(TRANS_LIFT_STATE);
+        break;
+      case b_lift_states::move_to_target:
+        shift(TRANS_LIFT_STATE);
+        break;        
+      case b_lift_states::manual:
+        shift(TRANS_LIFT_STATE);
+        break;
+    }
+  }
+  // if the transmission is in lift mode and the target state is an intake state, shift
+  else{
+    switch(get_target_state()){
+      case b_lift_states::intake_off:
+        shift(TRANS_INTAKE_STATE);
+        break;
+      case b_lift_states::intake_on:
+        shift(TRANS_INTAKE_STATE);
+        break;
+      case b_lift_states::intake_reversed:
+        shift(TRANS_INTAKE_STATE);
+        break;
+    }
+  }
+}
+
+void B_Lift::shift(bool piston_state){
+  after_shift_state = get_target_state();
+  state_log.print("after_switch_state:%s", b_lift.state_names[(int)after_shift_state]);
+  lift_t.set_state(piston_state);
+  Subsystem::set_state(b_lift_states::shifting_up);
+}
+
+void B_Lift::increment_index(){
+  state_log.print("b_lift_increment");
+  int cur_index = find_index();
+  state_log.print("B_LIFT_CUR_INDEX: %d\n", cur_index);
+  // if state is between_positions, go to the closest position that's higher than the current position
+  if(cur_index == -1){
+    // if lift is above topmost position, go to top
+    if(b_lift_pot.get_value() > b_lift.driver_positions[b_lift.driver_positions.size() - 1]){
+      b_lift.set_state(b_lift_states::move_to_target, b_lift.driver_positions.size() - 1);
+    }
+    else{
+      for (size_t i = 0; i < b_lift.driver_positions.size(); i++){
+        if(driver_positions[i] > b_lift_pot.get_value()){
+          b_lift.set_state(b_lift_states::move_to_target, i);
+          break;
+        }
+      }
+    }
+  }
+  // otherwise just go to the next highest position, but doesn't increment index if it's out of bounds
+  else if(cur_index < b_lift.driver_positions.size() - 1)  b_lift.set_state(b_lift_states::move_to_target, cur_index + 1);
+}
+
+void B_Lift::decrement_index(){
+  state_log.print("b_lift_decrement");
+  int cur_index = find_index();
+  printf("B_LIFT_CUR_INDEX: %d\n", cur_index);
+  // if state is between_positions, go to the closest position that's lower than the current position
+  if(cur_index == -1){
+    // if lift is below bottommost position, go to bottom
+    if(b_lift_pot.get_value() < b_lift.driver_positions[0]){
+      b_lift.set_state(b_lift_states::move_to_target, 0);
+    }
+    else{
+      for (size_t i = b_lift.driver_positions.size() - 1; i >= 0; i--){
+        if(b_lift.driver_positions[i] < b_lift_pot.get_value()){
+          b_lift.set_state(b_lift_states::move_to_target, i);
+          break;
+        }
+      }
+    }
+  }
+  // otherwise just go to the next lowest position, but doesn't decrement index if it's out of bounds
+  else if(cur_index > 0)  b_lift.set_state(b_lift_states::move_to_target, cur_index - 1);
 }
 
 int elastic_b_up_time, elastic_b_down_time; //for gui_construction.cpp
@@ -238,7 +336,7 @@ void B_Claw::handle(){
 
     case b_claw_states::idle:
       // forces claw into searching if lift is at bottom
-      if(b_lift.get_state() == b_lift_states::bottom) set_state(b_claw_states::searching);
+      if(B_LIFT_AT_BOTTOM && b_lift.get_state() != b_lift_states::manual) set_state(b_claw_states::searching);
       break;
 
     case b_claw_states::about_to_search:
@@ -246,7 +344,7 @@ void B_Claw::handle(){
       if(search_timer.get_time() > 2000) set_state(b_claw_states::searching);
 
       // doesn't let driver search if lift isn't at bottom
-      if(b_lift.get_state() != b_lift_states::bottom) set_state(b_claw_states::idle);
+      if(!B_LIFT_AT_BOTTOM) set_state(b_claw_states::idle);
       break;
 
     case b_claw_states::searching:
@@ -254,7 +352,7 @@ void B_Claw::handle(){
       if(b_dist.get() < 40) set_state(b_claw_states::tilted);
 
       // doesn't let driver search if lift isn't at bottom
-      if(b_lift.get_state() != b_lift_states::bottom) set_state(b_claw_states::idle);
+      if(!B_LIFT_AT_BOTTOM) set_state(b_claw_states::idle);
       break;
 
     case b_claw_states::tilted:
@@ -274,7 +372,6 @@ void B_Claw::handle_state_change(){
       break;
 
     case b_claw_states::idle:
-      master.rumble("-");
       tilt_lock.set_state(HIGH);
       b_claw.set_state(LOW);
       break;
@@ -286,21 +383,16 @@ void B_Claw::handle_state_change(){
       break;
 
     case b_claw_states::searching:
-      master.rumble("-");
       b_claw.set_state(LOW);
       break;
 
     case b_claw_states::tilted:
-      master.rumble("-");
       b_claw.set_state(HIGH); // grabs mogo
-      // delay(100);
-      // tilt_lock.set_state(HIGH);
       break;
 
     case b_claw_states::flat:
-      master.rumble("-");
       tilt_lock.set_state(LOW);
-      delay(300);
+      delay(50);
       b_claw.set_state(LOW);
       break;
   }

@@ -1,6 +1,4 @@
 #include "piston.hpp"
-#include "Subsystems/b_lift.hpp"
-#include "Subsystems/intake.hpp"
 int Piston::count = 0;
 
 extern Button pneum_1, pneum_2, pneum_3, pneum_4, pneum_5, pneum_6, pneum_7, pneum_8;
@@ -27,7 +25,6 @@ Piston::Piston(ext_adi_port_pair_t port_pair, std::string name, bool open_state,
 
 
 void Piston::set_state(bool state){
-  printf("%s | Piston state change: %d, b_lift:%s, intake:%s\n", name.c_str(), state, b_lift.state_names[(int)b_lift.get_state()], intake.state_names[(int)intake.get_state()]);
   this->state = state != open_state;
   this->set_value(this->state);
   this->change_time = millis();

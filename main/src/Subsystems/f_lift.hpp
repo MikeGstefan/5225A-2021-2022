@@ -4,7 +4,7 @@
 #include "../pid.hpp"
 #include <atomic>
 
-#define NUM_OF_F_LIFT_POSITIONS 5 // for driver array
+#define F_LIFT_AT_BOTTOM (f_lift_pot.get_value() < f_lift.driver_positions[0] + f_lift.end_error)
 
 #define NUM_OF_F_LIFT_STATES 7
 #define F_LIFT_MAX_VELOCITY 100
@@ -12,9 +12,9 @@
 enum class f_lift_states{
   managed, // being managed externally (NOT DOING ANYTHING)
   bottom, // at lowest position
+  top, // at highest position
   idle,  // not doing anything
   move_to_target,  // moving to target position
-  top, // at highest position
   between_positions,  // not moving, but in between positions in the array
   manual  // controlled by joystick
 };
@@ -22,8 +22,9 @@ enum class f_lift_states{
 class F_Lift: public Motorized_subsystem<f_lift_states, NUM_OF_F_LIFT_STATES, F_LIFT_MAX_VELOCITY> {
     Timer up_press{"Up_press"}, down_press{"Down_press"};
     int search_cycle_check_count = 0, bad_count = 0; // cycle check for safeties
-    PID pid = PID(5.0,0.0,0.0,0.0);
+    PID pid = PID(3.0,0.0,0.0,0.0);
     int lift_power; // for manual control
+    int detection_end_error = 40; // the range the lift has to be within of a position to be considered at that position 
 
     // height conversion constants
     double offset_a = 365.0, offset_h = 9.75;
@@ -49,6 +50,13 @@ class F_Lift: public Motorized_subsystem<f_lift_states, NUM_OF_F_LIFT_STATES, F_
     // THIS IS AN OVERLOAD for the existing set state function, accepts an index for the lift
     void set_state(const f_lift_states next_state, const uint8_t index, const int32_t speed = 127);  // requests a state change and logs it
     
+    int find_index(); // returns current driver index depending on lift positions, returns -1 if not found
+
+    // for driver control
+    void increment_index();
+    void decrement_index();
+
+
     // getter because index is private
     int get_index() const{
       return index.load();

@@ -25,7 +25,8 @@ void skills(){
 	b_detect_goal(); 
   skills_d.print("FIRST GOAL GOt %d\n", millis() - time);
 	move_stop(); 
-  intake.set_state(intake_states::on);
+  // intake.set_state(intake_states::on);
+  b_lift.Subsystem::set_state(b_lift_states::intake_on);
 	// drivebase.brake(); 
 	move_start(move_types::tank_arc, tank_arc_params({tracking.x_coord, tracking.y_coord}, {20.5, 39.0,10.0},127.0,127.0,false));//arc to face neut goal 
   // move_start(move_types::turn_point, turn_point_params({36.5, 72.0})); 
