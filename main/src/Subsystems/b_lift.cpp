@@ -201,12 +201,12 @@ void B_Lift::set_state(const b_lift_states next_state, const uint8_t index, cons
         hitch_obj.set_state(hitch_states::grabbed);
       }
       // if the goal is detected, don't power the lift
-      // if(hitch_dist.get() > 25){
+      if(hitch_dist.get() > 30){
       this->index = index;
       this->speed = speed;
       state_log.print("%s | State change requested index is: %d \t", name, index);
       Subsystem::set_state(next_state);
-      // }
+      }
     }
     else{
       this->index = index;
