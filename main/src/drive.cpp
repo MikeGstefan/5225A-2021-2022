@@ -512,10 +512,10 @@ void handle_lift_buttons(){
   }
   // for partner (if lift buttons are held go all the way up/down)
   if(f_lift_up_press.get_time() > PARTNER_HOLD_TIME){
-    f_lift.set_state(f_lift_states::move_to_target, f_lift.driver_positions.size() - 1);
+    f_lift.set_state(f_lift_states::move_to_target, f_lift.driver_positions.size() - 2);
   }
   if(b_lift_up_press.get_time() > PARTNER_HOLD_TIME){
-    b_lift.set_state(b_lift_states::move_to_target, b_lift.driver_positions.size() - 1);
+    b_lift.set_state(b_lift_states::move_to_target, b_lift.driver_positions.size() - 2);
   }
   if(f_lift_down_press.get_time() > PARTNER_HOLD_TIME){
     f_lift.set_state(f_lift_states::move_to_target, 0);
