@@ -1634,7 +1634,7 @@ void Gyro::level(double kP, double kD){
   double speed;
   bool lowered = false;
   bool neg = false;
-  constexpr double min_pwr = 40.0;
+  constexpr double min_pwr = 30.0;
 
   screen_flash::start("PID", term_colours::NOTIF);
 
