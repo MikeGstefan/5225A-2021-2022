@@ -324,16 +324,16 @@ void main_setup(){
 
     intakes.set_func([](){
       if(GUI::prompt("Press to check intake", "", 1000)){
-        intake.set_state(intake_states::on);
+        // intake.set_state(intake_states::on);
         delay(1000);
 
-        intake.set_state(intake_states::off);
+        // intake.set_state(intake_states::off);
         delay(250);
 
-        intake.set_state(intake_states::reversed);
+        // intake.set_state(intake_states::reversed);
         delay(1000);
 
-        intake.set_state(intake_states::off);
+        // intake.set_state(intake_states::off);
       }
     });
 

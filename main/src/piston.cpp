@@ -1,5 +1,4 @@
 #include "piston.hpp"
-
 int Piston::count = 0;
 
 extern Button pneum_1, pneum_2, pneum_3, pneum_4, pneum_5, pneum_6, pneum_7, pneum_8;

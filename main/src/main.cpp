@@ -10,6 +10,7 @@
 #include "auton_util.hpp"
 #include "Subsystems/f_lift.hpp"
 #include "Subsystems/b_lift.hpp"
+#include "Subsystems/hitch.hpp"
 #include "distance.hpp"
 #include "util.hpp"
 using namespace std;
@@ -51,7 +52,7 @@ void initialize() {
 	update_t.start();
   lift_handle_t.start();
 	// master.print(2, 0, "Driver: %s", drivebase.drivers[drivebase.cur_driver].name);
-	gyro.finish_calibrating(); //Finishes calibrating gyro before program starts
+  gyro.finish_calibrating(); //Finishes calibrating gyro before program starts
 }
 
 /**
