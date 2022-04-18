@@ -1,4 +1,5 @@
 #include "pid.hpp"
+#include "Tracking.hpp"
 
 PID::PID(double kP, double kI, double kD, double bias, bool integral_sgn_reset, double integral_lower_bound, double integral_upper_bound):
   kP(kP), kI(kI), kD(kD),
@@ -42,6 +43,6 @@ double PID::compute(double input, double target){
     
   output = proportional + integral + derivative + bias;
 
-  // motion_i.print(" P: %f, D:%f, In:%f, Out:%f", proportional, derivative, input, output);
+  // motion_i.print(" P: %f, D:%f, In:%f, Out:%f Sens:%f", proportional, derivative, input, output, gyro.inertial.GYRO_AXIS());
   return output;
 }

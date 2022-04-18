@@ -46,7 +46,7 @@ class B_Lift: public Motorized_subsystem<b_lift_states, NUM_OF_B_LIFT_STATES, B_
 
   public:
     vector<int> driver_positions = {1035, 1720, 1825, 1970, 2800};
-    vector<int> prog_positions = {1035, 1720, 1825, 1970, 2800};
+    vector<int> prog_positions = {1035,1600, 1720, 1825, 1970, 2800};
 
     B_Lift(Motorized_subsystem<b_lift_states, NUM_OF_B_LIFT_STATES, B_LIFT_MAX_VELOCITY> motorized_subsystem);  // constructor
     

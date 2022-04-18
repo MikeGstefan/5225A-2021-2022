@@ -91,30 +91,29 @@ void autonomous() {
 }
 
 void opcontrol() {
+
   b_claw_obj.set_state(b_claw_states::managed);
   f_claw_obj.set_state(f_claw_states::managed);
-  b_lift.set_state(b_lift_states::move_to_target, 0);
+  hitch_obj.set_state(hitch_states::managed);
+  b_lift.set_state(b_lift_states::move_to_target, 5);
   f_lift.set_state(f_lift_states::move_to_target, 0);
-  // f_lift.move(-10); //holds lift down
-  // b_lift.move(-10);
+  drivebase.move(0.0, 0.0); //so it's not locked when switching trans
   
-  f_claw(LOW);
-  b_claw.set_state(LOW);
-  tilt_lock.set_state(HIGH);
+  // f_claw(LOW);
+  // b_claw.set_state(LOW);
+  // hitch.set_state(LOW);
+  // tilt_lock.set_state(HIGH);
 	drivebase.set_state(HIGH);
-  //Hitch
 
+  //Load goals
   master.wait_for_press(DIGITAL_R1);
   drivebase.move(0.0, 0.0); //so it's not locked when switching trans
 
-
 	f_claw(HIGH);
 	b_claw.set_state(HIGH);
+  hitch.set_state(HIGH);
   tilt_lock.set_state(LOW);
-  //Hitch
-	
-  b_lift.set_state(b_lift_states::move_to_target, 1);
-  f_lift.set_state(f_lift_states::move_to_target, 1);
+  // drivebase.set_state(LOW);
 
 	// flatten_against_wall(true); //resets, change to dist sensor
 	// tracking.reset();
@@ -130,26 +129,26 @@ void opcontrol() {
 
 	// move_start(move_types::turn_angle, turn_angle_params(90.0)); //aligns to ramp
 
-  // master.wait_for_press(DIGITAL_R1);
+  master.wait_for_press(DIGITAL_R1);
   int start = millis();
 
   gyro.climb_ramp();
-  gyro.level(1.6, 700.0);
+  gyro.level(1.6, 1000.0);
   /*
   Old - 2 goals: (1.8, 650)
   New - 2 goals: (1.6, 550) (5.3-5.7 s) Best:4.5, Worst:7.2
+  1.6, 850
   */
 
 
-
+  master.clear();
   printf("\n\nStart: %d\n", start);
   printf("\n\nEnd: %d\n", millis());
   printf("\n\nTotal: %d\n", millis()-start);
-  master.clear();
   master.print(0, 0, "Time:%d", millis()-start);
 
   master.wait_for_press(DIGITAL_R1);
-  b_claw.set_value(LOW);
+  hitch.set_value(LOW);
   f_claw(LOW);
   b_lift.set_state(b_lift_states::move_to_target, 0);
   f_lift.set_state(f_lift_states::move_to_target, 0);

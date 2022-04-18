@@ -63,7 +63,7 @@ class Tracking{
 
 
 class Gyro{
-  private:
+  public:
     Imu& inertial;
     double angle, last_angle;
     int time;
