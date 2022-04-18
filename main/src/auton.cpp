@@ -7,6 +7,7 @@
 #include "controller.hpp"
 #include "geometry.hpp"
 #include "logging.hpp"
+#include "pros/rtos.hpp"
 #include "util.hpp"
 #include <map>
 
@@ -269,11 +270,13 @@ void skills_park(){
   flatten_against_wall();
   delay(100);
   tracking.reset(reset_dist_r.get_dist(), DIST_FRONT, 180.0);
-  master.wait_for_press(DIGITAL_R1);
-  move_start(move_types::tank_point, tank_point_params({tracking.x_coord, 12.0, 180.0}));
+  printf2("\n\n\n\n\n\nTIME:%d\n\n\n\n", millis());
+  // master.wait_for_press(DIGITAL_R1);
+  move_start(move_types::tank_point, tank_point_params({tracking.x_coord, 12.0, 180.0}, false, 127.0, 1.0, true, 6.4, 70.0, 0.0, 0, {0.5, 0.5}, 30.0));
   move_start(move_types::turn_angle, turn_angle_params(90.0));
-  master.wait_for_press(DIGITAL_R1);
-  move_start(move_types::tank_point, tank_point_params({35.0, 12.0, 90.0}));
+  // master.wait_for_press(DIGITAL_R1);
+  move_start(move_types::tank_point, tank_point_params({32.0, 12.0, 90.0}));
+  f_lift.set_state(f_lift_states::move_to_target, 0);
 }
 
 void rush_high(){

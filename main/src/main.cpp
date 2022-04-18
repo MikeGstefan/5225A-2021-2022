@@ -91,12 +91,16 @@ void autonomous() {
 }
 
 void opcontrol() {
+  skills_park();
+  // master.wait_for_press(DIGITAL_R1);
+
 
   b_claw_obj.set_state(b_claw_states::managed);
   f_claw_obj.set_state(f_claw_states::managed);
   hitch_obj.set_state(hitch_states::managed);
   b_lift.set_state(b_lift_states::move_to_target, 5);
   f_lift.set_state(f_lift_states::move_to_target, 0);
+
   drivebase.move(0.0, 0.0); //so it's not locked when switching trans
   
   // f_claw(LOW);
@@ -106,40 +110,20 @@ void opcontrol() {
 	drivebase.set_state(HIGH);
 
   //Load goals
-  master.wait_for_press(DIGITAL_R1);
+  // master.wait_for_press(DIGITAL_R1);
   drivebase.move(0.0, 0.0); //so it's not locked when switching trans
+  while(f_lift.get_target_state() != f_lift_states::idle)delay(10); //wait for bottom
 
-	f_claw(HIGH);
-	b_claw.set_state(HIGH);
-  hitch.set_state(HIGH);
-  tilt_lock.set_state(LOW);
-  // drivebase.set_state(LOW);
+	// f_claw(HIGH);
+	// b_claw.set_state(HIGH);
+  // hitch.set_state(HIGH);
+  // tilt_lock.set_state(LOW);
 
-	// flatten_against_wall(true); //resets, change to dist sensor
-	// tracking.reset();
-
-	// move_start(move_types::turn_angle, turn_angle_params(85.0)); //turns to goal
-	// b_lift.move_absolute(100); //lowers lifts
-	// f_lift.move_absolute(0, 100, true, 50);
-	// f_lift.move(-10); //holds lift down
-
-	// // drivebase.move(0.0, 25, 0.0);
-	// // move_start(move_types::tank_point, tank_point_params({-5.0, 0.0, -90.0}, false, 127.0, 1.0, true, 6.5, 150.0, 0.0, 0, {6.0, 0.5}), false);
-	// // f_detect_goal(false);
-
-	// move_start(move_types::turn_angle, turn_angle_params(90.0)); //aligns to ramp
-
-  master.wait_for_press(DIGITAL_R1);
+  // master.wait_for_press(DIGITAL_R1);
   int start = millis();
 
   gyro.climb_ramp();
   gyro.level(1.6, 1000.0);
-  /*
-  Old - 2 goals: (1.8, 650)
-  New - 2 goals: (1.6, 550) (5.3-5.7 s) Best:4.5, Worst:7.2
-  1.6, 850
-  */
-
 
   master.clear();
   printf("\n\nStart: %d\n", start);
