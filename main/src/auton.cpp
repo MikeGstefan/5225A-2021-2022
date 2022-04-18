@@ -2,6 +2,7 @@
 #include "Libraries/printing.hpp"
 #include "Subsystems/f_lift.hpp"
 #include "Tracking.hpp"
+#include "auton_util.hpp"
 #include "config.hpp"
 #include "controller.hpp"
 #include "geometry.hpp"
@@ -256,6 +257,23 @@ void skills4(){
   // master.print(2,2,"time %d", millis() - time);
 
   // move
+}
+
+void skills_park(){
+  f_claw(HIGH);
+	b_claw.set_state(HIGH);
+  hitch.set_state(HIGH);
+  tilt_lock.set_state(LOW);
+  f_lift.set_state(f_lift_states::move_to_target, f_lift.prog_positions.size()-1);
+  b_lift.set_state(b_lift_states::move_to_target, b_lift.prog_positions.size()-1);
+  flatten_against_wall();
+  delay(100);
+  tracking.reset(reset_dist_r.get_dist(), DIST_FRONT, 180.0);
+  master.wait_for_press(DIGITAL_R1);
+  move_start(move_types::tank_point, tank_point_params({tracking.x_coord, 12.0, 180.0}));
+  move_start(move_types::turn_angle, turn_angle_params(90.0));
+  master.wait_for_press(DIGITAL_R1);
+  move_start(move_types::tank_point, tank_point_params({35.0, 12.0, 90.0}));
 }
 
 void rush_high(){
