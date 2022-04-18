@@ -6,7 +6,7 @@
 
 #define B_LIFT_AT_BOTTOM (b_lift_pot.get_value() < b_lift.driver_positions[0] + b_lift.end_error)
 
-#define NUM_OF_B_LIFT_STATES 11
+#define NUM_OF_B_LIFT_STATES 13
 #define B_LIFT_MAX_VELOCITY 100
 
 // state of the transmission piston for the lift and intake
@@ -19,9 +19,11 @@ enum class b_lift_states{
   top, // at highest position
   idle,  // not doing anything
   move_to_target,  // moving to target position
+  park_position,
   manual,  // controlled by joystick
   intake_off, // intake isn't running
   intake_on,  // intake is running forwards
+  intk_jam,
   intake_reversed, // intake is running in reverse
   shifting_up, // lift/intake transmission shifting, moving up
   shifting_down // lift/intake transmission shifting, moving down
@@ -34,7 +36,8 @@ class B_Lift: public Motorized_subsystem<b_lift_states, NUM_OF_B_LIFT_STATES, B_
     PID pid = PID(3.0,0.0,0.0,0.0);
     int lift_power; // for manual control
     int detection_end_error = 40; // the range the lift has to be within of a position to be considered at that position 
-
+    int intk_jam_count = 0;
+    int jam_time =0;
     // height conversion constants
     double offset_a = 365.0, offset_h = 9.75;
     double arm_len = 8.0;
@@ -47,6 +50,7 @@ class B_Lift: public Motorized_subsystem<b_lift_states, NUM_OF_B_LIFT_STATES, B_
   public:
     vector<int> driver_positions = {1035, 1720, 1825, 1970, 2800};
     vector<int> prog_positions = {1035, 1720, 1825, 1970, 2800};
+    const int park_position =1650 ;
 
     B_Lift(Motorized_subsystem<b_lift_states, NUM_OF_B_LIFT_STATES, B_LIFT_MAX_VELOCITY> motorized_subsystem);  // constructor
     

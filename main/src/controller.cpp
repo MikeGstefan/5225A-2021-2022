@@ -43,6 +43,8 @@ controller_digital_e_t partner_claw_tilt_button = DIGITAL_X;
 controller_digital_e_t partner_hitch_button = DIGITAL_UP;
 
 controller_digital_e_t partner_joy_mode_switch_button = DIGITAL_RIGHT;
+controller_digital_e_t timer_btn = DIGITAL_RIGHT;
+// controller_digital_e_t timer_btn
 
 std::array<_Controller*, num_controller> _Controller::objs; //= {nullptr};
 _Task _Controller::controller_task = nullptr;

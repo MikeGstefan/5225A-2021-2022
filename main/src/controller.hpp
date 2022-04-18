@@ -52,6 +52,7 @@ extern controller_digital_e_t partner_claw_tilt_button;
 extern controller_digital_e_t partner_hitch_button;
 
 extern controller_digital_e_t partner_joy_mode_switch_button;
+extern controller_digital_e_t timer_btn;
 
 
 #define num_controller 2

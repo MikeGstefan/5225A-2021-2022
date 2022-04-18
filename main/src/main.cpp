@@ -85,6 +85,9 @@ void autonomous() {
   run_auton();
 }
 
+
+bool timer_state = 0; 
+int timer = millis();
 void opcontrol() {
 	// wait_until(master.get_digital_new_press(DIGITAL_A));
 	// b_claw.set_state(HIGH);
@@ -232,10 +235,20 @@ void opcontrol() {
 		b_claw_obj.handle();
 		f_claw_obj.handle();
 		hitch_obj.handle();
+
+
 		
 		if(print_timer.get_time() > 100){
 			printf("b_lift_pot_val:%d, f_lift_pot_val:%d\n", b_lift_pot.get_value(), f_lift_pot.get_value());
 			print_timer.reset();
+		}
+
+		if(partner.is_rising(timer_btn)){ 
+			timer_state = !timer_state;
+			if(timer_state)timer = millis();
+			else{
+				partner.print(0,0,"time: %d", millis() - timer);
+			}
 		}
 
 		delay(10);
