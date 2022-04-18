@@ -43,6 +43,9 @@ class B_Lift: public Motorized_subsystem<b_lift_states, NUM_OF_B_LIFT_STATES, B_
     // to avoid race conditions these are atomic
     std::atomic<uint8_t> index{0};
     std::atomic<int32_t> speed{127}; // max pwm applied to the lifts during a move to target
+public:
+  vector<int> driver_positions = {1042, 1500, 2050, 2800};
+  vector<int> prog_positions = {1042, 1850, 2000, 2200, 2800};
 
   public:
     vector<int> driver_positions = {1035, 1720, 1825, 1970, 2800};

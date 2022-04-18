@@ -61,7 +61,8 @@ class F_Lift: public Motorized_subsystem<f_lift_states, NUM_OF_F_LIFT_STATES, F_
     }
     
     void elastic_util(int high); // up time should be about 1100mms (ignore this time, it was on the old lift), down time should be slightly slower than that
-    void move_absolute(double position, double velocity = F_LIFT_MAX_VELOCITY, bool wait_for_comp = true, double end_error = 20);
+    
+
 };
 
 extern F_Lift f_lift;

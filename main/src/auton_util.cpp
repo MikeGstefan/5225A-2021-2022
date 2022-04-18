@@ -135,7 +135,11 @@ void b_detect_goal(){
   b_claw.set_state(1);
 }
 
-
+void tilt_goal(){
+  tilt_lock.set_state(1);
+  delay(300);
+  b_claw.set_state(0);
+}
 
 void f_detect_goal(bool safety){ 
   if(safety) wait_until(!tracking.move_complete);
@@ -191,6 +195,7 @@ void subsystem_handle_t(void*params){
   while(true){ 
     b_lift.handle(false);
 		f_lift.handle(false);
+    // intake.handle();
     // b_claw_obj.handle();
 		// f_claw_obj.handle();
     if(ptr->notify_handle())return;
