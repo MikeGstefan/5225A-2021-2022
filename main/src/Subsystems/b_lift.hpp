@@ -31,7 +31,6 @@ enum class b_lift_states{
 
 class B_Lift: public Motorized_subsystem<b_lift_states, NUM_OF_B_LIFT_STATES, B_LIFT_MAX_VELOCITY> {
     Timer up_press{"Up_press"}, down_press{"Down_press"};
-    b_lift_states after_shift_state; // the state the subsystem will go to after transmission shifts
     int bad_count = 0; // cycle check for safeties
     PID pid = PID(3.0,0.0,0.0,0.0);
     int lift_power; // for manual control
@@ -48,6 +47,7 @@ class B_Lift: public Motorized_subsystem<b_lift_states, NUM_OF_B_LIFT_STATES, B_
     std::atomic<int32_t> speed{127}; // max pwm applied to the lifts during a move to target
 
   public:
+    b_lift_states after_shift_state; // the state the subsystem will go to after transmission shifts
     vector<int> driver_positions = {1035, 1720, 1825, 1970, 2800};
     vector<int> prog_positions = {1035, 1720, 1825, 1970, 2800};
     const int park_position =1650 ;

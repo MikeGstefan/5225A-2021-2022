@@ -12,6 +12,8 @@ Timer b_lift_down_press{"b_lift_down_press", nullptr, false};
 
 Timer toggle_press_timer{"toggle_press_timer", nullptr, false}; // for back claw
 
+Timer buzz_timer{"buzz_timer", nullptr, true}; // buzzes every 50 ms when the speed limit is on
+
 joy_modes joy_mode = joy_modes::lift_select;
 
 // array<int, 7> f_lift_pos= {10, 150, 300, 475, 630, 665, 675};
@@ -233,11 +235,18 @@ void Drivebase::handle_input(){
   // tracking.power_x = drivers[cur_driver].custom_drives[0].lookup(master.get_analog(drivers[cur_driver].joy_sticks[0]));
   tracking.power_y = drivers[cur_driver].custom_drives[1].lookup(master.get_analog(ANALOG_LEFT_Y));
   // caps drive speed at 40 if intake is on
-  if(b_lift.get_state() == b_lift_states::intake_on || b_lift.get_state() == b_lift_states::intk_jam){
+  // if(b_lift.get_state() == b_lift_states::intake_on || b_lift.get_state() == b_lift_states::intk_jam){
+  if(master.is_rising(speed_limit_button)) speed_limit_active = !speed_limit_active;
+
+  if(speed_limit_active){
+    if(buzz_timer.get_time() > 50){
+      master.rumble("-");
+      buzz_timer.reset();
+    }
     if(fabs(tracking.power_y) > MAX_DRIVE_SPEED)  tracking.power_y = sgn(tracking.power_y) * MAX_DRIVE_SPEED;
     // caps turns speed at 40% when intake is on
     tracking.power_a = 0.4 * drivers[cur_driver].custom_drives[2].lookup(master.get_analog(ANALOG_LEFT_X));
-  } 
+  }
   else tracking.power_a = 0.6 * drivers[cur_driver].custom_drives[2].lookup(master.get_analog(ANALOG_LEFT_X));
   // printf2("%d, %f, %f", master.get_analog(ANALOG_LEFT_Y), tracking.power_y, tracking.power_a );
   if(fabs(tracking.power_x) < deadzone) tracking.power_x = 0.0;
@@ -420,7 +429,7 @@ bool get_lift(){
 
 void handle_lift_buttons(){
   // if(master.is_rising(joy_mode_switch_button) || partner.is_rising(partner_joy_mode_switch_button)){
-    if(master.is_rising(joy_mode_switch_button)){
+    if(partner.is_rising(partner_joy_mode_switch_button)){
     // toggles joy_mode
     if(joy_mode == joy_modes::lift_select)  joy_mode = joy_modes::manual;
     else joy_mode = joy_modes::lift_select;
@@ -534,6 +543,11 @@ void handle_lift_buttons(){
   if(partner.is_rising(partner_both_lifts_down_button)){
     f_lift.set_state(f_lift_states::move_to_target, 0);
     b_lift.set_state(b_lift_states::move_to_target, 0);
+  }
+
+  // transfer to intake
+  if(partner.is_rising(partner_trans_to_intk_button) && lift_t.get_state() == TRANS_LIFT_STATE){
+    b_lift.Subsystem::set_state(b_lift_states::intake_off);
   }
 }
 
@@ -652,7 +666,7 @@ void handle_intake_buttons(){
     }
   }
   // toggles intake reverse state if intake reverse button is pressed
-  if(master.is_rising(intake_reverse_button) || partner.is_rising(partner_intake_reverse_button)){
+  if(master.is_rising(intake_reverse_button)){
     switch(b_lift.get_state()){
         case b_lift_states::intake_reversed:
           b_lift.Subsystem::set_state(b_lift_states::intake_off);

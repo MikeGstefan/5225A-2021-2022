@@ -21,12 +21,17 @@ extern controller_digital_e_t claw_toggle_button;
 extern controller_digital_e_t hitch_button;
 
 // intake buttons
+extern controller_digital_e_t speed_limit_button;
 extern controller_digital_e_t intake_button;
 extern controller_digital_e_t intake_reverse_button;
 
+extern bool speed_limit_active;
+
 // misc buttons
 extern controller_digital_e_t ok_button;
+// extern controller_digital_e_t joy_mode_switch_button;
 extern controller_digital_e_t joy_mode_switch_button;
+
 extern controller_digital_e_t shift_button;
 
 // partner buttons
@@ -43,7 +48,7 @@ extern controller_digital_e_t partner_both_lifts_down_button;
 
 // intake buttons
 extern controller_digital_e_t partner_intake_button;
-extern controller_digital_e_t partner_intake_reverse_button;
+extern controller_digital_e_t partner_trans_to_intk_button;
 
 // claw buttons
 extern controller_digital_e_t partner_back_claw_toggle_button;

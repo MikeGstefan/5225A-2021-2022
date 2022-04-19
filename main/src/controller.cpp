@@ -11,12 +11,15 @@ controller_digital_e_t claw_toggle_button =  DIGITAL_L2;
 controller_digital_e_t hitch_button = DIGITAL_A;
 
 // intake buttons
+controller_digital_e_t speed_limit_button = DIGITAL_Y;
 controller_digital_e_t intake_button = DIGITAL_B;
 controller_digital_e_t intake_reverse_button = DIGITAL_DOWN;
 
+bool speed_limit_active = false;
+
 // misc buttons
 controller_digital_e_t ok_button = DIGITAL_A;
-controller_digital_e_t joy_mode_switch_button = DIGITAL_Y;
+// controller_digital_e_t joy_mode_switch_button = DIGITAL_Y;
 controller_digital_e_t shift_button = DIGITAL_X;
 
 // partner buttons
@@ -33,7 +36,7 @@ controller_digital_e_t partner_both_lifts_down_button = DIGITAL_DOWN;
 
 // intake buttons
 controller_digital_e_t partner_intake_button = DIGITAL_B;
-controller_digital_e_t partner_intake_reverse_button = DIGITAL_Y;
+controller_digital_e_t partner_trans_to_intk_button = DIGITAL_Y;
 
 // claw buttons
 controller_digital_e_t partner_back_claw_toggle_button = DIGITAL_A;

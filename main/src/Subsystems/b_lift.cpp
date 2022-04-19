@@ -204,7 +204,7 @@ void B_Lift::handle_state_change(){
       jam_time= millis();
       motor.move(127);
       printf("AHHHHHHHHHHHHHH here \n\n\n\n");
-    break;
+      break;
     case b_lift_states::intake_reversed:
       motor.move(127);
       break;
