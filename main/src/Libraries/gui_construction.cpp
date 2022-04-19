@@ -52,7 +52,7 @@
       Button save_pos (15, 140, 100, 75, GUI::Style::SIZE, Button::SINGLE, checks, "Save Position");
       Button auton_selector (130, 140, 100, 75, GUI::Style::SIZE, Button::SINGLE, checks, "Select Autons");
       Button misc_checks (245, 140, 100, 75, GUI::Style::SIZE, Button::SINGLE, checks, "Misc");
-      Button distance (360, 140, 100, 75, GUI::Style::SIZE, Button::SINGLE, checks, "Distance");
+      Button dist (360, 140, 100, 75, GUI::Style::SIZE, Button::SINGLE, checks, "Distance");
 
     Page track ("Tracking"); //Display tracking vals and reset btns
       Text track_x(50, 45, GUI::Style::CENTRE, TEXT_SMALL, track, "X:%.1f", tracking.x_coord);
@@ -369,6 +369,16 @@ void main_setup(){
         }
         else return;
       }
+    });
+
+    dist.set_func([](){
+      if(!in_range(static_cast<int>(b_dist.get()), 20, 2000)) screen_flash::start("Distance Sensor: Back");
+      if(!in_range(static_cast<int>(f_dist.get()), 20, 2000)) screen_flash::start("Distance Sensor: Front");
+      if(!in_range(static_cast<int>(r_dist.get()), 20, 2000)) screen_flash::start("Distance Sensor: Right");
+      if(!in_range(static_cast<int>(l_dist.get()), 20, 2000)) screen_flash::start("Distance Sensor: Left");
+      if(!in_range(static_cast<int>(r_reset_dist.get()), 20, 2000)) screen_flash::start("Distance Sensor: Right Reset");
+      if(!in_range(static_cast<int>(l_reset_dist.get()), 20, 2000)) screen_flash::start("Distance Sensor: Back Reset");
+      else(screen_flash::start("All Distance Sensors Good", term_colours::GREEN));
     });
 
     misc_checks.set_func([](){

@@ -86,16 +86,16 @@ void autonomous() {
 
 void opcontrol() {
   /* Nathan
-  distance sensor check
+  -distance sensor check
   lift movement
   misc: check if what's plugged matches what's registered to that port
   jam code for main motors (will have to be a page func) (not needed if motor class)
-  list of functions for docs
 
   auton give up func - ask mike
 
   After Worlds:
   make flash its own page
+  make flash queue. (if multiple things try to flash, wait for the first one to finish)
   motor subclass
   adaptable fll menu selector
   file writing functions
