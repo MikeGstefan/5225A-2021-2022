@@ -77,16 +77,10 @@ public:
   static char* to_char(const char* format, ...);
 
 
-  /**
-   * @brief 
-   * 
-   * @param colour term_colour to print in
-   * @param format printf format string
-   * @param args printf args
-   */
   template <typename... Params>
   void print(term_colours colour, std::string format, Params... args) const{
-    std::string str = sprintf2_no_colour(print_type, format, args...) + '\n';
+    char newline = print_type == -1 ? '\0' : '\n';
+    std::string str = sprintf2_no_colour(print_type, format, args...) + newline;
 
     int buffer_len = str.length() + 3;
     char buffer[256];
@@ -95,7 +89,7 @@ public:
     if(static_cast<int>(this->log_type) != 0){
       switch(log_location){
         case log_locations::t:
-          printf2(colour, print_type, format.c_str(), args...);
+          printf("%s%c", sprintf2_format(colour, print_type, format, args...).c_str(), newline);
           break;
         case log_locations::sd:
           this->log_print(buffer, buffer_len);
@@ -103,20 +97,13 @@ public:
         case log_locations::none:
           break;
         case log_locations::both:
-          printf2(colour, print_type, format.c_str(), args...);
+          printf("%s%c", sprintf2_format(colour, print_type, format, args...).c_str(), newline);
           this->log_print(buffer, buffer_len);
           break;
       }
     }
   }
 
-
-  /**
-   * @brief 
-   * 
-   * @param format printf format string
-   * @param args printf args
-   */
   template <typename... Params>
   void print(std::string format, Params... args) const{
     print(print_colour, format, args...);

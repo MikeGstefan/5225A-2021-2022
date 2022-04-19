@@ -1107,7 +1107,7 @@ void tank_move_to_target(void* params){
       // printf2("Powers | y: %lf, a: %lf",tracking.power_y, tracking.power_a);
 
       motion_d.print("error y : %.2f error a : %.2f, end con: %.2f, end clause %.2f, end dist: %.2f, pow y : %.2f, pow a : %.2f\n ", local_error.y, rad_to_deg(error.angle), fabs(line_disp.get_y()), end_error.y, end_dist, tracking.power_y, tracking.power_a);
-      motion_d.print("sng: %d, orig sgn: %d", sgn_line_y, orig_sgn_line_y);
+      motion_d.print("sgn: %d, orig sgn: %d", sgn_line_y, orig_sgn_line_y);
       // exits movement once the target has been overshot (if the sign of y error along the line has flipped)
       // if(fabs(line_disp.get_y()) < end_error.y || sgn_line_y != orig_sgn_line_y){
       if((fabs(local_error.y) < end_error.y && fabs(line_disp.get_y()) < 4)|| sgn_line_y != orig_sgn_line_y){

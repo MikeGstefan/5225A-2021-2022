@@ -237,14 +237,6 @@ std::string sprintf2(std::string fmt, const Param& arg, const Params&... args){
  * @brief printf that handles strings and automatically newlines. Can print coloured and a timestamp
  * 
  * @param colour The colour to print in 
- * @param time_type:
- * -1: no timestamp
- * 0: 1500 ms
- * 1: 1500 millis
- * 2: 1500 milliseconds
- * 3: 1 s 500 ms
- * 4: 1 sec 500 millis
- * 5: 1 second 500 milliseconds
  * @param fmt printf format string
  * @param args printf args
  */
@@ -272,14 +264,6 @@ std::string sprintf2_format(term_colours colour, int time_type, std::string fmt,
  * @brief printf that handles strings and automatically newlines. Can print coloured and a timestamp
  * 
  * @param colour The colour to print in 
- * @param time_type:
- * -1: no timestamp
- * 0: 1500 ms
- * 1: 1500 millis
- * 2: 1500 milliseconds
- * 3: 1 s 500 ms
- * 4: 1 sec 500 millis
- * 5: 1 second 500 milliseconds
  * @param fmt printf format string
  * @param args printf args
  */
@@ -307,40 +291,24 @@ std::string sprintf2_no_colour(int time_type, std::string fmt, Params... args){
  * @brief printf that handles all datatypes and automatically newlines. Can print coloured and a timestamp
  *
  * @param colour The colour to print in 
- * @param time_type:
- * -1: no timestamp
- * 0: 1500 ms
- * 1: 1500 millis
- * 2: 1500 milliseconds
- * 3: 1 s 500 ms
- * 4: 1 sec 500 millis
- * 5: 1 second 500 milliseconds
  * @param fmt printf format string
  * @param args printf args
  */
 template <typename... Params>
 int printf2(term_colours colour, int time_type, const char* fmt, Params... args){
-  return sprintf2_format(colour, time_type, fmt, args...).length();
+  return printf("%s\n", sprintf2_format(colour, time_type, fmt, args...));
 }
 
 /**
  * @brief printf that handles all datatypes and automatically newlines. Can print coloured
  *
  * @param colour The colour to print in 
- * @param time_type:
- * -1: no timestamp
- * 0: 1500 ms
- * 1: 1500 millis
- * 2: 1500 milliseconds
- * 3: 1 s 500 ms
- * 4: 1 sec 500 millis
- * 5: 1 second 500 milliseconds
  * @param fmt printf format string
  * @param args printf args
  */
 template <typename... Params>
 int printf2(term_colours colour, std::string fmt, Params... args){
-  return sprintf2_format(colour, default_time_fmt, fmt, args...).length();
+  return printf("%s\n", sprintf2_format(colour, default_time_fmt, fmt, args...));
 }
 
 /**

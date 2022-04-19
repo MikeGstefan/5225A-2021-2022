@@ -99,7 +99,7 @@ std::function<long double (long double)> func_scale(std::function<long double(lo
 /**
  * @brief returns a random bool with probability of being true
  * 
- * @param ratio 1:ratio getting false. 1:1 is 50/50. 1:2 means true is twice as likely.
+ * @param ratio ratio:1 of getting true. 1:1 is 50/50. 2:1 means true is twice as likely than false.
  * @return true
  */
 bool random_bool(int ratio = 1);

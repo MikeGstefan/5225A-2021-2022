@@ -1,5 +1,4 @@
 #include "logging.hpp"
-#include "Libraries/printing.hpp"
 const char* file_name= "/usd/data.txt";
 const char* file_meta= "/usd/meta_data.txt";
 char queue[queue_size];
@@ -33,7 +32,7 @@ Data motion_i("motion.txt","$06",general,log_locations::both);
 Data motion_d("motion.txt", "$06", general,log_locations::both);
 Data term("terminal.txt","$07",general,log_locations::t);
 Data log_d("log.txt","$08",general,log_locations::both);
-Data graph("graph.txt","$09",general,log_locations::sd);
+Data graph("graph.txt","$09",general,log_locations::sd, term_colours::NONE, -1);
 Data state_log("state.txt", "$11", general,log_locations::both);
 Data ERROR("error.txt", "$12", error, log_locations::both, term_colours::ERROR);
 // Data state_log("log.txt","$13",general,log_locations::both);
