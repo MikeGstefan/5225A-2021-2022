@@ -1,16 +1,13 @@
 #include "logging.hpp"
 #include "task.hpp"
 
-using namespace std;
-
-
 const char* file_name= "/usd/data.txt";
 const char* file_meta= "/usd/meta_data.txt";
 char queue[queue_size];
 char* front = queue;
 char* back = queue;
 
-ofstream file;
+std::ofstream file;
 uintptr_t queue_start = reinterpret_cast<uintptr_t>(&queue);
 std::vector<Data*> Data::obj_list;
 _Task Data::log_t(queue_handle, "logging");
@@ -55,7 +52,7 @@ std::vector<Data*> Data::get_objs(){
 
 
 void Data::init(){
-  file.open(file_meta,ofstream::trunc | ofstream::out);
+  file.open(file_meta, std::ofstream::trunc | std::ofstream::out);
   if(!file.is_open()){
     printf2(term_colours::ERROR, "Log File not found");
     for(int i = 0; i< Data::obj_list.size(); i++){
@@ -79,7 +76,7 @@ void Data::init(){
     }
     file.write(meta_data,strlen(meta_data));
     file.close();
-    file.open(file_name,ofstream::trunc);
+    file.open(file_name, std::ofstream::trunc);
     file.close();
     Data::log_t.start();
 
@@ -129,7 +126,7 @@ void queue_handle(void* params){
       temp_back = back;
       //does the queue rollover?
       if(reinterpret_cast<uintptr_t>(back) < reinterpret_cast<uintptr_t>(front)){
-        file.open(file_name,ofstream::app);
+        file.open(file_name, std::ofstream::app);
         //print from the front to the end of the queue
         file.write(front, queue_size-1-( reinterpret_cast<uintptr_t>(front)-queue_start));
         //print from the start to the end of the data
@@ -138,7 +135,7 @@ void queue_handle(void* params){
         front = queue +(reinterpret_cast<uintptr_t>(temp_back)-queue_start);
       }
       else{
-        file.open(file_name,ofstream::app);
+        file.open(file_name, std::ofstream::app);
         //print the data marked to be printed
         file.write(front, reinterpret_cast<uintptr_t>(temp_back)- reinterpret_cast<uintptr_t>(front));
         file.close();
@@ -154,8 +151,8 @@ void queue_handle(void* params){
 }
 
 uintptr_t data_size(){//returns the number of characters needed to be printed from the queue
-  if(reinterpret_cast<uintptr_t>(back) < reinterpret_cast<uintptr_t>(front))return(queue_size-1-( reinterpret_cast<uintptr_t>(front)-queue_start))+(reinterpret_cast<uintptr_t>(back)-queue_start); //Should be changeable to return (reinterpret_cast<uintptr_t>(back) - reinterpret_cast<uintptr_t>(front) + queue_size - 1);
-  else return reinterpret_cast<uintptr_t>(back)- reinterpret_cast<uintptr_t>(front);
+  uintptr_t size = reinterpret_cast<uintptr_t>(back) - reinterpret_cast<uintptr_t>(front);
+  return size < 0 ? size + queue_size - 1 : size;
 }
 
 

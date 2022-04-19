@@ -8,9 +8,6 @@
 
 static const std::string start_pos_file_name ="/usd/start_position.txt";
 
-using namespace std;
-
-
 Reset_dist reset_dist_r(&r_dist, 7.5);
 Reset_dist reset_dist_l(&l_dist, 7.5);
 
@@ -45,12 +42,12 @@ void save_positions(){
   if(GUI::prompt("Press to save position", "Press to save the current position to a file.")){
     tracking_imp.print("Saving %.2f to file", Position{tracking.x_coord, tracking.y_coord, tracking.get_angle_in_deg()});
     
-    ofstream file;
+    std::ofstream file;
     Data::log_t.data_update();
-    file.open(start_pos_file_name, fstream::out | fstream::trunc);
-    file << tracking.x_coord << endl;
-    file << tracking.y_coord << endl;
-    file << rad_to_deg(tracking.global_angle) << endl;
+    file.open(start_pos_file_name, std::fstream::out | std::fstream::trunc);
+    file << tracking.x_coord << std::endl;
+    file << tracking.y_coord << std::endl;
+    file << rad_to_deg(tracking.global_angle) << std::endl;
     file.close();
     Data::log_t.done_update();
   }
@@ -58,10 +55,10 @@ void save_positions(){
 
 void load_positions(){
   Position pos;
-  ifstream file;
+  std::ifstream file;
 
   Data::log_t.data_update();
-  file.open(start_pos_file_name, fstream::in);
+  file.open(start_pos_file_name, std::fstream::in);
   file >> pos.x >> pos.y >> pos.angle;
   file.close();
   Data::log_t.done_update();

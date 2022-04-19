@@ -6,8 +6,6 @@
 struct Point;
 struct Position;
 
-using namespace pros;
-
 /**
  * -1: no timestamp
  * 0: 1500 ms

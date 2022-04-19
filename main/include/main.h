@@ -51,9 +51,6 @@
  * namespace.
  */
 using namespace pros;
-// using namespace pros::literals;
-// using namespace okapi;
-// using namespace std;
 
 
 /**

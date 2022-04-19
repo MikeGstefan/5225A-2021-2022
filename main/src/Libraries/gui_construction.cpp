@@ -9,8 +9,6 @@
 #include "../tracking.hpp"
 #include "../drive.hpp"
 
-using namespace std;
-
 //DO NOT MESS WITH INDENTATION IN THIS FILE
 
 /*Field array*/ static std::vector<std::bitset<200>> field (200, std::bitset<200>{}); //Initializes to 200 blank bitsets
@@ -179,7 +177,7 @@ using namespace std;
       Text enc (350, 100, GUI::Style::CENTRE, TEXT_SMALL, encoders, "%s", std::function([](){return sprintf2("%d:%c%c", expander_1.get_value(), port_1.get_value()+64, port_2.get_value()+64);}));
       Text enc_degs (350, 120, GUI::Style::CENTRE, TEXT_SMALL, encoders, "Degs: %d", enc_val);
       Text enc_rots (350, 140, GUI::Style::CENTRE, TEXT_SMALL, encoders, "Rots: %d", std::function([](){return int(enc_val/360);}));
-      Text enc_remain (350, 160, GUI::Style::CENTRE, TEXT_SMALL, encoders, "Remaining: %d", std::function([](){return abs(enc_val-360*int(round((enc_val+sgn(enc_val)*180)/360)));}));
+      Text enc_remain (350, 160, GUI::Style::CENTRE, TEXT_SMALL, encoders, "Remaining: %d", std::function([](){return abs(enc_val-360*int(std::round((enc_val+sgn(enc_val)*180)/360)));})); //replace with near_angle
       Button enc_res (350, 200, 50, 20, GUI::Style::CENTRE, Button::SINGLE, encoders, "Reset");
 
     Page motor ("Motor Control");
@@ -521,9 +519,9 @@ void main_setup(){
             left -= left_rot;
             right -= right_rot;
             back -= back_rot;
-            term_colours left_col = abs(left) <= 0.01 ? term_colours::GREEN : term_colours::RED;
-            term_colours right_col = abs(right) <= 0.01 ? term_colours::GREEN : term_colours::RED;
-            term_colours back_col = abs(back) <= 0.01 ? term_colours::GREEN : term_colours::RED;
+            term_colours left_col = fabs(left) <= 0.01 ? term_colours::GREEN : term_colours::RED;
+            term_colours right_col = fabs(right) <= 0.01 ? term_colours::GREEN : term_colours::RED;
+            term_colours back_col = fabs(back) <= 0.01 ? term_colours::GREEN : term_colours::RED;
 
             if(left == 0) printf2(term_colours::GREEN, "The left encoder was perfect over %d rotations", left_rot);
             else printf2(left_col, "The left encoder %s %d ticks over %d rotations", left > 0 ? "gained" : "lost", fabs(360.0*left), left_rot);
@@ -549,7 +547,7 @@ void main_setup(){
           if (GUI::prompt("Press when stopped")){
             int back = BackEncoder.get_value();
             if(abs(back) <= 2) printf2(term_colours::GREEN, "The back wheel is pretty accurate, it is at %d ticks.", back);
-            else printf2(term_colours::RED, "The back wheel is corkscrewing. It is at %d ticks. Consider turning it %sclockwise.", left, sgn(LeftEncoder.get_value()) == sgn(back) ? "" : "counter-");
+            else printf2(term_colours::RED, "The back wheel is corkscrewing. It is at %d ticks. Consider turning it %sclockwise.", back, sgn(LeftEncoder.get_value()) == sgn(back) ? "" : "counter-");
           }
         }
       }
@@ -563,7 +561,7 @@ void main_setup(){
 
           int back = BackEncoder.get_value();
           if(abs(back) <= 2) printf2(term_colours::GREEN, "The back wheel is pretty accurate, it is at %d ticks.", back);
-          else printf2(term_colours::RED, "The back wheel is corkscrewing. It is at %d ticks. Consider turning it %sclockwise.", left, sgn(LeftEncoder.get_value()) == sgn(back) ? "" : "counter-");
+          else printf2(term_colours::RED, "The back wheel is corkscrewing. It is at %d ticks. Consider turning it %sclockwise.", back, sgn(LeftEncoder.get_value()) == sgn(back) ? "" : "counter-");
         }
       }
     });
@@ -646,7 +644,7 @@ void main_setup(){
             turned = 180*(turned-rots);
             rots /= 2;
 
-            double dist = fabs(LeftEncoder.get_value()-RightEncoder.get_value())/(360.0*rots);
+            double dist = abs(LeftEncoder.get_value()-RightEncoder.get_value())/(360.0*rots);
 
             if(fabs(turned) <= 0.05) printf2(term_colours::GREEN, "This seems pretty accurate. It's %.4f degrees off over %.1f rotations.", turned, rots);
             else if(turned > 0) printf2(term_colours::RED, "However, the robot gained %.2f degrees over %.1f rotations. Consider decreasing the DistanceLR to %.3f.", turned, rots, dist);
@@ -679,7 +677,7 @@ void main_setup(){
           turned = 180*(turned-rots);
           rots /= 2;
 
-          double dist = fabs(LeftEncoder.get_value()-RightEncoder.get_value())/(360.0*rots);
+          double dist = abs(LeftEncoder.get_value()-RightEncoder.get_value())/(360.0*rots);
 
           if(fabs(turned) <= 0.05) printf2(term_colours::GREEN, "This seems pretty accurate. It's %.4f degrees off over %.1f rotations.", turned, rots);
           else if(turned > 0) printf2(term_colours::RED, "However, the robot gained %.2f degrees over %.1f rotations. Consider decreasing the DistanceLR to %.3f.", turned, rots, dist);
@@ -862,7 +860,7 @@ void util_background(){
     if (port != std::numeric_limits<int>::max()){
       std::get<5>(*it) = sprintf2("%d: %d", port, c::motor_get_actual_velocity(port));
       if(mot_jam_detect.on){
-        if (fabs(c::motor_get_actual_velocity(port)) < fabs(c::motor_get_target_velocity(port))/4) stall_count++;
+        if (fabs(c::motor_get_actual_velocity(port)) < fabs(c::motor_get_target_velocity(port)/4.0)) stall_count++;
         else stall_count = 0;
         if (stall_count > 10){
           stall_count = 0;

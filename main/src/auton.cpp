@@ -8,9 +8,6 @@
 #include "Libraries/gui.hpp"
 #include <map> //Not put in main.h because util.hpp cannot include <map>
 
-using namespace std;
-
-
 static const std::string auton_file_name = "/usd/auton.txt";
 
 void skills(){
@@ -120,10 +117,10 @@ void load_auton(){
   std::string target, task;
   selected_positions.clear();
 
-  ifstream file;
+  std::ifstream file;
   Data::log_t.data_update();
   printf2(term_colours::BLUE, "\n\nLoading Autons:");
-  file.open(auton_file_name, fstream::in);
+  file.open(auton_file_name, std::fstream::in);
   while(file >> target >> task){
     printf2(term_colours::BLUE, "%s: %s", target, task);
     selected_positions.push_back(target);
@@ -134,10 +131,10 @@ void load_auton(){
 }
 
 void save_auton(){
-  ofstream file;
+  std::ofstream file;
   Data::log_t.data_update();
   printf2("\n\nSaving Autons:");
-  file.open(auton_file_name, fstream::out | fstream::trunc);
+  file.open(auton_file_name, std::fstream::out | std::fstream::trunc);
   for(std::vector<std::string>::const_iterator it = selected_positions.begin(); it != selected_positions.end(); it++){
     file << *it << std::endl;
     file << std::get<std::string>(targets[*it]) << std::endl;
