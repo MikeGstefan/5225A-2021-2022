@@ -69,7 +69,7 @@ Position distance_reset_left(int cycles){
 		misc.print("End Time: %d", millis());
 	}
 	else{
-		misc.print(term_colours::RED, "Reset Failed Error Count is %d", error_count);
+		misc.print(term_colours::ERROR, "Reset Failed Error Count is %d", error_count);
 		ram = true;
 	}
 	if(ram == 0){
@@ -148,7 +148,7 @@ Position distance_reset_right(int cycles){
 		misc.print("End Time: %d", millis());
 	}
 	else{
-		misc.print(term_colours::RED, "Reset Failed Error Count is %d", error_count);
+		misc.print(term_colours::ERROR, "Reset Failed Error Count is %d", error_count);
 		ram = true;
 	}
 	if(ram == 0){

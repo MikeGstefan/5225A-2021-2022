@@ -5,10 +5,10 @@
 // lift buttons
 controller_digital_e_t lift_up_button = DIGITAL_R1;
 controller_digital_e_t lift_down_button = DIGITAL_R2;
-controller_digital_e_t both_lifts_down_button = DIGITAL_A;
 
 controller_digital_e_t reverse_drive_button = DIGITAL_L1;
 controller_digital_e_t claw_toggle_button =  DIGITAL_L2;
+controller_digital_e_t hitch_button = DIGITAL_A;
 
 // intake buttons
 controller_digital_e_t intake_button = DIGITAL_B;
@@ -40,6 +40,9 @@ controller_digital_e_t partner_back_claw_toggle_button = DIGITAL_A;
 controller_digital_e_t partner_front_claw_toggle_button = DIGITAL_LEFT;
 controller_digital_e_t partner_claw_tilt_button = DIGITAL_X;
 
+controller_digital_e_t partner_hitch_button = DIGITAL_UP;
+
+controller_digital_e_t partner_joy_mode_switch_button = DIGITAL_RIGHT;
 
 std::array<_Controller*, num_controller> _Controller::objs; //= {nullptr};
 _Task _Controller::controller_task = nullptr;
@@ -172,6 +175,10 @@ bool _Controller::interrupt(bool analog, bool digital, bool OK_except){
 }
 
 controller_digital_e_t _Controller::wait_for_press(std::vector<controller_digital_e_t> buttons, int timeout){
+  if(competition::is_autonomous()){
+    ERROR.print("Cannot get controller press in autonomous!");
+    return static_cast<controller_digital_e_t>(0);
+  }
   int start_time = millis();
   controller_queue.print("waiting for button press from controller %d", this->controller_num);
   controller_digital_e_t button = static_cast<controller_digital_e_t>(0);
@@ -187,14 +194,16 @@ controller_digital_e_t _Controller::wait_for_press(std::vector<controller_digita
     }
   }
   controller_queue.print("button %d pressed from controller %d", button, this->controller_num);
-// button handling methods
-
   return button;
 }
 
 
 //create wait for press for multiple buttons and return the one that was pressed
 void _Controller::wait_for_press(controller_digital_e_t button, int timeout){
+  if(competition::is_autonomous()){
+    ERROR.print("Cannot get controller press in autonomous!");
+    return;
+  }
   int start_time = millis();
   controller_queue.print("waiting for button %d from controller %d", button, this->controller_num);
   

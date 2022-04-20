@@ -19,7 +19,7 @@ std::string sprintf2(const std::string& fmt){
 }
 
 void newline(int count){
-  std::cout << std::string (count-1 , '\n') << std::endl;
+  std::cout << std::string (count-1 , '\n') << std::endl; //-1 because endl puts the final one
 }
 
 const char* get_term_colour(term_colours colour){

@@ -27,8 +27,21 @@ double weighted_avg(double first, double second, double first_scale){
   return first*first_scale + second*(1-first_scale);
 }
 
+bool random_bool(int ratio){
+  return millis() % (ratio + 1);
+}
+
 int random_direction(){
-  return std::rand()-RAND_MAX/2 > 0 ? 1 : -1;
+  return bool2sgn(random_bool());
+  // return std::rand()-RAND_MAX/2 > 0 ? 1 : -1;
+}
+
+int bool2sgn(bool boolean){
+  return boolean ? 1 : -1;
+}
+
+bool sgn2bool(int sgn){
+  return sgn > 0;
 }
 
 std::function<long double (long double)> func_scale(std::function<long double(long double)> f, Point p1, Point p2, double control){

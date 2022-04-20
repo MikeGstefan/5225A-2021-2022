@@ -52,7 +52,7 @@
       Button save_pos (15, 140, 100, 75, GUI::Style::SIZE, Button::SINGLE, checks, "Save Position");
       Button auton_selector (130, 140, 100, 75, GUI::Style::SIZE, Button::SINGLE, checks, "Select Autons");
       Button misc_checks (245, 140, 100, 75, GUI::Style::SIZE, Button::SINGLE, checks, "Misc");
-      Button distance (360, 140, 100, 75, GUI::Style::SIZE, Button::SINGLE, checks, "Distance");
+      Button dist (360, 140, 100, 75, GUI::Style::SIZE, Button::SINGLE, checks, "Distance");
 
     Page track ("Tracking"); //Display tracking vals and reset btns
       Text track_x(50, 45, GUI::Style::CENTRE, TEXT_SMALL, track, "X:%.1f", tracking.x_coord);
@@ -158,7 +158,7 @@
     Page ports ("Ports"); //Shows what ports to use on builder util
       Text mot (10, 50, GUI::Style::CORNER, TEXT_MEDIUM, ports, "Motors: %s", motor_port_nums);
       Text expanders (10, 100, GUI::Style::CORNER, TEXT_MEDIUM, ports, "Expanders: %s", expander_port_nums);
-      Text no_pneumatic (10, 150, GUI::Style::CORNER, TEXT_MEDIUM, ports, "No Pneumatics: %s", no_pneumatic_port_nums);
+      Text no_pneumatic (10, 150, GUI::Style::CORNER, TEXT_MEDIUM, ports, "No Pneumatics (Ignore): %s", no_pneumatic_port_nums);
 
     Page encoders ("Encoders"); //Display tracking vals and reset btns
       Slider expander_1 (30, 90, 30, 100, GUI::Style::SIZE, Slider::VERTICAL, 0, 21, encoders, "E1");
@@ -324,16 +324,16 @@ void main_setup(){
 
     intakes.set_func([](){
       if(GUI::prompt("Press to check intake", "", 1000)){
-        intake.set_state(intake_states::on);
+        // intake.set_state(intake_states::on);
         delay(1000);
 
-        intake.set_state(intake_states::off);
+        // intake.set_state(intake_states::off);
         delay(250);
 
-        intake.set_state(intake_states::reversed);
+        // intake.set_state(intake_states::reversed);
         delay(1000);
 
-        intake.set_state(intake_states::off);
+        // intake.set_state(intake_states::off);
       }
     });
 
@@ -369,6 +369,16 @@ void main_setup(){
         }
         else return;
       }
+    });
+
+    dist.set_func([](){
+      if(!in_range(static_cast<int>(b_dist.get()), 20, 2000)) screen_flash::start("Distance Sensor: Back");
+      if(!in_range(static_cast<int>(f_dist.get()), 20, 2000)) screen_flash::start("Distance Sensor: Front");
+      if(!in_range(static_cast<int>(r_dist.get()), 20, 2000)) screen_flash::start("Distance Sensor: Right");
+      if(!in_range(static_cast<int>(l_dist.get()), 20, 2000)) screen_flash::start("Distance Sensor: Left");
+      if(!in_range(static_cast<int>(r_reset_dist.get()), 20, 2000)) screen_flash::start("Distance Sensor: Right Reset");
+      if(!in_range(static_cast<int>(l_reset_dist.get()), 20, 2000)) screen_flash::start("Distance Sensor: Back Reset");
+      else(screen_flash::start("All Distance Sensors Good", term_colours::GREEN));
     });
 
     misc_checks.set_func([](){
@@ -413,22 +423,22 @@ void main_setup(){
 
   //Moving
     moving.set_setup_func([](){
-      x_val.val = tracking.x_coord;
-      y_val.val = tracking.y_coord;
-      a_val.val = tracking.get_angle_in_deg();
+      x_val.set_value(tracking.x_coord);
+      y_val.set_value(tracking.y_coord);
+      a_val.set_value(tracking.get_angle_in_deg());
     });
 
     go_to_xya.set_func([&](){
       Position target (x_val.get_value(), y_val.get_value(), a_val.get_value());
-      if (GUI::prompt("Press to go to " + convert_all_args("%d", target), "", 1000)) move_start(move_types::point, point_params(target));
+      if (GUI::prompt("Press to go to " + sprintf2("%d", target), "", 1000)) move_start(move_types::point, point_params(target));
     });
     go_home.set_func([](){
       Position target (0, 0, tracking.get_angle_in_deg());
-      if (GUI::prompt("Press to go to " + convert_all_args("%d", target), "", 1000)) move_start(move_types::point, point_params(target));
+      if (GUI::prompt("Press to go to " + sprintf2("%d", target), "", 1000)) move_start(move_types::point, point_params(target));
     });
     go_centre.set_func([](){
       Position target (72, 72, tracking.get_angle_in_deg());
-      if (GUI::prompt("Press to go to " + convert_all_args("%d", target), "", 1000)) move_start(move_types::point, point_params(target));
+      if (GUI::prompt("Press to go to " + sprintf2("%d", target), "", 1000)) move_start(move_types::point, point_params(target));
     });
 
   //Subsystems
@@ -438,8 +448,8 @@ void main_setup(){
     f_lift_val.max = f_lift.prog_positions.back();
 
     lift_move.set_setup_func([](){
-      b_lift_val.val = b_lift_pot.get_value();
-      f_lift_val.val = f_lift_pot.get_value();
+      b_lift_val.set_value(b_lift_pot.get_value());
+      f_lift_val.set_value(f_lift_pot.get_value());
       if(f_claw_o.get_state()) front_claw.select();
       if(b_claw.get_state()) back_claw.select();
     });
@@ -514,14 +524,14 @@ void main_setup(){
             term_colours right_col = abs(right) <= 0.01 ? term_colours::GREEN : term_colours::RED;
             term_colours back_col = abs(back) <= 0.01 ? term_colours::GREEN : term_colours::RED;
 
-            if(left == 0) printf2(term_colours::GREEN, -1, "The left encoder was perfect over %d rotations", left_rot);
-            else printf2(left_col, -1, "The left encoder %s %d ticks over %d rotations", left > 0 ? "gained" : "lost", fabs(360.0*left), left_rot);
+            if(left == 0) printf2(term_colours::GREEN, "The left encoder was perfect over %d rotations", left_rot);
+            else printf2(left_col, "The left encoder %s %d ticks over %d rotations", left > 0 ? "gained" : "lost", fabs(360.0*left), left_rot);
 
-            if(right == 0) printf2(term_colours::GREEN, -1, "The right encoder was perfect over %d rotations", right_rot);
-            else printf2(right_col, -1, "The right encoder %s %d ticks over %d rotations", right > 0 ? "gained" : "lost", fabs(360.0*right), right_rot);
+            if(right == 0) printf2(term_colours::GREEN, "The right encoder was perfect over %d rotations", right_rot);
+            else printf2(right_col, "The right encoder %s %d ticks over %d rotations", right > 0 ? "gained" : "lost", fabs(360.0*right), right_rot);
 
-            if(back == 0) printf2(term_colours::GREEN, -1, "The back encoder was perfect over %d rotations", back_rot);
-            else printf2(back_col, -1, "The back encoder %s %d ticks over %d rotations", back > 0 ? "gained" : "lost", fabs(360.0*back), back_rot);
+            if(back == 0) printf2(term_colours::GREEN, "The back encoder was perfect over %d rotations", back_rot);
+            else printf2(back_col, "The back encoder %s %d ticks over %d rotations", back > 0 ? "gained" : "lost", fabs(360.0*back), back_rot);
           }
         }
       }
@@ -537,8 +547,8 @@ void main_setup(){
 
           if (GUI::prompt("Press when stopped")){
             int back = BackEncoder.get_value();
-            if(abs(back) <= 2) printf2(term_colours::GREEN, -1, "The back wheel is pretty accurate, it is at %d ticks.", back);
-            else printf2(term_colours::RED, -1, "The back wheel is corkscrewing. It is at %d ticks. Consider turning it %sclockwise.", left, sgn(LeftEncoder.get_value()) == sgn(back) ? "" : "counter-");
+            if(abs(back) <= 2) printf2(term_colours::GREEN, "The back wheel is pretty accurate, it is at %d ticks.", back);
+            else printf2(term_colours::RED, "The back wheel is corkscrewing. It is at %d ticks. Consider turning it %sclockwise.", left, sgn(LeftEncoder.get_value()) == sgn(back) ? "" : "counter-");
           }
         }
       }
@@ -551,8 +561,8 @@ void main_setup(){
           drivebase.brake();
 
           int back = BackEncoder.get_value();
-          if(abs(back) <= 2) printf2(term_colours::GREEN, -1, "The back wheel is pretty accurate, it is at %d ticks.", back);
-          else printf2(term_colours::RED, -1, "The back wheel is corkscrewing. It is at %d ticks. Consider turning it %sclockwise.", left, sgn(LeftEncoder.get_value()) == sgn(back) ? "" : "counter-");
+          if(abs(back) <= 2) printf2(term_colours::GREEN, "The back wheel is pretty accurate, it is at %d ticks.", back);
+          else printf2(term_colours::RED, "The back wheel is corkscrewing. It is at %d ticks. Consider turning it %sclockwise.", left, sgn(LeftEncoder.get_value()) == sgn(back) ? "" : "counter-");
         }
       }
     });
@@ -566,11 +576,11 @@ void main_setup(){
             int left = LeftEncoder.get_value();
             int right = RightEncoder.get_value();
 
-            if(abs(left) <= 2) printf2(term_colours::GREEN, -1, "The left wheel is pretty accurate, it is at %d ticks.", left);
-            else printf2(term_colours::RED, -1, "The left wheel is corkscrewing. It is at %d ticks. Consider turning it %sclockwise.", left, sgn(left) == sgn(BackEncoder.get_value()) ? "counter-" : "");
+            if(abs(left) <= 2) printf2(term_colours::GREEN, "The left wheel is pretty accurate, it is at %d ticks.", left);
+            else printf2(term_colours::RED, "The left wheel is corkscrewing. It is at %d ticks. Consider turning it %sclockwise.", left, sgn(left) == sgn(BackEncoder.get_value()) ? "counter-" : "");
 
-            if(abs(right) <= 2) printf2(term_colours::GREEN, -1, "The right wheel is pretty accurate, it is at %d ticks.", right);
-            else printf2(term_colours::RED, -1, "The right wheel is corkscrewing. It is at %d ticks. Consider turning it %sclockwise.", right, sgn(right) == sgn(BackEncoder.get_value()) ? "counter-" : "");
+            if(abs(right) <= 2) printf2(term_colours::GREEN, "The right wheel is pretty accurate, it is at %d ticks.", right);
+            else printf2(term_colours::RED, "The right wheel is corkscrewing. It is at %d ticks. Consider turning it %sclockwise.", right, sgn(right) == sgn(BackEncoder.get_value()) ? "counter-" : "");
           }
         }
       }
@@ -585,8 +595,8 @@ void main_setup(){
           drivebase.reset();
 
           if (GUI::prompt("Press when completed 30 inches")){
-            printf2("The left tracking wheel's diameter is %f", 60.0/LeftEncoder.get_value());
-            printf2("The right tracking wheel's diameter is %f", 60.0/RightEncoder.get_value());
+            printf2("The left tracking wheel's diameter is %f", 60.0/deg_to_rad(LeftEncoder.get_value()));
+            printf2("The right tracking wheel's diameter is %f", 60.0/deg_to_rad(RightEncoder.get_value()));
           }
         }
       }
@@ -600,8 +610,8 @@ void main_setup(){
           drivebase.brake();
 
           printf2("If the robot is far off of 30 inches, consider changing the wheel size constants.");
-          printf2("Multiply the actual travelled distance by %f to get the left wheel diameter", fabs(2.0/LeftEncoder.get_value()));
-          printf2("Multiply the actual travelled distance by %f to get the right wheel diameter", fabs(2.0/RightEncoder.get_value()));
+          printf2("Multiply the actual travelled distance by %f to get the left wheel diameter", fabs(2.0/deg_to_rad(LeftEncoder.get_value())));
+          printf2("Multiply the actual travelled distance by %f to get the right wheel diameter", fabs(2.0/deg_to_rad(RightEncoder.get_value())));
         }
       }
     });
@@ -612,7 +622,7 @@ void main_setup(){
           drivebase.reset();
 
           if (GUI::prompt("Press when completed 30 inches")){
-            printf2("The back tracking wheel's diameter is %f", 60.0/BackEncoder.get_value());
+            printf2("The back tracking wheel's diameter is %f", 60.0/deg_to_rad(BackEncoder.get_value()));
           }
         }
       }
@@ -635,11 +645,11 @@ void main_setup(){
             turned = 180*(turned-rots);
             rots /= 2;
 
-            double dist = rots*fabs(LeftEncoder.get_value()-RightEncoder.get_value())/360.0;
+            double dist = fabs(LeftEncoder.get_value()-RightEncoder.get_value())/(360.0*rots);
 
-            if(fabs(turned) <= 0.05) printf2(term_colours::GREEN, -1, "This seems pretty accurate. It's %.4f degrees off over %.1f rotations.", turned, rots);
-            else if(turned > 0) printf2(term_colours::RED, -1, "However, the robot gained %.2f degrees over %.1f rotations. Consider decreasing the DistanceLR to %.3f.", turned, rots, dist);
-            else printf2(term_colours::RED, -1, "However, the robot lost %.2f degrees over %.1f rotations. Consider increasing the DistanceLR to %.3f.", -turned, rots, dist);
+            if(fabs(turned) <= 0.05) printf2(term_colours::GREEN, "This seems pretty accurate. It's %.4f degrees off over %.1f rotations.", turned, rots);
+            else if(turned > 0) printf2(term_colours::RED, "However, the robot gained %.2f degrees over %.1f rotations. Consider decreasing the DistanceLR to %.3f.", turned, rots, dist);
+            else printf2(term_colours::RED, "However, the robot lost %.2f degrees over %.1f rotations. Consider increasing the DistanceLR to %.3f.", -turned, rots, dist);
           }
         }
       }
@@ -668,11 +678,11 @@ void main_setup(){
           turned = 180*(turned-rots);
           rots /= 2;
 
-          double dist = rots*fabs(LeftEncoder.get_value()-RightEncoder.get_value())/360.0;
+          double dist = fabs(LeftEncoder.get_value()-RightEncoder.get_value())/(360.0*rots);
 
-          if(fabs(turned) <= 0.05) printf2(term_colours::GREEN, -1, "This seems pretty accurate. It's %.4f degrees off over %.1f rotations.", turned, rots);
-          else if(turned > 0) printf2(term_colours::RED, -1, "However, the robot gained %.2f degrees over %.1f rotations. Consider decreasing the DistanceLR to %.3f.", turned, rots, dist);
-          else printf2(term_colours::RED, -1, "However, the robot lost %.2f degrees over %.1f rotations. Consider increasing the DistanceLR to %.3f.", -turned, rots, dist);
+          if(fabs(turned) <= 0.05) printf2(term_colours::GREEN, "This seems pretty accurate. It's %.4f degrees off over %.1f rotations.", turned, rots);
+          else if(turned > 0) printf2(term_colours::RED, "However, the robot gained %.2f degrees over %.1f rotations. Consider decreasing the DistanceLR to %.3f.", turned, rots, dist);
+          else printf2(term_colours::RED, "However, the robot lost %.2f degrees over %.1f rotations. Consider increasing the DistanceLR to %.3f.", -turned, rots, dist);
         }
       }
     });

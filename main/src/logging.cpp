@@ -1,5 +1,4 @@
 #include "logging.hpp"
-#include "Libraries/printing.hpp"
 const char* file_name= "/usd/data.txt";
 const char* file_meta= "/usd/meta_data.txt";
 char queue[queue_size];
@@ -23,22 +22,20 @@ Data::Data(const char* obj_name, const char* id_code, log_types log_type_param, 
 
 
 
-Data task_log("tasks.txt","$01", debug, log_locations::both);
-Data controller_queue("controller.txt","$02", debug,log_locations::none);
-Data tracking_data("tracking.txt","$03",debug,log_locations::sd);
-Data tracking_imp("tracking.txt","$03",debug,log_locations::both);
-Data misc("misc.txt", "$04",debug,log_locations::both);
-Data drivers_data("driver.txt", "$05", debug,log_locations::none);
-Data motion_i("motion.txt","$06",debug,log_locations::both);
-Data motion_d("motion.txt", "$06", debug,log_locations::sd);
-Data term("terminal.txt","$07",debug,log_locations::t);
-Data log_d("log.txt","$08",debug,log_locations::both, term_colours::BLUE);
-Data graph("graph.txt","$09",debug,log_locations::sd, term_colours::BLUE);
-Data events("events.txt", "$10", debug,log_locations::both, term_colours::BLUE);
-Data state_log("state.txt", "$11", debug,log_locations::sd);
+Data task_log("tasks.txt","$01", general, log_locations::both);
+Data controller_queue("controller.txt","$02", general,log_locations::none);
+Data tracking_data("tracking.txt","$03",general,log_locations::both);
+Data tracking_imp("tracking.txt","$03",general,log_locations::both);
+Data misc("misc.txt", "$04",general,log_locations::both);
+Data drivers_data("driver.txt", "$05", general,log_locations::none);
+Data motion_i("motion.txt","$06",general,log_locations::both);
+Data motion_d("motion.txt", "$06", general,log_locations::both);
+Data term("terminal.txt","$07",general,log_locations::t);
+Data log_d("log.txt","$08",general,log_locations::both);
+Data graph("graph.txt","$09",general,log_locations::sd, term_colours::NONE, -1);
+Data state_log("state.txt", "$11", general,log_locations::both);
 Data ERROR("error.txt", "$12", error, log_locations::both, term_colours::ERROR);
-// Data state_log("log.txt","$13",debug,log_locations::both);
-Data skills_d("skills.txt", "$13", debug, log_locations::both);
+Data skills_d("skills.txt", "$13", general, log_locations::both);
 
 
 vector<Data*> Data::get_objs(){
@@ -49,7 +46,7 @@ vector<Data*> Data::get_objs(){
 void Data::init(){
   file.open(file_meta,ofstream::trunc | ofstream::out);
   if(!file.is_open()){
-    printf2(term_colours::RED, -1, "Log File not found");
+    printf2(term_colours::ERROR, "Log File not found");
     for(int i = 0; i< Data::obj_list.size(); i++){
       if(Data::obj_list[i]->log_location == log_locations::sd && int(Data::obj_list[i]->log_type) ==1)Data::obj_list[i]->log_location = log_locations::t;
       if(int(Data::obj_list[i]->log_type) ==2){
