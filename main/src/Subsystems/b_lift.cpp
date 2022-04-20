@@ -17,7 +17,8 @@ B_Lift b_lift({{"B_Lift",
   "intk_jam",
   "intake_reversed",
   "shifting_to_lift_up",
-  "shifting_to_lift_down"
+  "shifting_to_lift_down",
+  "reshift"
 },  b_lift_states::managed, b_lift_states::idle // goes from managed to idle upon startup
 }, b_lift_m});
 
@@ -126,14 +127,26 @@ void B_Lift::handle(bool driver_array){
       break;
 
     case b_lift_states::intake_on:
-      // printf("current:%lf\n", motor.get_actual_velocity());
-      printf("sensor: %d\n", intk_t.get_value());
-      if(!intk_t.get_value())intk_jam_count++;
-      else intk_jam_count = 0;
-      if(intk_jam_count == 4){
-        b_lift.Subsystem::set_state(b_lift_states::intk_jam);
-        
+      // printf("vel:%lf\n", motor.get_actual_velocity());
+      if(fabs(motor.get_actual_velocity()) < 5.0) not_moving_count++;
+      else not_moving_count = 0;
+      if(intake_safe.get_time() < 300 && not_moving_count > 20){
+        not_moving_count = 0;
+        after_shift_state = b_lift_states::reshift;
+        shift(TRANS_LIFT_STATE); // shifts to lift
+        intake_safe.reset(false);
       }
+      // printf("current:%lf\n", motor.get_actual_velocity());
+      else{
+        if(!intk_t.get_value())intk_jam_count++;
+        else intk_jam_count = 0;
+        if(intk_jam_count == 4){
+          intake_safe.reset(false);
+          Subsystem::set_state(b_lift_states::intk_jam);
+          
+        }
+      }
+      printf("sensor: %d\n", intk_t.get_value());
       break;
 
     case b_lift_states::intk_jam:
@@ -154,6 +167,9 @@ void B_Lift::handle(bool driver_array){
       if(fabs(motor.get_target_position() - motor.get_position()) < 15){
         Subsystem::set_state(after_shift_state);
       }
+      break;
+
+    case b_lift_states::reshift:  // shifts to intake 
       break;
 
   }
@@ -198,6 +214,7 @@ void B_Lift::handle_state_change(){
       break;
 
     case b_lift_states::intake_on:
+      intake_safe.reset();
       motor.move(-127);
       break;
     case b_lift_states::intk_jam:
@@ -217,6 +234,10 @@ void B_Lift::handle_state_change(){
       motor.move_relative(-30, 100);
       break;
 
+    case b_lift_states::reshift:
+      after_shift_state = b_lift_states::intake_on;
+      shift(TRANS_LIFT_STATE); // shifts to lift
+      break;
     default:
     break;
 

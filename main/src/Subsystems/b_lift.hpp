@@ -6,7 +6,7 @@
 
 #define B_LIFT_AT_BOTTOM (b_lift_pot.get_value() < b_lift.driver_positions[0] + b_lift.end_error)
 
-#define NUM_OF_B_LIFT_STATES 13
+#define NUM_OF_B_LIFT_STATES 14
 #define B_LIFT_MAX_VELOCITY 100
 
 // state of the transmission piston for the lift and intake
@@ -26,11 +26,15 @@ enum class b_lift_states{
   intk_jam,
   intake_reversed, // intake is running in reverse
   shifting_up, // lift/intake transmission shifting, moving up
-  shifting_down // lift/intake transmission shifting, moving down
+  shifting_down, // lift/intake transmission shifting, moving down
+  reshift // if the intake failed to transmit, shifts to lift and enters this state, then goes back to intake-on
 };
 
 class B_Lift: public Motorized_subsystem<b_lift_states, NUM_OF_B_LIFT_STATES, B_LIFT_MAX_VELOCITY> {
     Timer up_press{"Up_press"}, down_press{"Down_press"};
+    Timer intake_safe{"intake_safe", nullptr, false};
+    int not_moving_count = 0;
+
     int bad_count = 0; // cycle check for safeties
     PID pid = PID(3.0,0.0,0.0,0.0);
     int lift_power; // for manual control
@@ -48,8 +52,8 @@ class B_Lift: public Motorized_subsystem<b_lift_states, NUM_OF_B_LIFT_STATES, B_
 
   public:
     b_lift_states after_shift_state; // the state the subsystem will go to after transmission shifts
-    vector<int> driver_positions = {1035, 1720, 1825, 1970, 2800};
-    vector<int> prog_positions = {1035, 1720, 1825, 1970, 2800};
+    vector<int> driver_positions = {1045, 1720, 1825, 1970, 2800};
+    vector<int> prog_positions = {1045, 1720, 1825, 1970, 2800};
     const int park_position =1650 ;
 
     B_Lift(Motorized_subsystem<b_lift_states, NUM_OF_B_LIFT_STATES, B_LIFT_MAX_VELOCITY> motorized_subsystem);  // constructor

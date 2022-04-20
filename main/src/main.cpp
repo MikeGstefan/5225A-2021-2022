@@ -240,6 +240,7 @@ void opcontrol() {
 		
 		if(print_timer.get_time() > 100){
 			printf("b_lift_pot_val:%d, f_lift_pot_val:%d\n", b_lift_pot.get_value(), f_lift_pot.get_value());
+			// printf("b_dist:%d\n", b_dist.get());
 			print_timer.reset();
 		}
 
