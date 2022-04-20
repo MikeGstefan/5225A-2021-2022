@@ -4,7 +4,7 @@
 #include "../pid.hpp"
 #include <atomic>
 
-#define B_LIFT_AT_BOTTOM (b_lift_pot.get_value() < b_lift.driver_positions[0] + b_lift.end_error)
+#define B_LIFT_AT_BOTTOM (b_lift_pot.get_value() < b_lift.driver_positions[0] + b_lift.end_error) //please make this a function
 
 #define NUM_OF_B_LIFT_STATES 11
 #define B_LIFT_MAX_VELOCITY 100

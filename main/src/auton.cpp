@@ -348,9 +348,9 @@ std::map<std::string, std::pair<Point, std::string>> targets = {
   {"Tall", {{73.0, 71.0}, "Front"}},
   {"High", {{107.0, 71.0}, "Front"}},
   {"Low", {{34.5, 72.0}, "Front"}},
-  {"AWP", {{130.0, 36.0}, "Back"}},
-  {"Ramp", {{128.0, 36.0}, "Back"}},
-}; //see if we ever get a hitch
+  {"AWP", {{130.0, 36.0}, "Hitch"}},
+  {"Ramp", {{128.0, 36.0}, "Hitch"}},
+};
 
 void load_auton(){
   std::string target, task;
@@ -403,36 +403,35 @@ bool select_auton_task(std::string target){
   std::string choice = std::get<std::string>(targets[target]);
   bool selected = false;
 
-  wait_until(selected){
+  while(true){
     master.clear_line(1);
     master.print(1, 0, choice);
 
     switch(master.wait_for_press({DIGITAL_A, DIGITAL_RIGHT, DIGITAL_LEFT, DIGITAL_B})){ //see how to use ok_button
-      case DIGITAL_B: return false; break;
       case DIGITAL_A:
-        selected = true;
+        selected_positions.push_back(target);
+        std::get<std::string>(targets[target]) = choice;
+        return true;
         break;
-
       case DIGITAL_RIGHT:
         if(choice == "Front") choice = "Back";
-        else if(choice == "Back") choice = "None";
+        else if(choice == "Back") choice = "Hitch";
+        else if(choice == "Hitch") choice = "None";
         else if(choice == "None") choice = "Front";
         break;
       
       case DIGITAL_LEFT:
         if(choice == "Front") choice = "None";
+        else if(choice == "None") choice = "Hitch";
+        else if(choice == "Hitch") choice = "Back";
         else if(choice == "Back") choice = "Front";
-        else if(choice == "None") choice = "Back";
         break;
-
+      case DIGITAL_B:
+        return false;
+        break;
       default: break;
     }
   }
-
-  selected_positions.push_back(target);
-  std::get<std::string>(targets[target]) = choice;
-
-  return true;
 }
 
 void select_auton(){
@@ -454,6 +453,7 @@ void select_auton(){
         break;
       case DIGITAL_A:
         if(!select_auton_task(selection->first)) break;
+        //fallthrough intentional if true
 
       case DIGITAL_RIGHT:
         do{ //Goes to next available choice
@@ -488,20 +488,26 @@ void run_auton(){
 
     if(!run_defined_auton(selected_positions[i], selected_positions[i+1])){
       if(target.second == "None"){
-        move_start(move_types::tank_rush, tank_rush_params({target.first, /*figure out angle based on front/back*/}, false));
+        move_start(move_types::tank_rush, tank_rush_params(target.first, false));
       }
       else if(target.second == "Front"){
         f_lift.set_state(f_lift_states::move_to_target, 0);
-        move_start(move_types::tank_rush, tank_rush_params({target.first, /*figure out angle based on front/back*/}, false));
-        f_detect_goal();
+        move_start(move_types::tank_rush, tank_rush_params(target.first, false));
+        f_claw_obj.set_state(f_claw_states::searching);
         f_lift.set_state(f_lift_states::move_to_target, 1);
       }
       else if(target.second == "Back"){
         b_lift.set_state(b_lift_states::move_to_target, 0);
-        move_start(move_types::tank_rush, tank_rush_params({target.first, /*figure out angle based on front/back*/}, true));
-        b_detect_goal();
+        move_start(move_types::tank_rush, tank_rush_params(target.first, true));
+        b_claw_obj.set_state(b_claw_states::searching);
         b_lift.set_state(b_lift_states::move_to_target, 1);
       }
+      else if(target.second == "Hitch"){
+        b_lift.set_state(b_lift_states::move_to_target, 4);
+        move_start(move_types::tank_rush, tank_rush_params(target.first, true));
+        hitch_obj.set_state(hitch_states::searching);
+      }
+      else ERROR.print("Wrong target selected");
 
     }
   }

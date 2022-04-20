@@ -332,7 +332,8 @@ void tank_rush_goal(void* params){
     orig_sgn_line_y = sgn(line_disp.get_y()); // used to calculate if the robot has overshot
     // END OF MOTION FIX
 
-    motion_i.print("Starting tank rush goal to point from (%.2f, %.2f, %.2f) to (%.2f, %.2f, %.2f)", tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle),target.x, target.y, target.angle);
+    // motion_i.print("Starting tank rush goal to point from (%.2f, %.2f, %.2f) to (%.2f, %.2f, %.2f)", tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle),target.x, target.y, target.angle);
+    motion_i.print("Starting tank rush goal to point from %.2f to %.2f", Position{tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle)}, target);
     while(true){
       // global displacement of robot and target
       line_disp = Vector(target.x - tracking.x_coord, target.y - tracking.y_coord);
