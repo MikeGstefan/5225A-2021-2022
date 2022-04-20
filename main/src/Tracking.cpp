@@ -74,9 +74,7 @@ void update(void* params){
   _Task* ptr = _Task::get_obj(params);
   Timer data_timer{"tracking logs"};
   // LeftEncoder.reset(); RightEncoder.reset(); BackEncoder.reset();
-
-  // Make most of these constants in a header
-  double DistanceLR = 9.84, DistanceB = 0.85;
+  double DistanceLR = 9.91, DistanceB = 0.85;
   double Left, Right, Back, NewLeft, NewRight, NewBack, LastLeft = LeftEncoder.get_value()/360.0 *(2.75*M_PI), LastRight =  RightEncoder.get_value()/360.0 *(2.75*M_PI), LastBack = BackEncoder.get_value()/360.0 *(2.75*M_PI);
   double Theta = 0.0, Beta = 0.0, Alpha = 0.0;
   double RadiusR, RadiusB, h, h2;
@@ -424,8 +422,8 @@ point_params::point_params(const Position target, const double max_power, const 
 tank_arc_params::tank_arc_params(const Point start_pos, Position target, const double power, const double max_power, const bool brake, double decel_start, double decel_end, double decel_target_speed):
   start_pos{start_pos}, target{target}, power{power}, max_power{max_power}, brake{brake}, decel_start{decel_start}, decel_end{decel_end}, decel_target_speed{decel_target_speed}{}
 
-tank_point_params::tank_point_params(const Position target, const bool turn_dir_if_0, const double max_power, const double min_angle_percent, const bool brake, double kp_y, double kp_a, double kd_a, int timeout, Point end_error):
-  target{target}, turn_dir_if_0{turn_dir_if_0}, max_power{max_power}, min_angle_percent{min_angle_percent}, brake{brake}, kp_y{kp_y}, kp_a{kp_a}, kd_a{kd_a}, timeout{timeout}, end_error{end_error}{}
+tank_point_params::tank_point_params(const Position target, const bool turn_dir_if_0, const double max_power, const double min_angle_percent, const bool brake, double kp_y, double kp_a, double kd_a, int timeout, Point end_error, double min_power_y):
+  target{target}, turn_dir_if_0{turn_dir_if_0}, max_power{max_power}, min_angle_percent{min_angle_percent}, brake{brake}, kp_y{kp_y}, kp_a{kp_a}, kd_a{kd_a}, timeout{timeout}, end_error{end_error}, min_power_y{min_power_y}{}
 
 tank_rush_params::tank_rush_params(const Position target, const bool turn_dir_if_0, const double max_power, const double min_angle_percent, const bool brake, double kp_a, double kd_a, double dist_past): 
   target{target}, turn_dir_if_0{turn_dir_if_0}, max_power{max_power}, min_angle_percent{min_angle_percent}, brake{brake}, kp_a{kp_a}, kd_a{kd_a}, dist_past{dist_past}{}
@@ -989,6 +987,7 @@ void tank_move_to_target(void* params){
     double kd_a = tank_point_params_g.kd_a;
     int timeout = tank_point_params_g.timeout;
     Point end_error = tank_point_params_g.end_error;
+    double min_power_y = tank_point_params_g.min_power_y;
     // Pid angle(kp.a);
     
     tracking.move_complete = false;
@@ -1080,7 +1079,7 @@ void tank_move_to_target(void* params){
       }
       
       // gives min power to local y if that is not satisfied
-      if (fabs(tracking.power_y) < min_move_power_y && fabs(local_error.y) > 0.5) tracking.power_y = min_move_power_y * sgn(local_error.y);
+      if (fabs(tracking.power_y) < min_power_y && fabs(local_error.y) > 0.5) tracking.power_y = min_power_y * sgn(local_error.y);
 
       // scales powers
       total_power = fabs(tracking.power_y) + fabs(tracking.power_a);
@@ -1610,39 +1609,51 @@ void Gyro::climb_ramp(){
   Task([this](){
     wait_until(false){
       get_angle();
-      motion_i.print("Angle:%f Angle_v:%f, L_v:%f, R_v:%f, Dist:%f", angle, get_angle_dif(), tracking.l_velo, tracking.r_velo, tracking.x_coord);
+      // motion_i.print("Angle:%f Angle_v:%f, L_v:%f, R_v:%f, Dist:%f", angle, get_angle_dif(), tracking.l_velo, tracking.r_velo, tracking.x_coord);
       // motion_i.print("Angle:%f", angle);
     }
   });
+  b_lift.set_state(b_lift_states::move_to_target, 2);
   wait_until(angle > 22);
+  drivebase.brake();
+  f_lift.set_state(f_lift_states::move_to_target, 1, 100);
   motion_i.print("ON RAMP: %f", angle);
   screen_flash::start("On Ramp", term_colours::NOTIF);
+  // master.wait_for_press(DIGITAL_R1);
 
   tracking.reset();
 
-	// f_lift.move_absolute(100); //Lowers lift
-
-  drivebase.move(-GYRO_SIDE*127, 0.0); //Can probably get rid of this
+  drivebase.move(-GYRO_SIDE*90, 0.0); //Can probably get rid of this
   tracking.wait_for_dist(18);
 }
 
 void Gyro::level(double kP, double kD){
 	PID gyro_p(kP, 0, kD, 0);
   Timer gyro_steady ("Gyro", &motion_i);
-  // int speed;
-  // bool neg = false;
+  double speed;
+  bool lowered = false;
+  bool neg = false;
+  constexpr double min_pwr = 30.0;
 
   screen_flash::start("PID", term_colours::NOTIF);
 
-	wait_until(gyro_steady.get_time() > 500 || master.interrupt(true, true)){
-    gyro_p.compute(-angle, 0);
-    drivebase.move(gyro_p.get_output(), 0.0);
-    // gyro_steady.print("Angle: %f | Speed: %f", angle, gyro_p.get_output());
+	while(!(gyro_steady.get_time() > 500 || master.interrupt(true, true))){
+    speed = gyro_p.compute(-angle, 0);
+
+    if(!lowered && fabs(angle) < 21.0){
+      f_lift.set_state(f_lift_states::move_to_target, 0);
+      lowered = true;
+    }
+    if(!neg && in_range(speed, 10.0, min_pwr)) speed = min_pwr*sgn(speed);
+    if(speed < 0) neg = true;
+    if(in_range(fabs(speed), 0.0, 10.0)) speed = 0;
+
+    drivebase.move(speed, 0.0);
+    motion_i.print("In:%.3f Sens:%.3f Out:%.3f, Speed:%.3f, P:%.3f, D:%.3f", -angle, gyro.inertial.GYRO_AXIS(), gyro_p.get_output(), speed, gyro_p.proportional, gyro_p.derivative);
+    drivebase.move(speed, 0.0);
     
 		if (fabs(angle) > 6 || get_angle_dif() > 0.06) gyro_steady.reset();
-
-    // if(speed < 0) neg = true;
-    // if(neg && speed > 0) break;
+    delay(11);
   }
 
 	motion_i.print("\nLevelled on ramp\n");
@@ -1650,6 +1661,8 @@ void Gyro::level(double kP, double kD){
   front_r.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
   back_l.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
   back_r.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
+  center_l.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
+  center_r.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
   drivebase.velo_brake();
 
   screen_flash::start("Braked", term_colours::NOTIF);

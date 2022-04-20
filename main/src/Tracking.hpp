@@ -34,7 +34,7 @@ extern _Task move_t;
 
 constexpr int min_move_power_a = 30;
 constexpr int min_move_power_x = 40;
-constexpr int min_move_power_y = 16;
+constexpr int min_move_power_y = 22;
 
 
 void update(void* params);
@@ -63,7 +63,7 @@ class Tracking{
 
 
 class Gyro{
-  private:
+  public:
     Imu& inertial;
     double angle, last_angle;
     int time;
@@ -168,8 +168,9 @@ struct tank_point_params{
   double kd_a = 0.0;
   int timeout = 0;
   Point end_error = {0.5, 0.5};
+  double min_power_y = min_move_power_y;
   tank_point_params() = default;
-  tank_point_params(const Position target, const bool turn_dir_if_0 = false, const double max_power = 127.0, const double min_angle_percent = 1.0, const bool brake = true, double kp_y = 6.4, double kp_a =70.0, double kd_a = 0.0, int timeout = 0, Point end_error = {0.5, 0.5});
+  tank_point_params(const Position target, const bool turn_dir_if_0 = false, const double max_power = 127.0, const double min_angle_percent = 1.0, const bool brake = true, double kp_y = 6.4, double kp_a =70.0, double kd_a = 0.0, int timeout = 0, Point end_error = {0.5, 0.5}, double min_power_y = min_move_power_y);
 };
 
 struct tank_rush_params{ 
