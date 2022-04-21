@@ -486,29 +486,53 @@ void run_auton(){
 
     screen_flash::start(term_colours::BLUE, "Starting move to %s goal", selected_positions[i+1]);
 
-    if(!run_defined_auton(selected_positions[i], selected_positions[i+1])){
+    if(run_defined_auton(selected_positions[i], selected_positions[i+1])){
+      misc.print("Ran Predefined Auton Route from %s to %s", selected_positions[i], selected_positions[i+1]);
+    }
+    else{
       if(target.second == "None"){
+        b_lift.set_state(b_lift_states::intake_on, 0);
         move_start(move_types::tank_rush, tank_rush_params(target.first, false));
+
+        wait_until(tracking.move_complete);
+
+        b_lift.set_state(b_lift_states::intake_off, 0);
       }
       else if(target.second == "Front"){
         f_lift.set_state(f_lift_states::move_to_target, 0);
+        b_lift.set_state(b_lift_states::intake_on, 0);
         move_start(move_types::tank_rush, tank_rush_params(target.first, false));
+        wait_until(F_LIFT_AT_BOTTOM);
+
         f_claw_obj.set_state(f_claw_states::searching);
+        wait_until(tracking.move_complete || f_claw_obj.get_state() == f_claw_states::grabbed);
+
+        b_lift.set_state(b_lift_states::intake_off, 0);
         f_lift.set_state(f_lift_states::move_to_target, 1);
       }
       else if(target.second == "Back"){
         b_lift.set_state(b_lift_states::move_to_target, 0);
         move_start(move_types::tank_rush, tank_rush_params(target.first, true));
+        wait_until(B_LIFT_AT_BOTTOM);
+        
         b_claw_obj.set_state(b_claw_states::searching);
+        wait_until(tracking.move_complete || b_claw_obj.get_state() == b_claw_states::tilted);
+
         b_lift.set_state(b_lift_states::move_to_target, 1);
       }
       else if(target.second == "Hitch"){
         b_lift.set_state(b_lift_states::move_to_target, 4);
         move_start(move_types::tank_rush, tank_rush_params(target.first, true));
         hitch_obj.set_state(hitch_states::searching);
+
+        wait_until(tracking.move_complete || hitch_obj.get_state() == hitch_states::grabbed);
       }
       else ERROR.print("Wrong target selected");
 
     }
+
+    delay(1000);
+
   }
+  //go back to start
 }

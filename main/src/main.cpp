@@ -28,7 +28,7 @@ const GUI* GUI::current_gui = &main_obj;
 bool auton_run = false; // has auton run
 
 void initialize() {
-	gyro.calibrate();
+	// gyro.calibrate();
 	// front_l.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
 	// front_r.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
 	// back_l.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
@@ -53,7 +53,7 @@ void initialize() {
 	update_t.start();
   lift_handle_t.start();
 	// master.print(2, 0, "Driver: %s", drivebase.drivers[drivebase.cur_driver].name);
-  gyro.finish_calibrating(); //Finishes calibrating gyro before program starts
+  // gyro.finish_calibrating(); //Finishes calibrating gyro before program starts
 }
 
 /**
