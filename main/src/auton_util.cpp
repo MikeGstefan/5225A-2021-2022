@@ -126,6 +126,7 @@ void flatten_against_wall(bool front, int cycles){
 // }
 
 void b_detect_goal(){ 
+  tilt_lock.set_state(1);
   wait_until(!tracking.move_complete);
   while(b_dist.get() > 40 && !tracking.move_complete){ 
     misc.print("looking for goal at back: %d", b_dist.get());
@@ -195,7 +196,7 @@ void subsystem_handle_t(void*params){
   while(true){ 
     b_lift.handle(false);
 		f_lift.handle(false);
-    intake.handle();
+    // intake.handle();
     // b_claw_obj.handle();
 		// f_claw_obj.handle();
     if(ptr->notify_handle())return;

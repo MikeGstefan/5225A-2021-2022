@@ -66,8 +66,12 @@ void Tracking::wait_for_dist(double distance, int timeout){
   Timer dist_time{"Wait For Dist"};
 
   wait_until(get_dist(start_pos) > distance){
-    if(timeout != 0 && dist_time.get_time() > timeout) break;
+    if(timeout != 0 && dist_time.get_time() > timeout){
+      tracking_imp.print("Timed out on waiting for %.2f inches at (%.2f %.2f)", distance, tracking.x_coord, tracking.y_coord);
+      break;
+    }
   }
+  tracking_imp.print("Completed %.2f inches at (%.2f %.2f)", distance, tracking.x_coord, tracking.y_coord);
 }
 
 void update(void* params){
@@ -391,7 +395,7 @@ void tank_rush_goal(void* params){
       //   // tracking.move_stop_task();
       //   break;
       // }
-      if(f_dist.get() < 95){
+      if(f_dist.get() < 140){
         f_claw(1);
         if (brake) drivebase.brake();
         tracking.move_complete = true;
@@ -1115,8 +1119,8 @@ void tank_move_to_target(void* params){
       }
       // printf2("Powers | y: %lf, a: %lf",tracking.power_y, tracking.power_a);
 
-      motion_d.print(" %d || error y : %.2f error a : %.2f, end con: %.2f, end clause %.2f, end dist: %.2f, pow y : %.2f, pow a : %.2f\n ", millis(), local_error.y, rad_to_deg(error.angle), fabs(line_disp.get_y()), end_error.y, end_dist, tracking.power_y, tracking.power_a);
-      motion_d.print("%d|| sng: %d, orig sgn: %d\n",millis(), sgn_line_y, orig_sgn_line_y);
+      motion_d.print("error y : %.2f error a : %.2f, end con: %.2f, end clause %.2f, end dist: %.2f, pow y : %.2f, pow a : %.2f", local_error.y, rad_to_deg(error.angle), fabs(line_disp.get_y()), end_error.y, end_dist, tracking.power_y, tracking.power_a);
+      motion_d.print("sng: %d, orig sgn: %d", sgn_line_y, orig_sgn_line_y);
       graph.print("%d, %f\n", millis()-time, tracking.l_velo);
       // exits movement once the target has been overshot (if the sign of y error along the line has flipped)
       // if(fabs(line_disp.get_y()) < end_error.y || sgn_line_y != orig_sgn_line_y){

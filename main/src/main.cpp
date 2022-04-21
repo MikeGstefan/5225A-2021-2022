@@ -5,6 +5,7 @@
 #include "Libraries/printing.hpp"
 #include "pid.hpp"
 #include "Tracking.hpp"
+#include "pros/misc.h"
 #include "task.hpp"
 #include "auton.hpp"
 #include "auton_util.hpp"
@@ -46,7 +47,7 @@ void initialize() {
 
 	// tracking.x_coord = 104.0, tracking.y_coord = 12.0, tracking.global_angle = -30.0_deg;
 	// tracking.x_coord = 24.5, tracking.y_coord = 15.0, tracking.global_angle = 9.0_deg;
-	tracking.x_coord = 0.0, tracking.y_coord = 0.0, tracking.global_angle = 0.0_deg;
+	// tracking.x_coord = 0.0, tracking.y_coord = 0.0, tracking.global_angle = 0.0_deg;
 	update_t.start();
     // lift_handle_t.start();
 
@@ -122,7 +123,7 @@ void opcontrol() {
 	f_claw(0);
 
 	int state = 0;
-	while(!master.get_digital(DIGITAL_A)){
+	while(!master.get_digital(DIGITAL_R1)){
 		if(master.get_digital_new_press(DIGITAL_B)){
 			// state = !state;
 			// f_claw_o.set_state(state);
@@ -134,8 +135,23 @@ void opcontrol() {
 		delay(10);
 	}
 	int timer = millis();
-	move_start(move_types::tank_rush, tank_rush_params({0.0, 50.0,0.0}, false));
-	move_start(move_types::tank_point, tank_point_params({0.0,30.0,0.0}));
+	move_start(move_types::tank_rush, tank_rush_params({102.0, 72.0, 0.0}, false, 127.0, 1.0, false));
+  // move_start(move_types::tank_point, tank_point_params({0.0, 144.0, 0.0}), false);
+  drivebase.move_side(-40, 110);
+  tracking.wait_for_dist(6);
+  move_stop(true);
+  move_start(move_types::turn_angle, turn_angle_params(angle_to_point(130.0, 36.0)+180.0, false, true, 5.0, 0.0, 10.0, 20.0, 127.0, 0, 60));
+  move_start(move_types::tank_point, tank_point_params({130.0, 36.0, 0.0}), false);
+  b_detect_goal();
+  move_stop(true);
+  master.wait_for_press(DIGITAL_R1);
+  move_start(move_types::turn_angle, turn_angle_params(0.0));
+
+	// move_start(move_types::tank_point, tank_point_params({100.0, 40.0, 0.0}));
+  // master.wait_for_press(DIGITAL_R1);
+  // move_start(move_types::turn_point, turn_point_params({130.0, 36.0}), true);
+  // move_start(move_types::turn_angle, turn_angle_params(angle_to_point(130.0, 36.0)+180.0));
+
 	// skills();
 	// skills2();
 	// skills3();
@@ -186,11 +202,11 @@ void opcontrol() {
 
 
 		
-		if(print_timer.get_time() > 100){
-			printf("b_lift_pot_val:%d, f_lift_pot_val:%d\n", b_lift_pot.get_value(), f_lift_pot.get_value());
-			// printf("b_dist:%d\n", b_dist.get());
-			print_timer.reset();
-		}
+		// if(print_timer.get_time() > 100){
+		// 	printf("b_lift_pot_val:%d, f_lift_pot_val:%d\n", b_lift_pot.get_value(), f_lift_pot.get_value());
+		// 	// printf("b_dist:%d\n", b_dist.get());
+		// 	print_timer.reset();
+		// }
 
 		if(partner.is_rising(timer_btn)){ 
 			timer_state = !timer_state;

@@ -300,7 +300,7 @@ void main_setup(){
             case 55:
               text->set_background(COLOUR(RED)); break;
             default:
-              text->set_background(COLOUR(BLACK)); break;
+              text->set_background(Colour(rand())); break;
           }
         }
       }
