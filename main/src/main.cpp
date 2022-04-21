@@ -10,14 +10,13 @@
 #include "auton_util.hpp"
 #include "Subsystems/f_lift.hpp"
 #include "Subsystems/b_lift.hpp"
+#include "Subsystems/hitch.hpp"
 #include "distance.hpp"
-
-#include "task.hpp"
 #include "util.hpp"
 using namespace std;
 
 pros::Task *updt = nullptr; //What's this for
-const GUI* GUI::current_gui = &g_main;
+const GUI* GUI::current_gui = &main_obj;
 
 /**
  * Runs initialization code. This occurs as soon as the program is started.
@@ -30,29 +29,27 @@ bool auton_run = false; // has auton run
 
 void initialize() {
 	// gyro.calibrate();
-	// front_l.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
-	// front_r.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
-	// back_l.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
-	// back_r.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
-
 
 	drivebase.download_curve_data();
+  load_positions();
+  load_auton();
+
 	Data::init();
 	_Controller::init();
 	GUI::init();
+
 	delay(500);
 	// tracking.x_coord = 25.0, tracking.y_coord = 11.75, tracking.global_angle = -90.0_deg;
 
-	
 	b_lift.motor.set_brake_mode(E_MOTOR_BRAKE_HOLD);
 	f_lift.motor.set_brake_mode(E_MOTOR_BRAKE_HOLD);
-	
+
 	// tracking.x_coord = 104.0, tracking.y_coord = 12.0, tracking.global_angle = -30.0_deg;
 	// tracking.x_coord = 24.5, tracking.y_coord = 15.0, tracking.global_angle = 9.0_deg;
 	tracking.x_coord = 0.0, tracking.y_coord = 0.0, tracking.global_angle = 0.0_deg;
 	update_t.start();
-	printf("inti AHHHHHHHHH\n");
-	// master.print(2, 0, "Driver: %s", drivebase.drivers[drivebase.cur_driver].name);
+    // lift_handle_t.start();
+
 	// gyro.finish_calibrating(); //Finishes calibrating gyro before program starts
 	// GUI::go_to(3);
 }
@@ -87,11 +84,12 @@ void competition_initialize() {}
  * from where it left off.
  */
 void autonomous() {
-  load_positions();
-  load_auton();
   run_auton();
 }
 
+
+bool timer_state = 0; 
+int timer = millis();
 void opcontrol() {
 	// while(true){ 
 	// 	drivebase.handle_input();
@@ -164,46 +162,62 @@ void opcontrol() {
 		// drivebase.handle_input();
 	}
 	while(true){
-		// b_lift.set_state(b_lift_states::move_to_target, 0);
-		// delay(1500);
-		// b_lift.set_state(b_lift_states::move_to_target, 1);
-		// delay(10000);
+		// printf("b:%d, f:%d\n", b_lift_pot.get_value(), f_lift_pot.get_value());
+		master.update_buttons();
+		partner.update_buttons();
 		// printf("%d\n", get_lift());
 		// drivebase handlers
 		drivebase.handle_input();
 		drivebase.handle_trans();
 
 		// intake handlers
-		intake.handle_buttons();
-		intake.handle();
-		
+		handle_intake_buttons();
+
 		// lift handlers
 		handle_lift_buttons();
-		// b_lift.handle(true);
-		// f_lift.handle(true);
+		b_lift.handle(true);
+		f_lift.handle(true);
 
 		// claw handlers
 		handle_claw_buttons();
 		b_claw_obj.handle();
 		f_claw_obj.handle();
+		hitch_obj.handle();
+
+
+		
+		if(print_timer.get_time() > 100){
+			printf("b_lift_pot_val:%d, f_lift_pot_val:%d\n", b_lift_pot.get_value(), f_lift_pot.get_value());
+			// printf("b_dist:%d\n", b_dist.get());
+			print_timer.reset();
+		}
+
+		if(partner.is_rising(timer_btn)){ 
+			timer_state = !timer_state;
+			if(timer_state)timer = millis();
+			else{
+				partner.print(0,0,"time: %d", millis() - timer);
+			}
+		}
+
 		delay(10);
 	}
 	// */
 	master.clear();
-	b_lift.set_state(b_lift_states::move_to_target, 3);
-	wait_until(b_lift.get_state() == b_lift_states::idle);
+	f_lift.set_state(f_lift_states::move_to_target, 3);
+	wait_until(f_lift.get_state() == f_lift_states::idle);
 	master.rumble("-");
 	master.print(0,0,"reached 4");
 	delay(1000);
 
-	b_lift.set_state(b_lift_states::move_to_target, 1);
-	wait_until(b_lift.get_state() == b_lift_states::idle);
+	f_lift.set_state(f_lift_states::move_to_target, 1);
+	wait_until(f_lift.get_state() == f_lift_states::idle);
 	master.rumble("-");
 	master.print(0,0,"reached 1");
 	delay(1000);
 
-	b_lift.set_state(b_lift_states::move_to_target, 2);
-	wait_until(b_lift.get_state() == b_lift_states::idle);
+	f_lift.set_state(f_lift_states::move_to_target, 2, 50);
+	wait_until(f_lift.get_state() == f_lift_states::idle);
 	master.rumble("-");
 	master.print(0,0,"reached 1");
 	delay(1000);
@@ -263,8 +277,8 @@ void opcontrol() {
   // f_lift.set_state(f_lift_states::move_to_target, 2); // moves to top
 
 	// f_lift.elastic_util();
-// BACK bottom 1030 top 2754
-// FRONT bottom 1190 top 2778
+  // BACK bottom 1030 top 2754
+  // FRONT bottom 1190 top 2778
 
 	// pros::Task task{[=] {
 	// 	while(true){

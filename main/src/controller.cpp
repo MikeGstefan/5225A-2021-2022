@@ -1,6 +1,6 @@
 #include "controller.hpp"
 
-// Buttons
+// master buttons
 
 // lift buttons
 controller_digital_e_t lift_up_button = DIGITAL_R1;
@@ -8,16 +8,46 @@ controller_digital_e_t lift_down_button = DIGITAL_R2;
 
 controller_digital_e_t reverse_drive_button = DIGITAL_L1;
 controller_digital_e_t claw_toggle_button =  DIGITAL_L2;
+controller_digital_e_t hitch_button = DIGITAL_A;
 
 // intake buttons
+controller_digital_e_t speed_limit_button = DIGITAL_Y;
 controller_digital_e_t intake_button = DIGITAL_B;
 controller_digital_e_t intake_reverse_button = DIGITAL_DOWN;
 
+bool speed_limit_activated = false;
+
 // misc buttons
 controller_digital_e_t ok_button = DIGITAL_A;
-controller_digital_e_t both_lifts_down_button = DIGITAL_A;
-controller_digital_e_t joy_mode_switch_button = DIGITAL_Y;
+// controller_digital_e_t joy_mode_switch_button = DIGITAL_Y;
 controller_digital_e_t shift_button = DIGITAL_X;
+
+// partner buttons
+
+// lift buttons
+
+controller_digital_e_t partner_back_lift_up_button = DIGITAL_R1;
+controller_digital_e_t partner_back_lift_down_button =  DIGITAL_R2;
+
+controller_digital_e_t partner_front_lift_up_button = DIGITAL_L1;
+controller_digital_e_t partner_front_lift_down_button = DIGITAL_L2;
+
+controller_digital_e_t partner_both_lifts_down_button = DIGITAL_DOWN;
+
+// intake buttons
+controller_digital_e_t partner_intake_button = DIGITAL_B;
+controller_digital_e_t partner_trans_to_intk_button = DIGITAL_Y;
+
+// claw buttons
+controller_digital_e_t partner_back_claw_toggle_button = DIGITAL_A;
+controller_digital_e_t partner_front_claw_toggle_button = DIGITAL_LEFT;
+controller_digital_e_t partner_claw_tilt_button = DIGITAL_X;
+
+controller_digital_e_t partner_hitch_button = DIGITAL_UP;
+
+controller_digital_e_t partner_joy_mode_switch_button = DIGITAL_RIGHT;
+controller_digital_e_t timer_btn = DIGITAL_RIGHT;
+// controller_digital_e_t timer_btn
 
 std::array<_Controller*, num_controller> _Controller::objs; //= {nullptr};
 _Task _Controller::controller_task = nullptr;
@@ -52,7 +82,7 @@ void _Controller::init(){
 
 void _Controller::add_to_queue(std::function<void()> func){
   if(this->back +1 != this->front || (this->back == this->queue.size() -1 && this->front == 0)){
-    controller_queue.print("%d| adding to controller: %d queue\n",millis(), this->controller_num);
+    controller_queue.print("adding to controller: %d queue", this->controller_num);
     this->queue[this->back] = func;
     if(this->back == this->queue.size() -1){
       this->back = 0;
@@ -64,14 +94,14 @@ void _Controller::add_to_queue(std::function<void()> func){
 
 void _Controller::queue_handle(){
   if(this->front != this->back){
-    controller_queue.print("%d| running command on controller %d\n",millis(), this->controller_num);
+    controller_queue.print("running command on controller %d", this->controller_num);
     this->queue[this->front]();
     if(this->front == this->queue.size()-1) this->front = 0;
     else this->front++;
   }
 }
 
-//template this at some point
+//template this at some point (done in header_clean)
 void _Controller::print(std::uint8_t line, std::uint8_t col, const char* fmt, ... ){
   char buffer[19];
   std::va_list args;
@@ -80,47 +110,47 @@ void _Controller::print(std::uint8_t line, std::uint8_t col, const char* fmt, ..
   va_end(args);
   std::function<void()> func = [=](){
     pros::Controller::print(line, col, buffer);
-    controller_queue.print("%d| printing %s to %d\n", millis(), buffer, this->controller_num);
+    controller_queue.print("printing %s to %d", buffer, this->controller_num);
   };
   this->add_to_queue(func);
-  controller_queue.print("%d| adding print to queue for controller %d\n", millis(), this->controller_num);
+  controller_queue.print("adding print to queue for controller %d", this->controller_num);
 
 }
 void _Controller::print(std::uint8_t line, std::uint8_t col, std::string str){
   std::function<void()> func = [=](){
     pros::Controller::print(line, col, str.c_str());
-    controller_queue.print("%d| printing %s to %d\n", millis(), str.c_str(), this->controller_num);
+    controller_queue.print("printing %s to %d", str.c_str(), this->controller_num);
   };
   this->add_to_queue(func);
-  controller_queue.print("%d| adding print to queue for controller %d\n", millis(), this->controller_num);
+  controller_queue.print("adding print to queue for controller %d", this->controller_num);
 
 }
 void _Controller::clear_line (std::uint8_t line){
   std::function<void()> func = [=](){
     pros::Controller::clear_line(line);
-    controller_queue.print("%d| clearing line %d for controller %d\n",millis(), line, this->controller_num);
+    controller_queue.print("clearing line %d for controller %d", line, this->controller_num);
   };
   this->add_to_queue(func);
-  controller_queue.print("%d| adding clear_line to queue for controller %d\n",millis(), this->controller_num);
+  controller_queue.print("adding clear_line to queue for controller %d", this->controller_num);
 }
 
 void _Controller::clear(){
   std::function<void()> func = [=](){
     pros::Controller::clear();
-    controller_queue.print("%d| clearing %d\n",millis(), this->controller_num);
+    controller_queue.print("clearing %d", this->controller_num);
   };
   this->add_to_queue(func);
-  controller_queue.print("%d| adding clear to queue for controller %d\n",millis(), this->controller_num);
+  controller_queue.print("adding clear to queue for controller %d", this->controller_num);
 }
 
 
 void _Controller::rumble(const char* rumble_pattern){
   std::function<void()> func = [=](){
     pros::Controller::rumble(rumble_pattern);
-    controller_queue.print("%d| rumble controller %d\n",millis(), this->controller_num);
+    controller_queue.print("rumble controller %d", this->controller_num);
   };
   this->add_to_queue(func);
-  controller_queue.print("%d| adding rumble to queue for controller %d\n",millis(), this->controller_num);
+  controller_queue.print("adding rumble to queue for controller %d", this->controller_num);
 }
 
 bool _Controller::interrupt(bool analog, bool digital, bool OK_except){
@@ -150,22 +180,22 @@ bool _Controller::interrupt(bool analog, bool digital, bool OK_except){
 }
 
 controller_digital_e_t _Controller::wait_for_press(std::vector<controller_digital_e_t> buttons, int timeout){
-  
   int start_time = millis();
-  controller_queue.print("%d| waiting for button press from controller %d\n", millis(), this->controller_num);
-
+  controller_queue.print("waiting for button press from controller %d", this->controller_num);
   controller_digital_e_t button = static_cast<controller_digital_e_t>(0);
+  
   wait_until(button != static_cast<controller_digital_e_t>(0)){
-    for(std::vector<controller_digital_e_t>::iterator it = buttons.begin(); it != buttons.end(); it++){
+    for(std::vector<controller_digital_e_t>::const_iterator it = buttons.begin(); it != buttons.end(); it++){
       if(get_digital_new_press(*it)) button = *it;
     }
 
     if(timeout != 0 && millis() - start_time > timeout){
-      controller_queue.print("%d| timed out on waiting for button press from controller %d\n", millis(), this->controller_num);
+      controller_queue.print("timed out on waiting for button press from controller %d", this->controller_num);
       return static_cast<controller_digital_e_t>(0);
     }
   }
-  controller_queue.print("%d| button %d pressed from controller %d\n", millis(), button, this->controller_num);
+  controller_queue.print("button %d pressed from controller %d", button, this->controller_num);
+// button handling methods
 
   return button;
 }
@@ -173,14 +203,43 @@ controller_digital_e_t _Controller::wait_for_press(std::vector<controller_digita
 
 //create wait for press for multiple buttons and return the one that was pressed
 void _Controller::wait_for_press(controller_digital_e_t button, int timeout){
-
   int start_time = millis();
-  controller_queue.print("%d| waiting for button %d from controller %d\n", millis(), button, this->controller_num);
+  controller_queue.print("waiting for button %d from controller %d", button, this->controller_num);
+  
   wait_until(get_digital_new_press(button)){
     if(timeout != 0 && millis() - start_time > timeout){
-      controller_queue.print("%d| timed out on waiting for button %d press from controller %d\n", millis(), button, this->controller_num);
+      controller_queue.print("timed out on waiting for button %d press from controller %d", button, this->controller_num);
       return;
     }
   }
-  controller_queue.print("%d| button %d pressed from controller %d\n", millis(), button, this->controller_num);
+  controller_queue.print("button %d pressed from controller %d", button, this->controller_num);
 }
+
+void _Controller::update_buttons(){
+  for(int i = 0; i < 12; i++){
+    last_press_arr[i] = cur_press_arr[i];
+    // + 6 because controller_digital_e_t starts with 6 instead of 0
+    cur_press_arr[i] = this->get_digital(static_cast<pros::controller_digital_e_t>(i + 6));
+    // printf2("%d, %d ", i, cur_press_arr[i]);
+  }
+  // printf2("");
+}
+
+bool _Controller::get_button_state(pros::controller_digital_e_t button){
+  return cur_press_arr[static_cast<int>(button) - 6];
+}
+
+bool _Controller::get_button_last_state(pros::controller_digital_e_t button){
+  return cur_press_arr[static_cast<int>(button) - 6];
+}
+
+bool _Controller::is_rising(pros::controller_digital_e_t button){
+  int index = static_cast<int>(button) - 6;
+  return !last_press_arr[index] && cur_press_arr[index];
+}
+
+bool _Controller::is_falling(pros::controller_digital_e_t button){
+  int index = static_cast<int>(button) - 6;
+  return last_press_arr[index] && !cur_press_arr[index];
+}
+
