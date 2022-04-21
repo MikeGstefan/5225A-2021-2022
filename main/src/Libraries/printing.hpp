@@ -1,6 +1,6 @@
 #pragma once
 #include "main.h"
-#include "../timer.hpp"
+#include "timer.hpp"
 
 
 struct Point;

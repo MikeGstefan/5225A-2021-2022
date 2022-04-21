@@ -1,6 +1,6 @@
 #pragma once
 #include "main.h"
-#include "task.hpp"
+#include "Libraries/task.hpp"
 
 void save_positions();
 void load_positions();
@@ -30,10 +30,10 @@ class Reset_dist{
     static constexpr int cycles = 3;
     static constexpr int thresh = 10;
     const double dist_from_center;
-    pros::Distance* sensor;
+    Distance* sensor;
 
   public:
-    Reset_dist(pros::Distance* sensor, double dist_from_center);
+    Reset_dist(Distance* sensor, double dist_from_center);
 
     double get_dist();
 };

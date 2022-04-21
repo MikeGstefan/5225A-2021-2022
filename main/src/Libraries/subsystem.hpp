@@ -1,7 +1,7 @@
 #pragma once
 #include "main.h"
-#include "../logging.hpp"
-#include "../util.hpp"
+#include "logging.hpp"
+#include "util.hpp"
 
 // non-motorized subsystem
 template <typename state_type, int num_of_states>
@@ -81,7 +81,7 @@ public:
     Timer vel_rise_timeout("vel_rise");
     // waits for motor's velocity to rise or timeout to trigger
     wait_until(fabs(motor.get_actual_velocity()) > 45.0){
-      printf2("%s's velocity is (rising loop): %lf", this->name, motor.get_actual_velocity()); //change these printf's to logs
+      printf2("%s's velocity is (rising loop): %f", this->name, motor.get_actual_velocity()); //change these printf's to logs
       if (vel_rise_timeout.get_time() > 200){
         printf2("%s's rising loop timed out", this->name);
         break;
@@ -91,7 +91,7 @@ public:
     // waits until motors velocity slows down for 5 cycles
     cycleCheck(fabs(motor.get_actual_velocity()) < 5.0, 5, 10)
     motor.tare_position();  // resets subsystems position
-    printf2("%d, %s's reset %lf", millis(), this->name, motor.get_position());
+    printf2("%d, %s's reset %f", millis(), this->name, motor.get_position());
     motor.move(0);
   }
 

@@ -1,6 +1,7 @@
 #include "auton.hpp"
 #include "auton_util.hpp"
 #include "config.hpp"
+#include "controller.hpp"
 #include "distance.hpp"
 #include "Subsystems/b_lift.hpp"
 #include "Subsystems/f_lift.hpp"
@@ -168,9 +169,9 @@ bool select_auton_task(std::string target){
     master.clear_line(1);
     master.print(1, 0, "%s", choice);
 
-    switch(master.wait_for_press({DIGITAL_A, DIGITAL_RIGHT, DIGITAL_LEFT, DIGITAL_B})){ //see how to use ok_button
+    switch(master.wait_for_press({ok_button, DIGITAL_RIGHT, DIGITAL_LEFT, DIGITAL_B})){
       case DIGITAL_B: return false; break;
-      case DIGITAL_A:
+      case ok_button:
         selected = true;
         break;
 

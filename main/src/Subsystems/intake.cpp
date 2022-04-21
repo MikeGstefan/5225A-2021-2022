@@ -83,7 +83,7 @@ void Intake::handle(){
 
     case intake_states::shifting_to_intake_up:
       if(intktimer.get_time() > 100){
-        printf("cur position: %lf, target_position: %lf, voltage:%d\n", b_lift_m.get_target_position(), b_lift_m.get_position(), b_lift_m.get_voltage());
+        printf("cur position: %f, target_position: %f, voltage:%d\n", b_lift_m.get_target_position(), b_lift_m.get_position(), b_lift_m.get_voltage());
         intktimer.reset();
       }
       if(fabs(b_lift_m.get_target_position() - b_lift_m.get_position()) < 15){

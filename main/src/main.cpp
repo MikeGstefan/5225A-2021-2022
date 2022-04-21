@@ -8,7 +8,7 @@
 #include "Subsystems/f_lift.hpp"
 #include "Subsystems/b_lift.hpp"
 
-pros::Task *updt = nullptr; //What's this for
+Task *updt = nullptr; //What's this for
 const GUI* GUI::current_gui = &main_obj;
 
 /**

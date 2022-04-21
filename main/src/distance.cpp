@@ -1,8 +1,8 @@
 #include "distance.hpp"
 #include "config.hpp"
-#include "logging.hpp"
+#include "Libraries/logging.hpp"
 #include "auton_util.hpp"
-#include "util.hpp"
+#include "Libraries/util.hpp"
 #include "drive.hpp"
 #include "tracking.hpp"
 
@@ -58,9 +58,9 @@ Position distance_reset_left(int cycles){
 	// r_side_average /= r_side.size();
 	misc.print("average collected");
 	for(int i = 0; i< cycles; i++){
-		if(i < left.size() && abs(left.at(i) - l_average) > 50) left.erase(left.begin()+i);
-		if(i < right.size() && abs(right.at(i) - r_average) > 50) right.erase(right.begin()+i);
-		if(i < side.size() && abs(side.at(i) - s_average) > 50) side.erase(side.begin()+i);
+		if(i < left.size() && fabs(left.at(i) - l_average) > 50) left.erase(left.begin()+i);
+		if(i < right.size() && fabs(right.at(i) - r_average) > 50) right.erase(right.begin()+i);
+		if(i < side.size() && fabs(side.at(i) - s_average) > 50) side.erase(side.begin()+i);
 	}
 
 
@@ -138,9 +138,9 @@ Position distance_reset_right(int cycles){
 	// r_side_average /= r_side.size();
 	misc.print("average collected");
 	for(int i = 0; i< cycles; i++){
-		if(i < left.size() && abs(left.at(i) - l_average) > 50) left.erase(left.begin()+i);
-		if(i < right.size() && abs(right.at(i) - r_average) > 50) right.erase(right.begin()+i);
-		if(i < side.size() && abs(side.at(i) - s_average) > 50) side.erase(side.begin()+i);
+		if(i < left.size() && fabs(left.at(i) - l_average) > 50) left.erase(left.begin()+i);
+		if(i < right.size() && fabs(right.at(i) - r_average) > 50) right.erase(right.begin()+i);
+		if(i < side.size() && fabs(side.at(i) - s_average) > 50) side.erase(side.begin()+i);
 	}
 
 	if(error_count < 8){
@@ -229,10 +229,10 @@ Position distance_reset_center(int cycles){
 		// r_side_average /= r_side.size();
 		misc.print("average collected");
 		for(int i = 0; i< cycles; i++){
-			if(i < left.size() && abs(left.at(i) - l_average) > 50) left.erase(left.begin()+i);
-			if(i < right.size() && abs(right.at(i) - r_average) > 50) right.erase(right.begin()+i);
-			if(i < l_side.size() && abs(l_side.at(i) - l_side_average) > 50) l_side.erase(l_side.begin()+i);
-			if(i < r_side.size() && abs(r_side.at(i) - r_side_average) > 50) r_side.erase(r_side.begin()+i);
+			if(i < left.size() && fabs(left.at(i) - l_average) > 50) left.erase(left.begin()+i);
+			if(i < right.size() && fabs(right.at(i) - r_average) > 50) right.erase(right.begin()+i);
+			if(i < l_side.size() && fabs(l_side.at(i) - l_side_average) > 50) l_side.erase(l_side.begin()+i);
+			if(i < r_side.size() && fabs(r_side.at(i) - r_side_average) > 50) r_side.erase(r_side.begin()+i);
 		}
 
 			sort(left.begin(), left.end());

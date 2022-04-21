@@ -25,7 +25,7 @@
   std::array<int, 21> expander_ports;
   std::array<Button*, 8> exp_pneum_btns;
 
-  std::array<std::tuple<pros::Motor*, std::string, std::string, int, Text_*, Text_*, Button*, Button*>, 8> motors_for_gui {{
+  std::array<std::tuple<Motor*, std::string, std::string, int, Text_*, Text_*, Button*, Button*>, 8> motors_for_gui {{
     {&back_r, "Back Right", "BR", 0, nullptr, nullptr, nullptr, nullptr},
     {&center_r, "Center Right", "CR", 0, nullptr, nullptr, nullptr, nullptr},
     {&front_r, "Front Right", "FR", 0, nullptr, nullptr, nullptr, nullptr},
@@ -266,7 +266,7 @@ void main_setup(){
     std::get<7>(motors_for_gui[6]) = &mot_7_stop;
     std::get<7>(motors_for_gui[7]) = &mot_8_stop;
 
-    for(std::array<std::tuple<pros::Motor *, std::string, std::string, int, Text_ *, Text_ *, Button *, Button *>, 8>::iterator it = motors_for_gui.begin(); it != motors_for_gui.end(); it++){
+    for(std::array<std::tuple<Motor *, std::string, std::string, int, Text_ *, Text_ *, Button *, Button *>, 8>::iterator it = motors_for_gui.begin(); it != motors_for_gui.end(); it++){
       if(std::get<Motor*>(*it)){
         std::get<6>(*it)->set_func([=](){std::get<Motor*>(*it)->move(mot_speed_set.get_value());});
         std::get<7>(*it)->set_func([=](){std::get<Motor*>(*it)->move(0);});
@@ -381,7 +381,7 @@ void main_setup(){
     });
 
     misc_checks.set_func([](){
-      if (!pros::usd::is_installed()) screen_flash::start("No SD Card!");
+      if (!usd::is_installed()) screen_flash::start("No SD Card!");
       else(screen_flash::start("No Errors Found", term_colours::GREEN));
     });
 
@@ -716,8 +716,8 @@ void main_background(){
   int x = 200*tracking.x_coord/144, y = 200*tracking.y_coord/144;
   if(in_range(x, 0, 199) && in_range(y, 0, 199)) field[x].set(y); //Saves position (x,y) to as tracked
 
-  for (std::array<std::tuple<pros::Motor*, std::string, std::string, int, Text_*, Text_*, Button*, Button*>, 8>::iterator it = motors_for_gui.begin(); it != motors_for_gui.end(); it++){
-    std::tuple<pros::Motor*, std::string, std::string, int, Text_*, Text_*, Button*, Button*>& mot_tup = *it;
+  for (std::array<std::tuple<Motor*, std::string, std::string, int, Text_*, Text_*, Button*, Button*>, 8>::iterator it = motors_for_gui.begin(); it != motors_for_gui.end(); it++){
+    std::tuple<Motor*, std::string, std::string, int, Text_*, Text_*, Button*, Button*>& mot_tup = *it;
     std::get<int>(mot_tup) = std::get<Motor*>(mot_tup) ? std::get<Motor*>(mot_tup)->get_temperature() : std::numeric_limits<int>::max();
 
     if (!temp_flashed && std::get<Motor*>(mot_tup) && in_range(std::get<int>(mot_tup), 55, std::numeric_limits<int>::max()-1) && screen_flash::timer.playing()){ //Overheating
@@ -812,7 +812,7 @@ void util_setup(){
     if (expander_port_nums.back() == ',') expander_port_nums.pop_back();
 
     for (int i = 1; i <= 8; i++){
-      if(c::adi_port_get_config(i) != pros::E_ADI_DIGITAL_IN && c::adi_port_get_config(i) != E_ADI_DIGITAL_OUT){
+      if(c::adi_port_get_config(i) != E_ADI_DIGITAL_IN && c::adi_port_get_config(i) != E_ADI_DIGITAL_OUT){
         no_pneumatic_port_nums.push_back(char(i+64));
         no_pneumatic_port_nums.push_back(',');
       }

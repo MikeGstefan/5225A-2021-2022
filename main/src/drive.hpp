@@ -1,6 +1,6 @@
 #pragma once
 #include "main.h"
-#include "timer.hpp"
+#include "Libraries/timer.hpp"
 
 #define MASTER_HOLD_TIME 300
 #define PARTNER_HOLD_TIME 300

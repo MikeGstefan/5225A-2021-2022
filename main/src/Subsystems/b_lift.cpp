@@ -84,7 +84,7 @@ void B_Lift::handle(bool driver_array){
         motor.move(0);
         master.rumble("---");
         master.print(B_LIFT_STATE_LINE, 0, "B_Lift: Manual      ");
-        printf2("LIFT SAFETY TRIGGERED %lf, %lf", target, b_lift_pot.get_value());
+        printf2("LIFT SAFETY TRIGGERED %f, %f", target, b_lift_pot.get_value());
 
         set_state(b_lift_states::manual);
       }

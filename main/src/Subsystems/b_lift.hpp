@@ -1,6 +1,6 @@
 #pragma once
 #include "../Libraries/subsystem.hpp"
-#include "../pid.hpp"
+#include "../Libraries/pid.hpp"
 
 #define NUM_OF_B_LIFT_POSITIONS 4 // for driver array
 

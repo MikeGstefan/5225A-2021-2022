@@ -1,7 +1,7 @@
 #include "gui.hpp"
 #include "../config.hpp"
-#include "../util.hpp"
-#include "../task.hpp"
+#include "util.hpp"
+#include "task.hpp"
 
 //GUI:: Static Variable Declarations
   const Page* GUI::current_page = nullptr;

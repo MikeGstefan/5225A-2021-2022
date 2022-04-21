@@ -85,8 +85,8 @@ double get_filtered_output(ADIUltrasonic sensor, int check_count, uint16_t lower
     }
     else printf2(term_colours::ERROR, "FAILED! input: %d", input);
   }
-  filtered_output = total_input / success_count;
-  printf2("filtered output: %lf", filtered_output);
+  filtered_output = total_input / static_cast<double>(success_count);
+  printf2("filtered output: %f", filtered_output);
   return filtered_output;
 }
 
@@ -165,7 +165,7 @@ void detect_interference(){
   }
 }
 
-Reset_dist::Reset_dist(pros::Distance* sensor, double dist_from_center): sensor{sensor}, dist_from_center{dist_from_center}{}
+Reset_dist::Reset_dist(Distance* sensor, double dist_from_center): sensor{sensor}, dist_from_center{dist_from_center}{}
 
 double Reset_dist::get_dist(){
   double avg = 0.0;

@@ -1,6 +1,6 @@
 #pragma once
 #include "../Libraries/subsystem.hpp"
-#include "../timer.hpp"
+#include "../Libraries/timer.hpp"
 
 #define NUM_OF_INTAKE_STATES 6
 #define INTAKE_MAX_VELOCITY 600

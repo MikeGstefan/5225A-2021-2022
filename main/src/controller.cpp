@@ -1,55 +1,13 @@
 #include "controller.hpp"
-#include "task.hpp"
-#include "util.hpp"
-
-// master buttons
-
-// lift buttons
-controller_digital_e_t lift_up_button = DIGITAL_R1;
-controller_digital_e_t lift_down_button = DIGITAL_R2;
-controller_digital_e_t both_lifts_down_button = DIGITAL_A;
-
-controller_digital_e_t reverse_drive_button = DIGITAL_L1;
-controller_digital_e_t claw_toggle_button =  DIGITAL_L2;
-
-// intake buttons
-controller_digital_e_t intake_button = DIGITAL_B;
-controller_digital_e_t intake_reverse_button = DIGITAL_DOWN;
-
-// misc buttons
-controller_digital_e_t ok_button = DIGITAL_A;
-controller_digital_e_t joy_mode_switch_button = DIGITAL_Y;
-controller_digital_e_t shift_button = DIGITAL_X;
-
-// partner buttons
-
-// lift buttons
-
-controller_digital_e_t partner_back_lift_up_button = DIGITAL_R1;
-controller_digital_e_t partner_back_lift_down_button =  DIGITAL_R2;
-
-controller_digital_e_t partner_front_lift_up_button = DIGITAL_L1;
-controller_digital_e_t partner_front_lift_down_button = DIGITAL_L2;
-
-controller_digital_e_t partner_both_lifts_down_button = DIGITAL_DOWN;
-
-// intake buttons
-controller_digital_e_t partner_intake_button = DIGITAL_B;
-controller_digital_e_t partner_intake_reverse_button = DIGITAL_Y;
-
-// claw buttons
-controller_digital_e_t partner_back_claw_toggle_button = DIGITAL_A;
-controller_digital_e_t partner_front_claw_toggle_button = DIGITAL_LEFT;
-controller_digital_e_t partner_claw_tilt_button = DIGITAL_X;
-
-controller_digital_e_t partner_joy_mode_switch_button = DIGITAL_RIGHT;
+#include "Libraries/task.hpp"
+#include "Libraries/util.hpp"
 
 std::array<_Controller*, num_controller> _Controller::objs; //= {nullptr};
 _Task _Controller::controller_task = nullptr;
 
 int constructed = 0;
 
-_Controller::_Controller(pros::controller_id_e_t id): pros::Controller{id}
+_Controller::_Controller(controller_id_e_t id): Controller{id}
 {
   objs[constructed] = this;
   constructed++;
@@ -97,7 +55,7 @@ void _Controller::queue_handle(){
 }
 void _Controller::clear_line (std::uint8_t line){
   std::function<void()> func = [=](){
-    pros::Controller::clear_line(line);
+    Controller::clear_line(line);
     controller_queue.print("clearing line %d for controller %d", line, this->controller_num);
   };
   this->add_to_queue(func);
@@ -106,7 +64,7 @@ void _Controller::clear_line (std::uint8_t line){
 
 void _Controller::clear(){
   std::function<void()> func = [=](){
-    pros::Controller::clear();
+    Controller::clear();
     controller_queue.print("clearing %d", this->controller_num);
   };
   this->add_to_queue(func);
@@ -116,7 +74,7 @@ void _Controller::clear(){
 
 void _Controller::rumble(const char* rumble_pattern){
   std::function<void()> func = [=](){
-    pros::Controller::rumble(rumble_pattern);
+    Controller::rumble(rumble_pattern);
     controller_queue.print("rumble controller %d", this->controller_num);
   };
   this->add_to_queue(func);
@@ -125,10 +83,10 @@ void _Controller::rumble(const char* rumble_pattern){
 
 bool _Controller::interrupt(bool analog, bool digital, bool OK_except){
   if (analog){
-    if (fabs(get_analog(ANALOG_LEFT_X)) > 15) return true;
-    if (fabs(get_analog(ANALOG_LEFT_Y)) > 15) return true;
-    if (fabs(get_analog(ANALOG_RIGHT_X)) > 15) return true;
-    if (fabs(get_analog(ANALOG_RIGHT_Y)) > 15) return true;
+    if (abs(get_analog(ANALOG_LEFT_X)) > 15) return true;
+    if (abs(get_analog(ANALOG_LEFT_Y)) > 15) return true;
+    if (abs(get_analog(ANALOG_RIGHT_X)) > 15) return true;
+    if (abs(get_analog(ANALOG_RIGHT_Y)) > 15) return true;
   }
   if(digital){
     if (get_digital(ok_button)) return !OK_except;
@@ -195,26 +153,26 @@ void _Controller::update_buttons(){
   for(int i = 0; i < 12; i++){
     last_press_arr[i] = cur_press_arr[i];
     // + 6 because controller_digital_e_t starts with 6 instead of 0
-    cur_press_arr[i] = this->get_digital(static_cast<pros::controller_digital_e_t>(i + 6));
+    cur_press_arr[i] = this->get_digital(static_cast<controller_digital_e_t>(i + 6));
     // printf2("%d, %d ", i, cur_press_arr[i]);
   }
   // printf2("");
 }
 
-bool _Controller::get_button_state(pros::controller_digital_e_t button){
+bool _Controller::get_button_state(controller_digital_e_t button){
   return cur_press_arr[static_cast<int>(button) - 6];
 }
 
-bool _Controller::get_button_last_state(pros::controller_digital_e_t button){
+bool _Controller::get_button_last_state(controller_digital_e_t button){
   return cur_press_arr[static_cast<int>(button) - 6];
 }
 
-bool _Controller::is_rising(pros::controller_digital_e_t button){
+bool _Controller::is_rising(controller_digital_e_t button){
   int index = static_cast<int>(button) - 6;
   return !last_press_arr[index] && cur_press_arr[index];
 }
 
-bool _Controller::is_falling(pros::controller_digital_e_t button){
+bool _Controller::is_falling(controller_digital_e_t button){
   int index = static_cast<int>(button) - 6;
   return last_press_arr[index] && !cur_press_arr[index];
 }

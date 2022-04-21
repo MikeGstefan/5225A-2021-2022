@@ -21,8 +21,8 @@ enum notify_types{
 
 class _Task{
   private:
-    pros::Task* task_ptr = NULL;
-    pros::task_fn_t function;
+    Task* task_ptr = NULL;
+    task_fn_t function;
     std::tuple<_Task*, void*>params;
     std::uint32_t prio;
     std::uint16_t stack_depth;
@@ -30,7 +30,7 @@ class _Task{
 
 
   public:
-    _Task(pros::task_fn_t function, const char* name = "", void* params = NULL, std::uint32_t prio = TASK_PRIORITY_DEFAULT, std::uint16_t stack_depth = TASK_STACK_DEPTH_DEFAULT);
+    _Task(task_fn_t function, const char* name = "", void* params = NULL, std::uint32_t prio = TASK_PRIORITY_DEFAULT, std::uint16_t stack_depth = TASK_STACK_DEPTH_DEFAULT);
     ~_Task();
 
     static _Task* get_obj(void* params);
@@ -39,10 +39,10 @@ class _Task{
     bool notify_handle();
     void start(void* params = NULL);
     void kill();
-    void rebind(pros::task_fn_t, void* params = NULL);
+    void rebind(task_fn_t, void* params = NULL);
 
 
-    pros::Task* get_task_ptr() const;
+    Task* get_task_ptr() const;
 
 
     bool data_update();

@@ -84,7 +84,7 @@ void F_Lift::handle(bool driver_array){
         motor.move(0);
         master.rumble("---");
         master.print(F_LIFT_STATE_LINE, 0, "F_Lift: Manual      ");
-        printf2("LIFT SAFETY TRIGGERED %lf, %lf", target, f_lift_pot.get_value());
+        printf2("LIFT SAFETY TRIGGERED %f, %f", target, f_lift_pot.get_value());
 
         set_state(f_lift_states::manual);
       }

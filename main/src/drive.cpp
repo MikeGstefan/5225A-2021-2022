@@ -4,7 +4,7 @@
 #include "Subsystems/b_lift.hpp"
 #include "Subsystems/f_lift.hpp"
 #include "Subsystems/intake.hpp"
-#include "task.hpp"
+#include "Libraries/task.hpp"
 
 // NOTE: all timers start as paused
 // for lifts
@@ -145,7 +145,7 @@ void Drivebase::velo_brake(){
 void Drivebase::update_screen(){
   master.print(0, 0, "Driver: %s          ", driver_name()); // updates driver
   master.print(1, 0, screen_text[cur_screen]);  // updates text
-  master.print(2, 0, "Curvature: %lf", drivers[cur_driver].custom_drives[cur_screen].curvature);  // updates curvature
+  master.print(2, 0, "Curvature: %f", drivers[cur_driver].custom_drives[cur_screen].curvature);  // updates curvature
 }
 
 
@@ -163,7 +163,7 @@ void Drivebase::download_curve_data(){
     drivers_data.print("\nDRIVER: %s", drivers[driver].name);
     for (short curvature = 0; curvature < 3; curvature++){  // reads data for each axis of motion
       if (curve_file_exists)  fscanf(curve_file, "curvature:%lf\n", &drivers[driver].custom_drives[curvature].curvature);
-      drivers_data.print("curvature: %lf", drivers[driver].custom_drives[curvature].curvature);
+      drivers_data.print("curvature: %f", drivers[driver].custom_drives[curvature].curvature);
       drivers[driver].custom_drives[curvature].fill_lookup_table();
       delay(1);
     }
@@ -204,12 +204,12 @@ void Drivebase::update_lookup_table_util(){
 
     if(master.is_rising(E_CONTROLLER_DIGITAL_UP)){  // increase curvature
       if (drivers[cur_driver].custom_drives[cur_screen].curvature < 9.9)  drivers[cur_driver].custom_drives[cur_screen].curvature += 0.1;
-      master.print(2, 0, "Curvature: %lf", drivers[cur_driver].custom_drives[cur_screen].curvature);  // updates curvature
+      master.print(2, 0, "Curvature: %f", drivers[cur_driver].custom_drives[cur_screen].curvature);  // updates curvature
     }
     else if(master.is_rising(E_CONTROLLER_DIGITAL_DOWN)){  // decrease curvature
       printf2("pressed down");
       if (drivers[cur_driver].custom_drives[cur_screen].curvature > 0.1)  drivers[cur_driver].custom_drives[cur_screen].curvature -= 0.1;
-      master.print(2, 0, "Curvature: %lf", drivers[cur_driver].custom_drives[cur_screen].curvature);  // updates curvature
+      master.print(2, 0, "Curvature: %f", drivers[cur_driver].custom_drives[cur_screen].curvature);  // updates curvature
     }
 
     delay(10);
@@ -224,8 +224,8 @@ void Drivebase::update_lookup_table_util(){
 
     for (short driver = 0; driver < num_of_drivers; driver++){  // uploads curve data to curve file
       for (short curvature = 0; curvature < 3; curvature++){
-        fprintf(curve_file, "curvature:%lf\n", drivers[driver].custom_drives[curvature].curvature);
-        drivers_data.print("curvature:%lf", drivers[driver].custom_drives[curvature].curvature);
+        fprintf(curve_file, "curvature:%f\n", drivers[driver].custom_drives[curvature].curvature);
+        drivers_data.print("curvature:%f", drivers[driver].custom_drives[curvature].curvature);
       }
     }
     fclose(curve_file);

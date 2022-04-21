@@ -76,7 +76,7 @@ void Timer::print_fancy(std::string str, int long_names, bool unit_conversion){
 
 
 uint64_t Timer::get_time_in_timing_unit(){ // returns time in either millis or micros
-  return pros::micros() * (timing_unit == timing_units::micros ? 1 : (timing_unit == timing_units::millis ? 0.001 : 0.000001));
+  return micros() * (timing_unit == timing_units::micros ? 1 : (timing_unit == timing_units::millis ? 0.001 : 0.000001));
 }
 
 bool Timer::playing(){
