@@ -26,6 +26,7 @@ Piston drive_t({e_port, 8},"",0,0);
 Piston lift_t(4,"",1,0);
 Piston b_claw(5,"",0,0);
 Piston tilt_lock(3,"",1,0);
+Piston hitch({e_port, 7}, "Hitch", 0, 0);
 
 pros::ADIAnalogIn f_lift_pot(8), b_lift_pot(2);
 pros::Distance b_dist(11), f_dist(6);

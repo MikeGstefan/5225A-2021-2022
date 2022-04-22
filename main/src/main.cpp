@@ -117,6 +117,8 @@ void opcontrol() {
 	// move_start(move_types::tank_point, tank_point_params({36.0, 105.0, 0.0}));
 	// while(true) pros::delay(10);
 	lift_handle_t.start();
+  hitch.set_state(1);
+  delay(500);
 	b_lift.set_state(b_lift_states::move_to_target,0);
 
 
