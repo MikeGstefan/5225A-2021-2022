@@ -119,6 +119,7 @@ void opcontrol() {
 	// while(true) pros::delay(10);
 	lift_handle_t.start();
 	hitch.set_state(1);
+  tilt_lock.set_state(1);
 	delay(500);
 	b_lift.set_state(b_lift_states::move_to_target, 0);
 	f_lift.set_state(f_lift_states::move_to_target,0);
@@ -129,13 +130,22 @@ void opcontrol() {
 	int timer = millis();
 
 	move_start(move_types::tank_rush, tank_rush_params({102.0, 72.0, 0.0}, false, 127.0, 1.0, false));
-  drivebase.random_turn(-1);
-  move_start(move_types::turn_angle, turn_angle_params(angle_to_point(130.0, 36.0)+180.0, false, true, 5.0, 0.0, 10.0, 20.0, 127.0, 0, 60));
+  drivebase.random_turn(0);
+  master.wait_for_press(DIGITAL_R1);
+
+  move_start(move_types::tank_point, tank_point_params({105.0, 20.0, -45.0}, false, 127.0, 1.0, true, 6.4, 70.0, 0.0, 0, {5, 5}), false);
+  wait_until(tracking.x_coord < 50.0);
+  f_lift.set_state(f_lift_states::move_to_target, 1);
+  wait_until(tracking.x_coord < 40.0);
+  move_stop(true);
+  
+  master.wait_for_press(DIGITAL_R1);
+
+  move_start(move_types::turn_angle, turn_angle_params(angle_to_point(130.0, 36.0)+180.0, true, true, 5.0, 0.0, 10.0, 20.0, 127.0, 0, 50));
   move_start(move_types::tank_point, tank_point_params({130.0, 36.0, 0.0}), false);
   b_detect_goal();
   move_stop(true);
-  master.wait_for_press(DIGITAL_R1);
-  move_start(move_types::turn_angle, turn_angle_params(0.0));
+  move_start(move_types::turn_angle, turn_angle_params(0.0, true, true, 5.0, 0.0, 10.0, 20.0, 127.0, 0, 50));
   printf2("TIME: %d", millis()-timer);
 
 	// move_start(move_types::tank_point, tank_point_params({100.0, 40.0, 0.0}));

@@ -296,7 +296,7 @@ std::string sprintf2_no_colour(int time_type, std::string fmt, Params... args){
  */
 template <typename... Params>
 int printf2(term_colours colour, int time_type, const char* fmt, Params... args){
-  return printf("%s\n", sprintf2_format(colour, time_type, fmt, args...));
+  return printf("%s\n", sprintf2_format(colour, time_type, fmt, args...).c_str());
 }
 
 /**
@@ -308,7 +308,7 @@ int printf2(term_colours colour, int time_type, const char* fmt, Params... args)
  */
 template <typename... Params>
 int printf2(term_colours colour, std::string fmt, Params... args){
-  return printf("%s\n", sprintf2_format(colour, default_time_fmt, fmt, args...));
+  return printf("%s\n", sprintf2_format(colour, default_time_fmt, fmt, args...).c_str());
 }
 
 /**

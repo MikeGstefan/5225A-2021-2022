@@ -346,7 +346,7 @@ std::map<std::string, std::pair<Point, std::string>> targets = {
   {"Right", {{110.0, 14.0}, "None"}},
   {"Left", {{30.0, 12.0}, "None"}},
   {"Tall", {{73.0, 71.0}, "Front"}},
-  {"High", {{107.0, 71.0}, "Front"}},
+  {"High", {{102.0, 72.0}, "Front"}},
   {"Low", {{34.5, 72.0}, "Front"}},
   {"AWP", {{130.0, 36.0}, "Hitch"}},
   {"Ramp", {{128.0, 36.0}, "Hitch"}},
@@ -358,7 +358,7 @@ void load_auton(){
 
   ifstream file;
   Data::log_t.data_update();
-  printf2(term_colours::BLUE, "\n\nLoading Autons:");
+  printf2(term_colours::BLUE, "\n\nLoading Autons:\n");
   file.open(auton_file_name, fstream::in);
   while(file >> target >> task){
     printf2(term_colours::BLUE, "%s: %s", target, task);
