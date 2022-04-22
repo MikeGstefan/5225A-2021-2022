@@ -91,6 +91,7 @@ Drivebase::Drivebase(std::array<driver, num_of_drivers> drivers) : drivers(drive
 
 void Drivebase::move(double x, double y, double a){
   ERROR.print("you called the wrong function");
+  //btw some motions call this
   // front_l.move(x + y + a);
   // front_r.move(-x + y - a);
   // back_l.move(-x + y + a);

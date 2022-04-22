@@ -1591,6 +1591,10 @@ void Gyro::calibrate(){
   inertial.reset();
 }
 
+void Gyro::drive(int speed){
+  drivebase.move(-GYRO_SIDE*speed, 0.0);
+}
+
 void Gyro::finish_calibrating(){
   if(inertial.is_calibrating()){
     wait_until(!inertial.is_calibrating()) motion_d.print("Calibrating Gyro...");
@@ -1605,7 +1609,6 @@ void Gyro::climb_ramp(){
   inertial.tare_roll();
   inertial.tare_pitch();
 
-  drivebase.move(-GYRO_SIDE*127, 0.0);
   Task([this](){
     wait_until(false){
       get_angle();
@@ -1613,50 +1616,60 @@ void Gyro::climb_ramp(){
       // motion_i.print("Angle:%f", angle);
     }
   });
-  b_lift.set_state(b_lift_states::move_to_target, 2);
-  wait_until(angle > 22);
-  drivebase.brake();
-  f_lift.set_state(f_lift_states::move_to_target, 1, 100);
-  motion_i.print("ON RAMP: %f", angle);
-  screen_flash::start("On Ramp", term_colours::NOTIF);
-  // master.wait_for_press(DIGITAL_R1);
 
+  b_lift.set_state(b_lift_states::move_to_target, 2);
+  drive(127);
+  wait_until(fabs(angle) > 22);
+  drivebase.brake();
+  f_lift.set_state(f_lift_states::move_to_target, 1);
+
+  screen_flash::start("On Ramp", term_colours::NOTIF);
   tracking.reset();
 
-  drivebase.move(-GYRO_SIDE*90, 0.0); //Can probably get rid of this
-  tracking.wait_for_dist(18);
+  drive(90);
+  tracking.wait_for_dist(5);
+  f_lift.set_state(f_lift_states::move_to_target, 0);
+  tracking.wait_for_dist(12); //increase this number as much as possible
+  drive(35);
+  tracking.wait_for_dist(2);
 }
 
 void Gyro::level(double kP, double kD){
-	PID gyro_p(kP, 0, kD, 0);
-  Timer gyro_steady ("Gyro", &motion_i);
-  double speed;
-  bool lowered = false;
-  bool neg = false;
-  constexpr double min_pwr = 30.0;
-
   screen_flash::start("PID", term_colours::NOTIF);
 
-	while(!(gyro_steady.get_time() > 500 || master.interrupt(true, true))){
+	PID gyro_p(kP, 0, kD, 0);
+  Timer gyro_steady ("Gyro", &motion_i);
+  constexpr double min_pwr = 30.0;
+
+  double speed;
+  bool overshot = false;
+
+	while(true){
     speed = gyro_p.compute(-angle, 0);
 
-    if(!lowered && fabs(angle) < 21.0){
-      f_lift.set_state(f_lift_states::move_to_target, 0);
-      lowered = true;
-    }
-    if(!neg && in_range(speed, 10.0, min_pwr)) speed = min_pwr*sgn(speed);
-    if(speed < 0) neg = true;
+    if(!in_range(fabs(gyro_p.derivative), 0.01, 100.0)) motion_i.print(term_colours::RED, "SKIPPED. In:%.3f Out:%.3f, Speed:%.3f, P:%.3f, D:%.3f", -angle, gyro_p.get_output(), speed, gyro_p.proportional, gyro_p.derivative);
+
+    if(speed < 0) overshot = true;
+    if(!overshot && in_range(speed, 10.0, min_pwr)) speed = min_pwr*sgn(speed);
     if(in_range(fabs(speed), 0.0, 10.0)) speed = 0;
 
     drivebase.move(speed, 0.0);
-    motion_i.print("In:%.3f Sens:%.3f Out:%.3f, Speed:%.3f, P:%.3f, D:%.3f", -angle, gyro.inertial.GYRO_AXIS(), gyro_p.get_output(), speed, gyro_p.proportional, gyro_p.derivative);
-    drivebase.move(speed, 0.0);
+    motion_i.print("In:%.3f Out:%.3f, Speed:%.3f, P:%.3f, D:%.3f", -angle, gyro_p.get_output(), speed, gyro_p.proportional, gyro_p.derivative);
     
 		if (fabs(angle) > 6 || get_angle_dif() > 0.06) gyro_steady.reset();
+
+    if(gyro_steady.get_time() > 500){
+      motion_i.print("\nLevelled on ramp\n");
+      break;
+    }
+    if(master.interrupt(true, true)){
+      motion_i.print("\nController Interrupt\n");
+      break;
+    }
+
     delay(11);
   }
 
-	motion_i.print("\nLevelled on ramp\n");
   front_l.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
   front_r.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
   back_l.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);

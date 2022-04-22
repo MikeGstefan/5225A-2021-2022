@@ -377,7 +377,7 @@ void main_setup(){
       if(!in_range(static_cast<int>(r_dist.get()), 20, 2000)) screen_flash::start("Distance Sensor: Right");
       if(!in_range(static_cast<int>(l_dist.get()), 20, 2000)) screen_flash::start("Distance Sensor: Left");
       if(!in_range(static_cast<int>(r_reset_dist.get()), 20, 2000)) screen_flash::start("Distance Sensor: Right Reset");
-      if(!in_range(static_cast<int>(l_reset_dist.get()), 20, 2000)) screen_flash::start("Distance Sensor: Back Reset");
+      if(!in_range(static_cast<int>(l_reset_dist.get()), 20, 2000)) screen_flash::start("Distance Sensor: Left Reset");
       else(screen_flash::start("All Distance Sensors Good", term_colours::GREEN));
     });
 

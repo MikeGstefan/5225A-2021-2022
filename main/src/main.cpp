@@ -90,28 +90,14 @@ void autonomous() {
 }
 
 void opcontrol() {
-  /* Nathan
-  -distance sensor check
-  lift movement
-  misc: check if what's plugged matches what's registered to that port
-  jam code for main motors (will have to be a page func) (not needed if motor class)
+  skills_park();
 
-  auton give up func - ask mike
+  //take out random jumps to 100
+  //lower back lift when starting to tip
 
-  After Worlds:
-  make flash its own page
-  make flash queue. (if multiple things try to flash, wait for the first one to finish)
-  motor subclass
-  adaptable fll menu selector
-  file writing functions
-  proper text splitter for flash
-  allow multiple text variables through tuple
-  print stack trace
-  remove unnecessary 0s from str func. (03.4200 -> 3.42)
-  get rid of add_text. just change the buttons text directly (will have to deal with changeing text length)
-  controller button class
-  skills recorder. Have the program record movements and write the skills route.
-  lvgl images
-  2d sliders
-  */
+
+  //make sure angle is 0 once at ramp
+  //check that robot is physically on the ground and not being lifted
+  //check that tare isn't hiding issues by changing the zero point
+  
 }

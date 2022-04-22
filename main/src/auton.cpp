@@ -272,7 +272,7 @@ void skills_park(){
   delay(100);
   tracking.reset(reset_dist_r.get_dist(), DIST_FRONT, 180.0);
   int s_time = millis();
-  printf2("\n\n\n\n\n\nTIME:%d\n\n\n\n", millis());
+  printf2("\n\n\n\n\n\nTIME:%d\n\n\n\n", s_time);
   // master.wait_for_press(DIGITAL_R1);
   move_start(move_types::tank_point, tank_point_params({tracking.x_coord, 10.0, 180.0}, false, 127.0, 1.0, true, 6.4, 70.0, 0.0, 0, {0.5, 0.5}, 30.0));
   move_start(move_types::turn_angle, turn_angle_params(90.0));
@@ -287,17 +287,9 @@ void skills_park(){
   f_lift.set_state(f_lift_states::move_to_target, 0);
 
   drivebase.move(0.0, 0.0); //so it's not locked when switching trans
-  
-  // f_claw(LOW);
-  // b_claw.set_state(LOW);
-  // hitch.set_state(LOW);
-  // tilt_lock.set_state(HIGH);
 	drivebase.set_state(HIGH);
 
   //Load goals
-  // master.wait_for_press(DIGITAL_R1);
-  drivebase.move(0.0, 0.0); //so it's not locked when switching trans
-  while(f_lift_pot.get_value() > 1200)delay(10); //wait for bottom
 
 	// f_claw(HIGH);
 	// b_claw.set_state(HIGH);
@@ -305,21 +297,31 @@ void skills_park(){
   // tilt_lock.set_state(LOW);
 
   // master.wait_for_press(DIGITAL_R1);
+  wait_until(f_lift_pot.get_value() < 1200); //wait for bottom
   int start = millis();
 
   gyro.climb_ramp();
+
+  front_l.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
+  front_r.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
+  back_l.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
+  back_r.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
+  center_l.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
+  center_r.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
+  drivebase.velo_brake();
+  master.wait_for_press(DIGITAL_R1);
+
   gyro.level(1.6, 1000.0);
 
   master.clear();
-  printf("\n\nStart: %d\n", start);
-  printf("\n\nEnd: %d\n", millis());
-  printf("\n\nTotal: %d\n", millis()-start);
-  master.print(0, 0, "Time:%d", millis()-s_time);
+  printf2("\n\nRamp Time: %d\n", millis()-start);
+  printf2("\n\nTotal Time: %d\n", millis()-s_time);
+  master.print(0, 0, "Ramp Time: %d", millis()-start);
+  master.print(1, 0, "Total Time: %d", millis()-s_time);
 
   master.wait_for_press(DIGITAL_R1);
   hitch.set_value(LOW);
   f_claw(LOW);
-  b_lift.set_state(b_lift_states::move_to_target, 0);
   f_lift.set_state(f_lift_states::move_to_target, 0);
 }
 

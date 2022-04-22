@@ -234,7 +234,7 @@ namespace screen_flash{
       case term_colours::ERROR:
       case term_colours::RED: return COLOUR(RED); break;
       case term_colours::NOTIF:
-      case term_colours::GREEN: return COLOUR(GREEN); break;
+      case term_colours::GREEN: return COLOUR(LIME_GREEN); break;
       case term_colours::WARNING:
       case term_colours::YELLOW: return COLOUR(YELLOW); break;
       case term_colours::BLUE: return COLOUR(BLUE); break;
