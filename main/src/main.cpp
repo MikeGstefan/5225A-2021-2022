@@ -134,9 +134,9 @@ void opcontrol() {
   master.wait_for_press(DIGITAL_R1);
 
   move_start(move_types::tank_point, tank_point_params({105.0, 20.0, -45.0}, false, 127.0, 1.0, true, 6.4, 70.0, 0.0, 0, {5, 5}), false);
-  wait_until(tracking.x_coord < 50.0);
+  wait_until(tracking.y_coord < 50.0);
   f_lift.set_state(f_lift_states::move_to_target, 1);
-  wait_until(tracking.x_coord < 40.0);
+  wait_until(tracking.y_coord < 40.0);
   move_stop(true);
   
   master.wait_for_press(DIGITAL_R1);
