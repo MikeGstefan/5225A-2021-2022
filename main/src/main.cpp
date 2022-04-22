@@ -125,29 +125,18 @@ void opcontrol() {
 	f_claw(0);
 
 	int state = 0;
-	while(!master.get_digital(DIGITAL_R1)){
-		if(master.get_digital_new_press(DIGITAL_B)){
-			// state = !state;
-			// f_claw_o.set_state(state);
-			// f_claw_c.set_state(state);
-		}
-		
-		// gui_handle(); //
-		// printf("%d || opcontrol ENCODER L: %d, R: %d, B:%d \n", millis(), LeftEncoder.get_value(), RightEncoder.get_value(), BackEncoder.get_value());
-		delay(10);
-	}
+	master.wait_for_press(DIGITAL_R1);
 	int timer = millis();
+
 	move_start(move_types::tank_rush, tank_rush_params({102.0, 72.0, 0.0}, false, 127.0, 1.0, false));
-  // move_start(move_types::tank_point, tank_point_params({0.0, 144.0, 0.0}), false);
-  drivebase.move_side(-40, 110);
-  tracking.wait_for_dist(6);
-  move_stop(true);
+  drivebase.random_turn(-1);
   move_start(move_types::turn_angle, turn_angle_params(angle_to_point(130.0, 36.0)+180.0, false, true, 5.0, 0.0, 10.0, 20.0, 127.0, 0, 60));
   move_start(move_types::tank_point, tank_point_params({130.0, 36.0, 0.0}), false);
   b_detect_goal();
   move_stop(true);
   master.wait_for_press(DIGITAL_R1);
   move_start(move_types::turn_angle, turn_angle_params(0.0));
+  printf2("TIME: %d", millis()-timer);
 
 	// move_start(move_types::tank_point, tank_point_params({100.0, 40.0, 0.0}));
   // master.wait_for_press(DIGITAL_R1);

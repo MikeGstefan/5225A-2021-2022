@@ -498,35 +498,41 @@ void run_auton(){
 
         b_lift.set_state(b_lift_states::intake_off, 0);
       }
+
       else if(target.second == "Front"){
         f_lift.set_state(f_lift_states::move_to_target, 0);
         b_lift.set_state(b_lift_states::intake_on, 0);
-        move_start(move_types::tank_rush, tank_rush_params(target.first, false));
         wait_until(F_LIFT_AT_BOTTOM);
+        move_start(move_types::tank_rush, tank_rush_params(target.first, false));
 
-        f_claw_obj.set_state(f_claw_states::searching);
-        wait_until(tracking.move_complete || f_claw_obj.get_state() == f_claw_states::grabbed);
+        wait_until(tracking.move_complete);
+        drivebase.random_turn(-1);
 
         b_lift.set_state(b_lift_states::intake_off, 0);
         f_lift.set_state(f_lift_states::move_to_target, 1);
       }
+
       else if(target.second == "Back"){
         b_lift.set_state(b_lift_states::move_to_target, 0);
-        move_start(move_types::tank_rush, tank_rush_params(target.first, true));
+        move_start(move_types::turn_angle, turn_angle_params(angle_to_point(target.first.x, target.first.y)+180.0, false, true, 5.0, 0.0, 10.0, 20.0, 127.0, 0, 50));
         wait_until(B_LIFT_AT_BOTTOM);
         
         b_claw_obj.set_state(b_claw_states::searching);
         wait_until(tracking.move_complete || b_claw_obj.get_state() == b_claw_states::tilted);
+        drivebase.random_turn(-1);
 
         b_lift.set_state(b_lift_states::move_to_target, 1);
       }
+
       else if(target.second == "Hitch"){
         b_lift.set_state(b_lift_states::move_to_target, 4);
-        move_start(move_types::tank_rush, tank_rush_params(target.first, true));
+        move_start(move_types::turn_angle, turn_angle_params(angle_to_point(target.first.x, target.first.y)+180.0, false, true, 5.0, 0.0, 10.0, 20.0, 127.0, 0, 50));
+        
         hitch_obj.set_state(hitch_states::searching);
-
         wait_until(tracking.move_complete || hitch_obj.get_state() == hitch_states::grabbed);
+        drivebase.random_turn(-1);
       }
+
       else ERROR.print("Wrong target selected");
 
     }

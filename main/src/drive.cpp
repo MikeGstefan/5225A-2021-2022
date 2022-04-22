@@ -1,4 +1,5 @@
 #include "drive.hpp"
+#include <numeric>
 
 // NOTE: all timers start as paused
 // for lifts
@@ -405,6 +406,14 @@ void Drivebase::reset(){
 
   drivebase.move(0.0, 0.0);
   drivebase.set_state(HIGH);
+}
+
+void Drivebase::random_turn(int direction){
+  if(direction == 0) direction = random_direction();
+  if(direction < 0) drivebase.move_side(-40, 110);
+  else if(direction > 0) drivebase.move_side(110, -40);
+  tracking.wait_for_dist(6);
+  move_stop(true);
 }
 
 
