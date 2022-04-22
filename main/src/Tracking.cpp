@@ -268,7 +268,7 @@ void rush_goal2(double target_x, double target_y, double target_a){
         if (fabs(tracking.y_coord) > fabs(target_y) + 10.0){
           printf2("target_y: %lf", target_y);
           printf2("x: %lf, y: %lf, a: %lf", tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle));
-          printf2(term_colours::RED, -1, "FAILED GETTING TO GOAL: %d");
+          printf2(term_colours::ERROR, "FAILED GETTING TO GOAL");
           drivebase.brake();
           return;
         }
@@ -394,7 +394,7 @@ void tank_rush_goal(void* params){
         // f_claw.set_state(1);
         if (brake) drivebase.brake();
         tracking.move_complete = true;
-        motion_i.print("MISSED GOAL tank rush goal target X: %f Y: %f A: %f at X: %f Y: %f A: %f time: %d", target.x, target.y, target.angle, tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle), millis()- time);
+        motion_i.print(term_colours::ERROR, "MISSED GOAL tank rush goal target X: %f Y: %f A: %f at X: %f Y: %f A: %f time: %d", target.x, target.y, target.angle, tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle), millis()-time);
         //log_time("ending starting time: %d, delta time: %d X: %f Y: %f A: %f from X: %f Y: %f A: %f \n", millis(),millis() -starttime, target_x, target_y, target_a, tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle));
         // tracking.move_stop_task();
         break;
@@ -1106,7 +1106,7 @@ void tank_move_to_target(void* params){
       // printf2("Powers | y: %lf, a: %lf",tracking.power_y, tracking.power_a);
 
       motion_d.print("error y : %.2f error a : %.2f, end con: %.2f, end clause %.2f, end dist: %.2f, pow y : %.2f, pow a : %.2f\n ", local_error.y, rad_to_deg(error.angle), fabs(line_disp.get_y()), end_error.y, end_dist, tracking.power_y, tracking.power_a);
-      motion_d.print("sng: %d, orig sgn: %d", sgn_line_y, orig_sgn_line_y);
+      motion_d.print("sgn: %d, orig sgn: %d", sgn_line_y, orig_sgn_line_y);
       // exits movement once the target has been overshot (if the sign of y error along the line has flipped)
       // if(fabs(line_disp.get_y()) < end_error.y || sgn_line_y != orig_sgn_line_y){
       if((fabs(local_error.y) < end_error.y && fabs(line_disp.get_y()) < 4)|| sgn_line_y != orig_sgn_line_y){

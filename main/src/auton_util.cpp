@@ -1,22 +1,19 @@
 #include "auton_util.hpp"
+#include "Tracking.hpp"
+#include "geometry.hpp"
 
 static const std::string start_pos_file_name ="/usd/start_position.txt";
 
-//create an adaptable fll type menu selector, look at select_auton();
-
 Reset_dist reset_dist_r(&r_dist, 7.5);
 Reset_dist reset_dist_l(&l_dist, 7.5);
-
 
 void f_claw(bool state){
   f_claw_o.set_state(state);
   f_claw_c.set_state(state);
 }
 
-
-
 void save_positions(){
-  Position pos1 (141.0-8.75, 15.5, 0.0), pos2 (8.75, 15.5, 0);
+  Position pos1 (141.0-8.75, 15.5, 0.0), pos2 (8.75, 15.5, 0.0);
   master.clear();
   master.print(0, 0, "L1:(%.1f, %.1f, %.1f)", pos1.x, pos1.y , pos1.angle);
   master.print(1, 0, "R1:(%.1f, %.1f, %.1f)", pos2.x, pos2.y , pos2.angle);
@@ -39,7 +36,7 @@ void save_positions(){
   //move the robot
 
   if(GUI::prompt("Press to save position", "Press to save the current position to a file.")){
-    tracking_imp.print("Saving X: %f, Y:%f, A:%f", tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle));
+    tracking_imp.print("Saving %.2f to file", Position{tracking.x_coord, tracking.y_coord, tracking.get_angle_in_deg()});
     
     ofstream file;
     Data::log_t.data_update();
@@ -53,17 +50,17 @@ void save_positions(){
 }
 
 void load_positions(){
-  double x, y, a;
+  Position pos;
   ifstream file;
 
   Data::log_t.data_update();
   file.open(start_pos_file_name, fstream::in);
-  file >> x >> y >> a;
+  file >> pos.x >> pos.y >> pos.angle;
   file.close();
   Data::log_t.done_update();
 
-  tracking_imp.print(term_colours::BLUE, "Loading X: %f, Y:%f, A:%f from file", x, y, a);
-  tracking.reset(x, y, a);
+  tracking_imp.print("Loading %.2f from file", pos);
+  tracking.reset(pos);
 }
 
 //remove if unneeded
@@ -82,7 +79,7 @@ double get_filtered_output(ADIUltrasonic sensor, int check_count, uint16_t lower
       printf2("input: %d", input);
       success_count++;
     }
-    else printf2(term_colours::RED, -1, "FAILED! input: %d", input);
+    else printf2(term_colours::ERROR, "FAILED! input: %d", input);
   }
   filtered_output = total_input / success_count;
   printf2("filtered output: %lf", filtered_output);

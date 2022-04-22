@@ -47,7 +47,7 @@ extern Data term;
 extern Data motion_d;
 extern Data motion_i;
 extern Data log_d;
-extern Data events;
+extern Data graph;
 extern Data state_log;
 extern Data graph;
 extern Data skills_d;
@@ -72,24 +72,16 @@ public:
   void log_print(char* buffer, int buffer_len) const;
   void set_print(term_colours print_colour, int time_type);
 
-  Data(const char* obj_name, const char* id_code, log_types log_type_param, log_locations log_location_param, term_colours print_colour = term_colours::NONE, int print_type = 2);
+  Data(const char* obj_name, const char* id_code, log_types log_type_param, log_locations log_location_param, term_colours print_colour = term_colours::NONE, int print_type = default_time_fmt);
   
   static void init();
   static char* to_char(const char* format, ...);
 
-  //figure out how to put nice timestamps for file logs
 
-  /**
-   * @brief 
-   * 
-   * @param colour term_colour to print in
-   * @param format printf format string
-   * @param args printf args
-   */
   template <typename... Params>
   void print(term_colours colour, std::string format, Params... args) const{
-    std::string str = sprintf2(format, args...) + '\n';
-    // str = std::to_string(millis()) + " | ";
+    char newline = print_type == -1 ? '\0' : '\n';
+    std::string str = sprintf2_no_colour(print_type, format, args...) + newline;
 
     int buffer_len = str.length() + 3;
     char buffer[256];
@@ -98,7 +90,7 @@ public:
     if(static_cast<int>(this->log_type) != 0){
       switch(log_location){
         case log_locations::t:
-          printf2(colour, print_type, format, args...);
+          printf("%s%c", sprintf2_format(colour, print_type, format, args...).c_str(), newline);
           break;
         case log_locations::sd:
           this->log_print(buffer, buffer_len);
@@ -106,20 +98,13 @@ public:
         case log_locations::none:
           break;
         case log_locations::both:
-          printf2(colour, print_type, format, args...);
+          printf("%s%c", sprintf2_format(colour, print_type, format, args...).c_str(), newline);
           this->log_print(buffer, buffer_len);
           break;
       }
     }
   }
 
-
-  /**
-   * @brief 
-   * 
-   * @param format printf format string
-   * @param args printf args
-   */
   template <typename... Params>
   void print(std::string format, Params... args) const{
     print(print_colour, format, args...);

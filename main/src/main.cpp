@@ -34,7 +34,6 @@ void initialize() {
 	// back_l.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
 	// back_r.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
 
-
 	drivebase.download_curve_data();
 	Data::init();
 	_Controller::init();
@@ -85,15 +84,34 @@ void competition_initialize() {}
  * from where it left off.
  */
 void autonomous() {
-  // load_positions();
-  // load_auton();
-  // run_auton();
+  load_positions();
+  load_auton();
+  run_auton();
 }
 
 void opcontrol() {
-  skills_park();
-  // master.wait_for_press(DIGITAL_R1);
+  /* Nathan
+  -distance sensor check
+  lift movement
+  misc: check if what's plugged matches what's registered to that port
+  jam code for main motors (will have to be a page func) (not needed if motor class)
 
+  auton give up func - ask mike
 
-  
+  After Worlds:
+  make flash its own page
+  make flash queue. (if multiple things try to flash, wait for the first one to finish)
+  motor subclass
+  adaptable fll menu selector
+  file writing functions
+  proper text splitter for flash
+  allow multiple text variables through tuple
+  print stack trace
+  remove unnecessary 0s from str func. (03.4200 -> 3.42)
+  get rid of add_text. just change the buttons text directly (will have to deal with changeing text length)
+  controller button class
+  skills recorder. Have the program record movements and write the skills route.
+  lvgl images
+  2d sliders
+  */
 }

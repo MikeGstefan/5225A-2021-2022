@@ -68,7 +68,7 @@ class B_Lift: public Motorized_subsystem<b_lift_states, NUM_OF_B_LIFT_STATES, B_
       return index.load();
     }
     void elastic_util(int high); // up time should be about 1100mms (ignore this time, it was on the old lift), down time should be slightly slower than that
-    void move_absolute(double position, double velocity = B_LIFT_MAX_VELOCITY, bool wait_for_comp = true, double end_error = 20);
+    void move_to_top();
 };
 
 extern B_Lift b_lift;

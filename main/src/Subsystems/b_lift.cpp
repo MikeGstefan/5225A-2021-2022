@@ -25,18 +25,6 @@ B_Lift::B_Lift(Motorized_subsystem<b_lift_states, NUM_OF_B_LIFT_STATES, B_LIFT_M
   speed = 127;
 }
 
-void B_Lift::move_absolute(double position, double velocity, bool wait_for_comp, double end_error){ //blocking
-  if (end_error == 0.0) end_error = this->end_error;
-  int output;
-  pid.compute(b_lift_pot.get_value(), position);
-  wait_until(fabs(pid.get_error()) < end_error){
-    output = pid.compute(b_lift_pot.get_value(), position);
-    if (abs(output) > speed) output = speed * sgn(output); // cap the output at speed  
-    motor.move(output);
-  }
-  motor.move(0);
-}
-
 void B_Lift::handle(bool driver_array){
   // decides which position vector to use
   std::vector<int>& positions = driver_array? driver_positions: prog_positions;
@@ -332,6 +320,10 @@ void B_Lift::elastic_util(int high){ //1011 as of April 10th
   elastic_b_down_time = move_timer.get_time();
   master.print(2, 0, "down time: %d", elastic_b_up_time);
   b_lift_m.move(0);
+}
+
+void B_Lift::move_to_top(){
+  set_state(b_lift_states::move_to_target, prog_positions.size()-1);
 }
 
 

@@ -287,7 +287,7 @@ void Drivebase::driver_practice(){
   // });
   
   // f_claw_p.set_value(LOW);
-  b_claw.set_value(LOW);
+  b_claw.set_state(LOW);
   // lift.move(-10); // gives holding power
   cur_driver = 0; // defaults driver to Nikhil
   // master.print(2, 0, "Driver: %s", driver_name());
@@ -370,7 +370,7 @@ bool Drivebase::get_state(){
 
 void Drivebase::set_state(bool state){
   this->state = state;
-  drive_t.set_value(state);
+  drive_t.set_state(state);
 }
 
 
