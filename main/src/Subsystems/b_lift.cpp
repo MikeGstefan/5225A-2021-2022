@@ -188,7 +188,7 @@ void B_Lift::handle_state_change(){
       break;
 
     case b_lift_states::bottom:
-      motor.move(-10); // slight down holding power
+      motor.move(-20); // slight down holding power
       break;
 
     case b_lift_states::top:
