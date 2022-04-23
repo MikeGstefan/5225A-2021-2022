@@ -120,15 +120,15 @@ void opcontrol() {
 		drivebase.handle_trans();
 
 		// intake handlers
-		// handle_intake_buttons();
+		handle_intake_buttons();
 
 		// lift handlers
-		// handle_lift_buttons();
+		handle_lift_buttons();
 		// b_lift.handle(true);
 		// f_lift.handle(true);
 
 		// claw handlers
-		// handle_claw_buttons();
+		handle_claw_buttons();
 		b_claw_obj.handle();
 		f_claw_obj.handle();
 		hitch_obj.handle();
