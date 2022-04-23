@@ -160,12 +160,20 @@ void f_detect_goal(bool safety){
 
 void detect_interference(){ 
   int time = millis();
+  int count = 0;
   wait_until(move_t.get_task_ptr()->get_state() == 4){
     //numbers need funnyimh
-    safety.print("%d, %f, %f\n", millis(), fabs(tracking.l_velo), fabs(tracking.r_velo));
-    // if(millis() - time > 900){
-    //   if((fabs(tracking.l_velo) < 4.0 ||  fabs(tracking.r_velo) < 4.0))
-    // }
+    // safety.print("%d, %f, %f\n", millis(), fabs(tracking.l_velo), fabs(tracking.r_velo));
+    if(millis() - time > 700){
+      if((fabs(tracking.l_velo) < 4.0 ||  fabs(tracking.r_velo) < 4.0))count++;
+      else count = 0;
+    }
+
+    if(count > 10){
+      f_lift.set_state(f_lift_states::move_to_target, 0);
+      drivebase.set_state(1);
+      break;
+    }
   }
 }
 

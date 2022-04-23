@@ -281,9 +281,9 @@ void high_short(){
   f_claw_obj.set_state(f_claw_states::grabbed);
   hitch_obj.set_state(hitch_states::grabbed);
   move_start(move_types::tank_rush, tank_rush_params({107.0, 72.0, 0.0}, false, 127.0, 1.0,false));
-  move_start(move_types::turn_angle, turn_angle_params(-90.0, true, true, 15.0));
+  move_start(move_types::turn_angle, turn_angle_params(-90.0, true, true, 15.0, 0.0,10.0,20.0,127.0,1000));
   delay(2000);
-  move_start(move_types::turn_angle, turn_angle_params(15.0, true, true, 15.0));
+  move_start(move_types::turn_angle, turn_angle_params(15.0, true, true, 15.0, 0.0,10.0,20.0,127.0,1000));
   high_wp_goal();
   high_line();
   // move_start(move_types::tank_point, tank_point_params({107.0, 35.0,0.0}), false);
@@ -345,7 +345,7 @@ void high_tall(){
   f_claw_obj.set_state(f_claw_states::grabbed);
   hitch_obj.set_state(hitch_states::grabbed);
   move_start(move_types::tank_rush, tank_rush_params({68.5, 70.5, -45.0}, false, 127.0, 1.0,false, 180.0));
-  move_start(move_types::turn_angle, turn_angle_params(20.0, true, true, 15.0));
+  move_start(move_types::turn_angle, turn_angle_params(20.0, true, true, 15.0, 0.0,10.0,20.0,127.0,1000));
   delay(2000);
   // move_start(move_types::turn_angle, turn_angle_params(15.0, true, true, 15.0));
   high_wp_goal();
