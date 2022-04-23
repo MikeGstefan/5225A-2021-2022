@@ -31,6 +31,10 @@ void skills2();
 void skills3();
 void skills4();
 
+void  high_short();
+void high_wp_goal();
+void high_line();
+
 void select_auton();
 void run_auton();
 void load_auton();

@@ -23,7 +23,7 @@ Piston f_claw_o(6, "F Claw O", 0, 0);
 Piston drive_t({e_port, 8}, "Drive Trans", 0, 0);
 Piston lift_t(4, "Lift Trans", 1, 0);
 Piston b_claw(5, "B Claw", 0, 0);
-Piston tilt_lock(3, "Tilt Lock", 0, 0);
+Piston tilt_lock(3, "Tilt Lock", 1, 0);
 Piston hitch({e_port, 7}, "Hitch", 0, 0);
 // sensor is 7
 //hitch

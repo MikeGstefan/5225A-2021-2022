@@ -31,8 +31,8 @@ void initialize() {
 	// gyro.calibrate();
 
 	drivebase.download_curve_data();
-  load_positions();
-  load_auton();
+//   load_positions();
+//   load_auton();
 
 	Data::init();
 	_Controller::init();
@@ -46,7 +46,7 @@ void initialize() {
 
 	// tracking.x_coord = 104.0, tracking.y_coord = 12.0, tracking.global_angle = -30.0_deg;
 	// tracking.x_coord = 24.5, tracking.y_coord = 15.0, tracking.global_angle = 9.0_deg;
-	tracking.x_coord = 0.0, tracking.y_coord = 0.0, tracking.global_angle = 0.0_deg;
+	tracking.x_coord = 107.0, tracking.y_coord = 15.0, tracking.global_angle = 0.0_deg;
 	update_t.start();
     // lift_handle_t.start();
 
@@ -91,6 +91,7 @@ void autonomous() {
 bool timer_state = 0; 
 int timer = millis();
 void opcontrol() {
+
 	// while(true){ 
 	// 	drivebase.handle_input();
 	// 	delay(10);
@@ -116,6 +117,8 @@ void opcontrol() {
 	// while(true) pros::delay(10);
 	lift_handle_t.start();
 	hitch.set_state(1);
+	tilt_lock.set_state(0);
+	b_claw.set_state(0);
 	delay(500);
 	b_lift.set_state(b_lift_states::move_to_target, 0);
 	f_lift.set_state(f_lift_states::move_to_target,0);
@@ -134,13 +137,12 @@ void opcontrol() {
 		delay(10);
 	}
 	int timer = millis();
-	move_start(move_types::tank_rush, tank_rush_params({0.0, 50.0,0.0}, false));
-	move_start(move_types::tank_point, tank_point_params({0.0,30.0,0.0}));
+	high_short();
 	// skills();
 	// skills2();
 	// skills3();
 	// skills4();
-	// master.print(1,1,"total %d", millis() - timer);
+	master.print(1,1,"total %d", millis() - timer);
 	// skills3();
 	// // skills();
 	// move_start(move_types::tank_point, tank_point_params({5.0, 100.0,0.0},false,50));
@@ -186,11 +188,7 @@ void opcontrol() {
 
 
 		
-		if(print_timer.get_time() > 100){
-			printf("b_lift_pot_val:%d, f_lift_pot_val:%d\n", b_lift_pot.get_value(), f_lift_pot.get_value());
-			// printf("b_dist:%d\n", b_dist.get());
-			print_timer.reset();
-		}
+		
 
 		if(partner.is_rising(timer_btn)){ 
 			timer_state = !timer_state;
