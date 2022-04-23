@@ -7,7 +7,6 @@
 #include "controller.hpp"
 #include "geometry.hpp"
 #include "logging.hpp"
-#include "pros/rtos.hpp"
 #include "util.hpp"
 #include <map>
 
@@ -323,21 +322,110 @@ void skills_park(){
   f_lift.set_state(f_lift_states::move_to_target, 0);
 }
 
-void rush_high(){
-  move_start(move_types::tank_point, tank_point_params({107.0, 57.0, 0.0}));
-  delay(100);
-  move_start(move_types::turn_point, turn_point_params({107.0, 71.0}));
-  delay(100);
-  move_start(move_types::tank_point, tank_point_params({107.0, 71.0, 0.0}), false);
-  f_lift.reset();
-  f_lift.move(-10);
-  f_detect_goal();
+void high_short(){
 
+  //!turn arc
+  // move_start(move_types::tank_rush, tank_rush_params({107.0, 72.0, 0.0}, false, 127.0, 1.0,false), false);
+  // while(tracking.y_coord < 30.0 )delay(10);
+  // move_start(move_types::tank_point, tank_point_params({120.0, 78.0,0.0}), false);
+  // f_detect_goal();
   // move_wait_for_complete();
-  // f_lift.move_absolute(150,100);
-  // intk.move(10);
-  move_stop();
+
+
+  //? goal turn and line
+  // move_start(move_types::tank_rush, tank_rush_params({107.0, 72.0, 0.0}, false, 127.0, 1.0,false));
+  // move_start(move_types::turn_angle, turn_angle_params(-90.0, true, true, 15.0));
+  // delay(2000);
+  // move_start(move_types::turn_angle, turn_angle_params(15.0, true, true, 15.0));
+  // high_wp_goal();
+  // high_line();
+
+
+  //? goal and plus
+  b_claw_obj.set_state(b_claw_states::tilted);
+  f_claw_obj.set_state(f_claw_states::grabbed);
+  hitch_obj.set_state(hitch_states::grabbed);
+  move_start(move_types::tank_rush, tank_rush_params({107.0, 72.0, 0.0}, false, 127.0, 1.0,false));
+  move_start(move_types::turn_angle, turn_angle_params(-90.0, true, true, 15.0, 0.0,10.0,20.0,127.0,1000));
+  delay(2000);
+  move_start(move_types::turn_angle, turn_angle_params(15.0, true, true, 15.0, 0.0,10.0,20.0,127.0,1000));
+  high_wp_goal();
+  high_line();
+  // move_start(move_types::tank_point, tank_point_params({107.0, 35.0,0.0}), false);
+  move_start(move_types::turn_angle, turn_angle_params(-90.0));
+  // b_lift.Subsystem::set_state(b_lift_states::intake_on);
+  move_start(move_types::tank_point, tank_point_params({68.0, 48.0,0.0}, false,70));
+
+  
+
+  //? back straight up
+  // move_start(move_types::tank_rush, tank_rush_params({107.0, 72.0, 0.0}, false, 127.0, 1.0,false));
+  // delay(100);
+  // move_start(move_types::tank_point, tank_point_params({107.0, 35.0,0.0}), false);
+  // delay(500);
+  // f_lift.set_state(f_lift_states::move_to_target, 1);
+  // move_wait_for_complete();
+  // move_start(move_types::turn_angle, turn_angle_params(-90.0));
+  // delay(50);
+  // move_start(move_types::turn_angle, turn_angle_params(-90.0, true, true, 5.0,0.0,10.0,20.0,127.0,0,min_move_power_a, 3.0));
+  // move_start(move_types::tank_point, tank_point_params({130.0, 35.0,0.0}), false);
+  // b_detect_goal();
+  // move_stop();
+  // drivebase.brake();
+  // move_start(move_types::tank_point, tank_point_params({119.0, 35.0,0.0}));
+  // b_lift.Subsystem::set_state(b_lift_states::intake_on);
+  // move_start(move_types::turn_angle, turn_angle_params(0.0));
+  // move_start(move_types::tank_point, tank_point_params({117.0, 70.0,0.0}, false,70));
+
 }
+
+void high_wp_goal(){
+  move_start(move_types::tank_point, tank_point_params({107.0, 35.0,0.0}), false);
+  Task([](){detect_interference();});
+  delay(500);
+  f_lift.set_state(f_lift_states::move_to_target, 1);
+  move_wait_for_complete();
+  move_start(move_types::turn_angle, turn_angle_params(-90.0));
+  delay(50);
+  move_start(move_types::turn_angle, turn_angle_params(-90.0, true, true, 5.0,0.0,10.0,20.0,127.0,0,45, 3.0));
+  move_start(move_types::tank_point, tank_point_params({130.0, 35.0,0.0}), false);
+  b_detect_goal();
+  Task([](){
+    delay(150);
+    b_lift.Subsystem::set_state(b_lift_states::intake_on);
+  });
+  move_stop();
+  drivebase.brake();
+  
+}
+
+void high_line(){
+  move_start(move_types::tank_point, tank_point_params({119.0, 35.0,0.0}, false, 127.0, 1.0, true, 6.4, 70.0,0.0, 0,{4.0, 0.5}));
+  
+  move_start(move_types::turn_angle, turn_angle_params(0.0));
+  move_start(move_types::tank_point, tank_point_params({117.0, 70.0,0.0}, false,70));
+}
+
+void high_tall(){ 
+  b_claw_obj.set_state(b_claw_states::tilted);
+  f_claw_obj.set_state(f_claw_states::grabbed);
+  hitch_obj.set_state(hitch_states::grabbed);
+  move_start(move_types::tank_rush, tank_rush_params({68.5, 70.5, -45.0}, false, 127.0, 1.0,false, 180.0));
+  move_start(move_types::turn_angle, turn_angle_params(20.0, true, true, 15.0, 0.0,10.0,20.0,127.0,1000));
+  delay(2000);
+  // move_start(move_types::turn_angle, turn_angle_params(15.0, true, true, 15.0));
+  high_wp_goal();
+  high_line();
+  move_start(move_types::tank_point, tank_point_params({107.0, 35.0,0.0}));
+  // move_start(move_types::tank_point, tank_point_params({107.0, 35.0,0.0}), false);
+  move_start(move_types::turn_angle, turn_angle_params(-90.0));
+  // b_lift.Subsystem::set_state(b_lift_states::intake_on);
+  move_start(move_types::tank_point, tank_point_params({68.0, 48.0,0.0}, false,70));
+  // b_claw_obj.set_state(b_claw_states::tilted);
+  // f_claw_obj.set_state(f_claw_states::grabbed);
+  // hitch_obj.set_state(hitch_states::grabbed);
+}
+
 
 //target, task at target
 std::vector<std::pair<std::string, std::string>> selected_positions;

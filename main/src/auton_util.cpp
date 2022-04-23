@@ -33,17 +33,21 @@ void save_positions(){
   master.print(0, 0, "Move to new start");
   printf2("\nMove the robot to its new position.");
 
-  //move the robot
+  // move the robot
 
   if(GUI::prompt("Press to save position", "Press to save the current position to a file.")){
-    tracking_imp.print("Saving %.2f to file", Position{tracking.x_coord, tracking.y_coord, tracking.get_angle_in_deg()});
+    Position pos = {tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.get_angle_in_deg())};
+    tracking_imp.print("Saving %.2f to file", pos);
+    master.clear();
+    master.print(0, 0, "Saving");
+    master.print(1, 0, "(%.2f, %.2f, %.2f)", pos.x, pos.y, pos.angle);
     
     ofstream file;
     Data::log_t.data_update();
     file.open(start_pos_file_name, fstream::out | fstream::trunc);
-    file << tracking.x_coord << endl;
-    file << tracking.y_coord << endl;
-    file << rad_to_deg(tracking.global_angle) << endl;
+    file << pos.x << endl;
+    file << pos.y << endl;
+    file << pos.angle << endl;
     file.close();
     Data::log_t.done_update();
   }
@@ -59,8 +63,11 @@ void load_positions(){
   file.close();
   Data::log_t.done_update();
 
-  tracking_imp.print("Loading %.2f from file", pos);
+  tracking_imp.print(term_colours::BLUE, "Loading %.2f from file", pos);
   tracking.reset(pos);
+  master.clear();
+  master.print(0, 0, "Saving");
+  master.print(1, 0, "%.1f, %.1f, %.1f", tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle));
 }
 
 //remove if unneeded
@@ -152,15 +159,18 @@ void f_detect_goal(bool safety){
 
 void detect_interference(){ 
   int time = millis();
+  int count = 0;
   wait_until(move_t.get_task_ptr()->get_state() == 4){
     //numbers need funnyimh
-    if(millis()-time > 1500 && fabs(tracking.g_velocity.y) < 2.0){
-      drivebase.set_state(1);
-      master.print(1,1,"PULLING");
-      misc.print("TUG DETECTED");
-      break;
+    // safety.print("%d, %f, %f\n", millis(), fabs(tracking.l_velo), fabs(tracking.r_velo));
+    if(millis() - time > 700){
+      if((fabs(tracking.l_velo) < 4.0 ||  fabs(tracking.r_velo) < 4.0))count++;
+      else count = 0;
     }
-    else if(millis()-time > 1500 && fabs(tracking.g_velocity.y) > 3.0){
+
+    if(count > 10){
+      f_lift.set_state(f_lift_states::move_to_target, 0);
+      drivebase.set_state(1);
       break;
     }
   }
@@ -191,8 +201,8 @@ void subsystem_handle_t(void*params){
   _Task* ptr = _Task::get_obj(params);
 
   while(true){ 
-    b_lift.handle(false);
-		f_lift.handle(false);
+    b_lift.handle(true);
+		f_lift.handle(true);
     // intake.handle();
     // b_claw_obj.handle();
 		// f_claw_obj.handle();
