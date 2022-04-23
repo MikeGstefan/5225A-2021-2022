@@ -344,7 +344,7 @@ void high_tall(){
   b_claw_obj.set_state(b_claw_states::tilted);
   f_claw_obj.set_state(f_claw_states::grabbed);
   hitch_obj.set_state(hitch_states::grabbed);
-  move_start(move_types::tank_rush, tank_rush_params({70.5, 70.5, -45.0}, false, 127.0, 1.0,false, 180.0));
+  move_start(move_types::tank_rush, tank_rush_params({68.5, 70.5, -45.0}, false, 127.0, 1.0,false, 180.0));
   move_start(move_types::turn_angle, turn_angle_params(20.0, true, true, 15.0));
   delay(2000);
   // move_start(move_types::turn_angle, turn_angle_params(15.0, true, true, 15.0));
@@ -529,3 +529,64 @@ void run_auton(){
     }
   }
 }
+
+
+
+
+FILE* autoFile = NULL;
+autos cur_auto;
+
+void autonFile_read(){
+  Data::log_t.data_update();
+  autoFile = fopen("/usd/auto.txt","r");
+  if(autoFile==NULL) {printf("could not open logfile\n"); return;}
+  else printf("logfile found\n");
+  int file_auto;
+  if(autoFile != NULL){
+    fscanf(autoFile, "%d", &file_auto);
+    cur_auto = static_cast<autos>(file_auto);
+  }
+  if(autoFile != NULL) fclose(autoFile);
+  Data::log_t.done_update();
+  master.print(0,0,"%s\n", auto_names[(int)cur_auto].c_str());
+  delay(500);
+}
+
+void auto_select(){
+  // void autonFile_read();
+  master.print(0,0," HERE");
+  delay(1000);
+  while(true){
+     if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_B)){
+        // auto_increase();
+        // menu_update();
+        // cur_auto++;
+        cur_auto = next_enum_value(cur_auto);
+        master.print(2,2,"%s\n", auto_names[(int)cur_auto].c_str());
+      }
+      if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_X)){
+        
+        cur_auto = previous_enum_value(cur_auto);
+        master.print(2,2,"%s\n", auto_names[(int)cur_auto].c_str());
+        // auto_decrease();
+        // menu_update();
+      }
+      // if(master.get_digital_new_press(E_CONTROLLER_DIGITAL_Y)) side_select = true;
+      if(master.get_digital_new_press(ok_button)){
+        // auto_set = true;
+        autoFile = fopen("/usd/auto.txt","w");
+        //char name[80]  = auto_names[static_cast<int>(cur_auto)];
+        if(autoFile != NULL){
+          fprintf(autoFile, "%d", static_cast<int>(cur_auto));
+          fclose(autoFile);
+          return;
+        }
+        // done = true;
+      }
+  }
+}
+
+
+
+
+

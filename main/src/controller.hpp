@@ -29,6 +29,7 @@ extern bool speed_limit_activated;
 
 // misc buttons
 extern controller_digital_e_t ok_button;
+extern controller_digital_e_t auton_select;
 // extern controller_digital_e_t joy_mode_switch_button;
 extern controller_digital_e_t joy_mode_switch_button;
 

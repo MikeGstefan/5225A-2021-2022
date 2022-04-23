@@ -19,6 +19,7 @@ bool speed_limit_activated = false;
 
 // misc buttons
 controller_digital_e_t ok_button = DIGITAL_A;
+controller_digital_e_t auton_select = DIGITAL_UP;
 // controller_digital_e_t joy_mode_switch_button = DIGITAL_Y;
 controller_digital_e_t shift_button = DIGITAL_X;
 

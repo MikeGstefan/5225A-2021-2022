@@ -194,8 +194,8 @@ void subsystem_handle_t(void*params){
   _Task* ptr = _Task::get_obj(params);
 
   while(true){ 
-    b_lift.handle(!pros::competition::is_autonomous());
-		f_lift.handle(!pros::competition::is_autonomous());
+    b_lift.handle(true);
+		f_lift.handle(true);
     // intake.handle();
     // b_claw_obj.handle();
 		// f_claw_obj.handle();

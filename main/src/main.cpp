@@ -33,7 +33,8 @@ void initialize() {
 	// gyro.calibrate();
 
 	drivebase.download_curve_data();
-  load_positions();
+  	load_positions();
+  	autonFile_read();
 //   load_auton();
 
 	Data::init();
@@ -48,7 +49,7 @@ void initialize() {
 
 	// tracking.x_coord = 104.0, tracking.y_coord = 12.0, tracking.global_angle = -30.0_deg;
 	// tracking.x_coord = 24.5, tracking.y_coord = 15.0, tracking.global_angle = 9.0_deg;
-	tracking.x_coord = 107.0, tracking.y_coord = 15.0, tracking.global_angle = 0.0_deg;
+	// tracking.x_coord = 107.0, tracking.y_coord = 15.0, tracking.global_angle = 0.0_deg;
 	update_t.start();
     lift_handle_t.start();
 
@@ -87,7 +88,15 @@ void competition_initialize() {}
  */
 void autonomous() {
 //   run_auton();
-	high_short();
+	switch(cur_auto){
+		case auto1: //
+			high_short();
+		break;
+		case auto2: 
+			high_tall();
+		break;
+	}
+	
 }
 
 
@@ -112,6 +121,7 @@ void opcontrol() {
 
 	state_log.print("IN DRIVER\n");
 	while(true){
+		if(master.is_rising(auton_select))auto_select();
 		master.update_buttons();
 		partner.update_buttons();
 		// printf("%d\n", get_lift());

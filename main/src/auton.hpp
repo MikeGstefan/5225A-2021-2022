@@ -39,3 +39,20 @@ void high_tall();
 void select_auton();
 void run_auton();
 void load_auton();
+
+
+enum autos{
+  auto1,
+  auto2,
+  NUM_OF_ELEMENTS =2
+};
+
+extern autos cur_auto;
+
+const string auto_names[] = {
+  "high  ",
+  "center"
+};
+
+void autonFile_read();
+void auto_select();
