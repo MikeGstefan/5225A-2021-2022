@@ -121,7 +121,7 @@ public:
    * 0: random direction
    * 1: right
    */
-  void random_turn(int direction);
+  void random_turn(int direction = 0);
 };
 
 extern Drivebase drivebase;

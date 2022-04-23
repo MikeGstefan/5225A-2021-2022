@@ -136,7 +136,7 @@ void skills2(){
 }
 
 void skills3(){ 
-   int time = millis();
+  int time = millis();
   // f_claw(0);
   // b_claw.set_state(0);
   // tilt_lock.set_state(0);
@@ -430,12 +430,12 @@ void high_tall(){
 //target, task at target
 std::vector<std::pair<std::string, std::string>> selected_positions;
 
-std::map<const std::string, const Position> start_positions = {
+std::map<const std::string, const Position> start_positions {
   {"Right", {110.0, 15.0}},
   {"Left", {30.0, 15.0}},
 };
 
-std::map<const std::string, const Position> goal_positions = {
+std::map<const std::string, const Position> goal_positions {
   {"High", {102.0, 72.0}},
   {"Tall", {72.0, 72.0}},
   {"Low", {34.5, 72.0}},
@@ -443,7 +443,7 @@ std::map<const std::string, const Position> goal_positions = {
   {"Ramp", {128.0, 36.0}},
 };
 
-std::map<const std::string, const Position> end_positions = {
+std::map<const std::string, const Position> end_positions {
   {"Right", {110.0, 15.0}},
   {"Left", {30.0, 15.0}},
   {"Far Ramp", {110.0, 90.0}},
@@ -491,19 +491,6 @@ bool goal_already_selected(const std::string& goal){
   }
 
   return false;
-}
-
-bool run_defined_auton(std::string start, std::string target){
-//handles movement and goal pickup
-  if(start == "" && target == ""){
-
-  }
-  else if(start == "" && target == ""){
-
-  }
-  else return false; //Will be false if none of the ifs matched
-
-  return true;
 }
 
 bool select_auton_task(std::string target){
@@ -642,6 +629,17 @@ void select_auton(){
 
 }
 
+bool run_defined_auton(std::string start, std::string target){
+  // if(start == "Right" && target == "High") high_short();
+  // else if(start == "Right" && target == "Tall") high_tall();
+  // else if(start == "High" && target == "AWP") high_wp_goal();
+  // else return false; //Will be false if none of the ifs matched
+  // return true; // Jumps here after a movement was run
+
+
+  return false;
+}
+
 void run_auton(){
   std::string cur_task, target_task;
   Position cur_pos, target_pos;
@@ -660,21 +658,19 @@ void run_auton(){
     else{
       if(target_task == "None"){
         b_lift.Subsystem::set_state(b_lift_states::intake_on);
-        move_start(move_types::tank_rush, tank_rush_params(target_pos, false));
-
-        wait_until(tracking.move_complete);
+        move_start(move_types::tank_point, tank_point_params(target_pos, false, 127.0, 1.0, true, 6.4, 70.0, 0.0, 0, {3, 3}));
 
         b_lift.Subsystem::set_state(b_lift_states::intake_off);
       }
 
       else if(target_task == "Front"){
         f_lift.set_state(f_lift_states::move_to_target, 0);
-        b_lift.Subsystem::set_state(b_lift_states::intake_on);
         wait_until(F_LIFT_AT_BOTTOM);
-        move_start(move_types::tank_rush, tank_rush_params(target_pos, false));
+        b_lift.Subsystem::set_state(b_lift_states::intake_on);
 
-        wait_until(tracking.move_complete);
-        drivebase.random_turn(-1);
+        Task([](){detect_interference();});
+        move_start(move_types::tank_rush, tank_rush_params(target_pos, false, 127.0, 1.0, false));
+        drivebase.random_turn();
 
         b_lift.Subsystem::set_state(b_lift_states::intake_off);
         f_lift.set_state(f_lift_states::move_to_target, 1);
@@ -682,23 +678,31 @@ void run_auton(){
 
       else if(target_task == "Back"){
         b_lift.set_state(b_lift_states::move_to_target, 0);
-        move_start(move_types::turn_angle, turn_angle_params(angle_to_point(target_pos.x, target_pos.y)+180.0, false, true, 5.0, 0.0, 10.0, 20.0, 127.0, 0, 50));
         wait_until(B_LIFT_AT_BOTTOM);
+
+        Task([](){detect_interference();});
+        move_start(move_types::tank_point, tank_point_params(target_pos, false, 127.0, 1.0, true, 6.4, 70.0, 0.0, 0, {5, 5}));
+        move_start(move_types::turn_angle, turn_angle_params(angle_to_point(target_pos.x, target_pos.y)+180.0, true, true, 5.0, 0.0, 10.0, 20.0, 127.0, 0, 50, 3.0));
+        move_start(move_types::tank_point, tank_point_params(target_pos), false);
         
         b_claw_obj.set_state(b_claw_states::searching);
         wait_until(tracking.move_complete || b_claw_obj.get_state() == b_claw_states::tilted);
-        drivebase.random_turn(-1);
+        drivebase.random_turn();
 
         b_lift.set_state(b_lift_states::move_to_target, 1);
       }
 
       else if(target_task == "Hitch"){
         b_lift.set_state(b_lift_states::move_to_target, 4);
-        move_start(move_types::turn_angle, turn_angle_params(angle_to_point(target_pos.x, target_pos.y)+180.0, false, true, 5.0, 0.0, 10.0, 20.0, 127.0, 0, 50));
+
+        Task([](){detect_interference();});
+        move_start(move_types::tank_point, tank_point_params(target_pos, false, 127.0, 1.0, true, 6.4, 70.0, 0.0, 0, {5, 5}));
+        move_start(move_types::turn_angle, turn_angle_params(angle_to_point(target_pos.x, target_pos.y)+180.0, true, true, 5.0, 0.0, 10.0, 20.0, 127.0, 0, 50, 3.0));
+        move_start(move_types::tank_point, tank_point_params(target_pos), false);
         
         hitch_obj.set_state(hitch_states::searching);
         wait_until(tracking.move_complete || hitch_obj.get_state() == hitch_states::grabbed);
-        drivebase.random_turn(-1);
+        drivebase.random_turn();
       }
 
       else ERROR.print("Wrong target selected");

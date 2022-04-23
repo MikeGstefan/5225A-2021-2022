@@ -410,10 +410,7 @@ void Drivebase::reset(){
 
 void Drivebase::random_turn(int direction){
   if(direction == 0) direction = random_direction();
-  if(direction < 0) drivebase.move_side(40, 110);
-  else if(direction > 0) drivebase.move_side(110, 40);
-  tracking.wait_for_dist(6);
-  move_stop(true);
+  move_start(move_types::turn_angle, turn_angle_params(tracking.get_angle_in_deg()+direction*90.0, true, true, 15.0, 0.0, 10.0, 20.0, 127.0, 1000));
 }
 
 

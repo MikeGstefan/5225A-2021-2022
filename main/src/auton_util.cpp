@@ -164,11 +164,13 @@ void detect_interference(){
     //numbers need funnyimh
     // safety.print("%d, %f, %f\n", millis(), fabs(tracking.l_velo), fabs(tracking.r_velo));
     if(millis() - time > 700){
-      if((fabs(tracking.l_velo) < 4.0 ||  fabs(tracking.r_velo) < 4.0))count++;
+      if((fabs(tracking.l_velo) < 4.0 || fabs(tracking.r_velo) < 4.0)) count++;
       else count = 0;
     }
 
     if(count > 10){
+      safety.print(term_colours::ERROR, "Tug of War");
+      safety.print(term_colours::RED, "Switching to Low Gear + Lowering lift");
       f_lift.set_state(f_lift_states::move_to_target, 0);
       drivebase.set_state(1);
       break;
