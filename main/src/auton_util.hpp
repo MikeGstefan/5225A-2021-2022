@@ -8,9 +8,6 @@
 void save_positions();
 void load_positions();
 
-int end_target();
-
-
 using namespace pros;
 
 #define b_lift_hitch_pos 3

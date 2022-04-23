@@ -7,34 +7,6 @@ static const std::string start_pos_file_name = "/usd/start_position.txt";
 Reset_dist reset_dist_r(&r_dist, 7.5);
 Reset_dist reset_dist_l(&l_dist, 7.5);
 
-int end_target(){
-  std::array<std::string, 5> targets = {
-    "Target 1",
-    "Target 2",
-    "Target 3",
-    "Target 4",
-    "Target 5",
-  };
-  
-  int index = 0;
-  wait_until(master.get_digital_new_press(ok_button)){
-    master.clear();
-    master.print(0, 0, targets[index]);
-
-    if(master.get_digital_new_press(DIGITAL_LEFT)){
-      if(index == 0) index = targets.size() - 1;
-      else index--;
-    }
-
-    else if(master.get_digital_new_press(DIGITAL_RIGHT)){
-      if(index == targets.size() - 1) index = 0;
-      else index++;
-    }
-  }
-
-  return index;
-}
-
 void f_claw(bool state){
   f_claw_o.set_state(state);
   f_claw_c.set_state(state);

@@ -343,13 +343,17 @@ void rush_high(){
 //current is still necessary to look for collisions
 std::vector<std::string> selected_positions;
 std::map<std::string, std::pair<Point, std::string>> targets = {
-  {"Right", {{110.0, 14.0}, "None"}},
-  {"Left", {{30.0, 12.0}, "None"}},
-  {"Tall", {{73.0, 71.0}, "Front"}},
-  {"High", {{102.0, 72.0}, "Front"}},
-  {"Low", {{34.5, 72.0}, "Front"}},
-  {"AWP", {{130.0, 36.0}, "Hitch"}},
-  {"Ramp", {{128.0, 36.0}, "Hitch"}},
+  {"Right (Start)", {{110.0, 15.0}, "None"}},
+  {"Left (Start)", {{30.0, 15.0}, "None"}},
+  {"Tall (Goal)", {{72.0, 72.0}, "Front"}},
+  {"High (Goal)", {{102.0, 72.0}, "Front"}},
+  {"Low (Goal)", {{34.5, 72.0}, "Front"}},
+  {"AWP (Goal)", {{130.0, 36.0}, "Back"}},
+  {"Ramp (Goal)", {{128.0, 36.0}, "Back"}},
+  {"Right (End)", {{110.0, 15.0}, "None"}},
+  {"Left (End)", {{30.0, 15.0}, "None"}},
+  {"Far Ramp (End)", {{110.0, 90.0}, "None"}},
+  {"Far AWP (End)", {{15.0, 110.0}, "None"}},
 };
 
 void load_auton(){
@@ -436,7 +440,7 @@ bool select_auton_task(std::string target){
 
 void select_auton(){
   bool all_selected = false;
-  std::map<std::string, std::pair<Point, std::string>>::const_iterator selection = targets.find("Right");
+  std::map<std::string, std::pair<Point, std::string>>::const_iterator selection = targets.find("Right (Start)");
   selected_positions.clear();
 
   wait_until(all_selected){
