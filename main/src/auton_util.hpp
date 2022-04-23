@@ -8,6 +8,8 @@
 void save_positions();
 void load_positions();
 
+int end_target();
+
 
 using namespace pros;
 
