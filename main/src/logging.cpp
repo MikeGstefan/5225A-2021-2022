@@ -38,6 +38,7 @@ Data events("events.txt", "$10", general,log_locations::both);
 Data state_log("state.txt", "$11", general,log_locations::both);
 Data ERROR("error.txt", "$12", error, log_locations::both);
 Data skills_d("skills.txt", "$13", general, log_locations::both);
+Data safety("safety.txt", "$14", general, log_locations::both);
 
 
 vector<Data*> Data::get_objs(){

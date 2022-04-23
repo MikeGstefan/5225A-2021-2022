@@ -51,6 +51,7 @@ extern Data events;
 extern Data state_log;
 extern Data graph;
 extern Data skills_d;
+extern Data safety;
 extern Data ERROR;
 
 class Data{
@@ -88,8 +89,8 @@ public:
    */
   template <typename... Params>
   void print(term_colours colour, std::string format, Params... args) const{
-    std::string str = sprintf2(format, args...);
-    str = std::to_string(millis()) + " | ";
+    std::string str = sprintf2(format, args...) + "\n";
+    // str = std::to_string(millis()) + " | ";
 
     int buffer_len = str.length() + 3;
     char buffer[256];

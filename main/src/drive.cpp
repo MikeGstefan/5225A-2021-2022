@@ -236,9 +236,9 @@ void Drivebase::handle_input(){
   tracking.power_y = drivers[cur_driver].custom_drives[1].lookup(master.get_analog(ANALOG_LEFT_Y));
   // caps drive speed at 40 if intake is on
   // if(b_lift.get_state() == b_lift_states::intake_on || b_lift.get_state() == b_lift_states::intk_jam){
-  if(master.is_rising(speed_limit_button)) speed_limit_active = !speed_limit_active;
+  if(master.is_rising(speed_limit_button)) speed_limit_activated = !speed_limit_activated;
 
-  if(speed_limit_active){
+  if(speed_limit_activated){
     if(buzz_timer.get_time() > 50){
       master.rumble("-");
       buzz_timer.reset();
@@ -558,7 +558,7 @@ void handle_claw_buttons(){
       switch(f_claw_obj.get_state()){
         case f_claw_states::grabbed:
           if(F_LIFT_AT_BOTTOM) f_claw_obj.set_state(f_claw_states::about_to_search);
-          else f_claw_obj.set_state(f_claw_states::idle);
+          else {f_claw_obj.set_state(f_claw_states::idle);   state_log.print("561\n");}
           break;
 
         default:
@@ -596,7 +596,7 @@ void handle_claw_buttons(){
     switch(f_claw_obj.get_state()){
       case f_claw_states::grabbed:
         if(F_LIFT_AT_BOTTOM) f_claw_obj.set_state(f_claw_states::about_to_search);
-        else f_claw_obj.set_state(f_claw_states::idle);
+        else {f_claw_obj.set_state(f_claw_states::idle); state_log.print("599\n");}
         break;
 
       default:

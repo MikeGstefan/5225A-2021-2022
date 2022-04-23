@@ -18,6 +18,8 @@ using namespace std;
 pros::Task *updt = nullptr; //What's this for
 const GUI* GUI::current_gui = &main_obj;
 
+bool robot_setup = false;
+
 /**
  * Runs initialization code. This occurs as soon as the program is started.
  *
@@ -31,7 +33,7 @@ void initialize() {
 	// gyro.calibrate();
 
 	drivebase.download_curve_data();
-//   load_positions();
+  load_positions();
 //   load_auton();
 
 	Data::init();
@@ -48,7 +50,7 @@ void initialize() {
 	// tracking.x_coord = 24.5, tracking.y_coord = 15.0, tracking.global_angle = 9.0_deg;
 	tracking.x_coord = 107.0, tracking.y_coord = 15.0, tracking.global_angle = 0.0_deg;
 	update_t.start();
-    // lift_handle_t.start();
+    lift_handle_t.start();
 
 	// gyro.finish_calibrating(); //Finishes calibrating gyro before program starts
 	// GUI::go_to(3);
@@ -84,13 +86,57 @@ void competition_initialize() {}
  * from where it left off.
  */
 void autonomous() {
-  run_auton();
+//   run_auton();
+	high_short();
 }
 
 
 bool timer_state = 0; 
 int timer = millis();
 void opcontrol() {
+	move_t.kill();
+	printf("just entered driver\n");
+	if(!robot_setup){
+		hitch.set_state(1);
+		tilt_lock.set_state(0);
+		b_claw.set_state(0);
+		delay(500);
+		b_lift.set_state(b_lift_states::move_to_target, 0);
+		f_lift.set_state(f_lift_states::move_to_target,0);
+		f_claw(0);
+		delay(500);
+		robot_setup = true;
+		printf("just finished setup driver\n");
+	}
+	// state_
+
+	state_log.print("IN DRIVER\n");
+	while(true){
+		master.update_buttons();
+		partner.update_buttons();
+		// printf("%d\n", get_lift());
+		// drivebase handlers
+		drivebase.handle_input();
+		drivebase.handle_trans();
+
+		// intake handlers
+		// handle_intake_buttons();
+
+		// lift handlers
+		// handle_lift_buttons();
+		// b_lift.handle(true);
+		// f_lift.handle(true);
+
+		// claw handlers
+		// handle_claw_buttons();
+		b_claw_obj.handle();
+		f_claw_obj.handle();
+		hitch_obj.handle();
+
+
+		delay(10);
+	}
+	// save_positions();
 
 	// while(true){ 
 	// 	drivebase.handle_input();
@@ -115,17 +161,11 @@ void opcontrol() {
 	// move_start(move_types::turn_angle, turn_angle_params(90.0));
 	// move_start(move_types::tank_point, tank_point_params({36.0, 105.0, 0.0}));
 	// while(true) pros::delay(10);
-	lift_handle_t.start();
-	hitch.set_state(1);
-	tilt_lock.set_state(0);
-	b_claw.set_state(0);
-	delay(500);
-	b_lift.set_state(b_lift_states::move_to_target, 0);
-	f_lift.set_state(f_lift_states::move_to_target,0);
-	f_claw(0);
+	// lift_handle_t.start();
+	
 
 	int state = 0;
-	while(!master.get_digital(DIGITAL_A)){
+	while(!master.get_digital(DIGITAL_R1)){
 		if(master.get_digital_new_press(DIGITAL_B)){
 			// state = !state;
 			// f_claw_o.set_state(state);
@@ -137,7 +177,8 @@ void opcontrol() {
 		delay(10);
 	}
 	int timer = millis();
-	high_short();
+	
+	// high_tall();
 	// skills();
 	// skills2();
 	// skills3();

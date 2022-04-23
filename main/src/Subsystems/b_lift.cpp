@@ -146,7 +146,7 @@ void B_Lift::handle(bool driver_array){
           
         }
       }
-      printf("sensor: %d\n", intk_t.get_value());
+      // printf("sensor: %d\n", intk_t.get_value());
       break;
 
     case b_lift_states::intk_jam:
@@ -450,12 +450,12 @@ void B_Claw::handle_state_change(){
       break;
 
     case b_claw_states::idle:
-      tilt_lock.set_state(HIGH);
+      tilt_lock.set_state(LOW);
       b_claw.set_state(LOW);
       break;
 
     case b_claw_states::about_to_search:
-      tilt_lock.set_state(HIGH);
+      tilt_lock.set_state(LOW);
       b_claw.set_state(LOW);
       search_timer.reset(); // to wait 2 seconds before entering search
       break;
@@ -469,7 +469,7 @@ void B_Claw::handle_state_change(){
       break;
 
     case b_claw_states::flat:
-      tilt_lock.set_state(LOW);
+      tilt_lock.set_state(HIGH);
       delay(50);
       b_claw.set_state(LOW);
       break;

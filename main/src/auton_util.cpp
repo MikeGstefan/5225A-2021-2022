@@ -40,6 +40,9 @@ void save_positions(){
 
   if(GUI::prompt("Press to save position", "Press to save the current position to a file.")){
     tracking_imp.print("Saving X: %f, Y:%f, A:%f", tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle));
+    master.clear();
+    master.print(0, 0, "Saving");
+    master.print(1, 0, "(%.2f, %.2f, %.2f)", tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle));
     
     ofstream file;
     Data::log_t.data_update();
@@ -63,6 +66,9 @@ void load_positions(){
   Data::log_t.done_update();
 
   tracking_imp.print(term_colours::BLUE, "Loading X: %f, Y:%f, A:%f from file", x, y, a);
+  master.clear();
+  master.print(0, 0, "Saving");
+  master.print(1, 0, "(%.2f, %.2f, %.2f)", tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle));
   tracking.reset(x, y, a);
 }
 
@@ -156,15 +162,10 @@ void detect_interference(){
   int time = millis();
   wait_until(move_t.get_task_ptr()->get_state() == 4){
     //numbers need funnyimh
-    if(millis()-time > 1500 && fabs(tracking.g_velocity.y) < 2.0){
-      drivebase.set_state(1);
-      master.print(1,1,"PULLING");
-      misc.print("TUG DETECTED");
-      break;
-    }
-    else if(millis()-time > 1500 && fabs(tracking.g_velocity.y) > 3.0){
-      break;
-    }
+    safety.print("%d, %f, %f\n", millis(), fabs(tracking.l_velo), fabs(tracking.r_velo));
+    // if(millis() - time > 900){
+    //   if((fabs(tracking.l_velo) < 4.0 ||  fabs(tracking.r_velo) < 4.0))
+    // }
   }
 }
 
@@ -193,8 +194,8 @@ void subsystem_handle_t(void*params){
   _Task* ptr = _Task::get_obj(params);
 
   while(true){ 
-    b_lift.handle(false);
-		f_lift.handle(false);
+    b_lift.handle(!pros::competition::is_autonomous());
+		f_lift.handle(!pros::competition::is_autonomous());
     // intake.handle();
     // b_claw_obj.handle();
 		// f_claw_obj.handle();
