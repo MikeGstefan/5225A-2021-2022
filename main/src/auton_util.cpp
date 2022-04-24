@@ -163,7 +163,7 @@ void detect_interference(){
   int count = 0;
   wait_until(move_t.get_task_ptr()->get_state() == 4){
     //numbers need funnyimh
-    // safety.print("%d, %f, %f\n", millis(), fabs(tracking.l_velo), fabs(tracking.r_velo));
+    safety.print("%d, %f, %f\n", millis(), fabs(tracking.l_velo), fabs(tracking.r_velo));
     if(millis() - time > 700){
       if((fabs(tracking.l_velo) < 4.0 ||  fabs(tracking.r_velo) < 4.0))count++;
       else count = 0;
