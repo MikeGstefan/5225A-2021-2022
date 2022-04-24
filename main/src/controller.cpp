@@ -15,7 +15,7 @@ controller_digital_e_t speed_limit_button = DIGITAL_Y;
 controller_digital_e_t intake_button = DIGITAL_B;
 controller_digital_e_t intake_reverse_button = DIGITAL_DOWN;
 
-bool speed_limit_activated = false;
+bool speed_limit_active = false;
 
 // misc buttons
 controller_digital_e_t ok_button = DIGITAL_A;
