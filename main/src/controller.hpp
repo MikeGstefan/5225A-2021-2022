@@ -25,7 +25,7 @@ extern controller_digital_e_t speed_limit_button;
 extern controller_digital_e_t intake_button;
 extern controller_digital_e_t intake_reverse_button;
 
-extern bool speed_limit_activated;
+inline bool speed_limit_activated = false;
 
 // misc buttons
 extern controller_digital_e_t ok_button;
