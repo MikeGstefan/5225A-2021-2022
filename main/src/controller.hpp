@@ -10,26 +10,6 @@
     constexpr controller_digital_e_t both_lifts_down_button = DIGITAL_A;
 
   // Intake Buttons
-    constexpr controller_digital_e_t intake_button = DIGITAL_B;
-    constexpr controller_digital_e_t intake_reverse_button = DIGITAL_DOWN;
-
-  // Misc Buttons
-    constexpr controller_digital_e_t reverse_drive_button = DIGITAL_L1;
-    constexpr controller_digital_e_t claw_toggle_button =  DIGITAL_L2;
-    constexpr controller_digital_e_t ok_button = DIGITAL_A;
-    constexpr controller_digital_e_t joy_mode_switch_button = DIGITAL_Y;
-    constexpr controller_digital_e_t shift_button = DIGITAL_X;
-
-// Partner Buttons
-
-  // Lift Buttons
-    constexpr controller_digital_e_t partner_back_lift_up_button = DIGITAL_R1;
-    constexpr controller_digital_e_t partner_back_lift_down_button =  DIGITAL_R2;
-    constexpr controller_digital_e_t partner_front_lift_up_button = DIGITAL_L1;
-    constexpr controller_digital_e_t partner_front_lift_down_button = DIGITAL_L2;
-    constexpr controller_digital_e_t partner_both_lifts_down_button = DIGITAL_DOWN;
-
-  // Intake Buttons
     constexpr controller_digital_e_t partner_intake_button = DIGITAL_B;
     constexpr controller_digital_e_t partner_intake_reverse_button = DIGITAL_Y;
 
@@ -40,6 +20,24 @@
 
   //Misc Buttons
     constexpr controller_digital_e_t partner_joy_mode_switch_button = DIGITAL_RIGHT;
+
+
+extern controller_digital_e_t partner_both_lifts_down_button;
+extern controller_digital_e_t partner_trans_to_intk_button;
+extern controller_digital_e_t partner_hitch_button;
+extern controller_digital_e_t timer_btn;
+extern controller_digital_e_t reverse_drive_button;
+extern controller_digital_e_t claw_toggle_button;
+extern controller_digital_e_t hitch_button;
+extern controller_digital_e_t speed_limit_button;
+extern controller_digital_e_t intake_button;
+extern controller_digital_e_t intake_reverse_button;
+extern controller_digital_e_t ok_button;
+extern controller_digital_e_t auton_select;
+extern controller_digital_e_t joy_mode_switch_button;
+extern controller_digital_e_t shift_button;
+
+extern bool speed_limit_activated;
 
 
 #define num_controller 2

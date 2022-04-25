@@ -94,6 +94,16 @@ public:
   // bool get_lift_button(int side = 0);
 
   void reset();
+
+  /**
+   * @brief For after grabbing a goal in auton
+   * 
+   * @param direction
+   * -1: left
+   * 0: random direction
+   * 1: right
+   */
+  void random_turn(int direction = 0);
 };
 
 extern Drivebase drivebase;
@@ -104,11 +114,10 @@ bool get_lift();
 
 void handle_lift_buttons();
 void handle_claw_buttons();
+void handle_intake_buttons();
 
 void f_lift_increment_index();
-void b_lift_increment_index();
 void f_lift_decrement_index();
-void b_lift_decrement_index();
 
 extern Timer up_press;
 extern Timer down_press;

@@ -21,6 +21,7 @@ class Piston : public ADIDigitalOut{
     void set_state(bool state);
     bool get_state() const;
     bool toggle_state();
+    //open and close that just calls set_state with the right param
 
     int get_state_time() const;
     std::string get_name() const;

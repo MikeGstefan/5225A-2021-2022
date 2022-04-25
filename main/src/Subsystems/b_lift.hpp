@@ -2,30 +2,43 @@
 #include "../Libraries/subsystem.hpp"
 #include "../Libraries/pid.hpp"
 
-#define NUM_OF_B_LIFT_POSITIONS 4 // for driver array
+#define B_LIFT_AT_BOTTOM (b_lift_pot.get_value() < b_lift.driver_positions[0] + b_lift.end_error) //please make this a function
 
-#define NUM_OF_B_LIFT_STATES 9
+#define NUM_OF_B_LIFT_STATES 14
 #define B_LIFT_MAX_VELOCITY 100
+
+// state of the transmission piston for the lift and intake
+#define TRANS_LIFT_STATE 1
+#define TRANS_INTAKE_STATE 0
 
 enum class b_lift_states{
   managed, // being managed externally (NOT DOING ANYTHING)
   bottom, // at lowest position
+  top, // at highest position
   idle,  // not doing anything
   move_to_target,  // moving to target position
-  top, // at highest position
-  between_positions,  // not moving, but in between positions in the array
+  park_position,
   manual,  // controlled by joystick
-  shifting_to_lift_up, // lift/intake transmission switching to lift mode, moving up
-  shifting_to_lift_down // lift/intake transmission switching to lift mode, moving down
+  intake_off, // intake isn't running
+  intake_on,  // intake is running forwards
+  intk_jam,
+  intake_reversed, // intake is running in reverse
+  shifting_up, // lift/intake transmission shifting, moving up
+  shifting_down, // lift/intake transmission shifting, moving down
+  reshift // if the intake failed to transmit, shifts to lift and enters this state, then goes back to intake-on
 };
 
 class B_Lift: public Motorized_subsystem<b_lift_states, NUM_OF_B_LIFT_STATES, B_LIFT_MAX_VELOCITY> {
     Timer up_press{"Up_press"}, down_press{"Down_press"};
-    b_lift_states after_switch_state; // the state the lift will go to after transmission switches to lift
-    int bad_count = 0; // cycle check for safeties
-    PID pid = PID(5.0,0.0,0.0,0.0);
-    int lift_power; // for manual control
+    Timer intake_safe{"intake_safe", nullptr, false};
+    int not_moving_count = 0;
 
+    int bad_count = 0; // cycle check for safeties
+    PID pid = PID(3.0,0.0,0.0,0.0);
+    int lift_power; // for manual control
+    int detection_end_error = 40; // the range the lift has to be within of a position to be considered at that position 
+    int intk_jam_count = 0;
+    int jam_time =0;
     // height conversion constants
     double offset_a = 365.0, offset_h = 9.75;
     double arm_len = 8.0;
@@ -36,8 +49,10 @@ class B_Lift: public Motorized_subsystem<b_lift_states, NUM_OF_B_LIFT_STATES, B_
     std::atomic<int32_t> speed{127}; // max pwm applied to the lifts during a move to target
 
   public:
-    std::vector<int> driver_positions = {1035, 1825, 1970, 2750};
-    std::vector<int> prog_positions = {1035, 1825, 1970, 2750};
+    b_lift_states after_shift_state; // the state the subsystem will go to after transmission shifts
+    std::vector<int> driver_positions = {1045, 1720, 1825, 1970, 2800};
+    std::vector<int> prog_positions = {1045, 1720, 1825, 1970, 2800};
+    const int park_position = 1650 ;
 
     B_Lift(Motorized_subsystem<b_lift_states, NUM_OF_B_LIFT_STATES, B_LIFT_MAX_VELOCITY> motorized_subsystem);  // constructor
     
@@ -46,12 +61,20 @@ class B_Lift: public Motorized_subsystem<b_lift_states, NUM_OF_B_LIFT_STATES, B_
     // THIS IS AN OVERLOAD for the existing set state function, accepts an index for the lift
     void set_state(const b_lift_states next_state, const uint8_t index, const int32_t speed = 127);  // requests a state change and logs it
     
+    int find_index(); // returns current driver index depending on lift positions, returns -1 if not found
+    void handle_shift(); // checks if lift/intake transmission is in the wrong state, then shifts if necessary
+    void shift(bool piston_state); // sets tranmission piston, jiggles up then down, then goes to target state
+
+    // for driver control
+    void increment_index();
+    void decrement_index();
+
     // getters because index is private
     uint8_t get_index() const{
       return index.load();
     }
     void elastic_util(int high); // up time should be about 1100mms (ignore this time, it was on the old lift), down time should be slightly slower than that
-    void move_absolute(double position, double velocity = B_LIFT_MAX_VELOCITY, bool wait_for_comp = true, double end_error = 20);
+    void move_to_top();
 };
 
 extern B_Lift b_lift;
@@ -66,6 +89,7 @@ enum class b_claw_states{
   about_to_search, // claw is open and will search in 2 seconds
   searching,  // claw is open and is waiting to detect mogo
   tilted, // holding mogo tilted
+  // going_to_flat, // waiting 300 ms to flat
   flat, // holding mogo flat
 };
 

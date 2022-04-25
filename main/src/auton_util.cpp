@@ -5,8 +5,9 @@
 #include "Subsystems/f_lift.hpp"
 #include "tracking.hpp"
 #include "drive.hpp"
+#include "Libraries/logging.hpp"
 
-static const std::string start_pos_file_name ="/usd/start_position.txt";
+static const std::string start_pos_file_name = "/usd/start_position.txt";
 
 Reset_dist reset_dist_r(&r_dist, 7.5);
 Reset_dist reset_dist_l(&l_dist, 7.5);
@@ -37,17 +38,21 @@ void save_positions(){
   master.print(0, 0, "Move to new start");
   printf2("\nMove the robot to its new position.");
 
-  //move the robot
+  // move the robot
 
   if(GUI::prompt("Press to save position", "Press to save the current position to a file.")){
-    tracking_imp.print("Saving %.2f to file", Position{tracking.x_coord, tracking.y_coord, tracking.get_angle_in_deg()});
+    Position pos = {tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.get_angle_in_deg())};
+    tracking_imp.print("Saving %.2f to file", pos);
+    master.clear();
+    master.print(0, 0, "Saving");
+    master.print(1, 0, "(%.2f, %.2f, %.2f)", pos.x, pos.y, pos.angle);
     
     std::ofstream file;
     Data::log_t.data_update();
     file.open(start_pos_file_name, std::fstream::out | std::fstream::trunc);
-    file << tracking.x_coord << std::endl;
-    file << tracking.y_coord << std::endl;
-    file << rad_to_deg(tracking.global_angle) << std::endl;
+    file << pos.x << std::endl;
+    file << pos.y << std::endl;
+    file << pos.angle << std::endl;
     file.close();
     Data::log_t.done_update();
   }
@@ -63,8 +68,11 @@ void load_positions(){
   file.close();
   Data::log_t.done_update();
 
-  tracking_imp.print("Loading %.2f from file", pos);
+  tracking_imp.print(term_colours::BLUE, "Loading %.2f from file", pos);
   tracking.reset(pos);
+  master.clear();
+  master.print(0, 0, "Saving");
+  master.print(1, 0, "%.1f, %.1f, %.1f", tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle));
 }
 
 //remove if unneeded
@@ -127,6 +135,7 @@ void flatten_against_wall(bool front, int cycles){
 // }
 
 void b_detect_goal(){ 
+  tilt_lock.set_state(1);
   wait_until(!tracking.move_complete);
   while(b_dist.get() > 40 && !tracking.move_complete){ 
     misc.print("looking for goal at back: %d", b_dist.get());
@@ -136,7 +145,11 @@ void b_detect_goal(){
   b_claw.set_state(1);
 }
 
-
+void tilt_goal(){
+  tilt_lock.set_state(1);
+  delay(300);
+  b_claw.set_state(0);
+}
 
 void f_detect_goal(bool safety){ 
   if(safety) wait_until(!tracking.move_complete);
@@ -151,15 +164,20 @@ void f_detect_goal(bool safety){
 
 void detect_interference(){ 
   int time = millis();
+  int count = 0;
   wait_until(move_t.get_task_ptr()->get_state() == 4){
     //numbers need funnyimh
-    if(millis()-time > 1500 && fabs(tracking.g_velocity.y) < 2.0){
-      drivebase.set_state(1);
-      master.print(1,1,"PULLING");
-      misc.print("TUG DETECTED");
-      break;
+    // safety.print("%d, %f, %f\n", millis(), fabs(tracking.l_velo), fabs(tracking.r_velo));
+    if(millis() - time > 700){
+      if((fabs(tracking.l_velo) < 4.0 || fabs(tracking.r_velo) < 4.0)) count++;
+      else count = 0;
     }
-    else if(millis()-time > 1500 && fabs(tracking.g_velocity.y) > 3.0){
+
+    if(count > 10){
+      safety.print(term_colours::ERROR, "Tug of War");
+      safety.print(term_colours::RED, "Switching to Low Gear + Lowering lift");
+      f_lift.set_state(f_lift_states::move_to_target, 0);
+      drivebase.set_state(1);
       break;
     }
   }
@@ -190,8 +208,9 @@ void subsystem_handle_t(void*params){
   _Task* ptr = _Task::get_obj(params);
 
   while(true){ 
-    b_lift.handle(false);
-		f_lift.handle(false);
+    b_lift.handle(true);
+		f_lift.handle(true);
+    // intake.handle();
     // b_claw_obj.handle();
 		// f_claw_obj.handle();
     if(ptr->notify_handle())return;

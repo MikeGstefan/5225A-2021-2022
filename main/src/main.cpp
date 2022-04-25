@@ -11,6 +11,8 @@
 Task *updt = nullptr; //What's this for
 const GUI* GUI::current_gui = &main_obj;
 
+bool robot_setup = false;
+
 /**
  * Runs initialization code. This occurs as soon as the program is started.
  *
@@ -22,23 +24,29 @@ bool auton_run = false; // has auton run
 
 void initialize() {
 	// gyro.calibrate();
+	// front_l.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
+	// front_r.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
+	// back_l.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
+	// back_r.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
+
+  load_positions();
+  load_auton();
 
 	drivebase.download_curve_data();
-
 	Data::init();
 	_Controller::init();
 	GUI::init();
-
 	delay(500);
+	// tracking.x_coord = 25.0, tracking.y_coord = 11.75, tracking.global_angle = -90.0_deg;
 
-	b_lift.motor.set_brake_mode(E_MOTOR_BRAKE_HOLD);
-	f_lift.motor.set_brake_mode(E_MOTOR_BRAKE_HOLD);
-
+  b_lift.motor.set_brake_mode(E_MOTOR_BRAKE_HOLD);
+  f_lift.motor.set_brake_mode(E_MOTOR_BRAKE_HOLD);
+	
 	// tracking.x_coord = 104.0, tracking.y_coord = 12.0, tracking.global_angle = -30.0_deg;
 	// tracking.x_coord = 24.5, tracking.y_coord = 15.0, tracking.global_angle = 9.0_deg;
-	tracking.x_coord = 0.0, tracking.y_coord = 0.0, tracking.global_angle = 0.0_deg;
+	// tracking.x_coord = 107.0, tracking.y_coord = 15.0, tracking.global_angle = 0.0_deg;
 	update_t.start();
-  // lift_handle_t.start();
+  lift_handle_t.start();
 
 	// gyro.finish_calibrating(); //Finishes calibrating gyro before program starts
 }
@@ -73,10 +81,10 @@ void competition_initialize() {}
  * from where it left off.
  */
 void autonomous() {
-  load_positions();
-  load_auton();
   run_auton();
 }
 
+bool timer_state = 0; 
+int timer = millis();
 void opcontrol() {
 }

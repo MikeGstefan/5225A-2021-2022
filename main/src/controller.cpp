@@ -7,8 +7,7 @@ _Task _Controller::controller_task = nullptr;
 
 int constructed = 0;
 
-_Controller::_Controller(controller_id_e_t id): Controller{id}
-{
+_Controller::_Controller(controller_id_e_t id): Controller{id}{
   objs[constructed] = this;
   constructed++;
   this->controller_num = constructed;
@@ -130,8 +129,6 @@ controller_digital_e_t _Controller::wait_for_press(std::vector<controller_digita
   return button;
 }
 
-
-//create wait for press for multiple buttons and return the one that was pressed
 void _Controller::wait_for_press(controller_digital_e_t button, int timeout){
   if(competition::is_autonomous()){
     ERROR.print("Cannot get controller press in autonomous!");
