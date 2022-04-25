@@ -128,6 +128,7 @@ void B_Lift::handle(bool driver_array){
 
     case b_lift_states::intake_on:
       // printf("vel:%lf\n", motor.get_actual_velocity());
+      printf("sensor: %d, count:%d\n", intk_t.get_value(), intk_jam_count);
       if(fabs(motor.get_actual_velocity()) < 5.0) not_moving_count++;
       else not_moving_count = 0;
       if(intake_safe.get_time() < 300 && not_moving_count > 20){
@@ -140,13 +141,12 @@ void B_Lift::handle(bool driver_array){
       else{
         if(!intk_t.get_value())intk_jam_count++;
         else intk_jam_count = 0;
-        if(intk_jam_count == 4){
+        if(intk_jam_count >= 4){
           intake_safe.reset(false);
           Subsystem::set_state(b_lift_states::intk_jam);
           
         }
       }
-      printf("sensor: %d\n", intk_t.get_value());
       break;
 
     case b_lift_states::intk_jam:
@@ -218,6 +218,7 @@ void B_Lift::handle_state_change(){
       motor.move(-127);
       break;
     case b_lift_states::intk_jam:
+      intk_jam_count = 0; // resets jam counter
       jam_time= millis();
       motor.move(127);
       printf("AHHHHHHHHHHHHHH here \n\n\n\n");
