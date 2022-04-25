@@ -84,7 +84,7 @@ void competition_initialize() {}
  * from where it left off.
  */
 void autonomous() {
-  run_auton();
+//   run_auton();
 }
 
 
@@ -117,11 +117,12 @@ void opcontrol() {
 	lift_handle_t.start();
   hitch.set_state(1);
   delay(500);
-	b_lift.set_state(b_lift_states::move_to_target,0);
+	// b_lift.set_state(b_lift_states::move_to_target,0);
 
 
 	int state = 0;
 	while(!master.get_digital(DIGITAL_A)){
+		printf("sensor %d\n", b_dist.get());
 		if(master.get_digital_new_press(DIGITAL_B)){
 			state = !state;
 			f_claw_o.set_state(state);
@@ -130,13 +131,13 @@ void opcontrol() {
 		
 		// gui_handle(); //
 		// printf("%d || opcontrol ENCODER L: %d, R: %d, B:%d \n", millis(), LeftEncoder.get_value(), RightEncoder.get_value(), BackEncoder.get_value());
-		delay(10);
+		delay(33);
 	}
 	int timer = millis();
-	skills();
+	// skills();
 	skills2();
-	skills3();
-	skills4();
+	// skills3();
+	// skills4();
 	master.print(1,1,"total %d", millis() - timer);
 	// skills3();
 	// // skills();
@@ -183,11 +184,11 @@ void opcontrol() {
 
 
 		
-		if(print_timer.get_time() > 100){
-			printf("b_lift_pot_val:%d, f_lift_pot_val:%d\n", b_lift_pot.get_value(), f_lift_pot.get_value());
-			// printf("b_dist:%d\n", b_dist.get());
-			print_timer.reset();
-		}
+		// if(print_timer.get_time() > 100){
+		// 	printf("b_lift_pot_val:%d, f_lift_pot_val:%d\n", b_lift_pot.get_value(), f_lift_pot.get_value());
+		// 	// printf("b_dist:%d\n", b_dist.get());
+		// 	print_timer.reset();
+		// }
 
 		if(partner.is_rising(timer_btn)){ 
 			timer_state = !timer_state;
