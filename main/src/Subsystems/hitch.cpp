@@ -30,7 +30,7 @@ void Hitch::handle(){
       break;
 
     case hitch_states::searching:
-      if(hitch_dist.get() < 25)  set_state(hitch_states::grabbed);  // grabs goal if mogo is detected
+      if(hitch_dist.get() < 30)  set_state(hitch_states::grabbed);  // grabs goal if mogo is detected
       break;
 
     case hitch_states::grabbed:

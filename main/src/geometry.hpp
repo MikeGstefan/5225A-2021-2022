@@ -20,6 +20,7 @@ struct Position{   // stores members variables for a coordinate: x, y and angle 
   Position(); // default constructor
   Position(Point point);
   Position(Point point, double angle);
+  Position(double x, double y);
   Position(double x, double y, double angle);
 };
 

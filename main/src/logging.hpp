@@ -51,6 +51,7 @@ extern Data graph;
 extern Data state_log;
 extern Data graph;
 extern Data skills_d;
+extern Data safety;
 extern Data ERROR;
 
 class Data{

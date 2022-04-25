@@ -7,7 +7,6 @@
 #include "controller.hpp"
 #include "geometry.hpp"
 #include "logging.hpp"
-#include "pros/rtos.hpp"
 #include "util.hpp"
 #include <map>
 
@@ -137,7 +136,7 @@ void skills2(){
 }
 
 void skills3(){ 
-   int time = millis();
+  int time = millis();
   // f_claw(0);
   // b_claw.set_state(0);
   // tilt_lock.set_state(0);
@@ -323,34 +322,133 @@ void skills_park(){
   f_lift.set_state(f_lift_states::move_to_target, 0);
 }
 
-void rush_high(){
-  move_start(move_types::tank_point, tank_point_params({107.0, 57.0, 0.0}));
-  delay(100);
-  move_start(move_types::turn_point, turn_point_params({107.0, 71.0}));
-  delay(100);
-  move_start(move_types::tank_point, tank_point_params({107.0, 71.0, 0.0}), false);
-  f_lift.reset();
-  f_lift.move(-10);
-  f_detect_goal();
+void high_short(){
 
+  //!turn arc
+  // move_start(move_types::tank_rush, tank_rush_params({107.0, 72.0, 0.0}, false, 127.0, 1.0,false), false);
+  // while(tracking.y_coord < 30.0 )delay(10);
+  // move_start(move_types::tank_point, tank_point_params({120.0, 78.0,0.0}), false);
+  // f_detect_goal();
   // move_wait_for_complete();
-  // f_lift.move_absolute(150,100);
-  // intk.move(10);
-  move_stop();
+
+
+  //? goal turn and line
+  // move_start(move_types::tank_rush, tank_rush_params({107.0, 72.0, 0.0}, false, 127.0, 1.0,false));
+  // move_start(move_types::turn_angle, turn_angle_params(-90.0, true, true, 15.0));
+  // delay(2000);
+  // move_start(move_types::turn_angle, turn_angle_params(15.0, true, true, 15.0));
+  // high_wp_goal();
+  // high_line();
+
+
+  //? goal and plus
+  b_claw_obj.set_state(b_claw_states::tilted);
+  f_claw_obj.set_state(f_claw_states::grabbed);
+  hitch_obj.set_state(hitch_states::grabbed);
+  move_start(move_types::tank_rush, tank_rush_params({107.0, 72.0, 0.0}, false, 127.0, 1.0,false));
+  move_start(move_types::turn_angle, turn_angle_params(-90.0, true, true, 15.0, 0.0,10.0,20.0,127.0,1000));
+  delay(2000);
+  move_start(move_types::turn_angle, turn_angle_params(15.0, true, true, 15.0, 0.0,10.0,20.0,127.0,1000));
+  high_wp_goal();
+  high_line();
+  // move_start(move_types::tank_point, tank_point_params({107.0, 35.0,0.0}), false);
+  move_start(move_types::turn_angle, turn_angle_params(-90.0));
+  // b_lift.Subsystem::set_state(b_lift_states::intake_on);
+  move_start(move_types::tank_point, tank_point_params({68.0, 48.0,0.0}, false,70));
+
+  
+
+  //? back straight up
+  // move_start(move_types::tank_rush, tank_rush_params({107.0, 72.0, 0.0}, false, 127.0, 1.0,false));
+  // delay(100);
+  // move_start(move_types::tank_point, tank_point_params({107.0, 35.0,0.0}), false);
+  // delay(500);
+  // f_lift.set_state(f_lift_states::move_to_target, 1);
+  // move_wait_for_complete();
+  // move_start(move_types::turn_angle, turn_angle_params(-90.0));
+  // delay(50);
+  // move_start(move_types::turn_angle, turn_angle_params(-90.0, true, true, 5.0,0.0,10.0,20.0,127.0,0,min_move_power_a, 3.0));
+  // move_start(move_types::tank_point, tank_point_params({130.0, 35.0,0.0}), false);
+  // b_detect_goal();
+  // move_stop();
+  // drivebase.brake();
+  // move_start(move_types::tank_point, tank_point_params({119.0, 35.0,0.0}));
+  // b_lift.Subsystem::set_state(b_lift_states::intake_on);
+  // move_start(move_types::turn_angle, turn_angle_params(0.0));
+  // move_start(move_types::tank_point, tank_point_params({117.0, 70.0,0.0}, false,70));
+
 }
 
-//name, target, common point, task at target, angle to go to target
-//current is still necessary to look for collisions
-std::vector<std::string> selected_positions;
-std::map<std::string, std::pair<Point, std::string>> targets = {
-  {"Right", {{110.0, 14.0}, "None"}},
-  {"Left", {{30.0, 12.0}, "None"}},
-  {"Tall", {{73.0, 71.0}, "Front"}},
-  {"High", {{107.0, 71.0}, "Front"}},
-  {"Low", {{34.5, 72.0}, "Front"}},
-  {"AWP", {{130.0, 36.0}, "Back"}},
-  {"Ramp", {{128.0, 36.0}, "Back"}},
-}; //see if we ever get a hitch
+void high_wp_goal(){
+  move_start(move_types::tank_point, tank_point_params({107.0, 35.0,0.0}), false);
+  Task([](){detect_interference();});
+  delay(500);
+  f_lift.set_state(f_lift_states::move_to_target, 1);
+  move_wait_for_complete();
+  move_start(move_types::turn_angle, turn_angle_params(-90.0));
+  delay(50);
+  move_start(move_types::turn_angle, turn_angle_params(-90.0, true, true, 5.0,0.0,10.0,20.0,127.0,0,45, 3.0));
+  move_start(move_types::tank_point, tank_point_params({130.0, 35.0,0.0}), false);
+  b_detect_goal();
+  Task([](){
+    delay(150);
+    b_lift.Subsystem::set_state(b_lift_states::intake_on);
+  });
+  move_stop();
+  drivebase.brake();
+  
+}
+
+void high_line(){
+  move_start(move_types::tank_point, tank_point_params({119.0, 35.0,0.0}, false, 127.0, 1.0, true, 6.4, 70.0,0.0, 0,{4.0, 0.5}));
+  
+  move_start(move_types::turn_angle, turn_angle_params(0.0));
+  move_start(move_types::tank_point, tank_point_params({117.0, 70.0,0.0}, false,70));
+}
+
+void high_tall(){ 
+  b_claw_obj.set_state(b_claw_states::tilted);
+  f_claw_obj.set_state(f_claw_states::grabbed);
+  hitch_obj.set_state(hitch_states::grabbed);
+  move_start(move_types::tank_rush, tank_rush_params({68.5, 70.5, -45.0}, false, 127.0, 1.0,false, 180.0));
+  move_start(move_types::turn_angle, turn_angle_params(20.0, true, true, 15.0, 0.0,10.0,20.0,127.0,1000));
+  delay(2000);
+  // move_start(move_types::turn_angle, turn_angle_params(15.0, true, true, 15.0));
+  high_wp_goal();
+  high_line();
+  move_start(move_types::tank_point, tank_point_params({107.0, 35.0,0.0}));
+  // move_start(move_types::tank_point, tank_point_params({107.0, 35.0,0.0}), false);
+  move_start(move_types::turn_angle, turn_angle_params(-90.0));
+  // b_lift.Subsystem::set_state(b_lift_states::intake_on);
+  move_start(move_types::tank_point, tank_point_params({68.0, 48.0,0.0}, false,70));
+  // b_claw_obj.set_state(b_claw_states::tilted);
+  // f_claw_obj.set_state(f_claw_states::grabbed);
+  // hitch_obj.set_state(hitch_states::grabbed);
+}
+
+
+//target, task at target
+std::vector<std::pair<std::string, std::string>> selected_positions;
+
+std::map<const std::string, const Position> start_positions {
+  {"Right", {110.0, 15.0}},
+  {"Left", {30.0, 15.0}},
+};
+
+std::map<const std::string, const Position> goal_positions {
+  {"High", {102.0, 72.0}},
+  {"Tall", {72.0, 72.0}},
+  {"Low", {34.5, 72.0}},
+  {"AWP", {130.0, 36.0}},
+  {"Ramp", {128.0, 36.0}},
+};
+
+std::map<const std::string, const Position> end_positions {
+  {"Right", {110.0, 15.0}},
+  {"Left", {30.0, 15.0}},
+  {"Far Ramp", {110.0, 90.0}},
+  {"Far AWP", {15.0, 110.0}},
+};
 
 void load_auton(){
   std::string target, task;
@@ -362,7 +460,7 @@ void load_auton(){
   file.open(auton_file_name, fstream::in);
   while(file >> target >> task){
     printf2(term_colours::BLUE, "%s: %s", target, task);
-    selected_positions.push_back(target);
+    selected_positions.push_back({target, task});
   }
   newline();
   file.close();
@@ -374,10 +472,11 @@ void save_auton(){
   Data::log_t.data_update();
   printf2("\n\nSaving Autons:");
   file.open(auton_file_name, fstream::out | fstream::trunc);
-  for(std::vector<std::string>::const_iterator it = selected_positions.begin(); it != selected_positions.end(); it++){
-    file << *it << std::endl;
-    file << std::get<std::string>(targets[*it]) << std::endl;
-    printf2("%s: %s", *it, std::get<std::string>(targets[*it]));
+  for(std::vector<std::pair<std::string, std::string>>::const_iterator it = selected_positions.begin(); it != selected_positions.end(); it++){
+    file << it->first << std::endl;
+    file << it->second << std::endl;
+    printf2("%s: %s", it->first, it->second);
+    //Technically should be able to print as printf2("%s", *it);
   }
   newline();
   file.close();
@@ -386,123 +485,230 @@ void save_auton(){
   master.print(0, 0, "Saved Autons");
 }
 
-bool run_defined_auton(std::string start, std::string target){
-//handles movement and goal pickup
-  if(start == "" && target == ""){
-
+bool goal_already_selected(const std::string& goal){
+  for (std::vector<std::pair<std::string, std::string>>::const_iterator it = selected_positions.begin(); it != selected_positions.end(); it++){
+    if(it->first == goal) return true;
   }
-  else if(start == "" && target == ""){
 
-  }
-  else return false; //Will be false if none of the ifs matched
-
-  return true;
+  return false;
 }
 
 bool select_auton_task(std::string target){
-  std::string choice = std::get<std::string>(targets[target]);
+  std::string choice = "Front";
   bool selected = false;
 
-  wait_until(selected){
+  while(true){
     master.clear_line(1);
     master.print(1, 0, choice);
 
     switch(master.wait_for_press({DIGITAL_A, DIGITAL_RIGHT, DIGITAL_LEFT, DIGITAL_B})){ //see how to use ok_button
-      case DIGITAL_B: return false; break;
       case DIGITAL_A:
-        selected = true;
+        selected_positions.push_back({target, choice});
+        return true;
         break;
-
       case DIGITAL_RIGHT:
         if(choice == "Front") choice = "Back";
-        else if(choice == "Back") choice = "None";
-        else if(choice == "None") choice = "Front";
+        else if(choice == "Back") choice = "Hitch";
+        else if(choice == "Hitch") choice = "Front";
         break;
       
       case DIGITAL_LEFT:
-        if(choice == "Front") choice = "None";
+        if(choice == "Front") choice = "Hitch";
+        else if(choice == "Hitch") choice = "Back";
         else if(choice == "Back") choice = "Front";
-        else if(choice == "None") choice = "Back";
         break;
-
+      case DIGITAL_B:
+        return false;
+        break;
       default: break;
     }
   }
-
-  selected_positions.push_back(target);
-  std::get<std::string>(targets[target]) = choice;
-
-  return true;
 }
 
 void select_auton(){
-  bool all_selected = false;
-  std::map<std::string, std::pair<Point, std::string>>::const_iterator selection = targets.find("Right");
   selected_positions.clear();
+  master.clear();
 
-  wait_until(all_selected){
-    master.clear();
-    master.print(0, 0, selection->first);
+  std::map<const std::string, const Position>::const_iterator start_selection = start_positions.find("Right");
+  std::map<const std::string, const Position>::const_iterator goal_selection = goal_positions.find("High");
+  std::map<const std::string, const Position>::const_iterator end_selection = end_positions.find("Right");
 
-    const std::map<std::string, std::pair<Point, std::string>>::const_iterator og = selection;
+  
+  bool done_start_selection = false;
+  bool done_goal_selection = false;
+  bool done_end_selection = false;
 
-    switch(master.wait_for_press({DIGITAL_X, DIGITAL_A, DIGITAL_RIGHT, DIGITAL_LEFT})){//see how to use ok_button here instead of A
-      case DIGITAL_X:
-        master.clear();
-        save_auton();
-        return;
-        break;
+  master.clear_line(0);
+  master.print(0, 0, "Start Pos");
+  master.clear_line(1);
+  master.print(1, 0, start_selection->first);
+  while(!done_start_selection){
+    switch(master.wait_for_press({DIGITAL_A, DIGITAL_RIGHT, DIGITAL_LEFT})){
       case DIGITAL_A:
-        if(!select_auton_task(selection->first)) break;
+        selected_positions.push_back({start_selection->first, "None"});
+        done_start_selection = true;
+        break;
 
       case DIGITAL_RIGHT:
-        do{ //Goes to next available choice
-          if(selection != std::prev(targets.end())) selection++;
-          else selection = targets.begin();
-          if(selection == og) all_selected = true;
-        }
-        while(!all_selected && contains(selected_positions, selection->first));
+        if(start_selection != std::prev(start_positions.end())) start_selection++;
+        else start_selection = start_positions.begin();
         break;
       
       case DIGITAL_LEFT:
-        do{ //Goes to previous available choice
-          if(selection != targets.begin()) selection--;
-          else selection = std::prev(targets.end());
-          if(selection == og) all_selected = true;
-        }
-        while(!all_selected && contains(selected_positions, selection->first));
+        if(start_selection != start_positions.begin()) start_selection--;
+        else start_selection = std::prev(start_positions.end());
         break;
 
       default: break;
     }
-
   }
+
+  int goal_count = 0;
+  master.clear_line(0);
+  master.print(0, 0, "Goal %d", goal_count+1);
+
+  while(!done_goal_selection && goal_count < goal_positions.size()){
+    master.clear_line(1);
+    master.print(1, 0, goal_selection->first);
+
+    switch(master.wait_for_press({DIGITAL_X, DIGITAL_A, DIGITAL_RIGHT, DIGITAL_LEFT})){
+      case DIGITAL_X:
+        done_goal_selection = true;
+        break;
+
+      case DIGITAL_A:
+        if(!select_auton_task(goal_selection->first)) break;
+        goal_count++;
+        //fallthrough intentional if true
+
+      case DIGITAL_RIGHT:
+        do{
+          if(goal_selection != std::prev(goal_positions.end())) goal_selection++;
+          else goal_selection = goal_positions.begin();
+        }
+        while(!goal_already_selected(goal_selection->first));
+        break;
+      
+      case DIGITAL_LEFT:
+        do{
+          if(goal_selection != goal_positions.begin()) goal_selection--;
+          else goal_selection = std::prev(goal_positions.end());
+        }
+        while(!goal_already_selected(goal_selection->first));
+        break;
+
+      default: break;
+    }
+  }
+
+  master.clear_line(0);
+  master.print(0, 0, "End Pos");
+  master.clear_line(1);
+  master.print(1, 0, end_selection->first);
+
+  while(!done_end_selection){
+    switch(master.wait_for_press({DIGITAL_A, DIGITAL_RIGHT, DIGITAL_LEFT})){
+      case DIGITAL_A:
+        selected_positions.push_back({end_selection->first, "None"});
+        done_end_selection = true;
+        break;
+
+      case DIGITAL_RIGHT:
+        if(end_selection != std::prev(end_positions.end())) end_selection++;
+        else end_selection = end_positions.begin();
+        break;
+      
+      case DIGITAL_LEFT:
+        if(end_selection != end_positions.begin()) end_selection--;
+        else end_selection = std::prev(end_positions.end());
+        break;
+
+      default: break;
+    }
+  }
+
+}
+
+bool run_defined_auton(std::string start, std::string target){
+  // if(start == "Right" && target == "High") high_short();
+  // else if(start == "Right" && target == "Tall") high_tall();
+  // else if(start == "High" && target == "AWP") high_wp_goal();
+  // else return false; //Will be false if none of the ifs matched
+  // return true; // Jumps here after a movement was run
+
+
+  return false;
 }
 
 void run_auton(){
-  std::pair<Point, std::string> current, target;
+  std::string cur_task, target_task;
+  Position cur_pos, target_pos;
   for(int i = 0; i+1 < selected_positions.size(); i++){
-    target = targets[selected_positions[i+1]];
+    cur_task = selected_positions[i].second;
+    target_task = selected_positions[i+1].second;
+    
+    cur_pos = goal_positions[selected_positions[i].first];
+    target_pos = goal_positions[selected_positions[i+1].first];
 
-    screen_flash::start(term_colours::BLUE, "Starting move to %s goal", selected_positions[i+1]);
+    screen_flash::start(term_colours::BLUE, "Starting move to %s goal", selected_positions[i+1].first);
 
-    if(!run_defined_auton(selected_positions[i], selected_positions[i+1])){
-      if(target.second == "None"){
-        move_start(move_types::tank_rush, tank_rush_params({target.first, /*figure out angle based on front/back*/}, false));
+    if(run_defined_auton(selected_positions[i].first, selected_positions[i+1].first)){
+      misc.print("Ran Predefined Auton Route from %s to %s", selected_positions[i].first, selected_positions[i+1].first);
+    }
+    else{
+      if(target_task == "None"){
+        b_lift.Subsystem::set_state(b_lift_states::intake_on);
+        move_start(move_types::tank_point, tank_point_params(target_pos, false, 127.0, 1.0, true, 6.4, 70.0, 0.0, 0, {3, 3}));
+
+        b_lift.Subsystem::set_state(b_lift_states::intake_off);
       }
-      else if(target.second == "Front"){
+
+      else if(target_task == "Front"){
         f_lift.set_state(f_lift_states::move_to_target, 0);
-        move_start(move_types::tank_rush, tank_rush_params({target.first, /*figure out angle based on front/back*/}, false));
-        f_detect_goal();
+        wait_until(F_LIFT_AT_BOTTOM);
+        b_lift.Subsystem::set_state(b_lift_states::intake_on);
+
+        Task([](){detect_interference();});
+        move_start(move_types::tank_rush, tank_rush_params(target_pos, false, 127.0, 1.0, false));
+        drivebase.random_turn();
+
+        b_lift.Subsystem::set_state(b_lift_states::intake_off);
         f_lift.set_state(f_lift_states::move_to_target, 1);
       }
-      else if(target.second == "Back"){
+
+      else if(target_task == "Back"){
         b_lift.set_state(b_lift_states::move_to_target, 0);
-        move_start(move_types::tank_rush, tank_rush_params({target.first, /*figure out angle based on front/back*/}, true));
-        b_detect_goal();
+        wait_until(B_LIFT_AT_BOTTOM);
+
+        Task([](){detect_interference();});
+        move_start(move_types::tank_point, tank_point_params(target_pos, false, 127.0, 1.0, true, 6.4, 70.0, 0.0, 0, {5, 5}));
+        move_start(move_types::turn_angle, turn_angle_params(angle_to_point(target_pos.x, target_pos.y)+180.0, true, true, 5.0, 0.0, 10.0, 20.0, 127.0, 0, 50, 3.0));
+        move_start(move_types::tank_point, tank_point_params(target_pos), false);
+        
+        b_claw_obj.set_state(b_claw_states::searching);
+        wait_until(tracking.move_complete || b_claw_obj.get_state() == b_claw_states::tilted);
+        drivebase.random_turn();
+
         b_lift.set_state(b_lift_states::move_to_target, 1);
       }
 
+      else if(target_task == "Hitch"){
+        b_lift.set_state(b_lift_states::move_to_target, 4);
+
+        Task([](){detect_interference();});
+        move_start(move_types::tank_point, tank_point_params(target_pos, false, 127.0, 1.0, true, 6.4, 70.0, 0.0, 0, {5, 5}));
+        move_start(move_types::turn_angle, turn_angle_params(angle_to_point(target_pos.x, target_pos.y)+180.0, true, true, 5.0, 0.0, 10.0, 20.0, 127.0, 0, 50, 3.0));
+        move_start(move_types::tank_point, tank_point_params(target_pos), false);
+        
+        hitch_obj.set_state(hitch_states::searching);
+        wait_until(tracking.move_complete || hitch_obj.get_state() == hitch_states::grabbed);
+        drivebase.random_turn();
+      }
+
+      else ERROR.print("Wrong target selected");
     }
+
+    delay(1000);
+
   }
 }

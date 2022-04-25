@@ -43,6 +43,6 @@ double PID::compute(double input, double target){
     
   output = proportional + integral + derivative + bias;
 
-  // motion_i.print(" P: %f, D:%f, In:%f, Out:%f Sens:%f", proportional, derivative, input, output, gyro.inertial.GYRO_AXIS());
+  // motion_i.print("P: %.3f, D:%.3f, In:%.3f, Out:%.3f", proportional, derivative, input, output);
   return output;
 }

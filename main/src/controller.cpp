@@ -11,12 +11,16 @@ controller_digital_e_t claw_toggle_button =  DIGITAL_L2;
 controller_digital_e_t hitch_button = DIGITAL_A;
 
 // intake buttons
+controller_digital_e_t speed_limit_button = DIGITAL_Y;
 controller_digital_e_t intake_button = DIGITAL_B;
 controller_digital_e_t intake_reverse_button = DIGITAL_DOWN;
 
+bool speed_limit_activated = false;
+
 // misc buttons
 controller_digital_e_t ok_button = DIGITAL_A;
-controller_digital_e_t joy_mode_switch_button = DIGITAL_Y;
+controller_digital_e_t auton_select = DIGITAL_UP;
+// controller_digital_e_t joy_mode_switch_button = DIGITAL_Y;
 controller_digital_e_t shift_button = DIGITAL_X;
 
 // partner buttons
@@ -33,7 +37,7 @@ controller_digital_e_t partner_both_lifts_down_button = DIGITAL_DOWN;
 
 // intake buttons
 controller_digital_e_t partner_intake_button = DIGITAL_B;
-controller_digital_e_t partner_intake_reverse_button = DIGITAL_Y;
+controller_digital_e_t partner_trans_to_intk_button = DIGITAL_Y;
 
 // claw buttons
 controller_digital_e_t partner_back_claw_toggle_button = DIGITAL_A;
@@ -43,6 +47,8 @@ controller_digital_e_t partner_claw_tilt_button = DIGITAL_X;
 controller_digital_e_t partner_hitch_button = DIGITAL_UP;
 
 controller_digital_e_t partner_joy_mode_switch_button = DIGITAL_RIGHT;
+controller_digital_e_t timer_btn = DIGITAL_RIGHT;
+// controller_digital_e_t timer_btn
 
 std::array<_Controller*, num_controller> _Controller::objs; //= {nullptr};
 _Task _Controller::controller_task = nullptr;
@@ -197,8 +203,6 @@ controller_digital_e_t _Controller::wait_for_press(std::vector<controller_digita
   return button;
 }
 
-
-//create wait for press for multiple buttons and return the one that was pressed
 void _Controller::wait_for_press(controller_digital_e_t button, int timeout){
   if(competition::is_autonomous()){
     ERROR.print("Cannot get controller press in autonomous!");

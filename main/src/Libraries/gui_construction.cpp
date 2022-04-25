@@ -301,7 +301,7 @@ void main_setup(){
             case 55:
               text->set_background(COLOUR(RED)); break;
             default:
-              text->set_background(COLOUR(BLACK)); break;
+              text->set_background(Colour(rand())); break;
           }
         }
       }
@@ -377,7 +377,6 @@ void main_setup(){
       if(!in_range(static_cast<int>(f_dist.get()), 20, 2000)) screen_flash::start("Distance Sensor: Front");
       if(!in_range(static_cast<int>(r_dist.get()), 20, 2000)) screen_flash::start("Distance Sensor: Right");
       if(!in_range(static_cast<int>(l_dist.get()), 20, 2000)) screen_flash::start("Distance Sensor: Left");
-      if(!in_range(static_cast<int>(r_goal_dist.get()), 20, 2000)) screen_flash::start("Distance Sensor: Right Goal");
       if(!in_range(static_cast<int>(hitch_dist.get()), 20, 2000)) screen_flash::start("Distance Sensor: Hitch");
       if(!in_range(static_cast<int>(r_reset_dist.get()), 20, 2000)) screen_flash::start("Distance Sensor: Right Reset");
       if(!in_range(static_cast<int>(l_reset_dist.get()), 20, 2000)) screen_flash::start("Distance Sensor: Left Reset");

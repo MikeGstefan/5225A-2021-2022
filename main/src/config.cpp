@@ -25,12 +25,13 @@ Piston lift_t(4, "Lift Trans", 1, 0);
 Piston b_claw(5, "B Claw", 0, 0);
 Piston tilt_lock(3, "Tilt Lock", 1, 0);
 Piston hitch({e_port, 7}, "Hitch", 0, 0);
-
 pros::ADIAnalogIn f_lift_pot(8), b_lift_pot(2);
+pros::ADIDigitalIn intk_t(1);
 pros::Distance b_dist(11), f_dist(6);
 pros::Distance r_reset_dist(13), l_reset_dist(14);
 pros::Distance r_dist(12), l_dist(18);
 pros::Distance hitch_dist(7);
+pros::Distance r_goal_dist(15);
 // pros::ADIDigitalIn intake_jam({{16, 7}});
 
 pros::Imu ramp_imu(17);

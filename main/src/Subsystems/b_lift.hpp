@@ -4,9 +4,9 @@
 #include "../pid.hpp"
 #include <atomic>
 
-#define B_LIFT_AT_BOTTOM (b_lift_pot.get_value() < b_lift.driver_positions[0] + b_lift.end_error)
+#define B_LIFT_AT_BOTTOM (b_lift_pot.get_value() < b_lift.driver_positions[0] + b_lift.end_error) //please make this a function
 
-#define NUM_OF_B_LIFT_STATES 11
+#define NUM_OF_B_LIFT_STATES 14
 #define B_LIFT_MAX_VELOCITY 100
 
 // state of the transmission piston for the lift and intake
@@ -19,22 +19,28 @@ enum class b_lift_states{
   top, // at highest position
   idle,  // not doing anything
   move_to_target,  // moving to target position
+  park_position,
   manual,  // controlled by joystick
   intake_off, // intake isn't running
   intake_on,  // intake is running forwards
+  intk_jam,
   intake_reversed, // intake is running in reverse
   shifting_up, // lift/intake transmission shifting, moving up
-  shifting_down // lift/intake transmission shifting, moving down
+  shifting_down, // lift/intake transmission shifting, moving down
+  reshift // if the intake failed to transmit, shifts to lift and enters this state, then goes back to intake-on
 };
 
 class B_Lift: public Motorized_subsystem<b_lift_states, NUM_OF_B_LIFT_STATES, B_LIFT_MAX_VELOCITY> {
     Timer up_press{"Up_press"}, down_press{"Down_press"};
-    b_lift_states after_shift_state; // the state the subsystem will go to after transmission shifts
+    Timer intake_safe{"intake_safe", nullptr, false};
+    int not_moving_count = 0;
+
     int bad_count = 0; // cycle check for safeties
     PID pid = PID(3.0,0.0,0.0,0.0);
     int lift_power; // for manual control
     int detection_end_error = 40; // the range the lift has to be within of a position to be considered at that position 
-
+    int intk_jam_count = 0;
+    int jam_time =0;
     // height conversion constants
     double offset_a = 365.0, offset_h = 9.75;
     double arm_len = 8.0;
@@ -45,8 +51,10 @@ class B_Lift: public Motorized_subsystem<b_lift_states, NUM_OF_B_LIFT_STATES, B_
     std::atomic<int32_t> speed{127}; // max pwm applied to the lifts during a move to target
 
   public:
-    vector<int> driver_positions = {1035, 1720, 1825, 1970, 2800};
-    vector<int> prog_positions = {1035,1600, 1720, 1825, 1970, 2800};
+    b_lift_states after_shift_state; // the state the subsystem will go to after transmission shifts
+    vector<int> driver_positions = {1045, 1720, 1825, 1970, 2800};
+    vector<int> prog_positions = {1045, 1720, 1825, 1970, 2800};
+    const int park_position =1650 ;
 
     B_Lift(Motorized_subsystem<b_lift_states, NUM_OF_B_LIFT_STATES, B_LIFT_MAX_VELOCITY> motorized_subsystem);  // constructor
     

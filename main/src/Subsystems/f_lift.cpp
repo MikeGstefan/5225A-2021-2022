@@ -100,7 +100,7 @@ void F_Lift::handle_state_change(){
       break;
 
     case f_lift_states::bottom:
-      motor.move(-10); // slight down holding power
+      motor.move(-20); // slight down holding power
       break;
 
     case f_lift_states::top:
@@ -119,7 +119,7 @@ void F_Lift::handle_state_change(){
 
     case f_lift_states::manual:
       // we don't want the f_claw in search mode while the lift is in manual
-      if(f_claw_obj.get_state() == f_claw_states::searching)  f_claw_obj.set_state(f_claw_states::idle);
+      if(f_claw_obj.get_state() == f_claw_states::searching){  f_claw_obj.set_state(f_claw_states::idle); state_log.print("134\n");}
       break;
   }
   log_state_change();  
@@ -223,7 +223,7 @@ F_Claw f_claw_obj({"F_Claw",
   "about_to_search",
   "searching",
   "grabbed",
-}, f_claw_states::managed, f_claw_states::searching // goes from managed to searching
+}, f_claw_states::managed, f_claw_states::managed // goes from managed to searching
 });
 
 F_Claw::F_Claw(Subsystem<f_claw_states, NUM_OF_F_CLAW_STATES> subsystem): Subsystem(subsystem)  // constructor
@@ -245,14 +245,14 @@ void F_Claw::handle(){
       if(search_timer.get_time() > 2000) set_state(f_claw_states::searching);
       
       // doesn't let driver search if lift isn't at bottom
-      if(!F_LIFT_AT_BOTTOM) set_state(f_claw_states::idle);
+      if(!F_LIFT_AT_BOTTOM){ set_state(f_claw_states::idle); state_log.print("256\n");}
       break;
 
     case f_claw_states::searching:
       if(f_dist.get() < 30)  set_state(f_claw_states::grabbed);  // grabs goal if mogo is detected
       
       // doesn't let driver search if lift isn't at bottom
-      if(!F_LIFT_AT_BOTTOM) set_state(f_claw_states::idle);
+      if(!F_LIFT_AT_BOTTOM){ set_state(f_claw_states::idle);  state_log.print("263\n");}
       break;
 
     case f_claw_states::grabbed:
@@ -286,7 +286,11 @@ void F_Claw::handle_state_change(){
       f_claw(HIGH);
       // raises mogo above rings automatically if lift is in bottom state
       if(f_lift.get_state() == f_lift_states::bottom){
-        f_lift.set_state(f_lift_states::move_to_target, 1); // sends f_lift to raised position
+        Task([](){
+          delay(100);
+          f_lift.set_state(f_lift_states::move_to_target, 1); // sends f_lift to raised position
+        });
+        
       }
       break;
   }

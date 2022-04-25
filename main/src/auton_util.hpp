@@ -8,7 +8,6 @@
 void save_positions();
 void load_positions();
 
-
 using namespace pros;
 
 #define b_lift_hitch_pos 3
@@ -45,7 +44,6 @@ class Reset_dist{
 
 extern Reset_dist reset_dist_r;
 extern Reset_dist reset_dist_l;
-
 
 
 
