@@ -64,7 +64,8 @@
       Button res_x(15, 60, 70, 55, GUI::Style::SIZE, Button::SINGLE, track, "Reset X");
       Button res_y(100, 60, 70, 55, GUI::Style::SIZE, Button::SINGLE, track, "Reset Y");
       Button res_a(185, 60, 70, 55, GUI::Style::SIZE, Button::SINGLE, track, "Reset A");
-      Button res_all(15, 160, 240, 60, GUI::Style::SIZE, Button::SINGLE, track, "Reset All");
+      Button res_all(15, 160, 110, 60, GUI::Style::SIZE, Button::SINGLE, track, "Reset All");
+      Button res_target(135, 160, 110, 60, GUI::Style::SIZE, Button::SINGLE, track, "Reset to Target");
 
     Page driver_curve ("Drivers"); //Select a driver and their exp curve
       Button prev_drivr(20, 70, 110, 120, GUI::Style::SIZE, Button::SINGLE, driver_curve, "Prev Driver");
@@ -318,22 +319,22 @@ void main_setup(){
         drivebase.move(-60, 0);
         delay(1000);
 
-        drivebase.brake();
+        drivebase.move(0, 0);
       }
     });
 
     intakes.set_func([](){
       if(GUI::prompt("Press to check intake", "", 1000)){
-        // intake.set_state(intake_states::on);
+        b_lift.Subsystem::set_state(b_lift_states::intake_on);
         delay(1000);
 
-        // intake.set_state(intake_states::off);
+        b_lift.Subsystem::set_state(b_lift_states::intake_off);
         delay(250);
 
-        // intake.set_state(intake_states::reversed);
+        b_lift.Subsystem::set_state(b_lift_states::intake_reversed);
         delay(1000);
 
-        // intake.set_state(intake_states::off);
+        b_lift.Subsystem::set_state(b_lift_states::intake_off);
       }
     });
 
@@ -343,8 +344,8 @@ void main_setup(){
         f_lift.set_state(f_lift_states::move_to_target, 0);
         delay(1000);
 
-        b_lift.set_state(b_lift_states::move_to_target, b_lift.driver_positions.size() - 1);
-        f_lift.set_state(f_lift_states::move_to_target, f_lift.driver_positions.size() - 1);
+        b_lift.move_to_top();
+        f_lift.move_to_top();
         delay(1000);
 
         b_lift.set_state(b_lift_states::move_to_target, 0);
@@ -352,8 +353,8 @@ void main_setup(){
 
         delay(250);
 
-        b_lift.set_state(b_lift_states::idle, 0);
-        f_lift.set_state(f_lift_states::idle, 0);
+        b_lift.set_state(b_lift_states::managed, 0);
+        f_lift.set_state(f_lift_states::managed, 0);
       }
     });
 
@@ -376,8 +377,10 @@ void main_setup(){
       if(!in_range(static_cast<int>(f_dist.get()), 20, 2000)) screen_flash::start("Distance Sensor: Front");
       if(!in_range(static_cast<int>(r_dist.get()), 20, 2000)) screen_flash::start("Distance Sensor: Right");
       if(!in_range(static_cast<int>(l_dist.get()), 20, 2000)) screen_flash::start("Distance Sensor: Left");
+      if(!in_range(static_cast<int>(r_goal_dist.get()), 20, 2000)) screen_flash::start("Distance Sensor: Right Goal");
+      if(!in_range(static_cast<int>(hitch_dist.get()), 20, 2000)) screen_flash::start("Distance Sensor: Hitch");
       if(!in_range(static_cast<int>(r_reset_dist.get()), 20, 2000)) screen_flash::start("Distance Sensor: Right Reset");
-      if(!in_range(static_cast<int>(l_reset_dist.get()), 20, 2000)) screen_flash::start("Distance Sensor: Back Reset");
+      if(!in_range(static_cast<int>(l_reset_dist.get()), 20, 2000)) screen_flash::start("Distance Sensor: Left Reset");
       else(screen_flash::start("All Distance Sensors Good", term_colours::GREEN));
     });
 
@@ -403,7 +406,15 @@ void main_setup(){
     });
     track.set_loop_func([](){
       screen::set_pen(COLOUR(RED));
-      screen::draw_pixel(270+(200*tracking.x_coord/144), 230-(200*tracking.y_coord/144)); //Scales to screen
+      screen::draw_pixel(270+(200.0*tracking.x_coord/144.0), 230-(200.0*tracking.y_coord/144.0)); //Scales to screen
+
+      if(main_obj.pressed()){
+        int x = GUI::x-270, y = 230-GUI::y;
+        if(in_range(x, 0, 200) && in_range(y, 0, 200)){
+          x_val.set_value(x*144.0/200.0);
+          y_val.set_value(y*144.0/200.0);
+        }
+      }
     });
 
     res_x.set_func([](){tracking.reset(0.0, tracking.y_coord, rad_to_deg(tracking.global_angle));});
@@ -415,6 +426,13 @@ void main_setup(){
       LeftEncoder.reset();
       BackEncoder.reset();
       tracking.reset();
+    });
+
+    res_target.set_func([](){
+      RightEncoder.reset();
+      LeftEncoder.reset();
+      BackEncoder.reset();
+      tracking.reset(Position(x_val.get_value(), y_val.get_value(), a_val.get_value()));
     });
 
   //Driving

@@ -92,13 +92,18 @@ void autonomous() {
 void opcontrol() {
   /* Nathan
   -distance sensor check
-  lift movement
-  misc: check if what's plugged matches what's registered to that port
-  jam code for main motors (will have to be a page func) (not needed if motor class)
+  -when pressing the field diagram, switch the sliders to that pos
+  -allow reset to the slider position
+  check if what's plugged matches what's registered to that port
 
+  lift movement
   auton give up func - ask mike
 
   After Worlds:
+  movement that avoids obstacles
+  be able to draw on field diagram, and robot moves in the drawn route
+  jam code for main motors (will have to be a page func) (not needed if motor class)
+
   make flash its own page
   make flash queue. (if multiple things try to flash, wait for the first one to finish)
   motor subclass
