@@ -512,7 +512,7 @@ void move_wait_for_error(double error){
 
 void move_stop(bool brake){
   move_t.kill();
-  if(brake)drivebase.brake();
+  if(brake) drivebase.brake();
   else drivebase.move(0,0);
 }
 
@@ -1677,12 +1677,12 @@ void Gyro::level(double kP, double kD){
   }
 
 	motion_i.print("\nLevelled on ramp\n");
-  front_l.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
-  front_r.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
-  back_l.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
-  back_r.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
-  center_l.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
-  center_r.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
+  front_l.set_brake_mode(E_MOTOR_BRAKE_HOLD);
+  front_r.set_brake_mode(E_MOTOR_BRAKE_HOLD);
+  back_l.set_brake_mode(E_MOTOR_BRAKE_HOLD);
+  back_r.set_brake_mode(E_MOTOR_BRAKE_HOLD);
+  center_l.set_brake_mode(E_MOTOR_BRAKE_HOLD);
+  center_r.set_brake_mode(E_MOTOR_BRAKE_HOLD);
   drivebase.velo_brake();
 
   screen_flash::start("Braked", term_colours::NOTIF);

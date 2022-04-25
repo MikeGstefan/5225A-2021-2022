@@ -8,36 +8,40 @@
     constexpr controller_digital_e_t lift_up_button = DIGITAL_R1;
     constexpr controller_digital_e_t lift_down_button = DIGITAL_R2;
     constexpr controller_digital_e_t both_lifts_down_button = DIGITAL_A;
+    constexpr controller_digital_e_t reverse_drive_button = DIGITAL_L1;
+    constexpr controller_digital_e_t hitch_button = DIGITAL_A;
+    constexpr controller_digital_e_t partner_back_lift_up_button = DIGITAL_R1;
+    constexpr controller_digital_e_t partner_back_lift_down_button = DIGITAL_R2;
+    constexpr controller_digital_e_t partner_front_lift_up_button = DIGITAL_L1;
+    constexpr controller_digital_e_t partner_front_lift_down_button = DIGITAL_L2;
+    constexpr controller_digital_e_t partner_both_lifts_down_button = DIGITAL_DOWN;
+    constexpr controller_digital_e_t partner_hitch_button = DIGITAL_UP;
 
   // Intake Buttons
     constexpr controller_digital_e_t partner_intake_button = DIGITAL_B;
     constexpr controller_digital_e_t partner_intake_reverse_button = DIGITAL_Y;
+    constexpr controller_digital_e_t speed_limit_button = DIGITAL_Y;
 
   // Claw Buttons
     constexpr controller_digital_e_t partner_back_claw_toggle_button = DIGITAL_A;
     constexpr controller_digital_e_t partner_front_claw_toggle_button = DIGITAL_LEFT;
     constexpr controller_digital_e_t partner_claw_tilt_button = DIGITAL_X;
+    constexpr controller_digital_e_t claw_toggle_button = DIGITAL_L2;
+
+  // Intake Buttons
+    constexpr controller_digital_e_t intake_button = DIGITAL_B;
+    constexpr controller_digital_e_t intake_reverse_button = DIGITAL_DOWN;
+    constexpr controller_digital_e_t partner_trans_to_intk_button = DIGITAL_Y;
 
   //Misc Buttons
+    constexpr controller_digital_e_t ok_button = DIGITAL_A;
+    constexpr controller_digital_e_t auton_select = DIGITAL_UP;
+    constexpr controller_digital_e_t timer_btn = DIGITAL_RIGHT;
+    constexpr controller_digital_e_t joy_mode_switch_button = DIGITAL_Y;
     constexpr controller_digital_e_t partner_joy_mode_switch_button = DIGITAL_RIGHT;
+    constexpr controller_digital_e_t shift_button = DIGITAL_X;
 
-
-extern controller_digital_e_t partner_both_lifts_down_button;
-extern controller_digital_e_t partner_trans_to_intk_button;
-extern controller_digital_e_t partner_hitch_button;
-extern controller_digital_e_t timer_btn;
-extern controller_digital_e_t reverse_drive_button;
-extern controller_digital_e_t claw_toggle_button;
-extern controller_digital_e_t hitch_button;
-extern controller_digital_e_t speed_limit_button;
-extern controller_digital_e_t intake_button;
-extern controller_digital_e_t intake_reverse_button;
-extern controller_digital_e_t ok_button;
-extern controller_digital_e_t auton_select;
-extern controller_digital_e_t joy_mode_switch_button;
-extern controller_digital_e_t shift_button;
-
-extern bool speed_limit_activated;
+inline bool speed_limit_activated = false;
 
 
 #define num_controller 2
@@ -91,9 +95,9 @@ class _Controller : public Controller{
   void print(std::uint8_t line, std::uint8_t col, const char* fmt, Params... args){
     std::function<void()> func = [=](){
       Controller::print(line, col, fmt, args...);
-      controller_queue.print("%d| printing %s to %d\n", millis(), sprintf2(fmt, args...).c_str(), this->controller_num);
+      controller_queue.print("Printing %s to %d", sprintf2(fmt, args...), controller_num);
     };
-    this->add_to_queue(func);
-    controller_queue.print("%d| adding print to queue for controller %d\n", millis(), this->controller_num);
+    add_to_queue(func);
+    controller_queue.print("Adding print to queue for controller %d", controller_num);
   }
 };

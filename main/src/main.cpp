@@ -24,10 +24,10 @@ bool auton_run = false; // has auton run
 
 void initialize() {
 	// gyro.calibrate();
-	// front_l.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
-	// front_r.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
-	// back_l.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
-	// back_r.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
+	// front_l.set_brake_mode(E_MOTOR_BRAKE_HOLD);
+	// front_r.set_brake_mode(E_MOTOR_BRAKE_HOLD);
+	// back_l.set_brake_mode(E_MOTOR_BRAKE_HOLD);
+	// back_r.set_brake_mode(E_MOTOR_BRAKE_HOLD);
 
   load_positions();
   load_auton();

@@ -8,7 +8,6 @@
 #include "tracking.hpp"
 #include "Libraries/gui.hpp"
 #include "Subsystems/hitch.hpp"
-#include <map> //Not put in main.h because util.hpp cannot include <map>
 
 static const std::string auton_file_name = "/usd/auton.txt";
 
@@ -122,16 +121,14 @@ void skills2(){
   move_start(move_types::turn_angle, turn_angle_params(270));
   move_start(move_types::tank_point, tank_point_params({130.0, 35.5, 270.0}), false);
   b_detect_goal();
-  move_stop();
-  drivebase.brake();
+  move_stop(true);
   move_start(move_types::tank_point, tank_point_params({110.0, 35.5, 270.0},false, 127.0,1.0,true, 6.4, 70.0, 0.0, 0, {5.0, 0.5}), false);
   delay(100);
   b_lift.set_state(b_lift_states::move_to_target, b_level);
   while(b_lift.get_target_state() != b_lift_states::idle)delay(10);
   move_start(move_types::tank_point, tank_point_params({130.0, 35.5, 270.0},false, 127.0,1.0,true, 6.4, 70.0, 0.0, 0, {5.0, 0.5}));
   flatten_against_wall(false);
-  // move_stop();
-  // drivebase.brake();
+  // move_stop(true);
   master.print(0,0,"time %d", millis() - time);
 }
 
@@ -224,8 +221,7 @@ void skills4(){
     f_lift.set_state(f_lift_states::move_to_target,f_bottom);
   });
   b_detect_goal();
-  move_stop();
-  drivebase.brake();
+  move_stop(true);
   // move_start(move_types::tank_arc, tank_arc_params({tracking.x_coord, tracking.y_coord}, {120.5, 102.0,200.0},127.0,127.0,false));//arc to face neut goal
   // move_start(move_types::turn_angle, turn_angle_params(rad_to_deg(atan2(104.5 - tracking.x_coord, 72.0 - tracking.y_coord)) +180.0, true,true,140.0));
   move_start(move_types::tank_point, tank_point_params({106.5,73.0,  45.0},false, 127.0,1.0,true,9.0,130.0));// drive throught neut goal
@@ -233,8 +229,7 @@ void skills4(){
   move_start(move_types::turn_angle, turn_angle_params(-90));
   move_start(move_types::tank_point, tank_point_params({70.5,73.0,  45.0},false, 60.0,1.0,true), false);
   f_detect_goal();
-  move_stop();
-  drivebase.brake();
+  move_stop(true);
   Task([](){
     delay(150);
     f_lift.set_state(f_lift_states::move_to_target, f_carry);
@@ -347,8 +342,8 @@ void high_short(){
   hitch_obj.set_state(hitch_states::grabbed);
   move_start(move_types::tank_rush, tank_rush_params({107.0, 72.0, 0.0}, false, 127.0, 1.0,false));
   move_start(move_types::turn_angle, turn_angle_params(-90.0, true, true, 15.0, 0.0,10.0,20.0,127.0,1000));
-  delay(2000);
-  move_start(move_types::turn_angle, turn_angle_params(15.0, true, true, 15.0, 0.0,10.0,20.0,127.0,1000));
+  // delay(2000);
+  move_start(move_types::turn_angle, turn_angle_params(15.0, true, true, 15.0, 0.0,10.0,20.0,127.0,700));
   high_wp_goal();
   high_line();
   // move_start(move_types::tank_point, tank_point_params({107.0, 35.0,0.0}), false);
@@ -370,8 +365,7 @@ void high_short(){
   // move_start(move_types::turn_angle, turn_angle_params(-90.0, true, true, 5.0,0.0,10.0,20.0,127.0,0,min_move_power_a, 3.0));
   // move_start(move_types::tank_point, tank_point_params({130.0, 35.0,0.0}), false);
   // b_detect_goal();
-  // move_stop();
-  // drivebase.brake();
+  // move_stop(true);
   // move_start(move_types::tank_point, tank_point_params({119.0, 35.0,0.0}));
   // b_lift.Subsystem::set_state(b_lift_states::intake_on);
   // move_start(move_types::turn_angle, turn_angle_params(0.0));
@@ -380,9 +374,11 @@ void high_short(){
 }
 
 void high_wp_goal(){
-  move_start(move_types::tank_point, tank_point_params({107.0, 35.0,0.0}), false);
-  Task([](){detect_interference();});
-  delay(500);
+  drivebase.set_state(1);
+  move_start(move_types::tank_point, tank_point_params({107.0, 35.0,0.0}, false,127.0, 1.0,true,15.0));
+  drivebase.set_state(0);
+  // Task([](){detect_interference();});
+  // delay(500);
   f_lift.set_state(f_lift_states::move_to_target, 1);
   move_wait_for_complete();
   move_start(move_types::turn_angle, turn_angle_params(-90.0));
@@ -394,9 +390,7 @@ void high_wp_goal(){
     delay(150);
     b_lift.Subsystem::set_state(b_lift_states::intake_on);
   });
-  move_stop();
-  drivebase.brake();
-  
+  move_stop(true);
 }
 
 void high_line(){
@@ -412,7 +406,7 @@ void high_tall(){
   hitch_obj.set_state(hitch_states::grabbed);
   move_start(move_types::tank_rush, tank_rush_params({68.5, 70.5, -45.0}, false, 127.0, 1.0,false, 180.0));
   move_start(move_types::turn_angle, turn_angle_params(20.0, true, true, 15.0, 0.0,10.0,20.0,127.0,1000));
-  delay(2000);
+  // delay(2000);
   // move_start(move_types::turn_angle, turn_angle_params(15.0, true, true, 15.0));
   high_wp_goal();
   high_line();

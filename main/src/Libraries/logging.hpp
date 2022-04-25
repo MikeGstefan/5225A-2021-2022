@@ -100,8 +100,6 @@ public:
     }
   }
 
-
-  void print(Timer* tmr,int freq, std::vector<std::function<char*()>> str) const; //How is this used?
   /*
    * @brief 
    * 
@@ -113,6 +111,7 @@ public:
     print(print_colour, format, args...);
   }
 
+  void print(Timer* tmr,int freq, std::vector<std::function<char*()>> str) const; //How is this used?
 };
 
 
