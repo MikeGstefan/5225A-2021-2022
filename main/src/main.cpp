@@ -117,7 +117,7 @@ void opcontrol() {
 	lift_handle_t.start();
   hitch.set_state(1);
   delay(500);
-	// b_lift.set_state(b_lift_states::move_to_target,0);
+	b_lift.set_state(b_lift_states::move_to_target,0);
 
 
 	int state = 0;
@@ -135,8 +135,8 @@ void opcontrol() {
 	}
 	int timer = millis();
 	// skills();
-	skills2();
-	// skills3();
+	// skills2();
+	skills3();
 	// skills4();
 	master.print(1,1,"total %d", millis() - timer);
 	// skills3();
