@@ -44,7 +44,7 @@
 inline bool speed_limit_activated = false;
 
 
-#define num_controller 2
+constexpr int controller_count = 2;
 
 class _Task;
 
@@ -52,7 +52,7 @@ class _Controller : public Controller{
   private:
     std::array<std::function<void()>,20> queue;
     int front = 0, back = 0;
-    static std::array<_Controller*, num_controller> objs;
+    static std::array<_Controller*, controller_count> objs;
     void add_to_queue(std::function<void()>);
     void queue_handle();
     int controller_num;

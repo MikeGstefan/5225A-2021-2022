@@ -249,7 +249,7 @@ void Drivebase::handle_input(){
       master.rumble("-");
       buzz_timer.reset();
     }
-    if(fabs(tracking.power_y) > MAX_DRIVE_SPEED)  tracking.power_y = sgn(tracking.power_y) * MAX_DRIVE_SPEED;
+    if(fabs(tracking.power_y) > max_drive_speed)  tracking.power_y = sgn(tracking.power_y) * max_drive_speed;
     // caps turns speed at 40% when intake is on
     tracking.power_a = 0.4 * drivers[cur_driver].custom_drives[2].lookup(master.get_analog(ANALOG_LEFT_X));
   }
@@ -557,7 +557,7 @@ void handle_lift_buttons(){
   }
 
   // transfer to intake
-  if(partner.is_rising(partner_trans_to_intk_button) && lift_t.get_state() == TRANS_LIFT_STATE){
+  if(partner.is_rising(partner_trans_to_intk_button) && lift_t.get_state() == trans_lift_state){
     b_lift.Subsystem::set_state(b_lift_states::intake_off);
   }
 }
@@ -568,7 +568,7 @@ void handle_claw_buttons(){
       // toggles f_claw open/closed when claw toggle button is pressed
       switch(f_claw_obj.get_state()){
         case f_claw_states::grabbed:
-          if(F_LIFT_AT_BOTTOM) f_claw_obj.set_state(f_claw_states::about_to_search);
+          if(f_lift.at_bottom()) f_claw_obj.set_state(f_claw_states::about_to_search);
           else {f_claw_obj.set_state(f_claw_states::idle);   state_log.print("561\n");}
           break;
 
@@ -606,7 +606,7 @@ void handle_claw_buttons(){
   if(partner.is_rising(partner_front_claw_toggle_button)){
     switch(f_claw_obj.get_state()){
       case f_claw_states::grabbed:
-        if(F_LIFT_AT_BOTTOM) f_claw_obj.set_state(f_claw_states::about_to_search);
+        if(f_lift.at_bottom()) f_claw_obj.set_state(f_claw_states::about_to_search);
         else {f_claw_obj.set_state(f_claw_states::idle); state_log.print("599\n");}
         break;
 

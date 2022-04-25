@@ -1,29 +1,16 @@
 #pragma once
 #include "main.h"
 #include "Libraries/geometry.hpp"
-// #include "task.hpp"
+#include "Libraries/util.hpp"
 
 class _Task;
 
 extern _Task update_t;
 extern _Task move_t;
 
-// Right: get_roll, -1
-// Left: get_roll, 1
-// Back: get_pitch, 1
-// Front: get_pitch, -1
-#define GYRO_AXIS get_roll
-#define GYRO_SIDE -1
-
-
-#define DIST_BACK 8.5
-#define DIST_FRONT 8.5
-
-
 constexpr int min_move_power_a = 30;
 constexpr int min_move_power_x = 40;
 constexpr int min_move_power_y = 22;
-
 
 void update(void* params);
 
@@ -218,11 +205,6 @@ void move_wait_for_error(double error);
 void move_stop(bool brake = false);
 bool get_move_state();
 
-void rush_goal(double target_x, double target_y, double target_a);
-void rush_goal2(double target_x, double target_y, double target_a);
-void tank_rush_goal(void* params);
-
-
 void move_to_point(void* params);
 void move_on_arc(void* params);
 void move_on_line(void* params);
@@ -231,6 +213,7 @@ void move_on_line_old(void* params);
 // tank drive move algorithms
 void tank_move_to_target(void* params);
 void tank_move_on_arc(void* params);  // min speed for smooth move is 100
+void tank_rush_goal(void* params);
 
 void turn_to_angle(void* params);
 //overloaded to be called in another function DO NOT CALL ALONE
@@ -240,18 +223,13 @@ void turn_to_point(void* params);
 
 
 
-#define xy_enable a
+constexpr bool xy_enable = true;
 
 // macros for convenient modification of move algorithms
-
-#define polar_to_vector_line(start_x, start_y, magnitude, theta, angle)\
-  {start_x, start_y}, {start_x + sin(deg_to_rad(theta)) * magnitude, start_y + cos(deg_to_rad(theta)) * magnitude, angle}\
-
-#define polar_to_vector_facing_line(start_x, start_y, magnitude, angle){\
-  polar_to_vector(start_x, start_y, magnitude, angle, angle)\
+Vector polar_to_vector_line(Point start, double magnitude, double theta, double angle);
+Vector polar_to_vector_facing_line(Point start, double magnitude, double angle);
+Position polar_to_vector_point(double magnitude, double theta, double angle);
+double point_to_angle(Point point);
+constexpr Position polar_to_vector_point(Point start, double magnitude, double theta, double angle){
+  return {start.x + sin(deg_to_rad(theta)) * magnitude, start.y + cos(deg_to_rad(theta)) * magnitude, angle};
 }
-#define polar_to_vector_point(start_x, start_y, magnitude, theta, angle)\
-  {start_x + sin(deg_to_rad(theta)) * magnitude, start_y + cos(deg_to_rad(theta)) * magnitude, angle}\
-
-#define angle_to_point(x, y)\
-  rad_to_deg(atan2(x - tracking.x_coord, y - tracking.y_coord))

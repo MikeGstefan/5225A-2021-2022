@@ -19,7 +19,7 @@ F_Lift f_lift({{"F_Lift",
 }, f_lift_m});
 
 
-F_Lift::F_Lift(Motorized_subsystem<f_lift_states, NUM_OF_F_LIFT_STATES, F_LIFT_MAX_VELOCITY> motorized_subsystem): Motorized_subsystem(motorized_subsystem){ // constructor
+F_Lift::F_Lift(Motorized_subsystem<f_lift_states, num_of_f_lift_states, f_lift_max_velo> motorized_subsystem): Motorized_subsystem(motorized_subsystem){ // constructor
   index = 0;
   speed = 127;
 }
@@ -83,9 +83,9 @@ void F_Lift::handle(bool driver_array){
     case f_lift_states::manual:
       lift_power = master.get_analog(ANALOG_RIGHT_Y);
       // if master controller joystick isn't active, take partner input instead
-      if(fabs(lift_power) < 10) lift_power = partner.get_analog(ANALOG_LEFT_Y);
+      if(abs(lift_power) < 10) lift_power = partner.get_analog(ANALOG_LEFT_Y);
       // holds motor if joystick is within deadzone or lift is out of range
-      if (fabs(lift_power) < 10 || (lift_power < 0 && f_lift_pot.get_value() <= driver_positions[0]) || (lift_power > 0 && f_lift_pot.get_value() >= driver_positions[driver_positions.size() - 1])){
+      if (abs(lift_power) < 10 || (lift_power < 0 && f_lift_pot.get_value() <= driver_positions[0]) || (lift_power > 0 && f_lift_pot.get_value() >= driver_positions[driver_positions.size() - 1])){
         lift_power = 0;
       } 
       motor.move_velocity(lift_power);
@@ -143,7 +143,7 @@ void F_Lift::set_state(const f_lift_states next_state, const uint8_t index, cons
 int F_Lift::find_index(){
   for(size_t i = 0; i < driver_positions.size(); i++){
     // if the lift is at a position in the array, return that index
-    if(fabs(driver_positions[i] - f_lift_pot.get_value()) < detection_end_error)  return i;
+    if(abs(driver_positions[i] - f_lift_pot.get_value()) < detection_end_error)  return i;
   }
   return -1;
 }
@@ -194,18 +194,22 @@ void F_Lift::decrement_index(){
   else if(cur_index > 0)  f_lift.set_state(f_lift_states::move_to_target, cur_index - 1);
 }
 
+int F_Lift::get_index() const{
+  return index.load();
+}
+
 int elastic_f_up_time, elastic_f_down_time; //for gui_construction.cpp
 
 void F_Lift::elastic_util(int high){ //935 as of April 10th
   GUI::prompt("Press to start front elastic test", "", 500);
   Timer move_timer{"move"};
-  while(abs(f_lift_m.get_position() - high) > 15) f_lift_m.move(127);
+  while(fabs(f_lift_m.get_position() - high) > 15) f_lift_m.move(127);
   move_timer.print();
   elastic_f_up_time = move_timer.get_time();
   master.print(1, 0, "Up Time: %d", elastic_f_up_time);
 
   move_timer.reset();
-  while(abs(f_lift_m.get_position() - 0) > 15) f_lift_m.move(-127);
+  while(fabs(f_lift_m.get_position() - 0) > 15) f_lift_m.move(-127);
   move_timer.print();
   elastic_f_down_time = move_timer.get_time();
   master.print(2, 0, "Down Time: %d", elastic_f_up_time);
@@ -216,6 +220,9 @@ void F_Lift::move_to_top(){
   set_state(f_lift_states::move_to_target, prog_positions.size()-1);
 }
 
+bool F_Lift::at_bottom() const{
+  return f_lift_pot.get_value() < f_lift.driver_positions[0] + f_lift.end_error;
+}
 
 
 // FRONT CLAW SUBSYSTEM
@@ -229,7 +236,7 @@ F_Claw f_claw_obj({"F_Claw",
 }, f_claw_states::managed, f_claw_states::managed // goes from managed to searching
 });
 
-F_Claw::F_Claw(Subsystem<f_claw_states, NUM_OF_F_CLAW_STATES> subsystem): Subsystem(subsystem)  // constructor
+F_Claw::F_Claw(Subsystem<f_claw_states, num_of_f_claw_states> subsystem): Subsystem(subsystem)  // constructor
 {}
 
 
@@ -240,7 +247,7 @@ void F_Claw::handle(){
 
     case f_claw_states::idle:
       // forces claw into searching if lift is at bottom
-      if(F_LIFT_AT_BOTTOM) set_state(f_claw_states::searching);
+      if(f_lift.at_bottom()) set_state(f_claw_states::searching);
       break;
     
     case f_claw_states::about_to_search:
@@ -248,14 +255,14 @@ void F_Claw::handle(){
       if(search_timer.get_time() > 2000) set_state(f_claw_states::searching);
       
       // doesn't let driver search if lift isn't at bottom
-      if(!F_LIFT_AT_BOTTOM){ set_state(f_claw_states::idle); state_log.print("256\n");}
+      if(!f_lift.at_bottom()){ set_state(f_claw_states::idle); state_log.print("256\n");}
       break;
 
     case f_claw_states::searching:
       if(f_dist.get() < 30)  set_state(f_claw_states::grabbed);  // grabs goal if mogo is detected
       
       // doesn't let driver search if lift isn't at bottom
-      if(!F_LIFT_AT_BOTTOM){ set_state(f_claw_states::idle);  state_log.print("263\n");}
+      if(!f_lift.at_bottom()){ set_state(f_claw_states::idle);  state_log.print("263\n");}
       break;
 
     case f_claw_states::grabbed:

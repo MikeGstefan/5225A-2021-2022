@@ -13,8 +13,8 @@ Point::Point(Position position): x(position.x), y(position.y){}
 
 // vector methods
 Vector::Vector(const double param_1, const double param_2, vector_types type){
-  if (type == vector_types::POLAR)  set_polar(param_1, param_2);
-  else  set_cartesian(param_1, param_2);
+  if (type == vector_types::POLAR) set_polar(param_1, param_2);
+  else set_cartesian(param_1, param_2);
 }
 
 Vector::Vector(const Point point){

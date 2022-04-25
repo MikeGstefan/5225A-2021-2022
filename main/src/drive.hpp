@@ -2,12 +2,10 @@
 #include "main.h"
 #include "Libraries/timer.hpp"
 
-#define MASTER_HOLD_TIME 300
-#define PARTNER_HOLD_TIME 300
-
-#define TILT_HOLD_TIME 300
-
-#define MAX_DRIVE_SPEED 40
+constexpr int master_hold_time = 300;
+constexpr int partner_hold_time = 300;
+constexpr int tilt_hold_time = 300;
+constexpr int max_drive_speed = 40;
 
 // what the right joystick currently does
 enum class joy_modes{
@@ -16,7 +14,7 @@ enum class joy_modes{
 };
 extern joy_modes joy_mode;
 
-#define game true
+constexpr bool game = true;
 
 // aliases to make code more readable, used to encode vales of drive.cur_driver
 // enum class drivers{Nikhil = 0, Emily = 1, Sarah = 2};

@@ -2,7 +2,6 @@
 
 static constexpr int e_port = 20;
 
-// 6 Motor config - Apr 12 2022
 _Controller master(E_CONTROLLER_MASTER);
 _Controller partner(E_CONTROLLER_PARTNER);
 ADIEncoder LeftEncoder({e_port, 1, 2}, false), RightEncoder({e_port, 5, 6}, true), BackEncoder({e_port, 3, 4}, false);

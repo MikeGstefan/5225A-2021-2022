@@ -12,7 +12,7 @@ Hitch hitch_obj({"Hitch",
 }, hitch_states::managed, hitch_states::grabbed // goes from managed to grabbed upon startup
 });
 
-Hitch::Hitch(Subsystem<hitch_states, NUM_OF_HITCH_STATES> subsystem): Subsystem(subsystem)  // constructor
+Hitch::Hitch(Subsystem<hitch_states, num_of_hitch_states> subsystem): Subsystem(subsystem)  // constructor
 {}
 
 

@@ -27,7 +27,7 @@ B_Lift b_lift({{"B_Lift",
 }, b_lift_m});
 
 
-B_Lift::B_Lift(Motorized_subsystem<b_lift_states, NUM_OF_B_LIFT_STATES, B_LIFT_MAX_VELOCITY> motorized_subsystem): Motorized_subsystem(motorized_subsystem){ // constructor
+B_Lift::B_Lift(Motorized_subsystem<b_lift_states, num_of_b_lift_states, b_lift_max_velo> motorized_subsystem): Motorized_subsystem(motorized_subsystem){ // constructor
   index = 0;
   speed = 127;
 }
@@ -125,7 +125,7 @@ void B_Lift::handle(bool driver_array){
       if(intake_safe.get_time() < 300 && not_moving_count > 20){
         not_moving_count = 0;
         after_shift_state = b_lift_states::reshift;
-        shift(TRANS_LIFT_STATE); // shifts to lift
+        shift(trans_lift_state); // shifts to lift
         intake_safe.reset(false);
       }
       // printf("current:%lf\n", motor.get_actual_velocity());
@@ -228,7 +228,7 @@ void B_Lift::handle_state_change(){
 
     case b_lift_states::reshift:
       after_shift_state = b_lift_states::intake_on;
-      shift(TRANS_LIFT_STATE); // shifts to lift
+      shift(trans_lift_state); // shifts to lift
       break;
     default:
     break;
@@ -264,7 +264,7 @@ void B_Lift::set_state(const b_lift_states next_state, const uint8_t index, cons
   else state_log.print("%s | INVALID move to target State change requested from %s to %s, index is: %d", name, state_names[static_cast<int>(get_state())], state_names[static_cast<int>(next_state)], index);
 }
 
-int B_Lift::find_index(){
+int B_Lift::find_index() const{
   for(size_t i = 0; i < driver_positions.size(); i++){
     // if the lift is at a position in the array, return that index
     if(abs(driver_positions[i] - b_lift_pot.get_value()) < detection_end_error)  return i;
@@ -274,22 +274,22 @@ int B_Lift::find_index(){
 
 void B_Lift::handle_shift(){
   // if the transmission is in intake mode and the target state is a lift state, shift
-  if(lift_t.get_state() == TRANS_INTAKE_STATE){
+  if(lift_t.get_state() == trans_intake_state){
     switch(get_target_state()){
       case b_lift_states::bottom:
-        shift(TRANS_LIFT_STATE);
+        shift(trans_lift_state);
         break;
       case b_lift_states::top:
-        shift(TRANS_LIFT_STATE);
+        shift(trans_lift_state);
         break;
       case b_lift_states::idle:
-        shift(TRANS_LIFT_STATE);
+        shift(trans_lift_state);
         break;
       case b_lift_states::move_to_target:
-        shift(TRANS_LIFT_STATE);
+        shift(trans_lift_state);
         break;        
       case b_lift_states::manual:
-        shift(TRANS_LIFT_STATE);
+        shift(trans_lift_state);
         break;
     }
   }
@@ -297,13 +297,13 @@ void B_Lift::handle_shift(){
   else{
     switch(get_target_state()){
       case b_lift_states::intake_off:
-        shift(TRANS_INTAKE_STATE);
+        shift(trans_intake_state);
         break;
       case b_lift_states::intake_on:
-        shift(TRANS_INTAKE_STATE);
+        shift(trans_intake_state);
         break;
       case b_lift_states::intake_reversed:
-        shift(TRANS_INTAKE_STATE);
+        shift(trans_intake_state);
         break;
     }
   }
@@ -362,6 +362,10 @@ void B_Lift::decrement_index(){
   else if(cur_index > 0)  b_lift.set_state(b_lift_states::move_to_target, cur_index - 1);
 }
 
+uint8_t B_Lift::get_index() const{
+  return index.load();
+}
+
 int elastic_b_up_time, elastic_b_down_time; //for gui_construction.cpp
 
 void B_Lift::elastic_util(int high){ //1011 as of April 10th
@@ -384,6 +388,10 @@ void B_Lift::move_to_top(){
   set_state(b_lift_states::move_to_target, prog_positions.size()-1);
 }
 
+bool B_Lift::at_bottom() const{
+  return b_lift_pot.get_value() < b_lift.driver_positions[0] + b_lift.end_error;
+}
+
 
 // BACK CLAW SUBSYSTEM
 B_Claw b_claw_obj({"B_Claw",
@@ -397,7 +405,7 @@ B_Claw b_claw_obj({"B_Claw",
 }, b_claw_states::managed, b_claw_states::idle // goes from managed to idle upon startup
 });
 
-B_Claw::B_Claw(Subsystem<b_claw_states, NUM_OF_B_CLAW_STATES> subsystem): Subsystem(subsystem)  // constructor
+B_Claw::B_Claw(Subsystem<b_claw_states, num_of_b_claw_states> subsystem): Subsystem(subsystem)  // constructor
 {
   state_at_toggle_press = b_claw_states::idle; // don't change this
 }
@@ -410,7 +418,7 @@ void B_Claw::handle(){
 
     case b_claw_states::idle:
       // forces claw into searching if lift is at bottom
-      if(B_LIFT_AT_BOTTOM && b_lift.get_state() != b_lift_states::manual) set_state(b_claw_states::searching);
+      if(b_lift.at_bottom() && b_lift.get_state() != b_lift_states::manual) set_state(b_claw_states::searching);
       break;
 
     case b_claw_states::about_to_search:
@@ -418,7 +426,7 @@ void B_Claw::handle(){
       if(search_timer.get_time() > 2000) set_state(b_claw_states::searching);
 
       // doesn't let driver search if lift isn't at bottom
-      if(!B_LIFT_AT_BOTTOM) set_state(b_claw_states::idle);
+      if(!b_lift.at_bottom()) set_state(b_claw_states::idle);
       break;
 
     case b_claw_states::searching:
@@ -426,7 +434,7 @@ void B_Claw::handle(){
       if(b_dist.get() < 45) set_state(b_claw_states::tilted);
 
       // doesn't let driver search if lift isn't at bottom
-      if(!B_LIFT_AT_BOTTOM) set_state(b_claw_states::idle);
+      if(!b_lift.at_bottom()) set_state(b_claw_states::idle);
       break;
 
     case b_claw_states::tilted:

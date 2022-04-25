@@ -2,7 +2,7 @@
 #include "Libraries/task.hpp"
 #include "Libraries/util.hpp"
 
-std::array<_Controller*, num_controller> _Controller::objs; //= {nullptr};
+std::array<_Controller*, controller_count> _Controller::objs; //= {nullptr};
 _Task _Controller::controller_task = nullptr;
 
 int constructed = 0;
@@ -16,7 +16,7 @@ _Controller::_Controller(controller_id_e_t id): Controller{id}{
 void _Controller::print_queue(void* params){
   _Task* ptr = _Task::get_obj(params);
   while(true){
-    for(int i = 0; i < num_controller; i++){
+    for(int i = 0; i < controller_count; i++){
       objs[i]->queue_handle();
       delay(50);
     }

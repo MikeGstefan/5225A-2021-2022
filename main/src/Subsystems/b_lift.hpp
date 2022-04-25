@@ -2,14 +2,9 @@
 #include "../Libraries/subsystem.hpp"
 #include "../Libraries/pid.hpp"
 
-#define B_LIFT_AT_BOTTOM (b_lift_pot.get_value() < b_lift.driver_positions[0] + b_lift.end_error) //please make this a function
-
-#define NUM_OF_B_LIFT_STATES 14
-#define B_LIFT_MAX_VELOCITY 100
-
-// state of the transmission piston for the lift and intake
-#define TRANS_LIFT_STATE 1
-#define TRANS_INTAKE_STATE 0
+constexpr int b_lift_max_velo = 100;
+constexpr bool trans_lift_state = HIGH;
+constexpr bool trans_intake_state = LOW;
 
 enum class b_lift_states{
   managed, // being managed externally (NOT DOING ANYTHING)
@@ -25,10 +20,13 @@ enum class b_lift_states{
   intake_reversed, // intake is running in reverse
   shifting_up, // lift/intake transmission shifting, moving up
   shifting_down, // lift/intake transmission shifting, moving down
-  reshift // if the intake failed to transmit, shifts to lift and enters this state, then goes back to intake-on
+  reshift, // if the intake failed to transmit, shifts to lift and enters this state, then goes back to intake-on
+  NUM_OF_ELEMENTS, // number of elements
 };
 
-class B_Lift: public Motorized_subsystem<b_lift_states, NUM_OF_B_LIFT_STATES, B_LIFT_MAX_VELOCITY> {
+constexpr int num_of_b_lift_states = static_cast<int>(b_lift_states::NUM_OF_ELEMENTS);
+
+class B_Lift: public Motorized_subsystem<b_lift_states, num_of_b_lift_states, b_lift_max_velo> {
     Timer up_press{"Up_press"}, down_press{"Down_press"};
     Timer intake_safe{"intake_safe", nullptr, false};
     int not_moving_count = 0;
@@ -49,19 +47,25 @@ class B_Lift: public Motorized_subsystem<b_lift_states, NUM_OF_B_LIFT_STATES, B_
     std::atomic<int32_t> speed{127}; // max pwm applied to the lifts during a move to target
 
   public:
+    static constexpr int bottom = 0;
+    static constexpr int plat = 1;
+    static constexpr int backup = 2;
+    static constexpr int level = 3;
+    static constexpr int top = 4;
+
     b_lift_states after_shift_state; // the state the subsystem will go to after transmission shifts
     std::vector<int> driver_positions = {1045, 1720, 1825, 1970, 2800};
     std::vector<int> prog_positions = {1045, 1720, 1825, 1970, 2800};
-    const int park_position = 1650 ;
+    static constexpr int park_position = 1650 ;
 
-    B_Lift(Motorized_subsystem<b_lift_states, NUM_OF_B_LIFT_STATES, B_LIFT_MAX_VELOCITY> motorized_subsystem);  // constructor
+    B_Lift(Motorized_subsystem<b_lift_states, num_of_b_lift_states, b_lift_max_velo> motorized_subsystem);  // constructor
     
     void handle(bool driver_array);  // contains state machine code, (if driver_array is false, uses prog_array)
     void handle_state_change(); // cleans up and preps the machine to be in the target state
     // THIS IS AN OVERLOAD for the existing set state function, accepts an index for the lift
     void set_state(const b_lift_states next_state, const uint8_t index, const int32_t speed = 127);  // requests a state change and logs it
     
-    int find_index(); // returns current driver index depending on lift positions, returns -1 if not found
+    int find_index() const; // returns current driver index depending on lift positions, returns -1 if not found
     void handle_shift(); // checks if lift/intake transmission is in the wrong state, then shifts if necessary
     void shift(bool piston_state); // sets tranmission piston, jiggles up then down, then goes to target state
 
@@ -70,18 +74,13 @@ class B_Lift: public Motorized_subsystem<b_lift_states, NUM_OF_B_LIFT_STATES, B_
     void decrement_index();
 
     // getters because index is private
-    uint8_t get_index() const{
-      return index.load();
-    }
+    uint8_t get_index() const;
     void elastic_util(int high); // up time should be about 1100mms (ignore this time, it was on the old lift), down time should be slightly slower than that
     void move_to_top();
+    bool at_bottom() const;
 };
 
 extern B_Lift b_lift;
-
-#define NUM_OF_B_CLAW_STATES 6
-
-// FRONT CLAW SUBSYSTEM
 
 enum class b_claw_states{
   managed, // being managed externally (NOT DOING ANYTHING)
@@ -91,15 +90,18 @@ enum class b_claw_states{
   tilted, // holding mogo tilted
   // going_to_flat, // waiting 300 ms to flat
   flat, // holding mogo flat
+  NUM_OF_ELEMENTS, // number of elements
 };
 
-class B_Claw: public Subsystem<b_claw_states, NUM_OF_B_CLAW_STATES> {
+constexpr int num_of_b_claw_states = static_cast<int>(b_claw_states::NUM_OF_ELEMENTS);
+
+class B_Claw: public Subsystem<b_claw_states, num_of_b_claw_states> {
     Timer toggle_press_timer{"Toggle_timer"};  // when the toggle buttons was last pressed
     int search_cycle_check_count = 0; // for searching for mogo's lip
     Timer search_timer{"Search_timer"}; // timer to return to search after 2 seconds
 
   public:
-    B_Claw(Subsystem<b_claw_states, NUM_OF_B_CLAW_STATES> subsystem);  // constructor
+    B_Claw(Subsystem<b_claw_states, num_of_b_claw_states> subsystem);  // constructor
     void handle();  // contains state machine code
     void handle_state_change(); // cleans up and preps the machine to be in the target state
 
