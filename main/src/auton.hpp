@@ -14,7 +14,6 @@
 #include "Subsystems/f_lift.hpp"
 #include <fstream>
 
-
 #define f_bottom 0
 #define f_carry 1 
 #define f_plat 2 

@@ -2,70 +2,42 @@
 
 // #define master partner
 
-// Front Lift object
+// Back Lift object
 B_Lift b_lift({{"B_Lift",
 {
   "managed",
   "bottom",
+  "top",
   "idle",
   "move_to_target",
+  "park pos",
   "manual",
+  "intake_off",
+  "intake_on",
+  "intk_jam",
+  "intake_reversed",
   "shifting_to_lift_up",
   "shifting_to_lift_down",
+  "reshift"
 },  b_lift_states::managed, b_lift_states::idle // goes from managed to idle upon startup
 }, b_lift_m});
 
 
 B_Lift::B_Lift(Motorized_subsystem<b_lift_states, NUM_OF_B_LIFT_STATES, B_LIFT_MAX_VELOCITY> motorized_subsystem): Motorized_subsystem(motorized_subsystem){ // constructor
-
   index = 0;
-
-  up_press.pause();
-  down_press.pause();
+  speed = 127;
 }
 
-void B_Lift::handle_buttons(){
-  // index incrementing and decrementing
-  if(master.get_digital_new_press(lift_up_button) && !get_lift()){
-    up_press.reset();
-    // if state is manual, go to the closest position that's higher than the current position
-    if(get_state() == b_lift_states::manual){
-      size_t i = 0;
-      while (i < driver_positions.size()){
-        if(driver_positions[i] > b_lift_pot.get_value()){
-          set_state(b_lift_states::move_to_target, i);
-          break;
-        }
-        i++;
-      }
-    }
-    // otherwise just go to the next highest position, but doesn't increment index if it's out of bounds
-    else if(index < driver_positions.size() - 1)  set_state(b_lift_states::move_to_target, ++index);
+void B_Lift::move_absolute(double position, double velocity, bool wait_for_comp, double end_error){ //blocking
+  if (end_error == 0.0) end_error = this->end_error;
+  int output;
+  pid.compute(b_lift_pot.get_value(), position);
+  wait_until(fabs(pid.get_error()) < end_error){
+    output = pid.compute(b_lift_pot.get_value(), position);
+    if (abs(output) > speed) output = speed * sgn(output); // cap the output at speed  
+    motor.move(output);
   }
-  if(master.get_digital_new_press(lift_down_button) && !get_lift()){
-    down_press.reset();
-    // if state is manual, go to the closest position that's lower than the current position
-    if(get_state() == b_lift_states::manual){
-      int i = driver_positions.size() - 1;
-      while (i > -1){
-        if(driver_positions[i] < b_lift_pot.get_value()){
-          set_state(b_lift_states::move_to_target, i);
-          break;
-        }
-        i--;
-      }
-    }
-    // otherwise just go to the next lowest position, but doesn't decrement index if it's out of bounds
-    else if(index > 0)  set_state(b_lift_states::move_to_target, --index);
-  }
-  // resets and pauses the timers if driver releases button
-  if(!master.get_digital(lift_up_button)) up_press.reset(false);
-  if(!master.get_digital(lift_down_button)) down_press.reset(false);
-
-  // goes to top position if up button is held
-  if(up_press.get_time() > 300) set_state(b_lift_states::move_to_target, driver_positions.size() - 1);
-  // goes to bottom position of down button is held
-  if(down_press.get_time() > 300) set_state(b_lift_states::move_to_target, 0);
+  motor.move(0);
 }
 
 void B_Lift::handle(bool driver_array){
@@ -77,24 +49,29 @@ void B_Lift::handle(bool driver_array){
       break;
     case b_lift_states::bottom: // at lowest position, this state is used by the intake and f_claw
       break;
+    case b_lift_states::top: // at highest position
+      break;
     case b_lift_states::idle: // not doing anything
+      // if(fabs(b_lift_pot.get_value() - driver_positions[index]) > detection_end_error){
+      //   state_log.print("B_lift slipped out of position, index: %d, position: %d", index.load(), b_lift_pot.get_value());
+      //   set_state(b_lift_states::move_to_target, index);
+      // }
       break;
 
     case b_lift_states::move_to_target: // moving to target
-      motor.move(pid.compute(b_lift_pot.get_value(), positions[index]));
-      
+      // output is scoped below to prevent other states from accessing it
+      { // don't power the motor if the state is no longer move to target
+        int output = pid.compute(b_lift_pot.get_value(), positions[index]);
+        if (abs(output) > speed) output = speed * sgn(output); // cap the output at speed
+        if(abs(output) < 50) output = 50 * sgn(output); // enforces a minimum of 30 power
+        motor.move(output);
+      }
       // moves to next state if the lift has reached its target
       if(fabs(pid.get_error()) < end_error){
-        motor.move_velocity(0); // holds motor
         // switches to idle by default or special case depending on current target
-        switch(index){
-          case 0: // lift is at bottom position, this state is used by intake 
-            Subsystem::set_state(b_lift_states::bottom);
-            break;
-          default:
-            Subsystem::set_state(b_lift_states::idle);
-            break;
-        }
+        if(index == 0)  Subsystem::set_state(b_lift_states::bottom);  // lift is at bottom position
+        else if(index == driver_positions.size() - 1) Subsystem::set_state(b_lift_states::top); // lift is at top position
+        else Subsystem::set_state(b_lift_states::idle);
       }
 
       // UNCOMMENT FOR LIFT SAFETY Handling
@@ -106,32 +83,93 @@ void B_Lift::handle(bool driver_array){
         motor.move(0);
         master.rumble("---");
         master.print(B_LIFT_STATE_LINE, 0, "B_Lift: Manual      ");
-        printf("LIFT SAFETY TRIGGERED %lf, %lf\n", target, b_lift_pot.get_value());
+        printf2("LIFT SAFETY TRIGGERED %lf, %lf", target, b_lift_pot.get_value());
 
         set_state(b_lift_states::manual);
       }
       */
       break;
 
+    case b_lift_states::park_position:
+      { // don't power the motor if the state is no longer move to target
+        int output = pid.compute(b_lift_pot.get_value(), park_position);
+        if (abs(output) > speed) output = speed * sgn(output); // cap the output at speed
+        if(abs(output) < 50) output = 50 * sgn(output); // enforces a minimum of 30 power
+        motor.move(output);
+      }
+      // moves to next state if the lift has reached its target
+      if(fabs(pid.get_error()) < end_error){
+        Subsystem::set_state(b_lift_states::idle);
+      }
+    break;
+
     case b_lift_states::manual:
       lift_power = master.get_analog(ANALOG_RIGHT_X);
+      // if master controller joystick isn't active, take partner input instead
+      if(fabs(lift_power) < 10) lift_power = partner.get_analog(ANALOG_RIGHT_Y);
       // holds motor if joystick is within deadzone or lift is out of range
-      if (fabs(lift_power) < 10 || (lift_power < 0 && b_lift_pot.get_value() <= driver_positions[0]) || (lift_power > 0 && b_lift_pot.get_value() >= driver_positions[driver_positions.size() - 1])) motor.move_velocity(0);
-      else motor.move(lift_power);
-      // exits manual state if up or down button is pressed or held
+      if (fabs(lift_power) < 10 || (lift_power < 0 && b_lift_pot.get_value() <= driver_positions[0]) || (lift_power > 0 && b_lift_pot.get_value() >= driver_positions[driver_positions.size() - 1])){
+        lift_power = 0;
+      }
+      // if back lift is below a threshold and the hitch is open, close it to not break it
+      if(b_lift_pot.get_value() < 1600 && lift_power < 0){
+        if(hitch_obj.get_state() != hitch_states::grabbed){
+          hitch_obj.set_state(hitch_states::grabbed);
+        }
+        // if the goal is detected, don't power the lift
+        if(hitch_dist.get() < 25) lift_power = 0;
+      }
+
+      motor.move_velocity(lift_power);
       break;
 
-    case b_lift_states::shifting_to_lift_up:
-      if(fabs(b_lift_m.get_target_position() - b_lift_m.get_position()) < 15){
-        Subsystem::set_state(b_lift_states::shifting_to_lift_down);
+    case b_lift_states::intake_off:
+      break;
+
+    case b_lift_states::intake_on:
+      // printf("vel:%lf\n", motor.get_actual_velocity());
+      if(fabs(motor.get_actual_velocity()) < 5.0) not_moving_count++;
+      else not_moving_count = 0;
+      if(intake_safe.get_time() < 300 && not_moving_count > 20){
+        not_moving_count = 0;
+        after_shift_state = b_lift_states::reshift;
+        shift(TRANS_LIFT_STATE); // shifts to lift
+        intake_safe.reset(false);
+      }
+      // printf("current:%lf\n", motor.get_actual_velocity());
+      else{
+        if(!intk_t.get_value())intk_jam_count++;
+        else intk_jam_count = 0;
+        if(intk_jam_count == 4){
+          intake_safe.reset(false);
+          Subsystem::set_state(b_lift_states::intk_jam);
+          
+        }
+      }
+      printf("sensor: %d\n", intk_t.get_value());
+      break;
+
+    case b_lift_states::intk_jam:
+      if(millis() - jam_time > 500)b_lift.Subsystem::set_state(b_lift_states::intake_on);
+    break;
+
+    case b_lift_states::intake_reversed:
+      break;
+
+    case b_lift_states::shifting_up:
+      if(fabs(motor.get_target_position() - motor.get_position()) < 15){
+        Subsystem::set_state(b_lift_states::shifting_down);
       }
       break;
 
-    case b_lift_states::shifting_to_lift_down:
+    case b_lift_states::shifting_down:
       // switches to desired state after transmission
-      if(fabs(b_lift_m.get_target_position() - b_lift_m.get_position()) < 15){
-        Subsystem::set_state(after_switch_state);
+      if(fabs(motor.get_target_position() - motor.get_position()) < 15){
+        Subsystem::set_state(after_shift_state);
       }
+      break;
+
+    case b_lift_states::reshift:  // shifts to intake 
       break;
 
   }
@@ -142,25 +180,19 @@ void B_Lift::handle_state_change(){
   if(get_target_state() == get_state()) return;
   // if state has changed, performs the necessary cleanup operation before entering next state
 
-  // if intake/lift transmission is in intake mode, shift the transmission to the lift
-  if(!lift_t.get_state() && get_state() != b_lift_states::shifting_to_lift_up){
-    after_switch_state = get_target_state();
-    printf("after_switch_state:%s", b_lift.state_names[(int)after_switch_state]);
-    Subsystem::set_state(b_lift_states::shifting_to_lift_up);
-  }
-
-  if(get_state() == b_lift_states::bottom){ // if lift is leaving the bottom state, turn off the intake
-    // b_lock_p.set_value(HIGH);  // unlock the lift
-    intake.set_state(intake_states::off);
-  }
+  // if intake/lift transmission is in the wrong state, shift
+  handle_shift();
 
   switch(get_target_state()){
     case b_lift_states::managed:
       break;
 
     case b_lift_states::bottom:
-      motor.move(-10); // slight down holding power
-      // b_lock_p.set_value(HIGH);  // lock the lift
+      motor.move(-20); // slight down holding power
+      break;
+
+    case b_lift_states::top:
+      motor.move(10); // slight up holding power
       break;
 
     case b_lift_states::idle:
@@ -171,57 +203,189 @@ void B_Lift::handle_state_change(){
       break;
 
     case b_lift_states::manual:
-      master.rumble("-");
       // we don't want the b_claw in search mode while the lift is in manual
       if(b_claw_obj.get_state() == b_claw_states::searching){
         b_claw_obj.set_state(b_claw_states::idle);
       }
       break;
 
-    case b_lift_states::shifting_to_lift_up:
-      lift_t.set_state(HIGH);
+    case b_lift_states::intake_off:
+      motor.move(0);
+      break;
+
+    case b_lift_states::intake_on:
+      intake_safe.reset();
+      motor.move(-127);
+      break;
+    case b_lift_states::intk_jam:
+      jam_time= millis();
+      motor.move(127);
+      printf("AHHHHHHHHHHHHHH here \n\n\n\n");
+      break;
+    case b_lift_states::intake_reversed:
+      motor.move(127);
+      break;
+
+    case b_lift_states::shifting_up:
       motor.move_relative(30, 100);
       break;
-    
-    case b_lift_states::shifting_to_lift_down:
+
+    case b_lift_states::shifting_down:
       motor.move_relative(-30, 100);
       break;
 
+    case b_lift_states::reshift:
+      after_shift_state = b_lift_states::intake_on;
+      shift(TRANS_LIFT_STATE); // shifts to lift
+      break;
+    default:
+    break;
+
   }
-  log_state_change();  
+  log_state_change();
 }
 
 // accepts an index argument used specifically for a move to target
-void B_Lift::set_state(const b_lift_states next_state, const uint8_t index){  // requests a state change and logs it
+void B_Lift::set_state(const b_lift_states next_state, const uint8_t index, const int32_t speed){  // requests a state change and logs it
   // confirms state change only if the state is actually move to target
   if (next_state == b_lift_states::move_to_target){
-    this->index = index;
-    state_log.print("%s | State change requested index is: %d \t", name, index);
-    Subsystem::set_state(next_state);
+    // if back lift is below a threshold and the hitch is open, close it to not break it
+    if(index == 0){
+      if(hitch_obj.get_state() != hitch_states::grabbed){
+        hitch_obj.set_state(hitch_states::grabbed);
+      }
+      // if the goal is detected, don't power the lift
+      // if(hitch_dist.get() > 30){
+      this->index = index;
+      this->speed = speed;
+      state_log.print("%s | State change requested index is: %d \t", name, index);
+      Subsystem::set_state(next_state);
+      // }
+    }
+    else{
+      this->index = index;
+      this->speed = speed;
+      state_log.print("%s | State change requested index is: %d \t", name, index);
+      Subsystem::set_state(next_state);
+    }
   }
-  else state_log.print("%s | INVALID move to target State change requested from %s to %s, index is: %d\n", name, state_names[static_cast<int>(get_state())], state_names[static_cast<int>(next_state)], index);
+  else state_log.print("%s | INVALID move to target State change requested from %s to %s, index is: %d", name, state_names[static_cast<int>(get_state())], state_names[static_cast<int>(next_state)], index);
 }
 
-extern int elastic_f_up_time, elastic_f_down_time; //from gui_construction.cpp
+int B_Lift::find_index(){
+  for(size_t i = 0; i < driver_positions.size(); i++){
+    // if the lift is at a position in the array, return that index
+    if(fabs(driver_positions[i] - b_lift_pot.get_value()) < detection_end_error)  return i;
+  }
+  return -1;
+}
 
-void B_Lift::elastic_util(){
-  motor.move(-10);
-  // GUI::go("Start Elastic Utility", "Press to start the elastic utility.", 500);
-  master.get_digital_new_press(DIGITAL_A);
+void B_Lift::handle_shift(){
+  // if the transmission is in intake mode and the target state is a lift state, shift
+  if(lift_t.get_state() == TRANS_INTAKE_STATE){
+    switch(get_target_state()){
+      case b_lift_states::bottom:
+        shift(TRANS_LIFT_STATE);
+        break;
+      case b_lift_states::top:
+        shift(TRANS_LIFT_STATE);
+        break;
+      case b_lift_states::idle:
+        shift(TRANS_LIFT_STATE);
+        break;
+      case b_lift_states::move_to_target:
+        shift(TRANS_LIFT_STATE);
+        break;        
+      case b_lift_states::manual:
+        shift(TRANS_LIFT_STATE);
+        break;
+    }
+  }
+  // if the transmission is in lift mode and the target state is an intake state, shift
+  else{
+    switch(get_target_state()){
+      case b_lift_states::intake_off:
+        shift(TRANS_INTAKE_STATE);
+        break;
+      case b_lift_states::intake_on:
+        shift(TRANS_INTAKE_STATE);
+        break;
+      case b_lift_states::intake_reversed:
+        shift(TRANS_INTAKE_STATE);
+        break;
+    }
+  }
+}
+
+void B_Lift::shift(bool piston_state){
+  after_shift_state = get_target_state();
+  state_log.print("after_switch_state:%s", b_lift.state_names[(int)after_shift_state]);
+  lift_t.set_state(piston_state);
+  Subsystem::set_state(b_lift_states::shifting_up);
+}
+
+void B_Lift::increment_index(){
+  state_log.print("b_lift_increment");
+  int cur_index = find_index();
+  state_log.print("B_LIFT_CUR_INDEX: %d\n", cur_index);
+  // if state is between_positions, go to the closest position that's higher than the current position
+  if(cur_index == -1){
+    // if lift is above topmost position, go to top
+    if(b_lift_pot.get_value() > b_lift.driver_positions[b_lift.driver_positions.size() - 1]){
+      b_lift.set_state(b_lift_states::move_to_target, b_lift.driver_positions.size() - 1);
+    }
+    else{
+      for (size_t i = 0; i < b_lift.driver_positions.size(); i++){
+        if(driver_positions[i] > b_lift_pot.get_value()){
+          b_lift.set_state(b_lift_states::move_to_target, i);
+          break;
+        }
+      }
+    }
+  }
+  // otherwise just go to the next highest position, but doesn't increment index if it's out of bounds
+  else if(cur_index < b_lift.driver_positions.size() - 1)  b_lift.set_state(b_lift_states::move_to_target, cur_index + 1);
+}
+
+void B_Lift::decrement_index(){
+  state_log.print("b_lift_decrement");
+  int cur_index = find_index();
+  printf("B_LIFT_CUR_INDEX: %d\n", cur_index);
+  // if state is between_positions, go to the closest position that's lower than the current position
+  if(cur_index == -1){
+    // if lift is below bottommost position, go to bottom
+    if(b_lift_pot.get_value() < b_lift.driver_positions[0]){
+      b_lift.set_state(b_lift_states::move_to_target, 0);
+    }
+    else{
+      for (size_t i = b_lift.driver_positions.size() - 1; i >= 0; i--){
+        if(b_lift.driver_positions[i] < b_lift_pot.get_value()){
+          b_lift.set_state(b_lift_states::move_to_target, i);
+          break;
+        }
+      }
+    }
+  }
+  // otherwise just go to the next lowest position, but doesn't decrement index if it's out of bounds
+  else if(cur_index > 0)  b_lift.set_state(b_lift_states::move_to_target, cur_index - 1);
+}
+
+int elastic_b_up_time, elastic_b_down_time; //for gui_construction.cpp
+
+void B_Lift::elastic_util(int high){ //1011 as of April 10th
+  GUI::prompt("Press to start back elastic test", "", 500);
   Timer move_timer{"move"};
-  set_state(b_lift_states::move_to_target, driver_positions.size() - 1); // moves to top
-  // // intake_piston.set_value(HIGH);  // raises intake
-  wait_until(get_state() == b_lift_states::idle);
+  while(abs(b_lift_m.get_position() - high) > 15) b_lift_m.move(127);
   move_timer.print();
-  elastic_f_up_time = move_timer.get_time();
-  master.print(1, 0, "up time: %d", elastic_f_up_time);
+  elastic_b_up_time = move_timer.get_time();
+  master.print(1, 0, "up time: %d", elastic_b_up_time);
 
   move_timer.reset();
-  set_state(b_lift_states::move_to_target, 0); // moves to bottom
-  wait_until(get_state() == b_lift_states::bottom);
+  while(abs(b_lift_m.get_position() - 0) > 15) b_lift_m.move(-127);
   move_timer.print();
-  elastic_f_down_time = move_timer.get_time();
-  master.print(2, 0, "down time: %d", elastic_f_up_time);
+  elastic_b_down_time = move_timer.get_time();
+  master.print(2, 0, "down time: %d", elastic_b_up_time);
+  b_lift_m.move(0);
 }
 
 
@@ -230,6 +394,7 @@ B_Claw b_claw_obj({"B_Claw",
 {
   "managed",
   "idle",
+  "about_to_search",
   "searching",
   "tilted",
   "flat"
@@ -237,26 +402,8 @@ B_Claw b_claw_obj({"B_Claw",
 });
 
 B_Claw::B_Claw(Subsystem<b_claw_states, NUM_OF_B_CLAW_STATES> subsystem): Subsystem(subsystem)  // constructor
-{}
-
-void B_Claw::handle_buttons(){
-  // resets the press timer if toggle button is pressed
-  if(master.get_digital_new_press(claw_toggle_button) && !get_lift()){
-    toggle_press_timer.reset();
-    // grabs goal if toggle button is pressed and claw is open
-    if(get_state() == b_claw_states::idle) set_state(b_claw_states::tilted);
-  }
-
-  if(toggle_press_timer.get_time() > 300){  // toggles tilt state if claw button was held
-    if(get_state() == b_claw_states::tilted) set_state(b_claw_states::flat);
-    else if(get_state() == b_claw_states::flat) set_state(b_claw_states::tilted);
-    toggle_press_timer.reset(false); // resets and pauses the timer 
-  }
-  // releases goal if toggle button is released before the button hold timeout triggers
-  else if(!master.get_digital(claw_toggle_button)){
-    toggle_press_timer.reset(false);  // resets and pauses the timer 
-    if(get_state() == b_claw_states::tilted || get_state() == b_claw_states::flat)  set_state(b_claw_states::idle);
-  }
+{
+  state_at_toggle_press = b_claw_states::idle; // don't change this
 }
 
 void B_Claw::handle(){
@@ -266,11 +413,24 @@ void B_Claw::handle(){
       break;
 
     case b_claw_states::idle:
+      // forces claw into searching if lift is at bottom
+      if(B_LIFT_AT_BOTTOM && b_lift.get_state() != b_lift_states::manual) set_state(b_claw_states::searching);
+      break;
+
+    case b_claw_states::about_to_search:
+      // start searching again after 2 seconds
+      if(search_timer.get_time() > 2000) set_state(b_claw_states::searching);
+
+      // doesn't let driver search if lift isn't at bottom
+      if(!B_LIFT_AT_BOTTOM) set_state(b_claw_states::idle);
       break;
 
     case b_claw_states::searching:
       // grabs goal if bowl is detected
-      if(b_dist.get() < 40) set_state(b_claw_states::tilted);
+      if(b_dist.get() < 45) set_state(b_claw_states::tilted);
+
+      // doesn't let driver search if lift isn't at bottom
+      if(!B_LIFT_AT_BOTTOM) set_state(b_claw_states::idle);
       break;
 
     case b_claw_states::tilted:
@@ -290,23 +450,29 @@ void B_Claw::handle_state_change(){
       break;
 
     case b_claw_states::idle:
-      master.rumble("-");
+      tilt_lock.set_state(HIGH);
       b_claw.set_state(LOW);
+      break;
+
+    case b_claw_states::about_to_search:
+      tilt_lock.set_state(HIGH);
+      b_claw.set_state(LOW);
+      search_timer.reset(); // to wait 2 seconds before entering search
       break;
 
     case b_claw_states::searching:
       b_claw.set_state(LOW);
-      search_cycle_check_count = 0; // resets search cycle count
       break;
 
     case b_claw_states::tilted:
-      master.rumble("-");
       b_claw.set_state(HIGH); // grabs mogo
       break;
 
     case b_claw_states::flat:
-      b_claw.set_state(HIGH); // grabs mogo
+      tilt_lock.set_state(LOW);
+      delay(50);
+      b_claw.set_state(LOW);
       break;
   }
-  log_state_change();  
+  log_state_change();
 }
