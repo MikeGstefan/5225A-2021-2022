@@ -86,16 +86,16 @@ void skills(){
 
 void skills2(){
   int time = millis();
-  f_lift.set_state(f_lift_states::move_to_target,0);
-  b_lift.set_state(b_lift_states::move_to_target,b_top);
-  while(b_lift.get_target_state() != b_lift_states::top);
+  // f_lift.set_state(f_lift_states::move_to_target,0);
+  // b_lift.set_state(b_lift_states::move_to_target,b_top);
+  // while(b_lift.get_target_state() != b_lift_states::top);
   
 
-  flatten_against_wall(false);
-  f_claw(0);
-  b_claw.set_state(0);
-  tilt_lock.set_state(0);
-  time = millis();
+  // flatten_against_wall(false);
+  // f_claw(0);
+  // b_claw.set_state(0);
+  // tilt_lock.set_state(0);
+  // time = millis();
 
 
 
