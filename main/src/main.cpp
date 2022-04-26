@@ -134,10 +134,10 @@ void opcontrol() {
 		delay(33);
 	}
 	int timer = millis();
-	// skills();
-	// skills2();
+	skills();
+	skills2();
 	skills3();
-	// skills4();
+	skills4();
 	master.print(1,1,"total %d", millis() - timer);
 	// skills3();
 	// // skills();
