@@ -63,9 +63,9 @@
       Button dist (360, 140, 100, 75, GUI::Style::SIZE, Button::SINGLE, checks, "Distance");
 
     Page track ("Tracking"); //Display tracking vals and reset btns
-      Text track_x(50, 45, GUI::Style::CENTRE, TEXT_SMALL, track, "X:%.1f", tracking.x_coord);
-      Text track_y(135, 45, GUI::Style::CENTRE, TEXT_SMALL, track, "Y:%.1f", tracking.y_coord);
-      Text track_a(220, 45, GUI::Style::CENTRE, TEXT_SMALL, track, "A:%.1f", std::function([](){return tracking.get_angle_in_deg();}));
+      Text track_x(50, 45, GUI::Style::CENTRE, TEXT_SMALL, track, "X:%.1f", tracking.coord().x);
+      Text track_y(135, 45, GUI::Style::CENTRE, TEXT_SMALL, track, "Y:%.1f", tracking.coord().y);
+      Text track_a(220, 45, GUI::Style::CENTRE, TEXT_SMALL, track, "A:%.1f", std::function([](){return fmod(tracking.coord().angle, 360);}));
       Text enc_l(50, 130, GUI::Style::CENTRE, TEXT_SMALL, track, "L:%d", std::function([](){return LeftEncoder.get_value() != std::numeric_limits<int32_t>::max() ? LeftEncoder.get_value() : 0;}));
       Text enc_r(135, 130, GUI::Style::CENTRE, TEXT_SMALL, track, "R:%d", std::function([](){return RightEncoder.get_value() != std::numeric_limits<int32_t>::max() ? RightEncoder.get_value() : 0;}));
       Text enc_b(220, 130, GUI::Style::CENTRE, TEXT_SMALL, track, "B:%d", std::function([](){return BackEncoder.get_value() != std::numeric_limits<int32_t>::max() ? BackEncoder.get_value() : 0;}));
@@ -413,7 +413,7 @@ void main_setup(){
     });
     track.set_loop_func([](){
       screen::set_pen(COLOUR(RED));
-      screen::draw_pixel(270+(200.0*tracking.x_coord/144.0), 230-(200.0*tracking.y_coord/144.0)); //Scales to screen
+      screen::draw_pixel(270+(200.0*tracking.coord().x/144.0), 230-(200.0*tracking.coord().y/144.0)); //Scales to screen
 
       if(main_obj.pressed()){
         int x = GUI::x-270, y = 230-GUI::y;
@@ -424,9 +424,9 @@ void main_setup(){
       }
     });
 
-    res_x.set_func([](){tracking.reset(0.0, tracking.y_coord, rad_to_deg(tracking.global_angle));});
-    res_y.set_func([](){tracking.reset(tracking.x_coord, 0.0, rad_to_deg(tracking.global_angle));});
-    res_a.set_func([](){tracking.reset(tracking.x_coord, tracking.y_coord, 0.0);});
+    res_x.set_func([](){tracking.reset(0.0, tracking.coord().y, tracking.coord().angle);});
+    res_y.set_func([](){tracking.reset(tracking.coord().x, 0.0, tracking.coord().angle);});
+    res_a.set_func([](){tracking.reset(tracking.coord().x, tracking.coord().y, 0.0);});
 
     res_all.set_func([](){
       RightEncoder.reset();
@@ -448,9 +448,9 @@ void main_setup(){
 
   //Moving
     moving.set_setup_func([](){
-      x_val.set_value(tracking.x_coord);
-      y_val.set_value(tracking.y_coord);
-      a_val.set_value(tracking.get_angle_in_deg());
+      x_val.set_value(tracking.coord().x);
+      y_val.set_value(tracking.coord().y);
+      a_val.set_value(tracking.coord().angle);
     });
 
     go_to_xya.set_func([&](){
@@ -458,11 +458,11 @@ void main_setup(){
       if (GUI::prompt("Press to go to " + sprintf2("%d", target), "", 1000)) move_start(move_types::point, point_params(target));
     });
     go_home.set_func([](){
-      Position target (0, 0, tracking.get_angle_in_deg());
+      Position target (0, 0, tracking.coord().angle);
       if (GUI::prompt("Press to go to " + sprintf2("%d", target), "", 1000)) move_start(move_types::point, point_params(target));
     });
     go_centre.set_func([](){
-      Position target (72, 72, tracking.get_angle_in_deg());
+      Position target (72, 72, tracking.coord().angle);
       if (GUI::prompt("Press to go to " + sprintf2("%d", target), "", 1000)) move_start(move_types::point, point_params(target));
     });
 
@@ -663,9 +663,9 @@ void main_setup(){
           drivebase.reset();
 
           if(GUI::prompt("Press when back at start position")){
-            printf2("The robot is %.2f inches %s and %.2f inches %s off the starting point.", fabs(tracking.x_coord), tracking.x_coord > 0 ? "right" : "left", fabs(tracking.y_coord), tracking.y_coord > 0 ? "forward" : "back");
+            printf2("The robot is %.2f inches %s and %.2f inches %s off the starting point.", fabs(tracking.coord().x), tracking.coord().x > 0 ? "right" : "left", fabs(tracking.coord().y), tracking.coord().y > 0 ? "forward" : "back");
             
-            double turned = rad_to_deg(tracking.global_angle) / 180.0;
+            double turned = tracking.coord().angle / 180.0;
             double rots = round(turned);
             turned = 180*(turned-rots);
             rots /= 2;
@@ -687,18 +687,18 @@ void main_setup(){
           tracking.wait_for_dist(10);
           drivebase.brake();
           drivebase.move(0.0, dir*80.0);
-          wait_until(fabs(tracking.global_angle) > 9.0_rot);
+          wait_until(fabs(tracking.coord().angle) > 3200);
           drivebase.move(0.0, dir*40.0);
-          wait_until(fabs(tracking.global_angle) > 10.0_rot);
+          wait_until(fabs(tracking.coord().angle) > 3600);
           drivebase.brake();
           drivebase.move(60.0, 0.0);
           tracking.wait_for_dist(5);
           flatten_against_wall();
           drivebase.brake();
 
-          printf2("The robot is %.2f inches %s and %.2f inches %s off the starting point.", fabs(tracking.x_coord), tracking.x_coord > 0 ? "right" : "left", fabs(tracking.y_coord), tracking.y_coord > 0 ? "forward" : "back");
+          printf2("The robot is %.2f inches %s and %.2f inches %s off the starting point.", fabs(tracking.coord().x), tracking.coord().x > 0 ? "right" : "left", fabs(tracking.coord().y), tracking.coord().y > 0 ? "forward" : "back");
             
-          double turned = rad_to_deg(tracking.global_angle) / 180.0;
+          double turned = tracking.coord().angle / 180.0;
           double rots = round(turned);
           turned = 180*(turned-rots);
           rots /= 2;
@@ -739,7 +739,7 @@ void main_setup(){
 
 void main_background(){
   //Saving Field coords
-  int x = 200*tracking.x_coord/144, y = 200*tracking.y_coord/144;
+  int x = 200*tracking.coord().x/144, y = 200*tracking.coord().y/144;
   if(in_range(x, 0, 199) && in_range(y, 0, 199)) field[x].set(y); //Saves position (x,y) to as tracked
 
   for (std::array<std::tuple<Motor*, std::string, std::string, int, Text_*, Text_*, Button*, Button*>, 8>::iterator it = motors_for_gui.begin(); it != motors_for_gui.end(); it++){

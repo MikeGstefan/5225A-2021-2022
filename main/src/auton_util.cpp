@@ -41,7 +41,7 @@ void save_positions(){
   // move the robot
 
   if(GUI::prompt("Press to save position", "Press to save the current position to a file.")){
-    Position pos = {tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.get_angle_in_deg())};
+    Position pos = tracking.coord();
     tracking_imp.print("Saving %.2f to file", pos);
     master.clear();
     master.print(0, 0, "Saving");
@@ -72,7 +72,7 @@ void load_positions(){
   tracking.reset(pos);
   master.clear();
   master.print(0, 0, "Saving");
-  master.print(1, 0, "%.1f, %.1f, %.1f", tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle));
+  master.print(1, 0, "%.1f", tracking.coord());
 }
 
 //remove if unneeded

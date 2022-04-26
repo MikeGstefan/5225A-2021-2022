@@ -238,8 +238,8 @@ void Drivebase::update_lookup_table_util(){
 }
 
 void Drivebase::handle_input(){
-  // tracking.power_x = drivers[cur_driver].custom_drives[0].lookup(master.get_analog(drivers[cur_driver].joy_sticks[0]));
-  tracking.power_y = drivers[cur_driver].custom_drives[1].lookup(master.get_analog(ANALOG_LEFT_Y));
+  // tracking.power.x = drivers[cur_driver].custom_drives[0].lookup(master.get_analog(drivers[cur_driver].joy_sticks[0]));
+  tracking.power.y = drivers[cur_driver].custom_drives[1].lookup(master.get_analog(ANALOG_LEFT_Y));
   // caps drive speed at 40 if intake is on
   // if(b_lift.get_state() == b_lift_states::intake_on || b_lift.get_state() == b_lift_states::intk_jam){
   if(master.is_rising(speed_limit_button)) speed_limit_activated = !speed_limit_activated;
@@ -249,15 +249,15 @@ void Drivebase::handle_input(){
       master.rumble("-");
       buzz_timer.reset();
     }
-    if(fabs(tracking.power_y) > max_drive_speed)  tracking.power_y = sgn(tracking.power_y) * max_drive_speed;
+    if(fabs(tracking.power.y) > max_drive_speed)  tracking.power.y = sgn(tracking.power.y) * max_drive_speed;
     // caps turns speed at 40% when intake is on
-    tracking.power_a = 0.4 * drivers[cur_driver].custom_drives[2].lookup(master.get_analog(ANALOG_LEFT_X));
+    tracking.power.angle = 0.4 * drivers[cur_driver].custom_drives[2].lookup(master.get_analog(ANALOG_LEFT_X));
   }
-  else tracking.power_a = 0.6 * drivers[cur_driver].custom_drives[2].lookup(master.get_analog(ANALOG_LEFT_X));
-  // printf2("%d, %f, %f", master.get_analog(ANALOG_LEFT_Y), tracking.power_y, tracking.power_a );
-  if(fabs(tracking.power_x) < deadzone) tracking.power_x = 0.0;
-  if(fabs(tracking.power_y) < deadzone) tracking.power_y = 0.0;
-  if(fabs(tracking.power_a) < deadzone) tracking.power_a = 0.0;
+  else tracking.power.angle = 0.6 * drivers[cur_driver].custom_drives[2].lookup(master.get_analog(ANALOG_LEFT_X));
+  // printf2("%d, %f, %f", master.get_analog(ANALOG_LEFT_Y), tracking.power.y, tracking.power.angle );
+  if(fabs(tracking.power.x) < deadzone) tracking.power.x = 0.0;
+  if(fabs(tracking.power.y) < deadzone) tracking.power.y = 0.0;
+  if(fabs(tracking.power.angle) < deadzone) tracking.power.angle = 0.0;
 
   if(master.is_rising(reverse_drive_button)){
     master.rumble("-");
@@ -266,21 +266,21 @@ void Drivebase::handle_input(){
     else master.print(0, 0, "Forward");
   }
   if (reversed){
-    tracking.power_y *= -1;
-    tracking.power_x *= -1;
+    tracking.power.y *= -1;
+    tracking.power.x *= -1;
   }
 
-  if(this->state && (fabs(tracking.power_y) < deadzone && fabs(tracking.power_a) < deadzone)){
+  if(this->state && (fabs(tracking.power.y) < deadzone && fabs(tracking.power.angle) < deadzone)){
     // velo_brake();
     brake();
   }
   else{ 
-    move(tracking.power_y, tracking.power_a);
+    move(tracking.power.y, tracking.power.angle);
     
   }
 
-  // move(tracking.power_y, tracking.power_a);
-  // move(0, tracking.power_a);
+  // move(tracking.power.y, tracking.power.angle);
+  // move(0, tracking.power.angle);
 }
 
 void Drivebase::driver_practice(){
@@ -309,13 +309,8 @@ void Drivebase::driver_practice(){
   while(true){
     while(true){
       // if(master.is_rising(tracking_button)){
-      //   master.print(1,1,"%.2f, %.2f, %.2f", tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle));
+        // master.print(1, 1, "%.2f", tracking.coord());
       // }
-      if(master.is_rising(ok_button)){
-        // auton_selector(); //talk to nathan if you're uncommenting this line
-        // master.print(1,1,"HERE");
-        delay(2000);
-      }
       drivebase.handle_input();
       // intake.handle();
 
@@ -415,7 +410,7 @@ void Drivebase::reset(){
 
 void Drivebase::random_turn(int direction){
   if(direction == 0) direction = random_direction();
-  move_start(move_types::turn_angle, turn_angle_params(tracking.get_angle_in_deg()+direction*90.0, true, true, 15.0, 0.0, 10.0, 20.0, 127.0, 1000));
+  move_start(move_types::turn_angle, turn_angle_params(tracking.coord().angle+direction*90.0, true, true, 15.0, 0.0, 10.0, 20.0, 127.0, 1000));
 }
 
 

@@ -14,23 +14,22 @@ constexpr int min_move_power_y = 22;
 
 void update(void* params);
 
-
 class Tracking{
+  friend void update(void* params);
+  private:
+    Position position;
+    bool move_started = false;
+
   public:
-    //Can we make x_coord, y_coord, global_angle a Position
-    double x_coord = 0.0; double y_coord = 0.0; double global_angle = 0.0; //double target_x = 0.0;
-    double power_x, power_y, power_a;
-    double l_velo, r_velo, b_velo;
-
-    double drive_error;
-    bool move_complete = true, move_started = false;
-    int movetime = 0;
-
     //global g_velocity stores x, y and angular velocities
-    Position g_velocity;
+    Position g_velocity, power;
+    bool move_complete = true;
+    double l_velo, r_velo, b_velo;
+    double drive_error;
+    int movetime = 0;
+    Position coord() const;
     void wait_for_dist(double distance, int timeout = 0);
-    double get_angle_in_deg();
-    void reset(double x, double y=0.0, double a=0.0);
+    void reset(double x, double y, double a=0.0);
     void reset(Position position = {});
     double get_dist(Position pos1);
     static double get_dist(Position pos1, Position pos2);

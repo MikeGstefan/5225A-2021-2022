@@ -273,12 +273,12 @@ void ramp_distance_line_up(double distance, int timeout){
 	double y_speed = 40;
 	double a_speed = 30;
 	int count = 0;
-	const Point start_pos = {tracking.x_coord, tracking.y_coord};
+	const Point start_pos = {tracking.coord().x, tracking.coord().y};
 	double delta_dist = 0.0;
 	int start_time = millis();
 
 	while(distance >= delta_dist){
-		delta_dist = sqrt(pow(tracking.x_coord -start_pos.x,2) + pow(tracking.y_coord - start_pos.y,2));
+		delta_dist = sqrt(pow(tracking.coord().x -start_pos.x,2) + pow(tracking.coord().y - start_pos.y,2));
 		misc.print("Delta Dist: %f", delta_dist);
 
 		if(abs(l_reset_dist.get() - r_reset_dist.get()) <= 50) setVisionState(Distance_States::stable); // 50 is a test value
@@ -318,7 +318,7 @@ void ramp_distance_line_up(double distance, int timeout){
 void goal_line_up(int timeout){
 	double y_speed = 40;
 	double a_speed = 30;
-	const Point start_pos = {tracking.x_coord, tracking.y_coord};
+	const Point start_pos = {tracking.coord().x, tracking.coord().y};
 	double delta_dist = 0.0;
 	int start_time = millis();
 
