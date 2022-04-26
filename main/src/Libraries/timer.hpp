@@ -1,19 +1,18 @@
 #pragma once
 #include "main.h"
 
-//forward declarations
-class Data;
-
 enum class timing_units{
   seconds,
   millis,
   micros
 };
 
+class Data;
+
 class Timer{
   // 'time' is the time counted by the timer until the last call of pause()
   uint64_t last_reset_time, time, last_play_time;
-  const char* name;
+  std::string name;
   bool paused; // state of timer
   timing_units timing_unit;
   uint64_t get_time_in_timing_unit(); // returns time in either millis micros
@@ -21,8 +20,8 @@ class Timer{
 
 public:
   //Why const bool& everywhere instead of just bool?
-  Timer(const char* name, const bool& play = true, timing_units timing_unit = timing_units::millis, Data* data_obj_ptr = nullptr);
-  Timer(const char* name, Data* data_obj_ptr, const bool& play = true, timing_units timing_unit = timing_units::millis);
+  Timer(std::string name, bool play = true, timing_units timing_unit = timing_units::millis, Data* data_obj_ptr = nullptr);
+  Timer(std::string name, Data* data_obj_ptr, bool play = true, timing_units timing_unit = timing_units::millis);
   uint64_t get_last_reset_time();
   void reset(const bool& play = true);
   uint64_t get_time();
@@ -30,9 +29,7 @@ public:
   void play();
   void pause();
   void print();
-  void print(std::string str);
-  void print(const char* fmt, ...);
-
+  
   /**
    * @brief To print the time as a fancy string
    * 

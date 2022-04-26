@@ -3,7 +3,7 @@
 #include "tracking.hpp"
 #include "Subsystems/b_lift.hpp"
 #include "Subsystems/f_lift.hpp"
-#include "Subsystems/intake.hpp"
+#include "Subsystems/hitch.hpp"
 #include "Libraries/task.hpp"
 
 // NOTE: all timers start as paused
@@ -90,7 +90,7 @@ int custom_drive::lookup(int x){
 }
 
 // driver struct constructor
-driver::driver(const char* name, std::array<controller_analog_e_t, 3> joy_sticks, std::array<custom_drive, 3> custom_drives):
+driver::driver(std::string name, std::array<controller_analog_e_t, 3> joy_sticks, std::array<custom_drive, 3> custom_drives):
 name(name), joy_sticks{joy_sticks[0], joy_sticks[1], joy_sticks[2]}, custom_drives{custom_drives[0], custom_drives[1], custom_drives[2]}
 {}
 
@@ -374,7 +374,7 @@ void Drivebase::prev_driver(){
   master.print(2, 0, "Driver: %s          ", driver_name());
 }
 
-const char* Drivebase::driver_name(){
+std::string Drivebase::driver_name(){
   return drivers[cur_driver].name;
 }
 
@@ -527,26 +527,26 @@ void handle_lift_buttons(){
 
   // goes to top position if up button is held
   // for master
-  if(up_press.get_time() > MASTER_HOLD_TIME){
+  if(up_press.get_time() > master_hold_time){
     if(get_lift())  f_lift.set_state(f_lift_states::move_to_target, f_lift.driver_positions.size() - 1);
     else  b_lift.set_state(b_lift_states::move_to_target, b_lift.driver_positions.size() - 1);
   }
   // goes to bottom position if down button is held
-  if(down_press.get_time() > MASTER_HOLD_TIME){
+  if(down_press.get_time() > master_hold_time){
     if(get_lift())  f_lift.set_state(f_lift_states::move_to_target, 0);
     else  b_lift.set_state(b_lift_states::move_to_target, 0);
   }
   // for partner (if lift buttons are held go all the way up/down)
-  if(f_lift_up_press.get_time() > PARTNER_HOLD_TIME){
+  if(f_lift_up_press.get_time() > partner_hold_time){
     f_lift.set_state(f_lift_states::move_to_target, f_lift.driver_positions.size() - 2);
   }
-  if(b_lift_up_press.get_time() > PARTNER_HOLD_TIME){
+  if(b_lift_up_press.get_time() > partner_hold_time){
     b_lift.set_state(b_lift_states::move_to_target, b_lift.driver_positions.size() - 2);
   }
-  if(f_lift_down_press.get_time() > PARTNER_HOLD_TIME){
+  if(f_lift_down_press.get_time() > partner_hold_time){
     f_lift.set_state(f_lift_states::move_to_target, 0);
   }
-  if(b_lift_down_press.get_time() > PARTNER_HOLD_TIME){
+  if(b_lift_down_press.get_time() > partner_hold_time){
     b_lift.set_state(b_lift_states::move_to_target, 0);
   }
 
@@ -626,7 +626,7 @@ void handle_claw_buttons(){
   }
   // tilt code here
 
-  if(toggle_press_timer.get_time() > TILT_HOLD_TIME){ // if toggle button was held, toggle tilted/flat state
+  if(toggle_press_timer.get_time() > tilt_hold_time){ // if toggle button was held, toggle tilted/flat state
     toggle_press_timer.reset(false);  // resets and pauses the timer
     // only toggle the tilt state if the state was tilted or flat when the button was pressed
     if(b_claw_obj.state_at_toggle_press == b_claw_states::tilted || b_claw_obj.state_at_toggle_press == b_claw_states::flat){
@@ -638,9 +638,9 @@ void handle_claw_buttons(){
   }
   if(master.is_falling(claw_toggle_button)){
     // if the button WASN'T held and the claw was closed when it was pressed, open the claw
-    if(toggle_press_timer.get_time() < TILT_HOLD_TIME && (b_claw_obj.state_at_toggle_press == b_claw_states::tilted || b_claw_obj.state_at_toggle_press == b_claw_states::flat)){
+    if(toggle_press_timer.get_time() < tilt_hold_time && (b_claw_obj.state_at_toggle_press == b_claw_states::tilted || b_claw_obj.state_at_toggle_press == b_claw_states::flat)){
       // printf("fail| state_at_toggle_press: %s, timer: %d\n", b_claw_obj.state_names[(int)b_claw_obj.state_at_toggle_press], toggle_press_timer.get_time());
-      if(B_LIFT_AT_BOTTOM) b_claw_obj.set_state(b_claw_states::about_to_search);
+      if(b_lift.at_bottom()) b_claw_obj.set_state(b_claw_states::about_to_search);
       else b_claw_obj.set_state(b_claw_states::idle);     
       b_claw_obj.state_at_toggle_press = b_claw_states::idle;  // resets state_at_toggle_press so this if isn't entered again
     }

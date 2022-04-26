@@ -1,7 +1,7 @@
 #include "timer.hpp"
 #include "logging.hpp"
 
-Timer::Timer(const char* name, const bool& play, timing_units timing_unit, Data* data_obj_ptr):
+Timer::Timer(std::string name, bool play, timing_units timing_unit, Data* data_obj_ptr):
 name(name), timing_unit(timing_unit)
 {
   if(data_obj_ptr == nullptr) this->data_obj = &term;
@@ -10,7 +10,7 @@ name(name), timing_unit(timing_unit)
   reset(play);
 }
 
-Timer::Timer(const char* name, Data* data_obj_ptr,const bool& play, timing_units timing_unit):
+Timer::Timer(std::string name, Data* data_obj_ptr, bool play, timing_units timing_unit):
 name(name), timing_unit(timing_unit)
 {
   if(data_obj_ptr == nullptr) this->data_obj = &term;
@@ -57,21 +57,8 @@ void Timer::print(){
   data_obj->print("%s's current time is: %lld", name, get_time());
 }
 
-void Timer::print(const std::string str){
-  data_obj->print("%s's current time is: %lld | %s", name, get_time(), str.c_str());
-}
-
-void Timer::print(const char* fmt, ...){
-  va_list args;
-  va_start(args, fmt);
-  char buffer[100];
-  vsnprintf(buffer, 100, fmt, args);
-  va_end(args);
-  data_obj->print("%s's current time is: %lld | %s", name, get_time(), buffer);
-}
-
 void Timer::print_fancy(std::string str, int long_names, bool unit_conversion){
-  data_obj->print("%s's current time is: %s | %s", name, to_string(get_time(), timing_unit, long_names, unit_conversion).c_str(), str.c_str());
+  data_obj->print("%s's current time is: %s | %s", name, to_string(get_time(), timing_unit, long_names, unit_conversion));
 }
 
 

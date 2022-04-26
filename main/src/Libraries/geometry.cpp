@@ -17,10 +17,6 @@ Vector::Vector(const double param_1, const double param_2, vector_types type){
   else set_cartesian(param_1, param_2);
 }
 
-Vector::Vector(const Point point){
-  set_cartesian(point);
-}
-
 // getters
 double Vector::get_x() const{
   return this-> x;

@@ -71,9 +71,9 @@ void _Controller::clear(){
 }
 
 
-void _Controller::rumble(const char* rumble_pattern){
+void _Controller::rumble(std::string rumble_pattern){
   std::function<void()> func = [=](){
-    Controller::rumble(rumble_pattern);
+    Controller::rumble(rumble_pattern.c_str());
     controller_queue.print("rumble controller %d", this->controller_num);
   };
   this->add_to_queue(func);

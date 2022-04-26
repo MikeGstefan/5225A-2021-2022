@@ -26,11 +26,11 @@ class _Task{
     std::tuple<_Task*, void*>params;
     std::uint32_t prio;
     std::uint16_t stack_depth;
-    const char* name;
+    std::string name;
 
 
   public:
-    _Task(task_fn_t function, const char* name = "", void* params = NULL, std::uint32_t prio = TASK_PRIORITY_DEFAULT, std::uint16_t stack_depth = TASK_STACK_DEPTH_DEFAULT);
+    _Task(task_fn_t function, std::string name = "", void* params = NULL, std::uint32_t prio = TASK_PRIORITY_DEFAULT, std::uint16_t stack_depth = TASK_STACK_DEPTH_DEFAULT);
     ~_Task();
 
     static _Task* get_obj(void* params);

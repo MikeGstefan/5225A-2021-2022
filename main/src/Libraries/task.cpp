@@ -12,7 +12,7 @@ struct point_params{
   point_params(Position target, const double max_power = 127.0, const bool overshoot = false, const double min_angle_percent = 0.0, const bool brake = true, const double decel_dist = 0.0, const double decel_speed = 0.0);
 };
 
-_Task::_Task(task_fn_t function, const char* name, void* params, std::uint32_t prio, std::uint16_t stack_depth){
+_Task::_Task(task_fn_t function, std::string name, void* params, std::uint32_t prio, std::uint16_t stack_depth){
   this->function = function;
   this->name = name;
   this->params = std::make_tuple(this,std::move(params));
@@ -49,7 +49,7 @@ void _Task::start(void* params){
   //  printf2("before move: %f",static_cast<point_params*>(params)->target.x);
    this->params = std::make_tuple(this,std::move(params));
   //  printf2("after move: %f",static_cast<point_params*>(_Task::get_params((void*)&this->params))->target.x);
-   this->task_ptr = new Task(this->function, &this->params, this->prio, this->stack_depth, this->name);
+   this->task_ptr = new Task(this->function, &this->params, this->prio, this->stack_depth, this->name.c_str());
    task_log.print(term_colours::GREEN, "%s started", this->name);
 }
 
@@ -89,7 +89,7 @@ bool _Task::notify_handle(){
 }
 
 bool _Task::data_update(){
-  if(this->task_ptr == NULL ||this->task_ptr->get_state() >=3)return false;
+  if(this->task_ptr == NULL || this->task_ptr->get_state() >=3)return false;
   task_log.print("%s pausing for data", this->name);
   this->task_ptr->notify_ext((int)reset, E_NOTIFY_ACTION_OWRITE,NULL);
   wait_until(this->task_ptr->get_state() == 3);

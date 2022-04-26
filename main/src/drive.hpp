@@ -38,11 +38,11 @@ public:
 };
 
 struct driver{
-  const char* name;
+  std::string name;
   // 0 is strafe, 1 is forward, 2 is turn
   std::array<controller_analog_e_t, 3> joy_sticks;
   std::array<custom_drive, 3> custom_drives;
-  driver(const char* name, std::array<controller_analog_e_t, 3> joy_sticks, std::array<custom_drive, 3> custom_drives); // constructor
+  driver(std::string name, std::array<controller_analog_e_t, 3> joy_sticks, std::array<custom_drive, 3> custom_drives); // constructor
 };
 
 
@@ -52,7 +52,7 @@ class Drivebase{
   bool reversed; // if false forwards is the intake side
   int cur_screen;
   int deadzone = 10;
-  const char* screen_text[3] = {"LOCAL_X CURVE:", "LOCAL_Y CURVE:", "LOCAL_A CURVE:"};
+  std::string screen_text[3] = {"LOCAL_X CURVE:", "LOCAL_Y CURVE:", "LOCAL_A CURVE:"};
   void update_screen();
   bool state;//state for the transmission
 
@@ -79,7 +79,7 @@ public:
   void non_blocking_driver_practice(); // method to let drivers drive and change driver profiles to be called in loop
   void next_driver(); //Goes to next driver. Called on drivebase object.
   void prev_driver(); //Goes to previous driver. Called on drivebase object.
-  const char* driver_name(); //Returns the current driver's name
+  std::string driver_name(); //Returns the current driver's name
 
   //returns the current state of the transmission
   bool get_state();

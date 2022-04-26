@@ -23,7 +23,7 @@ void newline(int count){
   std::cout << std::string (count-1 , '\n') << std::endl; //-1 because endl puts the final one
 }
 
-const char* get_term_colour(term_colours colour){
+std::string get_term_colour(term_colours colour){
   switch(colour){
     case term_colours::BLACK: return "\033[30m"; break;
     case term_colours::RED: return "\033[31m"; break;

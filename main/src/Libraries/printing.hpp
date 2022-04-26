@@ -2,9 +2,9 @@
 #include "main.h"
 #include "timer.hpp"
 
-
 struct Point;
 struct Position;
+class Data;
 
 /**
  * -1: no timestamp
@@ -20,6 +20,7 @@ constexpr int n_printf_max = 50;
 
 //feel free to suggest shorter names for term_colours
 enum class term_colours{
+  NONE = 0,
   BLACK,
   RED,
   GREEN,
@@ -28,7 +29,6 @@ enum class term_colours{
   MAGENTA,
   CYAN,
   WHITE,
-  NONE,
   ERROR,
   WARNING,
   NOTIF,
@@ -172,9 +172,9 @@ std::string convert_all_args(const std::string& fmt, const Point& arg);
  * @brief Get the terminal control string to modify its printing colour 
  * 
  * @param colour the colour to use
- * @return const char* 
+ * @return std::string 
  */
-const char* get_term_colour(term_colours colour);
+std::string get_term_colour(term_colours colour);
 
 /**
  * @brief prints a new line to the terminal

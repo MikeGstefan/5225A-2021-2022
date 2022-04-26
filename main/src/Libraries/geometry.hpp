@@ -20,6 +20,7 @@ struct Position{
   constexpr Position(): x(0.0), y(0.0), angle(0.0){}
   constexpr Position(Point point): x(point.x), y(point.y), angle(0.0){}
   constexpr Position(Point point, double angle): x(point.x), y(point.y), angle(angle){}
+  constexpr Position(double x, double y): x(x), y(y), angle(0.0){}
   constexpr Position(double x, double y, double angle): x(x), y(y), angle(angle){}
 };
 
@@ -31,7 +32,7 @@ class Vector{
   public:
     // constructors
     Vector(const double param_1, const double param_2, vector_types type = vector_types::CARTESIAN);
-    Vector(const Point point);
+    constexpr Vector(const Point point): x(point.x), y(point.y), magnitude(sqrt(pow(point.x, 2) + pow(point.y, 2))), angle(atan2(point.y, point.x)){}
 
     // configures vector as cartesian vector, with x and y coordinates
     constexpr void set_cartesian(const double x, const double y){

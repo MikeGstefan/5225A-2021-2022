@@ -50,7 +50,7 @@ class _Task;
 
 class _Controller : public Controller{
   private:
-    std::array<std::function<void()>,20> queue;
+    std::array<std::function<void()>, 20> queue;
     int front = 0, back = 0;
     static std::array<_Controller*, controller_count> objs;
     void add_to_queue(std::function<void()>);
@@ -69,7 +69,7 @@ class _Controller : public Controller{
 
     void clear_line (std::uint8_t line);
     void clear();
-    void rumble(const char* rumble_pattern);
+    void rumble(std::string rumble_pattern);
     bool interrupt(bool analog = true, bool digital = true, bool OK_except = true);
     void wait_for_press(controller_digital_e_t button, int timeout = 0);
     /**
@@ -92,9 +92,9 @@ class _Controller : public Controller{
 
 
   template <typename... Params>
-  void print(std::uint8_t line, std::uint8_t col, const char* fmt, Params... args){
+  void print(std::uint8_t line, std::uint8_t col, std::string fmt, Params... args){
     std::function<void()> func = [=](){
-      Controller::print(line, col, fmt, args...);
+      Controller::print(line, col, fmt.c_str(), args...);
       controller_queue.print("Printing %s to %d", sprintf2(fmt, args...), controller_num);
     };
     add_to_queue(func);
