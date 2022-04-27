@@ -62,7 +62,7 @@ void Timer::print_fancy(std::string str, int long_names, bool unit_conversion){
 }
 
 
-uint64_t Timer::get_time_in_timing_unit(){ // returns time in either millis or micros
+uint64_t Timer::get_time_in_timing_unit(){ //returns time in either millis or micros
   return micros() * (timing_unit == timing_units::micros ? 1 : (timing_unit == timing_units::millis ? 0.001 : 0.000001));
 }
 
@@ -114,24 +114,24 @@ std::string Timer::to_string(std::uint64_t time, timing_units unit, int long_nam
   if(unit_conversion){
 
     if(time >= 1000 && unit == timing_units::micros){
-      std::uint64_t milliseconds = time/1000;
-      time -= milliseconds*1000;
+      std::uint64_t milliseconds = time / 1000;
+      time -= milliseconds * 1000;
 
       if(milliseconds >= 1000) buffer += to_string(milliseconds, timing_units::millis, long_names, true) + ' ';
       else buffer += std::to_string(milliseconds) + millis + ' ';
     }
 
     else if(time >= 1000 && unit == timing_units::millis){
-      std::uint64_t seconds = time/1000;
-      time -= seconds*1000;
+      std::uint64_t seconds = time / 1000;
+      time -= seconds * 1000;
 
       if(seconds >= 60) buffer += to_string(seconds, timing_units::seconds, long_names, true) + ' ';
       else buffer += std::to_string(seconds) + sec + ' ';
     }
 
     else if(time >= 60 && unit == timing_units::seconds){
-      std::uint64_t minutes = time/60;
-      time -= minutes*60;
+      std::uint64_t minutes = time / 60;
+      time -= minutes * 60;
 
       buffer += std::to_string(minutes) + min + ' ';
     }

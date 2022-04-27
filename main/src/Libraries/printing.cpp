@@ -14,6 +14,10 @@ std::string convert_all_args(const std::string& fmt, const Point& arg){
   return '(' + convert_all_args(fmt, arg.x) + ", " + convert_all_args(fmt, arg.y) + ")";
 }
 
+std::string convert_all_args(const std::string& fmt, const Vector& arg){
+  return '(' + convert_all_args(fmt, arg.get_x()) + ", " + convert_all_args(fmt, arg.get_y()) + ")";
+}
+
 //Template Recursion Base case
 std::string sprintf2(const std::string& fmt){
   return fmt;

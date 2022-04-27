@@ -45,16 +45,16 @@ namespace screen_flash{
 
     misc.print(term_colours::BLUE, "\n\n\n%s\n", text);
 
-    int spaces = int(CHAR_WIDTH_LARGE*text.length()/460)+1;
+    int spaces = int(CHAR_WIDTH_LARGE*text.length() / 460)+1;
     std::size_t space, last_space=0;
     std::string sub;
 
     master.rumble(".-");
 
-    for(int i=1; i <= spaces; i++){ //make the printing actually look good
-      space = text.find(' ', text.length()*i/spaces);
+    for(int i = 1; i <= spaces; i++){ //make the printing actually look good
+      space = text.find(' ', text.length() *i / spaces);
       sub = text.substr(last_space, space-last_space);
-      screen::print(TEXT_LARGE, (480-sub.length()*CHAR_WIDTH_LARGE)/2, (CHAR_HEIGHT_LARGE+5)*i, "%s", sub);
+      screen::print(TEXT_LARGE, (480-sub.length() * CHAR_WIDTH_LARGE) / 2, (CHAR_HEIGHT_LARGE + 5) *i, "%s", sub);
       last_space = space+1;
     }
 
@@ -66,21 +66,21 @@ namespace screen_flash{
   void start(std::string text, term_colours colour, std::uint32_t time){
     touched = GUI::touched;
     GUI::clear_screen(GUI::get_colour(colour));
-    screen::set_pen(~GUI::get_colour(colour)&0xFFFFFF); //Makes text inverted colour of background so it is always visible
+    screen::set_pen(~GUI::get_colour(colour) &0xFFFFFF); //Makes text inverted colour of background so it is always visible
     screen::set_eraser(GUI::get_colour(colour));
 
     misc.print(colour, "\n\n\n%s\n", text);
 
-    int spaces = int(CHAR_WIDTH_LARGE*text.length()/460)+1;
+    int spaces = int(CHAR_WIDTH_LARGE*text.length() / 460)+1;
     std::size_t space, last_space=0;
     std::string sub;
 
     master.rumble(".-");
 
-    for(int i=1; i <= spaces; i++){ //make the printing actually look good
-      space = text.find(' ', text.length()*i/spaces);
+    for(int i = 1; i <= spaces; i++){ //make the printing actually look good
+      space = text.find(' ', text.length() *i / spaces);
       sub = text.substr(last_space, space-last_space);
-      screen::print(TEXT_LARGE, (480-sub.length()*CHAR_WIDTH_LARGE)/2, (CHAR_HEIGHT_LARGE+5)*i, "%s", sub);
+      screen::print(TEXT_LARGE, (480-sub.length() * CHAR_WIDTH_LARGE) / 2, (CHAR_HEIGHT_LARGE + 5) *i, "%s", sub);
       last_space = space+1;
     }
 
@@ -101,25 +101,25 @@ namespace screen_flash{
 
 //GUI Helpers
   //To get coordinates for aligned objects, (buttons, sliders...) of same size
-  //Put in how many of buttons/sliders you want, and get properly spaced coords
+  //Put in how many of buttons / sliders you want, and get properly spaced coords
   void GUI::aligned_coords (int x_objects, int y_objects, int x_size, int y_size, int x_range, int y_range){
-    double x_space = (x_range-x_objects*x_size)/(x_objects+1.0);
-    double y_space = (y_range-y_objects*y_size)/(y_objects+1.0);
+    double x_space = (x_range-x_objects * x_size) / (x_objects+1.0);
+    double y_space = (y_range-y_objects * y_size) / (y_objects+1.0);
 
     //Recalculates until it gets a nice multiple of 5
-    while (fmod(x_space, 5)) x_space = ((--x_range)-x_objects*x_size)/(x_objects+1.0);
-    while (fmod(y_space, 5)) y_space = ((--y_range)-y_objects*y_size)/(y_objects+1.0);
+    while (fmod(x_space, 5)) x_space = ((--x_range) - x_objects * x_size) / (x_objects+1.0);
+    while (fmod(y_space, 5)) y_space = ((--y_range) - y_objects * y_size) / (y_objects+1.0);
 
     newline(2);
     for (int y = 0; y < y_objects; y++){
       for (int x = 0; x < x_objects; x++){
-        printf2("(%d, %d, %d, %d, GUI::Style::SIZE)", (x_space)*(x+1) + x_size*x, (y_space)*(y+1) + y_size*y + 20, x_size, y_size);
+        printf2("(%d, %d, %d, %d, GUI::Style::SIZE)", (x_space) * (x+1) + x_size*x, (y_space) * (y+1) + y_size*y + 20, x_size, y_size);
       }
       newline();
     }
     printf2("\nScreen Size: %d x %d", x_range, y_range);
-    if ((x_space+x_size)*(x_objects) > 480) printf2("X out of bounds");
-    if ((y_space+y_size)*(y_objects) > 220) printf2("Y out of bounds");
+    if ((x_space + x_size) * (x_objects) > 480) printf2("X out of bounds");
+    if ((y_space + y_size) * (y_objects) > 220) printf2("Y out of bounds");
     newline(2);
   }
 
@@ -168,27 +168,27 @@ namespace screen_flash{
   }
 
   void GUI::draw_oblong(int x1, int y1, int x2, int y2, double kS, double kR){ //ks and kr and scale values for shrink and radius
-    int s = std::min(x2-x1, y2-y1)*kS; //Scale for shrinking button (pressed look)
-    int r = std::min(x2-x1, y2-y1)*kR; //Scale for how rounded the button edges should be
-    screen::fill_rect(x1+s, y1+s, x2-s, y2-s);
-    screen::erase_rect(x1+s, y1+s, x1+s+r, y1+s+r);
-    screen::erase_rect(x2-s, y1+s, x2-s-r, y1+s+r);
-    screen::erase_rect(x1+s, y2-s, x1+s+r, y2-s-r);
+    int s = std::min(x2-x1, y2-y1) * kS; //Scale for shrinking button (pressed look)
+    int r = std::min(x2-x1, y2-y1) * kR; //Scale for how rounded the button edges should be
+    screen::fill_rect(x1+ s, y1+ s, x2-s, y2-s);
+    screen::erase_rect(x1+ s, y1+ s, x1+ s + r, y1+ s + r);
+    screen::erase_rect(x2-s, y1+ s, x2-s-r, y1+ s + r);
+    screen::erase_rect(x1+ s, y2-s, x1+ s + r, y2-s-r);
     screen::erase_rect(x2-s, y2-s, x2-s-r, y2-s-r);
-    screen::fill_circle(x1+s+r, y1+s+r, r);
-    screen::fill_circle(x2-s-r, y1+s+r, r);
-    screen::fill_circle(x1+s+r, y2-s-r, r);
+    screen::fill_circle(x1+ s + r, y1+ s + r, r);
+    screen::fill_circle(x2-s-r, y1+ s + r, r);
+    screen::fill_circle(x1+ s + r, y2-s-r, r);
     screen::fill_circle(x2-s-r, y2-s-r, r);
   }
 
   //Formats coordinates based on a GUI::Style (always in x1, y1, x2, y2)
-  std::tuple<int, int, int, int> GUI::fix_points (int x1, int y1,int x2, int y2, Style type){
+  std::tuple<int, int, int, int> GUI::fix_points (int x1, int y1, int x2, int y2, Style type){
     switch(type){
       case GUI::Style::CENTRE:
         x1 -= x2;
         y1 -= y2;
-        x2 += x1+x2;
-        y2 += y1+y2;
+        x2 += x1+ x2;
+        y2 += y1+ y2;
         break;
 
       case GUI::Style::SIZE:
@@ -208,7 +208,7 @@ namespace screen_flash{
     temp = std::max(y1, y2);
     y1 = std::min(y1, y2);
     y2 = temp;
-    return {x1,y1,x2,y2}; //Gives back the fixed points as a tuple
+    return {x1, y1, x2, y2}; //Gives back the fixed points as a tuple
   }
 
   int GUI::get_height(text_format_e_t size){
@@ -264,7 +264,7 @@ namespace screen_flash{
         }
     }
 
-    int size = (PAGE_DOWN - y)/(std::count_if(terminal.texts.begin(), terminal.texts.end(), [](Text_* text){return text->txt_size == 4;})) - 5;
+    int size = (PAGE_DOWN - y) / (std::count_if(terminal.texts.begin(), terminal.texts.end(), [](Text_* text){return text->txt_size == 4;})) - 5;
     
     text_format_e_t fmt;
     if(get_height(TEXT_LARGE) <= size) fmt = TEXT_LARGE;
@@ -301,7 +301,7 @@ namespace screen_flash{
 
     //Saves params to class private vars
     this->b_col = b_col;
-    this->b_col_dark = RGB2COLOR(int(COLOR2R(b_col)*0.8), int(COLOR2G(b_col)*0.8), int(COLOR2B(b_col)*0.8));
+    this->b_col_dark = RGB2COLOR(int(COLOR2R(b_col) * 0.8), int(COLOR2G(b_col) * 0.8), int(COLOR2B(b_col) * 0.8));
     this->l_col = l_col;
     this->form = form;
 
@@ -311,27 +311,27 @@ namespace screen_flash{
     std::tie(this->x1, this->y1, this->x2, this->y2) = GUI::fix_points(x1, y1, x2, y2, type);
 
 
-    std::size_t next_space = text.find(' ', text.length()/2);
-    std::size_t prev_space = text.find_last_of(' ', text.length()/2);
-    std::size_t space = (next_space-text.length()/2 < text.length()/2-prev_space) ? next_space : prev_space;
+    std::size_t next_space = text.find(' ', text.length() / 2);
+    std::size_t prev_space = text.find_last_of(' ', text.length() / 2);
+    std::size_t space = (next_space-text.length() / 2 < text.length() / 2-prev_space) ? next_space : prev_space;
 
-    if (space != std::string::npos && 8*text.length()+5 > this->x2-this->x1){ //Spaces it if it's too long for one line
+    if (space != std::string::npos && 8*text.length() + 5 > this->x2-this->x1){ //Spaces it if it's too long for one line
       this->label = text.substr(0, space);
       this->label1 = text.substr(space+1);
 
-      this->text_x = (this->x1+this->x2-(this->label.length()*CHAR_WIDTH_SMALL))/2;
-      this->text_x1 = (this->x1+this->x2-(this->label1.length()*CHAR_WIDTH_SMALL))/2;
-      this->text_y = (this->y1+this->y2-CHAR_HEIGHT_SMALL)/2 - CHAR_HEIGHT_SMALL;
-      this->text_y1 = (this->y1+this->y2-CHAR_HEIGHT_SMALL)/2 + CHAR_HEIGHT_SMALL;
+      this->text_x = (this->x1+ this->x2-(this->label.length() * CHAR_WIDTH_SMALL)) / 2;
+      this->text_x1 = (this->x1+ this->x2-(this->label1.length() * CHAR_WIDTH_SMALL)) / 2;
+      this->text_y = (this->y1+ this->y2-CHAR_HEIGHT_SMALL) / 2 - CHAR_HEIGHT_SMALL;
+      this->text_y1 = (this->y1+ this->y2-CHAR_HEIGHT_SMALL) / 2 + CHAR_HEIGHT_SMALL;
     }
     else{
-      this->text_x = (this->x1+this->x2-(text.length()*CHAR_WIDTH_SMALL))/2;
-      this->text_y = (this->y1+this->y2-CHAR_HEIGHT_SMALL)/2;
+      this->text_x = (this->x1+ this->x2-(text.length() * CHAR_WIDTH_SMALL)) / 2;
+      this->text_y = (this->y1+ this->y2-CHAR_HEIGHT_SMALL) / 2;
       this->label = text;
     }
   }
 
-  GUI::GUI(std::vector<Page*> pages, std::function <void()> setup, std::function <void()> background){
+  GUI::GUI(std::vector<Page*> pages, std::function <void() > setup, std::function <void() > background){
     //Saves pages to gui
     this->pages.push_back(&perm);
     for (std::vector<Page*>::const_iterator it = pages.begin(); it != pages.end(); it++) this->pages.push_back(*it);
@@ -356,7 +356,7 @@ namespace screen_flash{
     this->min = min;
     this->max = max;
     this->page = &page;
-    this->val = in_range(0, min, max) ? 0 : (in_range(1, min, max) ? 1 : (min+max)/2); //0 if that's the min, otherwise the average
+    this->val = in_range(0, min, max) ? 0 : (in_range(1, min, max) ? 1 : (min + max) / 2); //0 if that's the min, otherwise the average
     this->b_col = background_colour;
     this->l_col = label_colour;
     this->page->sliders.push_back(this);
@@ -365,9 +365,9 @@ namespace screen_flash{
 
     switch(this->dir){
       case HORIZONTAL:
-        text_x = (this->x1+this->x2)/2;
-        text_y = this->y1-CHAR_HEIGHT_SMALL/2-2;
-        inc.construct(this->x2+5, this->y1, this->x2+25, this->y2, GUI::Style::CORNER, Button::SINGLE, this->page, ">", l_col, b_col);
+        text_x = (this->x1+ this->x2) / 2;
+        text_y = this->y1-CHAR_HEIGHT_SMALL / 2-2;
+        inc.construct(this->x2 + 5, this->y1, this->x2 + 25, this->y2, GUI::Style::CORNER, Button::SINGLE, this->page, ">", l_col, b_col);
         dec.construct(this->x1-25, this->y1, this->x1-5, this->y2, GUI::Style::CORNER, Button::SINGLE, this->page, "<", l_col, b_col);
         title.construct(text_x, text_y, GUI::Style::CENTRE, TEXT_SMALL, this->page, label + ":%d", [&](){return val;}, l_col); //why not pass val by reference
         min_title.construct(this->x1, text_y, GUI::Style::CENTRE, TEXT_SMALL, this->page, "%d", [&](){return this->min;}, l_col);
@@ -375,20 +375,20 @@ namespace screen_flash{
         break;
 
       case VERTICAL:
-        text_x = (this->x1+this->x2)/2;
-        text_y = (this->y1+this->y2)/2;
+        text_x = (this->x1+ this->x2) / 2;
+        text_y = (this->y1+ this->y2) / 2;
         inc.construct(this->x1, this->y1-17, this->x2-this->x1, -20, GUI::Style::SIZE, Button::SINGLE, this->page, "^", l_col, b_col);
         dec.construct(this->x1, this->y2+17, this->x2-this->x1, 20, GUI::Style::SIZE, Button::SINGLE, this->page, "v", l_col, b_col);
         title.construct(text_x, this->y1-17-22-CHAR_HEIGHT_SMALL, GUI::Style::CENTRE, TEXT_SMALL, this->page, label + ":%d", [&](){return val;}, l_col);
-        min_title.construct(text_x, this->y2+(CHAR_HEIGHT_SMALL+3)/2, GUI::Style::CENTRE, TEXT_SMALL, this->page, "%d", [&](){return this->min;}, l_col);
-        max_title.construct(text_x, this->y1-(CHAR_HEIGHT_SMALL+3)/2, GUI::Style::CENTRE, TEXT_SMALL, this->page, "%d", [&](){return this->max;}, l_col);
+        min_title.construct(text_x, this->y2 + (CHAR_HEIGHT_SMALL + 3) / 2, GUI::Style::CENTRE, TEXT_SMALL, this->page, "%d", [&](){return this->min;}, l_col);
+        max_title.construct(text_x, this->y1-(CHAR_HEIGHT_SMALL + 3) / 2, GUI::Style::CENTRE, TEXT_SMALL, this->page, "%d", [&](){return this->max;}, l_col);
         break;
     }
 
     //Buttons
     if(min > max) increment = -increment;
     dec.set_func([&, increment](){this->val-=increment; if(!in_range(this->val, this->min, this->max)) this->val = this->min;});
-    inc.set_func([&, increment](){this->val+=increment; if(!in_range(this->val, this->min, this->max)) this->val = this->max;});
+    inc.set_func([&, increment](){this->val +=increment; if(!in_range(this->val, this->min, this->max)) this->val = this->max;});
   }
 
   Page::Page(std::string title, Colour background_colour){
@@ -417,7 +417,7 @@ namespace screen_flash{
   void GUI::go_next(){
     std::vector<Page*>::const_iterator it = std::find(GUI::current_gui->pages.begin(), GUI::current_gui->pages.end(), current_page);
     do{
-      if (it == current_gui->pages.end()-2) it = current_gui->pages.begin();
+      if (it == current_gui->pages.end() - 2) it = current_gui->pages.begin();
       it++;
     } while(!(Page::page_num(*it) && (*it)->active));
     (*it)->go_to();
@@ -426,7 +426,7 @@ namespace screen_flash{
   void GUI::go_prev(){
     std::vector<Page*>::const_iterator it = std::find(GUI::current_gui->pages.begin(), GUI::current_gui->pages.end(), current_page);
     do{
-      if (it == current_gui->pages.begin()+1) it = current_gui->pages.end()-1;
+      if (it == current_gui->pages.begin()+1) it = current_gui->pages.end() - 1;
       it--;
     } while(!(Page::page_num(*it) && (*it)->active));
     (*it)->go_to();
@@ -453,7 +453,7 @@ namespace screen_flash{
     std::vector<Button*>::const_iterator it, it2; //For clarity
 
     for (it = buttons.begin(); it != buttons.end(); it++){
-      Button* btn_id= *it;
+      Button* btn_id = *it;
       if (btn_id->form != LATCH && btn_id->form != TOGGLE){
         throw std::invalid_argument(sprintf2("Option Feature is only available for latch and toggle buttons! Failed on \"%s\" button.\n", btn_id->label));
         return;
@@ -487,12 +487,12 @@ namespace screen_flash{
     text_ref.b_col = b_col;
     text_ref.active = active;
     text_ref.type = GUI::Style::CENTRE;
-    text_ref.y = (y1+y2)/2;
-    text_ref.x = (x1+x2)/2;
-    text_ref.x1=USER_RIGHT;
-    text_ref.y1=USER_DOWN;
-    text_ref.x2=USER_LEFT;
-    text_ref.y2=USER_UP;
+    text_ref.y = (y1+ y2) / 2;
+    text_ref.x = (x1+ x2) / 2;
+    text_ref.x1 = USER_RIGHT;
+    text_ref.y1 = USER_DOWN;
+    text_ref.x2 = USER_LEFT;
+    text_ref.y2 = USER_UP;
 
     if (overwrite){
       label = "";
@@ -537,7 +537,7 @@ namespace screen_flash{
     if (title) title->set_background(colour);
     if (b_col != colour){
       b_col = colour;
-      b_col_dark = RGB2COLOR(static_cast<int>(COLOR2R(b_col)*0.8), static_cast<int>(COLOR2G(b_col)*0.8), static_cast<int>(COLOR2B(b_col)*0.8));
+      b_col_dark = RGB2COLOR(static_cast<int>(COLOR2R(b_col) * 0.8), static_cast<int>(COLOR2G(b_col) * 0.8), static_cast<int>(COLOR2B(b_col) * 0.8));
       draw();
     }
   }
@@ -614,7 +614,7 @@ namespace screen_flash{
     screen::set_eraser(b_col);
     screen::fill_rect(PAGE_LEFT, PAGE_UP, PAGE_RIGHT, 20);
     screen::set_pen(COLOUR(WHITE));
-    screen::print(TEXT_SMALL, MID_X-(title.length()+3+std::to_string(page_num(this)).length())*CHAR_WIDTH_SMALL/2, 5, "%s - %d", title, page_num(this));
+    screen::print(TEXT_SMALL, MID_X-(title.length() + 3 + std::to_string(page_num(this)).length()) * CHAR_WIDTH_SMALL / 2, 5, "%s - %d", title, page_num(this));
     for (std::vector<Button*>::const_iterator it = buttons.begin(); it != buttons.end(); it++) (*it)->draw();
     for (std::vector<Slider*>::const_iterator it = sliders.begin(); it != sliders.end(); it++) (*it)->draw();
     for (std::vector<Text_*>::const_iterator it = texts.begin(); it != texts.end(); it++) (*it)->draw();
@@ -683,13 +683,13 @@ namespace screen_flash{
 
     int x_coord = x, y_coord = y;
     if (type == GUI::Style::CENTRE){
-      x_coord -= GUI::get_width(txt_size)/2.0*text.length();
-      y_coord -= GUI::get_height(txt_size)/2.0;
+      x_coord -= GUI::get_width(txt_size) / 2.0*text.length();
+      y_coord -= GUI::get_height(txt_size) / 2.0;
     }
     
     //Resizes the background so it won't have overwriting issues
     x1 = std::min(x1, x_coord);
-    x2 = std::max(x2, x_coord + (GUI::get_width(txt_size)+1)*static_cast<int>(text.length()));
+    x2 = std::max(x2, x_coord + (GUI::get_width(txt_size)+1) *static_cast<int>(text.length()));
     y1 = std::min(y1, y_coord);
     y2 = std::max(y2, y_coord + GUI::get_height(txt_size));
 
@@ -698,13 +698,13 @@ namespace screen_flash{
 
 
 //Function Handling
-  void Page::set_setup_func(std::function <void()> function){setup_func = function;}
+  void Page::set_setup_func(std::function <void() > function){setup_func = function;}
 
-  void Page::set_loop_func(std::function <void()> function){loop_func = function;}
+  void Page::set_loop_func(std::function <void() > function){loop_func = function;}
 
-  void Button::set_func(std::function <void()> function){func = function;}
+  void Button::set_func(std::function <void() > function){func = function;}
 
-  void Button::set_off_func(std::function <void()> function){off_func = function;}
+  void Button::set_off_func(std::function <void() > function){off_func = function;}
 
   void Button::run_func() const {if (func) func();}
 
@@ -727,7 +727,7 @@ namespace screen_flash{
     current_gui->setup();
     if(terminal.active) terminal.go_to();
     else go_to(1); //Sets it to page 1 for program start. Don't delete this. If you want to change the starting page, call GUI::go_to(Page Number) in initialize()
-    // update();
+    //update();
     GUI::task.start();
   }
 
@@ -736,12 +736,12 @@ namespace screen_flash{
     while(true){
       current_gui->background();
       update_screen_status();
-      const Page& cur_p = *current_page;
-      /*Page*/cur_p.update();
-      /*Button*/for (std::vector<Button*>::const_iterator it = cur_p.buttons.begin(); it != cur_p.buttons.end(); it++){(*it)->update(); if(&cur_p != current_page) continue;}
-      /*Slider*/for (std::vector<Slider*>::const_iterator it = cur_p.sliders.begin(); it != cur_p.sliders.end(); it++) (*it)->update();
-      /*Text*/for (std::vector<Text_*>::const_iterator it = cur_p.texts.begin(); it != cur_p.texts.end(); it++) (*it)->update();
-      /*Flash*/screen_flash::end();
+      const Page& cur_p = * current_page;
+      /*Page*/ cur_p.update();
+      /*Button*/ for (std::vector<Button*>::const_iterator it = cur_p.buttons.begin(); it != cur_p.buttons.end(); it++){(*it)->update(); if(&cur_p != current_page) continue;}
+      /*Slider*/ for (std::vector<Slider*>::const_iterator it = cur_p.sliders.begin(); it != cur_p.sliders.end(); it++) (*it)->update();
+      /*Text*/ for (std::vector<Text_*>::const_iterator it = cur_p.texts.begin(); it != cur_p.texts.end(); it++) (*it)->update();
+      /*Flash*/ screen_flash::end();
 
       delay(10);
       if(ptr->notify_handle()) break;

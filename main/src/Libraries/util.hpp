@@ -5,7 +5,7 @@
 
 #define wait_until(condition) while(delay(10), !(condition))
 
-// cycle check macro (checks a condition for a specified amount of cycles)
+//cycle check macro (checks a condition for a specified amount of cycles)
 #define cycleCheck(condition, checkCount, delayTime) \
 {\
   int successCount = 0;\
@@ -93,7 +93,7 @@ constexpr double operator "" _rot(long double rotations){
  * @return double 
  */
 constexpr double near_angle(double angle, double reference){
-	return round((reference - angle)/(M_TWOPI)) * (M_TWOPI) + angle - reference;
+	return round((reference - angle) / (M_TWOPI)) * (M_TWOPI) + angle - reference;
 }
 
 /**
@@ -103,24 +103,30 @@ constexpr double near_angle(double angle, double reference){
  * @param p1 1st point to pass through
  * @param p2 2nd point to pass through. Defaults to (0, 0)
  * @param control Control value
- * @return std::function<long double (long double)> 
+ * @return std::function<long double (long double) > 
  */
 //Scales a function using two points to pass through and a control value
 
 //Not a template because that won't allow implicit lambda
-std::function<long double (long double)> func_scale(std::function<long double(long double)> f, Point p1, Point p2 = {0.0, 0.0}, double control = 1.0);
+std::function<long double (long double) > func_scale(std::function<long double(long double) > f, Point p1, Point p2 = {0.0, 0.0}, double control = 1.0);
 
 //removed constrain because std::clamp already exists
 
 /**
  * @brief returns a random bool with probability of being true
  * 
- * @param ratio ratio:1 of getting true. 1:1 is 50/50. 2:1 means true is twice as likely than false.
+ * @param ratio ratio:1 of getting true. 1:1 is 50 / 50. 2:1 means true is twice as likely than false.
  * @return true
  */
 bool random_bool(int ratio = 1);
 
-int random_direction();
+/**
+ * @brief returns a random direction with probability of being positive
+ * 
+ * @param ratio ratio:1 of getting positive. 1:1 is 50 / 50. 2:1 means positive is twice as likely than negative.
+ * @return true
+ */
+int random_direction(int ratio = 1);
 
 constexpr int bool2sgn(bool boolean){
   return boolean ? 1 : -1;
@@ -129,7 +135,7 @@ constexpr bool sgn2bool(int sgn){
   return sgn > 0;
 }
 
-// gets the sign of a value (0, 1 or -1)
+//gets the sign of a value (0, 1 or -1)
 template <typename T>
 constexpr int sgn(T value){
   return (T(0) < value) - (value < T(0));
@@ -149,16 +155,16 @@ constexpr bool contains(T& container, typename T::value_type item){
  * @return double 
  */
 constexpr double weighted_avg(double first, double second, double first_scale = 0.5){
-  return first*first_scale + second*(1-first_scale);
+  return first*first_scale + second * (1-first_scale);
 }
 
 //please rename map. With proper includes it conflicts with std::map
-// maps a value to a range
+//maps a value to a range
 template <typename T>
 constexpr T map(T x, T in_min, T in_max, T out_min, T out_max){
   return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
 }
-// base case for recursive function map_set
+//base case for recursive function map_set
 template <typename T>
 constexpr T map_set(T input, T in_min, T in_max, T out_min, T out_max, T range, T val){
   if (input <= range) return map(input, in_min, range, out_min, val);
@@ -167,7 +173,7 @@ constexpr T map_set(T input, T in_min, T in_max, T out_min, T out_max, T range, 
     return static_cast<T>(0);
   }
 }
-// maps a values to a set of maps (a piecewise function)
+//maps a values to a set of maps (a piecewise function)
 template <typename T, typename... Ts>
 constexpr T map_set(T input, T in_min, T in_max, T out_min, T out_max, T range1, T val_1, Ts... args){
   if (input <= range1) return map(input, in_min, range1, out_min, val_1);
@@ -215,7 +221,7 @@ constexpr E& operator-- (E& enum_value){
 template <typename E, typename = typename std::enable_if_t<std::is_enum_v<E>, void>>
 constexpr E operator++ (E& enum_value, int){
   E old = enum_value;
-  ++enum_value;
+ ++ enum_value;
   return old;
 }
 

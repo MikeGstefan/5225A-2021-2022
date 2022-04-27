@@ -2,21 +2,23 @@
 #include "main.h"
 #include "Libraries/task.hpp"
 
-void save_positions();
-void load_positions();
+void
+  save_positions(),
+  load_positions(),
 
-void f_claw(bool state);
+  f_claw(bool state),
 
-double get_filtered_output(ADIUltrasonic sensor, int check_count, uint16_t lower_bound, uint16_t upper_bound, int timeout); // is blocking code
+  flatten_against_wall(bool front = true, int cycles = 4), //param cycles is unuse;
 
-//param cycles is unused
-void flatten_against_wall(bool front = true, int cycles = 4);
+  b_detect_goal(),
+  tilt_goal(),
+  f_detect_goal(bool safety = true),
 
-void b_detect_goal();
-void tilt_goal();
-void f_detect_goal(bool safety = true);
+  detect_interference();
 
-void detect_interference();
+
+double get_filtered_output(ADIUltrasonic sensor, int check_count, uint16_t lower_bound, uint16_t upper_bound, int timeout); //is blocking code
+
 
 class Reset_dist{
   private:
@@ -31,9 +33,7 @@ class Reset_dist{
     double get_dist();
 };
 
-extern Reset_dist reset_dist_r;
-extern Reset_dist reset_dist_l;
-
+extern Reset_dist reset_dist_r, reset_dist_l;
 
 
 void subsystem_handle_t(void* params);

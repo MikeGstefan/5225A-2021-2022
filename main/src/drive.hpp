@@ -3,22 +3,24 @@
 #include "Libraries/timer.hpp"
 #include "Libraries/geometry.hpp"
 
-constexpr int master_hold_time = 300;
-constexpr int partner_hold_time = 300;
-constexpr int tilt_hold_time = 300;
-constexpr int max_drive_speed = 40;
+extern bool speed_limit_activated;
+constexpr int
+  master_hold_time = 300,
+  partner_hold_time = 300,
+  tilt_hold_time = 300,
+  max_drive_speed = 40;
 
-// what the right joystick currently does
+//what the right joystick currently does
 enum class joy_modes{
-  lift_select, // the right joystick selects which lift is active
-  manual // the right joystick operates the lifts manually
+  lift_select, //the right joystick selects which lift is active
+  manual //the right joystick operates the lifts manually
 };
 extern joy_modes joy_mode;
 
 constexpr bool game = true;
 
-// aliases to make code more readable, used to encode vales of drive.cur_driver
-// enum class drivers{Nikhil = 0, Emily = 1, Sarah = 2};
+//aliases to make code more readable, used to encode vales of drive.cur_driver
+//enum class drivers{Nikhil = 0, Emily = 1, Sarah = 2};
 
 enum class lift_button{
   front = 1,
@@ -27,58 +29,58 @@ enum class lift_button{
 
 class custom_drive{
   int lookup_table[255];
-  // curve functions
-  int polynomial(int x);  // transforms a linear input to a polynomially tranformed output
-  int exponential(int x);  // transforms a linear input to a exponentially tranformed output
+  //curve functions
+  int polynomial(int x);  //transforms a linear input to a polynomially tranformed output
+  int exponential(int x);  //transforms a linear input to a exponentially tranformed output
 
 public:
   double curvature;
-  custom_drive(double curvature); // constructor
-  void fill_lookup_table(); // transforms linear mapping to exponential mapping for a singular axis
-  int lookup(int x);  // returns transformed value from lookup table, taking in an x input
+  custom_drive(double curvature); //constructor
+  void fill_lookup_table(); //transforms linear mapping to exponential mapping for a singular axis
+  int lookup(int x);  //returns transformed value from lookup table, taking in an x input
 };
 
 struct driver{
   std::string name;
-  // 0 is strafe, 1 is forward, 2 is turn
+  //0 is strafe, 1 is forward, 2 is turn
   std::array<controller_analog_e_t, 3> joy_sticks;
   std::array<custom_drive, 3> custom_drives;
-  driver(std::string name, std::array<controller_analog_e_t, 3> joy_sticks, std::array<custom_drive, 3> custom_drives); // constructor
+  driver(std::string name, std::array<controller_analog_e_t, 3> joy_sticks, std::array<custom_drive, 3> custom_drives); //constructor
 };
 
 
-// Nikhil is 0, Emily is 1, Sarah is 2
+//Nikhil is 0, Emily is 1, Sarah is 2
 
 class Drivebase{
-  bool reversed; // if false forwards is the intake side
+  bool reversed; //if false forwards is the intake side
   int cur_screen;
   int deadzone = 10;
   std::string screen_text[3] = {"LOCAL_X CURVE:", "LOCAL_Y CURVE:", "LOCAL_A CURVE:"};
   void update_screen();
-  bool state;//state for the transmission
+  bool state; //state for the transmission
 
 public:
-  int cur_driver = 0;  // driver defaults to Nikhil rn
+  int cur_driver = 0;  //driver defaults to Nikhil rn
   Timer screen_timer = {"screen_timer"};
   static constexpr int num_of_drivers = 5;
   FILE* curve_file;
   bool curve_file_exists;
-  std::array<driver, num_of_drivers> drivers;  // driver profiles
-  Drivebase(std::array<driver, num_of_drivers> drivers); // constructor
+  std::array<driver, num_of_drivers> drivers;  //driver profiles
+  Drivebase(std::array<driver, num_of_drivers> drivers); //constructor
 
-  // 'set-drive' methods
-  void move(Position power);
+  //'set-drive' methods
+  void move(Position pwr);
   void move(double x, double y, double a);
   void move(double y, double a);
   void move_side(double l, double r);
 
   void brake();
   void velo_brake();
-  void download_curve_data(); // grabs data from SD card and copies to driver arrays
-  void update_lookup_table_util();  // utility to alter expo curves for any driver
-  void handle_input();  // move the drivebase according to lookup tables from a joystick input
-  void driver_practice(); // method to let drivers drive and change driver profiles
-  void non_blocking_driver_practice(); // method to let drivers drive and change driver profiles to be called in loop
+  void download_curve_data(); //grabs data from SD card and copies to driver arrays
+  void update_lookup_table_util();  //utility to alter expo curves for any driver
+  void handle_input();  //move the drivebase according to lookup tables from a joystick input
+  void driver_practice(); //method to let drivers drive and change driver profiles
+  void non_blocking_driver_practice(); //method to let drivers drive and change driver profiles to be called in loop
   void next_driver(); //Goes to next driver. Called on drivebase object.
   void prev_driver(); //Goes to previous driver. Called on drivebase object.
   std::string driver_name(); //Returns the current driver's name
@@ -91,7 +93,7 @@ public:
 
   bool get_reverse();
   int get_deadzone();
-  // bool get_lift_button(int side = 0);
+  //bool get_lift_button(int side = 0);
 
   void reset();
 
@@ -108,9 +110,8 @@ public:
 
 extern Drivebase drivebase;
 
-// returns true if using front lift and false if using back lift
+//returns true if using front lift and false if using back lift
 bool get_lift();
-
 
 void handle_lift_buttons();
 void handle_claw_buttons();
@@ -127,6 +128,4 @@ extern Timer b_lift_up_press;
 extern Timer f_lift_down_press;
 extern Timer b_lift_down_press;
 
-
 extern Timer toggle_press_timer;
-

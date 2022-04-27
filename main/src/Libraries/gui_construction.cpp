@@ -174,10 +174,10 @@
       Slider port_1 (115, 90, 30, 100, GUI::Style::SIZE, Slider::VERTICAL, 1, 8, encoders, "P1");
       Slider port_2 (200, 90, 30, 100, GUI::Style::SIZE, Slider::VERTICAL, 1, 8, encoders, "P2");
       Button enc_set (350, 60, 50, 20, GUI::Style::CENTRE, Button::SINGLE, encoders, "Set");
-      Text enc (350, 100, GUI::Style::CENTRE, TEXT_SMALL, encoders, "%s", std::function([](){return sprintf2("%d:%c%c", expander_1.get_value(), port_1.get_value()+64, port_2.get_value()+64);}));
+      Text enc (350, 100, GUI::Style::CENTRE, TEXT_SMALL, encoders, "%s", std::function([](){return sprintf2("%d:%c%c", expander_1.get_value(), port_1.get_value() + 64, port_2.get_value() + 64);}));
       Text enc_degs (350, 120, GUI::Style::CENTRE, TEXT_SMALL, encoders, "Degs: %d", enc_val);
-      Text enc_rots (350, 140, GUI::Style::CENTRE, TEXT_SMALL, encoders, "Rots: %d", std::function([](){return int(enc_val/360);}));
-      Text enc_remain (350, 160, GUI::Style::CENTRE, TEXT_SMALL, encoders, "Remaining: %d", std::function([](){return abs(enc_val-360*int(std::round((enc_val+sgn(enc_val)*180)/360)));})); //replace with near_angle
+      Text enc_rots (350, 140, GUI::Style::CENTRE, TEXT_SMALL, encoders, "Rots: %d", std::function([](){return int(enc_val / 360);}));
+      Text enc_remain (350, 160, GUI::Style::CENTRE, TEXT_SMALL, encoders, "Remaining: %d", std::function([](){return abs(enc_val-360*int(std::round((enc_val + sgn(enc_val) * 180) / 360)));})); //replace with near_angle
       Button enc_res (350, 200, 50, 20, GUI::Style::CENTRE, Button::SINGLE, encoders, "Reset");
 
     Page motor ("Motor Control");
@@ -408,18 +408,18 @@ void main_setup(){
       screen::draw_line(370, 30, 370, 230);
       screen::draw_line(270, 130, 470, 130);
       for (int x = 0; x < 200; x++){
-        for (int y = 0; y < 200; y++) if(field[x].test(y)) screen::draw_pixel(270+x, 230-y); //Draws saved tracking values
+        for (int y = 0; y < 200; y++) if(field[x].test(y)) screen::draw_pixel(270 + x, 230-y); //Draws saved tracking values
       }
     });
     track.set_loop_func([](){
       screen::set_pen(COLOUR(RED));
-      screen::draw_pixel(270+(200.0*tracking.coord().x/144.0), 230-(200.0*tracking.coord().y/144.0)); //Scales to screen
+      screen::draw_pixel(270 + (200.0*tracking.coord().x / 144.0), 230-(200.0*tracking.coord().y / 144.0)); //Scales to screen
 
       if(main_obj.pressed()){
         int x = GUI::x-270, y = 230-GUI::y;
         if(in_range(x, 0, 200) && in_range(y, 0, 200)){
-          x_val.set_value(x*144.0/200.0);
-          y_val.set_value(y*144.0/200.0);
+          x_val.set_value(x * 144.0 / 200.0);
+          y_val.set_value(y * 144.0 / 200.0);
         }
       }
     });
@@ -501,7 +501,7 @@ void main_setup(){
 
   //Tuning Tracking
     manual.select();
-    //Figure out how to do these with the other left/right, front/back or moving in the other direction
+    //Figure out how to do these with the other left / right, front / back or moving in the other direction
 
     encoder_direction.set_func([](){ //Encoder Direction
       if(manual.on){
@@ -519,7 +519,7 @@ void main_setup(){
         if(GUI::prompt("Press, then clear the area", "", 1500)){
           drivebase.reset();
 
-          drivebase.move(50.0, 20.0); // preferably strafe right instead of turning.
+          drivebase.move(50.0, 20.0); //preferably strafe right instead of turning.
           tracking.wait_for_dist(30);
           drivebase.brake();
 
@@ -550,13 +550,13 @@ void main_setup(){
             term_colours back_col = fabs(back) <= 0.01 ? term_colours::GREEN : term_colours::RED;
 
             if(left == 0) printf2(term_colours::GREEN, "The left encoder was perfect over %d rotations", left_rot);
-            else printf2(left_col, "The left encoder %s %d ticks over %d rotations", left > 0 ? "gained" : "lost", fabs(360.0*left), left_rot);
+            else printf2(left_col, "The left encoder %s %d ticks over %d rotations", left > 0 ? "gained" : "lost", fabs(360.0 * left), left_rot);
 
             if(right == 0) printf2(term_colours::GREEN, "The right encoder was perfect over %d rotations", right_rot);
-            else printf2(right_col, "The right encoder %s %d ticks over %d rotations", right > 0 ? "gained" : "lost", fabs(360.0*right), right_rot);
+            else printf2(right_col, "The right encoder %s %d ticks over %d rotations", right > 0 ? "gained" : "lost", fabs(360.0 * right), right_rot);
 
             if(back == 0) printf2(term_colours::GREEN, "The back encoder was perfect over %d rotations", back_rot);
-            else printf2(back_col, "The back encoder %s %d ticks over %d rotations", back > 0 ? "gained" : "lost", fabs(360.0*back), back_rot);
+            else printf2(back_col, "The back encoder %s %d ticks over %d rotations", back > 0 ? "gained" : "lost", fabs(360.0 * back), back_rot);
           }
         }
       }
@@ -620,8 +620,8 @@ void main_setup(){
           drivebase.reset();
 
           if (GUI::prompt("Press when completed 30 inches")){
-            printf2("The left tracking wheel's diameter is %f", 60.0/deg_to_rad(LeftEncoder.get_value()));
-            printf2("The right tracking wheel's diameter is %f", 60.0/deg_to_rad(RightEncoder.get_value()));
+            printf2("The left tracking wheel's diameter is %f", 60.0 / deg_to_rad(LeftEncoder.get_value()));
+            printf2("The right tracking wheel's diameter is %f", 60.0 / deg_to_rad(RightEncoder.get_value()));
           }
         }
       }
@@ -635,8 +635,8 @@ void main_setup(){
           drivebase.brake();
 
           printf2("If the robot is far off of 30 inches, consider changing the wheel size constants.");
-          printf2("Multiply the actual travelled distance by %f to get the left wheel diameter", fabs(2.0/deg_to_rad(LeftEncoder.get_value())));
-          printf2("Multiply the actual travelled distance by %f to get the right wheel diameter", fabs(2.0/deg_to_rad(RightEncoder.get_value())));
+          printf2("Multiply the actual travelled distance by %f to get the left wheel diameter", fabs(2.0 / deg_to_rad(LeftEncoder.get_value())));
+          printf2("Multiply the actual travelled distance by %f to get the right wheel diameter", fabs(2.0 / deg_to_rad(RightEncoder.get_value())));
         }
       }
     });
@@ -647,7 +647,7 @@ void main_setup(){
           drivebase.reset();
 
           if (GUI::prompt("Press when completed 30 inches")){
-            printf2("The back tracking wheel's diameter is %f", 60.0/deg_to_rad(BackEncoder.get_value()));
+            printf2("The back tracking wheel's diameter is %f", 60.0 / deg_to_rad(BackEncoder.get_value()));
           }
         }
       }
@@ -667,10 +667,10 @@ void main_setup(){
             
             double turned = tracking.coord().angle / 180.0;
             double rots = round(turned);
-            turned = 180*(turned-rots);
+            turned = 180 * (turned-rots);
             rots /= 2;
 
-            double dist = abs(LeftEncoder.get_value()-RightEncoder.get_value())/(360.0*rots);
+            double dist = abs(LeftEncoder.get_value() - RightEncoder.get_value()) / (360.0 * rots);
 
             if(fabs(turned) <= 0.05) printf2(term_colours::GREEN, "This seems pretty accurate. It's %.4f degrees off over %.1f rotations.", turned, rots);
             else if(turned > 0) printf2(term_colours::RED, "However, the robot gained %.2f degrees over %.1f rotations. Consider decreasing the DistanceLR to %.3f.", turned, rots, dist);
@@ -700,10 +700,10 @@ void main_setup(){
             
           double turned = tracking.coord().angle / 180.0;
           double rots = round(turned);
-          turned = 180*(turned-rots);
+          turned = 180 * (turned-rots);
           rots /= 2;
 
-          double dist = abs(LeftEncoder.get_value()-RightEncoder.get_value())/(360.0*rots);
+          double dist = abs(LeftEncoder.get_value() - RightEncoder.get_value()) / (360.0 * rots);
 
           if(fabs(turned) <= 0.05) printf2(term_colours::GREEN, "This seems pretty accurate. It's %.4f degrees off over %.1f rotations.", turned, rots);
           else if(turned > 0) printf2(term_colours::RED, "However, the robot gained %.2f degrees over %.1f rotations. Consider decreasing the DistanceLR to %.3f.", turned, rots, dist);
@@ -739,14 +739,14 @@ void main_setup(){
 
 void main_background(){
   //Saving Field coords
-  int x = 200*tracking.coord().x/144, y = 200*tracking.coord().y/144;
-  if(in_range(x, 0, 199) && in_range(y, 0, 199)) field[x].set(y); //Saves position (x,y) to as tracked
+  int x = 200*tracking.coord().x / 144, y = 200*tracking.coord().y / 144;
+  if(in_range(x, 0, 199) && in_range(y, 0, 199)) field[x].set(y); //Saves position (x, y) to as tracked
 
   for (std::array<std::tuple<Motor*, std::string, std::string, int, Text_*, Text_*, Button*, Button*>, 8>::iterator it = motors_for_gui.begin(); it != motors_for_gui.end(); it++){
     std::tuple<Motor*, std::string, std::string, int, Text_*, Text_*, Button*, Button*>& mot_tup = *it;
     std::get<int>(mot_tup) = std::get<Motor*>(mot_tup) ? std::get<Motor*>(mot_tup)->get_temperature() : std::numeric_limits<int>::max();
 
-    if (!temp_flashed && std::get<Motor*>(mot_tup) && in_range(std::get<int>(mot_tup), 55, std::numeric_limits<int>::max()-1) && screen_flash::timer.playing()){ //Overheating
+    if (!temp_flashed && std::get<Motor*>(mot_tup) && in_range(std::get<int>(mot_tup), 55, std::numeric_limits<int>::max() - 1) && screen_flash::timer.playing()){ //Overheating
       temp_flashed = true;
       temps.go_to();
       screen_flash::start(term_colours::ERROR, 10000, "%s motor is at %dC\n", std::get<1>(mot_tup).c_str(), std::get<int>(mot_tup));
@@ -759,8 +759,8 @@ void util_setup(){
   //Encoders
     enc_set.set_func([](){
       int port = expander_1.get_value();
-      if(abs(port_1.get_value()-port_2.get_value()) != 1 || std::min(port_1.get_value(), port_2.get_value()) % 2 == 0){
-        screen_flash::start(term_colours::ERROR, "Invalid Ports %c%c", port_1.get_value()+64, port_2.get_value()+64);
+      if(abs(port_1.get_value() - port_2.get_value()) != 1 || std::min(port_1.get_value(), port_2.get_value()) % 2 == 0){
+        screen_flash::start(term_colours::ERROR, "Invalid Ports %c%c", port_1.get_value() + 64, port_2.get_value() + 64);
         return;
       }
       if(port){
@@ -801,7 +801,7 @@ void util_setup(){
       std::make_tuple(std::numeric_limits<int>::max(), &mot_update_8, &mot_stop_8, &mot_text_8, 0, ""),
     };
 
-    for (int port=0, i=0; port<21; port++){
+    for (int port=0, i = 0; port<21; port++){
       if (c::registry_get_plugged_type(port) == c::E_DEVICE_MOTOR && i < 8){
         std::get<0>(motor_ports[i]) = port+1;
         i++;
@@ -811,7 +811,7 @@ void util_setup(){
     for (std::array<std::tuple<int, Button*, Button*, Text_*, int, std::string>, 8>::const_iterator it = motor_ports.begin(); it != motor_ports.end(); it++){
       const std::tuple<int, Button*, Button*, Text_*, int, std::string>& mot_arr = *it;
 
-      if (std::get<0>(mot_arr) != std::numeric_limits<int>::max()) motor_port_nums.append(std::to_string(std::get<0>(mot_arr)) + ",");
+      if (std::get<0>(mot_arr) != std::numeric_limits<int>::max()) motor_port_nums.append(std::to_string(std::get<0>(mot_arr)) + ", ");
       else{
         std::get<1>(mot_arr)->set_active(false);
         std::get<2>(mot_arr)->set_active(false);
@@ -832,14 +832,14 @@ void util_setup(){
     }
 
     for (std::array<int, 21>::const_iterator it = expander_ports.begin(); it != expander_ports.end(); it++){
-      if (*it != std::numeric_limits<int>::max()) expander_port_nums.append(std::to_string(*it) + ",");
+      if (*it != std::numeric_limits<int>::max()) expander_port_nums.append(std::to_string(*it) + ", ");
     }
 
     if (expander_port_nums.back() == ',') expander_port_nums.pop_back();
 
     for (int i = 1; i <= 8; i++){
       if(c::adi_port_get_config(i) != E_ADI_DIGITAL_IN && c::adi_port_get_config(i) != E_ADI_DIGITAL_OUT){
-        no_pneumatic_port_nums.push_back(char(i+64));
+        no_pneumatic_port_nums.push_back(char(i + 64));
         no_pneumatic_port_nums.push_back(',');
       }
       exp_pneum_btns[i-1]->set_func([i](){
@@ -886,7 +886,7 @@ void util_background(){
     if (port != std::numeric_limits<int>::max()){
       std::get<5>(*it) = sprintf2("%d: %d", port, c::motor_get_actual_velocity(port));
       if(mot_jam_detect.on){
-        if (fabs(c::motor_get_actual_velocity(port)) < fabs(c::motor_get_target_velocity(port)/4.0)) stall_count++;
+        if (fabs(c::motor_get_actual_velocity(port)) < fabs(c::motor_get_target_velocity(port) / 4.0)) stall_count++;
         else stall_count = 0;
         if (stall_count > 10){
           stall_count = 0;

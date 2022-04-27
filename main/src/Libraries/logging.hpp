@@ -14,35 +14,35 @@ extern _Task log_t;
 */
 enum log_types{
   error = 1,
-  warning =1,
-  general =1,
+  warning = 1,
+  general = 1,
   debug = 2,
   off = 0,
 };
 
-enum class log_locations
-{
+enum class log_locations{
   t,
   sd,
   both,
   none
 };
 
-extern Data task_log;
-extern Data controller_queue;
-extern Data tracking_data;
-extern Data tracking_imp;
-extern Data misc;
-extern Data drivers_data;
-extern Data term;
-extern Data motion_d;
-extern Data motion_i;
-extern Data log_d;
-extern Data graph;
-extern Data state_log;
-extern Data skills_d;
-extern Data ERROR;
-extern Data safety;
+extern Data
+  task_log,
+  controller_queue,
+  tracking_data,
+  tracking_imp,
+  misc,
+  drivers_data,
+  term,
+  motion_d,
+  motion_i,
+  log_d,
+  graph,
+  state_log,
+  skills_d,
+  ERROR,
+  safety;
 
 class Data{
 private:
@@ -110,7 +110,7 @@ public:
     print(print_colour, format, args...);
   }
 
-  void print(Timer* tmr,int freq, std::vector<std::function<std::string()>> str) const; //How is this used?
+  void print(Timer* tmr, int freq, std::vector<std::function<std::string()>> str) const; //How is this used?
 };
 
 

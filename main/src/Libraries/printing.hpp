@@ -4,6 +4,7 @@
 
 struct Point;
 struct Position;
+struct Vector;
 class Data;
 
 /**
@@ -35,7 +36,7 @@ enum class term_colours{
 };
 
 //General case
-template <typename T, typename = typename std::enable_if_t<!std::is_arithmetic_v<T>, void>> //Forces double/int overload instead
+template <typename T, typename = typename std::enable_if_t<!std::is_arithmetic_v<T>, void>> //Forces double / int overload instead
 std::string convert_all_args(const std::string& fmt, const T& arg){
   char buffer[n_printf_max];
   snprintf(buffer, n_printf_max, fmt.c_str(), arg);
@@ -48,7 +49,7 @@ std::string convert_all_args(const std::string& fmt, T arg){ //Not const T& beca
   const char* format = fmt.c_str();
   std::string fmt_safe = "   " + fmt;
   char buffer[n_printf_max];
-  char end[3] = {static_cast<char>(tolower(*(fmt.end()-1))), static_cast<char>(*(fmt.end()-2)), static_cast<char>(*(fmt.end()-3))};
+  char end[3] = {static_cast<char>(tolower(*(fmt.end() - 1))), static_cast<char>(*(fmt.end() - 2)), static_cast<char>(*(fmt.end() - 3))};
 
   if(end[1] == 'L') snprintf(buffer, n_printf_max, format, static_cast<long double>(arg));
   else if(end[0] == 'f' || end[0] == 'e' || end[0] == 'g' || end[0] == 'a') snprintf(buffer, n_printf_max, format, static_cast<double>(arg));
@@ -79,7 +80,7 @@ std::string convert_all_args(const std::string& fmt, T arg){ //Not const T& beca
   return buffer;
 }
 
-//Vectors
+//Vectors (C++)
 template <typename _Tp>
 std::string convert_all_args(const std::string& fmt, const std::vector<_Tp>& arg){
   if(fmt.back() == 'p') return convert_all_args(fmt, arg.data());
@@ -110,7 +111,7 @@ std::string convert_all_args(const std::string& fmt, const std::array<_Tp, _Nm>&
 
 //Arrays (C)
 template <typename _Tp, std::size_t _Nm>
-std::string convert_all_args(const std::string& fmt, const _Tp (&arg)[_Nm]){
+std::string convert_all_args(const std::string& fmt, const _Tp (&arg) [_Nm]){
   if(fmt.back() == 'p') return convert_all_args(fmt, const_cast<_Tp*>(arg));
   else if(std::is_same<_Tp, char>::value && fmt.back() == 's') return convert_all_args(fmt, const_cast<_Tp*>(arg));
   std::string str;
@@ -167,6 +168,7 @@ std::string convert_all_args(const std::string& fmt, const std::tuple<Args...>& 
 std::string convert_all_args(const std::string& fmt, const std::string& arg);
 std::string convert_all_args(const std::string& fmt, const Position& arg);
 std::string convert_all_args(const std::string& fmt, const Point& arg);
+std::string convert_all_args(const std::string& fmt, const Vector& arg);
 
 /**
  * @brief Get the terminal control string to modify its printing colour 
@@ -222,7 +224,7 @@ std::string sprintf2(std::string fmt, const Param& arg, const Params&... args){
   }
   else if(format_specifier.back() == 'n'){
     converted = "";
-    // set_length(arg, start, converted);
+    //set_length(arg, start, converted);
     rest = sprintf2(rest, args...);
   }
   else{
@@ -246,8 +248,8 @@ std::string sprintf2_format(term_colours colour, int time_type, std::string fmt,
   std::string timestamp;
 
   int white_count = str.find_first_not_of(" \n");
-  std::string whitespace = std::string(str.begin(), str.begin()+white_count);
-  str.erase(str.begin(), str.begin()+white_count);
+  std::string whitespace = std::string(str.begin(), str.begin() + white_count);
+  str.erase(str.begin(), str.begin() + white_count);
 
   if(time_type == -1) timestamp = "";
   else if(time_type == 0) timestamp = sprintf2("%-9s| ", Timer::to_string(millis(), timing_units::millis, 0, 0));
@@ -273,8 +275,8 @@ std::string sprintf2_no_colour(int time_type, std::string fmt, Params... args){
   std::string timestamp;
 
   int white_count = str.find_first_not_of(" \n");
-  std::string whitespace = std::string(str.begin(), str.begin()+white_count);
-  str.erase(str.begin(), str.begin()+white_count);
+  std::string whitespace = std::string(str.begin(), str.begin() + white_count);
+  str.erase(str.begin(), str.begin() + white_count);
 
   if(time_type == -1) timestamp = "";
   else if(time_type == 0) timestamp = sprintf2("%-9s| ", Timer::to_string(millis(), timing_units::millis, 0, 0));

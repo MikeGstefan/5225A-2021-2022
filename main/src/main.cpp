@@ -8,7 +8,7 @@
 #include "Subsystems/f_lift.hpp"
 #include "Subsystems/b_lift.hpp"
 
-Task *updt = nullptr; //What's this for
+Task* updt = nullptr; //What's this for
 const GUI* GUI::current_gui = &main_obj;
 
 bool robot_setup = false;
@@ -20,14 +20,14 @@ bool robot_setup = false;
  * to keep execution time for this mode under a few seconds.
  */
 
-bool auton_run = false; // has auton run
+bool auton_run = false; //has auton run
 
 void initialize() {
 	// gyro.calibrate();
-	// front_l.set_brake_mode(E_MOTOR_BRAKE_HOLD);
+  // front_l.set_brake_mode(E_MOTOR_BRAKE_HOLD);
 	// front_r.set_brake_mode(E_MOTOR_BRAKE_HOLD);
-	// back_l.set_brake_mode(E_MOTOR_BRAKE_HOLD);
-	// back_r.set_brake_mode(E_MOTOR_BRAKE_HOLD);
+	 //back_l.set_brake_mode(E_MOTOR_BRAKE_HOLD);
+	 //back_r.set_brake_mode(E_MOTOR_BRAKE_HOLD);
 
   load_positions();
   load_auton();
@@ -43,7 +43,7 @@ void initialize() {
 	update_t.start();
   lift_handle_t.start();
 
-	// gyro.finish_calibrating(); //Finishes calibrating gyro before program starts
+	 //gyro.finish_calibrating(); //Finishes calibrating gyro before program starts
   tracking.reset(107, 15, 0);
 }
 
@@ -83,4 +83,8 @@ void autonomous() {
 bool timer_state = 0; 
 int timer = millis();
 void opcontrol() {
+  /*
+    Move all template / constexpr definitions to the bottom of the file
+    make distance.hpp functions static class memebers
+  */
 }

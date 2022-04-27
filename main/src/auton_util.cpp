@@ -101,38 +101,38 @@ double get_filtered_output(ADIUltrasonic sensor, int check_count, uint16_t lower
 void flatten_against_wall(bool front, int cycles){
   int safety_check = 0;
   //bool to + -
-  int direction = (static_cast<int>(front)*2)-1;
+  int direction = (static_cast<int>(front) * 2) - 1;
   tracking_imp.print("Start wall allign");
 
-	drivebase.move(50.0*direction,0.0);
+	drivebase.move(50.0 * direction, 0.0);
 
 	wait_until((fabs(tracking.l_velo) >= 2.0 && fabs(tracking.r_velo) >= 2.0) || safety_check >= 12){
     safety_check++;
-    misc.print(" reset things %.2f, %.2f",fabs(tracking.l_velo), fabs(tracking.r_velo));
+    misc.print(" reset things %.2f, %.2f", fabs(tracking.l_velo), fabs(tracking.r_velo));
   }
 	cycleCheck(fabs(tracking.l_velo) < 1.0 && fabs(tracking.r_velo) < 1.0, 4, 10);
-	drivebase.move(20.0*direction, 0.0);
+	drivebase.move(20.0 * direction, 0.0);
 	printf2("%d|| Done all align", millis());
 }
 
-// double get_front_dist(){
-//   double avg = 0.0;
-//   int count = 0;
-//   while(true){
-//     // for(int i = 0; i < 3; i++){
-//     if(front_dist.get() > 10){
-//       avg+= front_dist.get();
-//       count++;
-//     }
-//     if(count > 2){
-//       avg/=count;
-//       break;
-//     }
-//     delay(34);
+//double get_front_dist(){
+// double avg = 0.0;
+// int count = 0;
+// while(true){
+//   //for(int i = 0; i < 3; i++){
+//   if(front_dist.get() > 10){
+//     avg += front_dist.get();
+//     count++;
 //   }
-  // return ((avg/25.4) +front_dist_dist);
-  
+//   if(count > 2){
+//     avg /=count;
+//     break;
+//   }
+//   delay(34);
 // }
+  //return ((avg / 25.4) + front_dist_dist);
+  
+//}
 
 void b_detect_goal(){
   tilt_lock.set_state(1);
@@ -192,28 +192,28 @@ double Reset_dist::get_dist(){
     if(this->sensor->get() > Reset_dist::thresh){
       count++;
       avg += this->sensor->get();
-      misc.print("Dist in reset %f count %d", (double)this->sensor->get()/25.4, count);
+      misc.print("Dist in reset %f count %d", this->sensor->get() / 25.4, count);
     }
     delay(33);
   }
   //find averaeg, convert to inches
-  misc.print("reset %f", (avg/count)/25.4);
-  return ((avg/count)/25.4) + this->dist_from_center;
+  misc.print("reset %f", (avg / count) / 25.4);
+  return ((avg / count) / 25.4) + this->dist_from_center;
 }
 
 
 
 
-void subsystem_handle_t(void*params){
+void subsystem_handle_t(void * params){
   _Task* ptr = _Task::get_obj(params);
 
   while(true){
     b_lift.handle(true);
 		f_lift.handle(true);
-    // intake.handle();
-    // b_claw_obj.handle();
-		// f_claw_obj.handle();
-    if(ptr->notify_handle())return;
+    //intake.handle();
+    //b_claw_obj.handle();
+		 //f_claw_obj.handle();
+    if(ptr->notify_handle()) return;
     delay(10);
   }
 }

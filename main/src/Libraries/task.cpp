@@ -44,7 +44,7 @@ void _Task::start(void* params){
 void _Task::kill(){
   if(this->task_ptr != NULL){
     task_log.print("%s killing", this->name);
-    this->task_ptr->notify_ext((int)stop, E_NOTIFY_ACTION_OWRITE,NULL);
+    this->task_ptr->notify_ext(static_cast<int>(stop), E_NOTIFY_ACTION_OWRITE, NULL);
     task_log.print("%s notified", this->name);
     wait_until(this->task_ptr->get_state() == 4){
       task_log.print("%s state %d", this->name, this->task_ptr->get_state());

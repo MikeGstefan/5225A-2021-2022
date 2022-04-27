@@ -10,12 +10,12 @@ enum class timing_units{
 class Data;
 
 class Timer{
-  // 'time' is the time counted by the timer until the last call of pause()
+  //'time' is the time counted by the timer until the last call of pause()
   uint64_t last_reset_time, time, last_play_time;
   std::string name;
-  bool paused; // state of timer
+  bool paused; //state of timer
   timing_units timing_unit;
-  uint64_t get_time_in_timing_unit(); // returns time in either millis micros
+  uint64_t get_time_in_timing_unit(); //returns time in either millis micros
   Data* data_obj;
 
 public:
@@ -40,7 +40,7 @@ public:
    * 2: milliseconds
    * @param unit_conversion converts 1500ms to 1s 500ms if true
    */
-  void print_fancy(std::string str, int long_names=0, bool unit_conversion = false);
+  void print_fancy(std::string str, int long_names = 0, bool unit_conversion = false);
 
   /**
    * @brief To get the time as a fancy string
@@ -54,5 +54,5 @@ public:
    * @param unit_conversion converts 1500ms to 1s 500ms if true
    * @return std::string
    */
-  static std::string to_string(std::uint64_t time, timing_units unit = timing_units::millis, int long_names=0, bool unit_conversion = false);
+  static std::string to_string(std::uint64_t time, timing_units unit = timing_units::millis, int long_names = 0, bool unit_conversion = false);
 };

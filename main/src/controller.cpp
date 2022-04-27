@@ -2,10 +2,10 @@
 #include "Libraries/task.hpp"
 #include "Libraries/util.hpp"
 
-std::array<_Controller*, controller_count> _Controller::objs; //= {nullptr};
+std::array<_Controller*, 2> _Controller::objs; //= {nullptr};
 _Task _Controller::controller_task = nullptr;
 
-int constructed = 0;
+int _Controller::constructed = 0;
 
 _Controller::_Controller(controller_id_e_t id): Controller{id}{
   objs[constructed] = this;
@@ -16,31 +16,28 @@ _Controller::_Controller(controller_id_e_t id): Controller{id}{
 void _Controller::print_queue(void* params){
   _Task* ptr = _Task::get_obj(params);
   while(true){
-    for(int i = 0; i < controller_count; i++){
+    for(int i = 0; i < objs.size(); i++){
       objs[i]->queue_handle();
       delay(50);
     }
-    if(ptr->notify_handle())break;
+    if(ptr->notify_handle()) break;
 
   }
 }
 
 void _Controller::init(){
-  _Task ct(print_queue,"controller task");
+  _Task ct(print_queue, "controller task");
   _Controller::controller_task = std::move(ct);
   controller_task.start();
 }
 
 
-void _Controller::add_to_queue(std::function<void()> func){
-  if(this->back +1 != this->front || (this->back == this->queue.size() -1 && this->front == 0)){
+void _Controller::add_to_queue(std::function<void() > func){
+  if(this->back+1 != this->front || (this->back == this->queue.size() -1 && this->front == 0)){
     controller_queue.print("adding to controller: %d queue", this->controller_num);
     this->queue[this->back] = func;
-    if(this->back == this->queue.size() -1){
-      this->back = 0;
-    }
+    if(this->back == this->queue.size() -1) this->back = 0;
     else this->back++;
-
   }
 }
 
@@ -48,12 +45,13 @@ void _Controller::queue_handle(){
   if(this->front != this->back){
     controller_queue.print("running command on controller %d", this->controller_num);
     this->queue[this->front]();
-    if(this->front == this->queue.size()-1) this->front = 0;
+    if(this->front == this->queue.size() - 1) this->front = 0;
     else this->front++;
   }
 }
+
 void _Controller::clear_line (std::uint8_t line){
-  std::function<void()> func = [=](){
+  std::function<void() > func = [=](){
     Controller::clear_line(line);
     controller_queue.print("clearing line %d for controller %d", line, this->controller_num);
   };
@@ -62,7 +60,7 @@ void _Controller::clear_line (std::uint8_t line){
 }
 
 void _Controller::clear(){
-  std::function<void()> func = [=](){
+  std::function<void() > func = [=](){
     Controller::clear();
     controller_queue.print("clearing %d", this->controller_num);
   };
@@ -72,7 +70,7 @@ void _Controller::clear(){
 
 
 void _Controller::rumble(std::string rumble_pattern){
-  std::function<void()> func = [=](){
+  std::function<void() > func = [=](){
     Controller::rumble(rumble_pattern.c_str());
     controller_queue.print("rumble controller %d", this->controller_num);
   };
@@ -151,9 +149,9 @@ void _Controller::update_buttons(){
     last_press_arr[i] = cur_press_arr[i];
     // + 6 because controller_digital_e_t starts with 6 instead of 0
     cur_press_arr[i] = this->get_digital(static_cast<controller_digital_e_t>(i + 6));
-    // printf2("%d, %d ", i, cur_press_arr[i]);
+    //printf2("%d, %d ", i, cur_press_arr[i]);
   }
-  // printf2("");
+  //printf2("");
 }
 
 bool _Controller::get_button_state(controller_digital_e_t button){
