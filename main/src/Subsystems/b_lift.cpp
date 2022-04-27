@@ -238,7 +238,7 @@ void B_Lift::handle_state_change(){
 }
 
 // accepts an index argument used specifically for a move to target
-void B_Lift::set_state(const b_lift_states next_state, const uint8_t index, const int32_t speed){  // requests a state change and logs it
+void B_Lift::set_state(const b_lift_states next_state, const uint8_t index, const int32_t speed){ // requests a state change and logs it
   // confirms state change only if the state is actually move to target
   if (next_state == b_lift_states::move_to_target){
     // if back lift is below a threshold and the hitch is open, close it to not break it

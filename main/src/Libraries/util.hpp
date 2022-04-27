@@ -49,6 +49,26 @@ constexpr double deg_to_rad(double deg){
   return deg / 180.0 * M_PI;
 }
 
+/**
+ * @brief converts radians to degrees
+ * 
+ * @param rad 
+ * @return degrees
+ */
+constexpr Position rad_to_deg(const Position& rad){
+  return {rad.x, rad.y, rad_to_deg(rad.angle)};
+}
+
+/**
+ * @brief converts degrees to radians
+ * 
+ * @param deg 
+ * @return radians
+ */
+constexpr Position deg_to_rad(const Position& deg){
+  return {deg.x, deg.y, deg_to_rad(deg.angle)};
+}
+
 
 //degrees to radians
 constexpr double operator "" _deg(long double degree){

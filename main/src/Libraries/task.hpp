@@ -23,7 +23,7 @@ class _Task{
   private:
     Task* task_ptr = NULL;
     task_fn_t function;
-    std::tuple<_Task*, void*>params;
+    std::pair<_Task*, void*>params;
     std::uint32_t prio;
     std::uint16_t stack_depth;
     std::string name;

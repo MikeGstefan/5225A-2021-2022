@@ -122,14 +122,14 @@ void F_Lift::handle_state_change(){
 
     case f_lift_states::manual:
       // we don't want the f_claw in search mode while the lift is in manual
-      if(f_claw_obj.get_state() == f_claw_states::searching){  f_claw_obj.set_state(f_claw_states::idle); state_log.print("134\n");}
+      if(f_claw_obj.get_state() == f_claw_states::searching){ f_claw_obj.set_state(f_claw_states::idle); state_log.print("134\n");}
       break;
   }
   log_state_change();  
 }
 
 // accepts an index argument used specifically for a move to target
-void F_Lift::set_state(const f_lift_states next_state, const uint8_t index, const int32_t speed){  // requests a state change and logs it
+void F_Lift::set_state(const f_lift_states next_state, const uint8_t index, const int32_t speed){ // requests a state change and logs it
   // confirms state change only if the state is actually move to target
   if (next_state == f_lift_states::move_to_target){
     this->index = index;
@@ -255,14 +255,14 @@ void F_Claw::handle(){
       if(search_timer.get_time() > 2000) set_state(f_claw_states::searching);
       
       // doesn't let driver search if lift isn't at bottom
-      if(!f_lift.at_bottom()){ set_state(f_claw_states::idle); state_log.print("256\n");}
+      if(!f_lift.at_bottom()){set_state(f_claw_states::idle); state_log.print("256\n");}
       break;
 
     case f_claw_states::searching:
       if(f_dist.get() < 30)  set_state(f_claw_states::grabbed);  // grabs goal if mogo is detected
       
       // doesn't let driver search if lift isn't at bottom
-      if(!f_lift.at_bottom()){ set_state(f_claw_states::idle);  state_log.print("263\n");}
+      if(!f_lift.at_bottom()){set_state(f_claw_states::idle);  state_log.print("263\n");}
       break;
 
     case f_claw_states::grabbed:

@@ -25,7 +25,7 @@ public:
     name(name), state_names(state_names), state(starting_state), target_state(base_state) 
   {}
 
-  void set_state(const state_type next_state){  // requests a state change and logs it
+  void set_state(const state_type next_state){ // requests a state change and logs it
     state_log.print("%s | State change requested from %s to %s", name, state_names[static_cast<int>(state)], state_names[static_cast<int>(next_state)]);
     target_state_mutex.take(TIMEOUT_MAX);
     target_state = next_state;
@@ -33,7 +33,7 @@ public:
   }
 
 
-  void log_state_change(){  // confirms state change, logs it, and updates state to be the target state
+  void log_state_change(){ // confirms state change, logs it, and updates state to be the target state
     state_log.print("%s | State change confirmed from %s to %s", name, state_names[static_cast<int>(state)], state_names[static_cast<int>(target_state)]);
     state_mutex.take(TIMEOUT_MAX);
     state = target_state;  

@@ -460,8 +460,8 @@ namespace screen_flash{
       }
     }
 
-    for (it = buttons.begin(); it != buttons.end(); it++){//For each button in the list
-      for (it2 = buttons.begin(); it2 != buttons.end(); it2++){//Go through the list and save each button
+    for (it = buttons.begin(); it != buttons.end(); it++){ //For each button in the list
+      for (it2 = buttons.begin(); it2 != buttons.end(); it2++){ //Go through the list and save each button
         if (*it != *it2) (*it)->options.push_back(*it2);
       }
     }

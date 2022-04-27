@@ -133,7 +133,7 @@ void queue_handle(void* params){
   }
 }
 
-uintptr_t data_size(){//returns the number of characters needed to be printed from the queue
+uintptr_t data_size(){ //returns the number of characters needed to be printed from the queue
   uintptr_t size = reinterpret_cast<uintptr_t>(back) - reinterpret_cast<uintptr_t>(front);
   return size < 0 ? size + queue_size - 1 : size;
 }

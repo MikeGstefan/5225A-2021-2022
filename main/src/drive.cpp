@@ -97,6 +97,10 @@ name(name), joy_sticks{joy_sticks[0], joy_sticks[1], joy_sticks[2]}, custom_driv
 // Drivebase class constructor
 Drivebase::Drivebase(std::array<driver, num_of_drivers> drivers) : drivers(drivers){}
 
+void Drivebase::move(Position power){
+  move(power.x, power.y, power.angle);
+}
+
 void Drivebase::move(double x, double y, double a){
   ERROR.print("you called the wrong function");
   // front_l.move(x + y + a);
@@ -160,10 +164,10 @@ void Drivebase::download_curve_data(){
     drivers_data.print("WARNING: curve_file not found, using default data");
   }
   // reads data for each driver from file
-  for (short driver = 0; driver < num_of_drivers; driver++){  // reads curve curvature from curve file
+  for (short driver = 0; driver < num_of_drivers; driver++){ // reads curve curvature from curve file
     drivers_data.print("num of drivers: %d", num_of_drivers);
     drivers_data.print("\nDRIVER: %s", drivers[driver].name);
-    for (short curvature = 0; curvature < 3; curvature++){  // reads data for each axis of motion
+    for (short curvature = 0; curvature < 3; curvature++){ // reads data for each axis of motion
       if (curve_file_exists)  fscanf(curve_file, "curvature:%lf\n", &drivers[driver].custom_drives[curvature].curvature);
       drivers_data.print("curvature: %f", drivers[driver].custom_drives[curvature].curvature);
       drivers[driver].custom_drives[curvature].fill_lookup_table();
@@ -180,13 +184,13 @@ void Drivebase::update_lookup_table_util(){
   master.clear();
   update_screen();
 
-  while (!master.is_rising(E_CONTROLLER_DIGITAL_B)){  // user presses b to save and exit utility
-    if(master.is_rising(E_CONTROLLER_DIGITAL_A)){  // moves to next driver
+  while (!master.is_rising(E_CONTROLLER_DIGITAL_B)){ // user presses b to save and exit utility
+    if(master.is_rising(E_CONTROLLER_DIGITAL_A)){ // moves to next driver
       cur_driver++;
       cur_driver %= num_of_drivers;
       update_screen();
     }
-    else if(master.is_rising(E_CONTROLLER_DIGITAL_Y)){  // moves to previous driver
+    else if(master.is_rising(E_CONTROLLER_DIGITAL_Y)){ // moves to previous driver
       if (cur_driver == 0)  cur_driver = num_of_drivers - 1;
       else cur_driver--;
       update_screen();
@@ -197,18 +201,18 @@ void Drivebase::update_lookup_table_util(){
       cur_screen %= 3; // to create rollover
       update_screen();
     }
-    else if(master.is_rising(E_CONTROLLER_DIGITAL_LEFT)){  // moves to previous screen
+    else if(master.is_rising(E_CONTROLLER_DIGITAL_LEFT)){ // moves to previous screen
       // rollover but without mod because c++ handles negative mods differently :(
       if (cur_screen == 0)  cur_screen = 2;
       else cur_screen--;
       update_screen();
     }
 
-    if(master.is_rising(E_CONTROLLER_DIGITAL_UP)){  // increase curvature
+    if(master.is_rising(E_CONTROLLER_DIGITAL_UP)){ // increase curvature
       if (drivers[cur_driver].custom_drives[cur_screen].curvature < 9.9)  drivers[cur_driver].custom_drives[cur_screen].curvature += 0.1;
       master.print(2, 0, "Curvature: %f", drivers[cur_driver].custom_drives[cur_screen].curvature);  // updates curvature
     }
-    else if(master.is_rising(E_CONTROLLER_DIGITAL_DOWN)){  // decrease curvature
+    else if(master.is_rising(E_CONTROLLER_DIGITAL_DOWN)){ // decrease curvature
       printf2("pressed down");
       if (drivers[cur_driver].custom_drives[cur_screen].curvature > 0.1)  drivers[cur_driver].custom_drives[cur_screen].curvature -= 0.1;
       master.print(2, 0, "Curvature: %f", drivers[cur_driver].custom_drives[cur_screen].curvature);  // updates curvature
@@ -224,7 +228,7 @@ void Drivebase::update_lookup_table_util(){
     Data::log_t.data_update();
     curve_file = fopen("/usd/curve_file.txt", "w");
 
-    for (short driver = 0; driver < num_of_drivers; driver++){  // uploads curve data to curve file
+    for (short driver = 0; driver < num_of_drivers; driver++){ // uploads curve data to curve file
       for (short curvature = 0; curvature < 3; curvature++){
         fprintf(curve_file, "curvature:%f\n", drivers[driver].custom_drives[curvature].curvature);
         drivers_data.print("curvature:%f", drivers[driver].custom_drives[curvature].curvature);
@@ -274,7 +278,7 @@ void Drivebase::handle_input(){
     // velo_brake();
     brake();
   }
-  else{ 
+  else{
     move(tracking.power.y, tracking.power.angle);
     
   }
@@ -296,7 +300,7 @@ void Drivebase::driver_practice(){
   // initializes pneumatics in appropriate state
 
   // moves motors to necessary positions / speeds
-  // Task([](){ 
+  // Task([](){
     // b_lift.reset();
     // f_lift.reset();
   // });

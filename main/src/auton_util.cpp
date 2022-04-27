@@ -118,7 +118,7 @@ void flatten_against_wall(bool front, int cycles){
 // double get_front_dist(){
 //   double avg = 0.0;
 //   int count = 0;
-//   while(true){ 
+//   while(true){
 //     // for(int i = 0; i < 3; i++){
 //     if(front_dist.get() > 10){
 //       avg+= front_dist.get();
@@ -134,10 +134,10 @@ void flatten_against_wall(bool front, int cycles){
   
 // }
 
-void b_detect_goal(){ 
+void b_detect_goal(){
   tilt_lock.set_state(1);
   wait_until(!tracking.move_complete);
-  while(b_dist.get() > 40 && !tracking.move_complete){ 
+  while(b_dist.get() > 40 && !tracking.move_complete){
     misc.print("looking for goal at back: %d", b_dist.get());
     delay(33);
   }
@@ -151,7 +151,7 @@ void tilt_goal(){
   b_claw.set_state(0);
 }
 
-void f_detect_goal(bool safety){ 
+void f_detect_goal(bool safety){
   if(safety) wait_until(!tracking.move_complete);
   while(f_dist.get() > 30 && !tracking.move_complete){
     misc.print("looking for goal at front: %d", f_dist.get());
@@ -162,7 +162,7 @@ void f_detect_goal(bool safety){
 }
 
 
-void detect_interference(){ 
+void detect_interference(){
   int time = millis();
   int count = 0;
   wait_until(move_t.get_task_ptr()->get_state() == 4){
@@ -207,7 +207,7 @@ double Reset_dist::get_dist(){
 void subsystem_handle_t(void*params){
   _Task* ptr = _Task::get_obj(params);
 
-  while(true){ 
+  while(true){
     b_lift.handle(true);
 		f_lift.handle(true);
     // intake.handle();

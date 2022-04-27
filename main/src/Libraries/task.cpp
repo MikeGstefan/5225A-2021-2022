@@ -2,20 +2,10 @@
 #include "logging.hpp"
 #include "util.hpp"
 
-struct point_params{ 
-  Position target;
-  const double max_power;
-  const bool overshoot;
-  const double min_angle_percent;
-  const bool brake;
-  const double decel_dist, decel_speed;
-  point_params(Position target, const double max_power = 127.0, const bool overshoot = false, const double min_angle_percent = 0.0, const bool brake = true, const double decel_dist = 0.0, const double decel_speed = 0.0);
-};
-
 _Task::_Task(task_fn_t function, std::string name, void* params, std::uint32_t prio, std::uint16_t stack_depth){
   this->function = function;
   this->name = name;
-  this->params = std::make_tuple(this,std::move(params));
+  this->params = {this, std::move(params)};
   this->prio = prio;
   this->stack_depth = stack_depth;
 }
@@ -26,13 +16,13 @@ _Task::~_Task(){
 }
 
 _Task* _Task::get_obj(void* params){
-  //gets the _Task class pointer out of tuple passed as void*
-  return std::get<0>(*(std::tuple<_Task*, void*>*)(params));
+  //gets the _Task class pointer out of pair passed as void*
+  return (static_cast<std::pair<_Task*, void*>*>(params))->first;
 }
 
 void* _Task::get_params(void* params){
-  //gets void* params from the tuple
-  return std::get<1>(*(std::tuple<_Task*, void*>*)(params));
+  //gets void* params from the pair
+  return (static_cast<std::pair<_Task*, void*>*>(params))->second;
 }
 
 
@@ -41,16 +31,14 @@ Task* _Task::get_task_ptr() const{
 }
 
 void _Task::start(void* params){
-   task_log.print(term_colours::GREEN, "%s starting", this->name);
-   if(this->task_ptr != NULL){
-     task_log.print(term_colours::ERROR, "%s was already started", this->name);
-     this->kill();
-   }
-  //  printf2("before move: %f",static_cast<point_params*>(params)->target.x);
-   this->params = std::make_tuple(this,std::move(params));
-  //  printf2("after move: %f",static_cast<point_params*>(_Task::get_params((void*)&this->params))->target.x);
-   this->task_ptr = new Task(this->function, &this->params, this->prio, this->stack_depth, this->name.c_str());
-   task_log.print(term_colours::GREEN, "%s started", this->name);
+  task_log.print(term_colours::GREEN, "%s starting", this->name);
+  if(this->task_ptr != NULL){
+    task_log.print(term_colours::ERROR, "%s was already started", this->name);
+    this->kill();
+  }
+  this->params = {this, std::move(params)};
+  this->task_ptr = new Task(this->function, &this->params, this->prio, this->stack_depth, this->name.c_str());
+  task_log.print(term_colours::GREEN, "%s started", this->name);
 }
 
 void _Task::kill(){
@@ -72,38 +60,38 @@ void _Task::kill(){
 }
 
 bool _Task::notify_handle(){
-  switch((notify_types)this->task_ptr->notify_take(1,0)){
+  switch(static_cast<notify_types>(this->task_ptr->notify_take(1, 0))){
     case stop:
       return true;
-    break;
+      break;
+
     case reset:
       task_log.print("%s paused", this->name);
       this->task_ptr->suspend();
+      break;
 
-    break;
     default:
-
-    break;
+      break;
   }
+
   return false;
 }
 
 bool _Task::data_update(){
-  if(this->task_ptr == NULL || this->task_ptr->get_state() >=3)return false;
-  task_log.print("%s pausing for data", this->name);
-  this->task_ptr->notify_ext((int)reset, E_NOTIFY_ACTION_OWRITE,NULL);
+  if(this->task_ptr == NULL || this->task_ptr->get_state() >= 3) return false;
+  task_log.print("%s pausing for data update", this->name);
+  this->task_ptr->notify_ext(reset, E_NOTIFY_ACTION_OWRITE, NULL);
   wait_until(this->task_ptr->get_state() == 3);
+  task_log.print("%s paused", this->name);
   return true;
 }
 
 bool _Task::done_update(){
-  if(this->task_ptr == NULL || this->task_ptr->get_state() !=3)return false;
+  if(this->task_ptr == NULL || this->task_ptr->get_state() != 3) return false;
   this->task_ptr->resume();
   task_log.print("%s done data update, resuming", this->name);
   return true;
 }
-
-
 
 void _Task::rebind(task_fn_t function, void* params){
   task_log.print("%s rebinding", this->name);

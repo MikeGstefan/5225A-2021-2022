@@ -1,6 +1,7 @@
 #pragma once
 #include "main.h"
 #include "Libraries/timer.hpp"
+#include "Libraries/geometry.hpp"
 
 constexpr int master_hold_time = 300;
 constexpr int partner_hold_time = 300;
@@ -66,6 +67,7 @@ public:
   Drivebase(std::array<driver, num_of_drivers> drivers); // constructor
 
   // 'set-drive' methods
+  void move(Position power);
   void move(double x, double y, double a);
   void move(double y, double a);
   void move_side(double l, double r);

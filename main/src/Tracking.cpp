@@ -1,4 +1,5 @@
 #include "tracking.hpp"
+#include "Libraries/geometry.hpp"
 #include "Libraries/printing.hpp"
 #include "config.hpp"
 #include "constants.hpp"
@@ -27,26 +28,24 @@ turn_point_params turn_point_params_g;
 line_old_params line_old_params_g;
 tank_rush_params tank_rush_params_g;
 
-Vector polar_to_vector_line(Point start, double magnitude, double theta, double angle){
-  return Vector(0.0, 0.0);
-  //I have no idea what this is actually supposed to be
-  // return start, {start.x + sin(deg_to_rad(theta)) * magnitude, start.y + cos(deg_to_rad(theta)) * magnitude, angle};
-}
-
-Vector polar_to_vector_facing_line(Point start, double magnitude, double angle){
-  return polar_to_vector_line(start, magnitude, angle, angle);
-}
-
 double point_to_angle(Point point){
-  return rad_to_deg(atan2(point.x - tracking.coord().x, point.y - tracking.coord().y));
+  return rad_to_deg(Vector(tracking.coord(), point).get_angle());
 }
 
 Position polar_to_vector_point(double magnitude, double theta, double angle){
   return polar_to_vector_point(tracking.coord(), magnitude, theta, angle);
 }
 
+double Tracking::near_angle(double angle){
+  return round((position.angle - angle)/(M_TWOPI)) * (M_TWOPI) + angle - position.angle;
+}
+
+double Tracking::near_angle(Position pos){
+  return near_angle(pos.angle);
+}
+
 Position Tracking::coord() const{
-  return {position.x, position.y, rad_to_deg(position.angle)};
+  return rad_to_deg(position);
 }
 
 void Tracking::reset(double x, double y, double a){
@@ -56,15 +55,13 @@ void Tracking::reset(double x, double y, double a){
 void Tracking::reset(Position position){
   update_t.data_update();
   tracking_imp.print("Resetting tracking from %.2f to %.2f", coord(), position);
-  tracking.position.x = position.x;
-  tracking.position.y = position.y;
-  tracking.position.angle = deg_to_rad(position.angle);
+  tracking.position = deg_to_rad(position);
   update_t.done_update();
   screen_flash::start("Reset", term_colours::GREEN);
 }
 
 double Tracking::get_dist(Position pos1, Position pos2){
-  return sqrt(pow(pos1.x - pos2.x, 2) + pow(pos1.y - pos2.y, 2));
+  return Vector(pos2, pos1).get_magnitude();
 }
 
 double Tracking::get_dist(Position pos1){
@@ -89,19 +86,15 @@ void Tracking::wait_for_dist(double distance, int timeout){
 void update(void* params){
   _Task* ptr = _Task::get_obj(params);
   Timer data_timer{"tracking logs"};
-  // LeftEncoder.reset(); RightEncoder.reset(); BackEncoder.reset();
-  double DistanceLR = 9.91, DistanceB = 0.85;
   double Left, Right, Back, NewLeft, NewRight, NewBack, LastLeft = LeftEncoder.get_value()/360.0 *(2.75*M_PI), LastRight =  RightEncoder.get_value()/360.0 *(2.75*M_PI), LastBack = BackEncoder.get_value()/360.0 *(2.75*M_PI);
   double Theta = 0.0, Beta = 0.0, Alpha = 0.0;
   double RadiusR, RadiusB, h, h2;
   double Xx, Xy, Yy, Yx;
-  double last_x = 0, last_y = 0, last_a = 0;
   double last_vel_l = 0, last_vel_r = 0, last_vel_b = 0;
 
   Position last_position; // last position of robot
-  int last_velocity_time = 0;    // time of last velocity update
+  int last_velocity_time = 0; // time of last velocity update
   int velocity_update_time = 0; // time SINCE last velocity update
-
 
   while(true){
     NewLeft = LeftEncoder.get_value()/360.0 *(2.75*M_PI);
@@ -113,7 +106,7 @@ void update(void* params){
     Back = NewBack - LastBack;
 
     velocity_update_time = millis() - last_velocity_time;
-    if(velocity_update_time > 10){  // velocity is updated every 20 ms
+    if(velocity_update_time > 10){ // velocity is updated every 20 ms
       tracking.l_velo = (NewLeft - last_vel_l) / velocity_update_time * 1000; // velocities are in inches per second
       tracking.r_velo = (NewRight - last_vel_r) / velocity_update_time * 1000;
       tracking.b_velo = (NewBack - last_vel_b) / velocity_update_time * 1000;
@@ -123,9 +116,7 @@ void update(void* params){
       last_vel_b = NewBack;
 
       // gives us linear velocity in inches per second, and angular velocity in radians per second
-      tracking.g_velocity.x = (tracking.position.x - last_position.x) / velocity_update_time * 1000;
-      tracking.g_velocity.y = (tracking.position.y - last_position.y) / velocity_update_time * 1000;
-      tracking.g_velocity.angle = (tracking.position.angle - last_position.angle) / velocity_update_time * 1000;
+      tracking.g_velocity = (tracking.position - last_position) / velocity_update_time * 1000;
 
       last_position = tracking.position;
 
@@ -162,11 +153,11 @@ void update(void* params){
 
 
     tracking_data.print(&data_timer, 10, {
-      // [=](){return sprintf2("Pos: %.2lf", tracking.coord());},
-      // [=](){return sprintf2("GLOBAL VELOCITY| x: %.2f, y: %.2f a: %.2f", tracking.g_velocity.x, tracking.g_velocity.y, rad_to_deg(tracking.g_velocity.angle));},
-      // [=](){return sprintf2("ENCODER L: %d, R: %d, B:%d", LeftEncoder.get_value(), RightEncoder.get_value(), BackEncoder.get_value());},
-      // [=](){return sprintf2("ENCODER VELO| l: %.2f, r: %.2f, b: %.2f", tracking.l_velo, tracking.r_velo, tracking.b_velo);},
-      [=](){return sprintf2("%.2lf, %.2f, %.2f", tracking.coord(), tracking.l_velo, tracking.b_velo);},
+      // [](){return sprintf2("Pos: %.2lf", tracking.coord());},
+      // [](){return sprintf2("GLOBAL VELOCITY| x: %.2f, y: %.2f a: %.2f", tracking.g_velocity.x, tracking.g_velocity.y, rad_to_deg(tracking.g_velocity.angle));},
+      // [](){return sprintf2("ENCODER L: %d, R: %d, B:%d", LeftEncoder.get_value(), RightEncoder.get_value(), BackEncoder.get_value());},
+      // [](){return sprintf2("ENCODER VELO| l: %.2f, r: %.2f, b: %.2f", tracking.l_velo, tracking.r_velo, tracking.b_velo);},
+      [](){return sprintf2("%.2lf, L_v:%.2f, B_v:%.2f", tracking.coord(), tracking.l_velo, tracking.b_velo);},
     });
 
     if(ptr->notify_handle()) return;
@@ -174,116 +165,116 @@ void update(void* params){
   }
 }
 
-void tank_rush_goal(void* params){ 
+void tank_rush_goal(void* params){
   _Task* ptr = _Task::get_obj(params);
-    // tank_point_params* param_ptr = static_cast<tank_point_params*>(_Task::get_params(params));
-    const Position target = tank_rush_params_g.target;
-    const bool turn_dir_if_0 = tank_rush_params_g.turn_dir_if_0;
-    const double max_power = tank_rush_params_g.max_power;
-    const double min_angle_percent = tank_rush_params_g.min_angle_percent;
-    const bool brake = tank_rush_params_g.brake;
-    double kp_a =tank_rush_params_g.kp_a;
-    double kd_a = tank_rush_params_g.kd_a;
-    double dist_past = tank_rush_params_g.dist_past;
-    // Pid angle(kp.a);
+  // tank_point_params* param_ptr = static_cast<tank_point_params*>(_Task::get_params(params));
+  const Position target = tank_rush_params_g.target;
+  const bool turn_dir_if_0 = tank_rush_params_g.turn_dir_if_0;
+  const double max_power = tank_rush_params_g.max_power;
+  const double min_angle_percent = tank_rush_params_g.min_angle_percent;
+  const bool brake = tank_rush_params_g.brake;
+  double kp_a =tank_rush_params_g.kp_a;
+  double kd_a = tank_rush_params_g.kd_a;
+  double dist_past = tank_rush_params_g.dist_past;
+  // Pid angle(kp.a);
+  
+  tracking.move_complete = false;
+
+  Point local_error;
+  Position error;
+
+  double total_power, max_power_scale;
+  int sgn_local_error_y, orig_sgn_line_y, sgn_line_y;
+  double difference_a;
+  double hypotenuse;
+
+  // double kp_y = 11.5, kp_a = 150.0, kd_a = 0.0;
+  // printf2("Local errors | x: %f, y: %f ", local_error.x, local_error.y);
+  double min_power_a = max_power * min_angle_percent;
+  double pre_scaled_power_a;
+  double end_error = 0.5;
+
+  // double deriv_a = 0.0;
+  PID angle(kp_a, 0.0, kd_a, 0.0);
+
+  // move on line variables
+  Vector follow_line((target - tracking.coord()).y, (target - tracking.coord()).x); // used to keep track of angle of follow_line relative to the vertical
+  Vector line_disp(tracking.coord(), target);  // displacements relative to line
+  int time = millis();
+
+  // MOTION FIX
+    // global displacement of robot and target
+    line_disp = Vector(tracking.coord(), target);
+    hypotenuse = line_disp.get_magnitude(); // distance to target
+
+    // rotates vector by line angle, now the vector represents the displacement RELATIVE TO THE LINE
+    line_disp.rotate(follow_line.get_angle());
+    orig_sgn_line_y = sgn(line_disp.get_y()); // used to calculate if the robot has overshot
+    // END OF MOTION FIX
+
+  motion_i.print("Starting tank rush goal to point from %.2f to %.2f", tracking.coord(), target);
+  while(true){
+    // global displacement of robot and target
+    line_disp = Vector(tracking.coord(), target);
+    hypotenuse = line_disp.get_magnitude(); // distance to target
+
+    // rotates vector by line angle, now the vector represents the displacement RELATIVE TO THE LINE
+    line_disp.rotate(follow_line.get_angle());
+    sgn_line_y = sgn(line_disp.get_y() + dist_past); // used to calculate if the robot has overshot
+
+    // difference in angle between angle to target and robot's local y axis
+    difference_a = deg_to_rad(tracking.coord().angle) + Vector(tracking.coord(), target).get_angle();
+
     
-    tracking.move_complete = false;
-
-    Point local_error;
-    Position error;
-
-    double total_power, max_power_scale;
-    int sgn_local_error_y, orig_sgn_line_y, sgn_line_y;
-    double difference_a;
-    double hypotenuse;
-
-    // double kp_y = 11.5, kp_a = 150.0, kd_a = 0.0;
-    // printf2("Local errors | x: %f, y: %f ", local_error.x, local_error.y);
-    double min_power_a = max_power * min_angle_percent;
-    double pre_scaled_power_a;
-    double end_error = 0.5;
-
-    // double deriv_a = 0.0;
-    PID angle(kp_a, 0.0, kd_a, 0.0);
-
-    // move on line variables
-    Vector follow_line(target.y - tracking.coord().y, target.x - tracking.coord().x); // used to keep track of angle of follow_line relative to the vertical
-    Vector line_disp(target.x - tracking.coord().x, target.y - tracking.coord().y);  // displacements relative to line
-    int time = millis();
-
-    // MOTION FIX
-      // global displacement of robot and target
-      line_disp = Vector(target.x - tracking.coord().x, target.y - tracking.coord().y);
-      hypotenuse = line_disp.get_magnitude(); // distance to target
-
-      // rotates vector by line angle, now the vector represents the displacement RELATIVE TO THE LINE
-      line_disp.rotate(follow_line.get_angle());
-      orig_sgn_line_y = sgn(line_disp.get_y()); // used to calculate if the robot has overshot
-      // END OF MOTION FIX
-
-    motion_i.print("Starting tank rush goal to point from %.2f to %.2f", tracking.coord(), target);
-    while(true){
-      // global displacement of robot and target
-      line_disp = Vector(target.x - tracking.coord().x, target.y - tracking.coord().y);
-      hypotenuse = line_disp.get_magnitude(); // distance to target
-
-      // rotates vector by line angle, now the vector represents the displacement RELATIVE TO THE LINE
-      line_disp.rotate(follow_line.get_angle());
-      sgn_line_y = sgn(line_disp.get_y() + dist_past); // used to calculate if the robot has overshot
-
-      // difference in angle between angle to target and robot's local y axis
-      difference_a = deg_to_rad(tracking.coord().angle) + atan2(target.y - tracking.coord().y, target.x - tracking.coord().x);
-
-      
-      local_error.y = sin(difference_a) * hypotenuse; // local y displacement to target
-      sgn_local_error_y = sgn(local_error.y);
-      // printf2("sgn_y: %d", sgn_local_error_y);
-      if(sgn_local_error_y == 0){
-        sgn_local_error_y = bool2sgn(turn_dir_if_0);
-        // printf2("triggered");
-      }
-      // chooses nearest angle to turn to face target (back or front)
-      error.angle = near_angle(sgn_local_error_y * M_PI / 2, difference_a);
-      // printf2("Errors | y: %f, a: %f", local_error.y, rad_to_deg(error.angle));
-
-      // tracking.power.y = kp_y * local_error.y;
-      // tracking.power.y = kp_y * line_y_local_y;
-      // tracking.power.angle = angle.compute(error.angle, 0.0);
-      tracking.power.angle = kp_a * error.angle;
-      // gives min power to local y if that is not satisfied
-      // if (fabs(tracking.power.y) < min_move_power_y && fabs(local_error.y) > 0.5) tracking.power.y = min_move_power_y * sgn(local_error.y);
-
-      // scales powers
-      total_power = fabs(tracking.power.angle);
-      if (total_power > max_power){
-        tracking.power.y = 0;
-        pre_scaled_power_a = tracking.power.angle;
-        max_power_scale = max_power / total_power;
-        tracking.power.angle *= max_power_scale;
-      }
-      else tracking.power.y = orig_sgn_line_y*(max_power - total_power);
-      // printf2("Powers | y: %f, a: %f",tracking.power.y, tracking.power.angle);
-
-      motion_d.print("err_y: %.2f err_a : %.2f pow_y: %.2f, pow_a: %.2f\n ", local_error.y, rad_to_deg(error.angle), tracking.power.y, tracking.power.angle);
-      graph.print("%d, %f\n", millis()-time, tracking.l_velo);
-
-      if(f_dist.get() < 140){
-        f_claw(1);
-        if (brake) drivebase.brake();
-        tracking.move_complete = true;
-        motion_i.print("Ending tank rush goal target %f at %f | time: %d", target, tracking.coord(), millis()-time);
-        break;
-      }
-      if(orig_sgn_line_y != sgn_line_y){
-        if (brake) drivebase.brake();
-        tracking.move_complete = true;
-        motion_i.print(term_colours::ERROR, "MISSED GOAL tank rush goal target %f at %f time: %d", target, tracking.coord(), millis()-time);
-        break;
-      }
-      drivebase.move(tracking.power.y, tracking.power.angle);
-      if(ptr->notify_handle())return;
-      delay(10);
+    local_error.y = sin(difference_a) * hypotenuse; // local y displacement to target
+    sgn_local_error_y = sgn(local_error.y);
+    // printf2("sgn_y: %d", sgn_local_error_y);
+    if(sgn_local_error_y == 0){
+      sgn_local_error_y = bool2sgn(turn_dir_if_0);
+      // printf2("triggered");
     }
+    // chooses nearest angle to turn to face target (back or front)
+    error.angle = near_angle(sgn_local_error_y * M_PI / 2, difference_a);
+    // printf2("Errors | y: %f, a: %f", local_error.y, rad_to_deg(error.angle));
+
+    // tracking.power.y = kp_y * local_error.y;
+    // tracking.power.y = kp_y * line_y_local_y;
+    // tracking.power.angle = angle.compute(error.angle, 0.0);
+    tracking.power.angle = kp_a * error.angle;
+    // gives min power to local y if that is not satisfied
+    // if (fabs(tracking.power.y) < min_move_power_y && fabs(local_error.y) > 0.5) tracking.power.y = min_move_power_y * sgn(local_error.y);
+
+    // scales powers
+    total_power = fabs(tracking.power.angle);
+    if (total_power > max_power){
+      tracking.power.y = 0;
+      pre_scaled_power_a = tracking.power.angle;
+      max_power_scale = max_power / total_power;
+      tracking.power.angle *= max_power_scale;
+    }
+    else tracking.power.y = orig_sgn_line_y*(max_power - total_power);
+    // printf2("Powers | y: %f, a: %f",tracking.power.y, tracking.power.angle);
+
+    motion_d.print("err_y: %.2f err_a : %.2f pow_y: %.2f, pow_a: %.2f\n ", local_error.y, rad_to_deg(error.angle), tracking.power.y, tracking.power.angle);
+    graph.print("%d, %f\n", millis()-time, tracking.l_velo);
+
+    if(f_dist.get() < 140){
+      f_claw(1);
+      if (brake) drivebase.brake();
+      tracking.move_complete = true;
+      motion_i.print("Ending tank rush goal target %f at %f | time: %d", target, tracking.coord(), millis()-time);
+      break;
+    }
+    if(orig_sgn_line_y != sgn_line_y){
+      if (brake) drivebase.brake();
+      tracking.move_complete = true;
+      motion_i.print(term_colours::ERROR, "MISSED GOAL tank rush goal target %f at %f time: %d", target, tracking.coord(), millis()-time);
+      break;
+    }
+    drivebase.move(tracking.power.y, tracking.power.angle);
+    if(ptr->notify_handle()) return;
+    delay(10);
+  }
 }
 
 
@@ -368,7 +359,7 @@ bool get_move_state(){
   return move_t.get_task_ptr()->get_state() != 4;
 }
 
-void move_wait_for_error(double error){ 
+void move_wait_for_error(double error){
   wait_until(fabs(tracking.drive_error) <= error);
 }
 
@@ -394,14 +385,14 @@ void move_to_point(void* params){
   double end_error_a = point_params_g.end_error_a;
 
   tracking.move_complete= false;
-  target.angle = deg_to_rad(target.angle);
+  target = deg_to_rad(target);
   Position error;
   // Position tracking = {-2.0, 2.0, -20.0}, error;
 
   // Vector follow_line {target.x - start.x, target.y - start.y};
-  // double line_angle = atan2(target.x - start.x, target.y - start.y); // angle of follow_line relative to the vertical
+  // double line_angle = Vector(start, target).get_angle(); // angle of follow_line relative to the vertical
 
-  Vector target_line = {target.x - tracking.coord().x, target.y - tracking.coord().y};    // line of current position to target
+  Vector target_line (tracking.coord(), target);    // line of current position to target
   // target_line.rotate(line_angle);    // displacement towards and along follow_line
   int orig_sgn_line_y = sgn(target_line.get_y());
 
@@ -423,10 +414,10 @@ void move_to_point(void* params){
   // decel variables
   double h; // magnitude of power vector
   double decel_power, decel_power_scale;
-  double decel_start = sqrt(pow(x_pid.get_proportional(), 2) + pow(y_pid.get_proportional(), 2));  // theoretically when the deceleration starts
+  double decel_start = Vector(x_pid.get_proportional(), y_pid.get_proportional()).get_magnitude();  // theoretically when the deceleration starts
   Timer move_timer{"move_timer"};
   master.print(1,1,"y: %.3f", target.y);
-  motion_i.print("Move to point: %.2f from: %.2f", Position{target.x, target.y, rad_to_deg(target.angle)}, tracking.coord());
+  motion_i.print("Move to point: %.2f from: %.2f", rad_to_deg(target), tracking.coord());
   while(true){
     // gets line displacements
     printf2("Pos:%f", tracking.coord());
@@ -437,9 +428,9 @@ void move_to_point(void* params){
 
     tracking.power.x = x_pid.compute(-target_line.get_x(), 0.0);
     tracking.power.y = y_pid.compute(-target_line.get_y(), 0.0);
-    tracking.power.angle = angle_pid.compute(deg_to_rad(tracking.coord().angle), near_angle(target.angle, deg_to_rad(tracking.coord().angle)) + deg_to_rad(tracking.coord().angle));
+    tracking.power.angle = angle_pid.compute(deg_to_rad(tracking.coord().angle), tracking.near_angle(target) + deg_to_rad(tracking.coord().angle));
 
-    h = sqrt(pow(tracking.power.x, 2) + pow(tracking.power.y, 2));
+    h = Vector(tracking.power).get_magnitude();
 
     // deceleration code
     if(decel_dist){
@@ -448,13 +439,11 @@ void move_to_point(void* params){
         decel_power = std::clamp(map(d, decel_dist, max_power / decel_start, decel_speed, max_power), decel_speed, max_power);
         if (decel_power < decel_speed) decel_power = decel_speed;
         decel_power_scale = decel_power / h;
-        tracking.power.x *= decel_power_scale;
-        tracking.power.y *= decel_power_scale;
+        tracking.power *= decel_power_scale;
       }
       else{ // robot is before decel dist
         decel_power_scale = max_power / (fabs(tracking.power.x) + fabs(tracking.power.y));
-        tracking.power.x *= decel_power_scale;
-        tracking.power.y *= decel_power_scale;
+        tracking.power *= decel_power_scale;
       }
     }
 
@@ -483,12 +472,12 @@ void move_to_point(void* params){
         if (fabs(tracking.power.angle) < min_power_a)  tracking.power.angle = min_power_a * sgn(tracking.power.angle);  // power.angle has been overshadowed
       }
       // angle gets the power it demanded if pre_scaled power.angle was also less than min_power_a
-      else    tracking.power.angle = pre_scaled_power_a;
+      else tracking.power.angle = pre_scaled_power_a;
       if (power_xy > 0)  angle_power_guarantee_xy_scale = (max_power - fabs(tracking.power.angle)) / power_xy;
-      tracking.power.x *= angle_power_guarantee_xy_scale, tracking.power.y *= angle_power_guarantee_xy_scale;
+      tracking.power *= angle_power_guarantee_xy_scale;
       // printf2("****power.angle: %f, x:%f, y: %f, pre_scaled: %f, min: %f", tracking.power.angle, tracking.power.x , tracking.power.y, pre_scaled_power_a, min_power_a);
     }
-    drivebase.move(tracking.power.x, tracking.power.y, tracking.power.angle);
+    drivebase.move(tracking.power);
 
     motion_d.print("Pos:%f, err: (%f, %f), pow:%f, ex: %f, dx: %f, ey: %f, dy: %f", tracking.coord(), target.x - tracking.coord().x, target.y - tracking.coord().y, tracking.power, x_pid.error, x_pid.derivative, y_pid.error, y_pid.derivative);
 
@@ -496,21 +485,21 @@ void move_to_point(void* params){
       if(brake) drivebase.brake();
       else drivebase.move(0.0, 0.0, 0.0);
       tracking.move_complete = true;
-      motion_i.print("Ending move to point: %.2f at %.2f", Position{target.x, target.y, rad_to_deg(target.angle)}, tracking.coord());
+      motion_i.print("Ending move to point: %.2f at %.2f", rad_to_deg(target), tracking.coord());
       return;
     }
     else if(fabs(d) < end_error && fabs(rad_to_deg(angle_pid.get_error())) < end_error_a){
       if(brake) drivebase.brake();
       else drivebase.move(0.0, 0.0, 0.0);
       tracking.move_complete = true;
-      motion_i.print("Ending move to point: %.2f at %.2f", Position{target.x, target.y, rad_to_deg(target.angle)}, tracking.coord());
+      motion_i.print("Ending move to point: %.2f at %.2f", rad_to_deg(target), tracking.coord());
       return;
     }
     else if(move_timer.get_time() > time_out && time_out > 0){
       if(brake) drivebase.brake();
       else drivebase.move(0.0, 0.0, 0.0);
       tracking.move_complete = true;
-      motion_i.print("TIMED OUT move to point: %.2f at %.2f", Position{target.x, target.y, rad_to_deg(target.angle)}, tracking.coord());
+      motion_i.print("TIMED OUT move to point: %.2f at %.2f", rad_to_deg(target), tracking.coord());
       return;
     }
 
@@ -539,11 +528,11 @@ void move_on_arc(void* params){
 
   Position error, kp = Position(12.0, 30.0, 175.0);
 
-  target.angle = deg_to_rad(target.angle);
+  target = deg_to_rad(target);
   // variable 'd' in diagram
-  double chord_dist = sqrt(pow(target.x - start.x, 2) + pow(target.y - start.y, 2));
+  double chord_dist = Vector(start, target).get_magnitude();
   printf2("chord_dist = %f", chord_dist);
-  double theta = atan2(target.y - start.y, target.x - start.x);
+  double theta = Vector(start, target).get_angle();
   printf2("theta = %f", rad_to_deg(theta));
   double half_chord_dist = chord_dist / 2.0;
   printf2("half_chord_dist: %f", half_chord_dist);
@@ -562,7 +551,7 @@ void move_on_arc(void* params){
 
   Position arc_disp;
   double hypotenuse, h;
-  double angle_of_arc = atan2(target.y - arc_centre.y, target.x - arc_centre.x);
+  double angle_of_arc = Vector(arc_centre, target).get_angle();
   double beta; // angle relative to horizontal of h + robot angle + arc_disp.angle
 
   // move on arc variables
@@ -578,27 +567,27 @@ void move_on_arc(void* params){
 
   double decel_power, decel_power_scale;
 
-  const double final_angle = atan2(target.y - arc_centre.y, target.x - arc_centre.x); // angle of final position to centre at end of move
+  const double final_angle = Vector(arc_centre, target).get_angle(); // angle of final position to centre at end of move
 
   // positive turn_dir means cw movement about the arc
-  int turn_dir = -sgn(rad_to_deg(near_angle(atan2(target.y - arc_centre.y, target.x - arc_centre.x), atan2(tracking.coord().y - arc_centre.y, tracking.coord().x - arc_centre.x))));
+  int turn_dir = -sgn(rad_to_deg(near_angle(Vector(arc_centre, target).get_angle(), Vector(arc_centre, tracking.coord()).get_angle())));
   printf2("turn_dir: %d", turn_dir);
 
-  motion_i.print("Starting move on arc to %.2f from %.2f", Position{target.x, target.y, rad_to_deg(target.angle)}, tracking.coord());
+  motion_i.print("Starting move on arc to %.2f from %.2f", rad_to_deg(target), tracking.coord());
   while(true){
-    arc_disp.angle = atan2(tracking.coord().y - arc_centre.y, tracking.coord().x - arc_centre.x);
+    arc_disp.angle = Vector(arc_centre, tracking.coord()).get_angle();
     // printf2("arc_disp.angle: %f", arc_disp.angle);
-    hypotenuse = sqrt(pow(tracking.coord().x - arc_centre.x, 2) + pow(tracking.coord().y - arc_centre.y, 2)); // dist from centre of arc to cur position
+    hypotenuse = Vector(arc_centre, tracking.coord()).get_magnitude(); // dist from centre of arc to cur position
     arc_disp.x = radius - hypotenuse;
     arc_disp.y = radius * near_angle(angle_of_arc, arc_disp.angle);
     // printf2("\n Arc displacements | x: %f, y: %f", arc_disp.x, arc_disp.y);
 
     // rotating arc displacements
-    h = sqrt(pow(arc_disp.x, 2) + pow(arc_disp.y, 2));  // magnitude of displacement vector
-    beta = atan2(arc_disp.y, arc_disp.x) + deg_to_rad(tracking.coord().angle) + arc_disp.angle;  // angle of displacement vector local to robot
+    h = Vector(arc_disp).get_magnitude();  // magnitude of displacement vector
+    beta = Vector(arc_disp).get_angle() + deg_to_rad(tracking.coord().angle) + arc_disp.angle;  // angle of displacement vector local to robot
 
-    error.x = h * cos(beta);
-    error.y = h * sin(beta);
+    error.x = Vector(h, beta, vector_types::POLAR).get_x();
+    error.y = Vector(h, beta, vector_types::POLAR).get_y();
     // printf2("Local errors | x: %f, y: %f", error.x, error.y);
 
     if (angle_relative_to_arc){
@@ -607,7 +596,7 @@ void move_on_arc(void* params){
 
       // printf2("angle target: %f, angle_error: %f", rad_to_deg(target.angle - arc_disp.angle + (turn_dir == -1 ? 0 : M_PI)), rad_to_deg(error.angle));
     }
-    else  error.angle = near_angle(target.angle, deg_to_rad(tracking.coord().angle));
+    else  error.angle = tracking.near_angle(target);
 
     // deceleration code
     if(decel_dist){
@@ -615,13 +604,15 @@ void move_on_arc(void* params){
         decel_power = std::clamp(map(h, decel_dist, max_power / kp.y, decel_speed, max_power), decel_speed, max_power);
         if (decel_power < decel_speed) decel_power = decel_speed;
         decel_power_scale = decel_power / h;
-        tracking.power.x = decel_power_scale * error.x;
-        tracking.power.y = decel_power_scale * error.y;
+        tracking.power.x = error.x;
+        tracking.power.y = error.y;
+        tracking.power *= decel_power_scale;
       }
       else{ // robot is before decel dist
         decel_power_scale = max_power / (fabs(error.x) * kp.x + fabs(error.y) * kp.y);
-        tracking.power.x = error.x * kp.x * decel_power_scale;
-        tracking.power.y = error.y * kp.y * decel_power_scale;
+        tracking.power.x = error.x * kp.x;
+        tracking.power.y = error.y * kp.y;
+        tracking.power *= decel_power_scale;
       }
     }
     else{
@@ -657,15 +648,15 @@ void move_on_arc(void* params){
         // angle gets the power it demanded if pre_scaled power.angle was also less than min_power_a
         else    tracking.power.angle = pre_scaled_power_a;
         if (power_xy > 0)  angle_power_guarantee_xy_scale = (max_power - fabs(tracking.power.angle)) / power_xy;
-        tracking.power.x *= angle_power_guarantee_xy_scale, tracking.power.y *= angle_power_guarantee_xy_scale;
+        tracking.power *= angle_power_guarantee_xy_scale;
         // printf2("****power.angle: %f, x:%f, y: %f, pre_scaled: %f, min: %f", tracking.power.angle, tracking.power.x , tracking.power.y, pre_scaled_power_a, min_power_a);
     }
     // end of scaling
     // END OF MOVE ON ARC CODE
-    drivebase.move(tracking.power.x, tracking.power.y, tracking.power.angle);
+    drivebase.move(tracking.power);
     // waits for arc angle to become less than 1 degree
-    if (rad_to_deg(fabs(near_angle(final_angle, atan2(tracking.coord().y - arc_centre.y, tracking.coord().x - arc_centre.x)))) < 1.0){
-      motion_i.print("Ending move on arc: %.2f at %.2f", Position{target.x, target.y, rad_to_deg(target.angle)}, tracking.coord());
+    if (rad_to_deg(fabs(near_angle(final_angle, Vector(arc_centre, tracking.coord()).get_angle()))) < 1.0){
+      motion_i.print("Ending move on arc: %.2f at %.2f", rad_to_deg(target), tracking.coord());
       if(brake) drivebase.brake();
       else drivebase.move(0, 0, 0);
       printf2("min_a: %f", min_power_a);
@@ -673,164 +664,159 @@ void move_on_arc(void* params){
       return;
     }
     // printf2("****power.angle: %f, x:%f, y: %f, pre_scaled: %f, min: %f, sum: %f", tracking.power.angle, tracking.power.x , tracking.power.y, pre_scaled_power_a, min_power_a, fabs(tracking.power.angle) + fabs(tracking.power.x) + fabs(tracking.power.y));
-    if(ptr->notify_handle())return;
+    if(ptr->notify_handle()) return;
     delay(10);
   }
 }
 
 void move_on_line(void* params){
-    _Task* ptr = _Task::get_obj(params);
-    // line_params* param_ptr = static_cast<line_params*>(_Task::get_params(params));
+  _Task* ptr = _Task::get_obj(params);
+  // line_params* param_ptr = static_cast<line_params*>(_Task::get_params(params));
 
-    const Point start = line_params_g.start;
-    Position target = line_params_g.target;
-    const double max_power = line_params_g.max_power;
-    const bool overshoot = line_params_g.overshoot;
-    const double min_angle_percent = line_params_g.min_angle_percent;
-    const bool brake = line_params_g.brake;
-    const double decel_dist = line_params_g.decel_dist, decel_speed = line_params_g.decel_speed;
-    tracking.move_complete = false;
-    target.angle = deg_to_rad(target.angle);
-    Position error;
-    // Position tracking = {-2.0, 2.0, -20.0}, error;
+  const Point start = line_params_g.start;
+  Position target = line_params_g.target;
+  const double max_power = line_params_g.max_power;
+  const bool overshoot = line_params_g.overshoot;
+  const double min_angle_percent = line_params_g.min_angle_percent;
+  const bool brake = line_params_g.brake;
+  const double decel_dist = line_params_g.decel_dist, decel_speed = line_params_g.decel_speed;
+  tracking.move_complete = false;
+  target = deg_to_rad(target);
+  Position error;
+  // Position tracking = {-2.0, 2.0, -20.0}, error;
 
-    Vector follow_line {target.x - start.x, target.y - start.y};
-    double line_angle = atan2(target.x - start.x, target.y - start.y); // angle of follow_line relative to the vertical
+  // Vector follow_line (start, target);
+  double line_angle = Vector(start, target).get_angle(); // angle of follow_line relative to the vertical
 
-    Vector target_line = {target.x - tracking.coord().x, target.y - tracking.coord().y};    // line of current position to target
-    target_line.rotate(line_angle);    // displacement towards and along follow_line
-    int orig_sgn_line_y = sgn(target_line.get_y());
+  Vector target_line (tracking.coord(), target);    // line of current position to target
+  target_line.rotate(line_angle);    // displacement towards and along follow_line
+  int orig_sgn_line_y = sgn(target_line.get_y());
 
-    // power_scaling variables
-    // scaling variables
-    double pre_scaled_power_a = tracking.power.angle;
-    double d; // distance to target
-    double angle_power_guarantee_xy_scale;
-    double max_power_scale;
-    double power_xy;
-    double total_power;
-    double min_power_a = max_power * min_angle_percent;
-    constexpr double x_multiplier = 2.0; // how much slower the robot strafes than moves forwards
-    // PID'S
+  // power_scaling variables
+  // scaling variables
+  double pre_scaled_power_a = tracking.power.angle;
+  double d; // distance to target
+  double angle_power_guarantee_xy_scale;
+  double max_power_scale;
+  double power_xy;
+  double total_power;
+  double min_power_a = max_power * min_angle_percent;
+  constexpr double x_multiplier = 2.0; // how much slower the robot strafes than moves forwards
+  // PID'S
 
-    PID x_line_pid(23.0, 0.000, 0.0, 0.0, true, 0.2, 3.0);
-    PID y_line_pid(9.5, 0.0, 1000.0, 0.0, true, 0.2, 3.0);
-    // PID angle_pid(175.0, 0.0, 0.0, 0.0, true, 0.0, 360.0);
-    double kp_a = 125.0;
-    // decel variables
-    double h; // magnitude of power vector
-    double decel_power, decel_power_scale;
-    motion_i.print("Starting move on line to %.2f from %.2f", Position{target.x, target.y, rad_to_deg(target.angle)}, tracking.coord());
-    // motion_i.print("%d | ")
-    while(true){
-        // gets line displacements
-        target_line.set_cartesian(target.x - tracking.coord().x, target.y - tracking.coord().y);
-        target_line.rotate(deg_to_rad(tracking.coord().angle));
-        target_line.rotate(-deg_to_rad(tracking.coord().angle));
-        printf2("Errors | x %f, y: %f", target_line.get_x(), target_line.get_y());
+  PID x_line_pid(23.0, 0.000, 0.0, 0.0, true, 0.2, 3.0);
+  PID y_line_pid(9.5, 0.0, 1000.0, 0.0, true, 0.2, 3.0);
+  // PID angle_pid(175.0, 0.0, 0.0, 0.0, true, 0.0, 360.0);
+  double kp_a = 125.0;
+  // decel variables
+  double h; // magnitude of power vector
+  double decel_power, decel_power_scale;
+  motion_i.print("Starting move on line to %.2f from %.2f", rad_to_deg(target), tracking.coord());
+  // motion_i.print("%d | ")
+  while(true){
+    // gets line displacements
+    target_line.set_cartesian(target - tracking.coord());
+    target_line.rotate(deg_to_rad(tracking.coord().angle)); //Don't these lines just undo each other?
+    target_line.rotate(-deg_to_rad(tracking.coord().angle));
+    printf2("Errors | x %f, y: %f", target_line.get_x(), target_line.get_y());
 
-        d = target_line.get_magnitude();  // distance to target
-        target_line.rotate(line_angle);    // target_line becomes displacement towards and along follow_line
-        // printf2("x: %f, y: %f", target_line.get_x(), target_line.get_y());
-        // printf2("%f,%f",tracking.position.x, tracking.position.y);
+    d = target_line.get_magnitude();  // distance to target
+    target_line.rotate(line_angle);    // target_line becomes displacement towards and along follow_line
+    // printf2("x: %f, y: %f", target_line.get_x(), target_line.get_y());
+    // printf2("%f,%f",tracking.position.x, tracking.position.y);
 
-        // feeds line displacements into PID's
-        x_line_pid.compute(-target_line.get_x(), 0.0);
-        y_line_pid.compute(-target_line.get_y(), 0.0);
-        // angle_pid.compute(tracking.position.angle, near_angle(target.angle, tracking.position.angle) + tracking.position.angle);
+    // feeds line displacements into PID's
+    x_line_pid.compute(-target_line.get_x(), 0.0);
+    y_line_pid.compute(-target_line.get_y(), 0.0);
+    // angle_pid.compute(tracking.position.angle, near_angle(target.angle, tracking.position.angle) + tracking.position.angle);
 
-        target_line.set_cartesian(x_line_pid.get_output(), y_line_pid.get_output());
+    target_line.set_cartesian(x_line_pid.get_output(), y_line_pid.get_output());
 
-        // target_line now represents local vectors of robot to target, after PID transformation
-        target_line.rotate(deg_to_rad(tracking.coord().angle) - line_angle);
+    // target_line now represents local vectors of robot to target, after PID transformation
+    target_line.rotate(deg_to_rad(tracking.coord().angle) - line_angle);
 
-        tracking.power.x = target_line.get_x() * x_multiplier;
-        tracking.power.y = target_line.get_y();
-        // tracking.power.angle = angle_pid.get_output();
-        tracking.power.angle = kp_a * near_angle(target.angle, deg_to_rad(tracking.coord().angle));
-        // printf("output: %f", angle_pid.get_output());
-        printf2("output | x: %f, y: %f, a: %f", tracking.power.x, tracking.power.y, tracking.power.angle);
+    tracking.power.x = target_line.get_x() * x_multiplier;
+    tracking.power.y = target_line.get_y();
+    // tracking.power.angle = angle_pid.get_output();
+    tracking.power.angle = kp_a * tracking.near_angle(target);
+    // printf("output: %f", angle_pid.get_output());
+    printf2("output | pow: %f", tracking.power);
 
-        h = sqrt(pow(tracking.power.x, 2) + pow(tracking.power.y, 2));
-        ////////////
-        // deceleration code
-        if(decel_dist){
-          if(d < decel_dist){ // robot is past decel dist
-            decel_power = std::clamp(map(d, decel_dist, max_power / y_line_pid.get_proportional(), decel_speed, max_power), decel_speed, max_power);
-            if (decel_power < decel_speed) decel_power = decel_speed;
-            decel_power_scale = decel_power / h;
-            tracking.power.x *= decel_power_scale;
-            tracking.power.y *= decel_power_scale;
-          }
-          else{ // robot is before decel dist
-            decel_power_scale = max_power / (fabs(tracking.power.x) + fabs(tracking.power.y));
-            tracking.power.x *= decel_power_scale;
-            tracking.power.y *= decel_power_scale;
-          }
-        }
-        // else{
-        //   // tracking.power.x = error.x * kp.x;
-        //   // tracking.power.y = error.y * kp.y;
-        // }
-        // tracking.power.angle = error.angle * kp.angle;
-        /////////////
-
-
-        // gives minimum move powers if requested
-        if(fabs(tracking.power.x) < min_move_power_x)   tracking.power.x = sgn(tracking.power.x) * min_move_power_x;
-        if(fabs(tracking.power.y) < min_move_power_y)   tracking.power.y = sgn(tracking.power.y) * min_move_power_y;
-        if(fabs(tracking.power.angle) < min_move_power_a)   tracking.power.angle = sgn(tracking.power.angle) * min_move_power_a;
-
-        // printf2("After: x: %f, y: %f", target_line.get_x(), target_line.get_y());
-
-
-        // power scaling and angle power guarantee
-        total_power = fabs(tracking.power.x) + fabs(tracking.power.y) + fabs(tracking.power.angle);
-
-        if(total_power > max_power){
-
-            pre_scaled_power_a = tracking.power.angle;
-            angle_power_guarantee_xy_scale = 1.0;
-
-            max_power_scale = max_power / total_power;
-            tracking.power.x *= max_power_scale, tracking.power.y *= max_power_scale, tracking.power.angle *= max_power_scale;
-            // start of angle power guarantee
-
-            power_xy = fabs(tracking.power.x) + fabs(tracking.power.y);
-
-            if (fabs(pre_scaled_power_a) > min_power_a){
-                if (fabs(tracking.power.angle) < min_power_a)  tracking.power.angle = min_power_a * sgn(tracking.power.angle);  // power.angle has been overshadowed
-            }
-            // angle gets the power it demanded if pre_scaled power.angle was also less than min_power_a
-            else    tracking.power.angle = pre_scaled_power_a;
-            if (power_xy > 0)  angle_power_guarantee_xy_scale = (max_power - fabs(tracking.power.angle)) / power_xy;
-            tracking.power.x *= angle_power_guarantee_xy_scale, tracking.power.y *= angle_power_guarantee_xy_scale;
-            // printf2("****power.angle: %f, x:%f, y: %f, pre_scaled: %f, min: %f", tracking.power.angle, tracking.power.x , tracking.power.y, pre_scaled_power_a, min_power_a);
-        }
-        printf2("angle: %f, error: %f, power: x: %f, y: %f, a: %f", rad_to_deg(deg_to_rad(tracking.coord().angle)), rad_to_deg(near_angle(target.angle, deg_to_rad(tracking.coord().angle))),  tracking.power.x, tracking.power.y, tracking.power.angle);
-
-        drivebase.move(tracking.power.x, tracking.power.y, tracking.power.angle);
-
-        if (overshoot && sgn(target_line.get_y()) != orig_sgn_line_y){
-          if(brake) drivebase.brake();
-          else drivebase.move(0.0, 0.0, 0.0);
-          tracking.move_complete = true;
-          printf2("Ending move on line: %.2f at %.2f", Position{target.x, target.y, rad_to_deg(target.angle)}, tracking.coord());
-          return;
-        }
-        else if(fabs(d) < 0.5 && fabs(rad_to_deg(near_angle(target.angle, deg_to_rad(tracking.coord().angle)))) < 5.0){
-            if(brake) drivebase.brake();
-            else drivebase.move(0.0, 0.0, 0.0);
-            tracking.move_complete = true;
-            printf2("Ending move on line: %.2f at %.2f", Position{target.x, target.y, rad_to_deg(target.angle)}, tracking.coord());
-            return;
-        }
-        printf2("sum:%f", fabs(tracking.power.x) + fabs(tracking.power.y) + fabs(tracking.power.angle));
-        if(ptr->notify_handle())return;
-        delay(10);
-
+    h = Vector(tracking.power).get_magnitude();
+    ////////////
+    // deceleration code
+    if(decel_dist){
+      if(d < decel_dist){ // robot is past decel dist
+        decel_power = std::clamp(map(d, decel_dist, max_power / y_line_pid.get_proportional(), decel_speed, max_power), decel_speed, max_power);
+        if (decel_power < decel_speed) decel_power = decel_speed;
+        decel_power_scale = decel_power / h;
+        tracking.power *= decel_power_scale;
+      }
+      else{ // robot is before decel dist
+        decel_power_scale = max_power / (fabs(tracking.power.x) + fabs(tracking.power.y));
+        tracking.power *= decel_power_scale;
+      }
     }
+    // else{
+    //   // tracking.power.x = error.x * kp.x;
+    //   // tracking.power.y = error.y * kp.y;
+    // }
+    // tracking.power.angle = error.angle * kp.angle;
+    /////////////
 
+
+    // gives minimum move powers if requested
+    if(fabs(tracking.power.x) < min_move_power_x)   tracking.power.x = sgn(tracking.power.x) * min_move_power_x;
+    if(fabs(tracking.power.y) < min_move_power_y)   tracking.power.y = sgn(tracking.power.y) * min_move_power_y;
+    if(fabs(tracking.power.angle) < min_move_power_a)   tracking.power.angle = sgn(tracking.power.angle) * min_move_power_a;
+
+    // printf2("After: x: %f, y: %f", target_line.get_x(), target_line.get_y());
+
+
+    // power scaling and angle power guarantee
+    total_power = fabs(tracking.power.x) + fabs(tracking.power.y) + fabs(tracking.power.angle);
+
+    if(total_power > max_power){
+      pre_scaled_power_a = tracking.power.angle;
+      angle_power_guarantee_xy_scale = 1.0;
+
+      max_power_scale = max_power / total_power;
+      tracking.power.x *= max_power_scale, tracking.power.y *= max_power_scale, tracking.power.angle *= max_power_scale;
+      // start of angle power guarantee
+
+      power_xy = fabs(tracking.power.x) + fabs(tracking.power.y);
+
+      if (fabs(pre_scaled_power_a) > min_power_a){
+        if (fabs(tracking.power.angle) < min_power_a)  tracking.power.angle = min_power_a * sgn(tracking.power.angle);  // power.angle has been overshadowed
+      }
+      // angle gets the power it demanded if pre_scaled power.angle was also less than min_power_a
+      else tracking.power.angle = pre_scaled_power_a;
+      if (power_xy > 0) angle_power_guarantee_xy_scale = (max_power - fabs(tracking.power.angle)) / power_xy;
+      tracking.power *= angle_power_guarantee_xy_scale;
+      // printf2("****power.angle: %f, x:%f, y: %f, pre_scaled: %f, min: %f", tracking.power.angle, tracking.power.x , tracking.power.y, pre_scaled_power_a, min_power_a);
+    }
+    printf2("angle: %f, error: %f, power: x: %f, y: %f, a: %f", (tracking.coord().angle), rad_to_deg(tracking.near_angle(target)),  tracking.power.x, tracking.power.y, tracking.power.angle);
+
+    drivebase.move(tracking.power);
+
+    if (overshoot && sgn(target_line.get_y()) != orig_sgn_line_y){
+      if(brake) drivebase.brake();
+      else drivebase.move(0.0, 0.0, 0.0);
+      tracking.move_complete = true;
+      printf2("Ending move on line: %.2f at %.2f", rad_to_deg(target), tracking.coord());
+      return;
+    }
+    else if(fabs(d) < 0.5 && fabs(rad_to_deg(tracking.near_angle(target))) < 5.0){
+      if(brake) drivebase.brake();
+      else drivebase.move(0.0, 0.0, 0.0);
+      tracking.move_complete = true;
+      printf2("Ending move on line: %.2f at %.2f", rad_to_deg(target), tracking.coord());
+      return;
+    }
+    printf2("sum:%f", fabs(tracking.power.x) + fabs(tracking.power.y) + fabs(tracking.power.angle));
+    if(ptr->notify_handle()) return;
+    delay(10);
+  }
 }
 
 // TANK MOVE ALGORITHMS
@@ -873,13 +859,13 @@ void tank_move_to_target(void* params){
   PID y_pid(kp_y,0.0,350.0,0.0);
 
   // move on line variables
-  Vector follow_line(target.y - tracking.coord().y, target.x - tracking.coord().x); // used to keep track of angle of follow_line relative to the vertical
-  Vector line_disp(target.x - tracking.coord().x, target.y - tracking.coord().y);  // displacements relative to line
+  Vector follow_line((target - tracking.coord()).y, (target - tracking.coord()).x); // used to keep track of angle of follow_line relative to the vertical
+  Vector line_disp(tracking.coord(), target);  // displacements relative to line
   int time = millis();    
 
   // MOTION FIX
   // global displacement of robot and target
-  line_disp = Vector(target.x - tracking.coord().x, target.y - tracking.coord().y);
+  line_disp = Vector(tracking.coord(), target);
   hypotenuse = line_disp.get_magnitude(); // distance to target
 
   // rotates vector by line angle, now the vector represents the displacement RELATIVE TO THE LINE
@@ -889,10 +875,10 @@ void tank_move_to_target(void* params){
 
   int start_time = millis();
   bool last_state= false;
-  motion_i.print("Starting tank move to point: %.2f at %.2f", Position{target.x, target.y, rad_to_deg(target.angle)}, tracking.coord());
+  motion_i.print("Starting tank move to point: %.2f at %.2f", rad_to_deg(target), tracking.coord());
   while(true){
     // global displacement of robot and target
-    line_disp = {target.x - tracking.coord().x, target.y - tracking.coord().y};
+    line_disp = Vector(tracking.coord(), target);
     hypotenuse = line_disp.get_magnitude(); // distance to target
 
     // rotates vector by line angle, now the vector represents the displacement RELATIVE TO THE LINE
@@ -900,7 +886,7 @@ void tank_move_to_target(void* params){
     sgn_line_y = sgn(line_disp.get_y()); // used to calculate if the robot has overshot
 
     // difference in angle between angle to target and robot's local y axis
-    difference_a = deg_to_rad(tracking.coord().angle) + atan2(target.y - tracking.coord().y, target.x - tracking.coord().x);
+    difference_a = deg_to_rad(tracking.coord().angle) + Vector(tracking.coord(), target).get_angle();
 
     sgn_local_error_y = sgn(local_error.y);
     // printf2("sgn_y: %d", sgn_local_error_y);
@@ -914,8 +900,8 @@ void tank_move_to_target(void* params){
     error.angle = near_angle(sgn_local_error_y * M_PI / 2, difference_a);
     // printf2("Errors | y: %f, a: %f", local_error.y, rad_to_deg(error.angle));
 
-    end_dist = sqrt(pow(hypotenuse,2) + pow(local_error.y,2) - (2* hypotenuse * local_error.y * cos(deg_to_rad(tracking.coord().angle) - atan2(target.x - tracking.coord().x,target.y - tracking.coord().y))));  
-    motion_d.print("end_dist: %.2f, hypotenuse: %.2f, local %.2f, angle: %.2f", end_dist,hypotenuse, local_error.y,rad_to_deg(deg_to_rad(tracking.coord().angle) - atan2(target.x - tracking.coord().x,target.y - tracking.coord().y)));
+    end_dist = sqrt(pow(hypotenuse,2) + pow(local_error.y,2) - (2 * hypotenuse * local_error.y * cos(deg_to_rad(tracking.coord().angle) - Vector(tracking.coord(), target).get_angle())));  
+    motion_d.print("end_dist: %.2f, hypotenuse: %.2f, local %.2f, angle: %.2f", end_dist,hypotenuse, local_error.y, tracking.coord().angle - rad_to_deg(Vector(tracking.coord(), target).get_angle()));
 
     // tracking.power.y = kp_y * local_error.y;
     tracking.power.y = y_pid.compute(-local_error.y,0.0);
@@ -930,7 +916,7 @@ void tank_move_to_target(void* params){
       motion_d.print("correcting");
       tracking.power.angle = kp_a * error.angle;
     }
-    else{ 
+    else{
       if(last_state){
         last_state = false;
         master.print(0, 0, "vibing");
@@ -974,19 +960,19 @@ void tank_move_to_target(void* params){
     if((fabs(local_error.y) < end_error.y && fabs(line_disp.get_y()) < 4)|| sgn_line_y != orig_sgn_line_y){
       if (brake) drivebase.brake();
       tracking.move_complete = true;
-      motion_i.print("Ending move to target: %.2f at %.2f", Position{target.x, target.y, rad_to_deg(target.angle)}, tracking.coord());
+      motion_i.print("Ending move to target: %.2f at %.2f", rad_to_deg(target), tracking.coord());
       // tracking.move_stop_task();
       break;
     }
     if(timeout != 0 && millis() - start_time > timeout){
       if (brake) drivebase.brake();
       tracking.move_complete = true;
-      motion_i.print("TIME OUT move to target: %.2f at %.2f | time: %d", Position{target.x, target.y, rad_to_deg(target.angle)}, tracking.coord(), millis()-time);
+      motion_i.print("TIME OUT move to target: %.2f at %.2f | time: %d", rad_to_deg(target), tracking.coord(), millis()-time);
       break;
     }
     drivebase.move(tracking.power.y, tracking.power.angle);
     
-    if(ptr->notify_handle())return;
+    if(ptr->notify_handle()) return;
     delay(10);
   }
 }
@@ -1012,14 +998,14 @@ void turn_to_angle(void* params){
   double target_velocity;
   double kB = 17.2; // ratio of motor power to target velocity (in radians) i.e. multiply vel by this to get motor power
 
-  motion_i.print("Starting turn to angle %.2f from %.2f", target_a, rad_to_deg(deg_to_rad(tracking.coord().angle)));
+  motion_i.print("Starting turn to angle %.2f from %.2f", target_a, tracking.coord().angle);
   target_a = deg_to_rad(target_a);
   double new_target_a;
   double power;
   if(near){ // picks the closest angle to turn to
     new_target_a = near_angle(target_a, deg_to_rad(tracking.coord().angle)) + deg_to_rad(tracking.coord().angle);
   }
-  else {  // otherwise pick the angle passed in
+  else { // otherwise pick the angle passed in
     new_target_a = target_a;
   }
   int start_time = millis();
@@ -1039,14 +1025,14 @@ void turn_to_angle(void* params){
       tracking.move_complete = true;
       return;
     }
-    if(timeout != 0 && millis() - start_time > timeout){ 
+    if(timeout != 0 && millis() - start_time > timeout){
       motion_i.print("TIMED OUT Ending turn to angle: %.2f at %.2f, time: %d", rad_to_deg(target_a), tracking.coord(), millis() - start_time);
       drivebase.move(0, 0);
       if(brake) drivebase.brake();
       tracking.move_complete = true;
       return;
     }
-    if(ptr->notify_handle())return;
+    if(ptr->notify_handle()) return;
     delay(10);
   }
 }
@@ -1077,7 +1063,7 @@ void turn_to_angle(double target_a, const bool brake, double max_power, int time
       tracking.move_complete = true;
       return;
     }
-    if(ptr->notify_handle())return;
+    if(ptr->notify_handle()) return;
     delay(10);
   }
 
@@ -1091,8 +1077,8 @@ void turn_to_point(void* params){
   const bool brake = turn_point_params_g.brake;
   double max_power = turn_point_params_g.max_power;
   int timeout = turn_point_params_g.timeout;
-  motion_i.print("starting turn to point %.2f from %.2f target angle: %.2f", target, tracking.coord(), rad_to_deg(atan2(target.x - tracking.coord().x, target.y - tracking.coord().y)));
-  turn_to_angle(rad_to_deg(atan2(target.x - tracking.coord().x, target.y - tracking.coord().y)), brake, max_power, timeout, ptr);
+  motion_i.print("starting turn to point %.2f from %.2f target angle: %.2f", target, tracking.coord(), rad_to_deg(Vector(tracking.coord(), target).get_angle()));
+  turn_to_angle(rad_to_deg(Vector(tracking.coord(), target).get_angle()), brake, max_power, timeout, ptr);
   motion_i.print("Ending turn to point function ending");
 }
 
@@ -1106,10 +1092,10 @@ void tank_move_on_arc(void* params){
   double decel_start = tank_arc_params_g.decel_start, decel_end = tank_arc_params_g.decel_end, decel_target_speed = tank_arc_params_g.decel_target_speed;
   tracking.move_complete = false;
 
-  Vector p2 = start_pos, p1 = target;  // p2 and p1 are switched because Nikhil messed up the math
+  Vector p2 (start_pos), p1 (target);  // p2 and p1 are switched because Nikhil messed up the math
 
-  Vector disp = p2 - p1;
-  target.angle = deg_to_rad(target.angle);
+  Vector disp (p2 - p1);
+  target = deg_to_rad(target);
   disp.rotate(target.angle);  // rotates displacement by target's angle to obtain right triangles from isosceles triangle forming the arc
   double theta = 2.0 * atan2(disp.get_x(), disp.get_y()); // 'span' of the arc (in radians)
   double radius = disp.get_magnitude() / 2.0 / sin(theta / 2.0);
@@ -1121,7 +1107,7 @@ void tank_move_on_arc(void* params){
 
   // init variables
   Point g_position;
-  Vector arc_velocity = {0.0, 0.0};
+  Vector arc_velocity;
   double linear_velocity, angular_velocity_target;
   double total_power, max_power_scale;
   // robot travels at 220 degrees/second while power is 127; kp = 175
@@ -1132,7 +1118,7 @@ void tank_move_on_arc(void* params){
   constexpr double kR = 30.0; // multiplier on radial error
 
   constexpr double kA = pwm_to_vel * 90.0, kB = 1 / pwm_to_vel, kP = 50.0, kD = 30.0;
-  const double final_angle = atan2(target.y - centre.y, target.x - centre.x); // angle of final position to centre at end of move
+  const double final_angle = Vector(centre, target).get_angle(); // angle of final position to centre at end of move
 
   uint32_t last_d_update_time = millis();  // for derivative
   double last_angular_velocity = tracking.g_velocity.angle; // for derivative
@@ -1141,7 +1127,7 @@ void tank_move_on_arc(void* params){
   double radial_diff;
   radius = fabs(radius);
   // positive turn_dir means cw movement about the arc
-  int turn_dir = -sgn(rad_to_deg(near_angle(atan2(target.y - centre.y, target.x - centre.x), atan2(tracking.coord().y - centre.y, tracking.coord().x - centre.x))));
+  int turn_dir = -sgn(rad_to_deg(near_angle(Vector(centre, target).get_angle(), Vector(centre, tracking.coord()).get_angle())));
   // printf2("turn_dir: %d", turn_dir);
   double dist;
 
@@ -1149,7 +1135,7 @@ void tank_move_on_arc(void* params){
   motion_d.print("Starting tank move on arc: %.2f from %.2f on arc with r: %.2f and centre: %.2f", target, tracking.coord(), radius, centre);
   while(true){
     g_position = tracking.coord();
-    disp = g_position - centre; // global displacement of robot and arc's centra
+    disp = Vector(centre, g_position); // global displacement of robot and arc's centra
     // printf2("local_a: %f", rad_to_deg(disp.get_angle()));
 
     // global velocity of the robot
@@ -1183,8 +1169,7 @@ void tank_move_on_arc(void* params){
     // used for derivative
     last_d_update_time = millis();
     last_angular_velocity = tracking.g_velocity.angle;
-
-    dist = fabs(near_angle(atan2(target.y - centre.y, target.x - centre.x), atan2(tracking.coord().y - centre.y, tracking.coord().x - centre.x))) *radius;
+    dist = fabs(near_angle(Vector(centre, target).get_angle(), Vector(centre, tracking.coord()).get_angle())) * radius;
 
     tracking.power.y = sgn(power)* map_set(dist, 0.0, std::numeric_limits<double>::max(), static_cast<double>(min_move_power_y), fabs(power),
       decel_end, decel_target_speed,
@@ -1203,11 +1188,11 @@ void tank_move_on_arc(void* params){
     }
     motion_d.print("ARC power: y: %.2f, a: %.2f", tracking.power.y, tracking.power.angle);
     // exits movement after arc angle becomes less than 1 degree
-    if (rad_to_deg(fabs(near_angle(final_angle, atan2(tracking.coord().y - centre.y, tracking.coord().x - centre.x)))) < 1.0){
+    if (rad_to_deg(fabs(near_angle(final_angle, Vector(centre, tracking.coord()).get_angle()))) < 1.0){
 
-      // printf2("ang: %f", atan2(tracking.position.y - centre.y, tracking.position.x - centre.x));
+      // printf2("ang: %f", Vector(centre, tracking.coord()).get_angle());
       drivebase.move(0.0, 0.0);
-      if (brake)  drivebase.brake();
+      if (brake) drivebase.brake();
       tracking.move_complete = true;
       motion_d.print("Ending move on arc to target X: %.2f at %.2f ", target, tracking.coord());
       return;
@@ -1215,7 +1200,7 @@ void tank_move_on_arc(void* params){
     if(xy_enable) printf2("%f", tracking.coord());
     else printf2("power.y: %f, power.angle: %f", tracking.power.y, tracking.power.angle);
     drivebase.move(tracking.power.y, tracking.power.angle);
-    if(ptr->notify_handle())return;
+    if(ptr->notify_handle()) return;
     delay(10);
   }
 }
@@ -1257,7 +1242,7 @@ void move_on_line_old(void* params){
     error_x = target_x - tracking.coord().x;
     error_y = target_y - tracking.coord().y;
     error_a = target_a - deg_to_rad(tracking.coord().angle);
-    error_tot = sqrt(pow(error_x,2)+ pow(error_y,2));
+    error_tot = Vector(error_x, error_y).get_magnitude();
 
     error_angle = atan2(error_x,error_y)-d_angle;
     error_line = sin(error_angle)*error_tot;
@@ -1332,7 +1317,7 @@ void move_on_line_old(void* params){
 
     tracking.power.x = power_line_x + power_d_x;
     if(fabs(error_x) < end_error - 0.2) tracking.power.x = 0.0;
-    else if(fabs(tracking.power.x) < min_move_power_x)tracking.power.x = sgn(tracking.power.x)*min_move_power_x;
+    else if(fabs(tracking.power.x) < min_move_power_x) tracking.power.x = sgn(tracking.power.x)*min_move_power_x;
     tracking.power.y = power_line_y + power_d_y;
     if(fabs(error_y) < end_error - 0.2) tracking.power.y = 0.0;
     else if(fabs(tracking.power.y) < min_move_power_y)tracking.power.y = sgn(tracking.power.y)*min_move_power_y;
@@ -1340,14 +1325,12 @@ void move_on_line_old(void* params){
     else if(fabs(tracking.power.angle) < min_move_power_a)tracking.power.angle = sgn(tracking.power.angle)*min_move_power_a;
 
 
-
-
-    drivebase.move(tracking.power.x,tracking.power.y,tracking.power.angle);
+    drivebase.move(tracking.power);
 
     if(millis() - last_time > 20 && debug){
       motion_d.print("errors x: %.2f, y: %.2f, a: %.2f",error_x, error_y,rad_to_deg(error_a));
       motion_d.print("errors l: %.2f, d: %.2f",error_line, error_d);
-      motion_d.print("powers x: %.2f, y: %.2f, a: %.2f",tracking.power.x, tracking.power.y, tracking.power.angle);
+      motion_d.print("power: %.2f",tracking.power);
       motion_d.print("post s lx: %f, ly: %f, dx: %f, dy: %f, a: %f",power_line_x,power_line_y,power_d_x,power_d_y,tracking.power.angle);
       if(lpercent || apercent) motion_d.print("mins  lx: %.2f, ly: %.2f, a: %.2f", min_lx, min_ly, min_a);
       if(ki_lx || ki_ly || ki_dx || ki_dy || ki_a) motion_d.print("integ  l: %.2f, d: %.2f", integ_l, integ_d);
@@ -1363,7 +1346,7 @@ void move_on_line_old(void* params){
       return;
     }
 
-    if(ptr->notify_handle())return;
+    if(ptr->notify_handle()) return;
     delay(10);
   }
 }

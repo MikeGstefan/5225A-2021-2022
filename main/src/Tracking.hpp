@@ -33,6 +33,10 @@ class Tracking{
     void reset(Position position = {});
     double get_dist(Position pos1);
     static double get_dist(Position pos1, Position pos2);
+
+    //returns in radians
+    double near_angle(double angle);
+    double near_angle(Position pos);
 };
 
 
@@ -66,7 +70,7 @@ struct pid_const{
 
 struct arc_params{
   Point start = {0.0,0.0}; 
-  Position target = {0.0,0.0,0.0};
+  Position target;
   double radius = 0.0, max_power = 0.0, min_angle_percent = 0.0, decel_speed = 0.0, decel_dist = 0.0;
   bool positive = false, angle_relative_to_arc = false, brake = true;
   arc_params() = default;
@@ -76,7 +80,7 @@ struct arc_params{
 
 struct line_params{
   Point start = {0.0,0.0};
-  Position target = {0.0,0.0,0.0};
+  Position target;
   double max_power = 127.0; 
   bool overshoot = false;
   double min_angle_percent = 0.0; 
@@ -105,26 +109,26 @@ struct line_old_params{
   line_old_params(double start_x, double start_y, double target_x, double target_y, double target_a, bool Brake = true, bool debug = false, int max_power = 127, bool Overshoot = false, double end_error = 0.5, double end_error_a = 5.0, double p = 15.0, double lpercent = 0.0, double apercent = 0.0);
 };
 
-struct point_params{ 
-  Position target = {0.0,0.0,0.0};
+struct point_params{
+  Position target;
   double max_power = 0.0;
   bool overshoot = false;
   double min_angle_percent = 0.0;
   bool brake = true;
   double decel_dist = 0.0, decel_speed = 0.0;
-  pid_const x_pid_const = { 23.0,0.0,0.0};
-  pid_const y_pid_const = { 9.5,0.0,1000.0};
-  pid_const a_pid_const = { 125.0,0.0,1000.0};
+  pid_const x_pid_const = {23.0,0.0,0.0};
+  pid_const y_pid_const = {9.5,0.0,1000.0};
+  pid_const a_pid_const = {125.0,0.0,1000.0};
   uint32_t time_out = 0;
   double end_error =0.5;
   double end_error_a = 5.0;
   point_params() = default;
-  point_params(const Position target, const double max_power = 127.0, const bool overshoot = false, const double min_angle_percent = 0.0, const bool brake = true, const double decel_dist = 0.0, const double decel_speed = 0.0, pid_const x_pid_const = { 23.0,0.0,0.0}, pid_const y_pid_const = { 9.5,0.0,1000.0}, pid_const a_pid_const = { 125.0,0.0,1000.0}, const uint32_t time_out = 0, double end_error = 0.5, double end_error_a = 5.0);
+  point_params(const Position target, const double max_power = 127.0, const bool overshoot = false, const double min_angle_percent = 0.0, const bool brake = true, const double decel_dist = 0.0, const double decel_speed = 0.0, pid_const x_pid_const = {23.0,0.0,0.0}, pid_const y_pid_const = {9.5,0.0,1000.0}, pid_const a_pid_const = {125.0,0.0,1000.0}, const uint32_t time_out = 0, double end_error = 0.5, double end_error_a = 5.0);
 };
 
-struct tank_arc_params{ 
+struct tank_arc_params{
   Point start_pos = {0.0,0.0};
-  Position target = {0.0,0.0,0.0};
+  Position target;
   double power = 127.0, max_power = 127.0;
   bool brake = false;
   double decel_start = 0.0, decel_end = 0.0, decel_target_speed = 0.0;
@@ -132,8 +136,8 @@ struct tank_arc_params{
   tank_arc_params(const Point start_pos, Position target, const double power = 127.0, const double max_power = 127.0, const bool brake = false, double decel_start = 0.0, double decel_end = 0.0, double decel_target_speed = 0.0);
 };
 
-struct tank_point_params{ 
-  Position target = {0.0,0.0,0.0};
+struct tank_point_params{
+  Position target;
   bool turn_dir_if_0 = false;
   double max_power = 127.0, min_angle_percent = 1.0;
   bool brake= true;
@@ -147,8 +151,8 @@ struct tank_point_params{
   tank_point_params(const Position target, const bool turn_dir_if_0 = false, const double max_power = 127.0, const double min_angle_percent = 1.0, const bool brake = true, double kp_y = 6.4, double kp_a =70.0, double kd_a = 0.0, int timeout = 0, Point end_error = {0.5, 0.5}, double min_power_y = min_move_power_y);
 };
 
-struct tank_rush_params{ 
-  Position target = {0.0,0.0,0.0};
+struct tank_rush_params{
+  Position target;
   bool turn_dir_if_0 = false;
   double max_power = 127.0, min_angle_percent = 1.0;
   bool brake= true;
@@ -160,7 +164,7 @@ struct tank_rush_params{
 };
 
 
-struct turn_angle_params{ 
+struct turn_angle_params{
   double target_a = 0.0;
   bool brake = true;
   bool near = true;
@@ -174,7 +178,7 @@ struct turn_angle_params{
   turn_angle_params(const double target_a, const bool brake = true, bool near = true, double kp = 5.0, double kd = 0.0, double kp_v = 10.0, double kd_v = 20.0, double max_speed = 127.0, int timeout = 0, double min_power_a = min_move_power_a, double end_error = 5.0);
 };
 
-struct turn_point_params{ 
+struct turn_point_params{
   Point target = {0.0,0.0};
   bool brake = true;
   double max_power = 127;
@@ -225,10 +229,16 @@ void turn_to_point(void* params);
 constexpr bool xy_enable = true;
 
 // macros for convenient modification of move algorithms
-Vector polar_to_vector_line(Point start, double magnitude, double theta, double angle);
-Vector polar_to_vector_facing_line(Point start, double magnitude, double angle);
-Position polar_to_vector_point(double magnitude, double theta, double angle);
+constexpr Vector polar_to_vector_line(Point start, double magnitude, double theta, double angle){
+  return Vector();
+  //I have no idea what this is actually supposed to be
+  // return start, {start.x + sin(deg_to_rad(theta)) * magnitude, start.y + cos(deg_to_rad(theta)) * magnitude, angle};
+}
+constexpr Vector polar_to_vector_facing_line(Point start, double magnitude, double angle){
+  return polar_to_vector_line(start, magnitude, angle, angle);
+}
 double point_to_angle(Point point);
 constexpr Position polar_to_vector_point(Point start, double magnitude, double theta, double angle){
   return {start.x + sin(deg_to_rad(theta)) * magnitude, start.y + cos(deg_to_rad(theta)) * magnitude, angle};
 }
+Position polar_to_vector_point(double magnitude, double theta, double angle);
