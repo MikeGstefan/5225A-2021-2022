@@ -1608,6 +1608,8 @@ void Gyro::climb_ramp(){
   finish_calibrating(); //Makes sure it's calibrated before starting (should already be)
   inertial.tare_roll();
   inertial.tare_pitch();
+  screen_flash::start("ZERO", term_colours::NOTIF);
+
 
   Task([this](){
     wait_until(false){
@@ -1621,8 +1623,8 @@ void Gyro::climb_ramp(){
   drive(127);
 
   // wait_until(fabs(angle) > 10);
-  // f_lift.set_state(f_lift_states::move_to_target, 2);
   wait_until(fabs(angle) > 22);
+  f_lift.set_state(f_lift_states::move_to_target, 0);
   drivebase.brake();
 
   screen_flash::start("On Ramp", term_colours::NOTIF);

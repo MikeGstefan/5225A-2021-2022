@@ -40,7 +40,7 @@ void B_Lift::handle(bool driver_array){
     case b_lift_states::top: // at highest position
       break;
     case b_lift_states::idle: // not doing anything
-      // if(fabs(b_lift_pot.get_value() - driver_positions[index]) > detection_end_error){
+      // if(fabs(b_lift_pot.get_value() - positions[index]) > detection_end_error){
       //   state_log.print("B_lift slipped out of position, index: %d, position: %d", index.load(), b_lift_pot.get_value());
       //   set_state(b_lift_states::move_to_target, index);
       // }
@@ -58,7 +58,7 @@ void B_Lift::handle(bool driver_array){
       if(fabs(pid.get_error()) < end_error){
         // switches to idle by default or special case depending on current target
         if(index == 0)  Subsystem::set_state(b_lift_states::bottom);  // lift is at bottom position
-        else if(index == driver_positions.size() - 1) Subsystem::set_state(b_lift_states::top); // lift is at top position
+        else if(index == positions.size() - 1) Subsystem::set_state(b_lift_states::top); // lift is at top position
         else Subsystem::set_state(b_lift_states::idle);
       }
 
@@ -96,7 +96,7 @@ void B_Lift::handle(bool driver_array){
       // if master controller joystick isn't active, take partner input instead
       if(fabs(lift_power) < 10) lift_power = partner.get_analog(ANALOG_RIGHT_Y);
       // holds motor if joystick is within deadzone or lift is out of range
-      if (fabs(lift_power) < 10 || (lift_power < 0 && b_lift_pot.get_value() <= driver_positions[0]) || (lift_power > 0 && b_lift_pot.get_value() >= driver_positions[driver_positions.size() - 1])){
+      if (fabs(lift_power) < 10 || (lift_power < 0 && b_lift_pot.get_value() <= positions[0]) || (lift_power > 0 && b_lift_pot.get_value() >= positions[positions.size() - 1])){
         lift_power = 0;
       }
       // if back lift is below a threshold and the hitch is open, close it to not break it

@@ -1,5 +1,6 @@
 #include "auton.hpp"
 #include "Libraries/printing.hpp"
+#include "Subsystems/b_lift.hpp"
 #include "Subsystems/f_lift.hpp"
 #include "Tracking.hpp"
 #include "auton_util.hpp"
@@ -393,25 +394,28 @@ void skills_park(){
   wait_until(f_lift_pot.get_value() < 1200); //wait for bottom
   drivebase.brake();
 
+  f_lift.set_state(f_lift_states::move_to_target, 1);
+
   // master.wait_for_press(DIGITAL_R1);
   int start = millis();
 
   gyro.climb_ramp();
   drivebase.brake();
 
-
-  printf("\n\nStart: %d\n", start);
-  printf("\n\nEnd: %d\n", millis());
-  printf("\n\nTotal: %d\n", millis()-start);
-  master.print(0, 0, "Time:%d", millis()-start);
+  printf("\n\nTotal before drop: %d\n", millis()-start);
 
   delay(500);
   hitch.set_value(LOW);
   tilt_lock.set_state(HIGH);
   b_claw.set_state(LOW);
-  b_lift.set_state(b_lift_states::move_to_target, 4);
-  f_lift.set_state(f_lift_states::move_to_target, 0);
+  b_lift.move_to_top();
+  wait_until(b_lift_pot.get_value() > 1800);
   b_lift.Subsystem::set_state(b_lift_states::intake_off);
+
+  screen_flash::start("Done", term_colours::NOTIF);
+
+  printf("\n\nClimb Total: %d\n", millis()-start);
+  master.print(0, 0, "%d", millis()-start);
 }
 
 void rush_high(){

@@ -111,7 +111,6 @@ void opcontrol() {
   // tilt_lock.set_state(LOW);
 
   // f_lift.set_state(f_lift_states::move_to_target, 1);
-
   skills_park();
 
   // master.wait_for_press(DIGITAL_R1);
