@@ -131,13 +131,13 @@ void newline(int count = 1);
   int printf2(const char* fmt, Params... args);
 
 //Convert Args Definitions
-  template <typename T, typename = typename std::enable_if_t<!std::is_arithmetic_v<T>, void>> //Forces double / int overload instead
+  template <typename T, typename> //Forces double / int overload instead
   std::string convert_all_args(const std::string& fmt, const T& arg){
     char buffer[n_printf_max];
     snprintf(buffer, n_printf_max, fmt.c_str(), arg);
     return buffer;
   }
-  template <typename T, typename = typename std::enable_if_t<std::is_arithmetic_v<T>, void>>
+  template <typename T, typename>
   std::string convert_all_args(const std::string& fmt, T arg){ //Not const T& because that duplicates against the non-arithmetic template overload
     const char* format = fmt.c_str();
     std::string fmt_safe = "   " + fmt;

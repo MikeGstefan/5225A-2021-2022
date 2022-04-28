@@ -11,7 +11,7 @@
 Task* updt = nullptr; //What's this for
 const GUI* GUI::current_gui = &main_obj;
 
-bool robot_setup = false;
+static bool robot_setup = false;
 
 /**
  * Runs initialization code. This occurs as soon as the program is started.
@@ -20,14 +20,14 @@ bool robot_setup = false;
  * to keep execution time for this mode under a few seconds.
  */
 
-bool auton_run = false; //has auton run
+static bool auton_run = false; //has auton run
 
 void initialize() {
 	// gyro.calibrate();
   // front_l.set_brake_mode(E_MOTOR_BRAKE_HOLD);
 	// front_r.set_brake_mode(E_MOTOR_BRAKE_HOLD);
-	 //back_l.set_brake_mode(E_MOTOR_BRAKE_HOLD);
-	 //back_r.set_brake_mode(E_MOTOR_BRAKE_HOLD);
+  // back_l.set_brake_mode(E_MOTOR_BRAKE_HOLD);
+  // back_r.set_brake_mode(E_MOTOR_BRAKE_HOLD);
 
   load_positions();
   load_auton();
@@ -43,7 +43,7 @@ void initialize() {
 	update_t.start();
   lift_handle_t.start();
 
-	 //gyro.finish_calibrating(); //Finishes calibrating gyro before program starts
+  //gyro.finish_calibrating(); //Finishes calibrating gyro before program starts
   tracking.reset(107, 15, 0);
 }
 
@@ -80,7 +80,6 @@ void autonomous() {
   run_auton();
 }
 
-bool timer_state = 0; 
-int timer = millis();
+
 void opcontrol() {
 }

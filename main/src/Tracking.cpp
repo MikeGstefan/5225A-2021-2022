@@ -1,6 +1,7 @@
 #include "tracking.hpp"
 #include "Libraries/geometry.hpp"
 #include "Libraries/printing.hpp"
+#include "Libraries/timer.hpp"
 #include "config.hpp"
 #include "constants.hpp"
 #include "auton_util.hpp"
@@ -89,42 +90,42 @@ void Tracking::wait_for_dist(double distance, int timeout){
 
 void update(void* params){
   _Task* ptr = _Task::get_obj(params);
-  Timer data_timer{"tracking logs"};
-  double Left, Right, Back, NewLeft, NewRight, NewBack, LastLeft = LeftEncoder.get_value() / 360.0 * (2.75 * M_PI), LastRight =  RightEncoder.get_value() / 360.0 * (2.75 * M_PI), LastBack = BackEncoder.get_value() / 360.0 * (2.75 * M_PI);
-  double Theta = 0.0, Beta = 0.0, Alpha = 0.0;
-  double RadiusR, RadiusB, h, h2;
-  double Xx, Xy, Yy, Yx;
-  double last_vel_l = 0, last_vel_r = 0, last_vel_b = 0;
-
+  Timer data_timer("Tracking Logs"), update_timer("Tracking Update", true, timing_units::micros);
   Position last_position; //last position of robot
-  int last_velocity_time = 0; //time of last velocity update
-  int velocity_update_time = 0; //time SINCE last velocity update
+  double
+    Left, Right, Back, NewLeft, NewRight, NewBack,
+    RadiusR, RadiusB, h, h2,
+    Xx, Xy, Yy, Yx,
+    LastLeft = deg_to_rad(LeftEncoder.get_value()) * left_track_diameter / 2,
+    LastRight = deg_to_rad(RightEncoder.get_value()) * right_track_diameter / 2,
+    LastBack = deg_to_rad(BackEncoder.get_value()) * back_track_diameter / 2,
+    Theta = 0.0, Beta = 0.0, Alpha = 0.0,
+    last_vel_l = 0, last_vel_r = 0, last_vel_b = 0;
 
   while(true){
-    NewLeft = LeftEncoder.get_value() / 360.0 * (2.75 * M_PI);
-    NewRight = RightEncoder.get_value() / 360.0 * (2.75 * M_PI);
-    NewBack = BackEncoder.get_value() / 360.0 * (2.75 * M_PI);
+    NewLeft = deg_to_rad(LeftEncoder.get_value()) * left_track_diameter / 2,
+    NewRight = deg_to_rad(RightEncoder.get_value()) * right_track_diameter / 2,
+    NewBack = deg_to_rad(BackEncoder.get_value()) * back_track_diameter / 2,
 
     Left = NewLeft - LastLeft;
     Right = NewRight - LastRight;
     Back = NewBack - LastBack;
 
-    velocity_update_time = millis() - last_velocity_time;
-    if(velocity_update_time > 10){ //velocity is updated every 20 ms
-      tracking.l_velo = (NewLeft - last_vel_l) / velocity_update_time * 1000; //velocities are in inches per second
-      tracking.r_velo = (NewRight - last_vel_r) / velocity_update_time * 1000;
-      tracking.b_velo = (NewBack - last_vel_b) / velocity_update_time * 1000;
+    if(update_timer.get_time(timing_units::millis) > 10){ //velocity is updated every 20 ms
+      double time = update_timer.get_time(timing_units::seconds); //velocities are in inches per second
+      tracking.l_velo = (NewLeft - last_vel_l) / time;
+      tracking.r_velo = (NewRight - last_vel_r) / time;
+      tracking.b_velo = (NewBack - last_vel_b) / time;
 
       last_vel_l = NewLeft;
       last_vel_r = NewRight;
       last_vel_b = NewBack;
 
       //gives us linear velocity in inches per second, and angular velocity in radians per second
-      tracking.g_velocity = (tracking.position - last_position) / velocity_update_time * 1000;
+      tracking.g_velocity = (tracking.position - last_position) / time;
 
       last_position = tracking.position;
-
-      last_velocity_time = millis();
+      update_timer.reset();
     }
 
     LastLeft = NewLeft;
@@ -157,10 +158,10 @@ void update(void* params){
 
 
     tracking_data.print(&data_timer, 10, {
-      //[](){return sprintf2("Pos: %.2lf", tracking.coord());},
-      //[](){return sprintf2("GLOBAL VELOCITY| x: %.2f, y: %.2f a: %.2f", tracking.g_velocity.x, tracking.g_velocity.y, rad_to_deg(tracking.g_velocity.angle));},
-      //[](){return sprintf2("ENCODER L: %d, R: %d, B:%d", LeftEncoder.get_value(), RightEncoder.get_value(), BackEncoder.get_value());},
-      //[](){return sprintf2("ENCODER VELO| l: %.2f, r: %.2f, b: %.2f", tracking.l_velo, tracking.r_velo, tracking.b_velo);},
+      // [](){return sprintf2("Pos: %.2lf", tracking.coord());},
+      // [](){return sprintf2("GLOBAL VELOCITY| x: %.2f, y: %.2f a: %.2f", tracking.g_velocity.x, tracking.g_velocity.y, rad_to_deg(tracking.g_velocity.angle));},
+      // [](){return sprintf2("ENCODER L: %d, R: %d, B:%d", LeftEncoder.get_value(), RightEncoder.get_value(), BackEncoder.get_value());},
+      // [](){return sprintf2("ENCODER VELO| l: %.2f, r: %.2f, b: %.2f", tracking.l_velo, tracking.r_velo, tracking.b_velo);},
       [](){return sprintf2("%.2lf, L_v:%.2f, B_v:%.2f", tracking.coord(), tracking.l_velo, tracking.b_velo);},
     });
 

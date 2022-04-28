@@ -9,4 +9,7 @@ constexpr double
   DistanceLR = 9.91, DistanceB = 0.85, //From tracking update
   dist_back = 8.5,
   dist_front = 8.5,
-  front_dist_dist = 3.85;
+  front_dist_dist = 3.85,
+  left_track_diameter = 2.75,
+  right_track_diameter = 2.75,
+  back_track_diameter = 2.75;

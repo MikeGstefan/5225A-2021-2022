@@ -61,7 +61,7 @@ class Drivebase{
 
 public:
   int cur_driver = 0;  //driver defaults to Nikhil rn
-  Timer screen_timer = {"screen_timer"};
+  Timer screen_timer {"screen_timer"};
   static constexpr int num_of_drivers = 5;
   FILE* curve_file;
   bool curve_file_exists;

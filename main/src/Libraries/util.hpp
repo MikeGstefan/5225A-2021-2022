@@ -227,7 +227,7 @@
     else return map_set(input, range1, in_max, val_1, out_max, args...);
   }
 //Enum Definitions
-  template <typename E, typename = typename std::enable_if_t<std::is_enum_v<E>, void>>
+  template <typename E, typename>
   constexpr E next_enum_value(E enum_value){
     int value = static_cast<int>(enum_value);
 
@@ -236,7 +236,7 @@
 
     return static_cast<E>(value);
   }
-  template <typename E, typename = typename std::enable_if_t<std::is_enum_v<E>, void>>
+  template <typename E, typename>
   constexpr E previous_enum_value(E enum_value){
     int value = static_cast<int>(enum_value);
     
@@ -245,23 +245,23 @@
 
     return static_cast<E>(value);
   }
-  template <typename E, typename = typename std::enable_if_t<std::is_enum_v<E>, void>>
+  template <typename E, typename>
   constexpr E& operator++ (E& enum_value){
     enum_value = next_enum_value(enum_value);
     return enum_value;
   }
-  template <typename E, typename = typename std::enable_if_t<std::is_enum_v<E>, void>>
+  template <typename E, typename>
   constexpr E& operator-- (E& enum_value){
     enum_value = previous_enum_value(enum_value);
     return enum_value;
   }
-  template <typename E, typename = typename std::enable_if_t<std::is_enum_v<E>, void>>
+  template <typename E, typename>
   constexpr E operator++ (E& enum_value, int){
     E old = enum_value;
     ++enum_value;
     return old;
   }
-  template <typename E, typename = typename std::enable_if_t<std::is_enum_v<E>, void>>
+  template <typename E, typename>
   constexpr E operator-- (E& enum_value, int){
     E old = enum_value;
     --enum_value;

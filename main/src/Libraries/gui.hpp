@@ -52,26 +52,10 @@ namespace screen_flash{
     end(),
     start(std::string, Colour, std::uint32_t = 1000), //text + col + time / text + col
     start(std::string, term_colours = term_colours::ERROR, std::uint32_t = 1000); //text + cols + time / text + cols / text
-
-  template <typename... Params> //text + cols + time
-  void start(term_colours colour, std::uint32_t time, std::string fmt, Params... args){
-    start(sprintf2(fmt, args...), colour, time);
-  }
-
-  template <typename... Params> //text + col + time
-  void start(Colour colour, std::uint32_t time, std::string fmt, Params... args){
-    start(sprintf2(fmt, args...), colour, 1000);
-  }
-
-  template <typename... Params> //text + red + time
-  void start(std::uint32_t time, std::string fmt, Params... args){
-    start(sprintf2(fmt, args...), term_colours::ERROR, time);
-  }
-
-  template <typename... Params> //text + col+1000
-  void start(term_colours colour, std::string fmt, Params... args){
-    start(sprintf2(fmt, args...), colour, 1000);
-  }
+  template <typename... Params> void start(term_colours colour, std::uint32_t time, std::string fmt, Params... args); //text + cols + time
+  template <typename... Params> void start(Colour colour, std::uint32_t time, std::string fmt, Params... args); //text + col + time
+  template <typename... Params> void start(std::uint32_t time, std::string fmt, Params... args); //text + red + time
+  template <typename... Params> void start(term_colours colour, std::string fmt, Params... args); //text + col+1000
 }
 
 
@@ -407,6 +391,26 @@ class Slider{
     this->b_col = page->b_col;
     page->texts.push_back(this);
   } 
+
+//Screen Flash Definitions
+  namespace screen_flash{
+    template <typename... Params>
+    void start(term_colours colour, std::uint32_t time, std::string fmt, Params... args){
+      start(sprintf2(fmt, args...), colour, time);
+    }
+    template <typename... Params>
+    void start(Colour colour, std::uint32_t time, std::string fmt, Params... args){
+      start(sprintf2(fmt, args...), colour, 1000);
+    }
+    template <typename... Params>
+    void start(std::uint32_t time, std::string fmt, Params... args){
+      start(sprintf2(fmt, args...), term_colours::ERROR, time);
+    }
+    template <typename... Params>
+    void start(term_colours colour, std::string fmt, Params... args){
+      start(sprintf2(fmt, args...), colour, 1000);
+    }
+  }
 
 //Text Constructors
 

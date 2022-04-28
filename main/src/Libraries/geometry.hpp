@@ -1,49 +1,9 @@
 #pragma once
 #include "main.h"
 
-//No .cpp since everything here is constexpr
-
 struct Point;
 struct Position;
-struct Vector{
-  private:
-    double x, y, magnitude, angle;
-
-  public:
-    //Constructors
-      constexpr Vector();
-      constexpr explicit Vector(Point p1);
-      constexpr Vector(Point p1, Point p2); //Can't use default argument with previous because Point is incomplete
-
-    //Methods
-      constexpr Vector& set_cartesian(Point point);
-      constexpr Vector& set_cartesian(Point p2, Point p1);
-      constexpr Vector& set_cartesian(double x, double y);
-      constexpr Vector& set_polar(double magnitude, double angle);
-      constexpr Vector& invert();
-      constexpr Vector& rotate(double angle);
-      static constexpr Vector make_cartesian(double x, double y);
-      static constexpr Vector make_polar(double magnitude, double angle);
-
-    //Operators
-      friend constexpr Vector operator* (const Vector&, double);
-      friend constexpr Vector operator* (double, const Vector&);
-      friend constexpr Vector operator/ (const Vector&, double);
-      friend constexpr Vector operator/ (double, const Vector&);
-      constexpr bool operator== (const Vector& p2) const;
-      constexpr bool operator!= (const Vector& p2) const;
-      constexpr Vector operator+ (const Vector& p2) const;
-      constexpr Vector operator- (const Vector& p2) const;
-      constexpr Vector operator*= (double scalar);
-      constexpr Vector operator/= (double scalar);
-
-    //Getters
-      constexpr double get_x() const;
-      constexpr double get_y() const;
-      constexpr double get_magnitude() const;
-      constexpr double get_angle() const;
-};
-
+struct Vector;
 
 struct Point{
   double x, y;
@@ -66,10 +26,10 @@ struct Point{
     constexpr bool operator!= (const Point& p2) const;
     constexpr Point operator+ (const Point& p2) const;
     constexpr Point operator- (const Point& p2) const;
-    constexpr Point operator*= (double scalar);
-    constexpr Point operator/= (double scalar);
     constexpr Position operator+ (const Position& p2) const;
     constexpr Position operator- (const Position& p2) const;
+    constexpr Point& operator*= (double scalar);
+    constexpr Point& operator/= (double scalar);
 };
 
 struct Position{
@@ -96,9 +56,52 @@ struct Position{
     constexpr Position operator- (const Position& p2) const;
     constexpr Position operator+ (const Point& p2) const;
     constexpr Position operator- (const Point& p2) const;
-    constexpr Position operator*= (double scalar);
-    constexpr Position operator/= (double scalar);
+    constexpr Position& operator*= (double scalar);
+    constexpr Position& operator/= (double scalar);
 };
+
+struct Vector{
+  private:
+    double x, y, magnitude, angle;
+
+  public:
+    //Constructors
+      constexpr Vector();
+      constexpr explicit Vector(Point p1);
+      constexpr explicit Vector(Point p1, Point p2); //Can't use default argument with previous because that makes it -p2
+
+    //Methods
+      constexpr Vector& set_cartesian(Point point);
+      constexpr Vector& set_cartesian(Point p2, Point p1);
+      constexpr Vector& set_cartesian(double x, double y);
+      constexpr Vector& set_polar(double magnitude, double angle);
+      constexpr Vector& invert();
+      constexpr Vector& rotate(double angle);
+      static constexpr Vector make_cartesian(Point point);
+      static constexpr Vector make_cartesian(Point p2, Point p1);
+      static constexpr Vector make_cartesian(double x, double y);
+      static constexpr Vector make_polar(double magnitude, double angle);
+
+    //Operators
+      friend constexpr Vector operator* (const Vector&, double);
+      friend constexpr Vector operator* (double, const Vector&);
+      friend constexpr Vector operator/ (const Vector&, double);
+      friend constexpr Vector operator/ (double, const Vector&);
+      constexpr bool operator== (const Vector& p2) const;
+      constexpr bool operator!= (const Vector& p2) const;
+      constexpr Vector operator+ (const Vector& p2) const;
+      constexpr Vector operator- (const Vector& p2) const;
+      constexpr Vector& operator*= (double scalar);
+      constexpr Vector& operator/= (double scalar);
+
+    //Getters
+      constexpr double get_x() const;
+      constexpr double get_y() const;
+      constexpr double get_magnitude() const;
+      constexpr double get_angle() const;
+};
+
+
 
 
 //Constructors
@@ -162,6 +165,14 @@ struct Position{
 
     constexpr Vector& Vector::rotate(double angle){
       return set_polar(magnitude, this->angle + angle);
+    }
+
+    constexpr Vector Vector::make_cartesian(Point point){
+      return make_cartesian(point.x, point.y);
+    }
+
+    constexpr Vector Vector::make_cartesian(Point p1, Point p2){
+      return make_cartesian(p2-p1);
     }
 
     constexpr Vector Vector::make_cartesian(double x, double y){
@@ -230,13 +241,11 @@ struct Position{
     constexpr Vector Vector::operator- (const Vector& p2) const{
       return make_polar(x - p2.x, y - p2.y);
     }
-    constexpr Vector Vector::operator*= (double scalar){
-      *this = *this * scalar;
-      return *this;
+    constexpr Vector& Vector::operator*= (double scalar){
+      return set_polar(magnitude * scalar, angle);
     }
-    constexpr Vector Vector::operator/= (double scalar){
-      *this = *this / scalar;
-      return *this;
+    constexpr Vector& Vector::operator/= (double scalar){
+      return set_polar(magnitude / scalar, angle);
     }
 
   //Point
@@ -247,18 +256,16 @@ struct Position{
       return !(*this == p2);
     }
     constexpr Point Point::operator+ (const Point& p2) const{
-      return {x + p2.x, y + p2.y};
+      return *this - Position(p2);
     }
     constexpr Point Point::operator- (const Point& p2) const{
-      return {x - p2.x, y - p2.y};
+      return *this - Position(p2);
     }
-    constexpr Point Point::operator*= (double scalar){
-      *this = *this * scalar;
-      return *this;
+    constexpr Point& Point::operator*= (double scalar){
+      return *this = *this * scalar;
     }
-    constexpr Point Point::operator/= (double scalar){
-      *this = *this / scalar;
-      return *this;
+    constexpr Point& Point::operator/= (double scalar){
+      return *this = *this / scalar;
     }
     constexpr Point operator* (const Point& point, double scalar){
       return {point.x*scalar, point.y*scalar};
@@ -305,16 +312,14 @@ struct Position{
       return {x - p2.x, y - p2.y, angle - p2.angle};
     }
     constexpr Position Position::operator+ (const Point& p2) const{
-      return {x + p2.x, y + p2.y, angle};
+      return *this + Position(p2);
     }
     constexpr Position Position::operator- (const Point& p2) const{
-      return {x - p2.x, y - p2.y, angle};
+      return *this + Position(p2);
     }
-    constexpr Position Position::operator*= (double scalar){
-      *this = *this * scalar;
-      return *this;
+    constexpr Position& Position::operator*= (double scalar){
+      return *this = *this * scalar;
     }
-    constexpr Position Position::operator/= (double scalar){
-      *this = *this / scalar;
-      return *this;
+    constexpr Position& Position::operator/= (double scalar){
+      return *this = *this / scalar;
     }

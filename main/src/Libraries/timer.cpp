@@ -2,20 +2,16 @@
 #include "logging.hpp"
 
 Timer::Timer(std::string name, bool play, timing_units timing_unit, Data* data_obj_ptr):
-name(name), timing_unit(timing_unit)
-{
-  if(data_obj_ptr == nullptr) this->data_obj = &term;
-  else this->data_obj = data_obj_ptr;
-  data_obj->print("%s's initialize time is: %lld", name, get_time_in_timing_unit());
+name(name), timing_unit(timing_unit){
+  this->data_obj = data_obj_ptr ? data_obj_ptr : &term;
+  data_obj->print("\"%s\" initialized at: %lld", name, get_time_in_timing_unit());
   reset(play);
 }
 
 Timer::Timer(std::string name, Data* data_obj_ptr, bool play, timing_units timing_unit):
-name(name), timing_unit(timing_unit)
-{
-  if(data_obj_ptr == nullptr) this->data_obj = &term;
-  else this->data_obj = data_obj_ptr;
-  data_obj->print("%s's initialize time is: %lld", name, get_time_in_timing_unit());
+name(name), timing_unit(timing_unit){
+  this->data_obj = data_obj_ptr ? data_obj_ptr : &term;
+  data_obj->print("\"%s\" initialized at: %lld", name, get_time_in_timing_unit());
   reset(play);
 }
 
@@ -23,13 +19,17 @@ uint64_t Timer::get_last_reset_time(){
   return last_reset_time;
 }
 
-void Timer::reset(const bool& play){
+void Timer::reset(bool play){
   time = 0;
   if(play){
     paused = true;
     this->play();
   }
   else paused = true;
+}
+
+uint64_t Timer::get_time(timing_units timing_unit){
+  return convert_time(get_time(), this->timing_unit, timing_unit);
 }
 
 uint64_t Timer::get_time(){
@@ -61,9 +61,12 @@ void Timer::print_fancy(std::string str, int long_names, bool unit_conversion){
   data_obj->print("%s's current time is: %s | %s", name, to_string(get_time(), timing_unit, long_names, unit_conversion));
 }
 
+uint64_t Timer::convert_time(uint64_t time, timing_units from, timing_units to){
+  return time * static_cast<uint64_t>(from) / static_cast<uint64_t>(to);
+}
 
-uint64_t Timer::get_time_in_timing_unit(){ //returns time in either millis or micros
-  return micros() * (timing_unit == timing_units::micros ? 1 : (timing_unit == timing_units::millis ? 0.001 : 0.000001));
+uint64_t Timer::get_time_in_timing_unit(){
+  return convert_time(micros(), timing_units::micros, timing_unit);
 }
 
 bool Timer::playing(){
@@ -125,11 +128,11 @@ std::string Timer::to_string(std::uint64_t time, timing_units unit, int long_nam
       std::uint64_t seconds = time / 1000;
       time -= seconds * 1000;
 
-      if(seconds >= 60) buffer += to_string(seconds, timing_units::seconds, long_names, true) + ' ';
+      if(seconds >= 60) buffer += to_string(seconds, timing_units::sec, long_names, true) + ' ';
       else buffer += std::to_string(seconds) + sec + ' ';
     }
 
-    else if(time >= 60 && unit == timing_units::seconds){
+    else if(time >= 60 && unit == timing_units::sec){
       std::uint64_t minutes = time / 60;
       time -= minutes * 60;
 
@@ -145,7 +148,7 @@ std::string Timer::to_string(std::uint64_t time, timing_units unit, int long_nam
     switch(unit){
       case timing_units::micros: buffer += micros; break;
       case timing_units::millis: buffer += millis; break;
-      case timing_units::seconds: buffer += sec; break;
+      case timing_units::sec: buffer += sec; break;
     }
   }
 
