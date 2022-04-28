@@ -331,7 +331,7 @@ namespace screen_flash{
     }
   }
 
-  GUI::GUI(std::vector<Page*> pages, std::function <void() > setup, std::function <void() > background){
+  GUI::GUI(std::vector<Page*> pages, std::function <void()> setup, std::function <void()> background){
     //Saves pages to gui
     this->pages.push_back(&perm);
     for (std::vector<Page*>::const_iterator it = pages.begin(); it != pages.end(); it++) this->pages.push_back(*it);
@@ -698,13 +698,13 @@ namespace screen_flash{
 
 
 //Function Handling
-  void Page::set_setup_func(std::function <void() > function){setup_func = function;}
+  void Page::set_setup_func(std::function <void()> function){setup_func = function;}
 
-  void Page::set_loop_func(std::function <void() > function){loop_func = function;}
+  void Page::set_loop_func(std::function <void()> function){loop_func = function;}
 
-  void Button::set_func(std::function <void() > function){func = function;}
+  void Button::set_func(std::function <void()> function){func = function;}
 
-  void Button::set_off_func(std::function <void() > function){off_func = function;}
+  void Button::set_off_func(std::function <void()> function){off_func = function;}
 
   void Button::run_func() const {if (func) func();}
 

@@ -32,7 +32,7 @@ void _Controller::init(){
 }
 
 
-void _Controller::add_to_queue(std::function<void() > func){
+void _Controller::add_to_queue(std::function<void()> func){
   if(this->back+1 != this->front || (this->back == this->queue.size() -1 && this->front == 0)){
     controller_queue.print("adding to controller: %d queue", this->controller_num);
     this->queue[this->back] = func;
@@ -51,7 +51,7 @@ void _Controller::queue_handle(){
 }
 
 void _Controller::clear_line (std::uint8_t line){
-  std::function<void() > func = [=](){
+  std::function<void()> func = [=](){
     Controller::clear_line(line);
     controller_queue.print("clearing line %d for controller %d", line, this->controller_num);
   };
@@ -60,7 +60,7 @@ void _Controller::clear_line (std::uint8_t line){
 }
 
 void _Controller::clear(){
-  std::function<void() > func = [=](){
+  std::function<void()> func = [=](){
     Controller::clear();
     controller_queue.print("clearing %d", this->controller_num);
   };
@@ -70,7 +70,7 @@ void _Controller::clear(){
 
 
 void _Controller::rumble(std::string rumble_pattern){
-  std::function<void() > func = [=](){
+  std::function<void()> func = [=](){
     Controller::rumble(rumble_pattern.c_str());
     controller_queue.print("rumble controller %d", this->controller_num);
   };

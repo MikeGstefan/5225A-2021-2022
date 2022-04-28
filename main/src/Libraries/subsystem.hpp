@@ -6,26 +6,54 @@
 //non-motorized subsystem
 template <typename state_type, int num_of_states>
 class Subsystem{
-private:
-  state_type target_state, state;
+  private:
+    state_type target_state, state;
 
-protected:
-  //target state is what the subsystem is trying to reach 
-  //state is the current state
-  std::string name;
-  Mutex target_state_mutex, state_mutex; //mutexes to hold target_state and state, respectively
+  protected:
+    //target state is what the subsystem is trying to reach 
+    //state is the current state
+    std::string name;
+    Mutex target_state_mutex, state_mutex; //mutexes to hold target_state and state, respectively
 
-public:
-  std::array<std::string, num_of_states> state_names; //an array containing the names of each state (used for debug)
+  public:
+    std::array<std::string, num_of_states> state_names; //an array containing the names of each state (used for debug)
 
-  //constructor for non-motorized subsystem
-  Subsystem(std::string name, std::array<std::string, num_of_states> state_names,
-    state_type starting_state, state_type base_state):
+    //Constructor
+    Subsystem(std::string name, std::array<std::string, num_of_states> state_names, state_type starting_state, state_type base_state);
 
-    name(name), state_names(state_names), state(starting_state), target_state(base_state) 
-  {}
+    void set_state(const state_type next_state); //requests a state change and logs it
+    void log_state_change(); //confirms state change, logs it, and updates state to be the target state
+    //Not defined
+    void handle();  //has a switch containing the state machine for a given subsystem
+    void handle_state_change(); //cleans up and preps the machine to be in the target state
 
-  void set_state(const state_type next_state){ //requests a state change and logs it
+    //public getters for accessing 
+    state_type get_state();
+    state_type get_target_state();
+    std::string get_state_name();
+};
+
+template <typename state_type, int num_of_states, int default_velocity>
+class Motorized_subsystem: public Subsystem<state_type, num_of_states>{
+  public:
+    const int end_error; //how close the subsystem is to a target before considered "reached"
+
+    Motor& motor;
+    Motorized_subsystem(Subsystem<state_type, num_of_states> subsystem, Motor& motor, int end_error = 10);
+
+    void reset();
+    void move_absolute(double position, double velocity = default_velocity, bool wait_for_comp = false, double end_error = 0.0); //sets target and last target
+    void move(double speed);
+};
+
+//Subsystem Definitions
+  template <typename state_type, int num_of_states>
+  Subsystem<state_type, num_of_states>::Subsystem(std::string name, std::array<std::string, num_of_states> state_names, state_type starting_state, state_type base_state):
+    name(name), state_names(state_names), state(starting_state), target_state(base_state){}
+
+
+  template <typename state_type, int num_of_states>
+  void Subsystem<state_type, num_of_states>::set_state(const state_type next_state){ //requests a state change and logs it
     state_log.print("%s | State change requested from %s to %s", name, state_names[static_cast<int>(state) ], state_names[static_cast<int>(next_state) ]);
     target_state_mutex.take(TIMEOUT_MAX);
     target_state = next_state;
@@ -33,50 +61,43 @@ public:
   }
 
 
-  void log_state_change(){ //confirms state change, logs it, and updates state to be the target state
+  template <typename state_type, int num_of_states>
+  void Subsystem<state_type, num_of_states>::log_state_change(){ //confirms state change, logs it, and updates state to be the target state
     state_log.print("%s | State change confirmed from %s to %s", name, state_names[static_cast<int>(state) ], state_names[static_cast<int>(target_state) ]);
     state_mutex.take(TIMEOUT_MAX);
     state = target_state;  
     state_mutex.give();
   }
-  
-  //shouldn't handle be a virtual function
-  void handle();  //has a switch containing the state machine for a given subsystem
-  void handle_state_change(); //cleans up and preps the machine to be in the target state
 
-  //public getters for accessing 
-  state_type get_state(){
+  template <typename state_type, int num_of_states>
+  state_type Subsystem<state_type, num_of_states>::get_state(){
     state_mutex.take(TIMEOUT_MAX);
     state_type temp_state = state;
     state_mutex.give();
     return state;
   }
 
-  state_type get_target_state(){
+  template <typename state_type, int num_of_states>
+  state_type Subsystem<state_type, num_of_states>::get_target_state(){
     target_state_mutex.take(TIMEOUT_MAX);
     state_type temp_state = target_state;
     target_state_mutex.give();
     return temp_state;
   }
 
-  std::string get_state_name(){
+  template <typename state_type, int num_of_states>
+  std::string Subsystem<state_type, num_of_states>::get_state_name(){
     return state_names[static_cast<int>(get_state()) ];
   }
 
-};
 
-template <typename state_type, int num_of_states, int default_velocity>
-class Motorized_subsystem: public Subsystem<state_type, num_of_states>{
-//protected:
+//Motorized Subsystem Definitions
+  template <typename state_type, int num_of_states, int default_velocity>
+  Motorized_subsystem<state_type, num_of_states, default_velocity>::Motorized_subsystem(Subsystem<state_type, num_of_states> subsystem, Motor& motor, int end_error):
+  Subsystem<state_type, num_of_states>(subsystem), motor(motor), end_error(end_error){}
 
-public:
-  const int end_error; //how close the subsystem is to a target before considered "reached"
-
-  Motor& motor;
-  Motorized_subsystem(Subsystem<state_type, num_of_states> subsystem, Motor& motor, int end_error = 10):
-    Subsystem<state_type, num_of_states>(subsystem), motor(motor), end_error(end_error){}
-
-  void reset(){
+  template <typename state_type, int num_of_states, int default_velocity>
+  void Motorized_subsystem<state_type, num_of_states, default_velocity>::reset(){
     motor.move(-60);
     Timer vel_rise_timeout("vel_rise");
     //waits for motor's velocity to rise or timeout to trigger
@@ -95,14 +116,14 @@ public:
     motor.move(0);
   }
 
-  void move_absolute(double position, double velocity = default_velocity, bool wait_for_comp = false, double end_error = 0.0){ //sets target and last target
+  template <typename state_type, int num_of_states, int default_velocity>
+  void Motorized_subsystem<state_type, num_of_states, default_velocity>::move_absolute(double position, double velocity, bool wait_for_comp, double end_error){ //sets target and last target
     if (end_error == 0.0) end_error = this->end_error;
     motor.move_absolute(position, velocity);
     if (wait_for_comp) wait_until(fabs(motor.get_position() - position) < end_error);
   }
 
-  void move(double speed){
+  template <typename state_type, int num_of_states, int default_velocity>
+  void Motorized_subsystem<state_type, num_of_states, default_velocity>::move(double speed){
     motor.move(speed);
   }
-
-};

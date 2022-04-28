@@ -83,8 +83,4 @@ void autonomous() {
 bool timer_state = 0; 
 int timer = millis();
 void opcontrol() {
-  /*
-    Move all template / constexpr definitions to the bottom of the file
-    make distance.hpp functions static class memebers
-  */
 }

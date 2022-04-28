@@ -34,6 +34,7 @@ class F_Lift: public Motorized_subsystem<f_lift_states, num_of_f_lift_states, f_
     std::atomic<int32_t> speed{127}; //max pwm applied to the lifts during a move to target
 
   public:
+    //don't use these
     static constexpr int bottom = 0;
     static constexpr int carry = 1;
     static constexpr int plat = 2;

@@ -74,42 +74,16 @@ public:
    * @param args printf args
    */
   template <typename... Params>
-  void print(term_colours colour, std::string format, Params... args) const{
-    std::string str = sprintf2_no_colour(print_type, format, args...);
+  void print(term_colours colour, std::string format, Params... args) const;
 
-    int buffer_len = str.length() + 3;
-    char buffer[256];
-    snprintf(buffer, 256, str.c_str());
-
-    if(static_cast<int>(this->log_type) != 0){
-      switch(log_location){
-        case log_locations::t:
-          printf2(colour, print_type, format.c_str(), args...);
-          break;
-        case log_locations::sd:
-          this->log_print(buffer, buffer_len);
-          break;
-        case log_locations::none:
-          break;
-        case log_locations::both:
-          printf2(colour, print_type, format.c_str(), args...);
-          this->log_print(buffer, buffer_len);
-          break;
-      }
-    }
-  }
-
-  /*
+  /**
    * @brief 
    * 
    * @param format printf format string
    * @param args printf args
    */
   template <typename... Params>
-  void print(std::string format, Params... args) const{
-    print(print_colour, format, args...);
-  }
-
+  void print(std::string format, Params... args) const;
   void print(Timer* tmr, int freq, std::vector<std::function<std::string()>> str) const; //How is this used?
 };
 
@@ -119,3 +93,35 @@ uintptr_t data_size();
 constexpr int queue_size = 1024;
 constexpr int print_point = 500;
 constexpr int print_max_time = 1500;
+
+
+template <typename... Params>
+void Data::print(term_colours colour, std::string format, Params... args) const{
+  std::string str = sprintf2_no_colour(print_type, format, args...);
+
+  int buffer_len = str.length() + 3;
+  char buffer[256];
+  snprintf(buffer, 256, str.c_str());
+
+  if(static_cast<int>(this->log_type) != 0){
+    switch(log_location){
+      case log_locations::t:
+        printf2(colour, print_type, format.c_str(), args...);
+        break;
+      case log_locations::sd:
+        this->log_print(buffer, buffer_len);
+        break;
+      case log_locations::none:
+        break;
+      case log_locations::both:
+        printf2(colour, print_type, format.c_str(), args...);
+        this->log_print(buffer, buffer_len);
+        break;
+    }
+  }
+}
+
+template <typename... Params>
+void Data::print(std::string format, Params... args) const{
+  print(print_colour, format, args...);
+}

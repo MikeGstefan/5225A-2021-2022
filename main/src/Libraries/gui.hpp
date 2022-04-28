@@ -111,7 +111,7 @@ class GUI{
       static bool touched;
       static int x, y;
       std::vector<Page*> pages;
-      std::function <void() > setup, background;
+      std::function <void()> setup, background;
 
     //Functions
       static void
@@ -128,7 +128,7 @@ class GUI{
 
   public:
     //Pages in the gui, init function, loop function
-    GUI(std::vector<Page*>, std::function <void() >, std::function <void() >);
+    GUI(std::vector<Page*>, std::function <void()>, std::function <void()>);
 
     //Functions
       static void
@@ -155,7 +155,7 @@ class Page{
   private:
 
     //Vars
-      std::function <void() > setup_func, loop_func;
+      std::function <void()> setup_func, loop_func;
       Colour b_col;
       std::string title;
       bool active=true;
@@ -172,7 +172,7 @@ class Page{
         draw() const,
         update() const,
         go_to() const,
-        set_setup_func(std::function <void() >), set_loop_func(std::function <void() >),
+        set_setup_func(std::function <void()>), set_loop_func(std::function <void()>),
         set_active(bool = true);
 
   public:
@@ -245,89 +245,24 @@ class Text: public Text_{
       std::function<V() > value;
 
     //Functions
-      void update() override {
-        if (active && value && prev_value != value()) draw();
-      }
-      void update_val() override {
-        if(value){
-          prev_value = value();
-          text = sprintf2(label, prev_value);
-        }
-        else text = label;
-      }
-      void construct (int x, int y, GUI::Style type, text_format_e_t txt_size, Page* page, std::string label, std::function<V() > value, Colour l_col){
-        //static_assert(!std::is_same_v<V, std::string>, "Text variable cannot be std::string, it causes unknown failures"); //Keep this for memories
-        this->x = x;
-        this->y = y;
-        this->type = type;
-        this->txt_size = txt_size;
-        this->page = page;
-        this->label = label;
-        this->value = value;
-        this->l_col = l_col;
-        this->b_col = page->b_col;
-        page->texts.push_back(this);
-      } 
+      void update() override;
+      void update_val() override;
+      void construct (int, int, GUI::Style, text_format_e_t, Page*, std::string, std::function<V()>, Colour);
 
   public:
     //Constructors
       //Points, Format, Page, Label, [var info], Lcolour
 
-      //Terminal (var - no format)
-      Text (std::string text, V& value_obj, Colour label_colour = COLOUR(WHITE)){
-        construct (5, 0, GUI::Style::CORNER, E_TEXT_LARGE_CENTER, &terminal, text, [&](){return value_obj;}, label_colour);
-      }
-
-      //Terminal (var - format)
-      Text (std::string text, V& value_obj, text_format_e_t size, Colour label_colour = COLOUR(WHITE)){
-        construct (5, 0, GUI::Style::CORNER, size, &terminal, text, [&](){return value_obj;}, label_colour);
-      }
-
-      //Terminal (array - no format)
-      template <typename I>
-      Text (std::string text, V* value_arr, I& index, Colour label_colour = COLOUR(WHITE)){
-        construct (5, 0, GUI::Style::CORNER, E_TEXT_LARGE_CENTER, &terminal, text, [value_arr, &index](){return value_arr[static_cast<int>(index) ];}, label_colour);
-      }
-
-      //Terminal (array - format)
-      template <typename I>
-      Text (std::string text, V* value_arr, I& index, text_format_e_t size, Colour label_colour = COLOUR(WHITE)){
-        construct (5, 0, GUI::Style::CORNER, size, &terminal, text, [value_arr, &index](){return value_arr[static_cast<int>(index) ];}, label_colour);
-      }
-
-      //Terminal (function - no format)
-      Text (std::string text, const std::function<V() >& func, Colour label_colour = COLOUR(WHITE)){
-        construct (5, 0, GUI::Style::CORNER, E_TEXT_LARGE_CENTER, &terminal, text, func, label_colour);
-      }
-
-      //Terminal (function - format)
-      Text (std::string text, const std::function<V() >& func, text_format_e_t size, Colour label_colour = COLOUR(WHITE)){
-        construct (5, 0, GUI::Style::CORNER, size, &terminal, text, func, label_colour);
-      }
-
-
-
-      //No var
-      Text (int x, int y, GUI::Style rect_type, text_format_e_t size, Page& page, std::string text, Colour label_colour = COLOUR(WHITE)){
-        construct (x, y, rect_type, size, &page, text, nullptr, label_colour);
-      }
-
-      //Variable
-      Text (int x, int y, GUI::Style rect_type, text_format_e_t size, Page& page, std::string text, V& value_obj, Colour label_colour = COLOUR(WHITE)){
-        construct (x, y, rect_type, size, &page, text, [&](){return value_obj;}, label_colour);
-      }
-
-      //Array
-      template <typename I>
-      Text (int x, int y, GUI::Style rect_type, text_format_e_t size, Page& page, std::string text, V* value_arr, I& index, Colour label_colour = COLOUR(WHITE)){
-        construct (x, y, rect_type, size, &page, text, [value_arr, &index](){return value_arr[static_cast<int>(index) ];}, label_colour);
-      }
-
-      //Function
-      Text (int x, int y, GUI::Style rect_type, text_format_e_t size, Page& page, std::string text, const std::function<V() >& func, Colour label_colour = COLOUR(WHITE)){
-        construct (x, y, rect_type, size, &page, text, func, label_colour);
-      }
-
+      /*Terminal (var - no format)*/ Text (std::string, V&, Colour = COLOUR(WHITE));
+      /*Terminal (var - format)*/ Text (std::string, V&, text_format_e_t, Colour = COLOUR(WHITE));
+      /*Terminal (array - no format)*/ template <typename I> Text (std::string, V*, I&, Colour = COLOUR(WHITE));
+      /*Terminal (array - format)*/ template <typename I> Text (std::string, V*, I&, text_format_e_t, Colour = COLOUR(WHITE));
+      /*Terminal (function - no format)*/ Text (std::string, const std::function<V()>&, Colour = COLOUR(WHITE));
+      /*Terminal (function - format)*/ Text (std::string, const std::function<V()>&, text_format_e_t, Colour = COLOUR(WHITE));
+      /*No var*/ Text (int, int, GUI::Style, text_format_e_t, Page&, std::string, Colour = COLOUR(WHITE));
+      /*Variable*/ Text (int, int, GUI::Style, text_format_e_t, Page&, std::string, V&, Colour = COLOUR(WHITE));
+      /*Array*/ template <typename I> Text (int, int, GUI::Style, text_format_e_t, Page&, std::string, V*, I&, Colour = COLOUR(WHITE));
+      /*Function*/ Text (int, int, GUI::Style, text_format_e_t, Page&, std::string, const std::function<V() >&, Colour = COLOUR(WHITE));
 };
 
 class Button{
@@ -360,7 +295,7 @@ class Button{
       int x1, y1, x2, y2, text_x, text_y, text_x1, text_y1;
       bool last_pressed = 0;
       press_type form; //What type of button
-      std::function<void() > func, off_func;
+      std::function<void()> func, off_func;
       Text_* title = nullptr;
       bool active=true;
       Page* page;
@@ -383,7 +318,7 @@ class Button{
         construct (int, int, int, int, GUI::Style, press_type, Page*, std::string, Colour, Colour),
         update(),
         add_text (Text_&, bool = true),
-        set_func(std::function <void() >), set_off_func(std::function <void() >),
+        set_func(std::function <void()>), set_off_func(std::function <void()>),
         set_active(bool = true),
         set_background (Colour);
 
@@ -442,3 +377,100 @@ class Slider{
       int get_value() const;
       void set_value(int);
 };
+
+//Text Methods
+  template <typename V>
+  void Text<V>::update() {
+    if (active && value && prev_value != value()) draw();
+  }
+
+  template <typename V>
+  void Text<V>::update_val() {
+    if(value){
+      prev_value = value();
+      text = sprintf2(label, prev_value);
+    }
+    else text = label;
+  }
+
+  template <typename V>
+  void Text<V>::construct (int x, int y, GUI::Style type, text_format_e_t txt_size, Page* page, std::string label, std::function<V() > value, Colour l_col){
+    //static_assert(!std::is_same_v<V, std::string>, "Text variable cannot be std::string, it causes unknown failures"); //Keep this for memories
+    this->x = x;
+    this->y = y;
+    this->type = type;
+    this->txt_size = txt_size;
+    this->page = page;
+    this->label = label;
+    this->value = value;
+    this->l_col = l_col;
+    this->b_col = page->b_col;
+    page->texts.push_back(this);
+  } 
+
+//Text Constructors
+
+  //Terminal (var - no format)
+  template <typename V>
+  Text<V>::Text (std::string text, V& value_obj, Colour label_colour){
+    construct (5, 0, GUI::Style::CORNER, E_TEXT_LARGE_CENTER, &terminal, text, [&](){return value_obj;}, label_colour);
+  }
+
+  //Terminal (var - format)
+  template <typename V>
+  Text<V>::Text (std::string text, V& value_obj, text_format_e_t size, Colour label_colour){
+    construct (5, 0, GUI::Style::CORNER, size, &terminal, text, [&](){return value_obj;}, label_colour);
+  }
+
+  //Terminal (array - no format)
+  template <typename V>
+  template <typename I>
+  Text<V>::Text (std::string text, V* value_arr, I& index, Colour label_colour){
+    construct (5, 0, GUI::Style::CORNER, E_TEXT_LARGE_CENTER, &terminal, text, [value_arr, &index](){return value_arr[static_cast<int>(index) ];}, label_colour);
+  }
+
+  //Terminal (array - format)
+  template <typename V>
+  template <typename I>
+  Text<V>::Text (std::string text, V* value_arr, I& index, text_format_e_t size, Colour label_colour){
+    construct (5, 0, GUI::Style::CORNER, size, &terminal, text, [value_arr, &index](){return value_arr[static_cast<int>(index) ];}, label_colour);
+  }
+
+  //Terminal (function - no format)
+  template <typename V>
+  Text<V>::Text (std::string text, const std::function<V()>& func, Colour label_colour){
+    construct (5, 0, GUI::Style::CORNER, E_TEXT_LARGE_CENTER, &terminal, text, func, label_colour);
+  }
+
+  //Terminal (function - format)
+  template <typename V>
+  Text<V>::Text (std::string text, const std::function<V()>& func, text_format_e_t size, Colour label_colour){
+    construct (5, 0, GUI::Style::CORNER, size, &terminal, text, func, label_colour);
+  }
+
+
+
+  //No var
+  template <typename V>
+  Text<V>::Text (int x, int y, GUI::Style rect_type, text_format_e_t size, Page& page, std::string text, Colour label_colour){
+    construct (x, y, rect_type, size, &page, text, nullptr, label_colour);
+  }
+
+  //Variable
+  template <typename V>
+  Text<V>::Text (int x, int y, GUI::Style rect_type, text_format_e_t size, Page& page, std::string text, V& value_obj, Colour label_colour){
+    construct (x, y, rect_type, size, &page, text, [&](){return value_obj;}, label_colour);
+  }
+
+  //Array
+  template <typename V>
+  template <typename I>
+  Text<V>::Text (int x, int y, GUI::Style rect_type, text_format_e_t size, Page& page, std::string text, V* value_arr, I& index, Colour label_colour){
+    construct (x, y, rect_type, size, &page, text, [value_arr, &index](){return value_arr[static_cast<int>(index) ];}, label_colour);
+  }
+
+  //Function
+  template <typename V>
+  Text<V>::Text (int x, int y, GUI::Style rect_type, text_format_e_t size, Page& page, std::string text, const std::function<V() >& func, Colour label_colour){
+    construct (x, y, rect_type, size, &page, text, func, label_colour);
+  }

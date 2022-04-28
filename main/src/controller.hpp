@@ -47,10 +47,10 @@ class _Task;
 class _Controller : public Controller{
   private:
     static int constructed;
-    std::array<std::function<void() >, 20> queue;
+    std::array<std::function<void()>, 20> queue;
     int front = 0, back = 0;
     static std::array<_Controller*, 2> objs;
-    void add_to_queue(std::function<void() >);
+    void add_to_queue(std::function<void()>);
     void queue_handle();
     int controller_num;
 
@@ -69,6 +69,7 @@ class _Controller : public Controller{
     void rumble(std::string rumble_pattern);
     bool interrupt(bool analog = true, bool digital = true, bool OK_except = true);
     void wait_for_press(controller_digital_e_t button, int timeout = 0);
+    
     /**
     * @brief Waits for any button from param Buttons to be pressed
     * 
@@ -87,14 +88,16 @@ class _Controller : public Controller{
     bool is_rising(controller_digital_e_t button); //if button wasn't pressed but now is
     bool is_falling(controller_digital_e_t button); //if button was pressed but now is not
 
-
-  template <typename... Params>
-  void print(std::uint8_t line, std::uint8_t col, std::string fmt, Params... args){
-    std::function<void() > func = [=](){
-      Controller::print(line, col, fmt.c_str(), args...);
-      controller_queue.print("Printing %s to %d", sprintf2(fmt, args...), controller_num);
-    };
-    add_to_queue(func);
-    controller_queue.print("Adding print to queue for controller %d", controller_num);
-  }
+    template <typename... Params>
+    void print(std::uint8_t line, std::uint8_t col, std::string fmt, Params... args);
 };
+
+template <typename... Params>
+void _Controller::print(std::uint8_t line, std::uint8_t col, std::string fmt, Params... args){
+  std::function<void()> func = [=](){
+    Controller::print(line, col, fmt.c_str(), args...);
+    controller_queue.print("Printing %s to %d", sprintf2(fmt, args...), controller_num);
+  };
+  add_to_queue(func);
+  controller_queue.print("Adding print to queue for controller %d", controller_num);
+}
