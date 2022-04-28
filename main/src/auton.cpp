@@ -5,6 +5,7 @@
 #include "auton_util.hpp"
 #include "config.hpp"
 #include "controller.hpp"
+#include "drive.hpp"
 #include "geometry.hpp"
 #include "logging.hpp"
 #include "pros/rtos.hpp"
@@ -378,7 +379,6 @@ void skills_park(){
   // master.wait_for_press(DIGITAL_R1);
   move_start(move_types::tank_point, tank_point_params({tracking.x_coord, 10.0, 180.0}, false, 127.0, 1.0, true, 6.4, 70.0, 0.0, 0, {0.5, 0.5}, 30.0));
   move_start(move_types::turn_angle, turn_angle_params(90.0));
-  // master.wait_for_press(DIGITAL_R1);
   move_start(move_types::tank_point, tank_point_params({32.0, 12.0, 90.0}));
   f_lift.set_state(f_lift_states::move_to_target, 0);
 
@@ -390,41 +390,28 @@ void skills_park(){
 
   drivebase.move(0.0, 0.0); //so it's not locked when switching trans
 	drivebase.set_state(HIGH);
-
-  //Load goals
-
-	// f_claw(HIGH);
-	// b_claw.set_state(HIGH);
-  // hitch.set_state(HIGH);
-  // tilt_lock.set_state(LOW);
+  wait_until(f_lift_pot.get_value() < 1200); //wait for bottom
+  drivebase.brake();
 
   // master.wait_for_press(DIGITAL_R1);
-  wait_until(f_lift_pot.get_value() < 1200); //wait for bottom
   int start = millis();
 
   gyro.climb_ramp();
+  drivebase.brake();
 
-  front_l.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
-  front_r.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
-  back_l.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
-  back_r.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
-  center_l.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
-  center_r.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
-  drivebase.velo_brake();
-  master.wait_for_press(DIGITAL_R1);
 
-  gyro.level(1.6, 1000.0);
+  printf("\n\nStart: %d\n", start);
+  printf("\n\nEnd: %d\n", millis());
+  printf("\n\nTotal: %d\n", millis()-start);
+  master.print(0, 0, "Time:%d", millis()-start);
 
-  master.clear();
-  printf2("\n\nRamp Time: %d\n", millis()-start);
-  printf2("\n\nTotal Time: %d\n", millis()-s_time);
-  master.print(0, 0, "Ramp Time: %d", millis()-start);
-  master.print(1, 0, "Total Time: %d", millis()-s_time);
-
-  master.wait_for_press(DIGITAL_R1);
+  delay(500);
   hitch.set_value(LOW);
-  f_claw(LOW);
+  tilt_lock.set_state(HIGH);
+  b_claw.set_state(LOW);
+  b_lift.set_state(b_lift_states::move_to_target, 4);
   f_lift.set_state(f_lift_states::move_to_target, 0);
+  b_lift.Subsystem::set_state(b_lift_states::intake_off);
 }
 
 void rush_high(){

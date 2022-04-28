@@ -47,7 +47,7 @@ void initialize() {
 	
 	// tracking.x_coord = 104.0, tracking.y_coord = 12.0, tracking.global_angle = -30.0_deg;
 	// tracking.x_coord = 24.5, tracking.y_coord = 15.0, tracking.global_angle = 9.0_deg;
-	// tracking.x_coord = 0.0, tracking.y_coord = 0.0, tracking.global_angle = 0.0_deg;
+	tracking.x_coord = 0.0, tracking.y_coord = 0.0, tracking.global_angle = 0.0_deg;
 	update_t.start();
   lift_handle_t.start();
 	// master.print(2, 0, "Driver: %s", drivebase.drivers[drivebase.cur_driver].name);
@@ -91,45 +91,47 @@ void autonomous() {
 bool timer_state = 0; 
 int timer = millis();
 void opcontrol() {
-  tilt_lock.set_state(HIGH);
+  // tilt_lock.set_state(HIGH);
 
-  b_claw_obj.set_state(b_claw_states::managed);
-  f_claw_obj.set_state(f_claw_states::managed);
-  hitch_obj.set_state(hitch_states::managed);
-  b_lift.move_to_top();
-  // if(f_claw_o.get_state() == HIGH) f_claw(LOW);
-  f_claw(HIGH);
-  f_lift.set_state(f_lift_states::move_to_target, 2);
+  // b_claw_obj.set_state(b_claw_states::managed);
+  // f_claw_obj.set_state(f_claw_states::managed);
+  // hitch_obj.set_state(hitch_states::managed);
+  // b_lift.move_to_top();
+  // // if(f_claw_o.get_state() == HIGH) f_claw(LOW);
+  // f_claw(HIGH);
+  // f_lift.set_state(f_lift_states::move_to_target, 2);
 
-  drivebase.move(0.0, 0.0); //so it's not locked when switching trans
-	drivebase.set_state(HIGH);
+  // drivebase.move(0.0, 0.0); //so it's not locked when switching trans
+	// drivebase.set_state(HIGH);
 
-  master.wait_for_press(DIGITAL_R1);
-	f_claw(HIGH);
-	b_claw.set_state(HIGH);
-  hitch.set_state(HIGH);
-  tilt_lock.set_state(LOW);
+  // master.wait_for_press(DIGITAL_R1);
+	// f_claw(HIGH);
+	// b_claw.set_state(HIGH);
+  // hitch.set_state(HIGH);
+  // tilt_lock.set_state(LOW);
 
-  f_lift.set_state(f_lift_states::move_to_target, 1);
+  // f_lift.set_state(f_lift_states::move_to_target, 1);
 
-  master.wait_for_press(DIGITAL_R1);
-  int start = millis();
+  skills_park();
 
-  gyro.climb_ramp();
-  drivebase.brake();
+  // master.wait_for_press(DIGITAL_R1);
+  // int start = millis();
+
+  // gyro.climb_ramp();
+  // drivebase.brake();
 
 
-  printf("\n\nStart: %d\n", start);
-  printf("\n\nEnd: %d\n", millis());
-  printf("\n\nTotal: %d\n", millis()-start);
-  master.print(0, 0, "Time:%d", millis()-start);
+  // printf("\n\nStart: %d\n", start);
+  // printf("\n\nEnd: %d\n", millis());
+  // printf("\n\nTotal: %d\n", millis()-start);
+  // master.print(0, 0, "Time:%d", millis()-start);
 
-  delay(500);
-  hitch.set_value(LOW);
-  tilt_lock.set_state(HIGH);
-  b_claw.set_state(LOW);
-  b_lift.set_state(b_lift_states::move_to_target, 4);
-  f_lift.set_state(f_lift_states::move_to_target, 0);
-  // lift_t.toggle_state();
-  b_lift.Subsystem::set_state(b_lift_states::intake_off);
+  // delay(500);
+  // hitch.set_value(LOW);
+  // tilt_lock.set_state(HIGH);
+  // b_claw.set_state(LOW);
+  // b_lift.set_state(b_lift_states::move_to_target, 4);
+  // f_lift.set_state(f_lift_states::move_to_target, 0);
+  // // lift_t.toggle_state();
+  // b_lift.Subsystem::set_state(b_lift_states::intake_off);
 }
