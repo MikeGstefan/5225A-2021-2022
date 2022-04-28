@@ -124,7 +124,7 @@ void flatten_against_wall(bool front, int cycles){
 
 void b_detect_goal(){ 
   wait_until(!tracking.move_complete);
-  while(b_dist.get() > 40 && !tracking.move_complete){ 
+  while(b_dist.get() > 47 && !tracking.move_complete){ 
     misc.print("looking for goal at back: %d", b_dist.get());
     delay(33);
   }
@@ -138,9 +138,9 @@ void tilt_goal(){
   b_claw.set_state(0);
 }
 
-void f_detect_goal(bool safety){ 
+void f_detect_goal(bool safety, int threshold){ 
   if(safety) wait_until(!tracking.move_complete);
-  while(f_dist.get() > 30 && !tracking.move_complete){
+  while(f_dist.get() > threshold && !tracking.move_complete){
     misc.print("looking for goal at front: %d", f_dist.get());
     delay(33);
   }
@@ -148,6 +148,16 @@ void f_detect_goal(bool safety){
   f_claw(1);
 }
 
+
+void detect_hitch(){
+  wait_until(!tracking.move_complete);
+  while(hitch_dist.get() > 25 && !tracking.move_complete){
+    misc.print("looking for goal at front: %d", hitch_dist.get());
+    delay(33);
+  }
+  misc.print("Detected %d", hitch_dist.get());
+  hitch.set_state(1);
+}
 
 void detect_interference(){ 
   int time = millis();

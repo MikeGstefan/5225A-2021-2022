@@ -49,6 +49,7 @@ class F_Lift: public Motorized_subsystem<f_lift_states, NUM_OF_F_LIFT_STATES, F_
     void set_state(const f_lift_states next_state, const uint8_t index, const int32_t speed = 127);  // requests a state change and logs it
     
     int find_index(); // returns current driver index depending on lift positions, returns -1 if not found
+  
 
     // for driver control
     void increment_index();

@@ -100,7 +100,7 @@ void F_Lift::handle_state_change(){
       break;
 
     case f_lift_states::bottom:
-      motor.move(-10); // slight down holding power
+      motor.move(-20); // slight down holding power
       break;
 
     case f_lift_states::top:
@@ -286,7 +286,11 @@ void F_Claw::handle_state_change(){
       f_claw(HIGH);
       // raises mogo above rings automatically if lift is in bottom state
       if(f_lift.get_state() == f_lift_states::bottom){
-        f_lift.set_state(f_lift_states::move_to_target, 1); // sends f_lift to raised position
+        Task([](){
+          delay(100);
+          f_lift.set_state(f_lift_states::move_to_target, 1); // sends f_lift to raised position
+        });
+        
       }
       break;
   }

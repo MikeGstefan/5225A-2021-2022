@@ -39,7 +39,7 @@ void initialize() {
 	_Controller::init();
 	GUI::init();
 	delay(500);
-	// tracking.x_coord = 28.5, tracking.y_coord = 11.75, tracking.global_angle = -90.0_deg;
+	tracking.x_coord = 25.0, tracking.y_coord = 11.75, tracking.global_angle = -90.0_deg;
 
 
   b_lift.motor.set_brake_mode(E_MOTOR_BRAKE_HOLD);
@@ -84,11 +84,12 @@ void competition_initialize() {}
  * from where it left off.
  */
 void autonomous() {
-  load_positions();
-  load_auton();
-  run_auton();
+//   run_auton();
 }
 
+
+bool timer_state = 0; 
+int timer = millis();
 void opcontrol() {
   tilt_lock.set_state(HIGH);
 

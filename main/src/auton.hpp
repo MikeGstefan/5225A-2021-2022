@@ -15,12 +15,13 @@
 #include <fstream>
 
 #define f_bottom 0
-#define f_carry 1 
-#define f_plat 2 
-#define f_backup 3 
-#define f_push 4
-#define f_level 5 
-#define f_top 6
+#define f_low_carry 1
+#define f_carry 2 
+#define f_plat 3
+#define f_backup 4 
+#define f_push 5
+#define f_level 6 
+#define f_top 7
 #define b_bottom 0
 #define b_plat 1
 #define b_backup 2 

@@ -26,7 +26,8 @@ void flatten_against_wall(bool front = true, int cycles = 4);
 
 void b_detect_goal();
 void tilt_goal();
-void f_detect_goal(bool safety = true);
+void f_detect_goal(bool safety = true, int threshold = 30);
+void detect_hitch();
 
 void detect_interference();
 

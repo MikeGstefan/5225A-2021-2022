@@ -10,12 +10,15 @@ B_Lift b_lift({{"B_Lift",
   "top",
   "idle",
   "move_to_target",
+  "park pos",
   "manual",
   "intake_off",
   "intake_on",
+  "intk_jam",
   "intake_reversed",
   "shifting_to_lift_up",
-  "shifting_to_lift_down"
+  "shifting_to_lift_down",
+  "reshift"
 },  b_lift_states::managed, b_lift_states::idle // goes from managed to idle upon startup
 }, b_lift_m});
 
@@ -75,6 +78,19 @@ void B_Lift::handle(bool driver_array){
       */
       break;
 
+    case b_lift_states::park_position:
+      { // don't power the motor if the state is no longer move to target
+        int output = pid.compute(b_lift_pot.get_value(), park_position);
+        if (abs(output) > speed) output = speed * sgn(output); // cap the output at speed
+        if(abs(output) < 50) output = 50 * sgn(output); // enforces a minimum of 30 power
+        motor.move(output);
+      }
+      // moves to next state if the lift has reached its target
+      if(fabs(pid.get_error()) < end_error){
+        Subsystem::set_state(b_lift_states::idle);
+      }
+    break;
+
     case b_lift_states::manual:
       lift_power = master.get_analog(ANALOG_RIGHT_X);
       // if master controller joystick isn't active, take partner input instead
@@ -99,8 +115,31 @@ void B_Lift::handle(bool driver_array){
       break;
 
     case b_lift_states::intake_on:
-      printf("current:%lf\n", motor.get_actual_velocity());
+      // printf("vel:%lf\n", motor.get_actual_velocity());
+      if(fabs(motor.get_actual_velocity()) < 5.0) not_moving_count++;
+      else not_moving_count = 0;
+      if(intake_safe.get_time() < 300 && not_moving_count > 20){
+        not_moving_count = 0;
+        after_shift_state = b_lift_states::reshift;
+        shift(TRANS_LIFT_STATE); // shifts to lift
+        intake_safe.reset(false);
+      }
+      // printf("current:%lf\n", motor.get_actual_velocity());
+      else{
+        if(!intk_t.get_value())intk_jam_count++;
+        else intk_jam_count = 0;
+        if(intk_jam_count == 4){
+          intake_safe.reset(false);
+          Subsystem::set_state(b_lift_states::intk_jam);
+          
+        }
+      }
+      printf("sensor: %d\n", intk_t.get_value());
       break;
+
+    case b_lift_states::intk_jam:
+      if(millis() - jam_time > 500)b_lift.Subsystem::set_state(b_lift_states::intake_on);
+    break;
 
     case b_lift_states::intake_reversed:
       break;
@@ -118,12 +157,16 @@ void B_Lift::handle(bool driver_array){
       }
       break;
 
+    case b_lift_states::reshift:  // shifts to intake 
+      break;
+
   }
   handle_state_change(); // cleans up and preps the machine to be in the target state
 }
 
 void B_Lift::handle_state_change(){
   if(get_target_state() == get_state()) return;
+  if(get_target_state() == b_lift_states::intake_on) return; // doesn't let you turn the intake on
   // if state has changed, performs the necessary cleanup operation before entering next state
 
   // if intake/lift transmission is in the wrong state, shift
@@ -134,7 +177,7 @@ void B_Lift::handle_state_change(){
       break;
 
     case b_lift_states::bottom:
-      motor.move(-10); // slight down holding power
+      motor.move(-20); // slight down holding power
       break;
 
     case b_lift_states::top:
@@ -160,9 +203,14 @@ void B_Lift::handle_state_change(){
       break;
 
     case b_lift_states::intake_on:
+      intake_safe.reset();
       motor.move(-127);
       break;
-
+    case b_lift_states::intk_jam:
+      jam_time= millis();
+      motor.move(127);
+      printf("AHHHHHHHHHHHHHH here \n\n\n\n");
+      break;
     case b_lift_states::intake_reversed:
       motor.move(127);
       break;
@@ -174,6 +222,13 @@ void B_Lift::handle_state_change(){
     case b_lift_states::shifting_down:
       motor.move_relative(-30, 100);
       break;
+
+    case b_lift_states::reshift:
+      after_shift_state = b_lift_states::intake_on;
+      shift(TRANS_LIFT_STATE); // shifts to lift
+      break;
+    default:
+    break;
 
   }
   log_state_change();
@@ -365,7 +420,7 @@ void B_Claw::handle(){
 
     case b_claw_states::searching:
       // grabs goal if bowl is detected
-      if(b_dist.get() < 40) set_state(b_claw_states::tilted);
+      if(b_dist.get() < 45) set_state(b_claw_states::tilted);
 
       // doesn't let driver search if lift isn't at bottom
       if(!B_LIFT_AT_BOTTOM) set_state(b_claw_states::idle);
