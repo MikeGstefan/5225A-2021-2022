@@ -90,14 +90,45 @@ void autonomous() {
 }
 
 void opcontrol() {
-  skills_park();
+  tilt_lock.set_state(HIGH);
 
-  //take out random jumps to 100
-  //lower back lift when starting to tip
+  b_claw_obj.set_state(b_claw_states::managed);
+  f_claw_obj.set_state(f_claw_states::managed);
+  hitch_obj.set_state(hitch_states::managed);
+  b_lift.move_to_top();
+  // if(f_claw_o.get_state() == HIGH) f_claw(LOW);
+  f_claw(HIGH);
+  f_lift.set_state(f_lift_states::move_to_target, 2);
+
+  drivebase.move(0.0, 0.0); //so it's not locked when switching trans
+	drivebase.set_state(HIGH);
+
+  master.wait_for_press(DIGITAL_R1);
+	f_claw(HIGH);
+	b_claw.set_state(HIGH);
+  hitch.set_state(HIGH);
+  tilt_lock.set_state(LOW);
+
+  f_lift.set_state(f_lift_states::move_to_target, 1);
+
+  master.wait_for_press(DIGITAL_R1);
+  int start = millis();
+
+  gyro.climb_ramp();
+  drivebase.brake();
 
 
-  //make sure angle is 0 once at ramp
-  //check that robot is physically on the ground and not being lifted
-  //check that tare isn't hiding issues by changing the zero point
-  
+  printf("\n\nStart: %d\n", start);
+  printf("\n\nEnd: %d\n", millis());
+  printf("\n\nTotal: %d\n", millis()-start);
+  master.print(0, 0, "Time:%d", millis()-start);
+
+  delay(500);
+  hitch.set_value(LOW);
+  tilt_lock.set_state(HIGH);
+  b_claw.set_state(LOW);
+  b_lift.set_state(b_lift_states::move_to_target, 4);
+  f_lift.set_state(f_lift_states::move_to_target, 0);
+  // lift_t.toggle_state();
+  b_lift.Subsystem::set_state(b_lift_states::intake_off);
 }

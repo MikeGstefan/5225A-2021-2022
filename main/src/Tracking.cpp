@@ -1612,26 +1612,43 @@ void Gyro::climb_ramp(){
   Task([this](){
     wait_until(false){
       get_angle();
-      // motion_i.print("Angle:%f Angle_v:%f, L_v:%f, R_v:%f, Dist:%f", angle, get_angle_dif(), tracking.l_velo, tracking.r_velo, tracking.x_coord);
+      motion_i.print("Angle:%f Angle_v:%f, L_v:%f, R_v:%f, Dist:%f", angle, get_angle_dif(), tracking.l_velo, tracking.r_velo, tracking.x_coord);
       // motion_i.print("Angle:%f", angle);
     }
   });
 
   b_lift.set_state(b_lift_states::move_to_target, 2);
   drive(127);
+
+  // wait_until(fabs(angle) > 10);
+  // f_lift.set_state(f_lift_states::move_to_target, 2);
   wait_until(fabs(angle) > 22);
   drivebase.brake();
-  f_lift.set_state(f_lift_states::move_to_target, 1);
 
   screen_flash::start("On Ramp", term_colours::NOTIF);
   tracking.reset();
+  
+  // drivebase.brake();
+  // master.wait_for_press(DIGITAL_R1);
 
   drive(90);
-  tracking.wait_for_dist(5);
-  f_lift.set_state(f_lift_states::move_to_target, 0);
-  tracking.wait_for_dist(12); //increase this number as much as possible
+  // tracking.wait_for_dist(5);
+  f_lift.set_state(f_lift_states::move_to_target, 0, 60);
+  tracking.wait_for_dist(21); //increase this number as much as possible
+  int time1 = millis();
   drive(35);
   tracking.wait_for_dist(2);
+  wait_until(fabs(angle) < 20);
+  screen_flash::start("Backup", term_colours::NOTIF);
+  int time2 = millis();
+  drive(-127);
+  tracking.wait_for_dist(2);
+  drivebase.brake();
+  screen_flash::start("Braked", term_colours::NOTIF);
+  int time3 = millis();
+  master.clear();
+  master.print(1, 0, "Slow:%d", time2-time1);
+  master.print(2, 0, "Back:%d", time3-time2);
 }
 
 void Gyro::level(double kP, double kD){
@@ -1662,10 +1679,10 @@ void Gyro::level(double kP, double kD){
       motion_i.print("\nLevelled on ramp\n");
       break;
     }
-    if(master.interrupt(true, true)){
-      motion_i.print("\nController Interrupt\n");
-      break;
-    }
+    // if(master.interrupt(true, true)){
+    //   motion_i.print("\nController Interrupt\n");
+    //   break;
+    // }
 
     delay(11);
   }
