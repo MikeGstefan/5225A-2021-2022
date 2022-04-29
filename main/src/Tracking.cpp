@@ -1619,7 +1619,7 @@ void Gyro::climb_ramp(){
     }
   });
 
-  b_lift.set_state(b_lift_states::move_to_target, b_backup);
+  b_lift.set_state(b_lift_states::move_to_target, b_park);
   drive(127);
 
   wait_until(fabs(angle) > 22);

@@ -47,7 +47,7 @@ void initialize() {
 	
 	// tracking.x_coord = 104.0, tracking.y_coord = 12.0, tracking.global_angle = -30.0_deg;
 	// tracking.x_coord = 24.5, tracking.y_coord = 15.0, tracking.global_angle = 9.0_deg;
-	tracking.x_coord = 0.0, tracking.y_coord = 0.0, tracking.global_angle = 0.0_deg;
+	// tracking.x_coord = 0.0, tracking.y_coord = 0.0, tracking.global_angle = 0.0_deg;
 	update_t.start();
   lift_handle_t.start();
 	// master.print(2, 0, "Driver: %s", drivebase.drivers[drivebase.cur_driver].name);
@@ -110,7 +110,15 @@ void opcontrol() {
   // hitch.set_state(HIGH);
   // tilt_lock.set_state(LOW);
 
+  hitch.set_state(1);
+  delay(500);
+  b_lift.set_state(b_lift_states::move_to_target, 0);
   // f_lift.set_state(f_lift_states::move_to_target, 1);
+  while(!master.get_digital_new_press(DIGITAL_A))delay(10);
+  skills();
+  skills2();
+  skills3();
+  skills4();
   skills_park();
 
   // master.wait_for_press(DIGITAL_R1);
