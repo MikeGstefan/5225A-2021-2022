@@ -151,7 +151,10 @@ void f_detect_goal(bool safety, int threshold){
 
 void detect_hitch(){
   wait_until(!tracking.move_complete);
-  while(hitch_dist.get() > 25 && !tracking.move_complete){
+  int count = 0;
+  while( count < 4 && !tracking.move_complete){
+    if(hitch_dist.get() < 25)count++;
+    else count = 0;
     misc.print("looking for goal at front: %d", hitch_dist.get());
     delay(33);
   }

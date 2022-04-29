@@ -40,7 +40,7 @@ void initialize() {
 	GUI::init();
 	delay(500);
 	tracking.x_coord = 25.0, tracking.y_coord = 11.75, tracking.global_angle = -90.0_deg;
-
+  // tracking.x_coord = 36.0, tracking.y_coord = 106.0, tracking.global_angle = 90.0_deg;
 
   b_lift.motor.set_brake_mode(E_MOTOR_BRAKE_HOLD);
   f_lift.motor.set_brake_mode(E_MOTOR_BRAKE_HOLD);
@@ -115,11 +115,29 @@ void opcontrol() {
   b_lift.set_state(b_lift_states::move_to_target, 0);
   // f_lift.set_state(f_lift_states::move_to_target, 1);
   while(!master.get_digital_new_press(DIGITAL_A))delay(10);
-  skills();
-  skills2();
-  skills3();
+  int time = millis();
+  // b_lift.set_state(b_lift_states::move_to_target, b_top);
+  // hitch.set_state(0);
+  // while(b_lift.get_target_state() != b_lift_states::top)delay(10);
+  // // move_start(move_types::tank_point, tank_point_params({36.0,106.0, 30.0}, false, 80.0));
+  // // move_start(move_types::turn_angle, turn_angle_params(angle_to_point(12.0, 107.0) + 180));
+  // move_start(move_types::tank_point, tank_point_params({12.0,106.0, 30.0}, false, 80.0), false);
+  // Task([](){
+  //   while(true){
+  //     printf("SENSOR: %d\n", hitch_dist.get());
+  //     delay(33);
+  //   }
+  // });
+  // detect_hitch();
+  // move_stop();
+  // drivebase.brake();
+  // skills();
+  // skills2();
+  // skills3();
   skills4();
-  skills_park();
+  // skills_park();
+  master.print(0,0, "FULL : %D", millis()- time);
+  while(true)delay(10);
 
   // master.wait_for_press(DIGITAL_R1);
   // int start = millis();

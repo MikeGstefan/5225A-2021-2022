@@ -166,7 +166,7 @@ void B_Lift::handle(bool driver_array){
 
 void B_Lift::handle_state_change(){
   if(get_target_state() == get_state()) return;
-  if(get_target_state() == b_lift_states::intake_on) return; // doesn't let you turn the intake on
+  // if(get_target_state() == b_lift_states::intake_on) return; // doesn't let you turn the intake on
   // if state has changed, performs the necessary cleanup operation before entering next state
 
   // if intake/lift transmission is in the wrong state, shift

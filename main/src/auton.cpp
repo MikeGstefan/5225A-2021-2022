@@ -325,12 +325,13 @@ void skills4(){
   b_detect_goal();
   move_stop();
   drivebase.brake();
+  b_lift.Subsystem::set_state(b_lift_states::intake_on);
   // move_start(move_types::tank_arc, tank_arc_params({tracking.x_coord, tracking.y_coord}, {120.5, 102.0,200.0},127.0,127.0,false));//arc to face neut goal
   // move_start(move_types::turn_angle, turn_angle_params(rad_to_deg(atan2(104.5 - tracking.x_coord, 72.0 - tracking.y_coord)) +180.0, true,true,140.0));
-  move_start(move_types::tank_point, tank_point_params({106.5,73.0,  45.0},false, 127.0,1.0,true,9.0,130.0));// drive throught neut goal
+  move_start(move_types::tank_point, tank_point_params({106.5,75.0,  45.0},false, 127.0,1.0,true,9.0,130.0));// drive throught neut goal
   // intake.set_state(intake_states::on);
   move_start(move_types::turn_angle, turn_angle_params(-90));
-  move_start(move_types::tank_point, tank_point_params({70.5,73.0,  45.0},false, 80.0,1.0,true), false);
+  move_start(move_types::tank_point, tank_point_params({70.5,72.0,  45.0},false, 80.0,1.0,true), false);
   f_detect_goal();
   move_stop();
   drivebase.brake();
@@ -348,10 +349,11 @@ void skills4(){
   detect_hitch();
   move_stop();
   drivebase.brake();
-  move_start(move_types::tank_point, tank_point_params({22.0,106.0, 30.0}, false, 80.0));
+  b_lift.Subsystem::set_state(b_lift_states::intake_on);
+  move_start(move_types::tank_point, tank_point_params({22.0,106.0, 30.0}, false, 80.0, 1.0, true, 6.7,70.0,0.0,0,{0.5,0.5}, min_move_power_y + 15));
   move_start(move_types::turn_angle, turn_angle_params(180));
   f_lift.set_state(f_lift_states::move_to_target, f_top);
-  move_start(move_types::tank_point, tank_point_params({24.0,10.0, 30.0}, false, 80.0));
+  move_start(move_types::tank_point, tank_point_params({24.0,10.0, 30.0}, false, 80.0, 1.0, true, 6.7,70.0,0.0,0,{0.5,0.5}, min_move_power_y + 15));
   // while(tracking.y_coord > 65.0)delay(10);
   // move_start(move_types::tank_point, tank_point_params({24.0,10.0, 30.0}, false, 127.0), false);
   flatten_against_wall();
@@ -365,14 +367,17 @@ void skills4(){
 }
 
 void skills_park(){
-  f_claw(HIGH);
-	b_claw.set_state(HIGH);
-  hitch.set_state(HIGH);
-  tilt_lock.set_state(LOW);
-  f_lift.set_state(f_lift_states::move_to_target, f_plat);
-  b_lift.set_state(b_lift_states::move_to_target, b_lift.prog_positions.size()-1);
-  while(f_lift.get_target_state() != f_lift_states::idle)delay(10);
-  flatten_against_wall();
+  // f_claw(HIGH);
+	// b_claw.set_state(HIGH);
+  // hitch.set_state(HIGH);
+  // tilt_lock.set_state(LOW);
+  // f_lift.set_state(f_lift_states::move_to_target, f_plat);
+  // b_lift.set_state(b_lift_states::move_to_target, b_lift.prog_positions.size()-1);
+  // while(f_lift.get_target_state() != f_lift_states::idle)delay(10);
+  // flatten_against_wall();
+
+
+
   delay(100);
   tracking.reset(reset_dist_r.get_dist(), DIST_FRONT, 180.0);
   int s_time = millis();
@@ -391,7 +396,16 @@ void skills_park(){
 
   drivebase.move(0.0, 0.0); //so it's not locked when switching trans
 	drivebase.set_state(HIGH);
-  wait_until(f_lift_pot.get_value() < 1200); //wait for bottom
+  misc.print("Waiting for lift: %d", f_lift_pot.get_value());
+  Task([](){
+    while(f_lift_pot.get_value() > 1160){
+      misc.print("F Lift: %f", f_lift_pot.get_value());
+      delay(10);
+    } 
+  });
+  int time_lift_wait = millis();
+  wait_until(f_lift_pot.get_value() < 1200 || millis()-time_lift_wait > 2000); //wait for bottom
+  misc.print("Lift reached before climb: %d", f_lift_pot.get_value());
   drivebase.brake();
 
   // master.wait_for_press(DIGITAL_R1);
