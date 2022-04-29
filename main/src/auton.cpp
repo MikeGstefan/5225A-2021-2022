@@ -394,8 +394,6 @@ void skills_park(){
   wait_until(f_lift_pot.get_value() < 1200); //wait for bottom
   drivebase.brake();
 
-  f_lift.set_state(f_lift_states::move_to_target, 1);
-
   // master.wait_for_press(DIGITAL_R1);
   int start = millis();
 
@@ -404,18 +402,26 @@ void skills_park(){
 
   printf("\n\nTotal before drop: %d\n", millis()-start);
 
-  delay(500);
+  wait_until(b_lift_pot.get_value() > 1700);
+  printf("\n\nDone wait: %d\n", millis()-start);
   hitch.set_value(LOW);
+
   tilt_lock.set_state(HIGH);
+  delay(50);
   b_claw.set_state(LOW);
-  b_lift.move_to_top();
-  wait_until(b_lift_pot.get_value() > 1800);
+  delay(50);
+
   b_lift.Subsystem::set_state(b_lift_states::intake_off);
 
   screen_flash::start("Done", term_colours::NOTIF);
 
   printf("\n\nClimb Total: %d\n", millis()-start);
+  printf("\n\nWall Total: %d\n", millis()-s_time);
+  master.clear();
   master.print(0, 0, "%d", millis()-start);
+  master.print(1, 0, "%d", millis()-s_time);
+
+  printf("\n\n\n\n\n\n\n\n\n\n\n\n\n");
 }
 
 void rush_high(){

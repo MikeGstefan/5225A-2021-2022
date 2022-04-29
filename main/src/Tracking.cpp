@@ -1622,31 +1622,33 @@ void Gyro::climb_ramp(){
   b_lift.set_state(b_lift_states::move_to_target, 2);
   drive(127);
 
-  // wait_until(fabs(angle) > 10);
   wait_until(fabs(angle) > 22);
-  f_lift.set_state(f_lift_states::move_to_target, 0);
+  f_lift.set_state(f_lift_states::move_to_target, 1);
   drivebase.brake();
 
   screen_flash::start("On Ramp", term_colours::NOTIF);
   tracking.reset();
-  
-  // drivebase.brake();
-  // master.wait_for_press(DIGITAL_R1);
 
   drive(90);
-  // tracking.wait_for_dist(5);
-  f_lift.set_state(f_lift_states::move_to_target, 0, 60);
-  tracking.wait_for_dist(21); //increase this number as much as possible
+  tracking.wait_for_dist(5);
+  f_lift.set_state(f_lift_states::move_to_target, 0);
+  tracking.wait_for_dist(21-5); //increase this number as much as possible
+
   int time1 = millis();
   drive(35);
   tracking.wait_for_dist(2);
   wait_until(fabs(angle) < 20);
   screen_flash::start("Backup", term_colours::NOTIF);
+
   int time2 = millis();
   drive(-127);
+
+  b_lift.move_to_top();
+  
   tracking.wait_for_dist(2);
   drivebase.brake();
   screen_flash::start("Braked", term_colours::NOTIF);
+
   int time3 = millis();
   master.clear();
   master.print(1, 0, "Slow:%d", time2-time1);
