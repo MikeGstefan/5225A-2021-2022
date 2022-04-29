@@ -23,10 +23,11 @@
 #define f_level 6 
 #define f_top 7
 #define b_bottom 0
-#define b_plat 1
-#define b_backup 2 
-#define b_level 3
-#define b_top 4
+#define b_park 1
+#define b_plat 2
+#define b_backup 3 
+#define b_level 4
+#define b_top 5
 void skills();
 void skills2();
 void skills3();

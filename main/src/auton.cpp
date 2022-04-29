@@ -369,7 +369,7 @@ void skills_park(){
 	b_claw.set_state(HIGH);
   hitch.set_state(HIGH);
   tilt_lock.set_state(LOW);
-  f_lift.set_state(f_lift_states::move_to_target, 3);
+  f_lift.set_state(f_lift_states::move_to_target, f_plat);
   b_lift.set_state(b_lift_states::move_to_target, b_lift.prog_positions.size()-1);
   while(f_lift.get_target_state() != f_lift_states::idle)delay(10);
   flatten_against_wall();
@@ -386,8 +386,8 @@ void skills_park(){
   b_claw_obj.set_state(b_claw_states::managed);
   f_claw_obj.set_state(f_claw_states::managed);
   hitch_obj.set_state(hitch_states::managed);
-  b_lift.set_state(b_lift_states::move_to_target, 5);
-  f_lift.set_state(f_lift_states::move_to_target, 0);
+  b_lift.set_state(b_lift_states::move_to_target, b_top);
+  f_lift.set_state(f_lift_states::move_to_target, f_low_carry);
 
   drivebase.move(0.0, 0.0); //so it's not locked when switching trans
 	drivebase.set_state(HIGH);
