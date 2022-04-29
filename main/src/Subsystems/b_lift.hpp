@@ -53,10 +53,9 @@ class B_Lift: public Motorized_subsystem<b_lift_states, NUM_OF_B_LIFT_STATES, B_
 
   public:
     b_lift_states after_shift_state; // the state the subsystem will go to after transmission shifts
-    vector<int> driver_positions = {1045, 1720, 1825, 1970, 2800};
-    // vector<int> prog_positions = {1045, 1720, 1825, 1970, 2800};
-    vector<int> prog_positions = {1042, 1920, 2000, 2200, 2750};
-    const int park_position =1650 ;
+    vector<int> driver_positions = {1035, 1720, 1825, 1970, 2800};
+    vector<int> prog_positions = {1035,1600, 1720, 1825, 1970, 2800};
+    static constexpr int park_position = 1600;
 
     B_Lift(Motorized_subsystem<b_lift_states, NUM_OF_B_LIFT_STATES, B_LIFT_MAX_VELOCITY> motorized_subsystem);  // constructor
     
@@ -78,7 +77,7 @@ class B_Lift: public Motorized_subsystem<b_lift_states, NUM_OF_B_LIFT_STATES, B_
       return index.load();
     }
     void elastic_util(int high); // up time should be about 1100mms (ignore this time, it was on the old lift), down time should be slightly slower than that
-    void move_absolute(double position, double velocity = B_LIFT_MAX_VELOCITY, bool wait_for_comp = true, double end_error = 20);
+    void move_to_top();
 };
 
 extern B_Lift b_lift;

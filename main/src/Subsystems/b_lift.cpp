@@ -28,18 +28,6 @@ B_Lift::B_Lift(Motorized_subsystem<b_lift_states, NUM_OF_B_LIFT_STATES, B_LIFT_M
   speed = 127;
 }
 
-void B_Lift::move_absolute(double position, double velocity, bool wait_for_comp, double end_error){ //blocking
-  if (end_error == 0.0) end_error = this->end_error;
-  int output;
-  pid.compute(b_lift_pot.get_value(), position);
-  wait_until(fabs(pid.get_error()) < end_error){
-    output = pid.compute(b_lift_pot.get_value(), position);
-    if (abs(output) > speed) output = speed * sgn(output); // cap the output at speed  
-    motor.move(output);
-  }
-  motor.move(0);
-}
-
 void B_Lift::handle(bool driver_array){
   // decides which position vector to use
   std::vector<int>& positions = driver_array? driver_positions: prog_positions;
@@ -52,7 +40,7 @@ void B_Lift::handle(bool driver_array){
     case b_lift_states::top: // at highest position
       break;
     case b_lift_states::idle: // not doing anything
-      // if(fabs(b_lift_pot.get_value() - driver_positions[index]) > detection_end_error){
+      // if(fabs(b_lift_pot.get_value() - positions[index]) > detection_end_error){
       //   state_log.print("B_lift slipped out of position, index: %d, position: %d", index.load(), b_lift_pot.get_value());
       //   set_state(b_lift_states::move_to_target, index);
       // }
@@ -70,7 +58,7 @@ void B_Lift::handle(bool driver_array){
       if(fabs(pid.get_error()) < end_error){
         // switches to idle by default or special case depending on current target
         if(index == 0)  Subsystem::set_state(b_lift_states::bottom);  // lift is at bottom position
-        else if(index == driver_positions.size() - 1) Subsystem::set_state(b_lift_states::top); // lift is at top position
+        else if(index == positions.size() - 1) Subsystem::set_state(b_lift_states::top); // lift is at top position
         else Subsystem::set_state(b_lift_states::idle);
       }
 
@@ -108,7 +96,7 @@ void B_Lift::handle(bool driver_array){
       // if master controller joystick isn't active, take partner input instead
       if(fabs(lift_power) < 10) lift_power = partner.get_analog(ANALOG_RIGHT_Y);
       // holds motor if joystick is within deadzone or lift is out of range
-      if (fabs(lift_power) < 10 || (lift_power < 0 && b_lift_pot.get_value() <= driver_positions[0]) || (lift_power > 0 && b_lift_pot.get_value() >= driver_positions[driver_positions.size() - 1])){
+      if (fabs(lift_power) < 10 || (lift_power < 0 && b_lift_pot.get_value() <= positions[0]) || (lift_power > 0 && b_lift_pot.get_value() >= positions[positions.size() - 1])){
         lift_power = 0;
       }
       // if back lift is below a threshold and the hitch is open, close it to not break it
@@ -387,6 +375,10 @@ void B_Lift::elastic_util(int high){ //1011 as of April 10th
   elastic_b_down_time = move_timer.get_time();
   master.print(2, 0, "down time: %d", elastic_b_up_time);
   b_lift_m.move(0);
+}
+
+void B_Lift::move_to_top(){
+  set_state(b_lift_states::move_to_target, prog_positions.size()-1);
 }
 
 

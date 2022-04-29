@@ -268,7 +268,7 @@ void rush_goal2(double target_x, double target_y, double target_a){
         if (fabs(tracking.y_coord) > fabs(target_y) + 10.0){
           printf2("target_y: %lf", target_y);
           printf2("x: %lf, y: %lf, a: %lf", tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle));
-          printf2(term_colours::RED, -1, "FAILED GETTING TO GOAL: %d");
+          printf2(term_colours::ERROR, "FAILED GETTING TO GOAL");
           drivebase.brake();
           return;
         }
@@ -394,7 +394,7 @@ void tank_rush_goal(void* params){
         // f_claw.set_state(1);
         if (brake) drivebase.brake();
         tracking.move_complete = true;
-        motion_i.print("MISSED GOAL tank rush goal target X: %f Y: %f A: %f at X: %f Y: %f A: %f time: %d", target.x, target.y, target.angle, tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle), millis()- time);
+        motion_i.print(term_colours::ERROR, "MISSED GOAL tank rush goal target X: %f Y: %f A: %f at X: %f Y: %f A: %f time: %d", target.x, target.y, target.angle, tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle), millis()-time);
         //log_time("ending starting time: %d, delta time: %d X: %f Y: %f A: %f from X: %f Y: %f A: %f \n", millis(),millis() -starttime, target_x, target_y, target_a, tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle));
         // tracking.move_stop_task();
         break;
@@ -1106,7 +1106,7 @@ void tank_move_to_target(void* params){
       // printf2("Powers | y: %lf, a: %lf",tracking.power_y, tracking.power_a);
 
       motion_d.print("error y : %.2f error a : %.2f, end con: %.2f, end clause %.2f, end dist: %.2f, pow y : %.2f, pow a : %.2f\n ", local_error.y, rad_to_deg(error.angle), fabs(line_disp.get_y()), end_error.y, end_dist, tracking.power_y, tracking.power_a);
-      motion_d.print("sng: %d, orig sgn: %d", sgn_line_y, orig_sgn_line_y);
+      motion_d.print("sgn: %d, orig sgn: %d", sgn_line_y, orig_sgn_line_y);
       // exits movement once the target has been overshot (if the sign of y error along the line has flipped)
       // if(fabs(line_disp.get_y()) < end_error.y || sgn_line_y != orig_sgn_line_y){
       if((fabs(local_error.y) < end_error.y && fabs(line_disp.get_y()) < 4)|| sgn_line_y != orig_sgn_line_y){
@@ -1591,6 +1591,10 @@ void Gyro::calibrate(){
   inertial.reset();
 }
 
+void Gyro::drive(int speed){
+  drivebase.move(-GYRO_SIDE*speed, 0.0);
+}
+
 void Gyro::finish_calibrating(){
   if(inertial.is_calibrating()){
     wait_until(!inertial.is_calibrating()) motion_d.print("Calibrating Gyro...");
@@ -1604,8 +1608,9 @@ void Gyro::climb_ramp(){
   finish_calibrating(); //Makes sure it's calibrated before starting (should already be)
   inertial.tare_roll();
   inertial.tare_pitch();
+  screen_flash::start("ZERO", term_colours::NOTIF);
 
-  drivebase.move(-GYRO_SIDE*127, 0.0);
+
   Task([this](){
     wait_until(false){
       get_angle();
@@ -1613,42 +1618,85 @@ void Gyro::climb_ramp(){
       // motion_i.print("Angle:%f", angle);
     }
   });
-  wait_until(angle > 22);
-  motion_i.print("ON RAMP: %f", angle);
-  screen_flash::start("On Ramp", term_colours::NOTIF);
 
+  b_lift.set_state(b_lift_states::move_to_target, 2);
+  drive(127);
+
+  wait_until(fabs(angle) > 22);
+  f_lift.set_state(f_lift_states::move_to_target, 1);
+  drivebase.brake();
+
+  screen_flash::start("On Ramp", term_colours::NOTIF);
   tracking.reset();
 
-	// f_lift.move_absolute(100); //Lowers lift
+  drive(90);
+  tracking.wait_for_dist(5);
+  f_lift.set_state(f_lift_states::move_to_target, 0);
+  tracking.wait_for_dist(21-5); //increase this number as much as possible
 
-  drivebase.move(-GYRO_SIDE*127, 0.0); //Can probably get rid of this
-  tracking.wait_for_dist(18);
+  int time1 = millis();
+  drive(35);
+  tracking.wait_for_dist(2);
+  wait_until(fabs(angle) < 20);
+  screen_flash::start("Backup", term_colours::NOTIF);
+
+  int time2 = millis();
+  drive(-127);
+
+  b_lift.move_to_top();
+  
+  tracking.wait_for_dist(2);
+  drivebase.brake();
+  screen_flash::start("Braked", term_colours::NOTIF);
+
+  int time3 = millis();
+  master.clear();
+  master.print(1, 0, "Slow:%d", time2-time1);
+  master.print(2, 0, "Back:%d", time3-time2);
 }
 
 void Gyro::level(double kP, double kD){
-	PID gyro_p(kP, 0, kD, 0);
-  Timer gyro_steady ("Gyro", &motion_i);
-  // int speed;
-  // bool neg = false;
-
   screen_flash::start("PID", term_colours::NOTIF);
 
-	wait_until(gyro_steady.get_time() > 500 || master.interrupt(true, true)){
-    gyro_p.compute(-angle, 0);
-    drivebase.move(gyro_p.get_output(), 0.0);
-    // gyro_steady.print("Angle: %f | Speed: %f", angle, gyro_p.get_output());
+	PID gyro_p(kP, 0, kD, 0);
+  Timer gyro_steady ("Gyro", &motion_i);
+  constexpr double min_pwr = 30.0;
+
+  double speed;
+  bool overshot = false;
+
+	while(true){
+    speed = gyro_p.compute(-angle, 0);
+
+    if(!in_range(fabs(gyro_p.derivative), 0.01, 100.0)) motion_i.print(term_colours::RED, "SKIPPED. In:%.3f Out:%.3f, Speed:%.3f, P:%.3f, D:%.3f", -angle, gyro_p.get_output(), speed, gyro_p.proportional, gyro_p.derivative);
+
+    if(speed < 0) overshot = true;
+    if(!overshot && in_range(speed, 10.0, min_pwr)) speed = min_pwr*sgn(speed);
+    if(in_range(fabs(speed), 0.0, 10.0)) speed = 0;
+
+    drivebase.move(speed, 0.0);
+    motion_i.print("In:%.3f Out:%.3f, Speed:%.3f, P:%.3f, D:%.3f", -angle, gyro_p.get_output(), speed, gyro_p.proportional, gyro_p.derivative);
     
 		if (fabs(angle) > 6 || get_angle_dif() > 0.06) gyro_steady.reset();
 
-    // if(speed < 0) neg = true;
-    // if(neg && speed > 0) break;
+    if(gyro_steady.get_time() > 500){
+      motion_i.print("\nLevelled on ramp\n");
+      break;
+    }
+    // if(master.interrupt(true, true)){
+    //   motion_i.print("\nController Interrupt\n");
+    //   break;
+    // }
+
+    delay(11);
   }
 
-	motion_i.print("\nLevelled on ramp\n");
   front_l.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
   front_r.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
   back_l.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
   back_r.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
+  center_l.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
+  center_r.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
   drivebase.velo_brake();
 
   screen_flash::start("Braked", term_colours::NOTIF);

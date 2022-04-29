@@ -28,30 +28,30 @@ const GUI* GUI::current_gui = &main_obj;
 bool auton_run = false; // has auton run
 
 void initialize() {
-	// gyro.calibrate();
+	gyro.calibrate();
+	// front_l.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
+	// front_r.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
+	// back_l.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
+	// back_r.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
 
 	drivebase.download_curve_data();
-  load_positions();
-  load_auton();
-
 	Data::init();
 	_Controller::init();
 	GUI::init();
-
 	delay(500);
 	tracking.x_coord = 25.0, tracking.y_coord = 11.75, tracking.global_angle = -90.0_deg;
 
-	b_lift.motor.set_brake_mode(E_MOTOR_BRAKE_HOLD);
-	f_lift.motor.set_brake_mode(E_MOTOR_BRAKE_HOLD);
 
+  b_lift.motor.set_brake_mode(E_MOTOR_BRAKE_HOLD);
+  f_lift.motor.set_brake_mode(E_MOTOR_BRAKE_HOLD);
+	
 	// tracking.x_coord = 104.0, tracking.y_coord = 12.0, tracking.global_angle = -30.0_deg;
 	// tracking.x_coord = 24.5, tracking.y_coord = 15.0, tracking.global_angle = 9.0_deg;
-	// tracking.x_coord = 0.0, tracking.y_coord = 0.0, tracking.global_angle = 0.0_deg;
+	tracking.x_coord = 0.0, tracking.y_coord = 0.0, tracking.global_angle = 0.0_deg;
 	update_t.start();
-  // lift_handle_t.start();
-
-	// gyro.finish_calibrating(); //Finishes calibrating gyro before program starts
-	// GUI::go_to(3);
+  lift_handle_t.start();
+	// master.print(2, 0, "Driver: %s", drivebase.drivers[drivebase.cur_driver].name);
+  gyro.finish_calibrating(); //Finishes calibrating gyro before program starts
 }
 
 /**
@@ -91,204 +91,46 @@ void autonomous() {
 bool timer_state = 0; 
 int timer = millis();
 void opcontrol() {
-	// while(true){ 
-	// 	drivebase.handle_input();
-	// 	delay(10);
-	// }
+  // tilt_lock.set_state(HIGH);
 
-	// Position start = distance_reset_center();
-	// // update_t.kill();
-	// // tracking.x_coord = start.x, tracking.y_coord = start.y, tracking.global_angle = deg_to_rad(start.angle);
-	// // update_t.start();
+  // b_claw_obj.set_state(b_claw_states::managed);
+  // f_claw_obj.set_state(f_claw_states::managed);
+  // hitch_obj.set_state(hitch_states::managed);
+  // b_lift.move_to_top();
+  // // if(f_claw_o.get_state() == HIGH) f_claw(LOW);
+  // f_claw(HIGH);
+  // f_lift.set_state(f_lift_states::move_to_target, 2);
 
-	// // printf("x:%lf, y: %lf, a:%lf\n", start.x, start.y, start.angle);
-	// // x:69.576370, y: 26.728601, a:-3.335143
-	// // 81 back
-	// // tracking.reset(start.x, start.y, start.angle +180);
-	// flatten_against_wall(true);
-	// tracking.reset(70.0, 27.0, 180.0);
+  // drivebase.move(0.0, 0.0); //so it's not locked when switching trans
+	// drivebase.set_state(HIGH);
 
-	// // x: 36.47, y: 102.75, a: 105.66
-	// // x: 37.86, y: 103.60, a: 102.11
-	// move_start(move_types::tank_point, tank_point_params({70.0, 102.0, 0.0}, false, 80.0));
-	// move_start(move_types::turn_angle, turn_angle_params(90.0));
-	// move_start(move_types::tank_point, tank_point_params({36.0, 105.0, 0.0}));
-	// while(true) pros::delay(10);
-	lift_handle_t.start();
-  hitch.set_state(1);
-  delay(500);
-	b_lift.set_state(b_lift_states::move_to_target,0);
+  // master.wait_for_press(DIGITAL_R1);
+	// f_claw(HIGH);
+	// b_claw.set_state(HIGH);
+  // hitch.set_state(HIGH);
+  // tilt_lock.set_state(LOW);
 
+  // f_lift.set_state(f_lift_states::move_to_target, 1);
+  skills_park();
 
-	int state = 0;
-	while(!master.get_digital(DIGITAL_A)){
-		printf("sensor %d\n", b_dist.get());
-		if(master.get_digital_new_press(DIGITAL_B)){
-			state = !state;
-			f_claw_o.set_state(state);
-			f_claw_c.set_state(state);
-		}
-		
-		// gui_handle(); //
-		// printf("%d || opcontrol ENCODER L: %d, R: %d, B:%d \n", millis(), LeftEncoder.get_value(), RightEncoder.get_value(), BackEncoder.get_value());
-		delay(33);
-	}
-	int timer = millis();
-	skills();
-	skills2();
-	skills3();
-	skills4();
-	master.print(1,1,"total %d", millis() - timer);
-	// skills3();
-	// // skills();
-	// move_start(move_types::tank_point, tank_point_params({5.0, 100.0,0.0},false,50));
-	// move_start(move_types::turn_angle, turn_angle_params(90.0));
-	// move_start(move_types::tank_point, tank_point_params({20.0, 20.0,0.0}));
-	// // move_start(move_types::tank_arc, tank_arc_params({0.0,0.0}, {20.0,20.0,90.0}, 70.0));
-	// flatten_against_wall();
-	// // move_start(move_types::tank_arc, tank_arc_params({8.5,8.5}, {20.0,20.0,90.0}));
-	// move_start(move_types::tank_point, tank_point_params({30.0, 20.0,0.0}));
-	// int diff = LeftEncoder.get_value() - RightEncoder.get_value();
-	// int last_diff = diff;
-	while(true){
-	// 	diff = LeftEncoder.get_value() - RightEncoder.get_value();
-	// 	if(diff != last_diff){
-	// 		printf("%d|| diff: %d\n", millis(), diff);
-	// 		last_diff = diff;
-	// 	}
-		delay(10);
-		// drivebase.handle_input();
-	}
-	while(true){
-		// printf("b:%d, f:%d\n", b_lift_pot.get_value(), f_lift_pot.get_value());
-		master.update_buttons();
-		partner.update_buttons();
-		// printf("%d\n", get_lift());
-		// drivebase handlers
-		drivebase.handle_input();
-		drivebase.handle_trans();
+  // master.wait_for_press(DIGITAL_R1);
+  // int start = millis();
 
-		// intake handlers
-		handle_intake_buttons();
-
-		// lift handlers
-		handle_lift_buttons();
-		b_lift.handle(true);
-		f_lift.handle(true);
-
-		// claw handlers
-		handle_claw_buttons();
-		b_claw_obj.handle();
-		f_claw_obj.handle();
-		hitch_obj.handle();
+  // gyro.climb_ramp();
+  // drivebase.brake();
 
 
-		
-		// if(print_timer.get_time() > 100){
-		// 	printf("b_lift_pot_val:%d, f_lift_pot_val:%d\n", b_lift_pot.get_value(), f_lift_pot.get_value());
-		// 	// printf("b_dist:%d\n", b_dist.get());
-		// 	print_timer.reset();
-		// }
+  // printf("\n\nStart: %d\n", start);
+  // printf("\n\nEnd: %d\n", millis());
+  // printf("\n\nTotal: %d\n", millis()-start);
+  // master.print(0, 0, "Time:%d", millis()-start);
 
-		if(partner.is_rising(timer_btn)){ 
-			timer_state = !timer_state;
-			if(timer_state)timer = millis();
-			else{
-				partner.print(0,0,"time: %d", millis() - timer);
-			}
-		}
-
-		delay(10);
-	}
-	// */
-	master.clear();
-	f_lift.set_state(f_lift_states::move_to_target, 3);
-	wait_until(f_lift.get_state() == f_lift_states::idle);
-	master.rumble("-");
-	master.print(0,0,"reached 4");
-	delay(1000);
-
-	f_lift.set_state(f_lift_states::move_to_target, 1);
-	wait_until(f_lift.get_state() == f_lift_states::idle);
-	master.rumble("-");
-	master.print(0,0,"reached 1");
-	delay(1000);
-
-	f_lift.set_state(f_lift_states::move_to_target, 2, 50);
-	wait_until(f_lift.get_state() == f_lift_states::idle);
-	master.rumble("-");
-	master.print(0,0,"reached 1");
-	delay(1000);
-
-
-	while(true) delay(10); // don't exucute anything beyond this line
-
-	b_lift.set_state(b_lift_states::move_to_target, 3);
-	b_lift.Subsystem::set_state(b_lift_states::idle);
-
-
-	lift_t.set_state(HIGH);
-	b_lift_m.move_relative(30, 100);
-	while(fabs(b_lift_m.get_position() - b_lift_m.get_position()) > 15) delay(10);
-	b_lift_m.move_relative(-30, 100);
-	while(fabs(b_lift_m.get_position() - b_lift_m.get_position()) > 15) delay(10);
-	// b_lift.
-
-	// while(true){
-	// 	b_lift.handle_buttons();
-	// 	b_lift.handle(true);
-	// 	f_lift.handle_buttons();
-	// 	f_lift.handle(true);
-	// 	delay(10);
-	// }
-
-	// while(true){
-	pros::Task task{[=] {
-		while(true){
-			// f_lift.handle_buttons();
-			f_lift.handle(true);
-			delay(10);
-		}
-	}};
-	delay(5000);
-	f_lift.set_state(f_lift_states::move_to_target, 0);
-	delay(1000);
-	f_lift.set_state(f_lift_states::move_to_target, 1);
-
-
-
-	// delay(1000);
-	// f_lift.set_state(f_lift_states::move_to_target, 2);
-	// delay(1000);
-	// f_lift.set_state(f_lift_states::move_to_target, 3);
-	// delay(10);
-	// f_lift.set_state(f_lift_states::move_to_target, 0);
-
-	// drivebase.driver_practice();
-	// pros::Task task{[=] {
-	// 	while(true){
-	// 		f_lift.handle(true);
-	// 		b_lift.handle(true);
-	// 		delay(10);
-	// 	}
-	// }};
-  // f_lift.set_state(f_lift_states::move_to_target, 2); // moves to top
-
-	// f_lift.elastic_util();
-  // BACK bottom 1030 top 2754
-  // FRONT bottom 1190 top 2778
-
-	// pros::Task task{[=] {
-	// 	while(true){
-	// 		b_claw.handle();
-	// 		delay(10);
-	// 	}
-	// }};
-	// delay(2000);
-	// b_claw.set_state(b_claw_states::grabbed);
-	// delay(3000);
-	// b_claw.set_state(b_claw_states::search_lip);
-	// while(true) delay(10);
-
-	// drivebase.driver_practice();
+  // delay(500);
+  // hitch.set_value(LOW);
+  // tilt_lock.set_state(HIGH);
+  // b_claw.set_state(LOW);
+  // b_lift.set_state(b_lift_states::move_to_target, 4);
+  // f_lift.set_state(f_lift_states::move_to_target, 0);
+  // // lift_t.toggle_state();
+  // b_lift.Subsystem::set_state(b_lift_states::intake_off);
 }

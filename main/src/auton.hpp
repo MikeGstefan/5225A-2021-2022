@@ -31,6 +31,7 @@ void skills();
 void skills2();
 void skills3();
 void skills4();
+void skills_park();
 
 void select_auton();
 void run_auton();

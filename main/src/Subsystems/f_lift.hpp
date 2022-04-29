@@ -38,9 +38,7 @@ class F_Lift: public Motorized_subsystem<f_lift_states, NUM_OF_F_LIFT_STATES, F_
   public:
     // bottom is 1162
     vector<int> driver_positions = {1185, 1400, 1900, 2170, 2775};
-    // vector<int> prog_positions = {1185, 1400, 1900, 2170, 2775};
-    //                                  low carry
-    vector<int> prog_positions = {1170, 1290, 1400, 1950, 2020, 2100, 2300, 2750};
+    vector<int> prog_positions = {1280, 1400, 1900, 2170, 2775};
 
     F_Lift(Motorized_subsystem<f_lift_states, NUM_OF_F_LIFT_STATES, F_LIFT_MAX_VELOCITY> motorized_subsystem);  // constructor
     
@@ -64,7 +62,7 @@ class F_Lift: public Motorized_subsystem<f_lift_states, NUM_OF_F_LIFT_STATES, F_
     }
     
     void elastic_util(int high); // up time should be about 1100mms (ignore this time, it was on the old lift), down time should be slightly slower than that
-    void move_absolute(double position, double velocity = F_LIFT_MAX_VELOCITY, bool wait_for_comp = true, double end_error = 20);
+    void move_to_top();
 };
 
 extern F_Lift f_lift;

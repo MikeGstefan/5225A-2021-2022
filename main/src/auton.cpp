@@ -1,11 +1,15 @@
 #include "auton.hpp"
 #include "Libraries/printing.hpp"
+#include "Subsystems/b_lift.hpp"
 #include "Subsystems/f_lift.hpp"
 #include "Tracking.hpp"
+#include "auton_util.hpp"
 #include "config.hpp"
 #include "controller.hpp"
+#include "drive.hpp"
 #include "geometry.hpp"
 #include "logging.hpp"
+#include "pros/rtos.hpp"
 #include "util.hpp"
 #include <map>
 
@@ -360,6 +364,66 @@ void skills4(){
   // move
 }
 
+void skills_park(){
+  f_claw(HIGH);
+	b_claw.set_state(HIGH);
+  hitch.set_state(HIGH);
+  tilt_lock.set_state(LOW);
+  f_lift.set_state(f_lift_states::move_to_target, 3);
+  b_lift.set_state(b_lift_states::move_to_target, b_lift.prog_positions.size()-1);
+  while(f_lift.get_target_state() != f_lift_states::idle)delay(10);
+  flatten_against_wall();
+  delay(100);
+  tracking.reset(reset_dist_r.get_dist(), DIST_FRONT, 180.0);
+  int s_time = millis();
+  printf2("\n\n\n\n\n\nTIME:%d\n\n\n\n", s_time);
+  // master.wait_for_press(DIGITAL_R1);
+  move_start(move_types::tank_point, tank_point_params({tracking.x_coord, 10.0, 180.0}, false, 127.0, 1.0, true, 6.4, 70.0, 0.0, 0, {0.5, 0.5}, 30.0));
+  move_start(move_types::turn_angle, turn_angle_params(90.0));
+  move_start(move_types::tank_point, tank_point_params({32.0, 12.0, 90.0}));
+  f_lift.set_state(f_lift_states::move_to_target, 0);
+
+  b_claw_obj.set_state(b_claw_states::managed);
+  f_claw_obj.set_state(f_claw_states::managed);
+  hitch_obj.set_state(hitch_states::managed);
+  b_lift.set_state(b_lift_states::move_to_target, 5);
+  f_lift.set_state(f_lift_states::move_to_target, 0);
+
+  drivebase.move(0.0, 0.0); //so it's not locked when switching trans
+	drivebase.set_state(HIGH);
+  wait_until(f_lift_pot.get_value() < 1200); //wait for bottom
+  drivebase.brake();
+
+  // master.wait_for_press(DIGITAL_R1);
+  int start = millis();
+
+  gyro.climb_ramp();
+  drivebase.brake();
+
+  printf("\n\nTotal before drop: %d\n", millis()-start);
+
+  wait_until(b_lift_pot.get_value() > 1700);
+  printf("\n\nDone wait: %d\n", millis()-start);
+  hitch.set_value(LOW);
+
+  tilt_lock.set_state(HIGH);
+  delay(50);
+  b_claw.set_state(LOW);
+  delay(50);
+
+  b_lift.Subsystem::set_state(b_lift_states::intake_off);
+
+  screen_flash::start("Done", term_colours::NOTIF);
+
+  printf("\n\nClimb Total: %d\n", millis()-start);
+  printf("\n\nWall Total: %d\n", millis()-s_time);
+  master.clear();
+  master.print(0, 0, "%d", millis()-start);
+  master.print(1, 0, "%d", millis()-s_time);
+
+  printf("\n\n\n\n\n\n\n\n\n\n\n\n\n");
+}
+
 void rush_high(){
   move_start(move_types::tank_point, tank_point_params({107.0, 57.0, 0.0}));
   delay(100);
@@ -395,10 +459,10 @@ void load_auton(){
 
   ifstream file;
   Data::log_t.data_update();
-  printf2(term_colours::BLUE, -1, "\n\nLoading Autons:");
+  printf2(term_colours::BLUE, "\n\nLoading Autons:");
   file.open(auton_file_name, fstream::in);
   while(file >> target >> task){
-    printf2(term_colours::BLUE, -1, "%s: %s", target, task);
+    printf2(term_colours::BLUE, "%s: %s", target, task);
     selected_positions.push_back(target);
   }
   newline();
@@ -483,7 +547,7 @@ void select_auton(){
 
     const std::map<std::string, std::pair<Point, std::string>>::const_iterator og = selection;
 
-    switch(master.wait_for_press({DIGITAL_X, DIGITAL_A, DIGITAL_RIGHT, DIGITAL_LEFT})){//see how to use ok_button
+    switch(master.wait_for_press({DIGITAL_X, DIGITAL_A, DIGITAL_RIGHT, DIGITAL_LEFT})){//see how to use ok_button here instead of A
       case DIGITAL_X:
         master.clear();
         save_auton();
@@ -525,18 +589,18 @@ void run_auton(){
 
     if(!run_defined_auton(selected_positions[i], selected_positions[i+1])){
       if(target.second == "None"){
-        // move_start(move_types::tank_rush, tank_rush_params({target.first, /*figure out angle based on front/back*/}, false));
+        move_start(move_types::tank_rush, tank_rush_params({target.first, /*figure out angle based on front/back*/}, false));
       }
       else if(target.second == "Front"){
         f_lift.set_state(f_lift_states::move_to_target, 0);
-        // move_start(move_types::tank_rush, tank_rush_params({target.first, /*figure out angle based on front/back*/}, false));
-        // f_detect_goal();
+        move_start(move_types::tank_rush, tank_rush_params({target.first, /*figure out angle based on front/back*/}, false));
+        f_detect_goal();
         f_lift.set_state(f_lift_states::move_to_target, 1);
       }
       else if(target.second == "Back"){
         b_lift.set_state(b_lift_states::move_to_target, 0);
-        // move_start(move_types::tank_rush, tank_rush_params({target.first, /*figure out angle based on front/back*/}, true));
-        // b_detect_goal();
+        move_start(move_types::tank_rush, tank_rush_params({target.first, /*figure out angle based on front/back*/}, true));
+        b_detect_goal();
         b_lift.set_state(b_lift_states::move_to_target, 1);
       }
 

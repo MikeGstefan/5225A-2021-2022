@@ -93,6 +93,7 @@ Drivebase::Drivebase(std::array<driver, num_of_drivers> drivers) : drivers(drive
 
 void Drivebase::move(double x, double y, double a){
   ERROR.print("you called the wrong function");
+  //btw some motions call this
   // front_l.move(x + y + a);
   // front_r.move(-x + y - a);
   // back_l.move(-x + y + a);
@@ -296,7 +297,7 @@ void Drivebase::driver_practice(){
   // });
   
   // f_claw_p.set_value(LOW);
-  b_claw.set_value(LOW);
+  b_claw.set_state(LOW);
   // lift.move(-10); // gives holding power
   cur_driver = 0; // defaults driver to Nikhil
   // master.print(2, 0, "Driver: %s", driver_name());
@@ -379,7 +380,7 @@ bool Drivebase::get_state(){
 
 void Drivebase::set_state(bool state){
   this->state = state;
-  drive_t.set_value(state);
+  drive_t.set_state(state);
 }
 
 
