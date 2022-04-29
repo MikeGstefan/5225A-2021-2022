@@ -62,7 +62,7 @@ void newline(int count = 1);
   /*Strings*/ std::string convert_all_args(const std::string& fmt, const std::string& arg);
   /*Positions*/ std::string convert_all_args(const std::string& fmt, const Position& arg);
   /*Points*/ std::string convert_all_args(const std::string& fmt, const Point& arg);
-  /*Tuples*/ std::string convert_all_args(const std::string& fmt, const Vector& arg);
+  /*Vectors (Geometry)*/ std::string convert_all_args(const std::string& fmt, const Vector& arg);
 
 // Printing
 

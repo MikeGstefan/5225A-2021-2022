@@ -87,7 +87,7 @@
   * @return whether value is between minimum and maximum. will work even if maximum < minimum
   */
   template <typename T>
-  bool in_range(T value, T minimum, T maximum);
+  constexpr bool in_range(T value, T minimum, T maximum);
 
   /**
   * @brief returns a random bool with probability of being true
@@ -187,7 +187,7 @@
 
 //Numeric Definitions
   template <typename T>
-  bool in_range(T value, T minimum, T maximum){
+  constexpr bool in_range(T value, T minimum, T maximum){
     return (minimum <= value && value <= maximum) || (maximum <= value && value <= minimum);
   }
   template <typename T>

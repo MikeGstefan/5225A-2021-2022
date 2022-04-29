@@ -83,10 +83,10 @@ struct Vector{
       static constexpr Vector make_polar(double magnitude, double angle);
 
     //Operators
-      friend constexpr Vector operator* (const Vector&, double);
       friend constexpr Vector operator* (double, const Vector&);
-      friend constexpr Vector operator/ (const Vector&, double);
       friend constexpr Vector operator/ (double, const Vector&);
+      constexpr Vector operator* (double) const;
+      constexpr Vector operator/ (double) const;
       constexpr bool operator== (const Vector& p2) const;
       constexpr bool operator!= (const Vector& p2) const;
       constexpr Vector operator+ (const Vector& p2) const;
@@ -217,14 +217,14 @@ struct Vector{
 
 //Operators
   //Vector
-    constexpr Vector operator* (const Vector& vector, double scalar){
-      return Vector::make_polar(vector.magnitude * scalar, vector.angle);
+    constexpr Vector Vector::operator* (double scalar) const{
+      return make_polar(magnitude * scalar, angle);
     }
     constexpr Vector operator* (double scalar, const Vector& vector){
       return vector*scalar;
     }
-    constexpr Vector operator/ (const Vector& vector, double scalar){
-      return vector*(1 / scalar);
+    constexpr Vector Vector::operator/ (double scalar) const{
+      return *this * (1 / scalar);
     }
     constexpr Vector operator/ (double scalar, const Vector& vector){
       return Vector::make_polar(vector.magnitude / scalar, vector.angle);
