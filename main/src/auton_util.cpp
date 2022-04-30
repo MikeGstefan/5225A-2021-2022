@@ -16,7 +16,7 @@ void f_claw(bool state){
 
 
 void save_positions(){
-  Position pos1 (141.0-8.75, 15.5, 0.0), pos2 (8.75, 15.5, 0);
+  Position pos1 (110.0, 8.5, 0.0), pos2 (8.75, 15.5, 0);
   master.clear();
   master.print(0, 0, "L1:(%.1f, %.1f, %.1f)", pos1.x, pos1.y , pos1.angle);
   master.print(1, 0, "R1:(%.1f, %.1f, %.1f)", pos2.x, pos2.y , pos2.angle);

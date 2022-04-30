@@ -88,6 +88,7 @@ void competition_initialize() {}
  */
 void autonomous() {
 //   run_auton();
+  int time = millis();
 	switch(cur_auto){
 		case auto1: //
 			high_short();
@@ -96,6 +97,7 @@ void autonomous() {
 			high_tall();
 		break;
 	}
+  master.print(2,2,"time: %d", millis() - time);
 	
 }
 
