@@ -54,7 +54,7 @@ void F_Lift::handle(bool driver_array){
       if(fabs(pid.get_error()) < end_error){
         // switches to idle by default or special case depending on current target
         if(index == 0)  Subsystem::set_state(f_lift_states::bottom);  // lift is at bottom position
-        else if(index == driver_positions.size() - 1) Subsystem::set_state(f_lift_states::top); // lift is at top position
+        else if(index == positions.size() - 1) Subsystem::set_state(f_lift_states::top); // lift is at top position
         else Subsystem::set_state(f_lift_states::idle);
       }
 

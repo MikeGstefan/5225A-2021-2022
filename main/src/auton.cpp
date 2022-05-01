@@ -382,7 +382,7 @@ void skills_park(){
   // master.wait_for_press(DIGITAL_R1);
   move_start(move_types::tank_point, tank_point_params({tracking.x_coord, 10.0, 180.0}, false, 127.0, 1.0, true, 6.4, 70.0, 0.0, 0, {0.5, 0.5}, 30.0));
   move_start(move_types::turn_angle, turn_angle_params(90.0));
-  move_start(move_types::tank_point, tank_point_params({32.0, 12.0, 90.0}));
+  move_start(move_types::tank_point, tank_point_params({32.0, 10.5, 90.0}));
   f_lift.set_state(f_lift_states::move_to_target, 0); //1280
 
   b_claw_obj.set_state(b_claw_states::managed);
@@ -408,6 +408,8 @@ void skills_park(){
   printf("\n\nDone wait: %d\n", millis()-start);
   hitch.set_value(LOW);
 
+  b_claw.set_state(HIGH);
+  delay(50);
   tilt_lock.set_state(HIGH);
   delay(50);
   b_claw.set_state(LOW);
