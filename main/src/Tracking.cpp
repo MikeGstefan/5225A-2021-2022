@@ -1606,10 +1606,8 @@ void Gyro::finish_calibrating(){
 void Gyro::climb_ramp(){
   drivebase.set_state(HIGH);
   finish_calibrating(); //Makes sure it's calibrated before starting (should already be)
-  motion_i.print("\n\n\n\n\nGyro before calibrate: %f", get_angle());
   inertial.tare_roll();
   inertial.tare_pitch();
-  motion_i.print("Gyro after calibrate: %f\n\n\n\n\n", get_angle());
   screen_flash::start("ZERO", term_colours::NOTIF);
 
 
@@ -1621,11 +1619,11 @@ void Gyro::climb_ramp(){
     }
   });
 
-  b_lift.set_state(b_lift_states::move_to_target, b_park);
+  b_lift.set_state(b_lift_states::move_to_target, 2);
   drive(127);
 
   wait_until(fabs(angle) > 22);
-  f_lift.set_state(f_lift_states::move_to_target, f_carry);
+  f_lift.set_state(f_lift_states::move_to_target, 1);
   drivebase.brake();
 
   screen_flash::start("On Ramp", term_colours::NOTIF);
@@ -1633,7 +1631,7 @@ void Gyro::climb_ramp(){
 
   drive(90);
   tracking.wait_for_dist(5);
-  f_lift.set_state(f_lift_states::move_to_target, 1);
+  f_lift.set_state(f_lift_states::move_to_target, 0);
   tracking.wait_for_dist(21-5); //increase this number as much as possible
 
   int time1 = millis();

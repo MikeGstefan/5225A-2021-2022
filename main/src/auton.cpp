@@ -368,16 +368,13 @@ void skills4(){
 
 void skills_park(){
   f_claw(HIGH);
-	b_claw.set_state(HIGH);
+  b_claw.set_state(HIGH);
   hitch.set_state(HIGH);
   tilt_lock.set_state(LOW);
-  f_lift.set_state(f_lift_states::move_to_target, f_top);
+  f_lift.set_state(f_lift_states::move_to_target, 3);
   b_lift.set_state(b_lift_states::move_to_target, b_lift.prog_positions.size()-1);
   while(f_lift.get_target_state() != f_lift_states::idle)delay(10);
   flatten_against_wall();
-
-
-
   delay(100);
   tracking.reset(reset_dist_r.get_dist(), DIST_FRONT, 180.0);
   int s_time = millis();
@@ -386,26 +383,17 @@ void skills_park(){
   move_start(move_types::tank_point, tank_point_params({tracking.x_coord, 10.0, 180.0}, false, 127.0, 1.0, true, 6.4, 70.0, 0.0, 0, {0.5, 0.5}, 30.0));
   move_start(move_types::turn_angle, turn_angle_params(90.0));
   move_start(move_types::tank_point, tank_point_params({32.0, 12.0, 90.0}));
-  f_lift.set_state(f_lift_states::move_to_target, 1);
+  f_lift.set_state(f_lift_states::move_to_target, 0);
 
   b_claw_obj.set_state(b_claw_states::managed);
   f_claw_obj.set_state(f_claw_states::managed);
   hitch_obj.set_state(hitch_states::managed);
-  b_lift.set_state(b_lift_states::move_to_target, b_top);
-  f_lift.set_state(f_lift_states::move_to_target, f_low_carry);
+  b_lift.set_state(b_lift_states::move_to_target, 5);
+  f_lift.set_state(f_lift_states::move_to_target, 0);
 
   drivebase.move(0.0, 0.0); //so it's not locked when switching trans
-	drivebase.set_state(HIGH);
-  misc.print("Waiting for lift: %d", f_lift_pot.get_value());
-  Task([](){
-    while(f_lift_pot.get_value() > 1190){
-      misc.print("F Lift: %f", f_lift_pot.get_value());
-      delay(10);
-    } 
-  });
-  int time_lift_wait = millis();
-  wait_until(f_lift_pot.get_value() < 1200 || millis()-time_lift_wait > 2000); //wait for bottom
-  misc.print("Lift reached before climb: %d", f_lift_pot.get_value());
+  drivebase.set_state(HIGH);
+  wait_until(f_lift_pot.get_value() < 1200); //wait for bottom
   drivebase.brake();
 
   // master.wait_for_press(DIGITAL_R1);
