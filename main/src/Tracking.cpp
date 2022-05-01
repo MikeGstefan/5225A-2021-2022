@@ -1619,11 +1619,11 @@ void Gyro::climb_ramp(){
     }
   });
 
-  b_lift.set_state(b_lift_states::move_to_target, 2);
+  b_lift.set_state(b_lift_states::move_to_target, 2); //1720
   drive(127);
 
   wait_until(fabs(angle) > 22);
-  f_lift.set_state(f_lift_states::move_to_target, 1);
+  f_lift.set_state(f_lift_states::move_to_target, 1); //1400
   drivebase.brake();
 
   screen_flash::start("On Ramp", term_colours::NOTIF);
@@ -1631,7 +1631,7 @@ void Gyro::climb_ramp(){
 
   drive(90);
   tracking.wait_for_dist(5);
-  f_lift.set_state(f_lift_states::move_to_target, 0);
+  f_lift.set_state(f_lift_states::move_to_target, 0); //1280
   tracking.wait_for_dist(21-5); //increase this number as much as possible
 
   int time1 = millis();
@@ -1643,7 +1643,7 @@ void Gyro::climb_ramp(){
   int time2 = millis();
   drive(-127);
 
-  b_lift.move_to_top();
+  b_lift.move_to_top(); //2800
   
   tracking.wait_for_dist(2);
   drivebase.brake();
