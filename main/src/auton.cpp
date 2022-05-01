@@ -367,14 +367,14 @@ void skills4(){
 }
 
 void skills_park(){
-  // f_claw(HIGH);
-	// b_claw.set_state(HIGH);
-  // hitch.set_state(HIGH);
-  // tilt_lock.set_state(LOW);
-  // f_lift.set_state(f_lift_states::move_to_target, f_plat);
-  // b_lift.set_state(b_lift_states::move_to_target, b_lift.prog_positions.size()-1);
-  // while(f_lift.get_target_state() != f_lift_states::idle)delay(10);
-  // flatten_against_wall();
+  f_claw(HIGH);
+	b_claw.set_state(HIGH);
+  hitch.set_state(HIGH);
+  tilt_lock.set_state(LOW);
+  f_lift.set_state(f_lift_states::move_to_target, f_top);
+  b_lift.set_state(b_lift_states::move_to_target, b_lift.prog_positions.size()-1);
+  while(f_lift.get_target_state() != f_lift_states::idle)delay(10);
+  flatten_against_wall();
 
 
 
@@ -386,7 +386,7 @@ void skills_park(){
   move_start(move_types::tank_point, tank_point_params({tracking.x_coord, 10.0, 180.0}, false, 127.0, 1.0, true, 6.4, 70.0, 0.0, 0, {0.5, 0.5}, 30.0));
   move_start(move_types::turn_angle, turn_angle_params(90.0));
   move_start(move_types::tank_point, tank_point_params({32.0, 12.0, 90.0}));
-  f_lift.set_state(f_lift_states::move_to_target, 0);
+  f_lift.set_state(f_lift_states::move_to_target, 1);
 
   b_claw_obj.set_state(b_claw_states::managed);
   f_claw_obj.set_state(f_claw_states::managed);
@@ -398,7 +398,7 @@ void skills_park(){
 	drivebase.set_state(HIGH);
   misc.print("Waiting for lift: %d", f_lift_pot.get_value());
   Task([](){
-    while(f_lift_pot.get_value() > 1160){
+    while(f_lift_pot.get_value() > 1190){
       misc.print("F Lift: %f", f_lift_pot.get_value());
       delay(10);
     } 

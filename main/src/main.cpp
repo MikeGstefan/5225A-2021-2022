@@ -110,9 +110,9 @@ void opcontrol() {
   // hitch.set_state(HIGH);
   // tilt_lock.set_state(LOW);
 
-  hitch.set_state(1);
-  delay(500);
-  b_lift.set_state(b_lift_states::move_to_target, 0);
+  // hitch.set_state(1);
+  // delay(500);
+  // b_lift.set_state(b_lift_states::move_to_target, 0);
   // f_lift.set_state(f_lift_states::move_to_target, 1);
   while(!master.get_digital_new_press(DIGITAL_A))delay(10);
   int time = millis();
@@ -134,8 +134,8 @@ void opcontrol() {
   // skills();
   // skills2();
   // skills3();
-  skills4();
-  // skills_park();
+  // skills4();
+  skills_park();
   master.print(0,0, "FULL : %D", millis()- time);
   while(true)delay(10);
 
