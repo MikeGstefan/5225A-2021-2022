@@ -370,24 +370,24 @@ void skills4(){
 }
 
 void skills_park(){
-  // f_claw(HIGH);
-	// b_claw.set_state(HIGH);
-  // hitch.set_state(HIGH);
-  // tilt_lock.set_state(LOW);
-  // f_lift.set_state(f_lift_states::move_to_target, f_plat);
-  // b_lift.set_state(b_lift_states::move_to_target, b_lift.prog_positions.size()-1);
-  // while(f_lift.get_target_state() != f_lift_states::idle)delay(10);
-  // flatten_against_wall();
+  f_claw(HIGH);
+	b_claw.set_state(HIGH);
+  hitch.set_state(HIGH);
+  tilt_lock.set_state(LOW);
+  f_lift.set_state(f_lift_states::move_to_target, f_top);
+  b_lift.set_state(b_lift_states::move_to_target, b_lift.prog_positions.size()-1);
+  while(f_lift.get_target_state() != f_lift_states::idle)delay(10);
+  flatten_against_wall();
 
 
 
   delay(100);
   tracking.reset(reset_dist_r.get_dist(), DIST_FRONT, 180.0);
-  int time = millis();
-  while(millis() - time < 10000){
-    misc.print(" GYRO time: %d: %f\n", time, gyro.get_angle());
-    delay(10);
-  } 
+
+  delay(500);
+  gyro.calibrate();
+  gyro.finish_calibrating();
+
   int s_time = millis();
   printf2("\n\n\n\n\n\nTIME:%d\n\n\n\n", s_time);
   // master.wait_for_press(DIGITAL_R1);
@@ -428,10 +428,7 @@ void skills_park(){
   printf("\n\nDone wait: %d\n", millis()-start);
   hitch.set_value(LOW);
 
-  tilt_lock.set_state(HIGH);
-  delay(50);
-  b_claw.set_state(LOW);
-  delay(50);
+  tilt_goal();
 
   b_lift.Subsystem::set_state(b_lift_states::intake_off);
 

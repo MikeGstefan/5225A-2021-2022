@@ -1633,13 +1633,13 @@ void Gyro::climb_ramp(){
 
   drive(90);
   tracking.wait_for_dist(5);
-  f_lift.set_state(f_lift_states::move_to_target, f_bottom);
+  f_lift.set_state(f_lift_states::move_to_target, f_low_carry);
   tracking.wait_for_dist(21-5); //increase this number as much as possible
 
   int time1 = millis();
   drive(35);
   tracking.wait_for_dist(2);
-  wait_until(fabs(angle) < 20);
+  wait_until(fabs(angle) < 19);
   screen_flash::start("Backup", term_colours::NOTIF);
 
   drivebase.brake();
