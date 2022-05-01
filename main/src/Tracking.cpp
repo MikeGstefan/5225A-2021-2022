@@ -1642,6 +1642,8 @@ void Gyro::climb_ramp(){
   wait_until(fabs(angle) < 20);
   screen_flash::start("Backup", term_colours::NOTIF);
 
+  drivebase.brake();
+
   int time2 = millis();
   drive(-127);
 

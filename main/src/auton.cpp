@@ -323,15 +323,18 @@ void skills4(){
     f_lift.set_state(f_lift_states::move_to_target,f_bottom);
   });
   b_detect_goal();
+
   move_stop();
   drivebase.brake();
-  b_lift.Subsystem::set_state(b_lift_states::intake_on);
+  b_lift.Subsystem::set_state(b_lift_states::intake_on);   // needs to be put back
+  delay(200);
+  // move_start(move_types::tank_point, tank_point_params({106.5, 122, 125.0}, false,127.0, 1.0, true, 6.7,70.0,0.0,0,{0.5,0.5}, min_move_power_y+10));
   // move_start(move_types::tank_arc, tank_arc_params({tracking.x_coord, tracking.y_coord}, {120.5, 102.0,200.0},127.0,127.0,false));//arc to face neut goal
   // move_start(move_types::turn_angle, turn_angle_params(rad_to_deg(atan2(104.5 - tracking.x_coord, 72.0 - tracking.y_coord)) +180.0, true,true,140.0));
   move_start(move_types::tank_point, tank_point_params({106.5,75.0,  45.0},false, 127.0,1.0,true,9.0,130.0));// drive throught neut goal
   // intake.set_state(intake_states::on);
   move_start(move_types::turn_angle, turn_angle_params(-90));
-  move_start(move_types::tank_point, tank_point_params({70.5,72.0,  45.0},false, 80.0,1.0,true), false);
+  move_start(move_types::tank_point, tank_point_params({70.5,72.0,  45.0},false, 40.0,1.0,true), false);
   f_detect_goal();
   move_stop();
   drivebase.brake();
@@ -349,7 +352,7 @@ void skills4(){
   detect_hitch();
   move_stop();
   drivebase.brake();
-  b_lift.Subsystem::set_state(b_lift_states::intake_on);
+  b_lift.Subsystem::set_state(b_lift_states::intake_on); // needs to be put back
   move_start(move_types::tank_point, tank_point_params({22.0,106.0, 30.0}, false, 80.0, 1.0, true, 6.7,70.0,0.0,0,{0.5,0.5}, min_move_power_y + 15));
   move_start(move_types::turn_angle, turn_angle_params(180));
   f_lift.set_state(f_lift_states::move_to_target, f_top);
@@ -380,6 +383,11 @@ void skills_park(){
 
   delay(100);
   tracking.reset(reset_dist_r.get_dist(), DIST_FRONT, 180.0);
+  int time = millis();
+  while(millis() - time < 10000){
+    misc.print(" GYRO time: %d: %f\n", time, gyro.get_angle());
+    delay(10);
+  } 
   int s_time = millis();
   printf2("\n\n\n\n\n\nTIME:%d\n\n\n\n", s_time);
   // master.wait_for_press(DIGITAL_R1);
@@ -397,12 +405,12 @@ void skills_park(){
   drivebase.move(0.0, 0.0); //so it's not locked when switching trans
 	drivebase.set_state(HIGH);
   misc.print("Waiting for lift: %d", f_lift_pot.get_value());
-  Task([](){
-    while(f_lift_pot.get_value() > 1160){
-      misc.print("F Lift: %f", f_lift_pot.get_value());
-      delay(10);
-    } 
-  });
+  // Task([](){
+  //   while(f_lift_pot.get_value() > 1160){
+  //     misc.print("F Lift: %f", f_lift_pot.get_value());
+  //     delay(10);
+  //   } 
+  // });
   int time_lift_wait = millis();
   wait_until(f_lift_pot.get_value() < 1200 || millis()-time_lift_wait > 2000); //wait for bottom
   misc.print("Lift reached before climb: %d", f_lift_pot.get_value());
