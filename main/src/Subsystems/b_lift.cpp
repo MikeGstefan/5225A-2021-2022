@@ -127,11 +127,17 @@ void B_Lift::handle(bool driver_array){
       break;
 
     case b_lift_states::intake_on:
+      printf("at_max_vel_counter: %d, reached_max_vel: %d\n", at_max_vel_counter, reached_max_vel);
+      if(fabs(motor.get_actual_velocity()) > 80 && !reached_max_vel)  at_max_vel_counter++;
+      else at_max_vel_counter = 0;
+
+      if(at_max_vel_counter >= 5) reached_max_vel = true;
+
       printf("vel:%lf\n", motor.get_actual_velocity());
       // printf("sensor: %d, count:%d\n", intk_t.get_value(), intk_jam_count);
       if(fabs(motor.get_actual_velocity()) < 5.0) not_moving_count++;
       else not_moving_count = 0;
-      if(not_moving_count > 10 && intk_t.get_value()){  // safety out
+      if(not_moving_count > 10 && intk_t.get_value() && reached_max_vel){  // safety out
         state_log.print("INTAKE SAFETIED OFF, NOT MOVING | count: %d\n", not_moving_count);
         not_moving_count = 0;
         Subsystem::set_state(b_lift_states::intake_off);
@@ -144,12 +150,15 @@ void B_Lift::handle(bool driver_array){
         intk_jam_count = 0;
         Subsystem::set_state(b_lift_states::intk_jam);
       }
-      // if(intake_safe.get_time() < 300 && not_moving_count > 10){
-      //   not_moving_count = 0;
-      //   after_shift_state = b_lift_states::reshift;
-      //   shift(TRANS_LIFT_STATE); // shifts to lift
-      //   intake_safe.reset(false);
-      // }
+
+
+      if(not_moving_count > 10 && !reached_max_vel){
+        state_log.print("INTAKE SHIFT FAILED, SAFETIED OFF | not_moving_count: %d\n", not_moving_count);
+        not_moving_count = 0;
+        after_shift_state = b_lift_states::reshift;
+        shift(TRANS_LIFT_STATE); // shifts to lift
+        intake_safe.reset(false);
+      }
       // printf("current:%lf\n", motor.get_actual_velocity());
       // else{
 
@@ -222,6 +231,9 @@ void B_Lift::handle_state_change(){
 
     case b_lift_states::intake_on:
       intake_safe.reset();
+      reached_max_vel = false;
+      at_max_vel_counter = 0;
+      not_moving_count = 0;
       motor.move(-127);
       break;
 

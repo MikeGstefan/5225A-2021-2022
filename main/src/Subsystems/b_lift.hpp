@@ -33,6 +33,8 @@ enum class b_lift_states{
 class B_Lift: public Motorized_subsystem<b_lift_states, NUM_OF_B_LIFT_STATES, B_LIFT_MAX_VELOCITY> {
     Timer up_press{"Up_press"}, down_press{"Down_press"};
     Timer intake_safe{"intake_safe", nullptr, false};
+    bool reached_max_vel = false; // for safety
+    int at_max_vel_counter = 0; // for safety
     int not_moving_count = 0;
 
     int bad_count = 0; // cycle check for safeties
