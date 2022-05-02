@@ -236,7 +236,7 @@ void Drivebase::handle_input(){
   tracking.power_y = drivers[cur_driver].custom_drives[1].lookup(master.get_analog(ANALOG_LEFT_Y));
   // caps drive speed at 40 if intake is on
   // if(b_lift.get_state() == b_lift_states::intake_on || b_lift.get_state() == b_lift_states::intk_jam){
-  if(master.is_rising(speed_limit_button)) speed_limit_active = !speed_limit_active;
+  // if(master.is_rising(speed_limit_button)) speed_limit_active = !speed_limit_active;
 
   if(speed_limit_active){
     if(buzz_timer.get_time() > 50){
@@ -429,7 +429,7 @@ bool get_lift(){
 
 void handle_lift_buttons(){
   // if(master.is_rising(joy_mode_switch_button) || partner.is_rising(partner_joy_mode_switch_button)){
-    if(partner.is_rising(partner_joy_mode_switch_button)){
+    if(master.is_rising(joy_mode_switch_button) || partner.is_rising(partner_joy_mode_switch_button)){
     // toggles joy_mode
     if(joy_mode == joy_modes::lift_select)  joy_mode = joy_modes::manual;
     else joy_mode = joy_modes::lift_select;

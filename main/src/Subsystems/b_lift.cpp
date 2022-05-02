@@ -116,8 +116,6 @@ void B_Lift::handle(bool driver_array){
         if(hitch_obj.get_state() != hitch_states::grabbed){
           hitch_obj.set_state(hitch_states::grabbed);
         }
-        // if the goal is detected, don't power the lift
-        if(hitch_dist.get() < 25) lift_power = 0;
       }
 
       motor.move_velocity(lift_power);
@@ -159,10 +157,6 @@ void B_Lift::handle(bool driver_array){
         shift(TRANS_LIFT_STATE); // shifts to lift
         intake_safe.reset(false);
       }
-      // printf("current:%lf\n", motor.get_actual_velocity());
-      // else{
-
-      // }
       break;
 
     case b_lift_states::intk_jam:
