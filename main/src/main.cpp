@@ -62,7 +62,12 @@ void initialize() {
  * the VEX Competition Switch, following either autonomous or opcontrol. When
  * the robot is enabled, this task will exit.
  */
-void disabled() {}
+void disabled() {
+
+	// f_claw(0);
+	// delay(1000);
+	// f_claw(1);
+}
 
 /**
  * Runs after initialize(), and before autonomous when connected to the Field
@@ -87,6 +92,16 @@ void competition_initialize() {}
  * from where it left off.
  */
 void autonomous() {
+
+	Task([](){
+		pros::c::imu_accel_s_t accel;
+		while(true){ 
+			 accel = ramp_imu.get_accel();
+			misc.print("accel x: %f, y: %f, z :%f\n", accel.x, accel.y, accel.z);
+			delay(10);
+		}
+		
+	});
 //   run_auton();
   int time = millis();
 	switch(cur_auto){

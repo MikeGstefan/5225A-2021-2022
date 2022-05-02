@@ -32,7 +32,7 @@ pros::ADIAnalogIn f_lift_pot(8), b_lift_pot(2);
 pros::ADIDigitalIn intk_t(1);
 pros::Distance b_dist(11), f_dist(6);
 pros::Distance r_reset_dist(11), l_reset_dist(12);
-pros::Distance r_dist(16), l_dist(18);
+pros::Distance r_dist(14), l_dist(18);
 pros::Distance hitch_dist(7);
 // pros::ADIDigitalIn intake_jam({{16, 7}});
 

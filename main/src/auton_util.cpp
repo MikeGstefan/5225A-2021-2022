@@ -23,7 +23,9 @@ void save_positions(){
 
   wait_until(false){
     if(master.get_digital_new_press(DIGITAL_L1)){
-      tracking.reset(pos1);
+      // pos1.
+      tracking.reset(141.0 - reset_dist_r.get_dist(), pos1.y, pos1.angle);
+      // tracking.reset(pos1);
       break;
     }
     if(master.get_digital_new_press(DIGITAL_R1)){
@@ -157,6 +159,18 @@ void f_detect_goal(bool safety){
   f_claw(1);
 }
 
+void detect_hitch(){
+  wait_until(!tracking.move_complete);
+  int count = 0;
+  while( count < 4 && !tracking.move_complete){
+    if(hitch_dist.get() < 25)count++;
+    else count = 0;
+    misc.print("looking for goal at front: %d", hitch_dist.get());
+    delay(33);
+  }
+  misc.print("Detected %d", hitch_dist.get());
+  hitch.set_state(1);
+}
 
 void detect_interference(){ 
   int time = millis();

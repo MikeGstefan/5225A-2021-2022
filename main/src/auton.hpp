@@ -36,6 +36,7 @@ void high_wp_goal();
 void high_line();
 void high_tall();
 void high_plus();
+void high_awp();
 void high_match_loads();
 
 void select_auton();
