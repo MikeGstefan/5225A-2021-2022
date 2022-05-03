@@ -128,8 +128,9 @@ void B_Lift::handle(bool driver_array){
       else{
         if(!intk_t.get_value())intk_jam_count++;
         else intk_jam_count = 0;
-        if(intk_jam_count == 4){
+        if(intk_jam_count == 10){
           intake_safe.reset(false);
+          intk_jam_count = 0;
           Subsystem::set_state(b_lift_states::intk_jam);
           
         }

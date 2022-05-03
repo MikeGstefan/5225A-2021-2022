@@ -119,6 +119,11 @@ void opcontrol() {
   // f_lift.set_state(f_lift_states::move_to_target, 1);
   while(!master.get_digital_new_press(DIGITAL_A))delay(10);
   int time = millis();
+//   b_lift.Subsystem::set_state(b_lift_states::intake_on);
+//   move_start(move_types::tank_point, tank_point_params({0.0, 40.0, 0.0}, false, 60.0),false);
+//   f_detect_goal();
+//   move_stop();
+//   drivebase.brake();
   // b_lift.set_state(b_lift_states::move_to_target, b_top);
   // hitch.set_state(0);
   // while(b_lift.get_target_state() != b_lift_states::top)delay(10);
@@ -134,11 +139,11 @@ void opcontrol() {
   // detect_hitch();
   // move_stop();
   // drivebase.brake();
-  skills();
-  skills2();
-  skills3();
+//   skills();
+//   skills2();
+//   skills3();
   skills4();
-  skills_park();
+//   skills_park();
   master.print(0,0, "FULL : %D", millis()- time);
   while(true)delay(10);
 
