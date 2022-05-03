@@ -336,7 +336,7 @@ void high_awp(){
   move_start(move_types::tank_point, tank_point_params({20.0, 15.0, -90.0}, false));
   move_start(move_types::turn_angle, turn_angle_params(angle_to_point(40.0, 12.0) +180));
   move_start(move_types::tank_point, tank_point_params({40.0, 12.0, -90.0}, false, 60.0), false);
-   detect_hitch();
+   detect_hitch(45, 1);
   move_stop();
   drivebase.brake();
   b_lift.Subsystem::set_state(b_lift_states::intake_on);
@@ -369,25 +369,23 @@ void high_plus(){
 }
 
 void high_tall(){ 
+  //? goal and plus
+  int time = millis();
   b_claw_obj.set_state(b_claw_states::tilted);
   f_claw_obj.set_state(f_claw_states::grabbed);
   hitch_obj.set_state(hitch_states::grabbed);
-  move_start(move_types::tank_rush, tank_rush_params({69.5, 70.5, -45.0}, false, 127.0, 1.0,false, 180.0));
-  delay(100);
-  move_start(move_types::turn_angle, turn_angle_params(20.0, true, true, 15.0, 0.0,10.0,20.0,127.0,1000));
-  // delay(2000);
-  // move_start(move_types::turn_angle, turn_angle_params(15.0, true, true, 15.0));
+  move_start(move_types::tank_rush, tank_rush_params({72.0, 70.5, 0.0}, false, 127.0, 1.0,false));
+  // drivebase.brake();
+  drivebase.move(0.0,0.0);
+  delay(300);
+  drivebase.brake();
+  delay(300);
   high_wp_goal();
-  high_line();
-  high_match_loads();
-  // move_start(move_types::tank_point, tank_point_params({107.0, 35.0,0.0}));
-  // // move_start(move_types::tank_point, tank_point_params({107.0, 35.0,0.0}), false);
-  // move_start(move_types::turn_angle, turn_angle_params(-90.0));
-  // // b_lift.Subsystem::set_state(b_lift_states::intake_on);
-  // move_start(move_types::tank_point, tank_point_params({68.0, 48.0,0.0}, false,70));
-  // b_claw_obj.set_state(b_claw_states::tilted);
-  // f_claw_obj.set_state(f_claw_states::grabbed);
-  // hitch_obj.set_state(hitch_states::grabbed);
+  high_awp();
+  while(millis() - time  < 14900)delay(10);
+  hitch.set_state(0);
+  b_lift.Subsystem::set_state(b_lift_states::intake_off);
+  // high_line();
 }
 
 

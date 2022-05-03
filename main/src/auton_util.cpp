@@ -44,7 +44,7 @@ void save_positions(){
     tracking_imp.print("Saving X: %f, Y:%f, A:%f", tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle));
     master.clear();
     master.print(0, 0, "Saving");
-    master.print(1, 0, "(%.2f, %.2f, %.2f)", tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle));
+    master.print(1, 0, "(%.1f, %.1f, %.1f)", tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle));
     
     ofstream file;
     Data::log_t.data_update();
@@ -159,11 +159,11 @@ void f_detect_goal(bool safety){
   f_claw(1);
 }
 
-void detect_hitch(){
+void detect_hitch(int thresh, int cycles){
   wait_until(!tracking.move_complete);
   int count = 0;
-  while( count < 4 && !tracking.move_complete){
-    if(hitch_dist.get() < 25)count++;
+  while( count < cycles && !tracking.move_complete){
+    if(hitch_dist.get() < thresh)count++;
     else count = 0;
     misc.print("looking for goal at front: %d", hitch_dist.get());
     delay(33);
