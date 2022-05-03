@@ -318,12 +318,13 @@ void high_wp_goal(){
 }
 
 void high_awp(){ 
-  move_start(move_types::tank_point,tank_point_params({15.0, 37.0, -90.0}), false);
+  move_start(move_types::turn_angle, turn_angle_params(angle_to_point(15.0, 36)));
+  move_start(move_types::tank_point,tank_point_params({15.0, 38.0, -90.0}), false);
   f_lift.set_state(f_lift_states::move_to_target, 4);
   while(tracking.x_coord> 25.0)delay(10);
   // b_lift.set_state(b_lift_states::move_to_target, b_top);
   
-  move_start(move_types::tank_point,tank_point_params({15.0, 37.0, -90.0}, false, 60.0));
+  move_start(move_types::tank_point,tank_point_params({15.0, 38.0, -90.0}, false, 60.0, 1.0, true, 6.4, 70.0, 0.0, 0, {5.0, 0.5}));
   // while(tracking.x_coord> 6.0)delay(10);
   flatten_against_wall();
   delay(100); //

@@ -121,6 +121,8 @@ void autonomous() {
 bool timer_state = 0; 
 int timer = millis();
 void opcontrol() {
+	// drivebase.move(127.0,0.0);
+	// while(true)delay(10);
 	move_t.kill();
 	printf("just entered driver\n");
 	if(!robot_setup){
