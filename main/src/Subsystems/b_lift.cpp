@@ -121,21 +121,21 @@ void B_Lift::handle(bool driver_array){
 
       printf("vel:%lf\n", motor.get_actual_velocity());
       // printf("sensor: %d, count:%d\n", intk_t.get_value(), intk_jam_count);
-      if(fabs(motor.get_actual_velocity()) < 5.0) not_moving_count++;
-      else not_moving_count = 0;
-      if(not_moving_count > 10 && intk_t.get_value() && reached_max_vel){  // safety out
-        state_log.print("INTAKE SAFETIED OFF, NOT MOVING | count: %d\n", not_moving_count);
-        not_moving_count = 0;
-        Subsystem::set_state(b_lift_states::intake_off);
-      }
-      if(!intk_t.get_value())intk_jam_count++;
-      else intk_jam_count = 0;
-      if(intk_jam_count >= 4){
-        intake_safe.reset(false);
-        state_log.print("INTAKE JAM DETECTED SAFETIED OFF | jam count: %d\n", intk_jam_count);
-        intk_jam_count = 0;
-        Subsystem::set_state(b_lift_states::intk_jam);
-      }
+      // if(fabs(motor.get_actual_velocity()) < 5.0) not_moving_count++;
+      // else not_moving_count = 0;
+      // if(not_moving_count > 10 && intk_t.get_value() && reached_max_vel){  // safety out
+      //   state_log.print("INTAKE SAFETIED OFF, NOT MOVING | count: %d\n", not_moving_count);
+      //   not_moving_count = 0;
+      //   Subsystem::set_state(b_lift_states::intake_off);
+      // }
+      // if(!intk_t.get_value())intk_jam_count++;
+      // else intk_jam_count = 0;
+      // if(intk_jam_count >= 4){
+      //   intake_safe.reset(false);
+      //   state_log.print("INTAKE JAM DETECTED SAFETIED OFF | jam count: %d\n", intk_jam_count);
+      //   intk_jam_count = 0;
+      //   Subsystem::set_state(b_lift_states::intk_jam);
+      // }
 
 
       if(not_moving_count > 10 && !reached_max_vel){
@@ -146,7 +146,7 @@ void B_Lift::handle(bool driver_array){
         intake_safe.reset(false);
       }
       // printf("current:%lf\n", motor.get_actual_velocity());
-      else{
+      // else{
         if(!intk_t.get_value())intk_jam_count++;
         else intk_jam_count = 0;
         if(intk_jam_count == 10){
@@ -155,7 +155,7 @@ void B_Lift::handle(bool driver_array){
           Subsystem::set_state(b_lift_states::intk_jam);
           
         }
-      }
+      // }
       printf("sensor: %d\n", intk_t.get_value());
       break;
 
