@@ -135,10 +135,10 @@ void opcontrol() {
   // move_stop();
   // drivebase.brake();
   skills();
-//   skills2();
-//   skills3();
-//   skills4();
-//   skills_park();
+  skills2();
+  skills3();
+  skills4();
+  skills_park();
   master.print(0,0, "FULL : %D", millis()- time);
   while(true)delay(10);
 
