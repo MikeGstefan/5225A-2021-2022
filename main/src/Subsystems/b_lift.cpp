@@ -104,8 +104,6 @@ void B_Lift::handle(bool driver_array){
         if(hitch_obj.get_state() != hitch_states::grabbed){
           hitch_obj.set_state(hitch_states::grabbed);
         }
-        // if the goal is detected, don't power the lift
-        if(hitch_dist.get() < 25) lift_power = 0;
       }
 
       motor.move_velocity(lift_power);
@@ -115,10 +113,33 @@ void B_Lift::handle(bool driver_array){
       break;
 
     case b_lift_states::intake_on:
-      // printf("vel:%lf\n", motor.get_actual_velocity());
+      printf("at_max_vel_counter: %d, reached_max_vel: %d\n", at_max_vel_counter, reached_max_vel);
+      if(fabs(motor.get_actual_velocity()) > 80 && !reached_max_vel)  at_max_vel_counter++;
+      else at_max_vel_counter = 0;
+
+      if(at_max_vel_counter >= 5) reached_max_vel = true;
+
+      printf("vel:%lf\n", motor.get_actual_velocity());
+      // printf("sensor: %d, count:%d\n", intk_t.get_value(), intk_jam_count);
       if(fabs(motor.get_actual_velocity()) < 5.0) not_moving_count++;
       else not_moving_count = 0;
-      if(intake_safe.get_time() < 300 && not_moving_count > 20){
+      if(not_moving_count > 10 && intk_t.get_value() && reached_max_vel){  // safety out
+        state_log.print("INTAKE SAFETIED OFF, NOT MOVING | count: %d\n", not_moving_count);
+        not_moving_count = 0;
+        Subsystem::set_state(b_lift_states::intake_off);
+      }
+      if(!intk_t.get_value())intk_jam_count++;
+      else intk_jam_count = 0;
+      if(intk_jam_count >= 4){
+        intake_safe.reset(false);
+        state_log.print("INTAKE JAM DETECTED SAFETIED OFF | jam count: %d\n", intk_jam_count);
+        intk_jam_count = 0;
+        Subsystem::set_state(b_lift_states::intk_jam);
+      }
+
+
+      if(not_moving_count > 10 && !reached_max_vel){
+        state_log.print("INTAKE SHIFT FAILED, SAFETIED OFF | not_moving_count: %d\n", not_moving_count);
         not_moving_count = 0;
         after_shift_state = b_lift_states::reshift;
         shift(TRANS_LIFT_STATE); // shifts to lift
@@ -205,13 +226,19 @@ void B_Lift::handle_state_change(){
 
     case b_lift_states::intake_on:
       intake_safe.reset();
+      reached_max_vel = false;
+      at_max_vel_counter = 0;
+      not_moving_count = 0;
       motor.move(-127);
       break;
+
     case b_lift_states::intk_jam:
+      intk_jam_count = 0; // resets jam counter
       jam_time= millis();
       motor.move(127);
       printf("AHHHHHHHHHHHHHH here \n\n\n\n");
       break;
+    
     case b_lift_states::intake_reversed:
       motor.move(127);
       break;

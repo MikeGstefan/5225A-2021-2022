@@ -5,13 +5,13 @@
 // lift buttons
 controller_digital_e_t lift_up_button = DIGITAL_R1;
 controller_digital_e_t lift_down_button = DIGITAL_R2;
+controller_digital_e_t joy_mode_switch_button = DIGITAL_Y; // switches between manual and automatic
 
 controller_digital_e_t reverse_drive_button = DIGITAL_L1;
 controller_digital_e_t claw_toggle_button =  DIGITAL_L2;
 controller_digital_e_t hitch_button = DIGITAL_A;
 
 // intake buttons
-controller_digital_e_t speed_limit_button = DIGITAL_Y;
 controller_digital_e_t intake_button = DIGITAL_B;
 controller_digital_e_t intake_reverse_button = DIGITAL_DOWN;
 

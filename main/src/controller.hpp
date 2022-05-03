@@ -15,13 +15,13 @@ using namespace pros;
 // lift buttons
 extern controller_digital_e_t lift_up_button;
 extern controller_digital_e_t lift_down_button;
+extern controller_digital_e_t joy_mode_switch_button;
 
 extern controller_digital_e_t reverse_drive_button;
 extern controller_digital_e_t claw_toggle_button;
 extern controller_digital_e_t hitch_button;
 
 // intake buttons
-extern controller_digital_e_t speed_limit_button;
 extern controller_digital_e_t intake_button;
 extern controller_digital_e_t intake_reverse_button;
 
