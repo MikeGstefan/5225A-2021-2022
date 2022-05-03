@@ -113,6 +113,9 @@ void opcontrol() {
   hitch.set_state(1);
   delay(500);
   b_lift.set_state(b_lift_states::move_to_target, 0);
+  while(b_lift.get_target_state() != b_lift_states::bottom)delay(10);
+  b_lift.Subsystem::set_state(b_lift_states::intake_on);
+  b_lift.Subsystem::set_state(b_lift_states::intake_off);
   // f_lift.set_state(f_lift_states::move_to_target, 1);
   while(!master.get_digital_new_press(DIGITAL_A))delay(10);
   int time = millis();
@@ -132,10 +135,10 @@ void opcontrol() {
   // move_stop();
   // drivebase.brake();
   skills();
-  skills2();
-  skills3();
-  skills4();
-  skills_park();
+//   skills2();
+//   skills3();
+//   skills4();
+//   skills_park();
   master.print(0,0, "FULL : %D", millis()- time);
   while(true)delay(10);
 

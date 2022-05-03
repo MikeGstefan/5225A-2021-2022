@@ -35,7 +35,7 @@ void skills(){
   // move_start(move_types::turn_point, turn_point_params({36.5, 72.0})); 
   // delay(50); 
 	move_start(move_types::tank_point, tank_point_params({47.0,109.0,  20.0},false, 127.0,1.0,true),false);// drive throught neut goal 
-  f_detect_goal(); 
+  f_detect_goal(50); 
   skills_d.print("first neutral got %d\n", millis() - time);
   // f_lift.move_absolute(900,200); 
   Task([](){
@@ -61,20 +61,27 @@ void skills(){
   while(f_lift.get_target_state() != f_lift_states::idle)delay(10);
   delay(100);
   f_claw(0);
-  delay(100);
+  drivebase.move(60.0,0.0);
+  delay(250);
+  drivebase.move(-60.0,0.0);
+  delay(200);
   f_lift.set_state(f_lift_states::move_to_target, f_backup);
   move_start(move_types::tank_point, tank_point_params(polar_to_vector_point(tracking.x_coord, tracking.y_coord, -2.0, rad_to_deg(tracking.global_angle), rad_to_deg(tracking.global_angle)),false, 127.0,1.0,true, 9.0, 70.0, 0.0, 800, {1.0, 0.5}));
   // delay(100);
   
-  move_start(move_types::turn_angle, turn_angle_params(210, true, false));
+  move_start(move_types::turn_angle, turn_angle_params(170, true, false));
   delay(100);
   b_lift.set_state(b_lift_states::move_to_target, b_plat);
   while(b_lift.get_target_state() != b_lift_states::idle)delay(10);
   delay(100);
+  move_start(move_types::turn_angle, turn_angle_params(200, true, false, 6.0, 0.0, 10.0, 20.0, 127.0, 0, 127.0));
   // b_claw.set_state(0);
+  // return;
   tilt_lock.set_state(0);
   b_lift.set_state(b_lift_states::move_to_target, b_backup);
-  move_start(move_types::tank_point, tank_point_params({54.0,110.0, 210},false, 127.0,1.0,true, 7.0, 70.0, 0.0, 800));
+  drivebase.move(60.0, 0.0);
+  while(tracking.y_coord > 109)delay(10);
+  // move_start(move_types::tank_point, tank_point_params({54.0,110.0, 210},false, 127.0,1.0,true, 7.0, 70.0, 0.0, 800));
   // f_lift.set_state(f_lift_states::move_to_target, f_top);
   f_lift.set_state(f_lift_states::move_to_target,0);
   b_lift.set_state(b_lift_states::move_to_target,b_top);
