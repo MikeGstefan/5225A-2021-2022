@@ -19,15 +19,17 @@
 #define f_carry 2 
 #define f_plat 3
 #define f_backup 4 
-#define f_push 5
-#define f_level 6 
-#define f_top 7
+#define f_clear 5
+#define f_push 6
+#define f_level 7 
+#define f_top 8
 #define b_bottom 0
 #define b_park 1
-#define b_plat 2
-#define b_backup 3 
-#define b_level 4
-#define b_top 5
+#define b_low_plat 2
+#define b_plat 3
+#define b_backup 4 
+#define b_level 5
+#define b_top 6
 void skills();
 void skills2();
 void skills3();

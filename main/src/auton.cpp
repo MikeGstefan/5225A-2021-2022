@@ -200,8 +200,8 @@ void skills3(){
   // while(b_lift.get_target_state() != b_lift_states::idle)delay(10);
 
 
-  // time = millis();
-  // flatten_against_wall(false);
+  time = millis();
+  flatten_against_wall(false);
 
 
   time = millis();
@@ -214,27 +214,50 @@ void skills3(){
 
   move_start(move_types::tank_point, tank_point_params({118.0, tracking.y_coord, -90}), false);
   while(tracking.x_coord > 123.0)delay(10);
-  // b_lift.set_state(b_lift_states::move_to_target, 0);
+  b_lift.set_state(b_lift_states::move_to_target, 0);
   // Task([](){
     
   // });
   move_wait_for_complete();
-  move_start(move_types::turn_angle, turn_angle_params(angle_to_point(85.0,111.0), true, true,6.0));
-  // while(b_lift.get_target_state() != b_lift_states::bottom)delay(10);
-  //   b_lift.Subsystem::set_state(b_lift_states::intake_on);
+  move_start(move_types::turn_angle, turn_angle_params(0.0, true, true));
+  while(b_lift.get_target_state() != b_lift_states::bottom)delay(10);
+    b_lift.Subsystem::set_state(b_lift_states::intake_on);
+    f_lift.set_state(f_lift_states::move_to_target, f_clear);
+  move_start(move_types::tank_point,tank_point_params({ 118.0, 70.0, 0.0}, false, 80.0));
+  move_start(move_types::tank_point, tank_point_params({83.0, 111.0, 0.0}, false, 127.0, 1.0,true,6.7,120.0, 0.0,0,{0.5,0.5}, min_move_power_y + 15));
+    // return;
   // move_start(move_types::tank_point, tank_point_params({116.0, 80.0, 0.0}, false, 80.0), false);
   // while(tracking.y_coord < 65.0)delay(10);
   // move_start(move_types::tank_arc, tank_arc_params({116.0, 70.0},{92.0, 95.0,-80.0}));
   // move_start(move_types::tank_point, tank_point_params({72.0, 97.0, -90.0}, false, 80.0, 1.0, true, 6.4,70.0,0.0, 0, {5.0,0.5}));
   // move_start(move_types::tank_point, tank_point_params({95.0, 95.0, -40.0}));
-  b_lift.set_state(b_lift_states::move_to_target, b_backup);
-  f_lift.set_state(f_lift_states::move_to_target, f_push);
-  tilt_goal();
+  // b_lift.set_state(b_lift_states::move_to_target, b_backup);
+  
+  // tilt_goal();
   // return;
   // move_start(move_types::turn_angle, turn_angle_params(-140.0));
-  move_start(move_types::tank_point, tank_point_params({85.0, 111.0, 0.0}, false, 127.0, 1.0,true,6.7,120.0, 0.0,0,{0.5,0.5}, min_move_power_y + 15));
+  // move_start(move_types::tank_point, tank_point_params({85.0, 111.0, 0.0}, false, 127.0, 1.0,true,6.7,120.0, 0.0,0,{0.5,0.5}, min_move_power_y + 15));
   //
+  b_lift.set_state(b_lift_states::move_to_target, b_low_plat);
   f_claw(0);
+  f_lift.Subsystem::set_state(f_lift_states::managed);
+  f_lift.motor.move(-60);
+  // PID f_lift_pid = PID(3.0,0.0,0.0,0.0);
+  while(f_lift_pot.get_value() > 1980)delay(10);
+  f_lift.motor.move(0);
+  move_start(move_types::tank_point, tank_point_params({84.0, 109.0, 0.0}, false, 127.0, 1.0,true,6.7,120.0, 0.0,0,{0.5,0.5}, min_move_power_y));
+
+   master.print(1,1,"time %d", millis()-time);
+   tilt_goal();
+   move_start(move_types::turn_angle, turn_angle_params(-180.0, true, false, 6.0, 0.0,10.0, 20.0, 127.0, 0, min_move_power_a + 25));
+   tilt_lock.set_state(0);
+   move_start(move_types::turn_angle, turn_angle_params(-270.0, true, false, 6.0, 0.0,10.0, 20.0, 127.0, 0, min_move_power_a + 25));
+   b_lift.set_state(b_lift_states::move_to_target, 0);
+   move_start(move_types::tank_point, tank_point_params({123.0, 125.0, 60.0}, false,127.0, 1.0, true, 6.4, 100.0, 0.0,0,{5.0,0.5})); 
+  move_start(move_types::turn_angle, turn_angle_params(90.0)); 
+  flatten_against_wall();
+  master.print(1,1,"time %d", millis()-time);
+  return;
   move_start(move_types::tank_point, tank_point_params({86.0, 109.0, 0.0}, false, 127.0, 1.0,true,6.7,120.0, 0.0,0,{0.5,0.5}, min_move_power_y + 25));
   move_start(move_types::turn_angle, turn_angle_params(130.0, true, false));
   move_start(move_types::tank_point, tank_point_params({84.0, 111.0, 0.0}, false, 127.0, 1.0,true,6.7,120.0, 0.0,0,{0.5,0.5}, min_move_power_y + 25));
@@ -245,7 +268,7 @@ void skills3(){
   move_start(move_types::tank_point, tank_point_params({123.0, 126.0, 60.0}, false,127.0, 1.0, true, 6.4, 100.0, 0.0,0,{5.0,0.5})); 
   move_start(move_types::turn_angle, turn_angle_params(90.0)); 
   flatten_against_wall();
-  master.print(0,0,"time %d", millis()-time);
+  master.print(1,1,"time %d", millis()-time);
   return;
 
   move_start(move_types::turn_angle, turn_angle_params(-170.0, true,true, 10.0, 0.0,10.0,20.0,127.0));

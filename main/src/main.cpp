@@ -109,7 +109,7 @@ void opcontrol() {
 	// b_claw.set_state(HIGH);
   // hitch.set_state(HIGH);
   // tilt_lock.set_state(LOW);
-
+	master.clear();
   hitch.set_state(1);
   delay(500);
   b_lift.set_state(b_lift_states::move_to_target, 0);
