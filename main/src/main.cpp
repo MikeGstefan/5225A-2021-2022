@@ -106,7 +106,8 @@ void autonomous() {
   int time = millis();
 	switch(cur_auto){
 		case auto1: //
-			high_short();
+			// high_short();
+			low_short();
 		break;
 		case auto2: 
 			high_tall();
@@ -133,9 +134,9 @@ void opcontrol() {
 		delay(500);
 		robot_setup = true;
 		printf("just finished setup driver\n");
-		while(!master.get_digital_new_press(DIGITAL_A))delay(10);
-		b_lift.Subsystem::set_state(b_lift_states::intake_on);
-		b_lift.Subsystem::set_state(b_lift_states::intake_off);
+		// while(!master.get_digital_new_press(DIGITAL_A))delay(10);
+		// b_lift.Subsystem::set_state(b_lift_states::intake_on);
+		// b_lift.Subsystem::set_state(b_lift_states::intake_off);
 	}
 	// state_
 

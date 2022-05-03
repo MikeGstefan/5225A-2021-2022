@@ -38,6 +38,7 @@ void high_tall();
 void high_plus();
 void high_awp();
 void high_match_loads();
+void low_short();
 
 void select_auton();
 void run_auton();

@@ -37,6 +37,10 @@ extern controller_digital_e_t shift_button;
 
 // partner buttons
 
+
+
+extern controller_digital_e_t left_pos_btn;
+
 // lift buttons
 
 extern controller_digital_e_t partner_back_lift_up_button;

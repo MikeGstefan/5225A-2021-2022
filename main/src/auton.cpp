@@ -388,6 +388,29 @@ void high_tall(){
   // high_line();
 }
 
+void low_short(){
+  int time = millis();
+  b_claw_obj.set_state(b_claw_states::tilted);
+  f_claw_obj.set_state(f_claw_states::grabbed);
+  hitch_obj.set_state(hitch_states::grabbed);
+  move_start(move_types::tank_rush, tank_rush_params({36.0, 70.5, 0.0}, false, 127.0, 1.0,false));
+  drivebase.move(0.0,0.0);
+  delay(300);
+  drivebase.brake();
+  delay(300);
+  move_start(move_types::tank_point, tank_point_params({24.0, 14.0, 90.0}));
+  f_lift.set_state(f_lift_states::move_to_target, 1);
+  move_start(move_types::turn_angle, turn_angle_params(angle_to_point(40.0, 12.0) +180));
+  move_start(move_types::tank_point, tank_point_params({40.0, 12.0, -90.0}, false, 40.0), false);
+  //  detect_hitch(45, 1);
+  b_detect_goal();
+  move_stop();
+  drivebase.brake();
+  b_lift.Subsystem::set_state(b_lift_states::intake_on);
+  move_start(move_types::tank_point, tank_point_params({25.0, 12.0, -90.0}));
+
+}
+
 
 
 //name, target, common point, task at target, angle to go to target

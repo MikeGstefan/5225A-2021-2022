@@ -20,8 +20,12 @@ controller_digital_e_t intake_reverse_button = DIGITAL_DOWN;
 // misc buttons
 controller_digital_e_t ok_button = DIGITAL_A;
 controller_digital_e_t auton_select = DIGITAL_UP;
+
 // controller_digital_e_t joy_mode_switch_button = DIGITAL_Y;
 controller_digital_e_t shift_button = DIGITAL_X;
+
+
+controller_digital_e_t left_pos_btn = DIGITAL_LEFT;
 
 // partner buttons
 

@@ -16,10 +16,10 @@ void f_claw(bool state){
 
 
 void save_positions(){
-  Position pos1 (110.0, 8.5, 0.0), pos2 (8.75, 15.5, 0);
+  Position pos1 (110.0, 8.5, 0.0), pos2 (20, 8.5, 0.0);
   master.clear();
   master.print(0, 0, "L1:(%.1f, %.1f, %.1f)", pos1.x, pos1.y , pos1.angle);
-  master.print(1, 0, "R1:(%.1f, %.1f, %.1f)", pos2.x, pos2.y , pos2.angle);
+  master.print(1, 0, "LEFT:(%.1f, %.1f, %.1f)", pos2.x, pos2.y , pos2.angle);
 
   wait_until(false){
     if(master.get_digital_new_press(DIGITAL_L1)){
@@ -28,8 +28,9 @@ void save_positions(){
       // tracking.reset(pos1);
       break;
     }
-    if(master.get_digital_new_press(DIGITAL_R1)){
-      tracking.reset(pos2);
+    if(master.get_digital_new_press(left_pos_btn)){
+      tracking.reset(reset_dist_l.get_dist(), pos1.y, pos1.angle);
+      // tracking.reset(pos2);
       break;
     }
   }
