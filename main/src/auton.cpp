@@ -49,6 +49,7 @@ void skills(){
     delay(200);
     f_lift.set_state(f_lift_states::move_to_target, f_top);
     b_lift.set_state(b_lift_states::move_to_target, b_backup);
+    delay(300);
     tilt_goal();
   });
   
@@ -98,7 +99,7 @@ void skills(){
   // f_lift.set_state(f_lift_states::move_to_target, f_top);
   f_lift.set_state(f_lift_states::move_to_target,0);
   
-  move_start(move_types::turn_angle, turn_angle_params(-90, true));
+  move_start(move_types::turn_angle, turn_angle_params(-90, true, true, 5.0, 0.0, 10.0, 20.0, 127.0, 0, min_move_power_a,3.0));
   b_lift.set_state(b_lift_states::move_to_target,b_top);
    move_start(move_types::tank_point, tank_point_params({128.0,118.0, 200},false, 127.0,1.0,true, 6.4, 70.0, 0.0, 0, {5.0, 0.5}));
    move_start(move_types::turn_angle, turn_angle_params(-90, true));
@@ -151,6 +152,7 @@ void skills2(){
   move_start(move_types::turn_angle, turn_angle_params(angle_to_point(130.0,35.0)+ 180));
   move_start(move_types::tank_point, tank_point_params({130.0, 35.0, 270.0}, false,90.0, 1.0,true,6.4,70.0,0.0), false);
   b_detect_goal();
+  delay(200);
   move_stop();
   drivebase.brake();
   move_start(move_types::tank_point, tank_point_params({112.0, 36.0, 270.0},false, 127.0,1.0,true, 6.4, 70.0, 0.0, 0, {5.0, 0.5}), false);
@@ -334,10 +336,10 @@ return;
 void skills4(){
   int time = millis();
   
-  f_lift.set_state(f_lift_states::move_to_target,f_top);
-  b_lift.set_state(b_lift_states::move_to_target,0);
-  while(f_lift.get_target_state() != f_lift_states::idle);
-  time = millis();
+  // f_lift.set_state(f_lift_states::move_to_target,f_top);
+  // b_lift.set_state(b_lift_states::move_to_target,0);
+  // while(f_lift.get_target_state() != f_lift_states::idle);
+  // time = millis();
 
 
   flatten_against_wall(true);

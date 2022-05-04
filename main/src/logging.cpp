@@ -36,7 +36,7 @@ Data graph("graph.txt","$09",general,log_locations::sd, term_colours::NONE, -1);
 Data state_log("state.txt", "$11", general,log_locations::both);
 Data ERROR("error.txt", "$12", error, log_locations::both, term_colours::ERROR);
 Data skills_d("skills.txt", "$13", general, log_locations::both);
-
+Data skills_t("skillst.txt", "$14", general, log_locations::both);
 
 vector<Data*> Data::get_objs(){
   return obj_list;

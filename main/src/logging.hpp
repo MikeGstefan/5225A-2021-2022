@@ -52,6 +52,7 @@ extern Data state_log;
 extern Data graph;
 extern Data skills_d;
 extern Data ERROR;
+extern Data skills_t;
 
 class Data{
 private:
