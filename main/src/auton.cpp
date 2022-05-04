@@ -151,10 +151,14 @@ void skills2(){
   move_start(move_types::tank_point, tank_point_params({103.0, 42.0, 180.0}, false,127.0,1.0,true, 6.4, 100.0,0.0,0,{6.0,0.5})); 
   move_start(move_types::turn_angle, turn_angle_params(angle_to_point(130.0,35.0)+ 180));
   move_start(move_types::tank_point, tank_point_params({130.0, 35.0, 270.0}, false,90.0, 1.0,true,6.4,70.0,0.0), false);
-  b_detect_goal();
-  delay(200);
+  b_detect_goal(false);
+  // delay(200);
   move_stop();
-  drivebase.brake();
+  // drivebase.brake();
+  drivebase.move(10.0,0.0);
+  delay(200);
+  b_claw.set_state(1);
+  delay(60);
   move_start(move_types::tank_point, tank_point_params({112.0, 36.0, 270.0},false, 127.0,1.0,true, 6.4, 70.0, 0.0, 0, {5.0, 0.5}), false);
   // delay(100);
   b_lift.set_state(b_lift_states::move_to_target, b_backup);
@@ -206,8 +210,8 @@ void skills3(){
   // while(b_lift.get_target_state() != b_lift_states::idle)delay(10);
 
 
-  time = millis();
-  flatten_against_wall(false);
+  // time = millis();
+  // flatten_against_wall(false);
 
 
   time = millis();
@@ -342,10 +346,10 @@ void skills4(){
   // time = millis();
 
 
-  flatten_against_wall(true);
-  f_claw(0);
-  b_claw.set_state(0);
-  tilt_lock.set_state(0);
+  // flatten_against_wall(true);
+  // f_claw(0);
+  // b_claw.set_state(0);
+  // tilt_lock.set_state(0);
 
 
   time = millis();

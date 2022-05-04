@@ -122,14 +122,14 @@ void flatten_against_wall(bool front, int cycles){
   
 // }
 
-void b_detect_goal(){ 
+void b_detect_goal(bool close){ 
   wait_until(!tracking.move_complete);
   while(b_dist.get() > 47 && !tracking.move_complete){ 
     misc.print("looking for goal at back: %d", b_dist.get());
     delay(33);
   }
   misc.print("Detected %d", b_dist.get());
-  b_claw.set_state(1);
+  if(close)b_claw.set_state(1);
 }
 
 void tilt_goal(){
