@@ -135,19 +135,19 @@ void B_Lift::handle(bool driver_array){
       // printf("sensor: %d, count:%d\n", intk_t.get_value(), intk_jam_count);
       if(fabs(motor.get_actual_velocity()) < 5.0) not_moving_count++;
       else not_moving_count = 0;
-      if(not_moving_count > 10 && intk_t.get_value() && reached_max_vel){  // safety out
-        state_log.print("INTAKE SAFETIED OFF, NOT MOVING | count: %d\n", not_moving_count);
-        not_moving_count = 0;
-        Subsystem::set_state(b_lift_states::intake_off);
-      }
-      if(!intk_t.get_value())intk_jam_count++;
-      else intk_jam_count = 0;
-      if(intk_jam_count >= 4){
-        intake_safe.reset(false);
-        state_log.print("INTAKE JAM DETECTED SAFETIED OFF | jam count: %d\n", intk_jam_count);
-        intk_jam_count = 0;
-        Subsystem::set_state(b_lift_states::intk_jam);
-      }
+      // if(not_moving_count > 10 && intk_t.get_value() && reached_max_vel){  // safety out
+      //   state_log.print("INTAKE SAFETIED OFF, NOT MOVING | count: %d\n", not_moving_count);
+      //   not_moving_count = 0;
+      //   Subsystem::set_state(b_lift_states::intake_off);
+      // }
+      // if(!intk_t.get_value())intk_jam_count++;
+      // else intk_jam_count = 0;
+      // if(intk_jam_count >= 4){
+      //   intake_safe.reset(false);
+      //   state_log.print("INTAKE JAM DETECTED SAFETIED OFF | jam count: %d\n", intk_jam_count);
+      //   intk_jam_count = 0;
+      //   Subsystem::set_state(b_lift_states::intk_jam);
+      // }
 
 
       if(not_moving_count > 10 && !reached_max_vel){
@@ -228,7 +228,8 @@ void B_Lift::handle_state_change(){
       reached_max_vel = false;
       at_max_vel_counter = 0;
       not_moving_count = 0;
-      motor.move(-127);
+      if(b_lift_pot.get_value() < 1600)motor.move(-127);
+      else motor.move(-100);
       break;
 
     case b_lift_states::intk_jam:
@@ -314,6 +315,9 @@ void B_Lift::handle_shift(){
         break;        
       case b_lift_states::manual:
         shift(TRANS_LIFT_STATE);
+        break;
+        case b_lift_states::park_position:
+          shift(TRANS_LIFT_STATE);
         break;
     }
   }
