@@ -236,7 +236,7 @@ void Drivebase::handle_input(){
   tracking.power_y = drivers[cur_driver].custom_drives[1].lookup(master.get_analog(ANALOG_LEFT_Y));
   // caps drive speed at 40 if intake is on
   // if(b_lift.get_state() == b_lift_states::intake_on || b_lift.get_state() == b_lift_states::intk_jam){
-  if(master.is_rising(speed_limit_button)) speed_limit_activated = !speed_limit_activated;
+  // if(master.is_rising(speed_limit_button)) speed_limit_active = !speed_limit_active;
 
   if(speed_limit_activated){
     if(buzz_timer.get_time() > 50){
@@ -429,7 +429,7 @@ bool get_lift(){
 
 void handle_lift_buttons(){
   // if(master.is_rising(joy_mode_switch_button) || partner.is_rising(partner_joy_mode_switch_button)){
-    if(partner.is_rising(partner_joy_mode_switch_button)){
+    if(master.is_rising(joy_mode_switch_button) || partner.is_rising(partner_joy_mode_switch_button)){
     // toggles joy_mode
     if(joy_mode == joy_modes::lift_select)  joy_mode = joy_modes::manual;
     else joy_mode = joy_modes::lift_select;
@@ -647,7 +647,7 @@ void handle_claw_buttons(){
   // toggles open/closed when hitch button is pressed
   if(master.is_rising(hitch_button) || partner.is_rising(partner_hitch_button)){
     // hitch.toggle_state();
-    if(hitch_obj.get_state() == hitch_states::grabbed) hitch_obj.set_state(hitch_states::about_to_search);
+    if(hitch_obj.get_state() == hitch_states::grabbed) hitch_obj.set_state(hitch_states::idle);
     else hitch_obj.set_state(hitch_states::grabbed);
   }
 
