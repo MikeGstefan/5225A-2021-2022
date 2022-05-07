@@ -106,12 +106,50 @@ void autonomous() {
   int time = millis();
 	switch(cur_auto){
 		case auto1: //
-			// high_short();
-			low_short();
+			high_short();
+      // move_start(move_types::tank_point, tank_point_params({}))
+      move_start(move_types::tank_point, tank_point_params({98.0, 35.0,0.0}, false, 127.0, 1.0, true, 6.4, 70.0, 0.0, 2000, {5.0, 1.0} )); 
+			// low_short();
+      // while(millis() - time  < 14900)delay(10);
+      // hitch.set_state(0);
+      delay(1000);
+      tilt_goal();
+      b_lift.Subsystem::set_state(b_lift_states::intake_off);
 		break;
 		case auto2: 
 			high_tall();
+      // move_start(move_types::tank_point, tank_point_params({98.0, 35.0,0.0})); 
+      move_start(move_types::tank_point, tank_point_params({98.0, 35.0,0.0}, false, 127.0, 1.0, true, 6.4, 70.0, 0.0, 2000, {5.0, 1.0} ));
+      // while(millis() - time  < 14900)delay(10);
+      // hitch.set_state(0);
+      delay(1000);
+      tilt_goal();
+      b_lift.Subsystem::set_state(b_lift_states::intake_off);
 		break;
+    case auto3: //
+      low_short();
+      // while(millis() - time  < 14900)delay(10);
+      // hitch.set_state(0);
+      delay(1000);
+      tilt_goal();
+      b_lift.Subsystem::set_state(b_lift_states::intake_off);
+    break;
+    case auto4: //
+      high_short();
+      high_awp();
+      // while(millis() - time  < 14900)delay(10);
+      tilt_goal();
+      // hitch.set_state(0);
+      b_lift.Subsystem::set_state(b_lift_states::intake_off);
+    break;
+    case auto5: //
+      high_tall();
+      high_awp();
+      while(millis() - time  < 14900)delay(10);
+      tilt_goal();
+      hitch.set_state(0);
+      b_lift.Subsystem::set_state(b_lift_states::intake_off);
+    break;
 	}
   master.print(2,2,"time: %d", millis() - time);
 	
@@ -124,6 +162,7 @@ void opcontrol() {
 	// drivebase.move(127.0,0.0);
 	// while(true)delay(10);
 	move_t.kill();
+	drivebase.set_reverse(false);
 	printf("just entered driver\n");
 	if(!robot_setup){
 		hitch.set_state(1);

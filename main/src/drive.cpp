@@ -677,3 +677,9 @@ void handle_intake_buttons(){
     }
   }
 }
+
+
+
+void Drivebase::set_reverse(bool reverse_p){
+  reversed = reverse_p;
+}

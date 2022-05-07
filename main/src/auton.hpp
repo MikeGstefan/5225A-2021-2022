@@ -40,6 +40,7 @@ void high_awp();
 void high_match_loads();
 void low_short();
 
+
 void select_auton();
 void run_auton();
 void load_auton();
@@ -48,14 +49,20 @@ void load_auton();
 enum autos{
   auto1,
   auto2,
-  NUM_OF_ELEMENTS =2
+  auto3, 
+  auto4, 
+  auto5,
+  NUM_OF_ELEMENTS =5
 };
 
 extern autos cur_auto;
 
 const string auto_names[] = {
-  "high  ",
-  "center"
+  "high      ",
+  "center    ",
+  "low       ",
+  "high   AWP",
+  "center AWP"
 };
 
 void autonFile_read();

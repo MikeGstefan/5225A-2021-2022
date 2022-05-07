@@ -111,6 +111,8 @@ public:
   int get_deadzone();
   // bool get_lift_button(int side = 0);
 
+  void set_reverse(bool reverse);
+
   void reset();
 };
 

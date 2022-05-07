@@ -89,7 +89,7 @@ public:
    */
   template <typename... Params>
   void print(term_colours colour, std::string format, Params... args) const{
-    std::string str = sprintf2(format, args...) + "\n";
+    std::string str = std::to_string(millis()) + " | "+ sprintf2(format, args...) + "\n";
     // str = std::to_string(millis()) + " | ";
 
     int buffer_len = str.length() + 3;

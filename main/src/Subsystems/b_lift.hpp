@@ -54,8 +54,8 @@ class B_Lift: public Motorized_subsystem<b_lift_states, NUM_OF_B_LIFT_STATES, B_
 
   public:
     b_lift_states after_shift_state; // the state the subsystem will go to after transmission shifts
-    vector<int> driver_positions = {1045, 1720, 1825, 1970, 2800};
-    vector<int> prog_positions = {1045, 1720, 1825, 1970, 2800};
+    vector<int> driver_positions = {1045, 1720, 1825, 1970, 2650};
+    vector<int> prog_positions = {1045, 1720, 1825, 1970, 2650};
     const int park_position =1650 ;
     // bool 
 

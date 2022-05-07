@@ -370,7 +370,7 @@ void B_Lift::increment_index(){
 
 void B_Lift::decrement_index(){
   state_log.print("b_lift_decrement");
-  int cur_index = find_index();
+  int cur_index = find_index();//index;//find_index();//index;// find_index();
   printf("B_LIFT_CUR_INDEX: %d\n", cur_index);
   // if state is between_positions, go to the closest position that's lower than the current position
   if(cur_index == -1){
