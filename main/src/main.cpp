@@ -107,24 +107,31 @@ void autonomous() {
 	switch(cur_auto){
 		case auto1: //
 			high_short();
+	high_line();
       // move_start(move_types::tank_point, tank_point_params({}))
       move_start(move_types::tank_point, tank_point_params({98.0, 35.0,0.0}, false, 127.0, 1.0, true, 6.4, 70.0, 0.0, 2000, {5.0, 1.0} )); 
 			// low_short();
       // while(millis() - time  < 14900)delay(10);
       // hitch.set_state(0);
       delay(1000);
-      tilt_goal();
+    //   tilt_goal();
       b_lift.Subsystem::set_state(b_lift_states::intake_off);
 		break;
 		case auto2: 
-			high_tall();
-      // move_start(move_types::tank_point, tank_point_params({98.0, 35.0,0.0})); 
-      move_start(move_types::tank_point, tank_point_params({98.0, 35.0,0.0}, false, 127.0, 1.0, true, 6.4, 70.0, 0.0, 2000, {5.0, 1.0} ));
-      // while(millis() - time  < 14900)delay(10);
-      // hitch.set_state(0);
-      delay(1000);
-      tilt_goal();
-      b_lift.Subsystem::set_state(b_lift_states::intake_off);
+		delay(5000);
+		move_start(move_types::tank_point, tank_point_params({60.0, 80.0, 0.0}));
+		f_claw(0);
+		// f_claw_obj.set_state(f_claw_states::open_state);
+		 f_claw_obj.set_state(f_claw_states::grabbed);
+	// 		high_tall();
+	// 		high_line();
+    //   // move_start(move_types::tank_point, tank_point_params({98.0, 35.0,0.0})); 
+    //   move_start(move_types::tank_point, tank_point_params({98.0, 35.0,0.0}, false, 127.0, 1.0, true, 6.4, 70.0, 0.0, 2000, {5.0, 1.0} ));
+    //   // while(millis() - time  < 14900)delay(10);
+    //   // hitch.set_state(0);
+    //   delay(1000);
+    //   tilt_goal();
+    //   b_lift.Subsystem::set_state(b_lift_states::intake_off);
 		break;
     case auto3: //
       low_short();
@@ -143,13 +150,25 @@ void autonomous() {
       b_lift.Subsystem::set_state(b_lift_states::intake_off);
     break;
     case auto5: //
-      high_tall();
-      high_awp();
-      while(millis() - time  < 14900)delay(10);
+    //   high_tall();
+    //   high_awp();
+    //   while(millis() - time  < 14900)delay(10);
+    //   tilt_goal();
+    //   hitch.set_state(0);
+    //   b_lift.Subsystem::set_state(b_lift_states::intake_off);
+			high_tall();
+			high_line();
+      // move_start(move_types::tank_point, tank_point_params({98.0, 35.0,0.0})); 
+      move_start(move_types::tank_point, tank_point_params({98.0, 35.0,0.0}, false, 127.0, 1.0, true, 6.4, 70.0, 0.0, 2000, {5.0, 1.0} ));
+      // while(millis() - time  < 14900)delay(10);
+      // hitch.set_state(0);
+      delay(1000);
       tilt_goal();
-      hitch.set_state(0);
       b_lift.Subsystem::set_state(b_lift_states::intake_off);
     break;
+	case auto6: 
+		low_center();
+	break;
 	}
   master.print(2,2,"time: %d", millis() - time);
 	
