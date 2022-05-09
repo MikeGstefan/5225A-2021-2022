@@ -15,16 +15,55 @@ using namespace pros;
 // lift buttons
 extern controller_digital_e_t lift_up_button;
 extern controller_digital_e_t lift_down_button;
-extern controller_digital_e_t lift_claw_toggle_button;
-extern controller_digital_e_t lift_tilt_toggle_button;
+extern controller_digital_e_t joy_mode_switch_button;
 
-// misc buttons
+extern controller_digital_e_t reverse_drive_button;
+extern controller_digital_e_t claw_toggle_button;
+extern controller_digital_e_t hitch_button;
+
+// intake buttons
 extern controller_digital_e_t intake_button;
 extern controller_digital_e_t intake_reverse_button;
-extern controller_digital_e_t shift_button;
-extern controller_digital_e_t hitch_toggle_button;
+
+inline bool speed_limit_activated = false;
+
+// misc buttons
 extern controller_digital_e_t ok_button;
-extern controller_digital_e_t b_claw_toggle_button;
+extern controller_digital_e_t auton_select;
+// extern controller_digital_e_t joy_mode_switch_button;
+extern controller_digital_e_t joy_mode_switch_button;
+
+extern controller_digital_e_t shift_button;
+
+// partner buttons
+
+
+
+extern controller_digital_e_t left_pos_btn;
+
+// lift buttons
+
+extern controller_digital_e_t partner_back_lift_up_button;
+extern controller_digital_e_t partner_back_lift_down_button;
+
+extern controller_digital_e_t partner_front_lift_up_button;
+extern controller_digital_e_t partner_front_lift_down_button;
+
+extern controller_digital_e_t partner_both_lifts_down_button;
+
+// intake buttons
+extern controller_digital_e_t partner_intake_button;
+extern controller_digital_e_t partner_trans_to_intk_button;
+
+// claw buttons
+extern controller_digital_e_t partner_back_claw_toggle_button;
+extern controller_digital_e_t partner_front_claw_toggle_button;
+extern controller_digital_e_t partner_claw_tilt_button;
+extern controller_digital_e_t partner_hitch_button;
+
+extern controller_digital_e_t partner_joy_mode_switch_button;
+extern controller_digital_e_t timer_btn;
+// extern controller_digital_e_t intk_slow;
 
 
 #define num_controller 2
@@ -39,6 +78,10 @@ private:
   void add_to_queue(std::function<void()>);
   void queue_handle();
   int controller_num;
+
+  // button handling data
+  bool cur_press_arr[12] = {0};
+  bool last_press_arr[12] = {0};
 
 public:
   _Controller(pros::controller_id_e_t id);
@@ -61,4 +104,14 @@ public:
    * @return the button that was pressed. 0 if nothing pressed
    */
   controller_digital_e_t wait_for_press(std::vector<controller_digital_e_t> buttons, int timeout = 0);
+
+  // button handling methods
+  // NOTE: all the following methods are only updated every cycle as opposed to every function call, unlike the pros API
+
+  void update_buttons();  // called once every loop, updates current and last state for every button
+  bool get_button_state(pros::controller_digital_e_t button); // returns current state of desired button
+  bool get_button_last_state(pros::controller_digital_e_t button); // returns last state of desired button
+  bool is_rising(pros::controller_digital_e_t button); // if button wasn't pressed but now is
+  bool is_falling(pros::controller_digital_e_t button); // if button was pressed but now is not
+
 };

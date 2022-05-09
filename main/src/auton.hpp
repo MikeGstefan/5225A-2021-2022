@@ -14,24 +14,59 @@
 #include "Subsystems/f_lift.hpp"
 #include <fstream>
 
-void rush_high();
-void rush_tall();
-void rush_low();
-
+#define f_bottom 0
+#define f_carry 1 
+#define f_plat 2 
+#define f_backup 3 
+#define f_push 4
+#define f_level 5 
+#define f_top 6
+#define b_bottom 0
+#define b_plat 1
+#define b_backup 2 
+#define b_level 3
+#define b_top 4
 void skills();
 void skills2();
-void new_skills3();
-
 void skills3();
 void skills4();
-void skillsPark();
 
-void lrt_auton();
+void  high_short();
+void high_wp_goal();
+void high_line();
+void high_tall();
+void high_plus();
+void high_awp();
+void high_match_loads();
+void low_short();
+void low_center();
 
-void blue_highside();
-void blue_highside_tall();
-void blue_lowside();
 
 void select_auton();
 void run_auton();
 void load_auton();
+
+
+enum autos{
+  auto1,
+  auto2,
+  auto3, 
+  auto4, 
+  auto5,
+  auto6,
+  NUM_OF_ELEMENTS =6
+};
+
+extern autos cur_auto;
+
+const string auto_names[] = {
+  "high      ",
+  "center    ",
+  "low       ",
+  "high   AWP",
+  "center AWP",
+  "low center"
+};
+
+void autonFile_read();
+void auto_select();

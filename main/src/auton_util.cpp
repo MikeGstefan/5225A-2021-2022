@@ -7,40 +7,54 @@ static const std::string start_pos_file_name ="/usd/start_position.txt";
 Reset_dist reset_dist_r(&r_dist, 7.5);
 Reset_dist reset_dist_l(&l_dist, 7.5);
 
+
+void f_claw(bool state){
+  f_claw_o.set_state(state);
+  f_claw_c.set_state(state);
+}
+
+
+
 void save_positions(){
-  if(GUI::prompt("Reset position", "Press to reset the position, then move the robot.")){
-    Position pos1 (141.0-8.75, 15.5, 0.0), pos2 (8.75, 15.5, 0);
+  Position pos1 (110.0, 8.5, 0.0), pos2 (20, 8.5, 0.0);
+  master.clear();
+  master.print(0, 0, "L1:(%.1f, %.1f, %.1f)", pos1.x, pos1.y , pos1.angle);
+  master.print(1, 0, "LEFT:(%.1f, %.1f, %.1f)", pos2.x, pos2.y , pos2.angle);
+
+  wait_until(false){
+    if(master.get_digital_new_press(DIGITAL_L1)){
+      // pos1.
+      tracking.reset(141.0 - reset_dist_r.get_dist(), pos1.y, pos1.angle);
+      // tracking.reset(pos1);
+      break;
+    }
+    if(master.get_digital_new_press(left_pos_btn)){
+      tracking.reset(reset_dist_l.get_dist(), pos1.y, pos1.angle);
+      // tracking.reset(pos2);
+      break;
+    }
+  }
+
+  master.clear();
+  master.print(0, 0, "Move to new start");
+  printf2("\nMove the robot to its new position.");
+
+  //move the robot
+
+  if(GUI::prompt("Press to save position", "Press to save the current position to a file.")){
+    tracking_imp.print("Saving X: %f, Y:%f, A:%f", tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle));
     master.clear();
-    master.print(0, 0, "L1:(%.1f, %.1f, %.1f)", pos1.x, pos1.y , pos1.angle);
-    master.print(1, 0, "R1:(%.1f, %.1f, %.1f)", pos2.x, pos2.y , pos2.angle);
-
-    wait_until(false){
-      if(master.get_digital_new_press(DIGITAL_L1)){
-        tracking.reset(pos1);
-        break;
-      }
-      if(master.get_digital_new_press(DIGITAL_R1)){
-        tracking.reset(pos2);
-        break;
-      }
-    }
-
-    printf("\nMove the robot to its new position.\n");
-
-    //move the robot
-
-    if(GUI::prompt_end("Save Positions")){
-      tracking_imp.print("Saving X: %f, Y:%f, A:%f\n", tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle));
-      
-      ofstream file;
-      Data::log_t.data_update();
-      file.open(start_pos_file_name, fstream::out | fstream::trunc);
-      file << tracking.x_coord << endl;
-      file << tracking.y_coord << endl;
-      file << rad_to_deg(tracking.global_angle) << endl;
-      file.close();
-      Data::log_t.done_update();
-    }
+    master.print(0, 0, "Saving");
+    master.print(1, 0, "(%.1f, %.1f, %.1f)", tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle));
+    
+    ofstream file;
+    Data::log_t.data_update();
+    file.open(start_pos_file_name, fstream::out | fstream::trunc);
+    file << tracking.x_coord << endl;
+    file << tracking.y_coord << endl;
+    file << rad_to_deg(tracking.global_angle) << endl;
+    file.close();
+    Data::log_t.done_update();
   }
 }
 
@@ -54,10 +68,14 @@ void load_positions(){
   file.close();
   Data::log_t.done_update();
 
-  tracking_imp.print("Loading X: %f, Y:%f, A:%f from file\n", x, y, a);
+  tracking_imp.print(term_colours::BLUE, "Loading X: %f, Y:%f, A:%f from file", x, y, a);
+  master.clear();
+  master.print(0, 0, "Saving");
+  master.print(1, 0, "(%.2f, %.2f, %.2f)", tracking.x_coord, tracking.y_coord, rad_to_deg(tracking.global_angle));
   tracking.reset(x, y, a);
 }
 
+//remove if unneeded
 double get_filtered_output(ADIUltrasonic sensor, int check_count, uint16_t lower_bound, uint16_t upper_bound, int timeout){
   Timer timer{"Timer"};
   int success_count = 0;
@@ -70,31 +88,31 @@ double get_filtered_output(ADIUltrasonic sensor, int check_count, uint16_t lower
     if (in_range(input, lower_bound, upper_bound)){ //This used to be (lower_bound <= input <= upper_bound). I highly doubt that's what you wanted.
 
       total_input += input;
-      printf("input: %d\n", input);
+      printf2("input: %d", input);
       success_count++;
     }
-    else printf("FAILED! input: %d\n", input);
+    else printf2(term_colours::RED, -1, "FAILED! input: %d", input);
   }
   filtered_output = total_input / success_count;
-  printf("filtered output: %lf\n", filtered_output);
+  printf2("filtered output: %lf", filtered_output);
   return filtered_output;
 }
 
-void flatten_against_wall(bool front, int cycles){ 
+void flatten_against_wall(bool front, int cycles){
   int safety_check = 0;
   //bool to + -
-  int direction = (static_cast<int>(front)*2)-1; //use okapi::boolToSign
-  tracking_imp.print("%d|| Start wall allign\n", millis());
+  int direction = (static_cast<int>(front)*2)-1;
+  tracking_imp.print("Start wall allign");
 
 	drivebase.move(50.0*direction,0.0);
 
 	wait_until((fabs(tracking.l_velo) >= 2.0 && fabs(tracking.r_velo) >= 2.0) || safety_check >= 12){
-      safety_check++;
-      misc.print(" reset things %.2f, %.2f\n",fabs(tracking.l_velo), fabs(tracking.r_velo));
-    }
+    safety_check++;
+    misc.print(" reset things %.2f, %.2f",fabs(tracking.l_velo), fabs(tracking.r_velo));
+  }
 	cycleCheck(fabs(tracking.l_velo) < 1.0 && fabs(tracking.r_velo) < 1.0, 4, 10);
 	drivebase.move(20.0*direction, 0.0);
-	printf("%d|| Done all align\n", millis());
+	printf2("%d|| Done all align", millis());
 }
 
 // double get_front_dist(){
@@ -117,60 +135,58 @@ void flatten_against_wall(bool front, int cycles){
 // }
 
 void b_detect_goal(){ 
-  // cycleCheck(b_dist.get() > 80 && b_dist.get() < 90, 5, 33);
   wait_until(!tracking.move_complete);
-  while(b_dist.get() > 70 && !tracking.move_complete){ 
-    misc.print("looking for edge: %d\n", b_dist.get());
+  while(b_dist.get() > 40 && !tracking.move_complete){ 
+    misc.print("looking for goal at back: %d", b_dist.get());
     delay(33);
   }
-  int successCount = 0;
-    while (successCount < 2 && !tracking.move_complete){
-        if (b_dist.get() > 75 && b_dist.get() < 90) {
-          successCount++;
-          misc.print("found: %d count: %d\n", b_dist.get(), successCount);
-        }
-        else successCount = 0;
-        misc.print("looking: %d\n", b_dist.get());
-        delay(33);
-    }
-  misc.print("Detected %d\n", b_dist.get());
-  b_claw_p.set_value(1);
+  misc.print("Detected %d", b_dist.get());
+  b_claw.set_state(1);
 }
 
-
+void tilt_goal(){
+  tilt_lock.set_state(1);
+  delay(200);
+  b_claw.set_state(0);
+}
 
 void f_detect_goal(bool safety){ 
-  // cycleCheck(b_dist.get() > 80 && b_dist.get() < 90, 5, 33);
-  // while(f_dist.get() > 70){ 
-  //   misc.print("looking for edge: %d\n", f_dist.get());
-  //   delay(33);
-  // }
-  // int successCount = 0;
-  //   while (successCount < 2){
-  //       if (f_dist.get() > 70 && f_dist.get() < 90) successCount++;
-  //       else successCount = 0;
-  //       misc.print("looking: %d\n", f_dist.get());
-  //       delay(33);
-  //   }
-  if(safety) wait_until(f_touch.get_value() || tracking.move_complete);
-  else wait_until(f_touch.get_value());
-  
-  misc.print("Detected %d\n", f_dist.get());
-  f_claw_p.set_value(HIGH);
+  if(safety) wait_until(!tracking.move_complete);
+  while(f_dist.get() > 30 && !tracking.move_complete){
+    misc.print("looking for goal at front: %d", f_dist.get());
+    delay(33);
+  }
+  misc.print("Detected %d", f_dist.get());
+  f_claw(1);
 }
 
+void detect_hitch(int thresh, int cycles){
+  wait_until(!tracking.move_complete);
+  int count = 0;
+  while( count < cycles && !tracking.move_complete){
+    if(hitch_dist.get() < thresh)count++;
+    else count = 0;
+    misc.print("looking for goal at front: %d", hitch_dist.get());
+    delay(33);
+  }
+  misc.print("Detected %d", hitch_dist.get());
+  hitch.set_state(1);
+}
 
 void detect_interference(){ 
   int time = millis();
+  int count = 0;
   wait_until(move_t.get_task_ptr()->get_state() == 4){
     //numbers need funnyimh
-    if(millis()-time > 1500 && fabs(tracking.g_velocity.y) < 2.0){
-      drivebase.set_state(1);
-      master.print(1,1,"PULLING");
-      misc.print("%d || TUG DETECTED\n",millis());
-      break;
+    safety.print("%d, %f, %f\n", millis(), fabs(tracking.l_velo), fabs(tracking.r_velo));
+    if(millis() - time > 900){
+      if((fabs(tracking.l_velo) < 2.0 ||  fabs(tracking.r_velo) < 2.0))count++;
+      else count = 0;
     }
-    else if(millis()-time > 1500 && fabs(tracking.g_velocity.y) > 3.0){
+
+    if(count > 15){
+      f_lift.set_state(f_lift_states::move_to_target, 0);
+      drivebase.set_state(1);
       break;
     }
   }
@@ -185,11 +201,28 @@ double Reset_dist::get_dist(){
     if(this->sensor->get() > Reset_dist::thresh){
       count++;
       avg += this->sensor->get();
-      misc.print("%d || Dist in reset %f count %d\n", millis(), (double)this->sensor->get()/25.4, count);
+      misc.print("Dist in reset %f count %d", (double)this->sensor->get()/25.4, count);
     }
     delay(33);
   }
   //find averaeg, convert to inches
-  misc.print("%d || reset %f\n",millis(), (avg/count)/25.4);
+  misc.print("reset %f", (avg/count)/25.4);
   return ((avg/count)/25.4) + this->dist_from_center;
+}
+
+
+
+
+void subsystem_handle_t(void*params){
+  _Task* ptr = _Task::get_obj(params);
+
+  while(true){ 
+    b_lift.handle(true);
+		f_lift.handle(true);
+    // intake.handle();
+    // b_claw_obj.handle();
+		// f_claw_obj.handle();
+    if(ptr->notify_handle())return;
+    delay(10);
+  }
 }
